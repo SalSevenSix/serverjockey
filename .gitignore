@@ -1,5 +1,6 @@
 # My junk
 TODO.*
+*.json
 
 # PyCharm IDE
 .idea/

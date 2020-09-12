@@ -4,7 +4,7 @@
 //
 
 console.log('*** START ServerLink Bot ***')
-const config = { ...require("./config.json"), ...require(process.argv[2]) };
+const config = { ...require(process.argv[2]), ...require(process.argv[3]) };
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const client = new Discord.Client();
