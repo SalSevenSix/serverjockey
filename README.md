@@ -16,7 +16,7 @@ curl --version
 * Install `unzip` if not installed
 ```bash
 sudo apt install unzip
-unzip -v
+unzip -v | head -1
 ```
 
 * Now download and unzip the
@@ -29,8 +29,9 @@ unzip master.zip; mv serverjockey-master serverjockey; cd serverjockey
 ```
 
 * Now execute `start.sh` to start the apps.
-Expect it to fail initially as dependencies are checked and not found.
-Follow the instructions given to install the remaining dependencies.
+Expect it to fail as dependencies are checked and not found.
+Follow the instructions given by the script to install
+the remaining dependencies that require sudo.
 ```bash
 ./start.sh
 ```

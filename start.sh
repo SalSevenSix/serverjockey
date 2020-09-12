@@ -15,6 +15,19 @@ wait_file() {
 
 
 echo "Checking dependencies..."
+
+echo
+echo "Checking for steamcmd."
+steamcmd +quit
+if [ $? -ne 0 ]; then
+   echo "Steamcmd not found. Install commands;"
+   echo "$ sudo add-apt-repository multiverse"
+   echo "$ sudo dpkg --add-architecture i386"
+   echo "$ sudo apt update"
+   echo "$ sudo apt install lib32gcc1 steamcmd"
+   exit 1
+fi
+
 echo
 echo "Checking for python. Python 3.8 or higher required."
 python3 --version
@@ -111,11 +124,12 @@ fi
 
 
 echo
-echo "Starting serverjockey webservice..."
+echo "Checking serverjockey dependencies."
 cd "$JOCKEY_DIR" || exit 1
+python3 -m pipenv install || exit 1
+echo "Starting serverjockey webservice..."
 python3 -m pipenv run ./main.py --clientfile "$CLIENT_CONF" --host "$HOST" --port "$PORT" "$MODULE" "$HOME_DIR" "$EXECUTABLE" > /dev/null 2>&1 &
 [ $? -eq 0 ] && ps -fp $! || echo "Failed starting serverjockey"
-
 
 echo
 echo "Starting serverlink discord bot..."

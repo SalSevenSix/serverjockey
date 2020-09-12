@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import gzip
+import uuid
+
 from aiohttp import web
 from aiohttp import web_exceptions as h
 
@@ -80,7 +82,6 @@ class HttpService:
 
 
 class RequestHandler:
-
     REQUEST_RECEIVED = 'RequestHandler.RequestReceived'
 
     def __init__(self, mailer, resources, secret, request):
@@ -163,10 +164,9 @@ class Secret:
     SECRET = 'X-Secret'
 
     def __init__(self, mailer):
-        message = msgsvc.Message(self, Secret.NAME)
-        identity = str(message.get_id())
+        identity = str(uuid.uuid4())
         self.secret = identity[:4] + identity[len(identity)-4:]
-        mailer.post(message)
+        mailer.post((self, Secret.NAME, self.secret))
 
     def ask(self, headers):
         host = headers.get_host()[0]

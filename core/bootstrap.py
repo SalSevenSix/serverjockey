@@ -91,7 +91,7 @@ async def main(args):
     except Exception as e:
         if context and context.is_debug():
             raise e
-        logging.error('main() raised %s', e)
+        logging.error('main() raised %s', repr(e))
         return 9
     finally:
         if context:

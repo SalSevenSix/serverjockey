@@ -15,6 +15,7 @@ class Server:
         self.pipeinsvc = proch.PipeInLineService(context)
         context.register(s.ServerStateSubscriber(context))
         context.register(s.ServerDetailsSubscriber(context))
+        context.register(s.ProvideAdminPasswordSubscriber(context))
 
     def resources(self):
         conf_pre = self.deployment.config_dir + '/' + self.deployment.world_name

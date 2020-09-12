@@ -1,4 +1,4 @@
-from core import svrsvc, msgext, msgftr, msgsvc, proch, util
+from core import svrsvc, msgext, msgftr, msgsvc, proch, util, httpsvc
 
 
 def left_chop_and_strip(line, keyword):
@@ -130,4 +130,30 @@ class CaptureSteamidSubscriber:
                 names.append(name)
         else:
             self.steamids.update({steamid: [name]})
+        return None
+
+
+class ProvideAdminPasswordSubscriber:
+    SECRET_FILTER = msgftr.NameIs(httpsvc.Secret.NAME)
+    SOLICIT_FILTER = msgftr.And((
+        proch.Filter.STDOUT_LINE,
+        msgftr.Or((
+            msgftr.DataStrContains('Enter new administrator password'),
+            msgftr.DataStrContains('Confirm the password')
+        ))
+    ))
+    FILTER = msgftr.Or((SECRET_FILTER, SOLICIT_FILTER))
+
+    def __init__(self, mailer):
+        self.mailer = mailer
+        self.pwd = 'admin'
+
+    def accepts(self, message):
+        return ProvideAdminPasswordSubscriber.FILTER.accepts(message)
+
+    async def handle(self, message):
+        if ProvideAdminPasswordSubscriber.SECRET_FILTER.accepts(message):
+            self.pwd = message.get_data()
+        if ProvideAdminPasswordSubscriber.SOLICIT_FILTER.accepts(message):
+            await proch.PipeInLineService.request(self.mailer, self, self.pwd, force=True)
         return None
