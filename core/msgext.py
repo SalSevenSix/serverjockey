@@ -8,15 +8,24 @@ from core import msgsvc, msgftr, msgtrf
 class SynchronousMessenger:
 
     def __init__(self, mailer):
-        assert msgsvc.is_multimailer(mailer)
         self.mailer = mailer
+        self.catcher = None
+        self.timeout = None
 
-    async def request(self, message, catcher=None, timeout=None):
-        if not msgsvc.is_catcher(catcher):
-            catcher = SingleCatcher(msgftr.ReplyToIs(message))
+    def with_catcher(self, catcher):
+        self.catcher = catcher
+        return self
+
+    def with_timeout(self, timeout):
+        self.timeout = timeout
+        return self
+
+    async def request(self, message):
+        assert not (self.catcher and self.timeout)
+        catcher = self.catcher if self.catcher else SingleCatcher(msgftr.ReplyToIs(message), self.timeout)
         self.mailer.register(catcher)
         self.mailer.post(message)
-        return await catcher.get(timeout)
+        return await catcher.get()
 
 
 class MultiCatcher:
@@ -24,8 +33,10 @@ class MultiCatcher:
     def __init__(self, catch_filter,
                  stop_filter, include_stop=False,
                  start_filter=None, include_start=False,
-                 stop_only_after_start=False):
+                 stop_only_after_start=False,
+                 timeout=None):
         self.catch_filter = catch_filter
+        self.timeout = timeout
         self.stop_filter = stop_filter
         self.include_stop = include_stop
         self.queue = asyncio.Queue(maxsize=1)
@@ -34,22 +45,29 @@ class MultiCatcher:
         self.include_start = include_start
         self.stop_only_after_start = stop_only_after_start
         self.started = False
+        self.expired = False
         if not start_filter:
             self.start_filter = msgftr.AcceptNothing()
             self.stop_only_after_start = False
             self.started = True
 
-    async def get(self, timeout=None):
-        result = await asyncio.wait_for(self.queue.get(), timeout)
-        self.queue.task_done()
-        return result
+    async def get(self):
+        try:
+            result = await asyncio.wait_for(self.queue.get(), self.timeout)
+            self.queue.task_done()
+            return result
+        finally:
+            self.expired = True
 
     def accepts(self, message):
-        return self.catch_filter.accepts(message) \
+        return self.expired \
+            or self.catch_filter.accepts(message) \
             or self.stop_filter.accepts(message) \
             or self.start_filter.accepts(message)
 
     def handle(self, message):
+        if self.expired:
+            return False
         starting = not self.started and self.start_filter.accepts(message)
         stopping = self.stop_filter.accepts(message)
         if self.stop_only_after_start and stopping and not self.started and not starting:
@@ -76,11 +94,11 @@ class MultiCatcher:
 
 class SingleCatcher:
 
-    def __init__(self, msg_filter):
-        self.catcher = MultiCatcher(msg_filter, msg_filter, True)
+    def __init__(self, msg_filter, timeout=None):
+        self.catcher = MultiCatcher(msg_filter, msg_filter, include_stop=True, timeout=timeout)
 
-    async def get(self, timeout=None):
-        result = await self.catcher.get(timeout)
+    async def get(self):
+        result = await self.catcher.get()
         return None if len(result) == 0 else result[0]
 
     def accepts(self, message):
@@ -102,7 +120,7 @@ class Publisher:
         self.mailer = mailer
         self.producer = producer
         self.task = asyncio.create_task(self.run())
-        self.mailer.post((self, Publisher.START, self.task))
+        self.mailer.post((self, Publisher.START, producer))
 
     async def stop(self):
         await self.task
@@ -116,7 +134,7 @@ class Publisher:
             except Exception as e:
                 logging.error('Publishing exception. raised: %s', e)
             running = False if message is None else self.mailer.post(message)
-        self.mailer.post((self, Publisher.END, self.task))
+        self.mailer.post((self, Publisher.END, self.producer))
 
 
 class SleepPoster:
@@ -147,7 +165,10 @@ class RollingLogSubscriber:
         self.mailer = mailer
         self.identity = identity if identity is not None else str(uuid.uuid4())
         self.transformer = transformer
-        self.request_filter = msgftr.And((RollingLogSubscriber.REQUEST_FILTER, msgftr.DataEquals(self.identity)))
+        self.request_filter = msgftr.And((
+            RollingLogSubscriber.REQUEST_FILTER,
+            msgftr.DataEquals(self.identity)
+        ))
         self.msg_filter = msgftr.Or((msg_filter, self.request_filter))
         self.size = size
         self.container = collections.deque()

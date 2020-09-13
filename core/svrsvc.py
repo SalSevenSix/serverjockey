@@ -76,6 +76,7 @@ class ServerService:
 
 class ServerStatus:
     UPDATED = 'ServerStatus.Updated'
+    UPDATED_FILTER = msgftr.NameIs(UPDATED)
     REQUEST = 'ServerStatus.Request'
     RESPONSE = 'ServerStatus.Response'
     NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'

@@ -1,6 +1,6 @@
 import asyncio
-
-from core import proch, msgftr, httpext, svrsvc, util
+import logging
+from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext
 from servers.projectzomboid import handlers as h, subscribers as s
 
 
@@ -13,15 +13,19 @@ class Server:
         self.context = context
         self.deployment = Deployment(context)
         self.pipeinsvc = proch.PipeInLineService(context)
+        self.base_url = 'http://{}:{}'.format(self.context.get_host(), self.context.get_port())
+        self.httpsubs = httpsubs.HttpSubscriptionService(context, self.base_url + '/subscriptions')
         context.register(s.ServerStateSubscriber(context))
         context.register(s.ServerDetailsSubscriber(context))
+        context.register(s.PlayerActivitySubscriber(context))
         context.register(s.ProvideAdminPasswordSubscriber(context))
 
     def resources(self):
+        logging.info('================================================================================')
         conf_pre = self.deployment.config_dir + '/' + self.deployment.world_name
-        base_url = 'http://{}:{}'.format(self.context.get_host(), self.context.get_port())
-        return httpext.ResourceBuilder(base_url) \
+        resources = httpext.ResourceBuilder(self.base_url) \
             .push('server', httpext.ServerStatusHandler(self.context)) \
+            .append('subscribe', self.httpsubs.subscribe_handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', httpext.ServerCommandHandler(self.context)) \
             .pop() \
             .push('deployment', h.DeploymentHandler(self.deployment)) \
@@ -44,6 +48,7 @@ class Server:
             .pop() \
             .append('steamids', h.SteamidsHandler(self.context)) \
             .push('players', h.PlayersHandler(self.context)) \
+            .append('subscribe', self.httpsubs.subscribe_handler(s.PlayerActivitySubscriber.ALL_FILTER)) \
             .push('{player}') \
             .append('{command}', h.PlayerCommandHandler(self.context)) \
             .pop().pop() \
@@ -53,15 +58,20 @@ class Server:
             .push('banlist') \
             .append('{command}', h.BanlistCommandHandler(self.context)) \
             .pop() \
+            .push('subscriptions') \
+            .append('{identity}', self.httpsubs.subscriptions_handler()) \
+            .pop() \
             .append('log', h.ConsoleLogHandler(self.context)) \
             .build()
+        logging.info('================================================================================')
+        return resources
 
     async def run(self):
         self.context.post((self, svrsvc.ServerStatus.NOTIFY_DETAILS, {'host': self.context.get_host()}))
         return await proch.ProcessHandler(self.context, self.context.get_executable()) \
             .append_arg('-cachedir=' + self.deployment.world_dir) \
             .use_pipeinsvc(self.pipeinsvc) \
-            .wait_for_started(Server.STARTED_FILTER, 100) \
+            .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=100)) \
             .run()   # sync
 
     async def stop(self):
@@ -79,6 +89,7 @@ class Deployment:
         self.playerdb_file = self.playerdb_dir + '/' + self.world_name + '.db'
         self.config_dir = self.world_dir + '/Server'
         self.save_dir = self.world_dir + '/Saves'
+        self._build_world()
 
     def directory_list(self):
         return util.directory_list_dict(self.home_dir)
@@ -112,19 +123,19 @@ class Deployment:
 
     def wipe_world_all(self):
         util.delete_directory(self.world_dir)
+        self._build_world()
+
+    def wipe_world_playerdb(self):
+        util.wipe_directory(self.playerdb_dir)
+
+    def wipe_world_config(self):
+        util.wipe_directory(self.config_dir)
+
+    def wipe_world_save(self):
+        util.wipe_directory(self.save_dir)
+
+    def _build_world(self):
         util.create_directory(self.world_dir)
         util.create_directory(self.playerdb_dir)
         util.create_directory(self.config_dir)
-        util.create_directory(self.save_dir)
-
-    def wipe_world_playerdb(self):
-        util.delete_directory(self.playerdb_dir)
-        util.create_directory(self.playerdb_dir)
-
-    def wipe_world_config(self):
-        util.delete_directory(self.config_dir)
-        util.create_directory(self.config_dir)
-
-    def wipe_world_save(self):
-        util.delete_directory(self.save_dir)
         util.create_directory(self.save_dir)

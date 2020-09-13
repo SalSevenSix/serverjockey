@@ -60,6 +60,10 @@ class PipeInLineService:
                 self.pipe.write(b'\n')
                 response = await command.catcher.get() if command.catcher else None  # blocking
                 self.mailer.post((self, PipeInLineService.RESPONSE, response, message))
+            except asyncio.exceptions.TimeoutError as e:
+                logging.warning('Timeout on cmdline into pipein. raised: %s', e)
+                self.mailer.post((self, PipeInLineService.EXCEPTION, e, message))
+                # TODO still need to unregister catcher
             except Exception as e:
                 logging.error('Failed pass cmdline into pipein. raised: %s', e)
                 self.mailer.post((self, PipeInLineService.EXCEPTION, e, message))
@@ -67,12 +71,12 @@ class PipeInLineService:
             return None
 
     @staticmethod
-    async def request(mailer, source, cmdline, catcher=None, timeout=None, force=False):
-        # TODO move timeout into catcher!
-        return await msgext.SynchronousMessenger(mailer).request(msgsvc.Message(
+    async def request(mailer, source, cmdline, catcher=None, force=False):
+        messenger = msgext.SynchronousMessenger(mailer)
+        return await messenger.request(msgsvc.Message(
             source,
             PipeInLineService.REQUEST,
-            PipeInLineService.Command(cmdline, catcher, force)), timeout=timeout)
+            PipeInLineService.Command(cmdline, catcher, force)))
 
     def __init__(self, mailer, pipe=None):
         self.mailer = mailer
@@ -149,12 +153,9 @@ class ProcessHandler:
         self.command.append_command(arg)
         return self
 
-    def wait_for_started(self, filter_or_catcher, timeout=None):
-        self.started_catcher = filter_or_catcher
-        if msgsvc.is_filter(filter_or_catcher):
-            self.started_catcher = msgext.SingleCatcher(filter_or_catcher)
-        self.started_timeout = timeout
-        self.mailer.register(self.started_catcher)
+    def wait_for_started(self, catcher):
+        self.started_catcher = catcher
+        self.mailer.register(catcher)
         return self
 
     def terminate(self):
@@ -180,7 +181,7 @@ class ProcessHandler:
                 PipeInLineService(self.mailer, self.process.stdin)
             self.mailer.post((self, ProcessHandler.STATE_STARTING, self.process))
             if self.started_catcher is not None:
-                await self.started_catcher.get(self.started_timeout)   # blocking
+                await self.started_catcher.get()   # blocking
             self.mailer.post((self, ProcessHandler.STATE_STARTED, self.process))
             rc = await self.process.wait()   # blocking
             self.mailer.post((self, ProcessHandler.STATE_COMPLETE, self.process))

@@ -28,8 +28,6 @@ CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
 ACCEPT_ENCODING = 'Accept-Encoding'
 
-NO_CONTENT_RESPONSE = '{ "response": "OK" }'
-
 
 class ResponseBody:
     NO_CONTENT = h.HTTPNoContent
@@ -109,8 +107,6 @@ class RequestHandler:
             response_body = await resource.handle_get(path)
             if response_body is None:
                 raise h.HTTPNotFound
-            if response_body in ResponseBody.ERRORS:
-                raise response_body
             return self.build_response(response_body)
 
         # POST
@@ -131,16 +127,16 @@ class RequestHandler:
                 if request_body is None:
                     raise h.HTTPBadRequest
         response_body = await resource.handle_post(path, request_body)
-        if response_body in ResponseBody.ERRORS:
-            raise response_body
         return self.build_response(response_body)
 
     def build_response(self, body):
-        response = web.Response(status=200)
+        if body in ResponseBody.ERRORS:
+            raise body
+        response = web.Response()
         if body is ResponseBody.NO_CONTENT:
+            response.set_status(ResponseBody.NO_CONTENT.status_code)
             response.headers.add(CONTENT_TYPE, APPLICATION_JSON)
-            response.headers.add(CONTENT_LENGTH, str(len(NO_CONTENT_RESPONSE)))
-            response.text = NO_CONTENT_RESPONSE
+            response.headers.add(CONTENT_LENGTH, '0')
             return response
         content_type = APPLICATION_BIN
         if isinstance(body, str):

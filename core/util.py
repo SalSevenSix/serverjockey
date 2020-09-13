@@ -190,7 +190,8 @@ def directory_list_dict(path):
 
 
 def create_directory(path):
-    os.mkdir(path)
+    if not os.path.isdir(path):
+        os.mkdir(path)
 
 
 def archive_directory(path):
@@ -206,6 +207,11 @@ def archive_directory(path):
     file = '/'.join(file)
     shutil.make_archive(file, 'zip', root_dir=root_dir)
     return file
+
+
+def wipe_directory(path):
+    delete_directory(path)
+    create_directory(path)
 
 
 def delete_directory(path):

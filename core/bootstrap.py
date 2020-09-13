@@ -83,9 +83,7 @@ async def main(args):
         configure_logging(context)
         logging.info('*** START Serverjockey ***')
         server = context.create_server()
-        logging.info('================================================================================')
         httpsvr = httpsvc.HttpService(context, server.resources()).start()
-        logging.info('================================================================================')
         clientfile = await ClientFile(context, httpsvr).write()
         return await svrsvc.ServerService(context, server).run()
     except Exception as e:

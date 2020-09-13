@@ -25,7 +25,7 @@ function stringToBase10(string) {
 function base10ToString(number) {
 	var character;
 	var result = '';
-	for(var i = 0; i < number.length; i += 3) {
+	for (var i = 0; i < number.length; i += 3) {
 		character = parseInt(number.substr(i, 3), 10).toString(16);
 		result += '%' + ((character.length % 2 == 0) ? character : '0' + character);
 	}
@@ -56,23 +56,33 @@ function isAuthorAdmin(message) {
 // WEBSERVICE CLIENT
 //
 
-function headerHandler(response) {
-  if (!response.ok) {
-    throw new Error('Status: ' + response.status);
-  }
-  return response.json();
+function newPostRequest() {
+  return {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Secret': config.WEBSERVICE_TOKEN
+    }
+  };
 }
 
-function errorHandler(message, error) {
+function errorLogger(error) {
   console.error(error);
+}
+
+function errorHandler(error, message) {
+  errorLogger(error);
   message.react('⛔');
 }
 
 function doGet(message, path, tostring) {
   fetch(config.BASE_URL + path)
-    .then(headerHandler)
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      return response.json();
+    })
     .then(function(json) { message.channel.send(tostring(json)); })
-    .catch(function(error) { errorHandler(message, error); });
+    .catch(function(error) { errorHandler(error, message); });
 }
 
 function doPost(message, path, body = null) {
@@ -80,24 +90,16 @@ function doPost(message, path, body = null) {
     message.react('🔒');
     return;
   }
-  var request = {
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Secret': config.WEBSERVICE_TOKEN
-    }
-  }
+  var request = newPostRequest();
   if (body != null) {
     request.body = JSON.stringify(body);
   }
   fetch(config.BASE_URL + path, request)
-    .then(headerHandler)
-    .then(function(json) {
-      if (json.response === 'OK') {
-        message.react('✅');
-      }
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      message.react('✅');
     })
-    .catch(function(error) { errorHandler(message, error); })
+    .catch(function(error) { errorHandler(error, message); })
     .finally(function() {
       if (message.content === '!server shutdown') {
         console.log('*** END ServerLink Bot ***');
@@ -246,6 +248,45 @@ const handlers = {
 }
 
 
+// EVENT HOOKS
+//
+
+async function playerEventHook() {
+  var url = await fetch(config.BASE_URL + '/players/subscribe', newPostRequest())
+    .then(function(response) {
+      if (!response.ok) { throw new Error('Status: ' + response.status); }
+      return response.json();
+    })
+    .then(function(json) { return json.url; })
+    .catch(errorLogger);
+  if (url == null) return;
+  console.log('Subscribed to player events at: ' + url);
+  var channel = await client.channels.fetch(config.EVENTS_CHANNEL_ID)
+    .then(function(channel) { return channel; })
+    .catch(errorLogger);
+  if (channel == null) return;
+  console.log('Publishing player events to: ' + channel);
+  var running = true;
+  while (running) {
+    running = await fetch(url)
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        if (response.status == 204) return;
+        return response.json();
+      })
+      .then(function(json) {
+        if (json == null) return true;
+        channel.send('```Player "' + json.name + '" ' + json.activity + '```');
+        return true;
+      })
+      .catch(function(error) {
+        errorLogger(error);
+        return false;
+      });
+  }
+}
+
+
 // DISCORD HOOKS
 //
 
@@ -261,8 +302,9 @@ client.on('message', function(message) {
 
 client.on('ready', function() {
   console.log('Logged in as ' + client.user.tag);
+  playerEventHook();
 });
 
-console.log('Initialised with config...')
-console.log(config)
+console.log('Initialised with config...');
+console.log(config);
 client.login(config.BOT_TOKEN);

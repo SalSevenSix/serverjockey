@@ -91,18 +91,47 @@ class ServerDetailsSubscriber:
             svrsvc.ServerStatus.notify_details(self.mailer, self, {key: value})
 
 
+class PlayerActivitySubscriber:
+    LOGIN = 'PlayerActivitySubscriber.Login'
+    LOGIN_FILTER = msgftr.NameIs(LOGIN)
+    LOGIN_KEY = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
+    LOGIN_KEY_FILTER = msgftr.DataStrContains(LOGIN_KEY)
+    LOGOUT = 'PlayerActivitySubscriber.Logout'
+    LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
+    LOGOUT_KEY = 'Disconnected player'
+    LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
+    ALL_FILTER = msgftr.Or((LOGIN_FILTER, LOGOUT_FILTER))
+    FILTER = msgftr.And((
+        proch.Filter.STDOUT_LINE,
+        msgftr.Or((LOGIN_KEY_FILTER, LOGOUT_KEY_FILTER))
+    ))
+
+    def __init__(self, mailer):
+        self.mailer = mailer
+
+    def accepts(self, message):
+        return PlayerActivitySubscriber.FILTER.accepts(message)
+
+    def handle(self, message):
+        if PlayerActivitySubscriber.LOGIN_KEY_FILTER.accepts(message):
+            line = left_chop_and_strip(message.get_data(), PlayerActivitySubscriber.LOGIN_KEY)
+            name, steamid = line.split(' id=')
+            event = {'activity': 'login', 'steamid': steamid, 'name': name[1:-1]}
+            self.mailer.post((self, PlayerActivitySubscriber.LOGIN, event))
+        if PlayerActivitySubscriber.LOGOUT_KEY_FILTER.accepts(message):
+            line = left_chop_and_strip(message.get_data(), PlayerActivitySubscriber.LOGOUT_KEY)
+            parts = line.split(' ')
+            steamid, name = parts[-1], ' '.join(parts[:-1])
+            event = {'activity': 'logout', 'steamid': steamid, 'name': name[1:-1]}
+            self.mailer.post((self, PlayerActivitySubscriber.LOGOUT, event))
+        return None
+
+
 class CaptureSteamidSubscriber:
     REQUEST = 'CaptureSteadIdSubscriber.Request'
     RESPONSE = 'CaptureSteadIdSubscriber.Response'
     REQUEST_FILTER = msgftr.NameIs(REQUEST)
-    KEYSTRING = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
-    FILTER = msgftr.Or((
-        msgftr.And((
-            proch.Filter.STDOUT_LINE,
-            msgftr.DataStrContains(KEYSTRING)
-        )),
-        REQUEST_FILTER
-    ))
+    FILTER = msgftr.Or((REQUEST_FILTER, PlayerActivitySubscriber.LOGIN_FILTER))
 
     def __init__(self, mailer):
         self.mailer = mailer
@@ -120,16 +149,15 @@ class CaptureSteamidSubscriber:
     def handle(self, message):
         if CaptureSteamidSubscriber.REQUEST_FILTER.accepts(message):
             self.mailer.post((self, CaptureSteamidSubscriber.RESPONSE, self.steamids.copy(), message))
-            return None
-        line = left_chop_and_strip(message.get_data(), CaptureSteamidSubscriber.KEYSTRING)
-        name, steamid = line.split(' id=')
-        name = name[1:len(name) - 1]
-        names = util.get(steamid, self.steamids)
-        if names:
-            if name not in names:
-                names.append(name)
-        else:
-            self.steamids.update({steamid: [name]})
+        if PlayerActivitySubscriber.LOGIN_FILTER.accepts(message):
+            data = message.get_data()
+            steamid, name = data['steamid'], data['name']
+            names = util.get(steamid, self.steamids)
+            if names:
+                if name not in names:
+                    names.append(name)
+            else:
+                self.steamids.update({steamid: [name]})
         return None
 
 
