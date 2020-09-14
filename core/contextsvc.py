@@ -5,10 +5,13 @@ from core import msgsvc
 
 class Context:
 
-    def __init__(self, module, home, executable, clientfile=None, debug=False, host=None, port=9000):
+    def __init__(self, module, home, executable,
+                 logfile=None, clientfile=None,
+                 debug=False, host=None, port=9000):
         self.module = importlib.import_module('servers.{}.server'.format(module))
         self.home = home
         self.executable = executable
+        self.logfile = logfile if logfile else './serverjockey.log'
         self.clientfile = clientfile
         self.debug = debug
         self.host = host
@@ -32,24 +35,28 @@ class Context:
         return self.port
 
     def get_executable(self):
-        if self.executable[:1] in ('/', '.'):
-            return self.executable
-        return self.relative_path(self.executable)
+        return self._relative_path(self.executable)
+
+    def get_logfile(self):
+        return self._relative_path(self.logfile)
 
     def get_clientfile(self):
-        if self.clientfile is None:
-            return None
-        if self.clientfile[:1] in ('/', '.'):
-            return self.clientfile
-        return self.relative_path(self.clientfile)
+        return self._relative_path(self.clientfile)
 
     def relative_path(self, subpath):
-        path = [self.home]
         subpath = str(subpath)
+        path = [self.home]
         if not subpath.startswith('/'):
             path.append('/')
         path.append(subpath)
         return ''.join(path)
+
+    def _relative_path(self, subpath):
+        if subpath is None:
+            return None
+        if subpath[0] in ('/', '.'):
+            return subpath
+        return self.relative_path(subpath)
 
     def register(self, subscriber):
         return self.mailer.register(subscriber)

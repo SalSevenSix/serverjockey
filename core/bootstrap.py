@@ -9,7 +9,7 @@ def configure_logging(context):
     log_formatter = logging.Formatter('%(asctime)s %(levelname)05s %(message)s', '%Y%m%d%H%M%S')
     logging.basicConfig(
         level=log_level,
-        filename='./jockey.log', filemode='w',
+        filename=context.get_logfile(), filemode='w',
         format=log_formatter._fmt, datefmt=log_formatter.datefmt)
     if context.is_debug():
         stdout_handler = logging.StreamHandler(sys.stdout)
@@ -28,6 +28,8 @@ class ContextFactory:
                        help='Home directory of the server deployment')
         p.add_argument('executable', type=str,
                        help='Server executable to launch server, relative to "home" unless starts with "/" or "."')
+        p.add_argument('--logfile', type=str, default='./serverjockey.log',
+                       help='Log file to use, relative to "home" unless starts with "/" or "."')
         p.add_argument('--clientfile', type=str, default=None,
                        help='File to write config for clients, relative to "home" unless starts with "/" or "."')
         p.add_argument('--debug', action='store_true',
@@ -45,6 +47,7 @@ class ContextFactory:
             args.module,
             args.home,
             args.executable,
+            logfile=args.logfile,
             clientfile=args.clientfile,
             debug=args.debug,
             host=args.host,
@@ -65,8 +68,8 @@ class ClientFile:
         if clientfile is None:
             return self
         await util.write_file(clientfile, util.obj_to_json({
-            'BASE_URL': self.httpsvr.get_base_url(),
-            'WEBSERVICE_TOKEN': self.httpsvr.get_secret()
+            'SERVERJOCKEY_URL': self.httpsvr.get_base_url(),
+            'SERVERJOCKEY_TOKEN': self.httpsvr.get_secret()
         }))
         self.context.post((self, ClientFile.CLIENT_FILE_UPDATED, clientfile))
         logging.info('Clientfile: ' + clientfile)

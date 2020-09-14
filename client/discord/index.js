@@ -61,7 +61,7 @@ function newPostRequest() {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
-      'X-Secret': config.WEBSERVICE_TOKEN
+      'X-Secret': config.SERVERJOCKEY_TOKEN
     }
   };
 }
@@ -76,7 +76,7 @@ function errorHandler(error, message) {
 }
 
 function doGet(message, path, tostring) {
-  fetch(config.BASE_URL + path)
+  fetch(config.SERVERJOCKEY_URL + path)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       return response.json();
@@ -94,7 +94,7 @@ function doPost(message, path, body = null) {
   if (body != null) {
     request.body = JSON.stringify(body);
   }
-  fetch(config.BASE_URL + path, request)
+  fetch(config.SERVERJOCKEY_URL + path, request)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       message.react('✅');
@@ -136,16 +136,16 @@ const handlers = {
   },
 
   config: function(message, data) {
-    var result = config.BASE_URL + '/config/options\n';
-    result += config.BASE_URL + '/config/ini\n';
-    result += config.BASE_URL + '/config/sandbox\n';
-    result += config.BASE_URL + '/config/spawnpoints\n';
-    result += config.BASE_URL + '/config/spawnregions\n';
+    var result = config.SERVERJOCKEY_URL + '/config/options\n';
+    result += config.SERVERJOCKEY_URL + '/config/ini\n';
+    result += config.SERVERJOCKEY_URL + '/config/sandbox\n';
+    result += config.SERVERJOCKEY_URL + '/config/spawnpoints\n';
+    result += config.SERVERJOCKEY_URL + '/config/spawnregions\n';
     message.channel.send(result);
   },
 
   log: function(message, data) {
-    message.channel.send(config.BASE_URL + '/log');
+    message.channel.send(config.SERVERJOCKEY_URL + '/log');
   },
 
   world: function(message, data) {
@@ -252,7 +252,7 @@ const handlers = {
 //
 
 async function playerEventHook() {
-  var url = await fetch(config.BASE_URL + '/players/subscribe', newPostRequest())
+  var url = await fetch(config.SERVERJOCKEY_URL + '/players/subscribe', newPostRequest())
     .then(function(response) {
       if (!response.ok) { throw new Error('Status: ' + response.status); }
       return response.json();
@@ -260,12 +260,12 @@ async function playerEventHook() {
     .then(function(json) { return json.url; })
     .catch(errorLogger);
   if (url == null) return;
-  console.log('Subscribed to player events at: ' + url);
+  console.log('Subscribed to player events at ' + url);
   var channel = await client.channels.fetch(config.EVENTS_CHANNEL_ID)
     .then(function(channel) { return channel; })
     .catch(errorLogger);
   if (channel == null) return;
-  console.log('Publishing player events to: ' + channel);
+  console.log('Publishing player events to ' + channel);
   var running = true;
   while (running) {
     running = await fetch(url)
@@ -276,7 +276,11 @@ async function playerEventHook() {
       })
       .then(function(json) {
         if (json == null) return true;
-        channel.send('```Player "' + json.name + '" ' + json.activity + '```');
+        var result = '```diff\n';
+        if (json.activity == 'login') { result += '+ LOGIN "'; }
+        if (json.activity == 'logout') { result += '- LOGOUT "'; }
+        result += json.name + '"\n```'
+        channel.send(result);
         return true;
       })
       .catch(function(error) {
