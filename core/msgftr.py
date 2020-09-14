@@ -1,6 +1,12 @@
 import re
 
 
+def is_filter(candidate):
+    return candidate is not None \
+        and hasattr(candidate, 'accepts') \
+        and callable(candidate.accepts)
+
+
 class AcceptAll:
 
     def accepts(self, message):

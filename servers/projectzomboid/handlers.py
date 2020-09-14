@@ -183,13 +183,14 @@ class BanlistCommandHandler:
 
 
 class ConsoleLogHandler:
+    FILTER = s.ConsoleLogFilter()
 
     def __init__(self, mailer):
         self.mailer = mailer
         self.subscriber = msgext.RollingLogSubscriber(
             mailer,
             transformer=msgtrf.GetData(),
-            msg_filter=s.ConsoleLogFilter(),
+            msg_filter=ConsoleLogHandler.FILTER,
             size=100)
         mailer.register(self.subscriber)
 

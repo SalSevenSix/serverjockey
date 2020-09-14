@@ -1,6 +1,12 @@
 from core import util
 
 
+def is_transformer(candidate):
+    return candidate is not None \
+        and hasattr(candidate, 'transform') \
+        and callable(candidate.transform)
+
+
 class Noop:
 
     def transform(self, message):

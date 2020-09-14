@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext
+from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf
 from servers.projectzomboid import handlers as h, subscribers as s
 
 
@@ -58,10 +58,12 @@ class Server:
             .push('banlist') \
             .append('{command}', h.BanlistCommandHandler(self.context)) \
             .pop() \
+            .push('log', h.ConsoleLogHandler(self.context)) \
+            .append('subscribe', self.httpsubs.subscribe_handler(h.ConsoleLogHandler.FILTER, aggtrf.StrJoin('\n'))) \
+            .pop() \
             .push('subscriptions') \
             .append('{identity}', self.httpsubs.subscriptions_handler()) \
             .pop() \
-            .append('log', h.ConsoleLogHandler(self.context)) \
             .build()
         logging.info('================================================================================')
         return resources

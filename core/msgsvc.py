@@ -24,12 +24,6 @@ def is_multimailer(candidate):
         and callable(candidate.register)
 
 
-def is_filter(candidate):
-    return candidate is not None \
-        and hasattr(candidate, 'accepts') \
-        and callable(candidate.accepts)
-
-
 def is_handler(candidate):
     return candidate is not None \
         and hasattr(candidate, 'handle') \
@@ -37,7 +31,7 @@ def is_handler(candidate):
 
 
 def is_subscriber(candidate):
-    return is_filter(candidate) \
+    return msgftr.is_filter(candidate) \
         and is_handler(candidate)
 
 
