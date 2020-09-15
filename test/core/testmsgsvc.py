@@ -1,5 +1,5 @@
 import asyncio
-from core import msgsvc, msgext
+from core import msgsvc, msgext, msgftr
 
 
 def test():
@@ -40,7 +40,7 @@ async def test_catching():
     mailer = msgsvc.MulticastMailer()
     mailer.start()
     mailer.register(msgext.PrintSubscriber())
-    catcher = msgext.SingleCatcher(msgext.Filter.NameEquals('bon'))
+    catcher = msgext.SingleCatcher(msgftr.NameEquals('bon'))
     mailer.register(catcher)
     test_messages = asyncio.create_task(send_test_messages(mailer))
     message = await catcher.get()

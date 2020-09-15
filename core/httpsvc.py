@@ -2,11 +2,9 @@ import asyncio
 import logging
 import gzip
 import uuid
-
 from aiohttp import web
 from aiohttp import web_exceptions as h
-
-from core import msgsvc, util
+from core import util
 
 
 UTF8 = 'UTF-8'
@@ -37,42 +35,63 @@ class ResponseBody:
     ERRORS = (NOT_FOUND, BAD_REQUEST, UNAVAILABLE)
 
 
+class ClientFile:
+    CLIENT_FILE_UPDATED = 'ClientFile.Updated'
+
+    def __init__(self, context, base_url, secret):
+        self.context = context
+        self.base_url = base_url
+        self.secret = secret
+
+    async def write(self):
+        clientfile = self.context.get_clientfile()
+        if clientfile is None:
+            return self
+        await util.write_file(clientfile, util.obj_to_json({
+            'SERVERJOCKEY_URL': self.base_url,
+            'SERVERJOCKEY_TOKEN': self.secret
+        }))
+        self.context.post((self, ClientFile.CLIENT_FILE_UPDATED, clientfile))
+        logging.info('Clientfile: ' + clientfile)
+        return self
+
+    def delete(self):
+        util.delete_file(self.context.get_clientfile())
+
+
 class HttpService:
     SERVER_STARTING = 'HttpService.ServerStarting'
     SERVER_COMPLETE = 'HttpService.ServerComplete'
 
-    def __init__(self, mailer, resources):
-        self.mailer = mailer
+    def __init__(self, context, resources):
+        self.context = context
         self.resources = resources
-        self.secret = Secret(mailer)
+        self.secret = Secret(context)
+        self.clientfile = ClientFile(context, resources.get_name(), self.secret.secret)
         self.app = None
         self.task = None
 
-    def get_secret(self):
-        return self.secret.secret
-
-    def get_base_url(self):
-        return self.resources.get_name()
-
-    def start(self):
+    async def start(self):
         self.app = web.Application()
         self.app.add_routes([
             web.get('/{tail:.*}', self._handle),
             web.post('/{tail:.*}', self._handle)])
         self.task = asyncio.create_task(web._run_app(
-            self.app, host=self.mailer.get_host(), port=self.mailer.get_port()))
-        self.mailer.post((self, HttpService.SERVER_STARTING, self.task))
+            self.app, host=self.context.get_host(), port=self.context.get_port()))
+        self.context.post((self, HttpService.SERVER_STARTING, self.task))
+        await self.clientfile.write()
         return self
 
     async def stop(self):
+        self.clientfile.delete()
         if self.app:
             await self.app.shutdown()
             await self.app.cleanup()
-        self.mailer.post((self, HttpService.SERVER_COMPLETE, self.task))
+        self.context.post((self, HttpService.SERVER_COMPLETE, self.task))
 
     async def _handle(self, request):
         try:
-            handler = RequestHandler(self.mailer, self.resources, self.secret, request)
+            handler = RequestHandler(self.context, self.resources, self.secret, request)
             return await handler.handle()
         except Exception as e:
             logging.error('HTTP Response failed. raised: %s', e)

@@ -1,9 +1,9 @@
-from core import util, proch, msgext, msgftr, httpsvc
+from core import util, proch, msgext, msgftr, httpsvc, httpext
 from servers.projectzomboid import subscribers as s
 
 
 class Player:
-    DECODER = util.DictionaryCoder().append('player', util.b10str_to_str)
+    DECODER = httpext.DictionaryCoder().append('player', util.b10str_to_str)
 
     class Loader:
         def __init__(self, mailer, source, resource):
@@ -48,7 +48,7 @@ class Player:
 
 
 class Option:
-    DECODER = util.DictionaryCoder().append('option', util.b10str_to_str)
+    DECODER = httpext.DictionaryCoder().append('option', util.b10str_to_str)
 
     class Loader:
         def __init__(self, mailer, source, resource):

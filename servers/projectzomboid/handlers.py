@@ -1,10 +1,5 @@
-from core import httpsvc, httpext, proch, msgext, msgtrf, util
+from core import httpsvc, httpext, proch, msgext, msgtrf, util, aggtrf, cmdutil
 from servers.projectzomboid import subscribers as s, domain as d
-
-# TODO Stuff that is broken in PZ but may be fixed sometime...
-#      * -r "Reason" when kicking player
-#      * Setting any server option string with a space in it
-#      * Banning user by name with -ip, but -r "Reason" is fine though :/
 
 
 class DeploymentHandler:
@@ -47,7 +42,7 @@ class DeploymentCommandHandler:
 
 
 class WorldCommandHandler:
-    COMMANDS = httpext.CommandLines({
+    COMMANDS = cmdutil.CommandLines({
         'broadcast': 'servermsg "{message}"',
         'save': 'save',
         'chopper': 'chopper',
@@ -73,7 +68,7 @@ class OptionsHandler:
 
 
 class OptionsReloadHandler:
-    COMMANDS = httpext.CommandLines({'reload': 'reloadoptions'})
+    COMMANDS = cmdutil.CommandLines({'reload': 'reloadoptions'})
 
     def __init__(self, mailer):
         self.handler = httpext.PipeInLineNoContentPostHandler(
@@ -84,7 +79,7 @@ class OptionsReloadHandler:
 
 
 class OptionCommandHandler:
-    COMMANDS = httpext.CommandLines({'set': 'changeoption {option} "{value}"'})
+    COMMANDS = cmdutil.CommandLines({'set': 'changeoption {option} "{value}"'})
 
     def __init__(self, mailer):
         self.mailer = mailer
@@ -123,7 +118,7 @@ class PlayersHandler:
 
 class PlayerCommandHandler:
     # LEVELS = ('admin', 'moderator', 'overseer', 'gm', 'observer', 'none')
-    COMMANDS = httpext.CommandLines({
+    COMMANDS = cmdutil.CommandLines({
         'set-access-level': 'setaccesslevel "{player}" "{level}"',
         'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],
         'spawn-vehicle': 'addvehicle "{module}.{item}" "{player}"',
@@ -148,7 +143,7 @@ class PlayerCommandHandler:
 
 
 class WhitelistCommandHandler:
-    COMMANDS = httpext.CommandLines({
+    COMMANDS = cmdutil.CommandLines({
         'add-all': 'addalltowhitelist',
         'add': 'adduser "{player}" "{password}"',
         'remove': 'removeuserfromwhitelist "{player}"'})
@@ -165,7 +160,7 @@ class WhitelistCommandHandler:
 
 
 class BanlistCommandHandler:
-    COMMANDS = httpext.CommandLines({
+    COMMANDS = cmdutil.CommandLines({
         'add-player': ['banuser "{player}"', {'ip': '-ip', 'reason': '-r "{}"'}],
         'remove-player': 'unbanuser "{player}"',
         'add-id': 'banid {steamid}',
@@ -188,12 +183,11 @@ class ConsoleLogHandler:
     def __init__(self, mailer):
         self.mailer = mailer
         self.subscriber = msgext.RollingLogSubscriber(
-            mailer,
-            transformer=msgtrf.GetData(),
+            mailer, size=100,
             msg_filter=ConsoleLogHandler.FILTER,
-            size=100)
+            transformer=msgtrf.GetData(),
+            aggregator=aggtrf.StrJoin('\n'))
         mailer.register(self.subscriber)
 
     async def handle_get(self, resource, data):
-        lines = await msgext.RollingLogSubscriber.request(self.mailer, self, self.subscriber.get_identity())
-        return '\n'.join(lines)
+        return await msgext.RollingLogSubscriber.request(self.mailer, self, self.subscriber.get_identity())

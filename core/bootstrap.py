@@ -1,7 +1,7 @@
 import logging
 import argparse
 import sys
-from core import contextsvc, httpsvc, svrsvc, msgext, util
+from core import contextsvc, httpsvc, svrsvc, msgext
 
 
 def configure_logging(context):
@@ -55,39 +55,14 @@ class ContextFactory:
         return context
 
 
-# TODO maybe move this class into httpsvc
-class ClientFile:
-    CLIENT_FILE_UPDATED = 'ClientFile.Updated'
-
-    def __init__(self, context, httpsvr):
-        self.context = context
-        self.httpsvr = httpsvr
-
-    async def write(self):
-        clientfile = self.context.get_clientfile()
-        if clientfile is None:
-            return self
-        await util.write_file(clientfile, util.obj_to_json({
-            'SERVERJOCKEY_URL': self.httpsvr.get_base_url(),
-            'SERVERJOCKEY_TOKEN': self.httpsvr.get_secret()
-        }))
-        self.context.post((self, ClientFile.CLIENT_FILE_UPDATED, clientfile))
-        logging.info('Clientfile: ' + clientfile)
-        return self
-
-    def delete(self):
-        util.delete_file(self.context.get_clientfile())
-
-
 async def main(args):
-    httpsvr, context, clientfile = None, None, None
+    httpsvr, context = None, None
     try:
         context = ContextFactory().create(args)
         configure_logging(context)
         logging.info('*** START Serverjockey ***')
         server = context.create_server()
-        httpsvr = httpsvc.HttpService(context, server.resources()).start()
-        clientfile = await ClientFile(context, httpsvr).write()
+        httpsvr = await httpsvc.HttpService(context, server.resources()).start()
         return await svrsvc.ServerService(context, server).run()
     except Exception as e:
         if context and context.is_debug():
@@ -99,6 +74,4 @@ async def main(args):
             await context.shutdown()
         if httpsvr:
             await httpsvr.stop()
-        if clientfile:
-            clientfile.delete()
         logging.info('*** END Serverjockey ***')

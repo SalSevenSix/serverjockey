@@ -113,6 +113,11 @@ class Deployment:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.DEVNULL)
         stdout, stderr = await process.communicate()
+        steamclient_file = self.runtime_dir + '/steamclient.so'
+        if not util.file_exists(steamclient_file):
+            process = await asyncio.create_subprocess_shell(
+                'ln -s ~/.steam/steamcmd/linux64/steamclient.so ' + steamclient_file)
+            await process.wait()
         if stdout:
             return stdout.decode()
         return 'NO STDOUT'

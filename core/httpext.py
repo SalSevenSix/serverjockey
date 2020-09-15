@@ -1,7 +1,6 @@
 import logging
 import re
-
-from core import httpsvc, proch, util, svrsvc
+from core import httpsvc, proch, util, svrsvc, cmdutil
 
 
 class ResourceBuilder:
@@ -50,25 +49,38 @@ class ResourceBuilder:
         return name, kind
 
 
-class CommandLines:
+class DictionaryCoder:
 
-    def __init__(self, commands, command_key='command'):
-        assert isinstance(commands, dict)
-        self.commands = commands
-        self.command_key = command_key
+    def __init__(self, coders=None, deep=False):
+        self.coders = coders if coders else {}
+        if deep:
+            raise Exception('Unsupported')
 
-    def get(self, args, command_key=None):
-        if command_key is None:
-            command_key = self.command_key
-        command = util.get(util.get(command_key, args), self.commands)
-        return None if not command else util.CommandLine(command, args)
+    def append(self, key, coder):
+        self.coders.update({key: coder})
+        return self
+
+    def process(self, dictionary):
+        result = {}
+        for key, value in iter(dictionary.items()):
+            if key in self.coders:
+                coder = self.coders[key]
+                if callable(coder):
+                    result.update({key: coder(value)})
+                elif hasattr(coder, 'encode') and callable(coder.encode):
+                    result.update({key: coder.encode(value)})
+                elif hasattr(coder, 'decode') and callable(coder.decode):
+                    result.update({key: coder.decode(value)})
+            else:
+                result.update({key: value})
+        return result
 
 
 class PipeInLineNoContentPostHandler:
 
-    def __init__(self, mailer, source, commands, decoder=util.DictionaryCoder()):
-        assert isinstance(commands, CommandLines)
-        assert isinstance(decoder, util.DictionaryCoder)
+    def __init__(self, mailer, source, commands, decoder=DictionaryCoder()):
+        assert isinstance(commands, cmdutil.CommandLines)
+        assert isinstance(decoder, DictionaryCoder)
         self.mailer = mailer
         self.source = source
         self.commands = commands

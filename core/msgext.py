@@ -2,7 +2,7 @@ import asyncio
 import logging
 import uuid
 import collections
-from core import msgsvc, msgftr, msgtrf
+from core import msgsvc, msgftr, msgtrf, aggtrf
 
 
 class SynchronousMessenger:
@@ -106,8 +106,8 @@ class SingleCatcher:
 
     def handle(self, message):
         result = self.catcher.handle(message)
-        if result is None:
-            return None
+        if result is None or not isinstance(result, tuple):
+            return result
         return None if len(result) == 0 else result[0]
 
 
@@ -158,13 +158,15 @@ class RollingLogSubscriber:
     REQUEST_FILTER = msgftr.NameIs(REQUEST)
 
     def __init__(self, mailer,
-                 transformer=msgtrf.Noop(),
                  msg_filter=msgftr.AcceptAll(),
+                 transformer=msgtrf.Noop(),
+                 aggregator=aggtrf.Noop(),
                  size=20, identity=None):
         assert msgsvc.is_multimailer(mailer)
         self.mailer = mailer
         self.identity = identity if identity is not None else str(uuid.uuid4())
         self.transformer = transformer
+        self.aggregator = aggregator
         self.request_filter = msgftr.And((
             RollingLogSubscriber.REQUEST_FILTER,
             msgftr.DataEquals(self.identity)
@@ -188,7 +190,8 @@ class RollingLogSubscriber:
 
     def handle(self, message):
         if self.request_filter.accepts(message):
-            self.mailer.post((self, RollingLogSubscriber.RESPONSE, tuple(self.container), message))
+            result = self.aggregator.aggregate(tuple(self.container))
+            self.mailer.post((self, RollingLogSubscriber.RESPONSE, result, message))
         else:
             self.container.append(self.transformer.transform(message))
             while len(self.container) > self.size:

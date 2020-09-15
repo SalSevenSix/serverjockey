@@ -254,7 +254,7 @@ const handlers = {
 async function playerEventHook() {
   var url = await fetch(config.SERVERJOCKEY_URL + '/players/subscribe', newPostRequest())
     .then(function(response) {
-      if (!response.ok) { throw new Error('Status: ' + response.status); }
+      if (!response.ok) throw new Error('Status: ' + response.status);
       return response.json();
     })
     .then(function(json) { return json.url; })
@@ -271,15 +271,15 @@ async function playerEventHook() {
     running = await fetch(url)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
-        if (response.status == 204) return;
+        if (response.status == 204) return null;
         return response.json();
       })
       .then(function(json) {
         if (json == null) return true;
         var result = '```diff\n';
-        if (json.activity == 'login') { result += '+ LOGIN "'; }
-        if (json.activity == 'logout') { result += '- LOGOUT "'; }
-        result += json.name + '"\n```'
+        if (json.activity == 'login') { result += '+ LOGIN '; }
+        if (json.activity == 'logout') { result += '- LOGOUT '; }
+        result += json.name + '\n```';
         channel.send(result);
         return true;
       })

@@ -18,6 +18,7 @@ wait_file() {
 check_dependencies() {
     echo
     echo "Checking dependencies..."
+
     echo
     echo "Checking for steamcmd."
     steamcmd +quit
