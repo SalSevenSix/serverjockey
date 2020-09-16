@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf
+from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf, shell
 from servers.projectzomboid import handlers as h, subscribers as s
 
 
@@ -97,30 +97,28 @@ class Deployment:
         return util.directory_list_dict(self.home_dir)
 
     async def install_runtime(self, beta=None, validate=False, wipe=True):
-        app_arg = ['+app_update 380870']
-        if beta:
-            app_arg.append('-beta ' + beta)
-        if validate:
-            app_arg.append('validate')
         if wipe:
             util.delete_directory(self.runtime_dir)
-        process = await asyncio.create_subprocess_exec(
-            'steamcmd',
-            '+login anonymous',
-            '+force_install_dir ' + self.runtime_dir,
-            ' '.join(app_arg),
-            '+quit',
+        install_script = shell.steamcmd_app_update(
+            app_id=380870,
+            install_dir=self.runtime_dir,
+            beta=beta,
+            validate=validate)
+        link_script = util.to_text((
+            'SRC_FILE=' + self.runtime_dir + '/steamclient.so',
+            'TRG_FILE=$SRC_FILE',
+            '[ -f $SRC_FILE ] || SRC_FILE=~/.steam/steamcmd/linux64/steamclient.so',
+            '[ -f $SRC_FILE ] || SRC_FILE=~/Steam/linux64/steamclient.so',
+            '[ -f $TRG_FILE ] || ln -s $SRC_FILE $TRG_FILE'
+        ))
+        process = await asyncio.create_subprocess_shell(
+            util.to_text((install_script, link_script)),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.DEVNULL)
         stdout, stderr = await process.communicate()
-        steamclient_file = self.runtime_dir + '/steamclient.so'
-        if not util.file_exists(steamclient_file):
-            process = await asyncio.create_subprocess_shell(
-                'ln -s ~/.steam/steamcmd/linux64/steamclient.so ' + steamclient_file)
-            await process.wait()
-        if stdout:
-            return stdout.decode()
-        return 'NO STDOUT'
+        result = [stdout.decode()] if stdout else ['NO STDOUT']
+        result.append('EXIT STATUS: ' + str(process.returncode))
+        return util.to_text(result)
 
     def backup_runtime(self):
         return util.archive_directory(self.runtime_dir)

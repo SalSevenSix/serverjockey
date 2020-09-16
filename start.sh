@@ -15,19 +15,31 @@ wait_file() {
     done
 }
 
+find_steamcmd() {
+  steamcmd +quit >/dev/null 2>&1 && echo steamcmd && return 0
+  steamcmd.sh +quit >/dev/null 2>&1 && echo steamcmd.sh && return 0
+  ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0
+  echo steamcmd && return 1
+}
+
 check_dependencies() {
     echo
     echo "Checking dependencies..."
 
     echo
     echo "Checking for steamcmd."
-    steamcmd +quit
+    $STEAMCMD +quit >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Steamcmd not found. Install commands;"
-        echo "$ sudo add-apt-repository multiverse"
-        echo "$ sudo dpkg --add-architecture i386"
-        echo "$ sudo apt update"
-        echo "$ sudo apt install lib32gcc1 steamcmd"
+        echo "Steamcmd not found."
+        echo "If you have any installation issues, please consult the website;"
+        echo "  https://developer.valvesoftware.com/wiki/SteamCMD"
+        echo "For Ubuntu/Debian;"
+        echo "  $ sudo add-apt-repository multiverse"
+        echo "  $ sudo dpkg --add-architecture i386"
+        echo "  $ sudo apt update"
+        echo "  $ sudo apt install lib32gcc1 steamcmd"
+        echo "For RedHat/CentOS;"
+        echo "  $ sudo yum install steamcmd"
         exit 1
     fi
 
@@ -35,19 +47,25 @@ check_dependencies() {
     echo "Checking for python. Python 3.8 or higher required."
     python3 --version
     if [ $? -ne 0 ]; then
-        echo "Python3 not found. Install commands;"
-        echo "$ sudo apt install software-properties-common"
-        echo "$ sudo add-apt-repository ppa:deadsnakes/ppa"
-        echo "$ sudo apt install python3"
+        echo "Python3 not found."
+        echo "For Ubuntu/Debian;"
+        echo "  $ sudo apt install software-properties-common"
+        echo "  $ sudo add-apt-repository ppa:deadsnakes/ppa"
+        echo "  $ sudo apt install python3"
+        echo "For RedHat/CentOS;"
+        echo "  $ sudo yum install python3"
         exit 1
     fi
 
     echo
     echo "Checking for pip."
-    pip3 --version
+    python3 -m pip --version
     if [ $? -ne 0 ]; then
-        echo "Pip3 not found. Install command;"
-        echo "$ sudo apt install python3-pip"
+        echo "Pip not found."
+        echo "For Ubuntu/Debian;"
+        echo "  $ sudo apt install python3-pip"
+        echo "For RedHat/CentOS;"
+        echo "  $ sudo yum install python3-pip"
         exit 1
     fi
 
@@ -56,7 +74,7 @@ check_dependencies() {
     python3 -m pipenv --version
     if [ $? -ne 0 ]; then
         echo "Pipenv not found. Installing now."
-        pip3 install --user pipenv
+        python3 -m pip install --user pipenv
         if [ $? -ne 0 ]; then
             echo "Failed installing pipenv. Sorry."
             exit 1
@@ -64,20 +82,27 @@ check_dependencies() {
     fi
 
     echo
-    echo "Checking for nodejs."
-    node --version
+    echo "Checking for npm."
+    npm --version
     if [ $? -ne 0 ]; then
-        echo "Nodejs not found. Install command;"
-        echo "$ sudo apt install nodejs"
+        echo "Npm not found."
+        echo "For Ubuntu/Debian;"
+        echo "  $ sudo apt install npm"
+        echo "For RedHat/CentOS;"
+        echo "  $ sudo yum install npm"
         exit 1
     fi
 
     echo
-    echo "Checking for npm."
-    npm --version
+    echo "Checking for nodejs."
+    node --version
     if [ $? -ne 0 ]; then
-        echo "Npm not found. Install command;"
-        echo "$ sudo apt install npm"
+        # TODO use npm to install it instead
+        echo "Nodejs not found."
+        echo "For Ubuntu/Debian;"
+        echo "  $ sudo apt install nodejs"
+        echo "For RedHat/CentOS;"
+        echo "  $ sudo yum install nodejs"
         exit 1
     fi
 
@@ -92,15 +117,15 @@ check_dependencies() {
         } >"$DISCORD_CONF"
         echo "Discord configuration file not found. A template has been created."
         echo "You need to edit this file to provide details about your Discord bot and server."
-        echo "$ nano $DISCORD_CONF"
+        echo "  $ nano $DISCORD_CONF"
         exit 1
     fi
 
     echo
     echo "Checking for serverlink node_modules."
     if [ ! -d "$DISCORD_DIR/node_modules" ]; then
-        echo "Discord Bot package dependencies not found."
-        echo "Installing discord.js, node-fetch."
+        # TODO Get this to to install needed packages from package-lock.json
+        echo "Discord Bot package dependencies not found. Installing dependencies."
         cd "$DISCORD_DIR" || exit 1
         npm install discord.js || exit 1
         npm install node-fetch || exit 1
@@ -112,7 +137,8 @@ check_dependencies() {
     python3 -m pipenv install || exit 1
 
     echo
-    echo "All dependencies installed. Creating a file to skip these checks;"
+    echo "All dependencies installed."
+    echo "Creating a file to skip these checks;"
     date > "$DEPENDENCIES_FILE"
     echo "   $DEPENDENCIES_FILE"
     echo
@@ -130,6 +156,7 @@ DISCORD_DIR="$JOCKEY_DIR/client/discord"
 DISCORD_CONF="$JOCKEY_DIR/serverlink.json"
 DISCORD_LOG="$JOCKEY_DIR/serverlink.log"
 CLIENT_CONF="$JOCKEY_DIR/serverjockey-client.json"
+STEAMCMD=$(find_steamcmd)
 rm "$CLIENT_CONF" >/dev/null 2>&1
 if [ ! -f "$DEPENDENCIES_FILE" ]; then
     check_dependencies

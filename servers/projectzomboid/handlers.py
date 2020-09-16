@@ -12,9 +12,13 @@ class DeploymentHandler:
 
 
 class DeploymentCommandHandler:
+    DECODER = httpext.DictionaryCoder().append('beta', util.script_escape)
 
     def __init__(self, deployment):
         self.deployment = deployment
+
+    def get_decoder(self):
+        return DeploymentCommandHandler.DECODER
 
     async def handle_post(self, resource, data):
         command = util.get('command', data)

@@ -153,7 +153,7 @@ class ProtectedLineConfigHandler:
                     exclude = True
             if not exclude:
                 result.append(line)
-        return '\n'.join(result)
+        return util.to_text(result)
 
     async def handle_post(self, resource, data):
         await util.write_file(self.filename, data)

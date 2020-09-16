@@ -52,7 +52,7 @@ class PipeInLineService:
                 self.pipe.write(b'\n')
                 response = await command.catcher.get() if command.catcher else None  # blocking
                 self.mailer.post((self, PipeInLineService.RESPONSE, response, message))
-            except asyncio.exceptions.TimeoutError as e:
+            except asyncio.TimeoutError as e:
                 logging.warning('Timeout on cmdline into pipein. raised: %s', e)
                 self.mailer.post((self, PipeInLineService.EXCEPTION, e, message))
             except Exception as e:
@@ -170,7 +170,7 @@ class ProcessHandler:
             self.mailer.post((self, ProcessHandler.STATE_STARTED, self.process))
             rc = await self.process.wait()   # blocking
             self.mailer.post((self, ProcessHandler.STATE_COMPLETE, self.process))
-        except asyncio.exceptions.TimeoutError:
+        except asyncio.TimeoutError:
             logging.error('Timeout waiting for PROCESS_STARTED')
             self.mailer.post((self, ProcessHandler.STATE_TIMEOUT, self.process))
             self.terminate()

@@ -90,7 +90,7 @@ class _Subscriber:
         self.msg_filter = msgftr.Or((_InactivityCheckProducer.FILTER, selector.msg_filter))
         self.poll_timeout = 60.0
         self.inactivity_timeout = 120.0
-        self.queue = asyncio.Queue(maxsize=100)
+        self.queue = asyncio.Queue(maxsize=200)
         self.time_last_activity = time.time()
 
     def accepts(self, message):
@@ -132,7 +132,7 @@ class _Subscriber:
             message = await asyncio.wait_for(self.queue.get(), self.poll_timeout)
             self.queue.task_done()
             return self.transformer.transform(message)
-        except asyncio.exceptions.TimeoutError:
+        except asyncio.TimeoutError:
             return None
 
     def _get_all(self):

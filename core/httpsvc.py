@@ -76,8 +76,7 @@ class HttpService:
         self.app.add_routes([
             web.get('/{tail:.*}', self._handle),
             web.post('/{tail:.*}', self._handle)])
-        self.task = asyncio.create_task(web._run_app(
-            self.app, host=self.context.get_host(), port=self.context.get_port()))
+        self.task = asyncio.create_task(web._run_app(self.app, port=self.context.get_port()))
         self.context.post((self, HttpService.SERVER_STARTING, self.task))
         await self.clientfile.write()
         return self
@@ -179,16 +178,15 @@ class Secret:
     SECRET = 'X-Secret'
 
     def __init__(self, mailer):
+        self.mailer = mailer
         identity = str(uuid.uuid4())
         self.secret = identity[:4] + identity[len(identity)-4:]
         mailer.post((self, Secret.NAME, self.secret))
 
     def ask(self, headers):
-        host = headers.get_host()[0]
-        if host in ('localhost', '127.0.0.1') or host.startswith('192.168.1.'):   # bypass
+        if self.mailer.is_debug():
             return True
-        whisper = headers.get(Secret.SECRET)
-        return whisper is not None and whisper == self.secret
+        return headers.get(Secret.SECRET) == self.secret
 
 
 class HeadersTool:

@@ -6,11 +6,25 @@ import time
 import aiofiles
 
 
+SCRIPT_SPECIALS = str.maketrans({
+    '#':  r'\#', '$':  r'\$', '=':  r'\=', '[':  r'\[', ']':  r'\]',
+    '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
+    ';': r'\;', '|': r'\|', '~': r'\~', '(': r'\(', ')': r'\)',
+    '*': r'\*', '?': r'\?', '&': r'\&'
+})
+
+
 class _JsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if obj is None or type(obj) in (str, tuple, list, dict):
             return obj
         return obj_to_str(obj)
+
+
+def script_escape(value):
+    if not isinstance(value, str):
+        return value
+    return value.translate(SCRIPT_SPECIALS)
 
 
 def is_format(text):
@@ -69,6 +83,10 @@ def str_to_b10str(value):
 def b10str_to_str(value):
     chunks = [value[b:b+3] for b in range(0, len(value), 3)]
     return bytes([int(b) for b in chunks]).decode('utf-8')
+
+
+def to_text(lines):
+    return '\n'.join(lines)
 
 
 def get(key, dictionary):
