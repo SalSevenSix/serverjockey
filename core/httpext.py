@@ -122,11 +122,16 @@ class ServerCommandHandler:
 
 class ReadWriteFileHandler:
 
-    def __init__(self, filename, text=True):
+    def __init__(self, filename, protected=False, text=True):
         self.filename = filename
+        self.protected = protected
         self.text = text
 
     async def handle_get(self, resource, data):
+        if self.protected and not httpsvc.is_secure(data):
+            return httpsvc.ResponseBody.UNAUTHORISED
+        if not util.file_exists(self.filename):
+            return httpsvc.ResponseBody.NOT_FOUND
         return await util.read_file(self.filename, text=self.text)
 
     async def handle_post(self, resource, data):
@@ -143,10 +148,14 @@ class ProtectedLineConfigHandler:
             self.patterns.append(re.compile(regex))
 
     async def handle_get(self, resource, data):
-        data = await util.read_file(self.filename)
-        data = data.split('\n')
+        if not util.file_exists(self.filename):
+            return httpsvc.ResponseBody.NOT_FOUND
+        file = await util.read_file(self.filename)
+        if httpsvc.is_secure(data):
+            return file
+        file = file.split('\n')
         result = []
-        for line in iter(data):
+        for line in iter(file):
             exclude = False
             for pattern in iter(self.patterns):
                 if pattern.match(line) is not None:

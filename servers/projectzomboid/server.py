@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf, shell
+from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf, shell, msgtrf
 from servers.projectzomboid import handlers as h, subscribers as s
 
 
@@ -17,7 +17,7 @@ class Server:
         self.httpsubs = httpsubs.HttpSubscriptionService(context, self.base_url + '/subscriptions')
         context.register(s.ServerStateSubscriber(context))
         context.register(s.ServerDetailsSubscriber(context))
-        context.register(s.PlayerActivitySubscriber(context))
+        context.register(s.PlayerEventSubscriber(context))
         context.register(s.ProvideAdminPasswordSubscriber(context))
 
     def resources(self):
@@ -25,7 +25,7 @@ class Server:
         conf_pre = self.deployment.config_dir + '/' + self.deployment.world_name
         resources = httpext.ResourceBuilder(self.base_url) \
             .push('server', httpext.ServerStatusHandler(self.context)) \
-            .append('subscribe', self.httpsubs.subscribe_handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
+            .append('subscribe', self.httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', httpext.ServerCommandHandler(self.context)) \
             .pop() \
             .push('deployment', h.DeploymentHandler(self.deployment)) \
@@ -40,15 +40,16 @@ class Server:
             .push('{option}') \
             .append('{command}', h.OptionCommandHandler(self.context)) \
             .pop().pop() \
-            .append('db', httpext.ReadWriteFileHandler(self.deployment.playerdb_file, text=False)) \
-            .append('ini', httpext.ProtectedLineConfigHandler(conf_pre + '.ini', ('^Password=.*', '^DiscordToken.*'))) \
+            .append('jvm', httpext.ReadWriteFileHandler(self.deployment.jvm_config_file)) \
+            .append('db', httpext.ReadWriteFileHandler(self.deployment.playerdb_file, protected=True, text=False)) \
+            .append('ini', httpext.ProtectedLineConfigHandler(conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
             .append('sandbox', httpext.ReadWriteFileHandler(conf_pre + '_SandboxVars.lua')) \
             .append('spawnpoints', httpext.ReadWriteFileHandler(conf_pre + '_spawnpoints.lua')) \
             .append('spawnregions', httpext.ReadWriteFileHandler(conf_pre + '_spawnregions.lua')) \
             .pop() \
             .append('steamids', h.SteamidsHandler(self.context)) \
             .push('players', h.PlayersHandler(self.context)) \
-            .append('subscribe', self.httpsubs.subscribe_handler(s.PlayerActivitySubscriber.ALL_FILTER)) \
+            .append('subscribe', self.httpsubs.handler(s.PlayerEventSubscriber.ALL_FILTER, msgtrf.DataAsDict())) \
             .push('{player}') \
             .append('{command}', h.PlayerCommandHandler(self.context)) \
             .pop().pop() \
@@ -59,7 +60,7 @@ class Server:
             .append('{command}', h.BanlistCommandHandler(self.context)) \
             .pop() \
             .push('log', h.ConsoleLogHandler(self.context)) \
-            .append('subscribe', self.httpsubs.subscribe_handler(h.ConsoleLogHandler.FILTER, aggtrf.StrJoin('\n'))) \
+            .append('subscribe', self.httpsubs.handler(h.ConsoleLogHandler.FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .push('subscriptions') \
             .append('{identity}', self.httpsubs.subscriptions_handler()) \
@@ -69,7 +70,7 @@ class Server:
         return resources
 
     async def run(self):
-        self.context.post((self, svrsvc.ServerStatus.NOTIFY_DETAILS, {'host': self.context.get_host()}))
+        svrsvc.ServerStatus.notify_details(self.context, self, {'host': self.context.get_host()})
         return await proch.ProcessHandler(self.context, self.context.get_executable()) \
             .append_arg('-cachedir=' + self.deployment.world_dir) \
             .use_pipeinsvc(self.pipeinsvc) \
@@ -86,6 +87,7 @@ class Deployment:
         self.world_name = 'servertest'
         self.home_dir = context.get_home()
         self.runtime_dir = context.relative_path('runtime')
+        self.jvm_config_file = self.runtime_dir + '/ProjectZomboid64.json'
         self.world_dir = context.relative_path('world')
         self.playerdb_dir = self.world_dir + '/db'
         self.playerdb_file = self.playerdb_dir + '/' + self.world_name + '.db'

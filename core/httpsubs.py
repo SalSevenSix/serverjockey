@@ -76,7 +76,7 @@ class HttpSubscriptionService:
     def subscriptions_handler(self):
         return _SubscriptionsHandler(self)
 
-    def subscribe_handler(self, *argv):
+    def handler(self, *argv):
         return _SubscribeHandler(self.mailer, Selector.from_argv(*argv))
 
 
@@ -144,7 +144,7 @@ class _Subscriber:
                 message = self.queue.get_nowait()
                 results.append(self.transformer.transform(message))
                 self.queue.task_done()
-        except asyncio.QueueEmpty as e:
+        except asyncio.QueueEmpty:
             pass
         return results
 

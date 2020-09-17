@@ -45,6 +45,16 @@ def obj_to_str(obj):
     return repr(obj).replace(' object at ', ':')
 
 
+def obj_to_dict(obj):
+    if obj is None or isinstance(obj, dict):
+        return obj
+    if hasattr(obj, 'asdict'):
+        return obj.asdict()
+    if hasattr(obj, '__dict__'):
+        return obj.__dict__
+    raise Exception('obj_to_dict() failed converting {} to dict'.format(obj))
+
+
 def obj_to_json(obj):
     if obj is None:
         return None
@@ -189,3 +199,17 @@ async def write_file(filename, data, text=True):
 async def copy_file(source_file, target_file):
     data = await read_file(source_file, text=False)
     await write_file(target_file, data, text=False)
+
+
+def left_chop_and_strip(line, keyword):
+    index = line.find(keyword)
+    if index == -1:
+        return line
+    return line[index + len(keyword):].strip()
+
+
+def right_chop_and_strip(line, keyword):
+    index = line.find(keyword)
+    if index == -1:
+        return line
+    return line[:index].strip()

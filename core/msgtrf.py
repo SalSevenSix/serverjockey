@@ -19,6 +19,12 @@ class GetData:
         return message.get_data()
 
 
+class DataAsDict:
+
+    def transform(self, message):
+        return util.obj_to_dict(message.get_data())
+
+
 class ToString:
 
     def transform(self, message):

@@ -4,8 +4,9 @@ import gzip
 import uuid
 from aiohttp import web
 from aiohttp import web_exceptions as h
-from core import util
+from core import util, blobs
 
+SECURE = '_SECURE'
 
 UTF8 = 'UTF-8'
 GZIP = 'gzip'
@@ -24,7 +25,12 @@ HOST = 'Host'
 CONTENT_TYPE = 'Content-Type'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
+CACHE_CONTROL = 'Cache-Control'
 ACCEPT_ENCODING = 'Accept-Encoding'
+
+
+def is_secure(data):
+    return util.get(SECURE, data) is True
 
 
 class ResponseBody:
@@ -32,31 +38,8 @@ class ResponseBody:
     NOT_FOUND = h.HTTPNotFound
     BAD_REQUEST = h.HTTPBadRequest
     UNAVAILABLE = h.HTTPServiceUnavailable
-    ERRORS = (NOT_FOUND, BAD_REQUEST, UNAVAILABLE)
-
-
-class ClientFile:
-    CLIENT_FILE_UPDATED = 'ClientFile.Updated'
-
-    def __init__(self, context, base_url, secret):
-        self.context = context
-        self.base_url = base_url
-        self.secret = secret
-
-    async def write(self):
-        clientfile = self.context.get_clientfile()
-        if clientfile is None:
-            return self
-        await util.write_file(clientfile, util.obj_to_json({
-            'SERVERJOCKEY_URL': self.base_url,
-            'SERVERJOCKEY_TOKEN': self.secret
-        }))
-        self.context.post((self, ClientFile.CLIENT_FILE_UPDATED, clientfile))
-        logging.info('Clientfile: ' + clientfile)
-        return self
-
-    def delete(self):
-        util.delete_file(self.context.get_clientfile())
+    UNAUTHORISED = h.HTTPUnauthorized
+    ERRORS = (NOT_FOUND, BAD_REQUEST, UNAVAILABLE, UNAUTHORISED)
 
 
 class HttpService:
@@ -112,25 +95,25 @@ class RequestHandler:
             self.method = POST
 
     async def handle(self):
-        path = self.request.path
-        resource = self.resources.lookup(path)
+        resource = self.resources.lookup(self.request.path)
         if resource is None:
-            raise h.HTTPNotFound
+            return self.static_response()
         if not resource.allows(self.method):
             allowed = GET if self.method is POST else POST
             raise h.HTTPMethodNotAllowed(self.method, allowed)
+        headers = HeadersTool(self.request.headers)
+        secure = self.secret.ask(headers)
 
         # GET
         if self.method is GET:
-            response_body = await resource.handle_get(path)
+            response_body = await resource.handle_get(self.request.path, secure)
             if response_body is None:
                 raise h.HTTPNotFound
             return self.build_response(response_body)
 
         # POST
-        headers = HeadersTool(self.request.headers)
-        if not self.secret.ask(headers):
-            raise h.HTTPUnauthorized
+        if not secure:
+            raise ResponseBody.UNAUTHORISED
         request_body, mime, encoding = b'{}', APPLICATION_JSON, None
         if self.request.has_body:
             mime, encoding = headers.get_content_type()
@@ -144,7 +127,7 @@ class RequestHandler:
                 request_body = util.json_to_dict(request_body)
                 if request_body is None:
                     raise h.HTTPBadRequest
-        response_body = await resource.handle_post(path, request_body)
+        response_body = await resource.handle_post(self.request.path, request_body)
         return self.build_response(response_body)
 
     def build_response(self, body):
@@ -171,6 +154,18 @@ class RequestHandler:
         response.headers.add(CONTENT_LENGTH, str(len(body)))
         response.body = body
         return response
+
+    def static_response(self):
+        if self.method is POST:
+            raise h.HTTPNotFound
+        if self.request.path.endswith('favicon.ico'):
+            response = web.Response()
+            response.headers.add(CONTENT_TYPE, 'image/x-icon')
+            response.headers.add(CONTENT_LENGTH, str(len(blobs.FAVICON)))
+            response.headers.add(CACHE_CONTROL, 'max-age=315360000')
+            response.body = blobs.FAVICON
+            return response
+        raise h.HTTPNotFound
 
 
 class Secret:
@@ -223,6 +218,30 @@ class HeadersTool:
     def accepts_encoding(self, encoding):
         accepts = self.get(ACCEPT_ENCODING)
         return accepts is not None and accepts.find(encoding) != -1
+
+
+class ClientFile:
+    CLIENT_FILE_UPDATED = 'ClientFile.Updated'
+
+    def __init__(self, context, base_url, secret):
+        self.context = context
+        self.base_url = base_url
+        self.secret = secret
+
+    async def write(self):
+        clientfile = self.context.get_clientfile()
+        if clientfile is None:
+            return self
+        await util.write_file(clientfile, util.obj_to_json({
+            'SERVERJOCKEY_URL': self.base_url,
+            'SERVERJOCKEY_TOKEN': self.secret
+        }))
+        self.context.post((self, ClientFile.CLIENT_FILE_UPDATED, clientfile))
+        logging.info('Clientfile: ' + clientfile)
+        return self
+
+    def delete(self):
+        util.delete_file(self.context.get_clientfile())
 
 
 class Resource:
@@ -296,14 +315,16 @@ class Resource:
             return data
         return self.handler.get_decoder().process(data)
 
-    async def handle_get(self, path):
-        path_dict = PathParser(self, path).get_args()
-        return await self.handler.handle_get(self, self.decode(path_dict))
+    async def handle_get(self, path, secure=False):
+        data = PathParser(self, path).get_args()
+        if secure:
+            data.update({SECURE: secure})
+        return await self.handler.handle_get(self, self.decode(data))
 
     async def handle_post(self, path, body):
-        path_dict = PathParser(self, path).get_args()
         if isinstance(body, dict):
-            body = self.decode({**path_dict, **body})
+            data = PathParser(self, path).get_args()
+            body = self.decode({**data, **body})
         return await self.handler.handle_post(self, body)
 
 

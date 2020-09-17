@@ -136,11 +136,13 @@ const handlers = {
   },
 
   config: function(message, data) {
-    var result = config.SERVERJOCKEY_URL + '/config/options\n';
-    result += config.SERVERJOCKEY_URL + '/config/ini\n';
-    result += config.SERVERJOCKEY_URL + '/config/sandbox\n';
-    result += config.SERVERJOCKEY_URL + '/config/spawnpoints\n';
-    result += config.SERVERJOCKEY_URL + '/config/spawnregions\n';
+    var prefix = config.SERVERJOCKEY_URL + '/config/'
+    var result = prefix + 'jvm\n';
+    result += prefix + 'options\n';
+    result += prefix + 'ini\n';
+    result += prefix + 'sandbox\n';
+    result += prefix + 'spawnpoints\n';
+    result += prefix + 'spawnregions\n';
     message.channel.send(result);
   },
 
@@ -277,9 +279,9 @@ async function playerEventHook() {
       .then(function(json) {
         if (json == null) return true;
         var result = '```diff\n';
-        if (json.activity == 'login') { result += '+ LOGIN '; }
-        if (json.activity == 'logout') { result += '- LOGOUT '; }
-        result += json.name + '\n```';
+        if (json.event == 'login') { result += '+ LOGIN '; }
+        if (json.event == 'logout') { result += '- LOGOUT '; }
+        result += json.player.name + '\n```';
         channel.send(result);
         return true;
       })

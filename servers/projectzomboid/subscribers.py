@@ -1,18 +1,5 @@
 from core import svrsvc, msgext, msgftr, msgsvc, proch, util, httpsvc
-
-
-def left_chop_and_strip(line, keyword):
-    index = line.find(keyword)
-    if index == -1:
-        return line
-    return line[index + len(keyword):].strip()
-
-
-def right_chop_and_strip(line, keyword):
-    index = line.find(keyword)
-    if index == -1:
-        return line
-    return line[:index].strip()
+from servers.projectzomboid import domain as d
 
 
 class ConsoleLogFilter:
@@ -29,7 +16,7 @@ class ConsoleLogFilter:
     def accepts(self, message):
         if not (proch.Filter.STDOUT_LINE.accepts(message) or proch.Filter.STDERR_LINE.accepts(message)):
             return False
-        value = right_chop_and_strip(message.get_data(), ' ')
+        value = util.right_chop_and_strip(message.get_data(), ' ')
         return value not in ConsoleLogFilter.COMMANDS
 
 
@@ -78,20 +65,20 @@ class ServerDetailsSubscriber:
         key, value = None, None
         if ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             key = 'version'
-            value = left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.VERSION)
-            value = right_chop_and_strip(value, 'demo=')
+            value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.VERSION)
+            value = util.right_chop_and_strip(value, 'demo=')
         elif ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             key = 'port'
-            value = left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.PORT)
+            value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.PORT)
             value = int(value)
         elif ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
             key = 'steamid'
-            value = left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.STEAMID)
+            value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.STEAMID)
         if key:
             svrsvc.ServerStatus.notify_details(self.mailer, self, {key: value})
 
 
-class PlayerActivitySubscriber:
+class PlayerEventSubscriber:
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
     LOGIN_KEY = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
@@ -110,20 +97,20 @@ class PlayerActivitySubscriber:
         self.mailer = mailer
 
     def accepts(self, message):
-        return PlayerActivitySubscriber.FILTER.accepts(message)
+        return PlayerEventSubscriber.FILTER.accepts(message)
 
     def handle(self, message):
-        if PlayerActivitySubscriber.LOGIN_KEY_FILTER.accepts(message):
-            line = left_chop_and_strip(message.get_data(), PlayerActivitySubscriber.LOGIN_KEY)
+        if PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
+            line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGIN_KEY)
             name, steamid = line.split(' id=')
-            event = {'activity': 'login', 'steamid': steamid, 'name': name[1:-1]}
-            self.mailer.post((self, PlayerActivitySubscriber.LOGIN, event))
-        if PlayerActivitySubscriber.LOGOUT_KEY_FILTER.accepts(message):
-            line = left_chop_and_strip(message.get_data(), PlayerActivitySubscriber.LOGOUT_KEY)
+            event = d.PlayerEvent('login', d.Player(steamid, name[1:-1]))
+            self.mailer.post((self, PlayerEventSubscriber.LOGIN, event))
+        if PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
+            line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGOUT_KEY)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
-            event = {'activity': 'logout', 'steamid': steamid, 'name': name[1:-1]}
-            self.mailer.post((self, PlayerActivitySubscriber.LOGOUT, event))
+            event = d.PlayerEvent('logout', d.Player(steamid, name[1:-1]))
+            self.mailer.post((self, PlayerEventSubscriber.LOGOUT, event))
         return None
 
 
@@ -131,14 +118,14 @@ class CaptureSteamidSubscriber:
     REQUEST = 'CaptureSteadIdSubscriber.Request'
     RESPONSE = 'CaptureSteadIdSubscriber.Response'
     REQUEST_FILTER = msgftr.NameIs(REQUEST)
-    FILTER = msgftr.Or((REQUEST_FILTER, PlayerActivitySubscriber.LOGIN_FILTER))
+    FILTER = msgftr.Or((REQUEST_FILTER, PlayerEventSubscriber.LOGIN_FILTER))
 
     def __init__(self, mailer):
         self.mailer = mailer
-        self.steamids = {}
+        self.playerstore = d.PlayerStore()
 
     @staticmethod
-    async def request(mailer, source):
+    async def get_playerstore(mailer, source):
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(msgsvc.Message(source, CaptureSteamidSubscriber.REQUEST))
         return response.get_data()
@@ -148,16 +135,9 @@ class CaptureSteamidSubscriber:
 
     def handle(self, message):
         if CaptureSteamidSubscriber.REQUEST_FILTER.accepts(message):
-            self.mailer.post((self, CaptureSteamidSubscriber.RESPONSE, self.steamids.copy(), message))
-        if PlayerActivitySubscriber.LOGIN_FILTER.accepts(message):
-            data = message.get_data()
-            steamid, name = data['steamid'], data['name']
-            names = util.get(steamid, self.steamids)
-            if names:
-                if name not in names:
-                    names.append(name)
-            else:
-                self.steamids.update({steamid: [name]})
+            self.mailer.post((self, CaptureSteamidSubscriber.RESPONSE, self.playerstore, message))
+        if PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
+            self.playerstore.add_player(message.get_data().get_player())
         return None
 
 

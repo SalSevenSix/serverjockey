@@ -1,5 +1,5 @@
 from core import httpsvc, httpext, proch, msgext, msgtrf, util, aggtrf, cmdutil
-from servers.projectzomboid import subscribers as s, domain as d
+from servers.projectzomboid import subscribers as s, loaders as l
 
 
 class DeploymentHandler:
@@ -68,7 +68,7 @@ class OptionsHandler:
         self.mailer = mailer
 
     async def handle_get(self, resource, data):
-        return [o.get_data() for o in await d.Option.Loader(self.mailer, self, resource).all()]
+        return [o.asdict() for o in await l.OptionLoader(self.mailer, self, resource).all()]
 
 
 class OptionsReloadHandler:
@@ -89,10 +89,10 @@ class OptionCommandHandler:
         self.mailer = mailer
 
     def get_decoder(self):
-        return d.Option.DECODER
+        return l.OptionLoader.DECODER
 
     async def handle_post(self, resource, data):
-        if not await d.Option.Loader(self.mailer, self, resource).get(util.get('option', data)):
+        if not await l.OptionLoader(self.mailer, self, resource).get(util.get('option', data)):
             return httpsvc.ResponseBody.NOT_FOUND
         cmdline = OptionCommandHandler.COMMANDS.get(data)
         if not cmdline or util.get('value', data) is None:
@@ -108,7 +108,10 @@ class SteamidsHandler:
         mailer.register(s.CaptureSteamidSubscriber(mailer))
 
     async def handle_get(self, resource, data):
-        return await s.CaptureSteamidSubscriber.request(self.mailer, self)
+        if not httpsvc.is_secure(data):
+            return httpsvc.ResponseBody.UNAUTHORISED
+        playerstore = await s.CaptureSteamidSubscriber.get_playerstore(self.mailer, self)
+        return playerstore.asdict()
 
 
 class PlayersHandler:
@@ -117,7 +120,7 @@ class PlayersHandler:
         self.mailer = mailer
 
     async def handle_get(self, resource, data):
-        return [p.get_data() for p in await d.Player.Loader(self.mailer, self, resource).all()]
+        return [o.asdict() for o in await l.PlayerLoader(self.mailer, self, resource).all()]
 
 
 class PlayerCommandHandler:
@@ -134,10 +137,10 @@ class PlayerCommandHandler:
         self.mailer = mailer
 
     def get_decoder(self):
-        return d.Player.DECODER
+        return l.PlayerLoader.DECODER
 
     async def handle_post(self, resource, data):
-        if not await d.Player.Loader(self.mailer, self, resource).get(util.get('player', data)):
+        if not await l.PlayerLoader(self.mailer, self, resource).get(util.get('player', data)):
             return httpsvc.ResponseBody.NOT_FOUND
         cmdline = PlayerCommandHandler.COMMANDS.get(data)
         if not cmdline:
@@ -154,7 +157,7 @@ class WhitelistCommandHandler:
 
     def __init__(self, mailer):
         self.handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, WhitelistCommandHandler.COMMANDS, d.Player.DECODER)
+            mailer, self, WhitelistCommandHandler.COMMANDS, l.PlayerLoader.DECODER)
 
     def get_decoder(self):
         return self.handler.get_decoder()
@@ -172,7 +175,7 @@ class BanlistCommandHandler:
 
     def __init__(self, mailer):
         self.handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, BanlistCommandHandler.COMMANDS, d.Player.DECODER)
+            mailer, self, BanlistCommandHandler.COMMANDS, l.PlayerLoader.DECODER)
 
     def get_decoder(self):
         return self.handler.get_decoder()
@@ -188,7 +191,7 @@ class ConsoleLogHandler:
         self.mailer = mailer
         self.subscriber = msgext.RollingLogSubscriber(
             mailer, size=100,
-            msg_filter=ConsoleLogHandler.FILTER,
+            msg_filter=s.ConsoleLogFilter(),
             transformer=msgtrf.GetData(),
             aggregator=aggtrf.StrJoin('\n'))
         mailer.register(self.subscriber)
