@@ -49,7 +49,7 @@ class HttpSubscriptionService:
         self.mailer = mailer
         self.subscriptions_url = subscriptions_url
         self.subscriptions = {}
-        self.publisher = msgext.Publisher(mailer, _InactivityCheckProducer())
+        mailer.register(_InactivityCheck(mailer))
         mailer.register(self)
 
     def lookup(self, identity):
@@ -87,7 +87,7 @@ class _Subscriber:
         self.identity = identity
         self.transformer = selector.transformer
         self.aggregator = selector.aggregator
-        self.msg_filter = msgftr.Or((_InactivityCheckProducer.FILTER, selector.msg_filter))
+        self.msg_filter = msgftr.Or((_InactivityCheck.FILTER, selector.msg_filter))
         self.poll_timeout = 60.0
         self.inactivity_timeout = 120.0
         self.queue = asyncio.Queue(maxsize=200)
@@ -97,7 +97,7 @@ class _Subscriber:
         return self.msg_filter.accepts(message)
 
     def handle(self, message):
-        if _InactivityCheckProducer.FILTER.accepts(message):
+        if _InactivityCheck.FILTER.accepts(message):
             now = message.get_created()
             last = self.time_last_activity
             if last < 0.0 or ((now - last) < self.inactivity_timeout):
@@ -175,10 +175,20 @@ class _SubscribeHandler:
         return {'url': url}
 
 
-class _InactivityCheckProducer:
+class _InactivityCheck:
     CHECK_INACTIVITY = 'HttpSubscriber.CheckInactivity'
     FILTER = msgftr.NameIs(CHECK_INACTIVITY)
 
-    async def next_message(self):
-        await asyncio.sleep(200)
-        return msgsvc.Message(self, _InactivityCheckProducer.CHECK_INACTIVITY)
+    def __init__(self, mailer):
+        self.mailer = mailer
+        self.last_check = time.time()
+
+    def accepts(self, message):
+        return True
+
+    def handle(self, message):
+        now = time.time()
+        if (now - self.last_check) > 200.0:
+            self.last_check = now
+            self.mailer.post((self, _InactivityCheck.CHECK_INACTIVITY))
+        return None
