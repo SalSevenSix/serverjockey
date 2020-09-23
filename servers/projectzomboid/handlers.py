@@ -197,4 +197,4 @@ class ConsoleLogHandler:
         mailer.register(self.subscriber)
 
     async def handle_get(self, resource, data):
-        return await msgext.RollingLogSubscriber.request(self.mailer, self, self.subscriber.get_identity())
+        return await msgext.RollingLogSubscriber.get_log(self.mailer, self, self.subscriber.get_identity())

@@ -1,4 +1,5 @@
 import logging
+import importlib
 import argparse
 import sys
 from core import contextsvc, httpsvc, svrsvc, msgext
@@ -7,15 +8,17 @@ from core import contextsvc, httpsvc, svrsvc, msgext
 def configure_logging(context):
     log_level = logging.DEBUG if context.is_debug() else logging.INFO
     log_formatter = logging.Formatter('%(asctime)s %(levelname)05s %(message)s', '%Y%m%d%H%M%S')
+    log_file = context.config('logfile')
     logging.basicConfig(
         level=log_level,
-        filename=context.get_logfile(), filemode='w',
+        filename=log_file, filemode='w',
         format=log_formatter._fmt, datefmt=log_formatter.datefmt)
     if context.is_debug():
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setFormatter(log_formatter)
         logging.getLogger().addHandler(stdout_handler)
         context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
+    context.post(logging, 'Logging.File', log_file)
 
 
 class ContextFactory:
@@ -35,7 +38,7 @@ class ContextFactory:
         p.add_argument('--debug', action='store_true',
                        help='Debug mode')
         p.add_argument('--host', type=str, default='localhost',
-                       help='Restrictive host name for HTTP service, default is localhost')
+                       help='Host name to use, default is localhost')
         p.add_argument('--port', type=int, default=80,
                        help='Port for HTTP service, default is 80')
         self.parser = p
@@ -44,9 +47,9 @@ class ContextFactory:
         args = [] if args is None or len(args) < 2 else args[1:]
         args = self.parser.parse_args(args)
         context = contextsvc.Context(
-            args.module,
-            args.home,
-            args.executable,
+            module=args.module,
+            home=args.home,
+            executable=args.executable,
             logfile=args.logfile,
             clientfile=args.clientfile,
             debug=args.debug,
@@ -61,7 +64,8 @@ async def main(args):
         context = ContextFactory().create(args)
         configure_logging(context)
         logging.info('*** START Serverjockey ***')
-        server = context.create_server()
+        module = importlib.import_module('servers.{}.server'.format(context.config('module')))
+        server = module.Server(context)
         httpsvr = await httpsvc.HttpService(context, server.resources()).start()
         return await svrsvc.ServerService(context, server).run()
     except Exception as e:

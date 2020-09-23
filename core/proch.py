@@ -51,21 +51,21 @@ class PipeInLineService:
                 self.pipe.write(command.cmdline.encode())
                 self.pipe.write(b'\n')
                 response = await command.catcher.get() if command.catcher else None  # blocking
-                self.mailer.post((self, PipeInLineService.RESPONSE, response, message))
+                self.mailer.post(self, PipeInLineService.RESPONSE, response, message)
             except asyncio.TimeoutError as e:
                 logging.warning('Timeout on cmdline into pipein. raised: %s', e)
-                self.mailer.post((self, PipeInLineService.EXCEPTION, e, message))
+                self.mailer.post(self, PipeInLineService.EXCEPTION, e, message)
             except Exception as e:
                 logging.error('Failed pass cmdline into pipein. raised: %s', e)
-                self.mailer.post((self, PipeInLineService.EXCEPTION, e, message))
+                self.mailer.post(self, PipeInLineService.EXCEPTION, e, message)
             return None
 
     @staticmethod
     async def request(mailer, source, cmdline, catcher=None, force=False):
         messenger = msgext.SynchronousMessenger(mailer)
-        return await messenger.request(msgsvc.Message(
+        return await messenger.request(
             source, PipeInLineService.REQUEST,
-            PipeInLineService.Command(cmdline, catcher, force)))
+            PipeInLineService.Command(cmdline, catcher, force))
 
     def __init__(self, mailer, pipe=None):
         self.mailer = mailer
@@ -81,7 +81,7 @@ class PipeInLineService:
         else:
             self.persistent = False
             self.handler = PipeInLineService.Handler(mailer, pipe)
-        mailer.post((self, PipeInLineService.SERVICE_START, self))
+        mailer.post(self, PipeInLineService.SERVICE_START, self)
         mailer.register(self)
 
     def accepts(self, message):
@@ -99,14 +99,14 @@ class PipeInLineService:
             self.enabled = False
             if self.handler is not None:
                 self.handler.pipe.close()
-                self.mailer.post((self, PipeInLineService.PIPE_CLOSE, self.handler.pipe))
+                self.mailer.post(self, PipeInLineService.PIPE_CLOSE, self.handler.pipe)
                 self.handler = None
             if self.persistent:
                 return None
-            self.mailer.post((self, PipeInLineService.SERVICE_END, self))
+            self.mailer.post(self, PipeInLineService.SERVICE_END, self)
             return True
         if not (self.enabled or message.get_data().force) or self.handler is None:
-            self.mailer.post((self, PipeInLineService.RESPONSE, False, message))
+            self.mailer.post(self, PipeInLineService.RESPONSE, False, message)
             return None
         return await self.handler.handle(message)
 
@@ -147,12 +147,12 @@ class ProcessHandler:
 
     def terminate(self):
         self.process.terminate()
-        self.mailer.post((self, ProcessHandler.STATE_TERMINATED, self.process))
+        self.mailer.post(self, ProcessHandler.STATE_TERMINATED, self.process)
 
     async def run(self):
         rc, cmdline, stderr, stdout = (9, self.command.build(), None, None)
         try:
-            self.mailer.post((self, ProcessHandler.STATE_START, cmdline))
+            self.mailer.post(self, ProcessHandler.STATE_START, cmdline)
             cmdlist = self.command.build(output=list)
             self.process = await asyncio.create_subprocess_exec(
                 cmdlist[0], *cmdlist[1:],
@@ -161,22 +161,22 @@ class ProcessHandler:
                 stderr=asyncio.subprocess.PIPE)
             stderr = PipeOutLineProducer(self.mailer, self, ProcessHandler.STDERR_LINE, self.process.stderr)
             stdout = PipeOutLineProducer(self.mailer, self, ProcessHandler.STDOUT_LINE, self.process.stdout)
-            self.mailer.post((self, PipeInLineService.PIPE_NEW, self.process.stdin))
+            self.mailer.post(self, PipeInLineService.PIPE_NEW, self.process.stdin)
             if not self.pipeinsvc:
                 PipeInLineService(self.mailer, self.process.stdin)
-            self.mailer.post((self, ProcessHandler.STATE_STARTING, self.process))
+            self.mailer.post(self, ProcessHandler.STATE_STARTING, self.process)
             if self.started_catcher is not None:
                 await self.started_catcher.get()   # blocking
-            self.mailer.post((self, ProcessHandler.STATE_STARTED, self.process))
+            self.mailer.post(self, ProcessHandler.STATE_STARTED, self.process)
             rc = await self.process.wait()   # blocking
-            self.mailer.post((self, ProcessHandler.STATE_COMPLETE, self.process))
+            self.mailer.post(self, ProcessHandler.STATE_COMPLETE, self.process)
         except asyncio.TimeoutError:
             logging.error('Timeout waiting for PROCESS_STARTED')
-            self.mailer.post((self, ProcessHandler.STATE_TIMEOUT, self.process))
+            self.mailer.post(self, ProcessHandler.STATE_TIMEOUT, self.process)
             self.terminate()
         except Exception as e:
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
-            self.mailer.post((self, ProcessHandler.STATE_EXCEPTION, e))
+            self.mailer.post(self, ProcessHandler.STATE_EXCEPTION, e)
         finally:
             if stdout:
                 await stdout.close()

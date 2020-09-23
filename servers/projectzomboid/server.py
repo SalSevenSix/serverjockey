@@ -13,7 +13,7 @@ class Server:
         self.context = context
         self.deployment = Deployment(context)
         self.pipeinsvc = proch.PipeInLineService(context)
-        self.base_url = 'http://{}:{}'.format(self.context.get_host(), self.context.get_port())
+        self.base_url = 'http://{}:{}'.format(self.context.config('host'), self.context.config('port'))
         self.httpsubs = httpsubs.HttpSubscriptionService(context, self.base_url + '/subscriptions')
         context.register(s.ServerStateSubscriber(context))
         context.register(s.ServerDetailsSubscriber(context))
@@ -70,8 +70,8 @@ class Server:
         return resources
 
     async def run(self):
-        svrsvc.ServerStatus.notify_details(self.context, self, {'host': self.context.get_host()})
-        return await proch.ProcessHandler(self.context, self.context.get_executable()) \
+        svrsvc.ServerStatus.notify_details(self.context, self, {'host': self.context.config('host')})
+        return await proch.ProcessHandler(self.context, self.deployment.executable) \
             .append_arg('-cachedir=' + self.deployment.world_dir) \
             .use_pipeinsvc(self.pipeinsvc) \
             .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=100)) \
@@ -85,10 +85,13 @@ class Deployment:
 
     def __init__(self, context):
         self.world_name = 'servertest'
-        self.home_dir = context.get_home()
-        self.runtime_dir = context.relative_path('runtime')
+        self.home_dir = context.config('home')
+        self.executable = context.config('executable')
+        if self.executable[0] not in ('.', '/'):
+            self.executable = self.home_dir + '/' + self.executable
+        self.runtime_dir = self.home_dir + '/runtime'
         self.jvm_config_file = self.runtime_dir + '/ProjectZomboid64.json'
-        self.world_dir = context.relative_path('world')
+        self.world_dir = self.home_dir + '/world'
         self.playerdb_dir = self.world_dir + '/db'
         self.playerdb_file = self.playerdb_dir + '/' + self.world_name + '.db'
         self.config_dir = self.world_dir + '/Server'

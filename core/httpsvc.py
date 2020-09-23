@@ -6,6 +6,7 @@ from aiohttp import web
 from aiohttp import web_exceptions as h
 from core import util, blobs
 
+
 SECURE = '_SECURE'
 
 UTF8 = 'UTF-8'
@@ -59,8 +60,8 @@ class HttpService:
         self.app.add_routes([
             web.get('/{tail:.*}', self._handle),
             web.post('/{tail:.*}', self._handle)])
-        self.task = asyncio.create_task(web._run_app(self.app, port=self.context.get_port()))
-        self.context.post((self, HttpService.SERVER_STARTING, self.task))
+        self.task = asyncio.create_task(web._run_app(self.app, port=self.context.config('port')))
+        self.context.post(self, HttpService.SERVER_STARTING, self.task)
         await self.clientfile.write()
         return self
 
@@ -69,7 +70,7 @@ class HttpService:
         if self.app:
             await self.app.shutdown()
             await self.app.cleanup()
-        self.context.post((self, HttpService.SERVER_COMPLETE, self.task))
+        self.context.post(self, HttpService.SERVER_COMPLETE, self.task)
 
     async def _handle(self, request):
         try:
@@ -175,8 +176,8 @@ class Secret:
     def __init__(self, mailer):
         self.mailer = mailer
         identity = str(uuid.uuid4())
-        self.secret = identity[:4] + identity[len(identity)-4:]
-        mailer.post((self, Secret.NAME, self.secret))
+        self.secret = identity[:6] + identity[-6:]
+        mailer.post(self, Secret.NAME, self.secret)
 
     def ask(self, headers):
         if self.mailer.is_debug():
@@ -225,23 +226,23 @@ class ClientFile:
 
     def __init__(self, context, base_url, secret):
         self.context = context
+        self.clientfile = context.config('clientfile')
         self.base_url = base_url
         self.secret = secret
 
     async def write(self):
-        clientfile = self.context.get_clientfile()
-        if clientfile is None:
+        if self.clientfile is None:
             return self
-        await util.write_file(clientfile, util.obj_to_json({
+        await util.write_file(self.clientfile, util.obj_to_json({
             'SERVERJOCKEY_URL': self.base_url,
             'SERVERJOCKEY_TOKEN': self.secret
         }))
-        self.context.post((self, ClientFile.CLIENT_FILE_UPDATED, clientfile))
-        logging.info('Clientfile: ' + clientfile)
+        self.context.post(self, ClientFile.CLIENT_FILE_UPDATED, self.clientfile)
+        logging.info('Clientfile: ' + self.clientfile)
         return self
 
     def delete(self):
-        util.delete_file(self.context.get_clientfile())
+        util.delete_file(self.clientfile)
 
 
 class Resource:
@@ -261,6 +262,13 @@ class Resource:
             raise Exception('Only one Resource.ARG kind allowed')
         self.children.append(resource)
         return self
+
+    #def remove(self, name):
+    #    resource = self.get_resource(name)
+    #    if resource is None:
+    #        return None
+    #    self.children.remove(resource)
+    #    return resource
 
     def is_path(self):
         return self.kind is Resource.PATH

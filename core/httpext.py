@@ -103,7 +103,7 @@ class ServerStatusHandler:
         self.mailer = mailer
 
     async def handle_get(self, resource, data):
-        return await svrsvc.ServerStatus.request(self.mailer, self)
+        return await svrsvc.ServerStatus.get_status(self.mailer, self)
 
 
 class ServerCommandHandler:

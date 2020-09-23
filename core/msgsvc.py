@@ -3,7 +3,6 @@ import logging
 import asyncio
 import time
 import uuid
-
 from core import msgftr
 
 
@@ -54,6 +53,12 @@ def is_serializer(candidate):
 
 
 class Message:
+
+    @staticmethod
+    def from_vargs(*vargs):
+        if len(vargs) == 1 and is_message(vargs[0]):
+            return vargs[0]
+        return Message(*vargs)
 
     def __init__(self, source, name, data=None, reply_to=None):
         assert source is not None
@@ -110,9 +115,8 @@ class Mailer:
     def get_subscriber(self):
         return self.subscriber
 
-    def post(self, message):
-        if not is_message(message):
-            message = Message(*message)
+    def post(self, *vargs):
+        message = Message.from_vargs(*vargs)
         if not self.is_running():
             return False
         if message is STOP:
@@ -172,8 +176,8 @@ class MulticastMailer:
     def register(self, subscriber):
         return self.subscriber.add_mailer(subscriber).start()
 
-    def post(self, message):
-        return self.mailer.post(message)
+    def post(self, *vargs):
+        return self.mailer.post(*vargs)
 
     async def stop(self):
         expired = self.subscriber.mailers.copy()

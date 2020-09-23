@@ -2,7 +2,7 @@ import asyncio
 import logging
 import time
 import uuid
-from core import util, httpsvc, msgext, msgsvc, msgftr, msgtrf, aggtrf
+from core import util, httpsvc, msgext, msgftr, msgtrf, aggtrf
 
 
 class Selector:
@@ -38,12 +38,12 @@ class HttpSubscriptionService:
     @staticmethod
     async def subscribe(mailer, source, selector):
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(msgsvc.Message(source, HttpSubscriptionService.SUBSCRIBE, selector))
+        response = await messenger.request(source, HttpSubscriptionService.SUBSCRIBE, selector)
         return response.get_data()
 
     @staticmethod
     def unsubscribe(mailer, source, identity):
-        mailer.post((source, HttpSubscriptionService.UNSUBSCRIBE, identity))
+        mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity)
 
     def __init__(self, mailer, subscriptions_url):
         self.mailer = mailer
@@ -66,7 +66,7 @@ class HttpSubscriptionService:
             subscriber = _Subscriber(self.mailer, identity, selector)
             self.subscriptions.update({identity: subscriber})
             self.mailer.register(subscriber)
-            self.mailer.post((self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, url, message))
+            self.mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, url, message)
         if HttpSubscriptionService.UNSUBSCRIBE_FILTER.accepts(message):
             identity = message.get_data()
             if self.lookup(identity):
@@ -190,5 +190,5 @@ class _InactivityCheck:
         now = time.time()
         if (now - self.last_check) > 200.0:
             self.last_check = now
-            self.mailer.post((self, _InactivityCheck.CHECK_INACTIVITY))
+            self.mailer.post(self, _InactivityCheck.CHECK_INACTIVITY)
         return None

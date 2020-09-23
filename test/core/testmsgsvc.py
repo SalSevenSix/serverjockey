@@ -9,12 +9,12 @@ def test():
 
 
 async def send_test_messages(mailer):
-    mailer.post(('test-message', 'mot'))
-    mailer.post(('test-message', 'hai'))
-    mailer.post(('test-message', 'ba'))
-    mailer.post(('test-message', 'bon'))
-    mailer.post(('test-message', 'nam'))
-    mailer.post(('test-message', 'sau'))
+    mailer.post('test-message', 'mot')
+    mailer.post('test-message', 'hai')
+    mailer.post('test-message', 'ba')
+    mailer.post('test-message', 'bon')
+    mailer.post('test-message', 'nam')
+    mailer.post('test-message', 'sau')
 
 
 async def test_mailer():

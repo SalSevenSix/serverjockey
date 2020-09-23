@@ -1,6 +1,5 @@
 import asyncio
-
-from core import msgext, msgftr, msgsvc
+from core import msgext, msgftr
 
 
 class ServerService:
@@ -12,19 +11,19 @@ class ServerService:
 
     @staticmethod
     def start(mailer, source):
-        mailer.post((source, ServerService.START))
+        mailer.post(source, ServerService.START)
 
     @staticmethod
     def restart(mailer, source):
-        mailer.post((source, ServerService.RESTART))
+        mailer.post(source, ServerService.RESTART)
 
     @staticmethod
     def stop(mailer, source):
-        mailer.post((source, ServerService.STOP))
+        mailer.post(source, ServerService.STOP)
 
     @staticmethod
     def shutdown(mailer, source):
-        mailer.post((source, ServerService.SHUTDOWN))
+        mailer.post(source, ServerService.SHUTDOWN)
 
     def __init__(self, context, server):
         self.context = context
@@ -85,22 +84,22 @@ class ServerStatus:
     FILTER = msgftr.NameIn((REQUEST, NOTIFY_RUNNING, NOTIFY_STATE, NOTIFY_DETAILS))
 
     @staticmethod
-    async def request(mailer, source):
+    async def get_status(mailer, source):
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(msgsvc.Message(source, ServerStatus.REQUEST))
+        response = await messenger.request(source, ServerStatus.REQUEST)
         return response.get_data()
 
     @staticmethod
     def notify_running(mailer, source, value):
-        mailer.post((source, ServerStatus.NOTIFY_RUNNING, value))
+        mailer.post(source, ServerStatus.NOTIFY_RUNNING, value)
 
     @staticmethod
     def notify_state(mailer, source, value):
-        mailer.post((source, ServerStatus.NOTIFY_STATE, value))
+        mailer.post(source, ServerStatus.NOTIFY_STATE, value)
 
     @staticmethod
     def notify_details(mailer, source, value):
-        mailer.post((source, ServerStatus.NOTIFY_DETAILS, value))
+        mailer.post(source, ServerStatus.NOTIFY_DETAILS, value)
 
     def __init__(self, context):
         self.context = context
@@ -113,7 +112,7 @@ class ServerStatus:
         action = message.get_name()
         updated = False
         if action is ServerStatus.REQUEST:
-            self.context.post((self, ServerStatus.RESPONSE, self._status_copy(), message))
+            self.context.post(self, ServerStatus.RESPONSE, self._status_copy(), message)
         elif action is ServerStatus.NOTIFY_RUNNING:
             running = message.get_data()
             self.status['running'] = running
@@ -128,7 +127,7 @@ class ServerStatus:
                 self.status['details'].update(message.get_data())
                 updated = True
         if updated:
-            self.context.post((self, ServerStatus.UPDATED, self._status_copy()))
+            self.context.post(self, ServerStatus.UPDATED, self._status_copy())
         return None
 
     def _status_copy(self):

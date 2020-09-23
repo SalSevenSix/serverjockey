@@ -1,4 +1,4 @@
-from core import svrsvc, msgext, msgftr, msgsvc, proch, util, httpsvc
+from core import svrsvc, msgext, msgftr, proch, util, httpsvc
 from servers.projectzomboid import domain as d
 
 
@@ -104,13 +104,13 @@ class PlayerEventSubscriber:
             line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGIN_KEY)
             name, steamid = line.split(' id=')
             event = d.PlayerEvent('login', d.Player(steamid, name[1:-1]))
-            self.mailer.post((self, PlayerEventSubscriber.LOGIN, event))
+            self.mailer.post(self, PlayerEventSubscriber.LOGIN, event)
         if PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
             line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGOUT_KEY)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             event = d.PlayerEvent('logout', d.Player(steamid, name[1:-1]))
-            self.mailer.post((self, PlayerEventSubscriber.LOGOUT, event))
+            self.mailer.post(self, PlayerEventSubscriber.LOGOUT, event)
         return None
 
 
@@ -127,7 +127,7 @@ class CaptureSteamidSubscriber:
     @staticmethod
     async def get_playerstore(mailer, source):
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(msgsvc.Message(source, CaptureSteamidSubscriber.REQUEST))
+        response = await messenger.request(source, CaptureSteamidSubscriber.REQUEST)
         return response.get_data()
 
     def accepts(self, message):
@@ -135,7 +135,7 @@ class CaptureSteamidSubscriber:
 
     def handle(self, message):
         if CaptureSteamidSubscriber.REQUEST_FILTER.accepts(message):
-            self.mailer.post((self, CaptureSteamidSubscriber.RESPONSE, self.playerstore, message))
+            self.mailer.post(self, CaptureSteamidSubscriber.RESPONSE, self.playerstore, message)
         if PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             self.playerstore.add_player(message.get_data().get_player())
         return None

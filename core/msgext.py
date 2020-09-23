@@ -20,8 +20,9 @@ class SynchronousMessenger:
         self.timeout = timeout
         return self
 
-    async def request(self, message):
+    async def request(self, *vargs):
         assert not (self.catcher and self.timeout)
+        message = msgsvc.Message.from_vargs(*vargs)
         catcher = self.catcher if self.catcher else SingleCatcher(msgftr.ReplyToIs(message), self.timeout)
         self.mailer.register(catcher)
         self.mailer.post(message)
@@ -120,7 +121,7 @@ class Publisher:
         self.mailer = mailer
         self.producer = producer
         self.task = asyncio.create_task(self.run())
-        self.mailer.post((self, Publisher.START, producer))
+        self.mailer.post(self, Publisher.START, producer)
 
     async def stop(self):
         await self.task
@@ -134,7 +135,7 @@ class Publisher:
             except Exception as e:
                 logging.error('Publishing exception. raised: %s', e)
             running = False if message is None else self.mailer.post(message)
-        self.mailer.post((self, Publisher.END, self.producer))
+        self.mailer.post(self, Publisher.END, self.producer)
 
 
 class SleepPoster:
@@ -174,12 +175,12 @@ class RollingLogSubscriber:
         self.msg_filter = msgftr.Or((msg_filter, self.request_filter))
         self.size = size
         self.container = collections.deque()
-        mailer.post((self, RollingLogSubscriber.INIT, self.identity))
+        mailer.post(self, RollingLogSubscriber.INIT, self.identity)
 
     @staticmethod
-    async def request(mailer, source, identity):
+    async def get_log(mailer, source, identity):
         messenger = SynchronousMessenger(mailer)
-        response = await messenger.request(msgsvc.Message(source, RollingLogSubscriber.REQUEST, identity))
+        response = await messenger.request(source, RollingLogSubscriber.REQUEST, identity)
         return response.get_data()
 
     def get_identity(self):
@@ -191,7 +192,7 @@ class RollingLogSubscriber:
     def handle(self, message):
         if self.request_filter.accepts(message):
             result = self.aggregator.aggregate(tuple(self.container))
-            self.mailer.post((self, RollingLogSubscriber.RESPONSE, result, message))
+            self.mailer.post(self, RollingLogSubscriber.RESPONSE, result, message)
         else:
             self.container.append(self.transformer.transform(message))
             while len(self.container) > self.size:
