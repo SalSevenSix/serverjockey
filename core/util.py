@@ -1,8 +1,12 @@
+import inspect
 import os
+import signal
 import shutil
 import logging
 import json
 import time
+import uuid
+
 import aiofiles
 
 
@@ -86,6 +90,29 @@ def attr_dict(obj, names):
     return result
 
 
+async def silently_cleanup(obj):
+    if hasattr(obj, 'stop'):
+        await silently_call(obj.stop)
+    if hasattr(obj, 'close'):
+        await silently_call(obj.close)
+    if hasattr(obj, 'shutdown'):
+        await silently_call(obj.shutdown)
+    if hasattr(obj, 'cleanup'):
+        await silently_call(obj.cleanup)
+
+
+async def silently_call(invokable):
+    if not callable(invokable):
+        return
+    try:
+        if inspect.iscoroutinefunction(invokable):
+            await invokable()
+        else:
+            invokable()
+    except Exception as e:
+        logging.debug('silently_call failed: ' + repr(e))
+
+
 def str_to_b10str(value):
     return ''.join([str(b).zfill(3) for b in value.encode('utf-8')])
 
@@ -97,6 +124,19 @@ def b10str_to_str(value):
 
 def to_text(lines):
     return '\n'.join(lines)
+
+
+def build_url(host=None, port=80, path=None):
+    parts = ['http://', str(host) if host else 'localhost']
+    if port != 80:
+        parts.append(':')
+        parts.append(str(port))
+    if path:
+        path = str(path)
+        if not path.startswith('/'):
+            parts.append('/')
+        parts.append(path)
+    return ''.join(parts)
 
 
 def get(key, dictionary):
@@ -111,6 +151,12 @@ def iterable(obj):
     except Exception:
         return False
     return True
+
+
+def overridable_full_path(root, path):
+    if root is None or path is None or path[0] in ('.', '/'):
+        return path
+    return root + '/' + path
 
 
 def file_exists(file):
@@ -184,7 +230,7 @@ async def read_file(filename, text=True):
         try:
             return await file.read()
         finally:
-            await file.close()
+            await silently_cleanup(file)
 
 
 async def write_file(filename, data, text=True):
@@ -193,7 +239,7 @@ async def write_file(filename, data, text=True):
         try:
             await file.write(data)
         finally:
-            await file.close()
+            await silently_cleanup(file)
 
 
 async def copy_file(source_file, target_file):
@@ -213,3 +259,14 @@ def right_chop_and_strip(line, keyword):
     if index == -1:
         return line
     return line[:index].strip()
+
+
+def generate_token():
+    identity = str(uuid.uuid4())
+    return identity[:6] + identity[-6:]
+
+
+def signal_interrupt(pid=None):
+    if pid is None:
+        pid = os.getpid()
+    os.kill(pid, signal.SIGINT)

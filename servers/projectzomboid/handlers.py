@@ -7,7 +7,7 @@ class DeploymentHandler:
     def __init__(self, deployment):
         self.deployment = deployment
 
-    async def handle_get(self, resource, data):
+    def handle_get(self, resource, data):
         return self.deployment.directory_list()
 
 

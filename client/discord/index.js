@@ -115,6 +115,7 @@ const handlers = {
 
   server: function(message, data) {
     if (data.length === 1) {
+      if (data[0] === 'delete' || data[0] === 'subscribe') return;
       doPost(message, '/server/' + data[0]);
       return;
     }

@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from core import msgsvc, msgext, msgftr, cmdutil
+from core import msgsvc, msgext, msgftr, cmdutil, util
 
 
 class PipeOutLineProducer:
@@ -13,8 +13,8 @@ class PipeOutLineProducer:
         self.publisher = msgext.Publisher(mailer, self)
 
     async def close(self):
-        # pipe has no close, so just stop the publisher
-        await self.publisher.stop()
+        await util.silently_cleanup(self.publisher)
+        await util.silently_cleanup(self.pipe)
 
     async def next_message(self):
         line = await self.pipe.readline()  # blocking
@@ -98,7 +98,7 @@ class PipeInLineService:
         if Filter.PROCESS_STATE_DOWN.accepts(message):
             self.enabled = False
             if self.handler is not None:
-                self.handler.pipe.close()
+                await util.silently_cleanup(self.handler.pipe)
                 self.mailer.post(self, PipeInLineService.PIPE_CLOSE, self.handler.pipe)
                 self.handler = None
             if self.persistent:
@@ -169,6 +169,8 @@ class ProcessHandler:
                 await self.started_catcher.get()   # blocking
             self.mailer.post(self, ProcessHandler.STATE_STARTED, self.process)
             rc = await self.process.wait()   # blocking
+            if rc != 0:
+                raise Exception('Non-zero return code: ' + str(rc))
             self.mailer.post(self, ProcessHandler.STATE_COMPLETE, self.process)
         except asyncio.TimeoutError:
             logging.error('Timeout waiting for PROCESS_STARTED')
@@ -178,10 +180,8 @@ class ProcessHandler:
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
             self.mailer.post(self, ProcessHandler.STATE_EXCEPTION, e)
         finally:
-            if stdout:
-                await stdout.close()
-            if stderr:
-                await stderr.close()
+            await util.silently_cleanup(stdout)
+            await util.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
             self.process = None
         return rc

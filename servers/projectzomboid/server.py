@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf, shell, msgtrf
 from servers.projectzomboid import handlers as h, subscribers as s
 
@@ -13,17 +12,15 @@ class Server:
         self.context = context
         self.deployment = Deployment(context)
         self.pipeinsvc = proch.PipeInLineService(context)
-        self.base_url = 'http://{}:{}'.format(self.context.config('host'), self.context.config('port'))
-        self.httpsubs = httpsubs.HttpSubscriptionService(context, self.base_url + '/subscriptions')
+        self.httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
         context.register(s.ServerStateSubscriber(context))
-        context.register(s.ServerDetailsSubscriber(context))
+        context.register(s.ServerDetailsSubscriber(context, context.config('host')))
         context.register(s.PlayerEventSubscriber(context))
         context.register(s.ProvideAdminPasswordSubscriber(context))
 
-    def resources(self):
-        logging.info('================================================================================')
+    def resources(self, name):
         conf_pre = self.deployment.config_dir + '/' + self.deployment.world_name
-        resources = httpext.ResourceBuilder(self.base_url) \
+        return httpext.ResourceBuilder(name) \
             .push('server', httpext.ServerStatusHandler(self.context)) \
             .append('subscribe', self.httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', httpext.ServerCommandHandler(self.context)) \
@@ -66,12 +63,9 @@ class Server:
             .append('{identity}', self.httpsubs.subscriptions_handler()) \
             .pop() \
             .build()
-        logging.info('================================================================================')
-        return resources
 
     async def run(self):
-        svrsvc.ServerStatus.notify_details(self.context, self, {'host': self.context.config('host')})
-        return await proch.ProcessHandler(self.context, self.deployment.executable) \
+        await proch.ProcessHandler(self.context, self.deployment.executable) \
             .append_arg('-cachedir=' + self.deployment.world_dir) \
             .use_pipeinsvc(self.pipeinsvc) \
             .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=100)) \
@@ -86,10 +80,10 @@ class Deployment:
     def __init__(self, context):
         self.world_name = 'servertest'
         self.home_dir = context.config('home')
-        self.executable = context.config('executable')
-        if self.executable[0] not in ('.', '/'):
-            self.executable = self.home_dir + '/' + self.executable
         self.runtime_dir = self.home_dir + '/runtime'
+        self.executable = util.overridable_full_path(self.home_dir, context.config('executable'))
+        if not self.executable:
+            self.executable = self.runtime_dir + '/start-server.sh'
         self.jvm_config_file = self.runtime_dir + '/ProjectZomboid64.json'
         self.world_dir = self.home_dir + '/world'
         self.playerdb_dir = self.world_dir + '/db'
@@ -123,7 +117,7 @@ class Deployment:
         stdout, stderr = await process.communicate()
         result = [stdout.decode()] if stdout else ['NO STDOUT']
         result.append('EXIT STATUS: ' + str(process.returncode))
-        return util.to_text(result)
+        return util.to_text(result)   # TODO give a httpsub link back instead
 
     def backup_runtime(self):
         return util.archive_directory(self.runtime_dir)

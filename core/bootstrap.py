@@ -1,81 +1,78 @@
 import logging
-import importlib
 import argparse
 import sys
-from core import contextsvc, httpsvc, svrsvc, msgext
+from core import contextsvc, httpsvc, msgext, system, util
+
+LOG_FORMAT = '%(asctime)s %(levelname)05s %(message)s'
+DATE_FORMAT = '%Y%m%d%H%M%S'
 
 
-def configure_logging(context):
-    log_level = logging.DEBUG if context.is_debug() else logging.INFO
-    log_formatter = logging.Formatter('%(asctime)s %(levelname)05s %(message)s', '%Y%m%d%H%M%S')
-    log_file = context.config('logfile')
+def create_context(args):
+    p = argparse.ArgumentParser(description='Start serverjockey.')
+    p.add_argument('home', type=str,
+                   help='Home directory to use for server instances')
+    p.add_argument('--debug', action='store_true',
+                   help='Debug mode')
+    p.add_argument('--logfile', type=str, default='./serverjockey.log',
+                   help='Log file to use, relative to "home" unless starts with "/" or "."')
+    p.add_argument('--host', type=str, default='localhost',
+                   help='Host name to use, default is "localhost"')
+    p.add_argument('--port', type=int, default=80,
+                   help='Port number to use, default is 80')
+    p.add_argument('--clientfile', type=str,
+                   help='Filename for client file, relative to instance dir unless starts with "/" or "."')
+    args = [] if args is None or len(args) < 2 else args[1:]
+    args = p.parse_args(args)
+    return contextsvc.Context(
+        secret=util.generate_token(),
+        home=args.home,
+        debug=args.debug,
+        logfile=args.logfile,
+        clientfile=args.clientfile,
+        url=util.build_url(args.host, args.port),
+        host=args.host,
+        port=args.port)
+
+
+class Callbacks:
+
+    def __init__(self, context):
+        self.context = context
+
+    async def initialise(self):
+        if self.context.is_debug():
+            stdout_handler = logging.StreamHandler(sys.stdout)
+            stdout_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
+            logging.getLogger().addHandler(stdout_handler)
+        self.context.start()
+        if self.context.is_debug():
+            self.context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
+        self.context.post(self, 'Logging.File', self.context.config('logfile'))
+        syssvc = system.SystemService(self.context)
+        await syssvc.initialise()
+        return syssvc.resources()
+
+    async def shutdown(self):
+        # shutting down the context here doesn't work
+        # because the stupid aiohttp webserver cancels
+        # all the tasks before calling this!
+        pass
+
+
+def main(args=None):
+    context = create_context(args if args else sys.argv)
     logging.basicConfig(
-        level=log_level,
-        filename=log_file, filemode='w',
-        format=log_formatter._fmt, datefmt=log_formatter.datefmt)
-    if context.is_debug():
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setFormatter(log_formatter)
-        logging.getLogger().addHandler(stdout_handler)
-        context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
-    context.post(logging, 'Logging.File', log_file)
-
-
-class ContextFactory:
-
-    def __init__(self):
-        p = argparse.ArgumentParser(description='Start serverjockey.')
-        p.add_argument('module', type=str,
-                       help='Module to dynamically load for server handling')
-        p.add_argument('home', type=str,
-                       help='Home directory of the server deployment')
-        p.add_argument('executable', type=str,
-                       help='Server executable to launch server, relative to "home" unless starts with "/" or "."')
-        p.add_argument('--logfile', type=str, default='./serverjockey.log',
-                       help='Log file to use, relative to "home" unless starts with "/" or "."')
-        p.add_argument('--clientfile', type=str, default=None,
-                       help='File to write config for clients, relative to "home" unless starts with "/" or "."')
-        p.add_argument('--debug', action='store_true',
-                       help='Debug mode')
-        p.add_argument('--host', type=str, default='localhost',
-                       help='Host name to use, default is localhost')
-        p.add_argument('--port', type=int, default=80,
-                       help='Port for HTTP service, default is 80')
-        self.parser = p
-
-    def create(self, args):
-        args = [] if args is None or len(args) < 2 else args[1:]
-        args = self.parser.parse_args(args)
-        context = contextsvc.Context(
-            module=args.module,
-            home=args.home,
-            executable=args.executable,
-            logfile=args.logfile,
-            clientfile=args.clientfile,
-            debug=args.debug,
-            host=args.host,
-            port=args.port)
-        return context
-
-
-async def main(args):
-    httpsvr, context = None, None
+        level=logging.DEBUG if context.is_debug() else logging.INFO,
+        filename=context.config('logfile'), filemode='w',
+        format=LOG_FORMAT, datefmt=DATE_FORMAT)
     try:
-        context = ContextFactory().create(args)
-        configure_logging(context)
         logging.info('*** START Serverjockey ***')
-        module = importlib.import_module('servers.{}.server'.format(context.config('module')))
-        server = module.Server(context)
-        httpsvr = await httpsvc.HttpService(context, server.resources()).start()
-        return await svrsvc.ServerService(context, server).run()
+        httpsvc.HttpService(context, Callbacks(context)).run()
+        return 0
     except Exception as e:
-        if context and context.is_debug():
+        if context.is_debug():
             raise e
         logging.error('main() raised %s', repr(e))
-        return 9
+        return 1
     finally:
-        if context:
-            await context.shutdown()
-        if httpsvr:
-            await httpsvr.stop()
         logging.info('*** END Serverjockey ***')

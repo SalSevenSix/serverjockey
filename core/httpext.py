@@ -5,16 +5,16 @@ from core import httpsvc, proch, util, svrsvc, cmdutil
 
 class ResourceBuilder:
 
-    def __init__(self, name='', handler=None):
-        self.current = httpsvc.Resource(None, name, handler)
+    def __init__(self, name=''):
+        self.current = httpsvc.Resource(name)
 
     def push(self, signature, handler=None):
         name, kind = ResourceBuilder.decode(signature)
-        resource = httpsvc.Resource(self.current, name, kind, handler)
-        if handler:
-            logging.info(resource.get_path() + ' => ' + util.obj_to_str(handler))
+        resource = httpsvc.Resource(name, kind, handler)
         self.current.append(resource)
         self.current = resource
+        if handler:
+            logging.debug(resource.get_path() + ' => ' + util.obj_to_str(handler))
         return self
 
     def pop(self):
@@ -26,10 +26,10 @@ class ResourceBuilder:
 
     def append(self, signature, handler=None):
         name, kind = ResourceBuilder.decode(signature)
-        resource = httpsvc.Resource(self.current, name, kind, handler)
-        if handler:
-            logging.info(resource.get_path() + ' => ' + util.obj_to_str(handler))
+        resource = httpsvc.Resource(name, kind, handler)
         self.current.append(resource)
+        if handler:
+            logging.debug(resource.get_path() + ' => ' + util.obj_to_str(handler))
         return self
 
     def build(self):
@@ -97,6 +97,12 @@ class PipeInLineNoContentPostHandler:
         return httpsvc.ResponseBody.NO_CONTENT
 
 
+class HelloWorldHandler:
+
+    def handle_get(self, resource, data):
+        return 'Hello World'
+
+
 class ServerStatusHandler:
 
     def __init__(self, mailer):
@@ -107,14 +113,16 @@ class ServerStatusHandler:
 
 
 class ServerCommandHandler:
-    COMMANDS = util.attr_dict(svrsvc.ServerService, ('start', 'restart', 'stop', 'shutdown'))
+    COMMANDS = util.attr_dict(
+        svrsvc.ServerService,
+        ('signal_start', 'signal_restart', 'signal_stop', 'signal_delete'))
 
     def __init__(self, mailer):
         self.mailer = mailer
 
-    async def handle_post(self, resource, data):
-        command = util.get('command', data)
-        if command is None or command not in ServerCommandHandler.COMMANDS:
+    def handle_post(self, resource, data):
+        command = 'signal_' + str(util.get('command', data))
+        if command not in ServerCommandHandler.COMMANDS:
             return httpsvc.ResponseBody.BAD_REQUEST
         ServerCommandHandler.COMMANDS[command](self.mailer, self)
         return httpsvc.ResponseBody.NO_CONTENT

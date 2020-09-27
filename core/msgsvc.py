@@ -3,7 +3,7 @@ import logging
 import asyncio
 import time
 import uuid
-from core import msgftr
+from core import msgftr, tasks, util
 
 
 def is_message(candidate):
@@ -101,24 +101,24 @@ class Mailer:
     def __init__(self, subscriber):
         assert is_subscriber(subscriber)
         self.subscriber = subscriber
-        self.queue = asyncio.Queue()
+        self.queue = None
         self.task = None
 
     def is_running(self):
         return self.task is not None
 
     def start(self):
-        self.task = True
-        self.task = asyncio.create_task(self.run())
+        self.queue = asyncio.Queue()
+        self.task = tasks.task_start(self.run(), name=util.obj_to_str(self))
         return self.task
 
     def get_subscriber(self):
         return self.subscriber
 
     def post(self, *vargs):
-        message = Message.from_vargs(*vargs)
         if not self.is_running():
             return False
+        message = Message.from_vargs(*vargs)
         if message is STOP:
             self.task = None
         try:
@@ -129,11 +129,11 @@ class Mailer:
         return self.is_running()
 
     async def stop(self):
+        task = self.task
         if not self.is_running():
             return
         # Not calling queue.join() because STOP will end the tasks.
         # Any message after STOP should stay in queue and be ignored.
-        task = self.task
         self.post(STOP)
         await task
 
@@ -158,7 +158,8 @@ class Mailer:
                     if response is None:
                         response = True
             self.queue.task_done()
-        self.task = None
+        tasks.task_end(self.task)
+        self.task, self.queue = None, None
         return response
 
 

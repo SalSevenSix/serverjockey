@@ -2,7 +2,7 @@ import asyncio
 import logging
 import time
 import uuid
-from core import util, httpsvc, msgext, msgftr, msgtrf, aggtrf
+from core import util, httpsvc, msgext, msgftr, msgtrf, aggtrf, msgsvc
 
 
 class Selector:
@@ -94,7 +94,8 @@ class _Subscriber:
         self.time_last_activity = time.time()
 
     def accepts(self, message):
-        return self.msg_filter.accepts(message)
+        return self.msg_filter.accepts(message) \
+               or message is msgsvc.STOP
 
     def handle(self, message):
         if _InactivityCheck.FILTER.accepts(message):
@@ -102,6 +103,7 @@ class _Subscriber:
             last = self.time_last_activity
             if last < 0.0 or ((now - last) < self.inactivity_timeout):
                 return None
+            logging.info('Http subscription inactive, unsubscribing ' + self.identity)
             HttpSubscriptionService.unsubscribe(self.mailer, self, self.identity)
             return True
         try:
@@ -123,6 +125,8 @@ class _Subscriber:
                 if result is None:
                     return None
                 results.append(result)
+            if results[-1] is msgsvc.STOP:
+                return msgsvc.STOP
             return self.aggregator.aggregate(results)
         finally:
             self.time_last_activity = time.time()
@@ -130,8 +134,9 @@ class _Subscriber:
     async def _get_wait(self):
         try:
             message = await asyncio.wait_for(self.queue.get(), self.poll_timeout)
+            result = message if message is msgsvc.STOP else self.transformer.transform(message)
             self.queue.task_done()
-            return self.transformer.transform(message)
+            return result
         except asyncio.TimeoutError:
             return None
 
@@ -142,6 +147,9 @@ class _Subscriber:
         try:
             while True:
                 message = self.queue.get_nowait()
+                if message is msgsvc.STOP:
+                    results.append(message)
+                    return results
                 results.append(self.transformer.transform(message))
                 self.queue.task_done()
         except asyncio.QueueEmpty:
@@ -159,6 +167,8 @@ class _SubscriptionsHandler:
         if subscriber is None:
             return httpsvc.ResponseBody.NOT_FOUND
         result = await subscriber.get()
+        if result is msgsvc.STOP:
+            return httpsvc.ResponseBody.NOT_FOUND
         if result is None:
             return httpsvc.ResponseBody.NO_CONTENT
         return result
@@ -187,7 +197,7 @@ class _InactivityCheck:
         return True
 
     def handle(self, message):
-        now = time.time()
+        now = message.get_created()
         if (now - self.last_check) > 200.0:
             self.last_check = now
             self.mailer.post(self, _InactivityCheck.CHECK_INACTIVITY)

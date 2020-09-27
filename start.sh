@@ -149,7 +149,7 @@ echo "Paths init..."
 cd $(dirname $0) || exit 1
 JOCKEY_DIR="$(pwd)"
 cd "$JOCKEY_DIR/.." || exit 1
-HOME_DIR="$(pwd)"
+HOME_DIR="$(pwd)/servers"
 DEPENDENCIES_FILE="$JOCKEY_DIR/dependencies.ok"
 JOCKEY_LOG="$JOCKEY_DIR/serverjockey.log"
 DISCORD_DIR="$JOCKEY_DIR/client/discord"
@@ -163,20 +163,18 @@ if [ ! -f "$DEPENDENCIES_FILE" ]; then
 fi
 
 echo "Environment init..."
-EXECUTABLE="runtime/start-server.sh"
-MODULE="projectzomboid"
 HOST="pznewhope.duckdns.org"
 PORT="6164"
-MY_IP=$(curl -X GET -k -s 'https://ip6.seeip.org/')
-HOST_IP=$(host "$HOST" | grep IPv6 | grep -oE '[^[:space:]]+$' | tr -d '\n')
-if [ "$MY_IP" != "$HOST_IP" ]; then
+#MY_IP=$(curl -s https://ip6.seeip.org)
+#HOST_IP=$(host "$HOST" | grep IPv6 | grep -oE '[^[:space:]]+$' | tr -d '\n')
+#if [ "$MY_IP" != "$HOST_IP" ]; then
     HOST="localhost"
-fi
+#fi
 
 
 echo "Starting serverjockey webservice..."
 cd "$JOCKEY_DIR" || exit 1
-python3 -m pipenv run ./main.py --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" --host "$HOST" --port "$PORT" "$MODULE" "$HOME_DIR" "$EXECUTABLE" >/dev/null 2>&1 &
+python3 -m pipenv run ./main.py --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" --host "$HOST" --port "$PORT" "$HOME_DIR" >/dev/null 2>&1 &
 [ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting serverjockey"
 
 echo "Starting serverlink discord bot..."

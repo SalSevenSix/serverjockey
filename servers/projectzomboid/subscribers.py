@@ -1,4 +1,4 @@
-from core import svrsvc, msgext, msgftr, proch, util, httpsvc
+from core import svrsvc, msgext, msgftr, proch, util
 from servers.projectzomboid import domain as d
 
 
@@ -20,6 +20,7 @@ class ConsoleLogFilter:
         return value not in ConsoleLogFilter.COMMANDS
 
 
+# TODO pull into core
 class ServerStateSubscriber:
     STATE_MAP = {
         proch.ProcessHandler.STATE_START: 'START',
@@ -39,8 +40,10 @@ class ServerStateSubscriber:
 
     def handle(self, message):
         state = util.get(message.get_name(), ServerStateSubscriber.STATE_MAP)
-        state = state if state else 'UNKNOWN'
-        svrsvc.ServerStatus.notify_state(self.mailer, self, state)
+        svrsvc.ServerStatus.notify_state(self.mailer, self, state if state else 'UNKNOWN')
+        if message.get_name() is proch.ProcessHandler.STATE_EXCEPTION:
+            svrsvc.ServerStatus.notify_details(self.mailer, self, {'exception': repr(message.get_data())})
+        return None
 
 
 class ServerDetailsSubscriber:
@@ -55,27 +58,28 @@ class ServerDetailsSubscriber:
         msgftr.Or((VERSION_FILTER, PORT_FILTER, STEAMID_FILTER))
     ))
 
-    def __init__(self, mailer):
+    def __init__(self, mailer, host):
         self.mailer = mailer
+        self.host = host
 
     def accepts(self, message):
         return ServerDetailsSubscriber.FILTER.accepts(message)
 
     def handle(self, message):
-        key, value = None, None
+        data = None
         if ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            key = 'version'
             value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.VERSION)
             value = util.right_chop_and_strip(value, 'demo=')
+            data = {'version': value}
         elif ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            key = 'port'
             value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.PORT)
-            value = int(value)
+            data = {'host': self.host, 'port': int(value)}
         elif ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
-            key = 'steamid'
             value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.STEAMID)
-        if key:
-            svrsvc.ServerStatus.notify_details(self.mailer, self, {key: value})
+            data = {'steamid': int(value)}
+        if data:
+            svrsvc.ServerStatus.notify_details(self.mailer, self, data)
+        return None
 
 
 class PlayerEventSubscriber:
@@ -142,26 +146,20 @@ class CaptureSteamidSubscriber:
 
 
 class ProvideAdminPasswordSubscriber:
-    SECRET_FILTER = msgftr.NameIs(httpsvc.Secret.NAME)
-    SOLICIT_FILTER = msgftr.And((
+    FILTER = msgftr.And((
         proch.Filter.STDOUT_LINE,
         msgftr.Or((
             msgftr.DataStrContains('Enter new administrator password'),
             msgftr.DataStrContains('Confirm the password')
         ))
     ))
-    FILTER = msgftr.Or((SECRET_FILTER, SOLICIT_FILTER))
 
     def __init__(self, mailer):
         self.mailer = mailer
-        self.pwd = 'admin'
 
     def accepts(self, message):
         return ProvideAdminPasswordSubscriber.FILTER.accepts(message)
 
     async def handle(self, message):
-        if ProvideAdminPasswordSubscriber.SECRET_FILTER.accepts(message):
-            self.pwd = message.get_data()
-        if ProvideAdminPasswordSubscriber.SOLICIT_FILTER.accepts(message):
-            await proch.PipeInLineService.request(self.mailer, self, self.pwd, force=True)
+        await proch.PipeInLineService.request(self.mailer, self, self.mailer.config('secret'), force=True)
         return None

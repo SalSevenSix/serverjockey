@@ -2,7 +2,7 @@ import asyncio
 import logging
 import uuid
 import collections
-from core import msgsvc, msgftr, msgtrf, aggtrf
+from core import msgsvc, msgftr, msgtrf, aggtrf, tasks, util
 
 
 class SynchronousMessenger:
@@ -120,7 +120,7 @@ class Publisher:
         assert msgsvc.is_multimailer(mailer)
         self.mailer = mailer
         self.producer = producer
-        self.task = asyncio.create_task(self.run())
+        self.task = tasks.task_start(self.run(), name=util.obj_to_str(producer))
         self.mailer.post(self, Publisher.START, producer)
 
     async def stop(self):
@@ -136,6 +136,7 @@ class Publisher:
                 logging.error('Publishing exception. raised: %s', e)
             running = False if message is None else self.mailer.post(message)
         self.mailer.post(self, Publisher.END, self.producer)
+        tasks.task_end(self.task)
 
 
 class SleepPoster:
@@ -150,6 +151,19 @@ class SleepPoster:
     async def _post(self, message, delay):
         await asyncio.sleep(delay)
         self.mailer.post(message)
+
+
+class RelaySubscriber:
+
+    def __init__(self, mailer, msg_filter=msgftr.AcceptAll()):
+        self.mailer = mailer
+        self.msg_filter = msg_filter
+
+    def accepts(self, message):
+        return self.msg_filter.accepts(message)
+
+    def handle(self, message):
+        return None if self.mailer.post(message) else True
 
 
 class RollingLogSubscriber:

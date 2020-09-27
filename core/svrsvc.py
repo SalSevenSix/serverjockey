@@ -1,51 +1,67 @@
 import asyncio
-from core import msgext, msgftr
+import logging
+from core import msgext, msgftr, util, system, tasks
 
 
 class ServerService:
     START = 'ServerService.Start'
     RESTART = 'ServerService.Restart'
     STOP = 'ServerService.Stop'
+    DELETE = 'ServerService.Delete'
     SHUTDOWN = 'ServerService.Shutdown'
-    FILTER = msgftr.NameIn((START, RESTART, STOP, SHUTDOWN))
+    SHUTDOWN_RESPONSE = 'ServerService.ShutdownResponse'
+    FILTER = msgftr.NameIn((START, RESTART, STOP, DELETE, SHUTDOWN))
 
     @staticmethod
-    def start(mailer, source):
+    def signal_start(mailer, source):
         mailer.post(source, ServerService.START)
 
     @staticmethod
-    def restart(mailer, source):
+    def signal_restart(mailer, source):
         mailer.post(source, ServerService.RESTART)
 
     @staticmethod
-    def stop(mailer, source):
+    def signal_stop(mailer, source):
         mailer.post(source, ServerService.STOP)
 
     @staticmethod
-    def shutdown(mailer, source):
-        mailer.post(source, ServerService.SHUTDOWN)
+    def signal_delete(mailer, source):
+        mailer.post(source, ServerService.DELETE)
+
+    @staticmethod
+    async def shutdown(mailer, source):
+        messenger = msgext.SynchronousMessenger(mailer)
+        response = await messenger.request(source, ServerService.SHUTDOWN)
+        return response.get_data()
 
     def __init__(self, context, server):
         self.context = context
         self.server = server
+        self.clientfile = ClientFile(context)
         self.queue = asyncio.Queue(maxsize=1)
         self.running = False
+        self.task = None
         context.register(ServerStatus(context))
         context.register(self)
 
+    def start(self):
+        self.task = tasks.task_start(self.run(), name=util.obj_to_str(self))
+        return self.task
+
     async def run(self):
-        rc = 0
+        await self.clientfile.write()
         keep_running = True
         while keep_running:
-            keep_running = await self.queue.get()   # blocking
+            keep_running = await self.queue.get()  # blocking
             self.running = keep_running
             ServerStatus.notify_running(self.context, self, self.running)
             self.queue.task_done()
             if keep_running:
-                rc = await self.server.run()
+                await self.server.run()
             self.running = False
             ServerStatus.notify_running(self.context, self, self.running)
-        return rc
+        self.clientfile.delete()
+        tasks.task_end(self.task)
 
     def accepts(self, message):
         return ServerService.FILTER.accepts(message)
@@ -64,11 +80,17 @@ class ServerService:
         if self.running and action is ServerService.STOP:
             await self.server.stop()
             return None
-        if action is ServerService.SHUTDOWN:
+        if action in (ServerService.DELETE, ServerService.SHUTDOWN):
             self.queue.put_nowait(False)
             if self.running:
                 await self.server.stop()
             await self.queue.join()
+            if self.task:
+                await self.task
+            if action is ServerService.DELETE:
+                self.context.post(self, system.SystemService.SERVER_DELETE, self.context)
+            if action is ServerService.SHUTDOWN:
+                self.context.post(self, ServerService.SHUTDOWN_RESPONSE, self.task, message)
             return True
         return None
 
@@ -115,10 +137,11 @@ class ServerStatus:
             self.context.post(self, ServerStatus.RESPONSE, self._status_copy(), message)
         elif action is ServerStatus.NOTIFY_RUNNING:
             running = message.get_data()
-            self.status['running'] = running
-            if not running:
-                self.status['details'] = {}
-            updated = True
+            if self.status['running'] != running:
+                self.status['running'] = running
+                if not running:
+                    self.status.update({'state': None, 'details': {}})
+                updated = True
         elif action is ServerStatus.NOTIFY_STATE:
             self.status['state'] = message.get_data()
             updated = True
@@ -134,3 +157,25 @@ class ServerStatus:
         status = self.status.copy()
         status['details'] = self.status['details'].copy()
         return status
+
+
+class ClientFile:
+    UPDATED = 'ClientFile.Updated'
+
+    def __init__(self, context):
+        self.context = context
+        self.clientfile = util.overridable_full_path(context.config('home'), context.config('clientfile'))
+
+    async def write(self):
+        data = util.obj_to_json({
+            'SERVERJOCKEY_URL': self.context.config('url'),
+            'SERVERJOCKEY_TOKEN': self.context.config('secret')
+        })
+        if self.clientfile:
+            await util.write_file(self.clientfile, data)
+            self.context.post(self, ClientFile.UPDATED, self.clientfile)
+        logging.debug('Client config: ' + data)
+        return self
+
+    def delete(self):
+        util.delete_file(self.clientfile)

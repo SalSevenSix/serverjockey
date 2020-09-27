@@ -1,13 +1,8 @@
-import asyncio
 import logging
+import inspect
 import gzip
-import uuid
-from aiohttp import web
-from aiohttp import web_exceptions as h
+from aiohttp import web, web_exceptions as h
 from core import util, blobs
-
-
-SECURE = '_SECURE'
 
 UTF8 = 'UTF-8'
 GZIP = 'gzip'
@@ -28,6 +23,9 @@ CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
 CACHE_CONTROL = 'Cache-Control'
 ACCEPT_ENCODING = 'Accept-Encoding'
+X_SECRET = 'X-Secret'
+
+SECURE = '_SECURE'
 
 
 def is_secure(data):
@@ -44,37 +42,34 @@ class ResponseBody:
 
 
 class HttpService:
-    SERVER_STARTING = 'HttpService.ServerStarting'
-    SERVER_COMPLETE = 'HttpService.ServerComplete'
+    STARTING = 'HttpService.ServerStarting'
+    COMPLETE = 'HttpService.ServerComplete'
 
-    def __init__(self, context, resources):
+    def __init__(self, context, callbacks):
         self.context = context
-        self.resources = resources
-        self.secret = Secret(context)
-        self.clientfile = ClientFile(context, resources.get_name(), self.secret.secret)
-        self.app = None
-        self.task = None
-
-    async def start(self):
+        self.callbacks = callbacks
+        self.resources = None
         self.app = web.Application()
+        self.app.on_startup.append(self._initialise)
+        self.app.on_shutdown.append(self._shutdown)
         self.app.add_routes([
             web.get('/{tail:.*}', self._handle),
             web.post('/{tail:.*}', self._handle)])
-        self.task = asyncio.create_task(web._run_app(self.app, port=self.context.config('port')))
-        self.context.post(self, HttpService.SERVER_STARTING, self.task)
-        await self.clientfile.write()
-        return self
 
-    async def stop(self):
-        self.clientfile.delete()
-        if self.app:
-            await self.app.shutdown()
-            await self.app.cleanup()
-        self.context.post(self, HttpService.SERVER_COMPLETE, self.task)
+    def run(self):
+        web.run_app(self.app, port=self.context.config('port'), shutdown_timeout=100.0)
+
+    async def _initialise(self, app):
+        self.resources = await self.callbacks.initialise()
+
+    async def _shutdown(self, app):
+        await self.callbacks.shutdown()
 
     async def _handle(self, request):
+        if self.resources is None:
+            raise ResponseBody.UNAVAILABLE
         try:
-            handler = RequestHandler(self.context, self.resources, self.secret, request)
+            handler = RequestHandler(self.context, self.resources, request)
             return await handler.handle()
         except Exception as e:
             logging.error('HTTP Response failed. raised: %s', e)
@@ -84,11 +79,12 @@ class HttpService:
 class RequestHandler:
     REQUEST_RECEIVED = 'RequestHandler.RequestReceived'
 
-    def __init__(self, mailer, resources, secret, request):
-        self.mailer = mailer
+    def __init__(self, context, resources, request):
         self.resources = resources
-        self.secret = secret
         self.request = request
+        self.headers = HeadersTool(request.headers)
+        self.secure = context.is_debug() \
+            or self.headers.get(X_SECRET) == context.config('secret')
         self.method = None
         if self.request.method == GET:
             self.method = GET
@@ -100,24 +96,21 @@ class RequestHandler:
         if resource is None:
             return self.static_response()
         if not resource.allows(self.method):
-            allowed = GET if self.method is POST else POST
-            raise h.HTTPMethodNotAllowed(self.method, allowed)
-        headers = HeadersTool(self.request.headers)
-        secure = self.secret.ask(headers)
+            raise h.HTTPMethodNotAllowed(self.method, GET if self.method is POST else POST)
 
         # GET
         if self.method is GET:
-            response_body = await resource.handle_get(self.request.path, secure)
+            response_body = await resource.handle_get(self.request.path, self.secure)
             if response_body is None:
                 raise h.HTTPNotFound
             return self.build_response(response_body)
 
         # POST
-        if not secure:
+        if not self.secure:
             raise ResponseBody.UNAUTHORISED
         request_body, mime, encoding = b'{}', APPLICATION_JSON, None
         if self.request.has_body:
-            mime, encoding = headers.get_content_type()
+            mime, encoding = self.headers.get_content_type()
             if mime is None or mime not in ACCEPTED_MIME_TYPES:
                 raise h.HTTPUnsupportedMediaType
             request_body = await self.request.content.read()
@@ -149,7 +142,7 @@ class RequestHandler:
             body = util.obj_to_json(body)
             body = body.encode(UTF8)
         response.headers.add(CONTENT_TYPE, content_type)
-        if len(body) > 1024 and HeadersTool(self.request.headers).accepts_encoding(GZIP):
+        if len(body) > 1024 and self.headers.accepts_encoding(GZIP):
             body = gzip.compress(body)
             response.headers.add(CONTENT_ENCODING, GZIP)
         response.headers.add(CONTENT_LENGTH, str(len(body)))
@@ -169,22 +162,6 @@ class RequestHandler:
         raise h.HTTPNotFound
 
 
-class Secret:
-    NAME = 'Secret.Id'
-    SECRET = 'X-Secret'
-
-    def __init__(self, mailer):
-        self.mailer = mailer
-        identity = str(uuid.uuid4())
-        self.secret = identity[:6] + identity[-6:]
-        mailer.post(self, Secret.NAME, self.secret)
-
-    def ask(self, headers):
-        if self.mailer.is_debug():
-            return True
-        return headers.get(Secret.SECRET) == self.secret
-
-
 class HeadersTool:
 
     def __init__(self, headers):
@@ -192,19 +169,6 @@ class HeadersTool:
 
     def get(self, key):
         return self.headers.getone(key) if key in self.headers else None
-
-    def get_host(self):
-        host = self.get(HOST)
-        if host is None:
-            return '', None
-        result = str(host).split(':')
-        if len(result) == 1:
-            return result[0], None
-        return result[0], int(result[1])
-
-    def get_content_length(self):
-        content_length = self.get(CONTENT_LENGTH)
-        return int(content_length) if content_length else None
 
     def get_content_type(self):
         content_type = self.get(CONTENT_TYPE)
@@ -221,37 +185,12 @@ class HeadersTool:
         return accepts is not None and accepts.find(encoding) != -1
 
 
-class ClientFile:
-    CLIENT_FILE_UPDATED = 'ClientFile.Updated'
-
-    def __init__(self, context, base_url, secret):
-        self.context = context
-        self.clientfile = context.config('clientfile')
-        self.base_url = base_url
-        self.secret = secret
-
-    async def write(self):
-        if self.clientfile is None:
-            return self
-        await util.write_file(self.clientfile, util.obj_to_json({
-            'SERVERJOCKEY_URL': self.base_url,
-            'SERVERJOCKEY_TOKEN': self.secret
-        }))
-        self.context.post(self, ClientFile.CLIENT_FILE_UPDATED, self.clientfile)
-        logging.info('Clientfile: ' + self.clientfile)
-        return self
-
-    def delete(self):
-        util.delete_file(self.clientfile)
-
-
 class Resource:
     PATH = 'PATH'
     ARG = 'ARG'
 
-    def __init__(self, parent, name='', kind=None, handler=None, children=None):
-        assert isinstance(parent, Resource) or parent is None
-        self.parent = parent
+    def __init__(self, name='', kind=None, handler=None, children=None):
+        self.parent = None
         self.name = name
         self.kind = kind if kind else Resource.PATH
         self.handler = handler
@@ -260,15 +199,16 @@ class Resource:
     def append(self, resource):
         if resource.kind is Resource.ARG and self.get_arg_resource() is not None:
             raise Exception('Only one Resource.ARG kind allowed')
+        resource.parent = self
         self.children.append(resource)
         return self
 
-    #def remove(self, name):
-    #    resource = self.get_resource(name)
-    #    if resource is None:
-    #        return None
-    #    self.children.remove(resource)
-    #    return resource
+    def remove(self, name):
+        resource = self.get_resource(name)
+        if resource is None:
+            return None
+        self.children.remove(resource)
+        return resource
 
     def is_path(self):
         return self.kind is Resource.PATH
@@ -327,13 +267,18 @@ class Resource:
         data = PathParser(self, path).get_args()
         if secure:
             data.update({SECURE: secure})
-        return await self.handler.handle_get(self, self.decode(data))
+        data = self.decode(data)
+        if inspect.iscoroutinefunction(self.handler.handle_get):
+            return await self.handler.handle_get(self, data)
+        return self.handler.handle_get(self, data)
 
     async def handle_post(self, path, body):
         if isinstance(body, dict):
             data = PathParser(self, path).get_args()
             body = self.decode({**data, **body})
-        return await self.handler.handle_post(self, body)
+        if inspect.iscoroutinefunction(self.handler.handle_post):
+            return await self.handler.handle_post(self, body)
+        return self.handler.handle_post(self, body)
 
 
 class PathBuilder:
