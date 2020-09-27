@@ -90,18 +90,18 @@ function doPost(message, path, body = null) {
     message.react('🔒');
     return;
   }
+  var url = path;
   var request = newPostRequest();
-  if (body != null) {
-    request.body = JSON.stringify(body);
-  }
-  fetch(config.SERVERJOCKEY_URL + path, request)
+  if (path.startsWith('/')) { url = config.SERVERJOCKEY_URL + path; }
+  if (body != null) { request.body = JSON.stringify(body); }
+  fetch(url, request)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       message.react('✅');
     })
     .catch(function(error) { errorHandler(error, message); })
     .finally(function() {
-      if (message.content === '!server shutdown') {
+      if (message.content.includes('shutdown')) {
         console.log('*** END ServerLink Bot ***');
         client.destroy();
       }
@@ -112,6 +112,12 @@ function doPost(message, path, body = null) {
 // COMMAND HANDLERS
 //
 const handlers = {
+
+  dopost: function(message, data) {
+    if (data.length === 1) {
+      doPost(message, data[0]);
+    }
+  },
 
   server: function(message, data) {
     if (data.length === 1) {

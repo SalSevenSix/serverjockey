@@ -146,11 +146,13 @@ class ProcessHandler:
         return self
 
     def terminate(self):
+        if self.process is None or self.process.returncode is not None:
+            return
         self.process.terminate()
         self.mailer.post(self, ProcessHandler.STATE_TERMINATED, self.process)
 
     async def run(self):
-        rc, cmdline, stderr, stdout = (9, self.command.build(), None, None)
+        cmdline, stderr, stdout = (self.command.build(), None, None)
         try:
             self.mailer.post(self, ProcessHandler.STATE_START, cmdline)
             cmdlist = self.command.build(output=list)
@@ -167,15 +169,24 @@ class ProcessHandler:
             self.mailer.post(self, ProcessHandler.STATE_STARTING, self.process)
             if self.started_catcher is not None:
                 await self.started_catcher.get()   # blocking
+            rc = self.process.returncode
+            if rc is not None:
+                raise Exception('Process {} exit after STARTING, rc={}'.format(self.process, rc))
             self.mailer.post(self, ProcessHandler.STATE_STARTED, self.process)
             rc = await self.process.wait()   # blocking
             if rc != 0:
-                raise Exception('Non-zero return code: ' + str(rc))
+                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self.process, rc))
             self.mailer.post(self, ProcessHandler.STATE_COMPLETE, self.process)
         except asyncio.TimeoutError:
-            logging.error('Timeout waiting for PROCESS_STARTED')
-            self.mailer.post(self, ProcessHandler.STATE_TIMEOUT, self.process)
-            self.terminate()
+            rc = self.process.returncode
+            if rc is not None:   # It's dead Jim
+                logging.error('Timeout waiting for STARTED because process exit rc=' + str(rc))
+                self.mailer.post(self, ProcessHandler.STATE_EXCEPTION,
+                                 Exception('Process {} exit during STARTING, rc={}'.format(self.process, rc)))
+            else:
+                logging.error('Timeout waiting for STARTED but process still running, terminating now')
+                self.mailer.post(self, ProcessHandler.STATE_TIMEOUT, self.process)
+                self.terminate()
         except Exception as e:
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
             self.mailer.post(self, ProcessHandler.STATE_EXCEPTION, e)
@@ -184,7 +195,6 @@ class ProcessHandler:
             await util.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
             self.process = None
-        return rc
 
 
 class Filter:

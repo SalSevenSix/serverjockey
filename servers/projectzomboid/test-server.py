@@ -1,47 +1,50 @@
 #!/usr/bin/env python3
 
 import sys
-import asyncio
-from random import *
+from random import randint
+from time import sleep
 
 
-async def main():
+def p(line):
+    print(line, flush=True)
 
-    print('### Initialising')
-    print('1599635857306 versionNumber=40.43 demo=false')
-    await asyncio.sleep(1)
-    print('server is listening on port 16261')
-    await asyncio.sleep(1)
-    print('Server Steam ID 90138653263221765')
-    print('### *** SERVER STARTED ***')
+
+def main():
+    p('### Initialising')
+    p('1599635857306 versionNumber=40.43 demo=false')
+    sleep(1)
+    p('server is listening on port 16261')
+    sleep(1)
+    p('Server Steam ID 90138653263221765')
+    p('### *** SERVER STARTED ***')
     players = ['MrGoober', 'StabMasterArson', 'YouMadNow']
     for player in players:
-        print('### Player {} has joined the server'.format(player))
-        print("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
+        p('### Player {} has joined the server'.format(player))
+        p("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
 
     running = True
     while running:
         line = sys.stdin.readline()
         line = line.strip()
-        print('### Received STDIN: {}'.format(line))
-        print(line)
+        p('### Received STDIN: {}'.format(line))
+        p(line)
         if line == 'players':
-            print('### some garbage')
-            print('### more garbage')
-            print('Players connected ({}):'.format(len(players)))
+            p('### some garbage')
+            p('### more garbage')
+            p('Players connected ({}):'.format(len(players)))
             for player in players:
-                print('-{}'.format(player))
-            print('')
-            print('### some more junk')
+                p('-{}'.format(player))
+            p('')
+            p('### some more junk')
         elif line == 'showoptions':
-            print('List of Server Options:')
-            print('* PvP=False')
-            print('* MaxPlayerCount=16')
-            print('* ModsList=better_guns,hydro,survivor_radio')
-            print('* SaveOnExit=True')
-            print('* DayLength=12')
-            print('* ServerWelcomeMessage=Welcome to PZ test-script.sh <LINE> Enjoy testing!')
-            print('end')
+            p('List of Server Options:')
+            p('* PvP=False')
+            p('* MaxPlayerCount=16')
+            p('* ModsList=better_guns,hydro,survivor_radio')
+            p('* SaveOnExit=True')
+            p('* DayLength=12')
+            p('* ServerWelcomeMessage=Welcome to PZ test-script.sh <LINE> Enjoy testing!')
+            p('end')
         elif line.find('kickuser') != -1:
             found = None
             for player in players:
@@ -50,14 +53,14 @@ async def main():
             if found:
                 players.remove(found)
         elif line == 'quit':
-            print('### shutting down')
-            print('### messaging players')
-            await asyncio.sleep(1)
-            print('### goodbye')
+            p('### shutting down')
+            p('### messaging players')
+            sleep(1)
+            p('### goodbye')
             return
         else:
-            print('### NOOP')
+            p('### NOOP')
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

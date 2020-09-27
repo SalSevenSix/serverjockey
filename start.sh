@@ -163,18 +163,36 @@ if [ ! -f "$DEPENDENCIES_FILE" ]; then
 fi
 
 echo "Environment init..."
-HOST="pznewhope.duckdns.org"
+HOST="localhost"
 PORT="6164"
-#MY_IP=$(curl -s https://ip6.seeip.org)
-#HOST_IP=$(host "$HOST" | grep IPv6 | grep -oE '[^[:space:]]+$' | tr -d '\n')
-#if [ "$MY_IP" != "$HOST_IP" ]; then
-    HOST="localhost"
-#fi
+for i in "$@"; do
+    case $i in
+        -h=*|--host=*)
+        HOST="${i#*=}"
+        shift
+        ;;
+        -p=*|--port=*)
+        PORT="${i#*=}"
+        shift
+        ;;
+        *)
+        # unknown
+        ;;
+    esac
+done
+if [ "$HOST" != "localhost" ]; then
+    my_ip=$(curl -s https://ip6.seeip.org)
+    host_ip=$(host "$HOST" | grep IPv6 | grep -oE '[^[:space:]]+$' | tr -d '\n')
+    if [ "$my_ip" != "$host_ip" ]; then
+        echo "WARNING: host name provided does not match ip address, using localhost instead"
+        HOST="localhost"
+    fi
+fi
 
 
 echo "Starting serverjockey webservice..."
 cd "$JOCKEY_DIR" || exit 1
-python3 -m pipenv run ./main.py --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" --host "$HOST" --port "$PORT" "$HOME_DIR" >/dev/null 2>&1 &
+python3 -m pipenv run ./main.py --host "$HOST" --port "$PORT" --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" "$HOME_DIR" >/dev/null 2>&1 &
 [ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting serverjockey"
 
 echo "Starting serverlink discord bot..."

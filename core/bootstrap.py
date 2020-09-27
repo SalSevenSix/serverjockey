@@ -13,25 +13,22 @@ def create_context(args):
                    help='Home directory to use for server instances')
     p.add_argument('--debug', action='store_true',
                    help='Debug mode')
-    p.add_argument('--logfile', type=str, default='./serverjockey.log',
-                   help='Log file to use, relative to "home" unless starts with "/" or "."')
     p.add_argument('--host', type=str, default='localhost',
                    help='Host name to use, default is "localhost"')
     p.add_argument('--port', type=int, default=80,
                    help='Port number to use, default is 80')
+    p.add_argument('--logfile', type=str, default='./serverjockey.log',
+                   help='Log file to use, relative to "home" unless starts with "/" or "."')
     p.add_argument('--clientfile', type=str,
                    help='Filename for client file, relative to instance dir unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     return contextsvc.Context(
         secret=util.generate_token(),
-        home=args.home,
-        debug=args.debug,
-        logfile=args.logfile,
-        clientfile=args.clientfile,
+        home=args.home, debug=args.debug,
+        logfile=args.logfile, clientfile=args.clientfile,
         url=util.build_url(args.host, args.port),
-        host=args.host,
-        port=args.port)
+        host=args.host, port=args.port)
 
 
 class Callbacks:

@@ -56,10 +56,17 @@ class ServerService:
             self.running = keep_running
             ServerStatus.notify_running(self.context, self, self.running)
             self.queue.task_done()
+            exception = None
             if keep_running:
-                await self.server.run()
+                try:
+                    await self.server.run()
+                except Exception as e:
+                    exception = e
             self.running = False
             ServerStatus.notify_running(self.context, self, self.running)
+            if exception:
+                ServerStatus.notify_state(self.context, self, 'EXCEPTION')
+                ServerStatus.notify_details(self.context, self, {'exception': repr(exception)})
         self.clientfile.delete()
         tasks.task_end(self.task)
 
