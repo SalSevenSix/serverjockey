@@ -1,9 +1,10 @@
 from __future__ import annotations
 import typing
 import importlib
+import inspect
 import logging
 import uuid
-from core import msgabc, httpabc, httpext, svrsvc, msgext, util, msgftr, contextsvc
+from core import msgabc, httpabc, httpext, svrabc, svrsvc, msgext, util, msgftr, contextsvc
 
 
 class SystemService:
@@ -86,13 +87,16 @@ class SystemService:
         self._context.post(self, SystemService.SERVER_INITIALISED, subcontext)
         return subcontext
 
-    def _create_server(self, subcontext: contextsvc.Context) -> typing.Any:  # TODO Use an interface for Server!
+    def _create_server(self, subcontext: contextsvc.Context) -> svrabc.Server:
         module_name = subcontext.config('module')
         module = util.get(module_name, self._modules)
         if not module:
             module = importlib.import_module('servers.{}.server'.format(module_name))
             self._modules.update({module_name: module})
-        return module.Server(subcontext)
+        for name, member in inspect.getmembers(module):
+            if inspect.isclass(member) and svrabc.Server in inspect.getmro(member):
+                return member(subcontext)
+        raise Exception('Server class implementation not found in module: ' + repr(module))
 
 
 class _Subscriber(msgabc.Subscriber):

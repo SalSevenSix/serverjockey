@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import typing
-from core import msgabc, msgext, msgftr, util, system, tasks, contextsvc
+from core import svrabc, msgabc, msgext, msgftr, util, system, tasks, contextsvc
 
 
 class ServerService(msgabc.Subscriber):
@@ -35,7 +35,7 @@ class ServerService(msgabc.Subscriber):
         response = await messenger.request(source, ServerService.SHUTDOWN)
         return response.get_data()
 
-    def __init__(self, context: contextsvc.Context, server: typing.Any):
+    def __init__(self, context: contextsvc.Context, server: svrabc.Server):
         self._context = context
         self._server = server
         self._clientfile = _ClientFile(context)

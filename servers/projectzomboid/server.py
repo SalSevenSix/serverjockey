@@ -1,8 +1,8 @@
-from core import proch, msgftr, httpext, svrsvc, httpsubs, msgext, aggtrf, msgtrf, contextsvc, httpabc
+from core import proch, msgftr, httpext, svrabc, svrsvc, httpsubs, msgext, aggtrf, msgtrf, contextsvc, httpabc
 from servers.projectzomboid import deployment as dep, handlers as hdr, subscribers as sub
 
 
-class Server:
+class Server(svrabc.Server):
     STARTED_FILTER = msgftr.And(
         proch.Filter.STDOUT_LINE,
         msgftr.DataStrContains('SERVER STARTED'))
@@ -18,7 +18,7 @@ class Server:
         context.register(sub.PlayerEventSubscriber(context))
         context.register(sub.ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
-    def resources(self, name) -> httpabc.Resource:
+    def resources(self, name: str) -> httpabc.Resource:
         conf_pre = self._deployment.config_dir + '/' + self._deployment.world_name
         return httpext.ResourceBuilder(name) \
             .push('server', httpext.ServerStatusHandler(self._context)) \
