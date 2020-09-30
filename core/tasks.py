@@ -1,29 +1,34 @@
 import asyncio
 import logging
+import typing
 
 
 class _Tasker:
+    __instance = None
+
+    @staticmethod
+    def instance():
+        if not _Tasker.__instance:
+            _Tasker.__instance = _Tasker()
+        return _Tasker.__instance
 
     def __init__(self):
-        self.task_count = 0
+        self._task_count = 0
 
-    def task_start(self, coro, name=None):
+    def task_start(self, coro: typing.Coroutine, name: str) -> asyncio.Task:
         task = asyncio.create_task(coro, name=name)
-        self.task_count = self.task_count + 1
-        logging.debug('Task START ({}) : {}'.format(self.task_count, task))
+        self._task_count = self._task_count + 1
+        logging.debug('Task START ({}) : {}'.format(self._task_count, task))
         return task
 
-    def task_end(self, task):
-        self.task_count = self.task_count - 1
-        logging.debug('Task END   ({}) : {}'.format(self.task_count, task))
+    def task_end(self, task: asyncio.Task):
+        self._task_count = self._task_count - 1
+        logging.debug('Task END   ({}) : {}'.format(self._task_count, task))
 
 
-TASKER = _Tasker()
+def task_start(coro: typing.Coroutine, name: str) -> asyncio.Task:
+    return _Tasker.instance().task_start(coro, name=name)
 
 
-def task_start(coro, name=None):
-    return TASKER.task_start(coro, name=name)
-
-
-def task_end(task):
-    TASKER.task_end(task)
+def task_end(task: asyncio.Task):
+    _Tasker.instance().task_end(task)

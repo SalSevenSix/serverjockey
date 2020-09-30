@@ -2,242 +2,233 @@ import asyncio
 import logging
 import uuid
 import collections
-from core import msgsvc, msgftr, msgtrf, aggtrf, tasks, util
+import typing
+from core import msgabc, msgftr, msgtrf, aggtrf, tasks, util
 
 
 class SynchronousMessenger:
 
-    def __init__(self, mailer):
-        self.mailer = mailer
-        self.catcher = None
-        self.timeout = None
+    def __init__(self, mailer: msgabc.MulticastMailer,
+                 timeout: typing.Optional[float] = None,
+                 catcher: typing.Optional[msgabc.Catcher] = None):
+        self._mailer = mailer
+        self._timeout = timeout
+        self._catcher = catcher
 
-    def with_catcher(self, catcher):
-        self.catcher = catcher
-        return self
-
-    def with_timeout(self, timeout):
-        self.timeout = timeout
-        return self
-
-    async def request(self, *vargs):
-        assert not (self.catcher and self.timeout)
-        message = msgsvc.Message.from_vargs(*vargs)
-        catcher = self.catcher if self.catcher else SingleCatcher(msgftr.ReplyToIs(message), self.timeout)
-        self.mailer.register(catcher)
-        self.mailer.post(message)
+    async def request(self, *vargs) -> typing.Union[None, msgabc.Message, typing.Collection[msgabc.Message]]:
+        assert not (self._catcher and self._timeout)
+        message = msgabc.Message.from_vargs(*vargs)
+        catcher = self._catcher if self._catcher else SingleCatcher(msgftr.ReplyToIs(message), self._timeout)
+        self._mailer.register(catcher)
+        self._mailer.post(message)
         return await catcher.get()
 
 
-class MultiCatcher:
+class MultiCatcher(msgabc.Catcher):
 
-    def __init__(self, catch_filter,
-                 stop_filter, include_stop=False,
-                 start_filter=None, include_start=False,
-                 stop_only_after_start=False,
-                 timeout=None):
-        self.catch_filter = catch_filter
-        self.timeout = timeout
-        self.stop_filter = stop_filter
-        self.include_stop = include_stop
-        self.queue = asyncio.Queue(maxsize=1)
-        self.collector = []
-        self.start_filter = start_filter
-        self.include_start = include_start
-        self.stop_only_after_start = stop_only_after_start
-        self.started = False
-        self.expired = False
+    def __init__(self,
+                 catch_filter: msgabc.Filter,
+                 stop_filter: msgabc.Filter,
+                 include_stop: bool = False,
+                 start_filter: typing.Optional[msgabc.Filter] = None,
+                 include_start: bool = False,
+                 stop_only_after_start: bool = False,
+                 timeout: typing.Optional[float] = None):
+        self._catch_filter = catch_filter
+        self._timeout = timeout
+        self._stop_filter = stop_filter
+        self._include_stop = include_stop
+        self._queue = asyncio.Queue(maxsize=1)
+        self._collector = []
+        self._start_filter = start_filter
+        self._include_start = include_start
+        self._stop_only_after_start = stop_only_after_start
+        self._started = False
+        self._expired = False
         if not start_filter:
-            self.start_filter = msgftr.AcceptNothing()
-            self.stop_only_after_start = False
-            self.started = True
+            self._start_filter = msgftr.AcceptNothing()
+            self._stop_only_after_start = False
+            self._started = True
 
-    async def get(self):
+    async def get(self) -> typing.Collection[msgabc.Message]:
         try:
-            result = await asyncio.wait_for(self.queue.get(), self.timeout)
-            self.queue.task_done()
-            return result
+            messages = await asyncio.wait_for(self._queue.get(), self._timeout)
+            self._queue.task_done()
+            return messages
         finally:
-            self.expired = True
+            self._expired = True
 
     def accepts(self, message):
-        return self.expired \
-            or self.catch_filter.accepts(message) \
-            or self.stop_filter.accepts(message) \
-            or self.start_filter.accepts(message)
+        return self._expired \
+            or self._catch_filter.accepts(message) \
+            or self._stop_filter.accepts(message) \
+            or self._start_filter.accepts(message)
 
     def handle(self, message):
-        if self.expired:
+        if self._expired:
             return False
-        starting = not self.started and self.start_filter.accepts(message)
-        stopping = self.stop_filter.accepts(message)
-        if self.stop_only_after_start and stopping and not self.started and not starting:
+        starting = not self._started and self._start_filter.accepts(message)
+        stopping = self._stop_filter.accepts(message)
+        if self._stop_only_after_start and stopping and not self._started and not starting:
             return None
         if starting and stopping:
             stopping = False
         if starting:
-            self.started = True
-        if not self.started:
+            self._started = True
+        if not self._started:
             return None
         if starting or stopping:
-            if starting and self.include_start:
-                self.collector.append(message)
-            elif stopping and self.include_stop:
-                self.collector.append(message)
+            if starting and self._include_start:
+                self._collector.append(message)
+            elif stopping and self._include_stop:
+                self._collector.append(message)
         else:
-            self.collector.append(message)
+            self._collector.append(message)
         if stopping:
-            result = tuple(self.collector)
-            self.queue.put_nowait(result)
-            return result
+            messages = tuple(self._collector)
+            self._queue.put_nowait(messages)
+            return messages
         return None
 
 
-class SingleCatcher:
+class SingleCatcher(msgabc.Catcher):
 
-    def __init__(self, msg_filter, timeout=None):
-        self.catcher = MultiCatcher(msg_filter, msg_filter, include_stop=True, timeout=timeout)
+    def __init__(self, msg_filter: msgabc.Filter, timeout: typing.Optional[float] = None):
+        self._catcher = MultiCatcher(msg_filter, msg_filter, include_stop=True, timeout=timeout)
 
-    async def get(self):
-        result = await self.catcher.get()
-        return None if len(result) == 0 else result[0]
+    async def get(self) -> typing.Optional[msgabc.Message]:
+        messages = await self._catcher.get()
+        return util.single(messages)
 
     def accepts(self, message):
-        return self.catcher.accepts(message)
+        return self._catcher.accepts(message)
 
     def handle(self, message):
-        result = self.catcher.handle(message)
-        if result is None or not isinstance(result, tuple):
-            return result
-        return None if len(result) == 0 else result[0]
+        messages = self._catcher.handle(message)
+        if not isinstance(messages, tuple):
+            return messages
+        return util.single(messages)
 
 
 class Publisher:
     START = 'Publisher.Start'
     END = 'Publisher.End'
 
-    def __init__(self, mailer, producer):
-        assert msgsvc.is_multimailer(mailer)
-        self.mailer = mailer
-        self.producer = producer
-        self.task = tasks.task_start(self.run(), name=util.obj_to_str(producer))
-        self.mailer.post(self, Publisher.START, producer)
+    def __init__(self, mailer: msgabc.Mailer, producer: msgabc.Producer):
+        self._mailer = mailer
+        self._producer = producer
+        self._task = tasks.task_start(self._run(), name=util.obj_to_str(producer))
+        self._mailer.post(self, Publisher.START, producer)
 
     async def stop(self):
-        await self.task
+        await self._task   # TODO Add timeout then cancel task
 
-    async def run(self):
+    async def _run(self):
         running = True
         while running:
             message = None
             try:
-                message = await self.producer.next_message()
+                message = await self._producer.next_message()
             except Exception as e:
                 logging.error('Publishing exception. raised: %s', e)
-            running = False if message is None else self.mailer.post(message)
-        self.mailer.post(self, Publisher.END, self.producer)
-        tasks.task_end(self.task)
+            running = False if message is None else self._mailer.post(message)
+        self._mailer.post(self, Publisher.END, self._producer)
+        tasks.task_end(self._task)
 
 
-class SleepPoster:
+class RelaySubscriber(msgabc.Subscriber):
 
-    def __init__(self, mailer):
-        assert msgsvc.is_multimailer(mailer)
-        self.mailer = mailer
-
-    def post(self, message, delay):
-        asyncio.create_task(self._post(message, delay))
-
-    async def _post(self, message, delay):
-        await asyncio.sleep(delay)
-        self.mailer.post(message)
-
-
-class RelaySubscriber:
-
-    def __init__(self, mailer, msg_filter=msgftr.AcceptAll()):
-        self.mailer = mailer
-        self.msg_filter = msg_filter
+    def __init__(self, mailer: msgabc.Mailer, msg_filter: msgabc.Filter = msgftr.AcceptAll()):
+        self._mailer = mailer
+        self._msg_filter = msg_filter
 
     def accepts(self, message):
-        return self.msg_filter.accepts(message)
+        return self._msg_filter.accepts(message)
 
     def handle(self, message):
-        return None if self.mailer.post(message) else True
+        return None if self._mailer.post(message) else True
 
 
-class RollingLogSubscriber:
+class RollingLogSubscriber(msgabc.Subscriber):
     INIT = 'RollingLogSubscriber.Init'
     REQUEST = 'RollingLogSubscriber.Request'
     RESPONSE = 'RollingLogSubscriber.Response'
     REQUEST_FILTER = msgftr.NameIs(REQUEST)
 
-    def __init__(self, mailer,
-                 msg_filter=msgftr.AcceptAll(),
-                 transformer=msgtrf.Noop(),
-                 aggregator=aggtrf.Noop(),
-                 size=20, identity=None):
-        assert msgsvc.is_multimailer(mailer)
-        self.mailer = mailer
-        self.identity = identity if identity is not None else str(uuid.uuid4())
-        self.transformer = transformer
-        self.aggregator = aggregator
-        self.request_filter = msgftr.And((
+    def __init__(self, mailer: msgabc.Mailer,
+                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+                 transformer: msgabc.Transformer = msgtrf.Noop(),
+                 aggregator: aggtrf.Aggregator = aggtrf.Noop(),
+                 size: int = 20,
+                 identity: typing.Optional[str] = None):
+        self._mailer = mailer
+        self._identity = identity if identity else str(uuid.uuid4())
+        self._transformer = transformer
+        self._aggregator = aggregator
+        self._request_filter = msgftr.And(
             RollingLogSubscriber.REQUEST_FILTER,
-            msgftr.DataEquals(self.identity)
-        ))
-        self.msg_filter = msgftr.Or((msg_filter, self.request_filter))
-        self.size = size
-        self.container = collections.deque()
-        mailer.post(self, RollingLogSubscriber.INIT, self.identity)
+            msgftr.DataEquals(self._identity))
+        self._msg_filter = msgftr.Or(msg_filter, self._request_filter)
+        self._size = size
+        self._container = collections.deque()
+        mailer.post(self, RollingLogSubscriber.INIT, self._identity)
 
     @staticmethod
-    async def get_log(mailer, source, identity):
+    async def get_log(mailer: msgabc.MulticastMailer, source: typing.Any, identity: str) -> typing.Any:
         messenger = SynchronousMessenger(mailer)
         response = await messenger.request(source, RollingLogSubscriber.REQUEST, identity)
         return response.get_data()
 
-    def get_identity(self):
-        return self.identity
+    def get_identity(self) -> str:
+        return self._identity
 
     def accepts(self, message):
-        return self.msg_filter.accepts(message)
+        return self._msg_filter.accepts(message)
 
     def handle(self, message):
-        if self.request_filter.accepts(message):
-            result = self.aggregator.aggregate(tuple(self.container))
-            self.mailer.post(self, RollingLogSubscriber.RESPONSE, result, message)
+        if self._request_filter.accepts(message):
+            result = self._aggregator.aggregate(tuple(self._container))
+            self._mailer.post(self, RollingLogSubscriber.RESPONSE, result, message)
         else:
-            self.container.append(self.transformer.transform(message))
-            while len(self.container) > self.size:
-                self.container.popleft()
+            self._container.append(self._transformer.transform(message))
+            while len(self._container) > self._size:
+                self._container.popleft()
         return None
 
 
-class LoggerSubscriber:
+class LoggerSubscriber(msgabc.Subscriber):
 
-    def __init__(self, level=logging.DEBUG, transformer=msgtrf.ToString(), msg_filter=msgftr.AcceptAll()):
-        self.level = level
-        self.transformer = transformer
-        self.msg_filter = msg_filter
+    def __init__(self,
+                 level: int = logging.DEBUG,
+                 transformer: msgabc.Transformer = msgtrf.ToString(),
+                 msg_filter: msgabc.Filter = msgftr.AcceptAll()):
+        self._level = level
+        self._transformer = transformer
+        self._msg_filter = msg_filter
 
     def accepts(self, message):
-        return self.msg_filter.accepts(message)
+        return self._msg_filter.accepts(message)
 
     def handle(self, message):
-        logging.log(self.level, self.transformer.transform(message))
+        logging.log(self._level, self._transformer.transform(message))
         return None
 
 
-class PrintSubscriber:
+class PrintSubscriber(msgabc.Subscriber):
 
-    def __init__(self, transformer=msgtrf.ToString(), msg_filter=msgftr.AcceptAll()):
-        self.transformer = transformer
-        self.msg_filter = msg_filter
+    def __init__(self,
+                 transformer: msgabc.Transformer = msgtrf.ToString(),
+                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+                 file: typing.Optional[str] = None,
+                 flush: bool = False):
+        self._transformer = transformer
+        self._msg_filter = msg_filter
+        self._file = file
+        self._flush = flush
 
     def accepts(self, message):
-        return self.msg_filter.accepts(message)
+        return self._msg_filter.accepts(message)
 
     def handle(self, message):
-        print(self.transformer.transform(message))
+        print(self._transformer.transform(message), file=self._file, flush=self._flush)
         return None

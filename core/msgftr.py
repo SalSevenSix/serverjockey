@@ -1,142 +1,128 @@
 import re
+from core import msgabc
 
 
-def is_filter(candidate):
-    return candidate is not None \
-        and hasattr(candidate, 'accepts') \
-        and callable(candidate.accepts)
-
-
-class AcceptAll:
+class AcceptAll(msgabc.Filter):
 
     def accepts(self, message):
         return True
 
 
-class AcceptNothing:
+class AcceptNothing(msgabc.Filter):
 
     def accepts(self, message):
         return False
 
 
-class Not:
+class Not(msgabc.Filter):
 
     def __init__(self, msg_filter):
-        self.msg_filter = msg_filter
+        self._msg_filter = msg_filter
 
     def accepts(self, message):
-        return not self.msg_filter.accepts(message)
+        return not self._msg_filter.accepts(message)
 
 
-class And:
+class And(msgabc.Filter):
 
-    def __init__(self, msg_filters):
-        self.msg_filters = tuple(msg_filters)
+    def __init__(self, *msg_filters):
+        self._msg_filters = tuple(msg_filters)
 
     def accepts(self, message):
-        for msg_filter in iter(self.msg_filters):
+        for msg_filter in iter(self._msg_filters):
             if not msg_filter.accepts(message):
                 return False
         return True
 
 
-class Or:
+class Or(msgabc.Filter):
 
-    def __init__(self, msg_filters):
-        self.msg_filters = tuple(msg_filters)
+    def __init__(self, *msg_filters):
+        self._msg_filters = tuple(msg_filters)
 
     def accepts(self, message):
-        for msg_filter in iter(self.msg_filters):
+        for msg_filter in iter(self._msg_filters):
             if msg_filter.accepts(message):
                 return True
         return False
 
 
-class SourceIs:
+class SourceIs(msgabc.Filter):
 
     def __init__(self, source_object):
-        self.source_object = source_object
+        self._source_object = source_object
 
     def accepts(self, message):
-        return self.source_object is message.get_source()
+        return self._source_object is message.get_source()
 
 
-class SourceClassIs:
+class SourceClassIs(msgabc.Filter):
 
     def __init__(self, source_class):
-        self.source_class = source_class
+        self._source_class = source_class
 
     def accepts(self, message):
-        return self.source_class is type(message.get_source())
+        return self._source_class is type(message.get_source())
 
 
-class ReplyToIs:
+class ReplyToIs(msgabc.Filter):
 
     def __init__(self, reply_to):
-        self.reply_to = reply_to
+        self._reply_to = reply_to
 
     def accepts(self, message):
-        return self.reply_to is message.get_reply_to()
+        return self._reply_to is message.get_reply_to()
 
 
-class NameIs:
+class NameIs(msgabc.Filter):
 
     def __init__(self, name):
-        self.name = name
+        self._name = name
 
     def accepts(self, message):
-        return self.name is message.get_name()
+        return self._name is message.get_name()
 
 
-class NameIn:
+class NameIn(msgabc.Filter):
 
     def __init__(self, names):
-        self.names = names
+        self._names = names
 
     def accepts(self, message):
-        return message.get_name() in self.names
+        return message.get_name() in self._names
 
 
-class NameEquals:
+class NameEquals(msgabc.Filter):
 
     def __init__(self, name):
-        self.name = name
+        self._name = name
 
     def accepts(self, message):
-        return self.name == message.get_name()
+        return self._name == message.get_name()
 
 
-class NameMatches:
-
-    def __init__(self, regex):
-        self.pattern = regex if regex is re.Pattern else re.compile(regex)
-
-    def accepts(self, message):
-        return self.pattern.match(str(message.get_name())) is not None
-
-
-class DataEquals:
+class DataEquals(msgabc.Filter):
 
     def __init__(self, data):
-        self.data = data
+        self._data = data
 
     def accepts(self, message):
-        return self.data == message.get_data()
+        return self._data == message.get_data()
 
 
-class DataStrContains:
+class DataStrContains(msgabc.Filter):
 
     def __init__(self, value):
-        self.value = value
+        self._value = value
 
     def accepts(self, message):
-        return str(message.get_data()).find(self.value) != -1
+        return str(message.get_data()).find(self._value) != -1
 
 
-class DataMatches:
+class DataMatches(msgabc.Filter):
 
     def __init__(self, regex):
-        self.pattern = regex if regex is re.Pattern else re.compile(regex)
+        self._pattern = regex if regex is re.Pattern else re.compile(regex)
 
     def accepts(self, message):
-        return self.pattern.match(str(message.get_data())) is not None
+        return self._pattern.match(str(message.get_data())) is not None

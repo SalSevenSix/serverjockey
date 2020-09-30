@@ -1,43 +1,37 @@
-from core import util
+from core import util, msgabc
 
 
-def is_transformer(candidate):
-    return candidate is not None \
-        and hasattr(candidate, 'transform') \
-        and callable(candidate.transform)
-
-
-class Noop:
+class Noop(msgabc.Transformer):
 
     def transform(self, message):
         return message
 
 
-class GetData:
+class GetData(msgabc.Transformer):
 
     def transform(self, message):
         return message.get_data()
 
 
-class DataAsDict:
+class DataAsDict(msgabc.Transformer):
 
     def transform(self, message):
         return util.obj_to_dict(message.get_data())
 
 
-class ToString:
+class ToString(msgabc.Transformer):
 
     def transform(self, message):
-        text = ' '.join((util.timestamp(message.get_created()),
-                         str(message.get_id()),
-                         str(message.get_name()).ljust(32),
-                         util.obj_to_str(message.get_data())))
-        if message.get_reply_to() is not None:
-            text = text + ' [' + self.transform(message.get_reply_to()) + ']'
-        return text
+        line = [str(util.to_millis(message.get_created())),
+                str(message.get_id()),
+                str(message.get_name()).ljust(32),
+                util.obj_to_str(message.get_data())]
+        if message.has_reply_to():
+            line.append('[' + self.transform(message.get_reply_to()) + ']')
+        return ' '.join(line)
 
 
-class ToJson:
+class ToJson(msgabc.Transformer):
 
     def transform(self, message):
         return util.obj_to_json(message)

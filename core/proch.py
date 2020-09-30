@@ -1,29 +1,72 @@
+from __future__ import annotations
 import logging
 import asyncio
-from core import msgsvc, msgext, msgftr, cmdutil, util
+import typing
+from asyncio import streams
+from core import msgabc, msgext, msgftr, cmdutil, util
 
 
-class PipeOutLineProducer:
+class _PipeOutLineProducer(msgabc.Producer):
 
-    def __init__(self, mailer, process, name, pipe):
-        self.mailer = mailer
-        self.process = process
-        self.name = name
-        self.pipe = pipe
-        self.publisher = msgext.Publisher(mailer, self)
+    def __init__(self, mailer: msgabc.Mailer, process: ProcessHandler, name: str, pipe: streams.StreamReader):
+        self._process = process
+        self._name = name
+        self._pipe = pipe
+        self._publisher = msgext.Publisher(mailer, self)
 
     async def close(self):
-        await util.silently_cleanup(self.publisher)
-        await util.silently_cleanup(self.pipe)
+        await util.silently_cleanup(self._pipe)
+        await util.silently_cleanup(self._publisher)
 
     async def next_message(self):
-        line = await self.pipe.readline()  # blocking
+        line = None
+        try:
+            line = await self._pipe.readline()   # blocking
+        except Exception:
+            pass
         if line is None or line == b'':
+            logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
             return None
-        return msgsvc.Message(self.process, self.name, line.decode().strip())
+        return msgabc.Message(self._process, self._name, line.decode().strip())
 
 
-class PipeInLineService:
+class _PipeInLineCommand:
+
+    def __init__(self, cmdline: str, catcher: typing.Optional[msgabc.Catcher] = None, force: bool = False):
+        self.cmdline = cmdline
+        self.catcher = catcher
+        self.force = force
+
+
+class _PipeInLineHandler(msgabc.Handler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, pipe: streams.StreamWriter):
+        self._mailer = mailer
+        self._pipe = pipe
+
+    async def close(self):
+        await util.silently_cleanup(self._pipe)
+        self._mailer.post(self, PipeInLineService.PIPE_CLOSE, self._pipe)
+
+    async def handle(self, message):
+        command = message.get_data()
+        if command.catcher:
+            self._mailer.register(command.catcher)
+        try:
+            self._pipe.write(command.cmdline.encode())
+            self._pipe.write(b'\n')
+            response = await command.catcher.get() if command.catcher else None  # blocking
+            self._mailer.post(self, PipeInLineService.RESPONSE, response, message)
+        except asyncio.TimeoutError as e:
+            logging.warning('Timeout on cmdline into pipein. raised: ' + repr(e))
+            self._mailer.post(self, PipeInLineService.EXCEPTION, e, message)
+        except Exception as e:
+            logging.error('Failed pass cmdline into pipein. raised: ' + repr(e))
+            self._mailer.post(self, PipeInLineService.EXCEPTION, e, message)
+        return None
+
+
+class PipeInLineService(msgabc.Subscriber):
     REQUEST = 'PipeInLineService.Request'
     RESPONSE = 'PipeInLineService.Response'
     EXCEPTION = 'PipeInLineService.Exception'
@@ -32,83 +75,60 @@ class PipeInLineService:
     PIPE_NEW = 'PipeInLineService.PipeNew'
     PIPE_CLOSE = 'PipeInLineService.PipeClose'
 
-    class Command:
-        def __init__(self, cmdline, catcher=None, force=False):
-            self.cmdline = cmdline
-            self.catcher = catcher
-            self.force = force
-
-    class Handler:
-        def __init__(self, mailer, pipe):
-            self.mailer = mailer
-            self.pipe = pipe
-
-        async def handle(self, message):
-            command = message.get_data()
-            if command.catcher:
-                self.mailer.register(command.catcher)
-            try:
-                self.pipe.write(command.cmdline.encode())
-                self.pipe.write(b'\n')
-                response = await command.catcher.get() if command.catcher else None  # blocking
-                self.mailer.post(self, PipeInLineService.RESPONSE, response, message)
-            except asyncio.TimeoutError as e:
-                logging.warning('Timeout on cmdline into pipein. raised: %s', e)
-                self.mailer.post(self, PipeInLineService.EXCEPTION, e, message)
-            except Exception as e:
-                logging.error('Failed pass cmdline into pipein. raised: %s', e)
-                self.mailer.post(self, PipeInLineService.EXCEPTION, e, message)
-            return None
-
     @staticmethod
-    async def request(mailer, source, cmdline, catcher=None, force=False):
+    async def request(
+            mailer: msgabc.MulticastMailer,
+            source: typing.Any,
+            cmdline: str,
+            catcher: typing.Optional[msgabc.Catcher] = None,
+            force: bool = False) -> typing.Any:
         messenger = msgext.SynchronousMessenger(mailer)
-        return await messenger.request(
+        response = await messenger.request(
             source, PipeInLineService.REQUEST,
-            PipeInLineService.Command(cmdline, catcher, force))
+            _PipeInLineCommand(cmdline, catcher, force))
+        return response.get_data()
 
-    def __init__(self, mailer, pipe=None):
-        self.mailer = mailer
-        self.enabled = False
-        self.msg_filter = msgftr.Or((
+    def __init__(self, mailer: msgabc.MulticastMailer, pipe: typing.Optional[streams.StreamWriter] = None):
+        self._mailer = mailer
+        self._enabled = False
+        self._msg_filter = msgftr.Or(
             Filter.PIPEINSVC_REQUEST,
             Filter.PROCESS_STATE_STARTED,
-            Filter.PROCESS_STATE_DOWN))
+            Filter.PROCESS_STATE_DOWN)
         if pipe is None:
-            self.msg_filter = msgftr.Or((self.msg_filter, Filter.PIPEINSVC_PIPE_NEW))
-            self.persistent = True
-            self.handler = None
+            self._msg_filter = msgftr.Or(self._msg_filter, Filter.PIPEINSVC_PIPE_NEW)
+            self._persistent = True
+            self._handler = None
         else:
-            self.persistent = False
-            self.handler = PipeInLineService.Handler(mailer, pipe)
+            self._persistent = False
+            self._handler = _PipeInLineHandler(mailer, pipe)
         mailer.post(self, PipeInLineService.SERVICE_START, self)
         mailer.register(self)
 
     def accepts(self, message):
-        return self.msg_filter.accepts(message)
+        return self._msg_filter.accepts(message)
 
     async def handle(self, message):
         if Filter.PROCESS_STATE_STARTED.accepts(message):
-            self.enabled = True
+            self._enabled = True
             return None
         if Filter.PIPEINSVC_PIPE_NEW.accepts(message):
-            assert self.handler is None
-            self.handler = PipeInLineService.Handler(self.mailer, message.get_data())
+            assert self._handler is None
+            self._handler = _PipeInLineHandler(self._mailer, message.get_data())
             return None
         if Filter.PROCESS_STATE_DOWN.accepts(message):
-            self.enabled = False
-            if self.handler is not None:
-                await util.silently_cleanup(self.handler.pipe)
-                self.mailer.post(self, PipeInLineService.PIPE_CLOSE, self.handler.pipe)
-                self.handler = None
-            if self.persistent:
+            self._enabled = False
+            if self._handler is not None:
+                await self._handler.close()
+                self._handler = None
+            if self._persistent:
                 return None
-            self.mailer.post(self, PipeInLineService.SERVICE_END, self)
+            self._mailer.post(self, PipeInLineService.SERVICE_END, self)
             return True
-        if not (self.enabled or message.get_data().force) or self.handler is None:
-            self.mailer.post(self, PipeInLineService.RESPONSE, False, message)
+        if not (self._enabled or message.get_data().force) or self._handler is None:
+            self._mailer.post(self, PipeInLineService.RESPONSE, False, message)
             return None
-        return await self.handler.handle(message)
+        return await self._handler.handle(message)
 
 
 class ProcessHandler:
@@ -125,76 +145,75 @@ class ProcessHandler:
     STATES_DOWN = (STATE_TERMINATED, STATE_EXCEPTION, STATE_COMPLETE)
     STATES_ALL = STATES_UP + STATES_DOWN
 
-    def __init__(self, mailer, executable):
-        self.mailer = mailer
-        self.command = cmdutil.CommandLine(executable)
-        self.pipeinsvc = None
-        self.process = None
-        self.started_catcher = None
+    def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
+        self._mailer = mailer
+        self._command = cmdutil.CommandLine(executable)
+        self._process = None
+        self._pipeinsvc = None
+        self._started_catcher = None
 
-    def use_pipeinsvc(self, pipeinsvc):
-        self.pipeinsvc = pipeinsvc
+    def use_pipeinsvc(self, pipeinsvc: PipeInLineService) -> ProcessHandler:
+        self._pipeinsvc = pipeinsvc
         return self
 
-    def append_arg(self, arg):
-        self.command.append_command(arg)
+    def append_arg(self, arg: typing.Any) -> ProcessHandler:
+        self._command.append_command(arg)
         return self
 
-    def wait_for_started(self, catcher):
-        self.started_catcher = catcher
-        self.mailer.register(catcher)
+    def wait_for_started(self, catcher: msgabc.Catcher) -> ProcessHandler:
+        self._started_catcher = catcher
+        self._mailer.register(catcher)
         return self
 
     def terminate(self):
-        if self.process is None or self.process.returncode is not None:
+        if self._process is None or self._process.returncode is not None:
             return
-        self.process.terminate()
-        self.mailer.post(self, ProcessHandler.STATE_TERMINATED, self.process)
+        self._process.terminate()
+        self._mailer.post(self, ProcessHandler.STATE_TERMINATED, self._process)
 
     async def run(self):
-        cmdline, stderr, stdout = (self.command.build(), None, None)
+        cmdline, stderr, stdout = self._command.build_str(), None, None
         try:
-            self.mailer.post(self, ProcessHandler.STATE_START, cmdline)
-            cmdlist = self.command.build(output=list)
-            self.process = await asyncio.create_subprocess_exec(
+            self._mailer.post(self, ProcessHandler.STATE_START, cmdline)
+            cmdlist = self._command.build_list()
+            self._process = await asyncio.create_subprocess_exec(
                 cmdlist[0], *cmdlist[1:],
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE)
-            stderr = PipeOutLineProducer(self.mailer, self, ProcessHandler.STDERR_LINE, self.process.stderr)
-            stdout = PipeOutLineProducer(self.mailer, self, ProcessHandler.STDOUT_LINE, self.process.stdout)
-            self.mailer.post(self, PipeInLineService.PIPE_NEW, self.process.stdin)
-            if not self.pipeinsvc:
-                PipeInLineService(self.mailer, self.process.stdin)
-            self.mailer.post(self, ProcessHandler.STATE_STARTING, self.process)
-            if self.started_catcher is not None:
-                await self.started_catcher.get()   # blocking
-            rc = self.process.returncode
+            stderr = _PipeOutLineProducer(self._mailer, self, ProcessHandler.STDERR_LINE, self._process.stderr)
+            stdout = _PipeOutLineProducer(self._mailer, self, ProcessHandler.STDOUT_LINE, self._process.stdout)
+            self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
+            if not self._pipeinsvc:
+                PipeInLineService(self._mailer, self._process.stdin)
+            self._mailer.post(self, ProcessHandler.STATE_STARTING, self._process)
+            if self._started_catcher is not None:
+                await self._started_catcher.get()   # blocking
+            rc = self._process.returncode
             if rc is not None:
-                raise Exception('Process {} exit after STARTING, rc={}'.format(self.process, rc))
-            self.mailer.post(self, ProcessHandler.STATE_STARTED, self.process)
-            rc = await self.process.wait()   # blocking
+                raise Exception('Process {} exit after STARTING, rc={}'.format(self._process, rc))
+            self._mailer.post(self, ProcessHandler.STATE_STARTED, self._process)
+            rc = await self._process.wait()   # blocking
             if rc != 0:
-                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self.process, rc))
-            self.mailer.post(self, ProcessHandler.STATE_COMPLETE, self.process)
+                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self._process, rc))
+            self._mailer.post(self, ProcessHandler.STATE_COMPLETE, self._process)
         except asyncio.TimeoutError:
-            rc = self.process.returncode
+            rc = self._process.returncode
             if rc is not None:   # It's dead Jim
                 logging.error('Timeout waiting for STARTED because process exit rc=' + str(rc))
-                self.mailer.post(self, ProcessHandler.STATE_EXCEPTION,
-                                 Exception('Process {} exit during STARTING, rc={}'.format(self.process, rc)))
+                self._mailer.post(self, ProcessHandler.STATE_EXCEPTION,
+                                  Exception('Process {} exit during STARTING, rc={}'.format(self._process, rc)))
             else:
                 logging.error('Timeout waiting for STARTED but process still running, terminating now')
-                self.mailer.post(self, ProcessHandler.STATE_TIMEOUT, self.process)
-                self.terminate()
+                self._mailer.post(self, ProcessHandler.STATE_TIMEOUT, self._process)
         except Exception as e:
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
-            self.mailer.post(self, ProcessHandler.STATE_EXCEPTION, e)
+            self._mailer.post(self, ProcessHandler.STATE_EXCEPTION, e)
         finally:
             await util.silently_cleanup(stdout)
             await util.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
-            self.process = None
+            self._process = None
 
 
 class Filter:

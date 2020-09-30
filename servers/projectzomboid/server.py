@@ -1,145 +1,75 @@
-import asyncio
-from core import proch, msgftr, httpext, svrsvc, util, httpsubs, msgext, aggtrf, shell, msgtrf
-from servers.projectzomboid import handlers as h, subscribers as s
+from core import proch, msgftr, httpext, svrsvc, httpsubs, msgext, aggtrf, msgtrf, contextsvc, httpabc
+from servers.projectzomboid import deployment as dep, handlers as hdr, subscribers as sub
 
 
 class Server:
-    STARTED_FILTER = msgftr.And((
+    STARTED_FILTER = msgftr.And(
         proch.Filter.STDOUT_LINE,
-        msgftr.DataStrContains('SERVER STARTED')))
+        msgftr.DataStrContains('SERVER STARTED'))
 
-    def __init__(self, context):
-        self.context = context
-        self.deployment = Deployment(context)
-        self.pipeinsvc = proch.PipeInLineService(context)
-        self.httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
-        context.register(s.ServerStateSubscriber(context))
-        context.register(s.ServerDetailsSubscriber(context, context.config('host')))
-        context.register(s.PlayerEventSubscriber(context))
-        context.register(s.ProvideAdminPasswordSubscriber(context))
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
+        self._deployment = dep.Deployment(context)
+        self._pipeinsvc = proch.PipeInLineService(context)
+        self._httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
+        context.register(sub.ServerStateSubscriber(context))
+        context.register(sub.ServerDetailsSubscriber(context, context.config('host')))
+        context.register(sub.CaptureSteamidSubscriber(context))
+        context.register(sub.PlayerEventSubscriber(context))
+        context.register(sub.ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
-    def resources(self, name):
-        conf_pre = self.deployment.config_dir + '/' + self.deployment.world_name
+    def resources(self, name) -> httpabc.Resource:
+        conf_pre = self._deployment.config_dir + '/' + self._deployment.world_name
         return httpext.ResourceBuilder(name) \
-            .push('server', httpext.ServerStatusHandler(self.context)) \
-            .append('subscribe', self.httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .append('{command}', httpext.ServerCommandHandler(self.context)) \
+            .push('server', httpext.ServerStatusHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
+            .append('{command}', httpext.ServerCommandHandler(self._context)) \
             .pop() \
-            .push('deployment', h.DeploymentHandler(self.deployment)) \
-            .append('{command}', h.DeploymentCommandHandler(self.deployment)) \
+            .push('deployment', self._deployment.handler()) \
+            .append('{command}', self._deployment.command_handler()) \
             .pop() \
             .push('world') \
-            .append('{command}', h.WorldCommandHandler(self.context)) \
+            .append('{command}', hdr.WorldCommandHandler(self._context)) \
             .pop() \
             .push('config') \
-            .push('options', h.OptionsHandler(self.context)) \
-            .append('reload', h.OptionsReloadHandler(self.context)) \
+            .push('options', hdr.OptionsHandler(self._context)) \
+            .append('reload', hdr.OptionsReloadHandler(self._context)) \
             .push('{option}') \
-            .append('{command}', h.OptionCommandHandler(self.context)) \
+            .append('{command}', hdr.OptionCommandHandler(self._context)) \
             .pop().pop() \
-            .append('jvm', httpext.ReadWriteFileHandler(self.deployment.jvm_config_file)) \
-            .append('db', httpext.ReadWriteFileHandler(self.deployment.playerdb_file, protected=True, text=False)) \
+            .append('jvm', httpext.ReadWriteFileHandler(self._deployment.jvm_config_file)) \
+            .append('db', httpext.ReadWriteFileHandler(self._deployment.playerdb_file, protected=True, text=False)) \
             .append('ini', httpext.ProtectedLineConfigHandler(conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
             .append('sandbox', httpext.ReadWriteFileHandler(conf_pre + '_SandboxVars.lua')) \
             .append('spawnpoints', httpext.ReadWriteFileHandler(conf_pre + '_spawnpoints.lua')) \
             .append('spawnregions', httpext.ReadWriteFileHandler(conf_pre + '_spawnregions.lua')) \
             .pop() \
-            .append('steamids', h.SteamidsHandler(self.context)) \
-            .push('players', h.PlayersHandler(self.context)) \
-            .append('subscribe', self.httpsubs.handler(s.PlayerEventSubscriber.ALL_FILTER, msgtrf.DataAsDict())) \
+            .append('steamids', hdr.SteamidsHandler(self._context)) \
+            .push('players', hdr.PlayersHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(sub.PlayerEventSubscriber.ALL_FILTER, msgtrf.DataAsDict())) \
             .push('{player}') \
-            .append('{command}', h.PlayerCommandHandler(self.context)) \
+            .append('{command}', hdr.PlayerCommandHandler(self._context)) \
             .pop().pop() \
             .push('whitelist') \
-            .append('{command}', h.WhitelistCommandHandler(self.context)) \
+            .append('{command}', hdr.WhitelistCommandHandler(self._context)) \
             .pop() \
             .push('banlist') \
-            .append('{command}', h.BanlistCommandHandler(self.context)) \
+            .append('{command}', hdr.BanlistCommandHandler(self._context)) \
             .pop() \
-            .push('log', h.ConsoleLogHandler(self.context)) \
-            .append('subscribe', self.httpsubs.handler(h.ConsoleLogHandler.FILTER, aggtrf.StrJoin('\n'))) \
+            .push('log', hdr.ConsoleLogHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(sub.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .push('subscriptions') \
-            .append('{identity}', self.httpsubs.subscriptions_handler()) \
+            .append('{identity}', self._httpsubs.subscriptions_handler()) \
             .pop() \
             .build()
 
     async def run(self):
-        await proch.ProcessHandler(self.context, self.deployment.executable) \
-            .append_arg('-cachedir=' + self.deployment.world_dir) \
-            .use_pipeinsvc(self.pipeinsvc) \
-            .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=100)) \
+        await proch.ProcessHandler(self._context, self._deployment.executable) \
+            .append_arg('-cachedir=' + self._deployment.world_dir) \
+            .use_pipeinsvc(self._pipeinsvc) \
+            .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=60)) \
             .run()   # sync
 
     async def stop(self):
-        await proch.PipeInLineService.request(self.context, self, 'quit')
-
-
-class Deployment:
-
-    def __init__(self, context):
-        self.world_name = 'servertest'
-        self.home_dir = context.config('home')
-        self.runtime_dir = self.home_dir + '/runtime'
-        self.executable = util.overridable_full_path(self.home_dir, context.config('executable'))
-        if not self.executable:
-            self.executable = self.runtime_dir + '/start-server.sh'
-        self.jvm_config_file = self.runtime_dir + '/ProjectZomboid64.json'
-        self.world_dir = self.home_dir + '/world'
-        self.playerdb_dir = self.world_dir + '/db'
-        self.playerdb_file = self.playerdb_dir + '/' + self.world_name + '.db'
-        self.config_dir = self.world_dir + '/Server'
-        self.save_dir = self.world_dir + '/Saves'
-        self._build_world()
-
-    def directory_list(self):
-        return util.directory_list_dict(self.home_dir)
-
-    async def install_runtime(self, beta=None, validate=False, wipe=True):
-        if wipe:
-            util.delete_directory(self.runtime_dir)
-        install_script = shell.steamcmd_app_update(
-            app_id=380870,
-            install_dir=self.runtime_dir,
-            beta=beta,
-            validate=validate)
-        link_script = util.to_text((
-            'SRC_FILE=' + self.runtime_dir + '/steamclient.so',
-            'TRG_FILE=$SRC_FILE',
-            '[ -f $SRC_FILE ] || SRC_FILE=~/.steam/steamcmd/linux64/steamclient.so',
-            '[ -f $SRC_FILE ] || SRC_FILE=~/Steam/linux64/steamclient.so',
-            '[ -f $TRG_FILE ] || ln -s $SRC_FILE $TRG_FILE'
-        ))
-        process = await asyncio.create_subprocess_shell(
-            util.to_text((install_script, link_script)),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL)
-        stdout, stderr = await process.communicate()
-        result = [stdout.decode()] if stdout else ['NO STDOUT']
-        result.append('EXIT STATUS: ' + str(process.returncode))
-        return util.to_text(result)   # TODO give a httpsub link back instead
-
-    def backup_runtime(self):
-        return util.archive_directory(self.runtime_dir)
-
-    def backup_world(self):
-        return util.archive_directory(self.world_dir)
-
-    def wipe_world_all(self):
-        util.delete_directory(self.world_dir)
-        self._build_world()
-
-    def wipe_world_playerdb(self):
-        util.wipe_directory(self.playerdb_dir)
-
-    def wipe_world_config(self):
-        util.wipe_directory(self.config_dir)
-
-    def wipe_world_save(self):
-        util.wipe_directory(self.save_dir)
-
-    def _build_world(self):
-        util.create_directory(self.world_dir)
-        util.create_directory(self.playerdb_dir)
-        util.create_directory(self.config_dir)
-        util.create_directory(self.save_dir)
+        await proch.PipeInLineService.request(self._context, self, 'quit')

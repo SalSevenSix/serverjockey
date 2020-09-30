@@ -1,177 +1,145 @@
+from __future__ import annotations
 import logging
 import re
-from core import httpsvc, proch, util, svrsvc, cmdutil
+import typing
+from core import httpabc, httpsvc, proch, util, svrsvc, msgabc, cmdutil
 
 
 class ResourceBuilder:
 
-    def __init__(self, name=''):
-        self.current = httpsvc.Resource(name)
+    def __init__(self, name: str = ''):
+        self._current = httpsvc.WebResource(name)
 
-    def push(self, signature, handler=None):
-        name, kind = ResourceBuilder.decode(signature)
-        resource = httpsvc.Resource(name, kind, handler)
-        self.current.append(resource)
-        self.current = resource
+    def push(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
+        name, kind = ResourceBuilder._unpack(signature)
+        resource = httpsvc.WebResource(name, kind, handler)
+        self._current.append(resource)
+        self._current = resource
         if handler:
             logging.debug(resource.get_path() + ' => ' + util.obj_to_str(handler))
         return self
 
-    def pop(self):
-        parent = self.current.get_parent_resource()
+    def pop(self) -> ResourceBuilder:
+        parent = self._current.get_parent_resource()
         if not parent:
             raise Exception('Cannot pop() root')
-        self.current = parent
+        self._current = parent
         return self
 
-    def append(self, signature, handler=None):
-        name, kind = ResourceBuilder.decode(signature)
-        resource = httpsvc.Resource(name, kind, handler)
-        self.current.append(resource)
+    def append(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
+        name, kind = ResourceBuilder._unpack(signature)
+        resource = httpsvc.WebResource(name, kind, handler)
+        self._current.append(resource)
         if handler:
             logging.debug(resource.get_path() + ' => ' + util.obj_to_str(handler))
         return self
 
-    def build(self):
+    def build(self) -> httpabc.Resource:
         while True:
-            if self.current.get_parent_resource() is None:
-                return self.current
+            if self._current.get_parent_resource() is None:
+                return self._current
             else:
                 self.pop()
 
     @staticmethod
-    def decode(signature):
-        name = signature
-        kind = httpsvc.Resource.PATH
+    def _unpack(signature: str) -> typing.Tuple[str, httpabc.ResourceKind]:
         if signature.startswith('{') and signature.endswith('}'):
-            name = signature.replace('{', '').replace('}', '')
-            kind = httpsvc.Resource.ARG
-        return name, kind
+            return signature[1:-1], httpabc.ResourceKind.ARG
+        return signature, httpabc.ResourceKind.PATH
 
 
-class DictionaryCoder:
+class PipeInLineNoContentPostHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
 
-    def __init__(self, coders=None, deep=False):
-        self.coders = coders if coders else {}
-        if deep:
-            raise Exception('Unsupported')
+    def __init__(self,
+                 mailer: msgabc.MulticastMailer,
+                 source: typing.Any,
+                 commands: cmdutil.CommandLines,
+                 decoder: httpabc.DictionaryCoder = httpabc.DictionaryCoder()):
+        self._mailer = mailer
+        self._source = source
+        self._commands = commands
+        self._decoder = decoder
 
-    def append(self, key, coder):
-        self.coders.update({key: coder})
-        return self
-
-    def process(self, dictionary):
-        result = {}
-        for key, value in iter(dictionary.items()):
-            if key in self.coders:
-                coder = self.coders[key]
-                if callable(coder):
-                    result.update({key: coder(value)})
-                elif hasattr(coder, 'encode') and callable(coder.encode):
-                    result.update({key: coder.encode(value)})
-                elif hasattr(coder, 'decode') and callable(coder.decode):
-                    result.update({key: coder.decode(value)})
-            else:
-                result.update({key: value})
-        return result
-
-
-class PipeInLineNoContentPostHandler:
-
-    def __init__(self, mailer, source, commands, decoder=DictionaryCoder()):
-        assert isinstance(commands, cmdutil.CommandLines)
-        assert isinstance(decoder, DictionaryCoder)
-        self.mailer = mailer
-        self.source = source
-        self.commands = commands
-        self.decoder = decoder
-
-    def get_decoder(self):
-        return self.decoder
+    def decoder(self):
+        return self._decoder
 
     async def handle_post(self, resource, data):
-        cmdline = self.commands.get(data)
+        cmdline = self._commands.get(data)
         if not cmdline:
-            return httpsvc.ResponseBody.BAD_REQUEST
-        await proch.PipeInLineService.request(self.mailer, self.source, cmdline.build())
-        return httpsvc.ResponseBody.NO_CONTENT
+            return httpabc.ResponseBody.BAD_REQUEST
+        await proch.PipeInLineService.request(self._mailer, self._source, cmdline.build())
+        return httpabc.ResponseBody.NO_CONTENT
 
 
-class HelloWorldHandler:
+class ServerStatusHandler(httpabc.AsyncGetHandler):
 
-    def handle_get(self, resource, data):
-        return 'Hello World'
-
-
-class ServerStatusHandler:
-
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        return await svrsvc.ServerStatus.get_status(self.mailer, self)
+        return await svrsvc.ServerStatus.get_status(self._mailer, self)
 
 
-class ServerCommandHandler:
-    COMMANDS = util.attr_dict(
+class ServerCommandHandler(httpabc.PostHandler):
+    COMMANDS = util.callable_dict(
         svrsvc.ServerService,
         ('signal_start', 'signal_restart', 'signal_stop', 'signal_delete'))
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
     def handle_post(self, resource, data):
         command = 'signal_' + str(util.get('command', data))
         if command not in ServerCommandHandler.COMMANDS:
-            return httpsvc.ResponseBody.BAD_REQUEST
-        ServerCommandHandler.COMMANDS[command](self.mailer, self)
-        return httpsvc.ResponseBody.NO_CONTENT
+            return httpabc.ResponseBody.BAD_REQUEST
+        ServerCommandHandler.COMMANDS[command](self._mailer, self)
+        return httpabc.ResponseBody.NO_CONTENT
 
 
-class ReadWriteFileHandler:
+class ReadWriteFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, filename, protected=False, text=True):
-        self.filename = filename
-        self.protected = protected
-        self.text = text
+    def __init__(self, filename: str, protected: bool = False, text: bool = True):
+        self._filename = filename
+        self._protected = protected
+        self._text = text
 
     async def handle_get(self, resource, data):
-        if self.protected and not httpsvc.is_secure(data):
-            return httpsvc.ResponseBody.UNAUTHORISED
-        if not util.file_exists(self.filename):
-            return httpsvc.ResponseBody.NOT_FOUND
-        return await util.read_file(self.filename, text=self.text)
+        if self._protected and not httpsvc.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        if not util.file_exists(self._filename):
+            return httpabc.ResponseBody.NOT_FOUND
+        return await util.read_file(self._filename, text=self._text)
 
     async def handle_post(self, resource, data):
-        await util.write_file(self.filename, data, text=self.text)
-        return httpsvc.ResponseBody.NO_CONTENT
+        await util.write_file(self._filename, data, text=self._text)
+        return httpabc.ResponseBody.NO_CONTENT
 
 
-class ProtectedLineConfigHandler:
+class ProtectedLineConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, filename, excludes):
-        self.filename = filename
-        self.patterns = []
+    def __init__(self, filename: str, excludes: typing.Collection[str]):
+        self._filename = filename
+        self._patterns: typing.List[re.Pattern] = []
         for regex in iter(excludes):
-            self.patterns.append(re.compile(regex))
+            self._patterns.append(re.compile(regex))
 
     async def handle_get(self, resource, data):
-        if not util.file_exists(self.filename):
-            return httpsvc.ResponseBody.NOT_FOUND
-        file = await util.read_file(self.filename)
+        if not util.file_exists(self._filename):
+            return httpabc.ResponseBody.NOT_FOUND
+        file = await util.read_file(self._filename)
         if httpsvc.is_secure(data):
             return file
         file = file.split('\n')
         result = []
         for line in iter(file):
             exclude = False
-            for pattern in iter(self.patterns):
+            for pattern in iter(self._patterns):
                 if pattern.match(line) is not None:
                     exclude = True
             if not exclude:
                 result.append(line)
-        return util.to_text(result)
+        return '\n'.join(result)
 
     async def handle_post(self, resource, data):
-        await util.write_file(self.filename, data)
-        return httpsvc.ResponseBody.NO_CONTENT
+        await util.write_file(self._filename, data)
+        return httpabc.ResponseBody.NO_CONTENT

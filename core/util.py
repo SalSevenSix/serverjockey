@@ -6,16 +6,8 @@ import logging
 import json
 import time
 import uuid
-
 import aiofiles
-
-
-SCRIPT_SPECIALS = str.maketrans({
-    '#':  r'\#', '$':  r'\$', '=':  r'\=', '[':  r'\[', ']':  r'\]',
-    '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
-    ';': r'\;', '|': r'\|', '~': r'\~', '(': r'\(', ')': r'\)',
-    '*': r'\*', '?': r'\?', '&': r'\&'
-})
+import typing
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -25,13 +17,21 @@ class _JsonEncoder(json.JSONEncoder):
         return obj_to_str(obj)
 
 
-def script_escape(value):
+_SCRIPT_SPECIALS = str.maketrans({
+    '#':  r'\#', '$':  r'\$', '=':  r'\=', '[':  r'\[', ']':  r'\]',
+    '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
+    ';': r'\;', '|': r'\|', '~': r'\~', '(': r'\(', ')': r'\)',
+    '*': r'\*', '?': r'\?', '&': r'\&'
+})
+
+
+def script_escape(value: str) -> str:
     if not isinstance(value, str):
         return value
-    return value.translate(SCRIPT_SPECIALS)
+    return value.translate(_SCRIPT_SPECIALS)
 
 
-def is_format(text):
+def is_format(text: str) -> bool:
     open_index = text.count('{')
     close_index = text.count('}')
     if open_index == 0 and close_index == 0:
@@ -39,17 +39,26 @@ def is_format(text):
     return open_index == close_index
 
 
-def timestamp(value=None):
-    if value is None:
-        value = time.time()
-    return str(int(value * 10000000))
+def to_millis(value: float) -> int:
+    return int(value * 1000.0) + 1
 
 
-def obj_to_str(obj):
+def now_millis() -> int:
+    return to_millis(time.time())
+
+
+def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
+    if collection is None or len(collection) == 0:
+        return None
+    for message in iter(collection):
+        return message
+
+
+def obj_to_str(obj: typing.Any) -> str:
     return repr(obj).replace(' object at ', ':')
 
 
-def obj_to_dict(obj):
+def obj_to_dict(obj: typing.Any) -> typing.Optional[dict]:
     if obj is None or isinstance(obj, dict):
         return obj
     if hasattr(obj, 'asdict'):
@@ -59,10 +68,10 @@ def obj_to_dict(obj):
     raise Exception('obj_to_dict() failed converting {} to dict'.format(obj))
 
 
-def obj_to_json(obj):
+def obj_to_json(obj: typing.Any) -> typing.Optional[str]:
     if obj is None:
         return None
-    encoder = None if type(obj) is dict else _JsonEncoder
+    encoder = None if isinstance(obj, dict) else _JsonEncoder
     if hasattr(obj, '__dict__'):
         obj = obj.__dict__
     try:
@@ -72,9 +81,7 @@ def obj_to_json(obj):
         return None
 
 
-def json_to_dict(text):
-    if text is None or text == '':
-        return None
+def json_to_dict(text: str) -> typing.Optional[dict]:
     try:
         return json.loads(text)
     except Exception as e:
@@ -82,15 +89,17 @@ def json_to_dict(text):
         return None
 
 
-def attr_dict(obj, names):
+def callable_dict(obj: typing.Any, names: typing.Collection[str]) -> typing.Dict[str, typing.Callable]:
     result = {}
     for name in iter(names):
         if hasattr(obj, name):
-            result.update({name: getattr(obj, name)})
+            attribute = getattr(obj, name)
+            if callable(attribute):
+                result.update({name: attribute})
     return result
 
 
-async def silently_cleanup(obj):
+async def silently_cleanup(obj: typing.Any):
     if hasattr(obj, 'stop'):
         await silently_call(obj.stop)
     if hasattr(obj, 'close'):
@@ -101,7 +110,7 @@ async def silently_cleanup(obj):
         await silently_call(obj.cleanup)
 
 
-async def silently_call(invokable):
+async def silently_call(invokable: typing.Callable):
     if not callable(invokable):
         return
     try:
@@ -113,20 +122,19 @@ async def silently_call(invokable):
         logging.debug('silently_call failed: ' + repr(e))
 
 
-def str_to_b10str(value):
+def str_to_b10str(value: str) -> str:
     return ''.join([str(b).zfill(3) for b in value.encode('utf-8')])
 
 
-def b10str_to_str(value):
+def b10str_to_str(value: str) -> str:
     chunks = [value[b:b+3] for b in range(0, len(value), 3)]
     return bytes([int(b) for b in chunks]).decode('utf-8')
 
 
-def to_text(lines):
-    return '\n'.join(lines)
-
-
-def build_url(host=None, port=80, path=None):
+def build_url(
+        host: typing.Optional[str] = None,
+        port: int = 80,
+        path: typing.Optional[str] = None) -> str:
     parts = ['http://', str(host) if host else 'localhost']
     if port != 80:
         parts.append(':')
@@ -145,34 +153,26 @@ def get(key, dictionary):
     return None
 
 
-def iterable(obj):
-    try:
-        iter(obj)
-    except Exception:
-        return False
-    return True
-
-
-def overridable_full_path(root, path):
-    if root is None or path is None or path[0] in ('.', '/'):
+def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
+    if base is None or path is None or path[0] in ('.', '/'):
         return path
-    return root + '/' + path
+    return base + '/' + path
 
 
-def file_exists(file):
-    if not file:
-        return False
-    return os.path.isfile(file)
+def file_exists(file: typing.Optional[str]) -> bool:
+    if file:
+        return os.path.isfile(file)
+    return False
 
 
-def insert_filename_suffix(filename, suffix):
+def insert_filename_suffix(filename: str, suffix: str) -> str:
     index = filename.rfind('.')
     if index == -1 or filename.rfind('/') > index:
         return filename + suffix
     return filename[:index] + suffix + filename[index:]
 
 
-def directory_list_dict(path):
+def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
     if not path.endswith('/'):
         path = path + '/'
     result = []
@@ -190,12 +190,12 @@ def directory_list_dict(path):
     return result
 
 
-def create_directory(path):
+def create_directory(path: str):
     if not os.path.isdir(path):
         os.mkdir(path)
 
 
-def archive_directory(path):
+def archive_directory(path: str) -> str:
     parts = path.split('/')
     if parts[-1] == '':
         del parts[-1]   # chop trailing '/'
@@ -204,27 +204,27 @@ def archive_directory(path):
     for part in iter(parts):
         file.append(part)
     file.append('..')
-    file.append(parts[-1] + '-' + timestamp())
+    file.append(parts[-1] + '-' + str(now_millis()))
     file = '/'.join(file)
     shutil.make_archive(file, 'zip', root_dir=root_dir)
     return file
 
 
-def wipe_directory(path):
+def wipe_directory(path: str):
     delete_directory(path)
     create_directory(path)
 
 
-def delete_directory(path):
+def delete_directory(path: str):
     shutil.rmtree(path, ignore_errors=True)
 
 
-def delete_file(file):
+def delete_file(file: str):
     if file is not None and file_exists(file):
         os.remove(file)
 
 
-async def read_file(filename, text=True):
+async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
     mode = 'r' if text else 'rb'
     async with aiofiles.open(filename, mode=mode) as file:
         try:
@@ -233,7 +233,7 @@ async def read_file(filename, text=True):
             await silently_cleanup(file)
 
 
-async def write_file(filename, data, text=True):
+async def write_file(filename: str, data: typing.Union[str, bytes], text: bool = True):
     mode = 'w' if text else 'wb'
     async with aiofiles.open(filename, mode=mode) as file:
         try:
@@ -242,31 +242,31 @@ async def write_file(filename, data, text=True):
             await silently_cleanup(file)
 
 
-async def copy_file(source_file, target_file):
+async def copy_file(source_file: str, target_file: str):
     data = await read_file(source_file, text=False)
     await write_file(target_file, data, text=False)
 
 
-def left_chop_and_strip(line, keyword):
+def left_chop_and_strip(line: str, keyword: str) -> str:
     index = line.find(keyword)
     if index == -1:
         return line
     return line[index + len(keyword):].strip()
 
 
-def right_chop_and_strip(line, keyword):
+def right_chop_and_strip(line: str, keyword: str) -> str:
     index = line.find(keyword)
     if index == -1:
         return line
     return line[:index].strip()
 
 
-def generate_token():
+def generate_token() -> str:
     identity = str(uuid.uuid4())
     return identity[:6] + identity[-6:]
 
 
-def signal_interrupt(pid=None):
+def signal_interrupt(pid: typing.Optional[int] = None):
     if pid is None:
         pid = os.getpid()
     os.kill(pid, signal.SIGINT)

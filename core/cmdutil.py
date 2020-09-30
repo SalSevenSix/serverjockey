@@ -1,29 +1,28 @@
+from __future__ import annotations
+import typing
 from core import util
 
 
 class CommandLine:
 
-    def __init__(self, command=None, args=None):
-        self.args = args if args else {}
-        self.command = []
+    def __init__(self, command: typing.Any = None, args: typing.Optional[dict] = None):
+        self._args = args if args else {}
+        self._command = []
         self.append_command(command)
 
-    def append_command(self, command):
-        if not command:
-            pass
-        elif isinstance(command, (tuple, list)):
-            self.command.extend(command)
+    def append_command(self, command: typing.Any) -> CommandLine:
+        if isinstance(command, (tuple, list)):
+            self._command.extend(command)
         elif isinstance(command, dict):
-            self.command.append(command)
+            self._command.append(command)
         else:
-            self.command.append(str(command))
+            self._command.append(str(command))
         return self
 
-    def build(self, args=None, output=str):
-        assert output in (str, list)
-        args = {**self.args, **args} if args else self.args
+    def build_list(self, args: typing.Optional[dict] = None) -> list:
+        args = {**self._args, **args} if args else self._args
         cmdline = []
-        for part in iter(self.command):
+        for part in iter(self._command):
             if isinstance(part, (str, int, float)):
                 part_str = str(part)
                 if util.is_format(part_str):
@@ -41,20 +40,23 @@ class CommandLine:
                             cmdline.append(arg_format.format(value))
                     elif arg_key in args:
                         cmdline.append(arg_format)
-        if output is list:
-            return cmdline
-        return ' '.join(cmdline)
+        return cmdline
+
+    def build_str(self, args: typing.Optional[dict] = None) -> str:
+        return ' '.join(self.build_list(args))
+
+    def build(self, args: typing.Optional[dict] = None) -> str:
+        return self.build_str(args)
 
 
 class CommandLines:
 
-    def __init__(self, commands, command_key='command'):
-        assert isinstance(commands, dict)
-        self.commands = commands
-        self.command_key = command_key
+    def __init__(self, commands: dict, command_key: str = 'command'):
+        self._commands = commands
+        self._command_key = command_key
 
-    def get(self, args, command_key=None):
+    def get(self, args: dict, command_key: typing.Optional[str] = None) -> CommandLine:
         if command_key is None:
-            command_key = self.command_key
-        command = util.get(util.get(command_key, args), self.commands)
+            command_key = self._command_key
+        command = util.get(util.get(command_key, args), self._commands)
         return None if not command else CommandLine(command, args)

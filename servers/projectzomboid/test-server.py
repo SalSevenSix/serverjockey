@@ -19,6 +19,7 @@ def main():
     p('### *** SERVER STARTED ***')
     players = ['MrGoober', 'StabMasterArson', 'YouMadNow']
     for player in players:
+        sleep(1)
         p('### Player {} has joined the server'.format(player))
         p("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
 

@@ -1,51 +1,8 @@
-from core import httpsvc, httpext, proch, msgext, msgtrf, util, aggtrf, cmdutil
-from servers.projectzomboid import subscribers as s, loaders as l
+from core import httpabc, httpext, proch, msgext, msgtrf, util, aggtrf, cmdutil, msgabc
+from servers.projectzomboid import subscribers as sub, loaders as ldr
 
 
-class DeploymentHandler:
-
-    def __init__(self, deployment):
-        self.deployment = deployment
-
-    def handle_get(self, resource, data):
-        return self.deployment.directory_list()
-
-
-class DeploymentCommandHandler:
-    DECODER = httpext.DictionaryCoder().append('beta', util.script_escape)
-
-    def __init__(self, deployment):
-        self.deployment = deployment
-
-    def get_decoder(self):
-        return DeploymentCommandHandler.DECODER
-
-    async def handle_post(self, resource, data):
-        command = util.get('command', data)
-        if command == 'backup-world':
-            return {'file': self.deployment.backup_world()}
-        if command == 'wipe-world-all':
-            self.deployment.wipe_world_all()
-            return httpsvc.ResponseBody.NO_CONTENT
-        if command == 'wipe-world-playerdb':
-            self.deployment.wipe_world_playerdb()
-            return httpsvc.ResponseBody.NO_CONTENT
-        if command == 'wipe-world-config':
-            self.deployment.wipe_world_config()
-            return httpsvc.ResponseBody.NO_CONTENT
-        if command == 'wipe-world-save':
-            self.deployment.wipe_world_save()
-            return httpsvc.ResponseBody.NO_CONTENT
-        if command == 'backup-runtime':
-            return {'file': self.deployment.backup_runtime()}
-        if command == 'install-runtime':
-            return await self.deployment.install_runtime(
-                beta=util.get('beta', data),
-                validate=util.get('validate', data))
-        return httpsvc.ResponseBody.NOT_FOUND
-
-
-class WorldCommandHandler:
+class WorldCommandHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
         'broadcast': 'servermsg "{message}"',
         'save': 'save',
@@ -54,76 +11,73 @@ class WorldCommandHandler:
         'start-rain': 'startrain',
         'stop-rain': 'stoprain'})
 
-    def __init__(self, context):
-        self.handler = httpext.PipeInLineNoContentPostHandler(
-            context, self, WorldCommandHandler.COMMANDS)
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, WorldCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
-        return await self.handler.handle_post(resource, data)
+        return await self._handler.handle_post(resource, data)
 
 
-class OptionsHandler:
+class OptionsHandler(httpabc.AsyncGetHandler):
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        return [o.asdict() for o in await l.OptionLoader(self.mailer, self, resource).all()]
+        return [o.asdict() for o in await ldr.OptionLoader(self._mailer, self, resource).all()]
 
 
-class OptionsReloadHandler:
+class OptionsReloadHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({'reload': 'reloadoptions'})
 
-    def __init__(self, mailer):
-        self.handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, OptionsReloadHandler.COMMANDS)
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, OptionsReloadHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
-        return await self.handler.handle_post(resource, {'command': resource.get_name()})
+        return await self._handler.handle_post(resource, {'command': resource.get_name()})
 
 
-class OptionCommandHandler:
+class OptionCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({'set': 'changeoption {option} "{value}"'})
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
-    def get_decoder(self):
-        return l.OptionLoader.DECODER
+    def decoder(self):
+        return ldr.OptionLoader.DECODER
 
     async def handle_post(self, resource, data):
-        if not await l.OptionLoader(self.mailer, self, resource).get(util.get('option', data)):
-            return httpsvc.ResponseBody.NOT_FOUND
+        if not await ldr.OptionLoader(self._mailer, self, resource).get(util.get('option', data)):
+            return httpabc.ResponseBody.NOT_FOUND
         cmdline = OptionCommandHandler.COMMANDS.get(data)
         if not cmdline or util.get('value', data) is None:
-            return httpsvc.ResponseBody.BAD_REQUEST
-        await proch.PipeInLineService.request(self.mailer, self, cmdline.build())
-        return httpsvc.ResponseBody.NO_CONTENT
+            return httpabc.ResponseBody.BAD_REQUEST
+        await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
+        return httpabc.ResponseBody.NO_CONTENT
 
 
-class SteamidsHandler:
+class SteamidsHandler(httpabc.AsyncGetHandler):
 
-    def __init__(self, mailer):
-        self.mailer = mailer
-        mailer.register(s.CaptureSteamidSubscriber(mailer))
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        if not httpsvc.is_secure(data):
-            return httpsvc.ResponseBody.UNAUTHORISED
-        playerstore = await s.CaptureSteamidSubscriber.get_playerstore(self.mailer, self)
+        if not httpabc.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        playerstore = await subs.CaptureSteamidSubscriber.get_playerstore(self._mailer, self)
         return playerstore.asdict()
 
 
-class PlayersHandler:
+class PlayersHandler(httpabc.AsyncGetHandler):
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        return [o.asdict() for o in await l.PlayerLoader(self.mailer, self, resource).all()]
+        return [o.asdict() for o in await ldr.PlayerLoader(self._mailer, self, resource).all()]
 
 
-class PlayerCommandHandler:
+class PlayerCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
     # LEVELS = ('admin', 'moderator', 'overseer', 'gm', 'observer', 'none')
     COMMANDS = cmdutil.CommandLines({
         'set-access-level': 'setaccesslevel "{player}" "{level}"',
@@ -133,68 +87,67 @@ class PlayerCommandHandler:
         'kick': ['kickuser "{player}"', {'reason': '-r "{}"'}],
         'whitelist': 'addusertowhitelist "{player}"'})
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
-    def get_decoder(self):
-        return l.PlayerLoader.DECODER
+    def decoder(self):
+        return ldr.PlayerLoader.DECODER
 
     async def handle_post(self, resource, data):
-        if not await l.PlayerLoader(self.mailer, self, resource).get(util.get('player', data)):
-            return httpsvc.ResponseBody.NOT_FOUND
+        if not await ldr.PlayerLoader(self._mailer, self, resource).get(util.get('player', data)):
+            return httpabc.ResponseBody.NOT_FOUND
         cmdline = PlayerCommandHandler.COMMANDS.get(data)
         if not cmdline:
-            return httpsvc.ResponseBody.BAD_REQUEST
-        await proch.PipeInLineService.request(self.mailer, self, cmdline.build())
-        return httpsvc.ResponseBody.NO_CONTENT
+            return httpabc.ResponseBody.BAD_REQUEST
+        await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
+        return httpabc.ResponseBody.NO_CONTENT
 
 
-class WhitelistCommandHandler:
+class WhitelistCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
         'add-all': 'addalltowhitelist',
         'add': 'adduser "{player}" "{password}"',
         'remove': 'removeuserfromwhitelist "{player}"'})
 
-    def __init__(self, mailer):
-        self.handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, WhitelistCommandHandler.COMMANDS, l.PlayerLoader.DECODER)
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._handler = httpext.PipeInLineNoContentPostHandler(
+            mailer, self, WhitelistCommandHandler.COMMANDS, ldr.PlayerLoader.DECODER)
 
-    def get_decoder(self):
-        return self.handler.get_decoder()
+    def decoder(self):
+        return self._handler.decoder()
 
     async def handle_post(self, resource, data):
-        return await self.handler.handle_post(resource, data)
+        return await self._handler.handle_post(resource, data)
 
 
-class BanlistCommandHandler:
+class BanlistCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
         'add-player': ['banuser "{player}"', {'ip': '-ip', 'reason': '-r "{}"'}],
         'remove-player': 'unbanuser "{player}"',
         'add-id': 'banid {steamid}',
         'remove-id': 'unbanid {steamid}'})
 
-    def __init__(self, mailer):
-        self.handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, BanlistCommandHandler.COMMANDS, l.PlayerLoader.DECODER)
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._handler = httpext.PipeInLineNoContentPostHandler(
+            mailer, self, BanlistCommandHandler.COMMANDS, ldr.PlayerLoader.DECODER)
 
-    def get_decoder(self):
-        return self.handler.get_decoder()
+    def decoder(self):
+        return self._handler.decoder()
 
     async def handle_post(self, resource, data):
-        return await self.handler.handle_post(resource, data)
+        return await self._handler.handle_post(resource, data)
 
 
-class ConsoleLogHandler:
-    FILTER = s.ConsoleLogFilter()
+class ConsoleLogHandler(httpabc.AsyncGetHandler):
 
-    def __init__(self, mailer):
-        self.mailer = mailer
-        self.subscriber = msgext.RollingLogSubscriber(
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+        self._subscriber = msgext.RollingLogSubscriber(
             mailer, size=100,
-            msg_filter=s.ConsoleLogFilter(),
+            msg_filter=sub.CONSOLE_LOG_FILTER,
             transformer=msgtrf.GetData(),
             aggregator=aggtrf.StrJoin('\n'))
-        mailer.register(self.subscriber)
+        mailer.register(self._subscriber)
 
     async def handle_get(self, resource, data):
-        return await msgext.RollingLogSubscriber.get_log(self.mailer, self, self.subscriber.get_identity())
+        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())

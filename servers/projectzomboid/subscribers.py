@@ -1,8 +1,9 @@
-from core import svrsvc, msgext, msgftr, proch, util
-from servers.projectzomboid import domain as d
+import typing
+from core import svrsvc, msgext, msgftr, proch, util, msgabc
+from servers.projectzomboid import domain as dom
 
 
-class ConsoleLogFilter:
+class ConsoleLogFilter(msgabc.Filter):
     COMMANDS = (
         'save', 'servermsg', 'chopper', 'gunshot', 'startrain', 'stoprain',
         'players', 'setaccesslevel', 'kickuser', 'additem', 'addvehicle', 'createhorde',
@@ -20,8 +21,10 @@ class ConsoleLogFilter:
         return value not in ConsoleLogFilter.COMMANDS
 
 
-# TODO pull into core
-class ServerStateSubscriber:
+CONSOLE_LOG_FILTER = ConsoleLogFilter()
+
+
+class ServerStateSubscriber(msgabc.Subscriber):   # TODO pull into core
     STATE_MAP = {
         proch.ProcessHandler.STATE_START: 'START',
         proch.ProcessHandler.STATE_STARTING: 'STARTING',
@@ -32,35 +35,34 @@ class ServerStateSubscriber:
         proch.ProcessHandler.STATE_COMPLETE: 'COMPLETE',
     }
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
 
     def accepts(self, message):
         return proch.Filter.PROCESS_STATE_ALL.accepts(message)
 
     def handle(self, message):
         state = util.get(message.get_name(), ServerStateSubscriber.STATE_MAP)
-        svrsvc.ServerStatus.notify_state(self.mailer, self, state if state else 'UNKNOWN')
+        svrsvc.ServerStatus.notify_state(self._mailer, self, state if state else 'UNKNOWN')
         if message.get_name() is proch.ProcessHandler.STATE_EXCEPTION:
-            svrsvc.ServerStatus.notify_details(self.mailer, self, {'exception': repr(message.get_data())})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'exception': repr(message.get_data())})
         return None
 
 
-class ServerDetailsSubscriber:
+class ServerDetailsSubscriber(msgabc.Subscriber):
     VERSION = 'versionNumber='
     VERSION_FILTER = msgftr.DataStrContains(VERSION)
     PORT = 'server is listening on port'
     PORT_FILTER = msgftr.DataStrContains(PORT)
     STEAMID = 'Server Steam ID'
     STEAMID_FILTER = msgftr.DataStrContains(STEAMID)
-    FILTER = msgftr.And((
+    FILTER = msgftr.And(
         proch.Filter.STDOUT_LINE,
-        msgftr.Or((VERSION_FILTER, PORT_FILTER, STEAMID_FILTER))
-    ))
+        msgftr.Or(VERSION_FILTER, PORT_FILTER, STEAMID_FILTER))
 
-    def __init__(self, mailer, host):
-        self.mailer = mailer
-        self.host = host
+    def __init__(self, mailer: msgabc.MulticastMailer, host: str):
+        self._mailer = mailer
+        self._host = host
 
     def accepts(self, message):
         return ServerDetailsSubscriber.FILTER.accepts(message)
@@ -73,16 +75,16 @@ class ServerDetailsSubscriber:
             data = {'version': value}
         elif ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.PORT)
-            data = {'host': self.host, 'port': int(value)}
+            data = {'host': self._host, 'port': int(value)}
         elif ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.STEAMID)
             data = {'steamid': int(value)}
         if data:
-            svrsvc.ServerStatus.notify_details(self.mailer, self, data)
+            svrsvc.ServerStatus.notify_details(self._mailer, self, data)
         return None
 
 
-class PlayerEventSubscriber:
+class PlayerEventSubscriber(msgabc.Subscriber):
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
     LOGIN_KEY = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
@@ -91,14 +93,13 @@ class PlayerEventSubscriber:
     LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
     LOGOUT_KEY = 'Disconnected player'
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
-    ALL_FILTER = msgftr.Or((LOGIN_FILTER, LOGOUT_FILTER))
-    FILTER = msgftr.And((
+    ALL_FILTER = msgftr.Or(LOGIN_FILTER, LOGOUT_FILTER)
+    FILTER = msgftr.And(
         proch.Filter.STDOUT_LINE,
-        msgftr.Or((LOGIN_KEY_FILTER, LOGOUT_KEY_FILTER))
-    ))
+        msgftr.Or(LOGIN_KEY_FILTER, LOGOUT_KEY_FILTER))
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.Mailer):
+        self._mailer = mailer
 
     def accepts(self, message):
         return PlayerEventSubscriber.FILTER.accepts(message)
@@ -107,29 +108,29 @@ class PlayerEventSubscriber:
         if PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
             line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGIN_KEY)
             name, steamid = line.split(' id=')
-            event = d.PlayerEvent('login', d.Player(steamid, name[1:-1]))
-            self.mailer.post(self, PlayerEventSubscriber.LOGIN, event)
+            event = dom.PlayerEvent('login', dom.Player(steamid, name[1:-1]))
+            self._mailer.post(self, PlayerEventSubscriber.LOGIN, event)
         if PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
             line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGOUT_KEY)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
-            event = d.PlayerEvent('logout', d.Player(steamid, name[1:-1]))
-            self.mailer.post(self, PlayerEventSubscriber.LOGOUT, event)
+            event = dom.PlayerEvent('logout', dom.Player(steamid, name[1:-1]))
+            self._mailer.post(self, PlayerEventSubscriber.LOGOUT, event)
         return None
 
 
-class CaptureSteamidSubscriber:
+class CaptureSteamidSubscriber(msgabc.Subscriber):
     REQUEST = 'CaptureSteadIdSubscriber.Request'
     RESPONSE = 'CaptureSteadIdSubscriber.Response'
     REQUEST_FILTER = msgftr.NameIs(REQUEST)
-    FILTER = msgftr.Or((REQUEST_FILTER, PlayerEventSubscriber.LOGIN_FILTER))
+    FILTER = msgftr.Or(REQUEST_FILTER, PlayerEventSubscriber.LOGIN_FILTER)
 
-    def __init__(self, mailer):
-        self.mailer = mailer
-        self.playerstore = d.PlayerStore()
+    def __init__(self, mailer: msgabc.Mailer):
+        self._mailer = mailer
+        self._playerstore = dom.PlayerStore()
 
     @staticmethod
-    async def get_playerstore(mailer, source):
+    async def get_playerstore(mailer: msgabc.MulticastMailer, source: typing.Any) -> dom.PlayerStore:
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, CaptureSteamidSubscriber.REQUEST)
         return response.get_data()
@@ -139,27 +140,26 @@ class CaptureSteamidSubscriber:
 
     def handle(self, message):
         if CaptureSteamidSubscriber.REQUEST_FILTER.accepts(message):
-            self.mailer.post(self, CaptureSteamidSubscriber.RESPONSE, self.playerstore, message)
+            self._mailer.post(self, CaptureSteamidSubscriber.RESPONSE, self._playerstore, message)
         if PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            self.playerstore.add_player(message.get_data().get_player())
+            self._playerstore.add_player(message.get_data().get_player())
         return None
 
 
-class ProvideAdminPasswordSubscriber:
-    FILTER = msgftr.And((
+class ProvideAdminPasswordSubscriber(msgabc.Subscriber):
+    FILTER = msgftr.And(
         proch.Filter.STDOUT_LINE,
-        msgftr.Or((
+        msgftr.Or(
             msgftr.DataStrContains('Enter new administrator password'),
-            msgftr.DataStrContains('Confirm the password')
-        ))
-    ))
+            msgftr.DataStrContains('Confirm the password')))
 
-    def __init__(self, mailer):
-        self.mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer, pwd: str):
+        self._mailer = mailer
+        self._pwd = pwd
 
     def accepts(self, message):
         return ProvideAdminPasswordSubscriber.FILTER.accepts(message)
 
     async def handle(self, message):
-        await proch.PipeInLineService.request(self.mailer, self, self.mailer.config('secret'), force=True)
+        await proch.PipeInLineService.request(self._mailer, self, self._pwd, force=True)
         return None

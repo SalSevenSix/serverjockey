@@ -1,13 +1,14 @@
 import logging
 import argparse
 import sys
-from core import contextsvc, httpsvc, msgext, system, util
+import typing
+from core import contextsvc, httpabc, httpsvc, msgext, system, util
 
 LOG_FORMAT = '%(asctime)s %(levelname)05s %(message)s'
 DATE_FORMAT = '%Y%m%d%H%M%S'
 
 
-def create_context(args):
+def _create_context(args: typing.Collection) -> contextsvc.Context:
     p = argparse.ArgumentParser(description='Start serverjockey.')
     p.add_argument('home', type=str,
                    help='Home directory to use for server instances')
@@ -31,21 +32,21 @@ def create_context(args):
         host=args.host, port=args.port)
 
 
-class Callbacks:
+class _Callbacks(httpabc.HttpServiceCallbacks):
 
-    def __init__(self, context):
-        self.context = context
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
 
-    async def initialise(self):
-        if self.context.is_debug():
+    async def initialise(self) -> httpabc.Resource:
+        if self._context.is_debug():
             stdout_handler = logging.StreamHandler(sys.stdout)
             stdout_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
             logging.getLogger().addHandler(stdout_handler)
-        self.context.start()
-        if self.context.is_debug():
-            self.context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
-        self.context.post(self, 'Logging.File', self.context.config('logfile'))
-        syssvc = system.SystemService(self.context)
+        self._context.start()
+        if self._context.is_debug():
+            self._context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
+        self._context.post(self, 'Logging.File', self._context.config('logfile'))
+        syssvc = system.SystemService(self._context)
         await syssvc.initialise()
         return syssvc.resources()
 
@@ -56,15 +57,15 @@ class Callbacks:
         pass
 
 
-def main(args=None):
-    context = create_context(args if args else sys.argv)
+def main(args: typing.Optional[typing.Collection] = None) -> int:
+    context = _create_context(args if args else sys.argv)
     logging.basicConfig(
         level=logging.DEBUG if context.is_debug() else logging.INFO,
         filename=context.config('logfile'), filemode='w',
         format=LOG_FORMAT, datefmt=DATE_FORMAT)
     try:
         logging.info('*** START Serverjockey ***')
-        httpsvc.HttpService(context, Callbacks(context)).run()
+        httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:
         if context.is_debug():
