@@ -53,7 +53,7 @@ class SourceIs(msgabc.Filter):
         self._source_object = source_object
 
     def accepts(self, message):
-        return self._source_object is message.get_source()
+        return self._source_object is message.source()
 
 
 class SourceClassIs(msgabc.Filter):
@@ -62,7 +62,7 @@ class SourceClassIs(msgabc.Filter):
         self._source_class = source_class
 
     def accepts(self, message):
-        return self._source_class is type(message.get_source())
+        return self._source_class is type(message.source())
 
 
 class ReplyToIs(msgabc.Filter):
@@ -71,7 +71,7 @@ class ReplyToIs(msgabc.Filter):
         self._reply_to = reply_to
 
     def accepts(self, message):
-        return self._reply_to is message.get_reply_to()
+        return self._reply_to is message.reply_to()
 
 
 class NameIs(msgabc.Filter):
@@ -80,7 +80,7 @@ class NameIs(msgabc.Filter):
         self._name = name
 
     def accepts(self, message):
-        return self._name is message.get_name()
+        return self._name is message.name()
 
 
 class NameIn(msgabc.Filter):
@@ -89,7 +89,7 @@ class NameIn(msgabc.Filter):
         self._names = names
 
     def accepts(self, message):
-        return message.get_name() in self._names
+        return message.name() in self._names
 
 
 class NameEquals(msgabc.Filter):
@@ -98,7 +98,7 @@ class NameEquals(msgabc.Filter):
         self._name = name
 
     def accepts(self, message):
-        return self._name == message.get_name()
+        return self._name == message.name()
 
 
 class DataEquals(msgabc.Filter):
@@ -107,7 +107,7 @@ class DataEquals(msgabc.Filter):
         self._data = data
 
     def accepts(self, message):
-        return self._data == message.get_data()
+        return self._data == message.data()
 
 
 class DataStrContains(msgabc.Filter):
@@ -116,7 +116,7 @@ class DataStrContains(msgabc.Filter):
         self._value = value
 
     def accepts(self, message):
-        return str(message.get_data()).find(self._value) != -1
+        return str(message.data()).find(self._value) != -1
 
 
 class DataMatches(msgabc.Filter):
@@ -125,4 +125,4 @@ class DataMatches(msgabc.Filter):
         self._pattern = regex if regex is re.Pattern else re.compile(regex)
 
     def accepts(self, message):
-        return self._pattern.match(str(message.get_data())) is not None
+        return self._pattern.match(str(message.data())) is not None

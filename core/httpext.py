@@ -16,11 +16,11 @@ class ResourceBuilder:
         self._current.append(resource)
         self._current = resource
         if handler:
-            logging.debug(resource.get_path() + ' => ' + util.obj_to_str(handler))
+            logging.debug(resource.path() + ' => ' + util.obj_to_str(handler))
         return self
 
     def pop(self) -> ResourceBuilder:
-        parent = self._current.get_parent_resource()
+        parent = self._current.parent()
         if not parent:
             raise Exception('Cannot pop() root')
         self._current = parent
@@ -31,37 +31,32 @@ class ResourceBuilder:
         resource = httpsvc.WebResource(name, kind, handler)
         self._current.append(resource)
         if handler:
-            logging.debug(resource.get_path() + ' => ' + util.obj_to_str(handler))
+            logging.debug(resource.path() + ' => ' + util.obj_to_str(handler))
         return self
 
     def build(self) -> httpabc.Resource:
         while True:
-            if self._current.get_parent_resource() is None:
+            if self._current.parent() is None:
                 return self._current
             else:
                 self.pop()
 
     @staticmethod
     def _unpack(signature: str) -> typing.Tuple[str, httpabc.ResourceKind]:
-        if signature.startswith('{') and signature.endswith('}'):
-            return signature[1:-1], httpabc.ResourceKind.ARG
+        if signature.endswith('}'):
+            if signature.startswith('{'):
+                return signature[1:-1], httpabc.ResourceKind.ARG
+            if signature.startswith('x{'):
+                return signature[2:-1], httpabc.ResourceKind.ARG_ENCODED
         return signature, httpabc.ResourceKind.PATH
 
 
-class PipeInLineNoContentPostHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
+class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
 
-    def __init__(self,
-                 mailer: msgabc.MulticastMailer,
-                 source: typing.Any,
-                 commands: cmdutil.CommandLines,
-                 decoder: httpabc.DictionaryCoder = httpabc.DictionaryCoder()):
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any, commands: cmdutil.CommandLines):
         self._mailer = mailer
         self._source = source
         self._commands = commands
-        self._decoder = decoder
-
-    def decoder(self):
-        return self._decoder
 
     async def handle_post(self, resource, data):
         cmdline = self._commands.get(data)
@@ -104,7 +99,7 @@ class ReadWriteFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         self._text = text
 
     async def handle_get(self, resource, data):
-        if self._protected and not httpsvc.is_secure(data):
+        if self._protected and not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         if not util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
@@ -127,7 +122,7 @@ class ProtectedLineConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandl
         if not util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
         file = await util.read_file(self._filename)
-        if httpsvc.is_secure(data):
+        if httpabc.is_secure(data):
             return file
         file = file.split('\n')
         result = []

@@ -49,7 +49,7 @@ class _PipeInLineHandler(msgabc.Handler):
         self._mailer.post(self, PipeInLineService.PIPE_CLOSE, self._pipe)
 
     async def handle(self, message):
-        command = message.get_data()
+        command = message.data()
         if command.catcher:
             self._mailer.register(command.catcher)
         try:
@@ -86,7 +86,7 @@ class PipeInLineService(msgabc.Subscriber):
         response = await messenger.request(
             source, PipeInLineService.REQUEST,
             _PipeInLineCommand(cmdline, catcher, force))
-        return response.get_data()
+        return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer, pipe: typing.Optional[streams.StreamWriter] = None):
         self._mailer = mailer
@@ -114,7 +114,7 @@ class PipeInLineService(msgabc.Subscriber):
             return None
         if Filter.PIPEINSVC_PIPE_NEW.accepts(message):
             assert self._handler is None
-            self._handler = _PipeInLineHandler(self._mailer, message.get_data())
+            self._handler = _PipeInLineHandler(self._mailer, message.data())
             return None
         if Filter.PROCESS_STATE_DOWN.accepts(message):
             self._enabled = False
@@ -125,7 +125,7 @@ class PipeInLineService(msgabc.Subscriber):
                 return None
             self._mailer.post(self, PipeInLineService.SERVICE_END, self)
             return True
-        if not (self._enabled or message.get_data().force) or self._handler is None:
+        if not (self._enabled or message.data().force) or self._handler is None:
             self._mailer.post(self, PipeInLineService.RESPONSE, False, message)
             return None
         return await self._handler.handle(message)

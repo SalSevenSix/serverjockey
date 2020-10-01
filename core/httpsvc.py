@@ -176,53 +176,47 @@ class WebResource(httpabc.Resource):
         self._handler = handler
 
     def append(self, resource: httpabc.Resource) -> httpabc.Resource:
-        if resource.is_arg() and self.get_arg_resource() is not None:
+        if resource.kind() in (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED) \
+                and len(self.children(httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED)) > 0:
             raise Exception('Only one ARG kind allowed')
         resource._parent = self
         self._children.append(resource)
         return self
 
     def remove(self, name: str) -> typing.Optional[httpabc.Resource]:
-        resource = self.get_resource(name)
+        resource = self.child(name)
         if resource is None:
             return None
         self._children.remove(resource)
         return resource
 
-    def is_path(self) -> bool:
-        return self._kind is httpabc.ResourceKind.PATH
+    def kind(self) -> httpabc.ResourceKind:
+        return self._kind
 
-    def is_arg(self) -> bool:
-        return self._kind is httpabc.ResourceKind.ARG
-
-    def get_name(self) -> str:
+    def name(self) -> str:
         return self._name
 
-    def get_path(self) -> str:
-        return PathBuilder(self).build()
+    def path(self, args: typing.Optional[typing.Dict[str, str]] = None) -> str:
+        return _PathProcessor(self).build_path(args)
 
     def lookup(self, path: str) -> typing.Optional[httpabc.Resource]:
-        return _PathParser(self, path).lookup()
+        return _PathProcessor(self).lookup_resource(path)
 
-    def get_parent_resource(self) -> typing.Optional[httpabc.Resource]:
+    def parent(self) -> typing.Optional[httpabc.Resource]:
         return self._parent
 
-    def get_resource(self, name: str) -> typing.Optional[httpabc.Resource]:
+    def child(self, name: str) -> typing.Optional[httpabc.Resource]:
         if name is None:
             return None
-        result = [c for c in self._children if c.get_name() == name]
-        return util.single(result)
+        return util.single([c for c in self._children if c.name() == name])
 
-    def get_path_resources(self) -> typing.Tuple[httpabc.Resource]:
-        return tuple([c for c in self._children if c.is_path()])
-
-    def get_path_resource(self, name: str) -> typing.Optional[httpabc.Resource]:
-        result = [c for c in self._children if c.is_path() and c.get_name() == name]
-        return util.single(result)
-
-    def get_arg_resource(self) -> typing.Optional[httpabc.Resource]:
-        result = [c for c in self._children if c.is_arg()]
-        return util.single(result)
+    def children(self, *kinds: httpabc.ResourceKind) -> typing.List[httpabc.Resource]:
+        if len(kinds) == 0:
+            return self._children.copy()
+        results = []
+        for kind in iter(kinds):
+            results.extend([c for c in self._children if c.kind() is kind])
+        return results
 
     def allows(self, method: httpabc.Method.GET) -> bool:
         if self._handler is None:
@@ -233,17 +227,8 @@ class WebResource(httpabc.Resource):
             return hasattr(self._handler, 'handle_post')
         return False
 
-    def _decode(self, data: httpabc.ABC_DATA_GET) -> httpabc.ABC_DATA_GET:
-        decoder = None
-        if hasattr(self._handler, 'decoder'):
-            decoder = self._handler.decoder()
-        if decoder:
-            return decoder.process(data)
-        return data
-
     async def handle_get(self, path: str, secure: bool = False) -> httpabc.ABC_RESPONSE:
-        data = _PathParser(self, path).get_args()
-        data = self._decode(data)
+        data = _PathProcessor(self).extract_args(path)
         if secure:
             httpabc.make_secure(data)
         if inspect.iscoroutinefunction(self._handler.handle_get):
@@ -252,73 +237,71 @@ class WebResource(httpabc.Resource):
 
     async def handle_post(self, path: str, body: httpabc.ABC_DATA_POST) -> httpabc.ABC_RESPONSE:
         if isinstance(body, dict):
-            data = _PathParser(self, path).get_args()
-            body = self._decode({**data, **body})
+            data = _PathProcessor(self).extract_args(path)
+            body = {**data, **body}
         if inspect.iscoroutinefunction(self._handler.handle_post):
             return await self._handler.handle_post(self, body)
         return self._handler.handle_post(self, body)
 
 
-class PathBuilder:   # TODO make this private, use get_path() only
+class _PathProcessor:
 
-    def __init__(self, resource: httpabc.Resource, name: typing.Optional[str] = None):
-        self._resource = resource.get_resource(name) if name else resource
-        self._args: typing.Dict[str, str] = {}
+    def __init__(self, resource: httpabc.Resource):
+        self._resource = resource
 
-    def append(self, name: str, arg: str) -> PathBuilder:
-        self._args.update({name: arg})
-        return self
+    def build_path(self, args: typing.Optional[typing.Dict[str, str]] = None) -> str:
+        return _PathProcessor._build(self._resource, args if args else {})
 
-    def build(self) -> str:
-        return PathBuilder._rbuild(self._resource, self._args)
+    def extract_args(self, path: str) -> httpabc.ABC_DATA_GET:
+        return _PathProcessor._extract(self._resource, _PathProcessor._split(path), {})
+
+    def lookup_resource(self, path: str) -> typing.Optional[httpabc.Resource]:
+        return _PathProcessor._lookup(self._resource, _PathProcessor._split(path), 0)
 
     @staticmethod
-    def _rbuild(resource: httpabc.Resource, args: typing.Dict[str, str]) -> str:
-        path = []
-        parent = resource.get_parent_resource()
-        if parent:
-            path.append(PathBuilder._rbuild(parent, args))
-        name = resource.get_name()
-        if resource.is_arg():
-            name = args[name] if name in args else '{' + name + '}'
+    def _build(resource: httpabc.Resource, args: typing.Dict[str, str]) -> str:
+        path, parent, name, kind = [], resource.parent(), resource.name(), resource.kind()
+        if parent is not None:
+            path.append(_PathProcessor._build(parent, args))
+        if kind in (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED) and name in args:
+            if kind is httpabc.ResourceKind.ARG_ENCODED:
+                name = util.str_to_b10str(args[name])
+            else:
+                name = args[name]
         path.append(name)
         return '/'.join(path)
 
-
-class _PathParser:
-
-    def __init__(self, resource: httpabc.Resource, path: str):
-        self._resource = resource
-        path = path.split('/')
-        if path[0] == '':
-            path.remove(path[0])
-        self._path: typing.List[str] = path
-
-    def get_args(self) -> httpabc.ABC_DATA_GET:
-        return _PathParser._rgather(self._resource, self._path.copy(), {})
-
     @staticmethod
-    def _rgather(resource: httpabc.Resource,
+    def _extract(resource: httpabc.Resource,
                  path: typing.List[str],
                  args: typing.Dict[str, str]) -> httpabc.ABC_DATA_GET:
         index = len(path) - 1
-        if resource.is_arg():
-            args.update({resource.get_name(): path[index]})
+        kind = resource.kind()
+        if kind in (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED):
+            if kind is httpabc.ResourceKind.ARG_ENCODED:
+                args.update({resource.name(): util.b10str_to_str(path[index])})
+            else:
+                args.update({resource.name(): path[index]})
         if index == 0:
             return args
         path.remove(path[index])
-        return _PathParser._rgather(resource.get_parent_resource(), path, args)
-
-    def lookup(self) -> typing.Optional[httpabc.Resource]:
-        return _PathParser._rlookup(self._resource, self._path.copy(), 0)
+        return _PathProcessor._extract(resource.parent(), path, args)
 
     @staticmethod
-    def _rlookup(resource: httpabc.Resource, path: typing.List[str], index: int) -> typing.Optional[httpabc.Resource]:
+    def _lookup(resource: httpabc.Resource,
+                path: typing.List[str], index: int) -> typing.Optional[httpabc.Resource]:
         stop = index == len(path) - 1
-        for path_resource in iter(resource.get_path_resources()):
-            if path_resource.get_name() == path[index]:
-                return path_resource if stop else _PathParser._rlookup(path_resource, path, index + 1)
-        arg_resource = resource.get_arg_resource()
+        for path_resource in iter(resource.children(httpabc.ResourceKind.PATH)):
+            if path_resource.name() == path[index]:
+                return path_resource if stop else _PathProcessor._lookup(path_resource, path, index + 1)
+        arg_resource = util.single(resource.children(httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED))
         if arg_resource is not None:
-            return arg_resource if stop else _PathParser._rlookup(arg_resource, path, index + 1)
+            return arg_resource if stop else _PathProcessor._lookup(arg_resource, path, index + 1)
         return None
+
+    @staticmethod
+    def _split(path: str) -> typing.List[str]:
+        path = path.split('/')
+        if path[0] == '':
+            path.remove(path[0])
+        return path

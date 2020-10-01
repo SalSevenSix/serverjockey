@@ -32,6 +32,7 @@ class Method(enum.Enum):
 class ResourceKind(enum.Enum):
     PATH = enum.auto()
     ARG = enum.auto()
+    ARG_ENCODED = enum.auto()
 
 
 class ResponseBody:
@@ -59,19 +60,15 @@ class Resource:
         pass
 
     @abc.abstractmethod
-    def is_path(self) -> bool:
+    def kind(self) -> ResourceKind:
         pass
 
     @abc.abstractmethod
-    def is_arg(self) -> bool:
+    def name(self) -> str:
         pass
 
     @abc.abstractmethod
-    def get_name(self) -> str:
-        pass
-
-    @abc.abstractmethod
-    def get_path(self) -> str:
+    def path(self, args: typing.Optional[typing.Dict[str, str]] = None) -> str:
         pass
 
     @abc.abstractmethod
@@ -79,27 +76,19 @@ class Resource:
         pass
 
     @abc.abstractmethod
-    def get_parent_resource(self) -> typing.Optional[Resource]:
+    def parent(self) -> typing.Optional[Resource]:
         pass
 
     @abc.abstractmethod
-    def get_resource(self, name: str) -> typing.Optional[Resource]:
+    def child(self, name: str) -> typing.Optional[Resource]:
         pass
 
     @abc.abstractmethod
-    def get_path_resources(self) -> typing.Tuple[Resource]:
+    def children(self, *kinds: ResourceKind) -> typing.List[Resource]:
         pass
 
     @abc.abstractmethod
-    def get_path_resource(self, name: str) -> typing.Optional[Resource]:
-        pass
-
-    @abc.abstractmethod
-    def get_arg_resource(self) -> typing.Optional[Resource]:
-        pass
-
-    @abc.abstractmethod
-    def allows(self, method: Method.GET) -> bool:
+    def allows(self, method: Method) -> bool:
         pass
 
     @abc.abstractmethod
@@ -144,26 +133,4 @@ class HttpServiceCallbacks(metaclass=abc.ABCMeta):
         pass
 
 
-class DecoderProvider(metaclass=abc.ABCMeta):   # TODO remove this and pull URL coding into Resource & helper classes
-    @abc.abstractmethod
-    def decoder(self) -> DictionaryCoder:
-        pass
-
-
-class DictionaryCoder:   # TODO ... and this too
-
-    def __init__(self):
-        self._coders: typing.Dict[str, typing.Callable[[str], str]] = {}
-
-    def append(self, key: str, coder: typing.Callable[[str], str]) -> DictionaryCoder:
-        self._coders.update({key: coder})
-        return self
-
-    def process(self, dictionary: ABC_DATA_GET) -> ABC_DATA_GET:
-        for key, value in iter(self._coders.items()):
-            if key in dictionary:
-                dictionary[key] = self._coders[key](value)
-        return dictionary
-
-
-ABC_HANDLER = typing.Union[DecoderProvider, GetHandler, AsyncGetHandler, PostHandler, AsyncPostHandler]
+ABC_HANDLER = typing.Union[GetHandler, AsyncGetHandler, PostHandler, AsyncPostHandler]

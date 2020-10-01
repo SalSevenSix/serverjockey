@@ -6,7 +6,7 @@ import uuid
 import typing
 
 
-class Message:   # TODO remove get_ from methods
+class Message:
 
     @staticmethod
     def from_vargs(*vargs):
@@ -17,35 +17,35 @@ class Message:   # TODO remove get_ from methods
     def __init__(
             self, source: typing.Any, name: str, data: typing.Any = None,
             reply_to: typing.Optional[Message] = None):
-        self._id = uuid.uuid4()
+        self._identity = uuid.uuid4()
         self._created = time.time()
         self._source = source
         self._name = name
         self._data = data
         self._reply_to = reply_to
 
-    def get_id(self):
-        return self._id
+    def identity(self):
+        return self._identity
 
-    def get_created(self):
+    def created(self):
         return self._created
 
-    def get_source(self):
+    def source(self):
         return self._source
 
-    def get_name(self):
+    def name(self):
         return self._name
 
     def has_data(self):
         return self._data is not None
 
-    def get_data(self):
+    def data(self):
         return self._data
 
     def has_reply_to(self):
         return self._reply_to is not None
 
-    def get_reply_to(self):
+    def reply_to(self):
         return self._reply_to
 
 

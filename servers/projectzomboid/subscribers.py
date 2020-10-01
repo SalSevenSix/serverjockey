@@ -17,36 +17,11 @@ class ConsoleLogFilter(msgabc.Filter):
     def accepts(self, message):
         if not (proch.Filter.STDOUT_LINE.accepts(message) or proch.Filter.STDERR_LINE.accepts(message)):
             return False
-        value = util.right_chop_and_strip(message.get_data(), ' ')
+        value = util.right_chop_and_strip(message.data(), ' ')
         return value not in ConsoleLogFilter.COMMANDS
 
 
 CONSOLE_LOG_FILTER = ConsoleLogFilter()
-
-
-class ServerStateSubscriber(msgabc.Subscriber):   # TODO pull into core
-    STATE_MAP = {
-        proch.ProcessHandler.STATE_START: 'START',
-        proch.ProcessHandler.STATE_STARTING: 'STARTING',
-        proch.ProcessHandler.STATE_STARTED: 'STARTED',
-        proch.ProcessHandler.STATE_TIMEOUT: 'TIMEOUT',
-        proch.ProcessHandler.STATE_TERMINATED: 'TERMINATED',
-        proch.ProcessHandler.STATE_EXCEPTION: 'EXCEPTION',
-        proch.ProcessHandler.STATE_COMPLETE: 'COMPLETE',
-    }
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    def accepts(self, message):
-        return proch.Filter.PROCESS_STATE_ALL.accepts(message)
-
-    def handle(self, message):
-        state = util.get(message.get_name(), ServerStateSubscriber.STATE_MAP)
-        svrsvc.ServerStatus.notify_state(self._mailer, self, state if state else 'UNKNOWN')
-        if message.get_name() is proch.ProcessHandler.STATE_EXCEPTION:
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'exception': repr(message.get_data())})
-        return None
 
 
 class ServerDetailsSubscriber(msgabc.Subscriber):
@@ -70,14 +45,14 @@ class ServerDetailsSubscriber(msgabc.Subscriber):
     def handle(self, message):
         data = None
         if ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.VERSION)
+            value = util.left_chop_and_strip(message.data(), ServerDetailsSubscriber.VERSION)
             value = util.right_chop_and_strip(value, 'demo=')
             data = {'version': value}
         elif ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.PORT)
+            value = util.left_chop_and_strip(message.data(), ServerDetailsSubscriber.PORT)
             data = {'host': self._host, 'port': int(value)}
         elif ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.get_data(), ServerDetailsSubscriber.STEAMID)
+            value = util.left_chop_and_strip(message.data(), ServerDetailsSubscriber.STEAMID)
             data = {'steamid': int(value)}
         if data:
             svrsvc.ServerStatus.notify_details(self._mailer, self, data)
@@ -106,12 +81,12 @@ class PlayerEventSubscriber(msgabc.Subscriber):
 
     def handle(self, message):
         if PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
-            line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGIN_KEY)
+            line = util.left_chop_and_strip(message.data(), PlayerEventSubscriber.LOGIN_KEY)
             name, steamid = line.split(' id=')
             event = dom.PlayerEvent('login', dom.Player(steamid, name[1:-1]))
             self._mailer.post(self, PlayerEventSubscriber.LOGIN, event)
         if PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
-            line = util.left_chop_and_strip(message.get_data(), PlayerEventSubscriber.LOGOUT_KEY)
+            line = util.left_chop_and_strip(message.data(), PlayerEventSubscriber.LOGOUT_KEY)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             event = dom.PlayerEvent('logout', dom.Player(steamid, name[1:-1]))
@@ -133,7 +108,7 @@ class CaptureSteamidSubscriber(msgabc.Subscriber):
     async def get_playerstore(mailer: msgabc.MulticastMailer, source: typing.Any) -> dom.PlayerStore:
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, CaptureSteamidSubscriber.REQUEST)
-        return response.get_data()
+        return response.data()
 
     def accepts(self, message):
         return CaptureSteamidSubscriber.FILTER.accepts(message)
@@ -142,7 +117,7 @@ class CaptureSteamidSubscriber(msgabc.Subscriber):
         if CaptureSteamidSubscriber.REQUEST_FILTER.accepts(message):
             self._mailer.post(self, CaptureSteamidSubscriber.RESPONSE, self._playerstore, message)
         if PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            self._playerstore.add_player(message.get_data().get_player())
+            self._playerstore.add_player(message.data().player())
         return None
 
 

@@ -79,6 +79,7 @@ class Deployment:
 
 
 class _Handler(httpabc.GetHandler):
+
     def __init__(self, deployment: Deployment):
         self._deployment = deployment
 
@@ -86,14 +87,10 @@ class _Handler(httpabc.GetHandler):
         return self._deployment.directory_list()
 
 
-class _CommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
-    DECODER = httpabc.DictionaryCoder().append('beta', util.script_escape)
+class _CommandHandler(httpabc.AsyncPostHandler):
 
     def __init__(self, deployment: Deployment):
         self._deployment = deployment
-
-    def decoder(self):
-        return _CommandHandler.DECODER
 
     async def handle_post(self, resource, data):
         command = util.get('command', data)
@@ -115,6 +112,6 @@ class _CommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
             return {'file': self._deployment.backup_runtime()}
         if command == 'install-runtime':
             return await self._deployment.install_runtime(
-                beta=util.get('beta', data),
+                beta=util.script_escape(util.get('beta', data)),
                 validate=util.get('validate', data))
         return httpabc.ResponseBody.NOT_FOUND

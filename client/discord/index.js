@@ -204,9 +204,9 @@ const handlers = {
     var command = data.shift();
     var body = null;
     if (command === 'add') {
-      body = { player: stringToBase10(data[0]), password: data[1] };
+      body = { player: data[0], password: data[1] };
     } else if (command === 'remove') {
-      body = { player: stringToBase10(data[0]) };
+      body = { player: data[0] };
     }
     doPost(message, '/whitelist/' + command, body);
   },

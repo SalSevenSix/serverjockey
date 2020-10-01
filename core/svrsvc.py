@@ -33,7 +33,7 @@ class ServerService(msgabc.Subscriber):
     async def shutdown(mailer: msgabc.MulticastMailer, source: typing.Any) -> asyncio.Task:
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, ServerService.SHUTDOWN)
-        return response.get_data()
+        return response.data()
 
     def __init__(self, context: contextsvc.Context, server: svrabc.Server):
         self._context = context
@@ -75,7 +75,7 @@ class ServerService(msgabc.Subscriber):
         return ServerService.FILTER.accepts(message)
 
     async def handle(self, message):
-        action = message.get_name()
+        action = message.name()
         if not self._running and action is ServerService.START:
             self._queue.put_nowait(True)
             await self._queue.join()
@@ -117,7 +117,7 @@ class ServerStatus(msgabc.Subscriber):
     async def get_status(mailer: msgabc.MulticastMailer, source: typing.Any):
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, ServerStatus.REQUEST)
-        return response.get_data()
+        return response.data()
 
     @staticmethod
     def notify_running(mailer: msgabc.Mailer, source: typing.Any, value: bool):
@@ -139,23 +139,23 @@ class ServerStatus(msgabc.Subscriber):
         return ServerStatus.FILTER.accepts(message)
 
     async def handle(self, message):
-        action = message.get_name()
+        action = message.name()
         updated = False
         if action is ServerStatus.REQUEST:
             self._context.post(self, ServerStatus.RESPONSE, self._status_copy(), message)
         elif action is ServerStatus.NOTIFY_RUNNING:
-            running = message.get_data()
+            running = message.data()
             if self._status['running'] != running:
                 self._status['running'] = running
                 if not running:
                     self._status.update({'state': None, 'details': {}})
                 updated = True
         elif action is ServerStatus.NOTIFY_STATE:
-            self._status['state'] = message.get_data()
+            self._status['state'] = message.data()
             updated = True
         elif action is ServerStatus.NOTIFY_DETAILS:
-            if isinstance(message.get_data(), dict):
-                self._status['details'].update(message.get_data())
+            if isinstance(message.data(), dict):
+                self._status['details'].update(message.data())
                 updated = True
         if updated:
             self._context.post(self, ServerStatus.UPDATED, self._status_copy())

@@ -121,7 +121,10 @@ class Publisher:
         self._mailer.post(self, Publisher.START, producer)
 
     async def stop(self):
-        await self._task   # TODO Add timeout then cancel task
+        try:
+            await asyncio.wait_for(self._task, 8.0)
+        except asyncio.TimeoutError:
+            self._task.cancel()
 
     async def _run(self):
         running = True
@@ -177,7 +180,7 @@ class RollingLogSubscriber(msgabc.Subscriber):
     async def get_log(mailer: msgabc.MulticastMailer, source: typing.Any, identity: str) -> typing.Any:
         messenger = SynchronousMessenger(mailer)
         response = await messenger.request(source, RollingLogSubscriber.REQUEST, identity)
-        return response.get_data()
+        return response.data()
 
     def get_identity(self) -> str:
         return self._identity

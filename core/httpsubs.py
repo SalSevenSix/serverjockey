@@ -44,7 +44,7 @@ class HttpSubscriptionService(msgabc.Subscriber):
     async def subscribe(mailer: msgabc.MulticastMailer, source: typing.Any, selector: _Selector) -> str:
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, HttpSubscriptionService.SUBSCRIBE, selector)
-        return response.get_data()
+        return response.data()
 
     @staticmethod
     def unsubscribe(mailer: msgabc.Mailer, source: typing.Any, identity: str):
@@ -67,13 +67,13 @@ class HttpSubscriptionService(msgabc.Subscriber):
         if HttpSubscriptionService.SUBSCRIBE_FILTER.accepts(message):
             identity = str(uuid.uuid4())
             url = self._subscriptions_url + '/' + identity
-            selector = message.get_data()
+            selector = message.data()
             subscriber = _Subscriber(self._mailer, identity, selector)
             self._subscriptions.update({identity: subscriber})
             self._mailer.register(subscriber)
             self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, url, message)
         if HttpSubscriptionService.UNSUBSCRIBE_FILTER.accepts(message):
-            identity = message.get_data()
+            identity = message.data()
             if self.lookup(identity):
                 self._subscriptions.pop(identity)
         return None
@@ -103,7 +103,7 @@ class _Subscriber(msgabc.Subscriber):
 
     def handle(self, message):
         if _InactivityCheck.FILTER.accepts(message):
-            now = message.get_created()
+            now = message.created()
             last = self._time_last_activity
             if last < 0.0 or ((now - last) < self._inactivity_timeout):
                 return None
@@ -200,7 +200,7 @@ class _InactivityCheck(msgabc.Subscriber):
         return True
 
     def handle(self, message):
-        now = message.get_created()
+        now = message.created()
         if (now - self._last_check) > 200.0:
             self._last_check = now
             self._mailer.post(self, _InactivityCheck.CHECK_INACTIVITY)

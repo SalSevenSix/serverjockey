@@ -1,4 +1,4 @@
-from core import proch, msgftr, httpext, svrabc, svrsvc, httpsubs, msgext, aggtrf, msgtrf, contextsvc, httpabc
+from core import proch, prcext, msgftr, httpext, svrabc, svrsvc, httpsubs, msgext, aggtrf, msgtrf, contextsvc, httpabc
 from servers.projectzomboid import deployment as dep, handlers as hdr, subscribers as sub
 
 
@@ -12,7 +12,7 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
         self._pipeinsvc = proch.PipeInLineService(context)
         self._httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
-        context.register(sub.ServerStateSubscriber(context))
+        context.register(prcext.ServerStateSubscriber(context))
         context.register(sub.ServerDetailsSubscriber(context, context.config('host')))
         context.register(sub.CaptureSteamidSubscriber(context))
         context.register(sub.PlayerEventSubscriber(context))
@@ -34,7 +34,7 @@ class Server(svrabc.Server):
             .push('config') \
             .push('options', hdr.OptionsHandler(self._context)) \
             .append('reload', hdr.OptionsReloadHandler(self._context)) \
-            .push('{option}') \
+            .push('x{option}') \
             .append('{command}', hdr.OptionCommandHandler(self._context)) \
             .pop().pop() \
             .append('jvm', httpext.ReadWriteFileHandler(self._deployment.jvm_config_file)) \
@@ -47,7 +47,7 @@ class Server(svrabc.Server):
             .append('steamids', hdr.SteamidsHandler(self._context)) \
             .push('players', hdr.PlayersHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(sub.PlayerEventSubscriber.ALL_FILTER, msgtrf.DataAsDict())) \
-            .push('{player}') \
+            .push('x{player}') \
             .append('{command}', hdr.PlayerCommandHandler(self._context)) \
             .pop().pop() \
             .push('whitelist') \

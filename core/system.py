@@ -23,7 +23,7 @@ class SystemService:
             .pop() \
             .append('instances', _InstancesHandler(self)) \
             .build()
-        self._instances = self._resources.get_resource('instances')
+        self._instances = self._resources.child('instances')
         context.register(_Subscriber(self))
 
     def resources(self) -> httpabc.Resource:
@@ -109,7 +109,7 @@ class _Subscriber(msgabc.Subscriber):
         return _Subscriber.FILTER.accepts(message)
 
     async def handle(self, message):
-        await self._system.delete_instance(message.get_data())
+        await self._system.delete_instance(message.data())
         return None
 
 

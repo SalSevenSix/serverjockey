@@ -24,7 +24,8 @@ class OptionsHandler(httpabc.AsyncGetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        return [o.asdict() for o in await ldr.OptionLoader(self._mailer, self, resource).all()]
+        options = await ldr.OptionLoader(self._mailer, self, resource.child('option')).all()
+        return [o.asdict() for o in options]
 
 
 class OptionsReloadHandler(httpabc.AsyncPostHandler):
@@ -34,20 +35,17 @@ class OptionsReloadHandler(httpabc.AsyncPostHandler):
         self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, OptionsReloadHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, {'command': resource.get_name()})
+        return await self._handler.handle_post(resource, {'command': resource.name()})
 
 
-class OptionCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
+class OptionCommandHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({'set': 'changeoption {option} "{value}"'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
 
-    def decoder(self):
-        return ldr.OptionLoader.DECODER
-
     async def handle_post(self, resource, data):
-        if not await ldr.OptionLoader(self._mailer, self, resource).get(util.get('option', data)):
+        if not await ldr.OptionLoader(self._mailer, self).get(util.get('option', data)):
             return httpabc.ResponseBody.NOT_FOUND
         cmdline = OptionCommandHandler.COMMANDS.get(data)
         if not cmdline or util.get('value', data) is None:
@@ -64,7 +62,7 @@ class SteamidsHandler(httpabc.AsyncGetHandler):
     async def handle_get(self, resource, data):
         if not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        playerstore = await subs.CaptureSteamidSubscriber.get_playerstore(self._mailer, self)
+        playerstore = await sub.CaptureSteamidSubscriber.get_playerstore(self._mailer, self)
         return playerstore.asdict()
 
 
@@ -74,10 +72,11 @@ class PlayersHandler(httpabc.AsyncGetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        return [o.asdict() for o in await ldr.PlayerLoader(self._mailer, self, resource).all()]
+        players = await ldr.PlayerLoader(self._mailer, self, resource.child('player')).all()
+        return [o.asdict() for o in players]
 
 
-class PlayerCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
+class PlayerCommandHandler(httpabc.AsyncPostHandler):
     # LEVELS = ('admin', 'moderator', 'overseer', 'gm', 'observer', 'none')
     COMMANDS = cmdutil.CommandLines({
         'set-access-level': 'setaccesslevel "{player}" "{level}"',
@@ -90,11 +89,8 @@ class PlayerCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
 
-    def decoder(self):
-        return ldr.PlayerLoader.DECODER
-
     async def handle_post(self, resource, data):
-        if not await ldr.PlayerLoader(self._mailer, self, resource).get(util.get('player', data)):
+        if not await ldr.PlayerLoader(self._mailer, self).get(util.get('player', data)):
             return httpabc.ResponseBody.NOT_FOUND
         cmdline = PlayerCommandHandler.COMMANDS.get(data)
         if not cmdline:
@@ -103,24 +99,20 @@ class PlayerCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class WhitelistCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
+class WhitelistCommandHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
         'add-all': 'addalltowhitelist',
         'add': 'adduser "{player}" "{password}"',
         'remove': 'removeuserfromwhitelist "{player}"'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, WhitelistCommandHandler.COMMANDS, ldr.PlayerLoader.DECODER)
-
-    def decoder(self):
-        return self._handler.decoder()
+        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, WhitelistCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, data)
 
 
-class BanlistCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
+class BanlistCommandHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
         'add-player': ['banuser "{player}"', {'ip': '-ip', 'reason': '-r "{}"'}],
         'remove-player': 'unbanuser "{player}"',
@@ -128,11 +120,7 @@ class BanlistCommandHandler(httpabc.DecoderProvider, httpabc.AsyncPostHandler):
         'remove-id': 'unbanid {steamid}'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = httpext.PipeInLineNoContentPostHandler(
-            mailer, self, BanlistCommandHandler.COMMANDS, ldr.PlayerLoader.DECODER)
-
-    def decoder(self):
-        return self._handler.decoder()
+        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, BanlistCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, data)
