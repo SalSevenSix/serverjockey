@@ -16,7 +16,7 @@ class OptionLoader:
     async def all(self) -> typing.Collection[dom.Option]:
         response = await proch.PipeInLineService.request(
             self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
-                catch_filter=proch.Filter.STDOUT_LINE,
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataEquals('List of Server Options:'), include_start=False,
                 stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True))
         options = []
@@ -49,7 +49,7 @@ class PlayerLoader:
     async def all(self) -> typing.Collection[dom.Player]:
         response = await proch.PipeInLineService.request(
             self._mailer, self._source, 'players', msgext.MultiCatcher(
-                catch_filter=proch.Filter.STDOUT_LINE,
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataMatches('Players connected.*'), include_start=False,
                 stop_filter=msgftr.DataEquals(''), include_stop=False))
         players = []

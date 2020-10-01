@@ -14,6 +14,12 @@ class AcceptNothing(msgabc.Filter):
         return False
 
 
+class IsStop(msgabc.Filter):
+
+    def accepts(self, message):
+        return message is msgabc.STOP
+
+
 class Not(msgabc.Filter):
 
     def __init__(self, msg_filter):

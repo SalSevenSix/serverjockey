@@ -6,8 +6,16 @@ import logging
 import json
 import time
 import uuid
-import aiofiles
 import typing
+import aiofiles
+from aiofiles import os as aiofilesos
+
+
+_isdir = aiofilesos.wrap(os.path.isdir)
+_isfile = aiofilesos.wrap(os.path.isfile)
+_listdir = aiofilesos.wrap(os.listdir)
+_make_archive = aiofilesos.wrap(shutil.make_archive)
+_rmtree = aiofilesos.wrap(shutil.rmtree)
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -153,16 +161,23 @@ def get(key, dictionary):
     return None
 
 
-def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
-    if base is None or path is None or path[0] in ('.', '/'):
-        return path
-    return base + '/' + path
+def left_chop_and_strip(line: str, keyword: str) -> str:
+    index = line.find(keyword)
+    if index == -1:
+        return line
+    return line[index + len(keyword):].strip()
 
 
-def file_exists(file: typing.Optional[str]) -> bool:
-    if file:
-        return os.path.isfile(file)
-    return False
+def right_chop_and_strip(line: str, keyword: str) -> str:
+    index = line.find(keyword)
+    if index == -1:
+        return line
+    return line[:index].strip()
+
+
+def generate_token() -> str:
+    identity = str(uuid.uuid4())
+    return identity[:6] + identity[-6:]
 
 
 def insert_filename_suffix(filename: str, suffix: str) -> str:
@@ -172,11 +187,23 @@ def insert_filename_suffix(filename: str, suffix: str) -> str:
     return filename[:index] + suffix + filename[index:]
 
 
-def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
+def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
+    if base is None or path is None or path[0] in ('.', '/'):
+        return path
+    return base + '/' + path
+
+
+async def file_exists(file: typing.Optional[str]) -> bool:
+    if file is None:
+        return False
+    return await _isfile(file)
+
+
+async def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
     if not path.endswith('/'):
         path = path + '/'
     result = []
-    for name in iter(os.listdir(path)):
+    for name in iter(await _listdir(path)):
         file = path + name
         ftype = 'unknown'
         if os.path.isfile(file):
@@ -190,38 +217,36 @@ def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
     return result
 
 
-def create_directory(path: str):
-    if not os.path.isdir(path):
-        os.mkdir(path)
+async def create_directory(path: str):
+    if not await _isdir(path):
+        await aiofilesos.mkdir(path)
 
 
-def archive_directory(path: str) -> str:
+async def archive_directory(path: str) -> str:
     parts = path.split('/')
     if parts[-1] == '':
         del parts[-1]   # chop trailing '/'
     root_dir = '/'.join(parts)
-    file = []
-    for part in iter(parts):
-        file.append(part)
+    file = parts.copy()
     file.append('..')
     file.append(parts[-1] + '-' + str(now_millis()))
     file = '/'.join(file)
-    shutil.make_archive(file, 'zip', root_dir=root_dir)
+    await _make_archive(file, 'zip', root_dir=root_dir)
     return file
 
 
-def wipe_directory(path: str):
-    delete_directory(path)
-    create_directory(path)
+async def wipe_directory(path: str):
+    await delete_directory(path)
+    await create_directory(path)
 
 
-def delete_directory(path: str):
-    shutil.rmtree(path, ignore_errors=True)
+async def delete_directory(path: str):
+    await _rmtree(path, ignore_errors=True)
 
 
-def delete_file(file: str):
-    if file is not None and file_exists(file):
-        os.remove(file)
+async def delete_file(file: str):
+    if await file_exists(file):
+        await aiofilesos.remove(file)
 
 
 async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
@@ -245,25 +270,6 @@ async def write_file(filename: str, data: typing.Union[str, bytes], text: bool =
 async def copy_file(source_file: str, target_file: str):
     data = await read_file(source_file, text=False)
     await write_file(target_file, data, text=False)
-
-
-def left_chop_and_strip(line: str, keyword: str) -> str:
-    index = line.find(keyword)
-    if index == -1:
-        return line
-    return line[index + len(keyword):].strip()
-
-
-def right_chop_and_strip(line: str, keyword: str) -> str:
-    index = line.find(keyword)
-    if index == -1:
-        return line
-    return line[:index].strip()
-
-
-def generate_token() -> str:
-    identity = str(uuid.uuid4())
-    return identity[:6] + identity[-6:]
 
 
 def signal_interrupt(pid: typing.Optional[int] = None):

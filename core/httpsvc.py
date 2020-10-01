@@ -73,8 +73,8 @@ class _RequestHandler:
             return self._static_response()
         if not resource.allows(self._method):
             raise h.HTTPMethodNotAllowed(
-                self._method.value(),
-                httpabc.Method.GET.value() if self._method is httpabc.Method.POST else httpabc.Method.POST.value())
+                str(self._method),
+                httpabc.Method.GET.value if self._method is httpabc.Method.POST else httpabc.Method.POST.value)
 
         # GET
         if self._method is httpabc.Method.GET:

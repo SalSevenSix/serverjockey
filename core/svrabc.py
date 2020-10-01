@@ -9,6 +9,10 @@ class Server(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    async def initialise(self):
+        pass
+
+    @abc.abstractmethod
     def resources(self, name: str) -> httpabc.Resource:
         pass
 

@@ -101,7 +101,7 @@ class ReadWriteFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
     async def handle_get(self, resource, data):
         if self._protected and not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        if not util.file_exists(self._filename):
+        if not await util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
         return await util.read_file(self._filename, text=self._text)
 
@@ -119,7 +119,7 @@ class ProtectedLineConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandl
             self._patterns.append(re.compile(regex))
 
     async def handle_get(self, resource, data):
-        if not util.file_exists(self._filename):
+        if not await util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
         file = await util.read_file(self._filename)
         if httpabc.is_secure(data):

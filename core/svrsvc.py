@@ -68,7 +68,7 @@ class ServerService(msgabc.Subscriber):
             if exception:
                 ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                 ServerStatus.notify_details(self._context, self, {'exception': repr(exception)})
-        self._clientfile.delete()
+        await self._clientfile.delete()
         tasks.task_end(self._task)
 
     def accepts(self, message):
@@ -184,5 +184,5 @@ class _ClientFile:
             self._context.post(self, _ClientFile.UPDATED, self._clientfile)
         logging.debug('Client config: ' + data)
 
-    def delete(self):
-        util.delete_file(self._clientfile)
+    async def delete(self):
+        await util.delete_file(self._clientfile)

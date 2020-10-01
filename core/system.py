@@ -30,11 +30,11 @@ class SystemService:
         return self._resources
 
     async def initialise(self) -> SystemService:
-        ls = util.directory_list_dict(self._home_dir)
+        ls = await util.directory_list_dict(self._home_dir)
         for directory in iter([o for o in ls if o['type'] == 'directory']):
             identity = directory['name']
             config_file = self._home_dir + '/' + identity + '/instance.json'
-            if util.file_exists(config_file):
+            if await util.file_exists(config_file):
                 configuration = await util.read_file(config_file)
                 configuration = util.json_to_dict(configuration)
                 configuration.update({
@@ -42,13 +42,13 @@ class SystemService:
                     'url': self._url + '/instances/' + identity,
                     'home': self._home_dir + '/' + identity
                 })
-                self._initialise_instance(configuration)
+                await self._initialise_instance(configuration)
         return self
 
     async def create_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
         identity = str(uuid.uuid4())
         home_dir = self._home_dir + '/' + identity
-        util.create_directory(home_dir)
+        await util.create_directory(home_dir)
         config_file = home_dir + '/' + 'instance.json'
         await util.write_file(config_file, util.obj_to_json(configuration))
         configuration.update({
@@ -56,12 +56,12 @@ class SystemService:
             'url': self._url + '/instances/' + identity,
             'home': home_dir
         })
-        return self._initialise_instance(configuration)
+        return await self._initialise_instance(configuration)
 
     async def delete_instance(self, subcontext: contextsvc.Context):
         self._instances.remove(subcontext.config('identity'))
         await self._context.destroy_subcontext(subcontext)
-        util.delete_directory(subcontext.config('home'))
+        await util.delete_directory(subcontext.config('home'))
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
 
     async def shutdown(self):
@@ -74,13 +74,14 @@ class SystemService:
         await self._context.shutdown()
         util.signal_interrupt()
 
-    def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
+    async def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
         subcontext.start()
         subcontext.register(msgext.RelaySubscriber(self._context, _Subscriber.FILTER))
         if subcontext.is_debug():
             subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
         server = self._create_server(subcontext)
+        await server.initialise()
         instance = server.resources(subcontext.config('identity'))
         self._instances.append(instance)
         svrsvc.ServerService(subcontext, server).start()

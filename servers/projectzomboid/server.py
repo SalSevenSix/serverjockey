@@ -4,7 +4,7 @@ from servers.projectzomboid import deployment as dep, handlers as hdr, subscribe
 
 class Server(svrabc.Server):
     STARTED_FILTER = msgftr.And(
-        proch.Filter.STDOUT_LINE,
+        proch.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.DataStrContains('SERVER STARTED'))
 
     def __init__(self, context: contextsvc.Context):
@@ -17,6 +17,9 @@ class Server(svrabc.Server):
         context.register(sub.CaptureSteamidSubscriber(context))
         context.register(sub.PlayerEventSubscriber(context))
         context.register(sub.ProvideAdminPasswordSubscriber(context, context.config('secret')))
+
+    async def initialise(self):
+        await self._deployment.initialise()
 
     def resources(self, name: str) -> httpabc.Resource:
         conf_pre = self._deployment.config_dir + '/' + self._deployment.world_name
@@ -65,7 +68,7 @@ class Server(svrabc.Server):
             .build()
 
     async def run(self):
-        await proch.ProcessHandler(self._context, self._deployment.executable) \
+        await proch.ServerProcess(self._context, self._deployment.executable) \
             .append_arg('-cachedir=' + self._deployment.world_dir) \
             .use_pipeinsvc(self._pipeinsvc) \
             .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=60)) \

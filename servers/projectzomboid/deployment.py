@@ -1,11 +1,11 @@
-import asyncio
 import typing
-from core import contextsvc, util, shell, httpabc
+from core import contextsvc, util, shell, httpabc, proch, httpsubs, aggtrf
 
 
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
+        self._mailer = context
         self.world_name = 'servertest'
         self.home_dir = context.config('home')
         self.runtime_dir = self.home_dir + '/runtime'
@@ -18,7 +18,10 @@ class Deployment:
         self.playerdb_file = self.playerdb_dir + '/' + self.world_name + '.db'
         self.config_dir = self.world_dir + '/Server'
         self.save_dir = self.world_dir + '/Saves'
-        self._build_world()
+        proch.ShellJobService(context)
+
+    async def initialise(self):
+        await self._build_world()
 
     def handler(self) -> httpabc.GetHandler:
         return _Handler(self)
@@ -26,15 +29,15 @@ class Deployment:
     def command_handler(self) -> httpabc.AsyncPostHandler:
         return _CommandHandler(self)
 
-    def directory_list(self) -> typing.List[typing.Dict[str, str]]:
-        return util.directory_list_dict(self.home_dir)
+    async def directory_list(self) -> typing.List[typing.Dict[str, str]]:
+        return await util.directory_list_dict(self.home_dir)
 
     async def install_runtime(self,
                               beta: typing.Optional[str] = None,
                               validate: bool = False,
-                              wipe: bool = True) -> str:
+                              wipe: bool = True) -> dict:
         if wipe:
-            util.delete_directory(self.runtime_dir)
+            await util.delete_directory(self.runtime_dir)
         script = shell.Script() \
             .include_steamcmd_app_update(
                 app_id=380870,
@@ -43,39 +46,39 @@ class Deployment:
                 validate=validate) \
             .include_softlink_steamclient_lib(self.runtime_dir) \
             .build()
-        process = await asyncio.create_subprocess_shell(
-            script,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL)
-        stdout, stderr = await process.communicate()
-        result = [stdout.decode()] if stdout else ['NO STDOUT']
-        result.append('EXIT STATUS: ' + str(process.returncode))
-        return '\n'.join(result)   # TODO give a httpsub link back instead
+        response = await proch.ShellJobService.start_job(self._mailer, self, script)
+        if isinstance(response, Exception):
+            return {'exception': repr(response)}
+        url = await httpsubs.HttpSubscriptionService.subscribe(self._mailer, self, httpsubs.Selector(
+            msg_filter=proch.ShellJobService.FILTER_STDOUT_LINE,
+            completed_filter=proch.ShellJobService.FILTER_JOB_DONE,
+            aggregator=aggtrf.StrJoin('\n')))
+        return {'url': url}
 
-    def backup_runtime(self) -> str:
-        return util.archive_directory(self.runtime_dir)
+    async def backup_runtime(self) -> str:
+        return await util.archive_directory(self.runtime_dir)
 
-    def backup_world(self) -> str:
-        return util.archive_directory(self.world_dir)
+    async def backup_world(self) -> str:
+        return await util.archive_directory(self.world_dir)
 
-    def wipe_world_all(self):
-        util.delete_directory(self.world_dir)
-        self._build_world()
+    async def wipe_world_all(self):
+        await util.delete_directory(self.world_dir)
+        await self._build_world()
 
-    def wipe_world_playerdb(self):
-        util.wipe_directory(self.playerdb_dir)
+    async def wipe_world_playerdb(self):
+        await util.wipe_directory(self.playerdb_dir)
 
-    def wipe_world_config(self):
-        util.wipe_directory(self.config_dir)
+    async def wipe_world_config(self):
+        await util.wipe_directory(self.config_dir)
 
-    def wipe_world_save(self):
-        util.wipe_directory(self.save_dir)
+    async def wipe_world_save(self):
+        await util.wipe_directory(self.save_dir)
 
-    def _build_world(self):
-        util.create_directory(self.world_dir)
-        util.create_directory(self.playerdb_dir)
-        util.create_directory(self.config_dir)
-        util.create_directory(self.save_dir)
+    async def _build_world(self):
+        await util.create_directory(self.world_dir)
+        await util.create_directory(self.playerdb_dir)
+        await util.create_directory(self.config_dir)
+        await util.create_directory(self.save_dir)
 
 
 class _Handler(httpabc.GetHandler):
@@ -83,8 +86,8 @@ class _Handler(httpabc.GetHandler):
     def __init__(self, deployment: Deployment):
         self._deployment = deployment
 
-    def handle_get(self, resource, data):
-        return self._deployment.directory_list()
+    async def handle_get(self, resource, data):
+        return await self._deployment.directory_list()
 
 
 class _CommandHandler(httpabc.AsyncPostHandler):
@@ -92,24 +95,28 @@ class _CommandHandler(httpabc.AsyncPostHandler):
     def __init__(self, deployment: Deployment):
         self._deployment = deployment
 
+    # TODO everything called here should be serialised with lock
+    #      ie. attempting concurrent request returns error if job still running
     async def handle_post(self, resource, data):
         command = util.get('command', data)
         if command == 'backup-world':
-            return {'file': self._deployment.backup_world()}
+            file = await self._deployment.backup_world()
+            return {'file': file}
         if command == 'wipe-world-all':
-            self._deployment.wipe_world_all()
+            await self._deployment.wipe_world_all()
             return httpabc.ResponseBody.NO_CONTENT
         if command == 'wipe-world-playerdb':
-            self._deployment.wipe_world_playerdb()
+            await self._deployment.wipe_world_playerdb()
             return httpabc.ResponseBody.NO_CONTENT
         if command == 'wipe-world-config':
-            self._deployment.wipe_world_config()
+            await self._deployment.wipe_world_config()
             return httpabc.ResponseBody.NO_CONTENT
         if command == 'wipe-world-save':
-            self._deployment.wipe_world_save()
+            await self._deployment.wipe_world_save()
             return httpabc.ResponseBody.NO_CONTENT
         if command == 'backup-runtime':
-            return {'file': self._deployment.backup_runtime()}
+            file = await self._deployment.backup_runtime()
+            return {'file': file}
         if command == 'install-runtime':
             return await self._deployment.install_runtime(
                 beta=util.script_escape(util.get('beta', data)),

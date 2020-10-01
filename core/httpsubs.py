@@ -7,29 +7,34 @@ import typing
 from core import util, httpabc, msgabc, msgext, msgftr, msgtrf, aggtrf
 
 
-class _Selector:
+class Selector:
 
     @staticmethod
     def from_argv(*argv):
-        msg_filter, transformer, aggregator = None, None, None
+        msg_filter, transformer, aggregator, completed_filter = None, None, None, None
         for arg in iter(argv):
-            if isinstance(arg, _Selector):
+            if isinstance(arg, Selector):
                 return arg
             if isinstance(arg, msgabc.Filter):
-                msg_filter = arg
+                if msg_filter is None:
+                    msg_filter = arg
+                elif completed_filter is None:
+                    completed_filter = arg
             if isinstance(arg, msgabc.Transformer):
                 transformer = arg
             if isinstance(arg, aggtrf.Aggregator):
                 aggregator = arg
-        return _Selector(msg_filter, transformer, aggregator)
+        return Selector(msg_filter, transformer, aggregator, completed_filter)
 
     def __init__(self,
                  msg_filter: typing.Optional[msgabc.Filter] = None,
                  transformer: typing.Optional[msgabc.Transformer] = None,
-                 aggregator: typing.Optional[aggtrf.Aggregator] = None):
+                 aggregator: typing.Optional[aggtrf.Aggregator] = None,
+                 completed_filter: typing.Optional[msgabc.Filter] = None):
         self.msg_filter = msg_filter if msg_filter else msgftr.AcceptAll()
         self.transformer = transformer if transformer else msgtrf.GetData()
         self.aggregator = aggregator
+        self.completed_filter = completed_filter if completed_filter else msgftr.AcceptNothing()
 
 
 class HttpSubscriptionService(msgabc.Subscriber):
@@ -41,7 +46,7 @@ class HttpSubscriptionService(msgabc.Subscriber):
     FILTER = msgftr.Or(SUBSCRIBE_FILTER, UNSUBSCRIBE_FILTER)
 
     @staticmethod
-    async def subscribe(mailer: msgabc.MulticastMailer, source: typing.Any, selector: _Selector) -> str:
+    async def subscribe(mailer: msgabc.MulticastMailer, source: typing.Any, selector: Selector) -> str:
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, HttpSubscriptionService.SUBSCRIBE, selector)
         return response.data()
@@ -82,24 +87,29 @@ class HttpSubscriptionService(msgabc.Subscriber):
         return _SubscriptionsHandler(self)
 
     def handler(self, *argv) -> _SubscribeHandler:
-        return _SubscribeHandler(self._mailer, _Selector.from_argv(*argv))
+        return _SubscribeHandler(self._mailer, Selector.from_argv(*argv))
 
 
 class _Subscriber(msgabc.Subscriber):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, identity: str, selector: _Selector):
+    def __init__(self, mailer: msgabc.MulticastMailer, identity: str, selector: Selector):
         self._mailer = mailer
         self._identity = identity
         self._transformer = selector.transformer
         self._aggregator = selector.aggregator
-        self._msg_filter = msgftr.Or(_InactivityCheck.FILTER, selector.msg_filter)
+        self._completed_filter = selector.completed_filter
+        self._msg_filter = msgftr.Or(
+            _InactivityCheck.FILTER,
+            selector.msg_filter,
+            self._completed_filter,
+            msgftr.IsStop())
         self._poll_timeout = 60.0
         self._inactivity_timeout = 120.0
         self._queue = asyncio.Queue(maxsize=200)
         self._time_last_activity = time.time()
 
     def accepts(self, message):
-        return self._msg_filter.accepts(message) or message is msgabc.STOP
+        return self._msg_filter.accepts(message)
 
     def handle(self, message):
         if _InactivityCheck.FILTER.accepts(message):
@@ -121,43 +131,61 @@ class _Subscriber(msgabc.Subscriber):
     async def get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
         self._time_last_activity = -1.0
         try:
-            if not self._aggregator:
-                return await self._get_wait()
-            results = self._get_all()
-            if len(results) == 0:
-                result = await self._get_wait()
-                if result is None:
-                    return None
-                results.append(result)
-            if results[-1] is msgabc.STOP:
-                return msgabc.STOP
-            return self._aggregator.aggregate(results)
+            result = await self._get()
+            if result is msgabc.STOP:
+                logging.info('Http subscription completed, unsubscribing ' + self._identity)
+                HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
+            return result
         finally:
             self._time_last_activity = time.time()
 
-    async def _get_wait(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
-        try:
-            message = await asyncio.wait_for(self._queue.get(), self._poll_timeout)
-            result = message if message is msgabc.STOP else self._transformer.transform(message)
-            self._queue.task_done()
-            return result
-        except asyncio.TimeoutError:
+    async def _get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
+        if self._aggregator is None:
+            message = await self._get_one()
+            if message is None:
+                return None
+            if message is msgabc.STOP or self._completed_filter.accepts(message):
+                return msgabc.STOP
+            return self._transformer.transform(message)
+        messages = await self._get_all()
+        message_count = len(messages)
+        if message_count == 0:
             return None
+        last_message = messages[-1]
+        if last_message is msgabc.STOP:
+            return msgabc.STOP
+        if self._completed_filter.accepts(last_message):
+            if message_count == 1:
+                return msgabc.STOP
+            messages.remove(last_message)
+            self._queue.put_nowait(msgabc.STOP)   # re-queue to kill next poll
+        return self._aggregator.aggregate([self._transformer.transform(m) for m in messages])
 
-    def _get_all(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
-        results = []
+    async def _get_all(self) -> typing.List[msgabc.Message]:
+        messages = []
         if self._queue.qsize() == 0:
-            return results
+            message = await self._get_one()
+            if message is not None:
+                messages.append(message)
+            return messages
         try:
             while True:
                 message = self._queue.get_nowait()
-                results.append(message if message is msgabc.STOP else self._transformer.transform(message))
+                messages.append(message)
                 self._queue.task_done()
-                if message is msgabc.STOP:
-                    return results
+                if message is msgabc.STOP or self._completed_filter.accepts(message):
+                    return messages
         except asyncio.QueueEmpty:
             pass
-        return results
+        return messages
+
+    async def _get_one(self) -> typing.Union[msgabc.Message, None]:
+        try:
+            message = await asyncio.wait_for(self._queue.get(), self._poll_timeout)
+            self._queue.task_done()
+            return message
+        except asyncio.TimeoutError:
+            return None
 
 
 class _SubscriptionsHandler(httpabc.AsyncGetHandler):
@@ -179,7 +207,7 @@ class _SubscriptionsHandler(httpabc.AsyncGetHandler):
 
 class _SubscribeHandler(httpabc.AsyncPostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, selector: _Selector):
+    def __init__(self, mailer: msgabc.MulticastMailer, selector: Selector):
         self._mailer = mailer
         self._selector = selector
 

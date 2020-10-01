@@ -15,7 +15,8 @@ class ConsoleLogFilter(msgabc.Filter):
         'releasesafehouse', 'reloadlua', 'sendpulse')
 
     def accepts(self, message):
-        if not (proch.Filter.STDOUT_LINE.accepts(message) or proch.Filter.STDERR_LINE.accepts(message)):
+        if not (proch.ServerProcess.FILTER_STDOUT_LINE.accepts(message)
+                or proch.ServerProcess.FILTER_STDERR_LINE.accepts(message)):
             return False
         value = util.right_chop_and_strip(message.data(), ' ')
         return value not in ConsoleLogFilter.COMMANDS
@@ -32,7 +33,7 @@ class ServerDetailsSubscriber(msgabc.Subscriber):
     STEAMID = 'Server Steam ID'
     STEAMID_FILTER = msgftr.DataStrContains(STEAMID)
     FILTER = msgftr.And(
-        proch.Filter.STDOUT_LINE,
+        proch.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.Or(VERSION_FILTER, PORT_FILTER, STEAMID_FILTER))
 
     def __init__(self, mailer: msgabc.MulticastMailer, host: str):
@@ -70,7 +71,7 @@ class PlayerEventSubscriber(msgabc.Subscriber):
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
     ALL_FILTER = msgftr.Or(LOGIN_FILTER, LOGOUT_FILTER)
     FILTER = msgftr.And(
-        proch.Filter.STDOUT_LINE,
+        proch.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.Or(LOGIN_KEY_FILTER, LOGOUT_KEY_FILTER))
 
     def __init__(self, mailer: msgabc.Mailer):
@@ -123,7 +124,7 @@ class CaptureSteamidSubscriber(msgabc.Subscriber):
 
 class ProvideAdminPasswordSubscriber(msgabc.Subscriber):
     FILTER = msgftr.And(
-        proch.Filter.STDOUT_LINE,
+        proch.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.Or(
             msgftr.DataStrContains('Enter new administrator password'),
             msgftr.DataStrContains('Confirm the password')))
