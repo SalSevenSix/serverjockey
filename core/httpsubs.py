@@ -4,7 +4,7 @@ import logging
 import time
 import uuid
 import typing
-from core import util, httpabc, msgabc, msgext, msgftr, msgtrf, aggtrf
+from core import httpabc, msgabc, msgext, msgftr, msgtrf, aggtrf, util
 
 
 class Selector:

@@ -1,4 +1,5 @@
-from core import msgabc, proch, svrsvc, util
+import typing
+from core import msgabc, httpabc, proch, svrsvc, cmdutil, util
 
 
 class ServerStateSubscriber(msgabc.Subscriber):
@@ -24,3 +25,18 @@ class ServerStateSubscriber(msgabc.Subscriber):
         if message.name() is proch.ServerProcess.STATE_EXCEPTION:
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'exception': repr(message.data())})
         return None
+
+
+class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any, commands: cmdutil.CommandLines):
+        self._mailer = mailer
+        self._source = source
+        self._commands = commands
+
+    async def handle_post(self, resource, data):
+        cmdline = self._commands.get(data)
+        if not cmdline:
+            return httpabc.ResponseBody.BAD_REQUEST
+        await proch.PipeInLineService.request(self._mailer, self._source, cmdline.build())
+        return httpabc.ResponseBody.NO_CONTENT

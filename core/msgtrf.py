@@ -1,4 +1,4 @@
-from core import util, msgabc
+from core import msgabc, util
 
 
 class Noop(msgabc.Transformer):

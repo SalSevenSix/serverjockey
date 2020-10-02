@@ -4,13 +4,12 @@ import importlib
 import inspect
 import logging
 import uuid
-from core import msgabc, httpabc, httpext, svrabc, svrsvc, msgext, util, msgftr, contextsvc
+from core import contextsvc, msgabc, httpabc, httpext, svrabc, svrsvc, msgext, msgftr, util
 
 
 class SystemService:
     SERVER_INITIALISED = 'SystemService.ServerInitialised'
     SERVER_DELETED = 'SystemService.ServerDestroyed'
-    SERVER_DELETE = 'SystemService.ServerDelete'
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -101,7 +100,7 @@ class SystemService:
 
 
 class _Subscriber(msgabc.Subscriber):
-    FILTER = msgftr.NameIs(SystemService.SERVER_DELETE)
+    FILTER = msgftr.NameIs(svrsvc.ServerService.DELETE_ME)
 
     def __init__(self, system: SystemService):
         self._system = system

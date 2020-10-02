@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
-import asyncio
 import typing
+import asyncio
 from asyncio import streams, subprocess
 from core import msgabc, msgext, msgftr, cmdutil, util
 

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import typing
-from core import svrabc, msgabc, msgext, msgftr, util, system, tasks, contextsvc
+from core import contextsvc, svrabc, msgabc, msgext, msgftr, tasks, util
 
 
 class ServerService(msgabc.Subscriber):
@@ -9,6 +9,7 @@ class ServerService(msgabc.Subscriber):
     RESTART = 'ServerService.Restart'
     STOP = 'ServerService.Stop'
     DELETE = 'ServerService.Delete'
+    DELETE_ME = 'ServerService.DeletedMe'
     SHUTDOWN = 'ServerService.Shutdown'
     SHUTDOWN_RESPONSE = 'ServerService.ShutdownResponse'
     FILTER = msgftr.NameIn((START, RESTART, STOP, DELETE, SHUTDOWN))
@@ -96,7 +97,7 @@ class ServerService(msgabc.Subscriber):
             if self._task:
                 await self._task
             if action is ServerService.DELETE:
-                self._context.post(self, system.SystemService.SERVER_DELETE, self._context)
+                self._context.post(self, ServerService.DELETE_ME, self._context)
             if action is ServerService.SHUTDOWN:
                 self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
             return True

@@ -2,7 +2,8 @@ from __future__ import annotations
 import logging
 import re
 import typing
-from core import httpabc, httpsvc, proch, util, svrsvc, msgabc, cmdutil
+from core import httpabc, httpsvc, msgabc, util
+from core import svrsvc   # TODO move to svrext
 
 
 class ResourceBuilder:
@@ -49,21 +50,6 @@ class ResourceBuilder:
             if signature.startswith('x{'):
                 return signature[2:-1], httpabc.ResourceKind.ARG_ENCODED
         return signature, httpabc.ResourceKind.PATH
-
-
-class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any, commands: cmdutil.CommandLines):
-        self._mailer = mailer
-        self._source = source
-        self._commands = commands
-
-    async def handle_post(self, resource, data):
-        cmdline = self._commands.get(data)
-        if not cmdline:
-            return httpabc.ResponseBody.BAD_REQUEST
-        await proch.PipeInLineService.request(self._mailer, self._source, cmdline.build())
-        return httpabc.ResponseBody.NO_CONTENT
 
 
 class ServerStatusHandler(httpabc.AsyncGetHandler):

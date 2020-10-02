@@ -1,4 +1,4 @@
-from core import httpabc, httpext, proch, msgext, msgtrf, util, aggtrf, cmdutil, msgabc
+from core import httpabc, proch, prcext, msgext, msgtrf, util, aggtrf, cmdutil, msgabc
 from servers.projectzomboid import subscribers as sub, loaders as ldr
 
 
@@ -12,7 +12,7 @@ class WorldCommandHandler(httpabc.AsyncPostHandler):
         'stop-rain': 'stoprain'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, WorldCommandHandler.COMMANDS)
+        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, WorldCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, data)
@@ -32,7 +32,7 @@ class OptionsReloadHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({'reload': 'reloadoptions'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, OptionsReloadHandler.COMMANDS)
+        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, OptionsReloadHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, {'command': resource.name()})
@@ -106,7 +106,7 @@ class WhitelistCommandHandler(httpabc.AsyncPostHandler):
         'remove': 'removeuserfromwhitelist "{player}"'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, WhitelistCommandHandler.COMMANDS)
+        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, WhitelistCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, data)
@@ -120,7 +120,7 @@ class BanlistCommandHandler(httpabc.AsyncPostHandler):
         'remove-id': 'unbanid {steamid}'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = httpext.PipeInLineNoContentPostHandler(mailer, self, BanlistCommandHandler.COMMANDS)
+        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, BanlistCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, data)
