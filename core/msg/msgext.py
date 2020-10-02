@@ -3,7 +3,8 @@ import logging
 import uuid
 import collections
 import typing
-from core import msgabc, msgftr, msgtrf, aggtrf, tasks, util
+from core.util import aggtrf, tasks, util
+from core.msg import msgabc, msgftr, msgtrf
 
 
 class SynchronousMessenger:

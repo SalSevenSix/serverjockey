@@ -1,5 +1,6 @@
 import abc
-from core import contextsvc, httpabc
+from core.context import contextsvc
+from core.http import httpabc
 
 
 class Server(metaclass=abc.ABCMeta):

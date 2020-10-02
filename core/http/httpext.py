@@ -2,8 +2,10 @@ from __future__ import annotations
 import logging
 import re
 import typing
-from core import httpabc, httpsvc, msgabc, util
-from core import svrsvc   # TODO move to svrext
+from core.util import util
+from core.msg import msgabc
+from core.http import httpabc, httpsvc
+from core.system import svrsvc   # TODO no no
 
 
 class ResourceBuilder:

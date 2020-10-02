@@ -1,6 +1,9 @@
 import typing
-from core import httpabc, proch, msgext, util, msgftr, msgabc
-from servers.projectzomboid import subscribers as subs, domain as dom
+from core.util import util
+from core.msg import msgabc, msgext, msgftr
+from core.http import httpabc
+from core.proc import proch
+from servers.projectzomboid import subscribers as sub, domain as dom
 
 
 class OptionLoader:
@@ -55,7 +58,7 @@ class PlayerLoader:
         players = []
         if not response:
             return players
-        playerstore = await subs.CaptureSteamidSubscriber.get_playerstore(self._mailer, self._source)
+        playerstore = await sub.CaptureSteamidSubscriber.get_playerstore(self._mailer, self._source)
         for line in iter([m.data() for m in response]):
             if line.startswith('-'):
                 name = line[1:]

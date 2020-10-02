@@ -1,7 +1,9 @@
 from __future__ import annotations
 import asyncio
 import typing
-from core import msgabc, msgsvc, util
+from core.util import util
+from core.msg import msgabc, msgsvc
+
 
 
 class Context(msgabc.MulticastMailer):

@@ -4,7 +4,11 @@ import importlib
 import inspect
 import logging
 import uuid
-from core import contextsvc, msgabc, httpabc, httpext, svrabc, svrsvc, msgext, msgftr, util
+from core.util import util
+from core.msg import msgabc, msgext, msgftr
+from core.context import contextsvc
+from core.http import httpabc, httpext
+from core.system import svrabc, svrsvc
 
 
 class SystemService:

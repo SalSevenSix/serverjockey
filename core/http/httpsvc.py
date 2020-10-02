@@ -3,7 +3,10 @@ import inspect
 import gzip
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as h
-from core import httpabc, contextsvc, blobs, util
+from core.util import util
+from core.context import contextsvc
+from core.http import httpabc, blobs
+
 
 REQUEST = 'REQUEST'
 RESPONSE = 'RESPONSE'

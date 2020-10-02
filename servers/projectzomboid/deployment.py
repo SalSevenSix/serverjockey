@@ -1,5 +1,8 @@
 import typing
-from core import contextsvc, util, shell, httpabc, proch, httpsubs, aggtrf
+from core.util import aggtrf, util
+from core.context import contextsvc
+from core.http import httpabc, httpsubs
+from core.proc import proch, shell
 
 
 class Deployment:

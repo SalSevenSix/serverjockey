@@ -1,4 +1,9 @@
-from core import proch, prcext, msgftr, httpext, svrabc, svrsvc, httpsubs, msgext, aggtrf, msgtrf, contextsvc, httpabc
+from core.util import aggtrf
+from core.msg import msgext, msgftr, msgtrf
+from core.context import contextsvc
+from core.http import httpabc, httpext, httpsubs
+from core.proc import proch, prcext
+from core.system import svrabc, svrsvc
 from servers.projectzomboid import deployment as dep, handlers as hdr, subscribers as sub
 
 

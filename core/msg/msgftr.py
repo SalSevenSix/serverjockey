@@ -1,5 +1,5 @@
 import re
-from core import msgabc
+from core.msg import msgabc
 
 
 class AcceptAll(msgabc.Filter):

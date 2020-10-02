@@ -3,7 +3,8 @@ import logging
 import typing
 import asyncio
 from asyncio import streams, subprocess
-from core import msgabc, msgext, msgftr, cmdutil, util
+from core.util import cmdutil, util
+from core.msg import msgabc, msgext, msgftr
 
 
 class _PipeOutLineProducer(msgabc.Producer):

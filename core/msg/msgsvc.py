@@ -2,7 +2,8 @@ import inspect
 import logging
 import asyncio
 import typing
-from core import msgabc, msgftr, tasks, util
+from core.util import tasks, util
+from core.msg import msgabc, msgftr
 
 
 class TaskMailer(msgabc.Mailer):

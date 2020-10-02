@@ -2,7 +2,11 @@ import logging
 import argparse
 import sys
 import typing
-from core import contextsvc, httpabc, httpsvc, msgext, system, util
+from core.util import util
+from core.msg import msgext
+from core.context import contextsvc
+from core.http import httpabc, httpsvc
+from core.system import system
 
 LOG_FORMAT = '%(asctime)s %(levelname)05s %(message)s'
 DATE_FORMAT = '%Y%m%d%H%M%S'
@@ -16,8 +20,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
                    help='Debug mode')
     p.add_argument('--host', type=str, default='localhost',
                    help='Host name to use, default is "localhost"')
-    p.add_argument('--port', type=int, default=80,
-                   help='Port number to use, default is 80')
+    p.add_argument('--port', type=int, default=6164,
+                   help='Port number to use, default is 6164')
     p.add_argument('--logfile', type=str, default='./serverjockey.log',
                    help='Log file to use, relative to "home" unless starts with "/" or "."')
     p.add_argument('--clientfile', type=str,

@@ -3,7 +3,7 @@ import abc
 import enum
 import typing
 from aiohttp import web_exceptions as we
-from core import util
+from core.util import util
 
 SECURE = '_SECURE'
 

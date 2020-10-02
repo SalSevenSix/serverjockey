@@ -1,5 +1,8 @@
 import typing
-from core import svrsvc, msgabc, msgext, msgftr, proch, util
+from core.util import util
+from core.msg import msgabc, msgext, msgftr
+from core.proc import proch
+from core.system import svrsvc
 from servers.projectzomboid import domain as dom
 
 

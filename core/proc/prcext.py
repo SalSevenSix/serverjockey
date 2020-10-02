@@ -1,5 +1,9 @@
 import typing
-from core import msgabc, httpabc, proch, svrsvc, cmdutil, util
+from core.util import cmdutil, util
+from core.msg import msgabc
+from core.http import httpabc
+from core.proc import proch
+from core.system import svrsvc
 
 
 class ServerStateSubscriber(msgabc.Subscriber):

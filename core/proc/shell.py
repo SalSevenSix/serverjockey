@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing
-from core import util
+from core.util import util
 
 
 class Script:

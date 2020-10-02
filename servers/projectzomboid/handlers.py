@@ -1,4 +1,7 @@
-from core import httpabc, proch, prcext, msgext, msgtrf, util, aggtrf, cmdutil, msgabc
+from core.util import aggtrf, cmdutil, util
+from core.msg import msgabc, msgext, msgtrf
+from core.http import httpabc
+from core.proc import proch, prcext
 from servers.projectzomboid import subscribers as sub, loaders as ldr
 
 

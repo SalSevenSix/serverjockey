@@ -146,7 +146,7 @@ check_dependencies() {
 
 
 echo "Paths init..."
-cd $(dirname $0) || exit 1
+cd "$(dirname $0)" || exit 1
 JOCKEY_DIR="$(pwd)"
 cd "$JOCKEY_DIR/.." || exit 1
 HOME_DIR="$(pwd)/servers"
@@ -192,7 +192,7 @@ fi
 
 echo "Starting serverjockey webservice..."
 cd "$JOCKEY_DIR" || exit 1
-python3 -m pipenv run ./main.py --host "$HOST" --port "$PORT" --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" "$HOME_DIR" >/dev/null 2>&1 &
+python3 -m pipenv run python3 -m core.system --host "$HOST" --port "$PORT" --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" "$HOME_DIR" >/dev/null 2>&1 &
 [ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting serverjockey"
 
 echo "Starting serverlink discord bot..."
