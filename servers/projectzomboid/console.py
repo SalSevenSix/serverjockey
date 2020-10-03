@@ -2,7 +2,7 @@ from core.util import cmdutil, util
 from core.msg import msgabc
 from core.http import httpabc, httpext
 from core.proc import proch, prcext
-from servers.projectzomboid import playerstore as pls, loaders as ldr
+from servers.projectzomboid import playerstore as pls, domain as dom
 
 
 class Console:
@@ -55,7 +55,7 @@ class _OptionsHandler(httpabc.AsyncGetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        options = await ldr.OptionLoader(self._mailer, self, resource.child('option')).all()
+        options = await dom.OptionLoader(self._mailer, self, resource.child('option')).all()
         return [o.asdict() for o in options]
 
 
@@ -76,7 +76,7 @@ class _OptionCommandHandler(httpabc.AsyncPostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        if not await ldr.OptionLoader(self._mailer, self).get(util.get('option', data)):
+        if not await dom.OptionLoader(self._mailer, self).get(util.get('option', data)):
             return httpabc.ResponseBody.NOT_FOUND
         cmdline = _OptionCommandHandler.COMMANDS.get(data)
         if not cmdline or util.get('value', data) is None:
@@ -103,7 +103,7 @@ class _PlayersHandler(httpabc.AsyncGetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        players = await ldr.PlayerLoader(self._mailer, self, resource.child('player')).all()
+        players = await dom.PlayerLoader(self._mailer, self, resource.child('player')).all()
         return [o.asdict() for o in players]
 
 
@@ -121,7 +121,7 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        if not await ldr.PlayerLoader(self._mailer, self).get(util.get('player', data)):
+        if not await dom.PlayerLoader(self._mailer, self).get(util.get('player', data)):
             return httpabc.ResponseBody.NOT_FOUND
         cmdline = _PlayerCommandHandler.COMMANDS.get(data)
         if not cmdline:

@@ -21,7 +21,6 @@ class Deployment:
         self._playerdb_file = self._playerdb_dir + '/' + self._world_name + '.db'
         self._config_dir = self._world_dir + '/Server'
         self._save_dir = self._world_dir + '/Saves'
-        proch.ShellJobService(context)
 
     def world_dir(self):
         return self._world_dir
@@ -30,6 +29,7 @@ class Deployment:
         return self._executable
 
     async def initialise(self):
+        proch.ShellJobService(self._mailer)
         await self._build_world()
 
     def resources(self, resource: httpabc.Resource):

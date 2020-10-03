@@ -265,14 +265,14 @@ class _PathProcessor:
 
     @staticmethod
     def _build(resource: httpabc.Resource, args: typing.Dict[str, str]) -> str:
-        path, parent, name, kind = [], resource.parent(), resource.name(), resource.kind()
+        parent, name, kind = resource.parent(), resource.name(), resource.kind()
+        path, has_arg = [], name in args
         if parent is not None:
             path.append(_PathProcessor._build(parent, args))
-        if kind in (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED) and name in args:
-            if kind is httpabc.ResourceKind.ARG_ENCODED:
-                name = util.str_to_b10str(args[name])
-            else:
-                name = args[name]
+        if has_arg and kind is httpabc.ResourceKind.ARG:
+            name = args[name]
+        elif has_arg and kind is httpabc.ResourceKind.ARG_ENCODED:
+            name = util.str_to_b10str(args[name])
         path.append(name)
         return '/'.join(path)
 

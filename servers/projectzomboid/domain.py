@@ -1,5 +1,9 @@
 import typing
 from core.util import util
+from core.msg import msgabc, msgext, msgftr
+from core.http import httpabc
+from core.proc import proch
+from servers.projectzomboid import playerstore as pls
 
 
 class Option:
@@ -12,6 +16,39 @@ class Option:
 
     def asdict(self) -> dict:
         return self._data.copy()
+
+
+class OptionLoader:
+
+    def __init__(self,
+                 mailer: msgabc.MulticastMailer,
+                 source: typing.Any,
+                 resource: typing.Optional[httpabc.Resource] = None):
+        self._mailer = mailer
+        self._source = source
+        self._resource = resource
+
+    async def all(self) -> typing.Collection[Option]:
+        response = await proch.PipeInLineService.request(
+            self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                start_filter=msgftr.DataEquals('List of Server Options:'), include_start=False,
+                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True))
+        options = []
+        if not response:
+            return options
+        for line in iter([m.data() for m in response]):
+            if line.startswith('* '):
+                option, value = line[2:].split('=')
+                url = self._resource.path({'option': option}) if self._resource else None
+                options.append(Option(option, value, url))
+        return options
+
+    async def get(self, option: str) -> typing.Optional[Option]:
+        if option is None:
+            return None
+        options = [o for o in await self.all() if o.option() == option]
+        return util.single(options)
 
 
 class Player:
@@ -29,38 +66,36 @@ class Player:
         return self._data.copy()
 
 
-class PlayerStore:
+class PlayerLoader:
 
-    def __init__(self):
-        self._data: typing.Dict[str, typing.List[str]] = {}
+    def __init__(self,
+                 mailer: msgabc.MulticastMailer,
+                 source: typing.Any,
+                 resource: typing.Optional[httpabc.Resource] = None):
+        self._mailer = mailer
+        self._source = source
+        self._resource = resource
 
-    def add_player(self, player: Player):
-        names = util.get(player.steamid(), self._data)
-        if names:
-            if player.name() not in names:
-                names.append(player.name())
-        else:
-            self._data.update({player.steamid(): [player.name()]})
+    async def all(self) -> typing.Collection[Player]:
+        response = await proch.PipeInLineService.request(
+            self._mailer, self._source, 'players', msgext.MultiCatcher(
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                start_filter=msgftr.DataMatches('Players connected.*'), include_start=False,
+                stop_filter=msgftr.DataEquals(''), include_stop=False))
+        players = []
+        if not response:
+            return players
+        playerstore = await pls.PlayerStoreService.get(self._mailer, self._source)
+        for line in iter([m.data() for m in response]):
+            if line.startswith('-'):
+                name = line[1:]
+                steamid = playerstore.find_steamid(name)
+                url = self._resource.path({'player': name}) if self._resource else None
+                players.append(Player(steamid, name, url))
+        return players
 
-    def find_steamid(self, name: str) -> typing.Optional[str]:
-        for steamid, names in iter(self._data.items()):
-            if name in names:
-                return steamid
-        return None
-
-    def asdict(self) -> dict:
-        return self._data.copy()
-
-
-class PlayerEvent:
-
-    def __init__(self, event: str, player: Player):
-        self._created = util.now_millis()
-        self._event = event
-        self._player = player
-
-    def player(self) -> Player:
-        return self._player
-
-    def asdict(self) -> dict:
-        return {'created': self._created, 'event': self._event, 'player': self._player.asdict()}
+    async def get(self, name: str) -> typing.Optional[Player]:
+        if name is None:
+            return None
+        players = [o for o in await self.all() if o.name() == name]
+        return util.single(players)
