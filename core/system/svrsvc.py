@@ -55,6 +55,13 @@ class ServerService(msgabc.Subscriber):
 
     async def run(self):
         await self._clientfile.write()
+        try:
+            await self._run()
+        finally:
+            tasks.task_end(self._task)
+            await self._clientfile.delete()
+
+    async def _run(self):
         keep_running = True
         while keep_running:
             keep_running = await self._queue.get()   # blocking
@@ -72,8 +79,6 @@ class ServerService(msgabc.Subscriber):
             if exception:
                 ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                 ServerStatus.notify_details(self._context, self, {'exception': repr(exception)})
-        await self._clientfile.delete()
-        tasks.task_end(self._task)
 
     def accepts(self, message):
         return ServerService.FILTER.accepts(message)
@@ -172,7 +177,7 @@ class ServerStatus(msgabc.Subscriber):
 
 
 class _ClientFile:
-    UPDATED = 'ClientFile.Updated'
+    WRITTEN = 'ClientFile.Written'
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -180,12 +185,12 @@ class _ClientFile:
 
     async def write(self):
         data = util.obj_to_json({
-            'SERVERJOCKEY_URL': self._context.config('url'),
-            'SERVERJOCKEY_TOKEN': self._context.config('secret')
+            'SERVER_URL': self._context.config('url'),
+            'SERVER_TOKEN': self._context.config('secret')
         })
         if self._clientfile:
             await util.write_file(self._clientfile, data)
-            self._context.post(self, _ClientFile.UPDATED, self._clientfile)
+            self._context.post(self, _ClientFile.WRITTEN, self._clientfile)
         logging.debug('Client config: ' + data)
 
     async def delete(self):

@@ -61,7 +61,7 @@ function newPostRequest() {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
-      'X-Secret': config.SERVERJOCKEY_TOKEN
+      'X-Secret': config.SERVER_TOKEN
     }
   };
 }
@@ -76,7 +76,7 @@ function errorHandler(error, message) {
 }
 
 function doGet(message, path, tostring) {
-  fetch(config.SERVERJOCKEY_URL + path)
+  fetch(config.SERVER_URL + path)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       return response.json();
@@ -92,7 +92,7 @@ function doPost(message, path, body = null) {
   }
   var url = path;
   var request = newPostRequest();
-  if (path.startsWith('/')) { url = config.SERVERJOCKEY_URL + path; }
+  if (path.startsWith('/')) { url = config.SERVER_URL + path; }
   if (body != null) { request.body = JSON.stringify(body); }
   fetch(url, request)
     .then(function(response) {
@@ -143,7 +143,7 @@ const handlers = {
   },
 
   config: function(message, data) {
-    var prefix = config.SERVERJOCKEY_URL + '/config/'
+    var prefix = config.SERVER_URL + '/config/'
     var result = prefix + 'jvm\n';
     result += prefix + 'options\n';
     result += prefix + 'ini\n';
@@ -154,7 +154,7 @@ const handlers = {
   },
 
   log: function(message, data) {
-    message.channel.send(config.SERVERJOCKEY_URL + '/log');
+    message.channel.send(config.SERVER_URL + '/log');
   },
 
   world: function(message, data) {
@@ -261,7 +261,7 @@ const handlers = {
 //
 
 async function playerEventHook() {
-  var url = await fetch(config.SERVERJOCKEY_URL + '/players/subscribe', newPostRequest())
+  var url = await fetch(config.SERVER_URL + '/players/subscribe', newPostRequest())
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       return response.json();

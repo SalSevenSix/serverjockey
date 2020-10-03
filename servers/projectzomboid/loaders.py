@@ -3,7 +3,7 @@ from core.util import util
 from core.msg import msgabc, msgext, msgftr
 from core.http import httpabc
 from core.proc import proch
-from servers.projectzomboid import subscribers as sub, domain as dom
+from servers.projectzomboid import playerstore as pls, domain as dom
 
 
 class OptionLoader:
@@ -58,7 +58,7 @@ class PlayerLoader:
         players = []
         if not response:
             return players
-        playerstore = await sub.CaptureSteamidSubscriber.get_playerstore(self._mailer, self._source)
+        playerstore = await pls.PlayerStoreService.get(self._mailer, self._source)
         for line in iter([m.data() for m in response]):
             if line.startswith('-'):
                 name = line[1:]

@@ -10,12 +10,14 @@ from core.system import svrsvc   # TODO no no
 
 class ResourceBuilder:
 
-    def __init__(self, name: str = ''):
-        self._current = httpsvc.WebResource(name)
+    def __init__(self, resource: httpabc.Resource):
+        self._current = resource
 
     def push(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
-        resource = httpsvc.WebResource(name, kind, handler)
+        resource = self._current.child(name)
+        if resource is None:
+            resource = httpsvc.WebResource(name, kind, handler)
         self._current.append(resource)
         self._current = resource
         if handler:
@@ -36,13 +38,6 @@ class ResourceBuilder:
         if handler:
             logging.debug(resource.path() + ' => ' + util.obj_to_str(handler))
         return self
-
-    def build(self) -> httpabc.Resource:
-        while True:
-            if self._current.parent() is None:
-                return self._current
-            else:
-                self.pop()
 
     @staticmethod
     def _unpack(signature: str) -> typing.Tuple[str, httpabc.ResourceKind]:

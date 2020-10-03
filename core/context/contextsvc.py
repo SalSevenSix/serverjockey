@@ -5,7 +5,6 @@ from core.util import util
 from core.msg import msgabc, msgsvc
 
 
-
 class Context(msgabc.MulticastMailer):
 
     def __init__(self, **configuration: typing.Union[str, int, float]):

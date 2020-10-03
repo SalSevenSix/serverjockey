@@ -14,7 +14,7 @@ class Server(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def resources(self, name: str) -> httpabc.Resource:
+    def resources(self, resource: httpabc.Resource):
         pass
 
     @abc.abstractmethod

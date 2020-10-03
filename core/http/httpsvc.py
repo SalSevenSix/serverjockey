@@ -1,5 +1,4 @@
 from __future__ import annotations
-import inspect
 import gzip
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as h
@@ -66,8 +65,7 @@ class _RequestHandler:
         self._resources = resources
         self._request = request
         self._headers = _HeadersTool(request)
-        self._secure = context.is_debug() \
-            or self._headers.get(X_SECRET) == context.config('secret')
+        self._secure = context.is_debug() or self._headers.is_secure(context.config('secret'))
         self._method = httpabc.Method.resolve(self._request.method)
 
     async def handle(self) -> web.Response:
@@ -151,6 +149,10 @@ class _HeadersTool:
     def get(self, key: str) -> str:
         return self._headers.getone(key) if key in self._headers else None
 
+    def is_secure(self, secret: str) -> bool:
+        value = self.get(X_SECRET)
+        return value is not None and value == secret
+
     def get_content_type(self) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
         content_type = self.get(CONTENT_TYPE)
         if content_type is None:
@@ -221,30 +223,30 @@ class WebResource(httpabc.Resource):
             results.extend([c for c in self._children if c.kind() is kind])
         return results
 
-    def allows(self, method: httpabc.Method.GET) -> bool:
+    def allows(self, method: httpabc.Method) -> bool:
         if self._handler is None:
             return False
         if method is httpabc.Method.GET:
-            return hasattr(self._handler, 'handle_get')
+            return isinstance(self._handler, (httpabc.GetHandler, httpabc.AsyncGetHandler))
         if method is httpabc.Method.POST:
-            return hasattr(self._handler, 'handle_post')
+            return isinstance(self._handler, (httpabc.PostHandler, httpabc.AsyncPostHandler))
         return False
 
     async def handle_get(self, path: str, secure: bool = False) -> httpabc.ABC_RESPONSE:
         data = _PathProcessor(self).extract_args(path)
         if secure:
             httpabc.make_secure(data)
-        if inspect.iscoroutinefunction(self._handler.handle_get):
-            return await self._handler.handle_get(self, data)
-        return self._handler.handle_get(self, data)
+        if isinstance(self._handler, httpabc.GetHandler):
+            return self._handler.handle_get(self, data)
+        return await self._handler.handle_get(self, data)
 
     async def handle_post(self, path: str, body: httpabc.ABC_DATA_POST) -> httpabc.ABC_RESPONSE:
         if isinstance(body, dict):
             data = _PathProcessor(self).extract_args(path)
             body = {**data, **body}
-        if inspect.iscoroutinefunction(self._handler.handle_post):
-            return await self._handler.handle_post(self, body)
-        return self._handler.handle_post(self, body)
+        if isinstance(self._handler, httpabc.PostHandler):
+            return self._handler.handle_post(self, body)
+        return await self._handler.handle_post(self, body)
 
 
 class _PathProcessor:

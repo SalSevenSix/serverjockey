@@ -7,7 +7,7 @@ import uuid
 from core.util import util
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httpabc, httpsvc, httpext
 from core.system import svrabc, svrsvc
 
 
@@ -20,17 +20,17 @@ class SystemService:
         self._modules = {}
         self._home_dir = context.config('home')
         self._url = context.config('url')
-        self._resources = httpext.ResourceBuilder(self._url) \
+        self._resource = httpsvc.WebResource(self._url)
+        httpext.ResourceBuilder(self._resource) \
             .push('system') \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
-            .append('instances', _InstancesHandler(self)) \
-            .build()
-        self._instances = self._resources.child('instances')
+            .append('instances', _InstancesHandler(self))
+        self._instances = self._resource.child('instances')
         context.register(_Subscriber(self))
 
-    def resources(self) -> httpabc.Resource:
-        return self._resources
+    def resources(self):
+        return self._resource
 
     async def initialise(self) -> SystemService:
         ls = await util.directory_list_dict(self._home_dir)
@@ -85,8 +85,9 @@ class SystemService:
             subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
         server = self._create_server(subcontext)
         await server.initialise()
-        instance = server.resources(subcontext.config('identity'))
-        self._instances.append(instance)
+        resource = httpsvc.WebResource(subcontext.config('identity'))
+        server.resources(resource)
+        self._instances.append(resource)
         svrsvc.ServerService(subcontext, server).start()
         self._context.post(self, SystemService.SERVER_INITIALISED, subcontext)
         return subcontext
