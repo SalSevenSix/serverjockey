@@ -67,7 +67,6 @@ class _PlayerEventSubscriber(msgabc.Subscriber):
     LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
     LOGOUT_KEY = 'Disconnected player'
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
-    ALL_FILTER = msgftr.Or(LOGIN_FILTER, LOGOUT_FILTER)
     FILTER = msgftr.And(
         proch.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.Or(LOGIN_KEY_FILTER, LOGOUT_KEY_FILTER))
@@ -112,3 +111,6 @@ class _CaptureSteamidSubscriber(msgabc.Subscriber):
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             self._playerstore.add_player(message.data().player())
         return None
+
+
+PLAYER_EVENT_FILTER = msgftr.Or(_PlayerEventSubscriber.LOGIN_FILTER, _PlayerEventSubscriber.LOGOUT_FILTER)

@@ -1,5 +1,7 @@
 import asyncio
+import enum
 import logging
+import time
 import uuid
 import collections
 import typing
@@ -123,7 +125,7 @@ class Publisher:
 
     async def stop(self):
         try:
-            await asyncio.wait_for(self._task, 8.0)
+            await asyncio.wait_for(self._task, 3.0)
         except asyncio.TimeoutError:
             self._task.cancel()
 
@@ -137,6 +139,146 @@ class Publisher:
                 logging.error('Publishing exception. raised: %s', e)
             running = False if message is None else self._mailer.post(message)
         self._mailer.post(self, Publisher.END, self._producer)
+        tasks.task_end(self._task)
+
+
+class LoggingPublisher:
+    CRITICAL = 'LoggingPublisher.CRITICAL'
+    ERROR = 'LoggingPublisher.ERROR'
+    WARNING = 'LoggingPublisher.WARNING'
+    INFO = 'LoggingPublisher.INFO'
+    DEBUG = 'LoggingPublisher.DEBUG'
+    _LEVEL_MAP = {
+        logging.CRITICAL: CRITICAL,
+        logging.ERROR: ERROR,
+        logging.WARNING: WARNING,
+        logging.INFO: INFO,
+        logging.DEBUG: DEBUG
+    }
+
+    def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
+        self._mailer = mailer
+        self._source = source
+
+    def log(self, level, msg, *args, **kwargs):
+        self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args)
+
+    def debug(self, msg, *args, **kwargs):
+        self.log(logging.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self.log(logging.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self.log(logging.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self.log(logging.ERROR, msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self.log(logging.CRITICAL, msg, *args, **kwargs)
+
+    def fatal(self, msg, *args, **kwargs):
+        self.critical(msg, *args, **kwargs)
+
+
+class SetSubscriber(msgabc.Subscriber):
+
+    def __init__(self, *delegates: msgabc.Subscriber):
+        self._delegates = list(delegates)
+
+    def accepts(self, message):
+        for delegate in iter(self._delegates):
+            if delegate.accepts(message):
+                return True
+        return False
+
+    async def handle(self, message):
+        expired = []
+        for delegate in iter(self._delegates):
+            if delegate.accepts(message):
+                result = await msgabc.try_handle('SetSubscriber', delegate, message)
+                if result is not None:
+                    expired.append(delegate)
+        for delegate in iter(expired):
+            self._delegates.remove(delegate)
+        if len(self._delegates) == 0 or message is msgabc.STOP:
+            return True
+        return None
+
+
+class MonitorReply(enum.Enum):
+    AT_START = enum.auto(),
+    AT_END = enum.auto(),
+    NEVER = enum.auto()
+
+
+class MonitorSubscriber(msgabc.Subscriber):
+    START = 'MonitorSubscriber.Start'
+    END = 'MonitorSubscriber.End'
+
+    def __init__(self,
+                 mailer: msgabc.Mailer,
+                 delegate: msgabc.Subscriber,
+                 reply: MonitorReply = MonitorReply.NEVER):
+        self._mailer = mailer
+        self._delegate = delegate
+        self._reply = reply
+
+    def accepts(self, message):
+        return self._delegate.accepts(message)
+
+    async def handle(self, message):
+        source = message.source()
+        self._mailer.post(source, MonitorSubscriber.START, self._delegate,
+                          message if self._reply is MonitorReply.AT_START else None)
+        result = await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
+        self._mailer.post(source, MonitorSubscriber.END, result,
+                          message if self._reply is MonitorReply.AT_END else None)
+        return result
+
+
+class TimeoutSubscriber(msgabc.Subscriber):
+    EXCEPTION = 'TimeoutSubscriber.Exception'
+
+    def __init__(self, mailer: msgabc.Mailer, delegate: msgabc.Subscriber, timeout: float = 1.0):
+        self._mailer = mailer
+        self._delegate = delegate
+        self._timeout = timeout
+        self._queue = asyncio.Queue(maxsize=2)
+        self._task = tasks.task_start(self._run(), name=util.obj_to_str(self))
+        self._running = True
+
+    def accepts(self, message):
+        return self._delegate.accepts(message) or message is msgabc.STOP
+
+    async def handle(self, message):
+        if message is msgabc.STOP:
+            self._running = False
+            self._queue.put_nowait(msgabc.STOP)
+            return True
+        source = message.source()
+        timeout = self._timeout - (time.time() - message.created())
+        if timeout < 0.0:
+            self._mailer.post(source, TimeoutSubscriber.EXCEPTION, Exception('Timeout in mailer queue'), message)
+            return None if self._running else True
+        try:
+            await asyncio.wait_for(self._queue.join(), timeout)
+            if self._running:
+                self._queue.put_nowait(message)
+            else:
+                self._mailer.post(source, TimeoutSubscriber.EXCEPTION, Exception('Job task has ended'), message)
+        except asyncio.TimeoutError:
+            self._mailer.post(source, TimeoutSubscriber.EXCEPTION, Exception('Timeout in job queue'), message)
+        return None if self._running else True
+
+    async def _run(self):
+        while self._running:
+            message = await self._queue.get()
+            if self._running:
+                result = await msgabc.try_handle('TimeoutSubscriber', self._delegate, message)
+                self._running = self._running and result is None
+                self._queue.task_done()
         tasks.task_end(self._task)
 
 
@@ -204,7 +346,7 @@ class LoggerSubscriber(msgabc.Subscriber):
 
     def __init__(self,
                  level: int = logging.DEBUG,
-                 transformer: msgabc.Transformer = msgtrf.ToString(),
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
                  msg_filter: msgabc.Filter = msgftr.AcceptAll()):
         self._level = level
         self._transformer = transformer
@@ -221,7 +363,7 @@ class LoggerSubscriber(msgabc.Subscriber):
 class PrintSubscriber(msgabc.Subscriber):
 
     def __init__(self,
-                 transformer: msgabc.Transformer = msgtrf.ToString(),
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  file: typing.Optional[str] = None,
                  flush: bool = False):

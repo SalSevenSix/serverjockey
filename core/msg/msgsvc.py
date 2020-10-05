@@ -46,29 +46,21 @@ class TaskMailer(msgabc.Mailer):
         await task
 
     async def _run(self) -> typing.Any:
-        response = None
+        result = None
         running = True
         while running:
             message = await self._queue.get()   # blocking
-            response = None
-            try:
-                if (message is not msgabc.STOP) or (message is msgabc.STOP and self._subscriber.accepts(msgabc.STOP)):
-                    if inspect.iscoroutinefunction(self._subscriber.handle):
-                        response = await self._subscriber.handle(message)
-                    else:
-                        response = self._subscriber.handle(message)
-            except Exception as e:
-                logging.error('Handling exception. raised: %s', e)
-                response = e
-            finally:
-                if response is not None or message is msgabc.STOP:
-                    running = False
-                    if response is None:
-                        response = True
+            result = None
+            if (message is not msgabc.STOP) or (message is msgabc.STOP and self._subscriber.accepts(msgabc.STOP)):
+                result = await msgabc.try_handle('TaskMailer', self._subscriber, message)
+            if result is not None or message is msgabc.STOP:
+                running = False
+                if result is None:
+                    result = True
             self._queue.task_done()
         tasks.task_end(self._task)
         self._task, self._queue = None, None
-        return response
+        return result
 
 
 class TaskMulticastMailer(msgabc.MulticastMailer):

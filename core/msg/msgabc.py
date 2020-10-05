@@ -1,6 +1,8 @@
 from __future__ import annotations
 import abc
 import asyncio
+import inspect
+import logging
 import time
 import uuid
 import typing
@@ -96,3 +98,15 @@ class Producer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def next_message(self) -> typing.Optional[Message]:
         pass
+
+
+async def try_handle(source: str, handler: Handler, message: Message) -> typing.Any:
+    try:
+        if inspect.iscoroutinefunction(handler.handle):
+            result = await handler.handle(message)
+        else:
+            result = handler.handle(message)
+    except Exception as e:
+        logging.error('%s handling exception. raised: %s', source, e)
+        result = e
+    return result

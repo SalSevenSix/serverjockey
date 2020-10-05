@@ -34,6 +34,9 @@ class Server(svrabc.Server):
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', httpext.ServerCommandHandler(self._context)) \
             .pop() \
+            .push('players') \
+            .append('subscribe', self._httpsubs.handler(pls.PLAYER_EVENT_FILTER, msgtrf.DataAsDict())) \
+            .pop() \
             .push('log', _ConsoleLogHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \

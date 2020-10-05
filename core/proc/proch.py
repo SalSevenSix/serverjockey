@@ -9,8 +9,8 @@ from core.msg import msgabc, msgext, msgftr
 
 class _PipeOutLineProducer(msgabc.Producer):
 
-    def __init__(self, mailer: msgabc.Mailer, process: typing.Any, name: str, pipe: streams.StreamReader):
-        self._process = process
+    def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str, pipe: streams.StreamReader):
+        self._source = source
         self._name = name
         self._pipe = pipe
         self._publisher = msgext.Publisher(mailer, self)
@@ -28,7 +28,7 @@ class _PipeOutLineProducer(msgabc.Producer):
         if line is None or line == b'':
             logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
             return None
-        return msgabc.Message(self._process, self._name, line.decode().strip())
+        return msgabc.Message(self._source, self._name, line.decode().strip())
 
 
 class _PipeInLineCommand:
@@ -226,13 +226,13 @@ class ServerProcess:
             self._process = None
 
 
-class ShellJobService(msgabc.Subscriber):
-    STDERR_LINE = 'ShellJobService.StdErrLine'
-    STDOUT_LINE = 'ShellJobService.StdOutLine'
-    START_JOB = 'ShellJobService.StartJob'
-    STATE_STARTED = 'ShellJobService.StateStarted'
-    STATE_EXCEPTION = 'ShellJobService.StateException'
-    STATE_COMPLETE = 'ShellJobService.StateComplete'
+class ShellJob(msgabc.Subscriber):
+    STDERR_LINE = 'ShellJob.StdErrLine'
+    STDOUT_LINE = 'ShellJob.StdOutLine'
+    START_JOB = 'ShellJob.StartJob'
+    STATE_STARTED = 'ShellJob.StateStarted'
+    STATE_EXCEPTION = 'ShellJob.StateException'
+    STATE_COMPLETE = 'ShellJob.StateComplete'
     JOB_DONE = (STATE_EXCEPTION, STATE_COMPLETE)
 
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
@@ -246,33 +246,33 @@ class ShellJobService(msgabc.Subscriber):
             source: typing.Any,
             script: str) -> typing.Union[subprocess.Process, Exception]:
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, ShellJobService.START_JOB, script)
+        response = await messenger.request(source, ShellJob.START_JOB, script)
         return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
-        mailer.register(self)
 
     def accepts(self, message):
-        return ShellJobService.FILTER.accepts(message)
+        return ShellJob.FILTER.accepts(message)
 
     async def handle(self, message):
         stderr, stdout, replied = None, None, False
+        source = message.source()
         try:
             process = await asyncio.create_subprocess_shell(
                 message.data(),
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE)
-            stderr = _PipeOutLineProducer(self._mailer, self, ShellJobService.STDERR_LINE, process.stderr)
-            stdout = _PipeOutLineProducer(self._mailer, self, ShellJobService.STDOUT_LINE, process.stdout)
-            replied = self._mailer.post(self, ShellJobService.STATE_STARTED, process, message)
+            stderr = _PipeOutLineProducer(self._mailer, source, ShellJob.STDERR_LINE, process.stderr)
+            stdout = _PipeOutLineProducer(self._mailer, source, ShellJob.STDOUT_LINE, process.stdout)
+            replied = self._mailer.post(source, ShellJob.STATE_STARTED, process, message)
             rc = await process.wait()
             if rc != 0:
                 raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(process, rc))
-            self._mailer.post(self, ShellJobService.STATE_COMPLETE, process)
+            self._mailer.post(source, ShellJob.STATE_COMPLETE, process)
         except Exception as e:
-            self._mailer.post(self, ShellJobService.STATE_EXCEPTION, e, None if replied else message)
+            self._mailer.post(source, ShellJob.STATE_EXCEPTION, e, None if replied else message)
         finally:
             await util.silently_cleanup(stdout)
             await util.silently_cleanup(stderr)

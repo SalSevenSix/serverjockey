@@ -99,10 +99,11 @@ class _Subscriber(msgabc.Subscriber):
         self._identity = identity
         self._transformer = selector.transformer
         self._aggregator = selector.aggregator
+        self._collect_filter = selector.msg_filter
         self._completed_filter = selector.completed_filter
         self._msg_filter = msgftr.Or(
             _InactivityCheck.FILTER,
-            selector.msg_filter,
+            self._collect_filter,
             self._completed_filter,
             msgftr.IsStop())
         self._poll_timeout = 60.0
@@ -144,10 +145,13 @@ class _Subscriber(msgabc.Subscriber):
     async def _get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
         if self._aggregator is None:
             message = await self._get_one()
-            if message is None:
-                return None
-            if message is msgabc.STOP or self._completed_filter.accepts(message):
-                return msgabc.STOP
+            if message is None or message is msgabc.STOP:
+                return message
+            if self._completed_filter.accepts(message):
+                if self._collect_filter.accepts(message):
+                    self._queue.put_nowait(msgabc.STOP)
+                else:
+                    return msgabc.STOP
             return self._transformer.transform(message)
         messages = await self._get_all()
         message_count = len(messages)
@@ -157,10 +161,11 @@ class _Subscriber(msgabc.Subscriber):
         if last_message is msgabc.STOP:
             return msgabc.STOP
         if self._completed_filter.accepts(last_message):
-            if message_count == 1:
-                return msgabc.STOP
-            messages.remove(last_message)
-            self._queue.put_nowait(msgabc.STOP)   # re-queue to kill next poll
+            if not self._collect_filter.accepts(last_message):
+                if message_count == 1:
+                    return msgabc.STOP
+                messages.remove(last_message)
+            self._queue.put_nowait(msgabc.STOP)
         return self._aggregator.aggregate([self._transformer.transform(m) for m in messages])
 
     async def _get_all(self) -> typing.List[msgabc.Message]:

@@ -20,17 +20,32 @@ class DataAsDict(msgabc.Transformer):
         return util.obj_to_dict(message.data())
 
 
+class ToLogLine(msgabc.Transformer):
+
+    def transform(self, message):
+        return 'msg> ' + ToLogLine._transform(message, 40)
+
+    @staticmethod
+    def _transform(message, pad):
+        line = [util.obj_to_str(message.source()).ljust(pad),
+                str(message.name()).ljust(pad),
+                util.obj_to_str(message.data()).ljust(pad)]
+        if message.has_reply_to():
+            line.append('[' + ToLogLine._transform(message.reply_to(), 10) + ']')
+        return ' '.join(line)
+
+
 class ToString(msgabc.Transformer):
 
     def transform(self, message):
         line = [str(util.to_millis(message.created())),
                 str(message.identity()),
-                str(message.name()).ljust(32),
+                repr(message.source()),
+                str(message.name()),
                 util.obj_to_str(message.data())]
         if message.has_reply_to():
             line.append('[' + self.transform(message.reply_to()) + ']')
-        return ' '.join(line)
-
+        return '\n'.join(line)
 
 class ToJson(msgabc.Transformer):
 

@@ -63,7 +63,13 @@ def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
 
 
 def obj_to_str(obj: typing.Any) -> str:
-    return repr(obj).replace(' object at ', ':')
+    value = repr(obj)
+    if obj is None or isinstance(obj, (str, tuple, list, dict, bool, int, float)):
+        return value
+    result = value.replace(' object at ', ':')
+    if result == value:
+        return result
+    return result[:-1].split('.')[-1]
 
 
 def obj_to_dict(obj: typing.Any) -> typing.Optional[dict]:
@@ -155,10 +161,10 @@ def build_url(
     return ''.join(parts)
 
 
-def get(key, dictionary):
+def get(key: typing.Any, dictionary: dict, default: typing.Any = None):
     if key and dictionary and isinstance(dictionary, dict) and key in dictionary:
         return dictionary[key]
-    return None
+    return default
 
 
 def left_chop_and_strip(line: str, keyword: str) -> str:
@@ -222,7 +228,7 @@ async def create_directory(path: str):
         await aiofilesos.mkdir(path)
 
 
-async def archive_directory(path: str) -> str:
+async def archive_directory(path: str, logger=None) -> str:
     parts = path.split('/')
     if parts[-1] == '':
         del parts[-1]   # chop trailing '/'
@@ -231,7 +237,9 @@ async def archive_directory(path: str) -> str:
     file.append('..')
     file.append(parts[-1] + '-' + str(now_millis()))
     file = '/'.join(file)
-    await _make_archive(file, 'zip', root_dir=root_dir)
+    await _make_archive(file, 'zip', root_dir=root_dir, logger=logger)
+    if logger:
+        logger.info('Archive created: ' + file)
     return file
 
 

@@ -13,10 +13,9 @@ class Script:
         for name, lines in iter(self._script.items()):
             text.append('# ' + name)
             if isinstance(lines, (tuple, list)):
-                for line in iter(lines):
-                    text.append(line)
+                text.extend(lines)
             else:
-                text.append(str(lines))
+                text.append(lines)
         return '\n'.join(text)
 
     def include(self, name: str, lines: typing.Union[str, typing.Collection[str]]) -> Script:
