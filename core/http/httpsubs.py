@@ -39,13 +39,10 @@ class Selector:
         self.completed_filter = completed_filter if completed_filter else msgftr.AcceptNothing()
 
 
-class HttpSubscriptionService(msgabc.Subscriber):
+class HttpSubscriptionService(msgabc.AbcSubscriber):
     SUBSCRIBE = 'HttpSubscriptionService.SubscribeRequest'
-    SUBSCRIBE_FILTER = msgftr.NameIs(SUBSCRIBE)
     SUBSCRIBE_RESPONSE = 'HttpSubscriptionService.SubscribeResponse'
     UNSUBSCRIBE = 'HttpSubscriptionService.UnsubscribeRequest'
-    UNSUBSCRIBE_FILTER = msgftr.NameIs(UNSUBSCRIBE)
-    FILTER = msgftr.Or(SUBSCRIBE_FILTER, UNSUBSCRIBE_FILTER)
 
     @staticmethod
     async def subscribe(mailer: msgabc.MulticastMailer, source: typing.Any, selector: Selector) -> str:
@@ -58,6 +55,7 @@ class HttpSubscriptionService(msgabc.Subscriber):
         mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity)
 
     def __init__(self, mailer: msgabc.MulticastMailer, subscriptions_url: str):
+        super().__init__(msgftr.NameIn((HttpSubscriptionService.SUBSCRIBE, HttpSubscriptionService.UNSUBSCRIBE)))
         self._mailer = mailer
         self._subscriptions_url = subscriptions_url
         self._subscriptions: typing.Dict[str, _Subscriber] = {}
@@ -67,11 +65,9 @@ class HttpSubscriptionService(msgabc.Subscriber):
     def lookup(self, identity: str) -> _Subscriber:
         return util.get(identity, self._subscriptions)
 
-    def accepts(self, message):
-        return HttpSubscriptionService.FILTER.accepts(message)
-
     def handle(self, message):
-        if HttpSubscriptionService.SUBSCRIBE_FILTER.accepts(message):
+        name = message.name()
+        if name is HttpSubscriptionService.SUBSCRIBE:
             identity = str(uuid.uuid4())
             url = self._subscriptions_url + '/' + identity
             selector = message.data()
@@ -79,40 +75,38 @@ class HttpSubscriptionService(msgabc.Subscriber):
             self._subscriptions.update({identity: subscriber})
             self._mailer.register(subscriber)
             self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, url, message)
-        if HttpSubscriptionService.UNSUBSCRIBE_FILTER.accepts(message):
+        if name is HttpSubscriptionService.UNSUBSCRIBE:
             identity = message.data()
+            if identity:
+                identity = str(identity).split('/')[-1]
+            else:
+                return None
             if self.lookup(identity):
                 self._subscriptions.pop(identity)
         return None
 
-    def subscriptions_handler(self) -> _SubscriptionsHandler:
-        return _SubscriptionsHandler(self)
+    def subscriptions_handler(self, name: str) -> _SubscriptionsHandler:
+        return _SubscriptionsHandler(self, name)
 
     def handler(self, *argv) -> _SubscribeHandler:
         return _SubscribeHandler(self._mailer, Selector.from_argv(*argv))
 
 
-class _Subscriber(msgabc.Subscriber):
+class _Subscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer, identity: str, selector: Selector):
+        super().__init__(msgftr.Or(_InactivityCheck.FILTER, msgftr.IsStop(),
+                                   selector.msg_filter, selector.completed_filter))
         self._mailer = mailer
         self._identity = identity
         self._transformer = selector.transformer
         self._aggregator = selector.aggregator
         self._collect_filter = selector.msg_filter
         self._completed_filter = selector.completed_filter
-        self._msg_filter = msgftr.Or(
-            _InactivityCheck.FILTER,
-            self._collect_filter,
-            self._completed_filter,
-            msgftr.IsStop())
         self._poll_timeout = 60.0
         self._inactivity_timeout = 120.0
         self._queue = asyncio.Queue(maxsize=200)
         self._time_last_activity = time.time()
-
-    def accepts(self, message):
-        return self._msg_filter.accepts(message)
 
     def handle(self, message):
         if _InactivityCheck.FILTER.accepts(message):
@@ -197,11 +191,13 @@ class _Subscriber(msgabc.Subscriber):
 
 class _SubscriptionsHandler(httpabc.AsyncGetHandler):
 
-    def __init__(self, service: HttpSubscriptionService):
+    def __init__(self, service: HttpSubscriptionService, name: str):
         self._service = service
+        self._name = name
 
     async def handle_get(self, resource, data):
-        subscriber = self._service.lookup(util.get('identity', data))
+        identity = util.get(self._name, data)
+        subscriber = self._service.lookup(identity)
         if subscriber is None:
             return httpabc.ResponseBody.NOT_FOUND
         result = await subscriber.get()
@@ -223,16 +219,14 @@ class _SubscribeHandler(httpabc.AsyncPostHandler):
         return {'url': url}
 
 
-class _InactivityCheck(msgabc.Subscriber):
+class _InactivityCheck(msgabc.AbcSubscriber):
     CHECK_INACTIVITY = 'HttpSubscriber.CheckInactivity'
     FILTER = msgftr.NameIs(CHECK_INACTIVITY)
 
     def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.AcceptAll())
         self._mailer = mailer
         self._last_check = time.time()
-
-    def accepts(self, message):
-        return True
 
     def handle(self, message):
         now = message.created()

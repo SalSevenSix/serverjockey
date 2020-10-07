@@ -92,7 +92,7 @@ class Resource:
         pass
 
     @abc.abstractmethod
-    async def handle_get(self, path: str, secure: bool = False) -> ABC_RESPONSE:
+    async def handle_get(self, path: str, secure: bool) -> ABC_RESPONSE:
         pass
 
     @abc.abstractmethod

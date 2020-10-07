@@ -7,7 +7,7 @@ from core.context import contextsvc
 from core.system import svrabc
 
 
-class ServerService(msgabc.Subscriber):
+class ServerService(msgabc.AbcSubscriber):
     START = 'ServerService.Start'
     RESTART = 'ServerService.Restart'
     STOP = 'ServerService.Stop'
@@ -15,7 +15,6 @@ class ServerService(msgabc.Subscriber):
     DELETE_ME = 'ServerService.DeletedMe'
     SHUTDOWN = 'ServerService.Shutdown'
     SHUTDOWN_RESPONSE = 'ServerService.ShutdownResponse'
-    FILTER = msgftr.NameIn((START, RESTART, STOP, DELETE, SHUTDOWN))
 
     @staticmethod
     def signal_start(mailer: msgabc.Mailer, source: typing.Any):
@@ -40,6 +39,8 @@ class ServerService(msgabc.Subscriber):
         return response.data()
 
     def __init__(self, context: contextsvc.Context, server: svrabc.Server):
+        super().__init__(msgftr.NameIn((ServerService.START, ServerService.RESTART, ServerService.STOP,
+                                        ServerService.DELETE, ServerService.SHUTDOWN)))
         self._context = context
         self._server = server
         self._clientfile = _ClientFile(context)
@@ -80,9 +81,6 @@ class ServerService(msgabc.Subscriber):
                 ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                 ServerStatus.notify_details(self._context, self, {'exception': repr(exception)})
 
-    def accepts(self, message):
-        return ServerService.FILTER.accepts(message)
-
     async def handle(self, message):
         action = message.name()
         if not self._running and action is ServerService.START:
@@ -112,7 +110,7 @@ class ServerService(msgabc.Subscriber):
         return None
 
 
-class ServerStatus(msgabc.Subscriber):
+class ServerStatus(msgabc.AbcSubscriber):
     UPDATED = 'ServerStatus.Updated'
     UPDATED_FILTER = msgftr.NameIs(UPDATED)
     REQUEST = 'ServerStatus.Request'
@@ -120,7 +118,6 @@ class ServerStatus(msgabc.Subscriber):
     NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'
     NOTIFY_STATE = 'ServerStatus.NotifyState'
     NOTIFY_DETAILS = 'ServerStatus.NotifyDetails'
-    FILTER = msgftr.NameIn((REQUEST, NOTIFY_RUNNING, NOTIFY_STATE, NOTIFY_DETAILS))
 
     @staticmethod
     async def get_status(mailer: msgabc.MulticastMailer, source: typing.Any):
@@ -141,11 +138,10 @@ class ServerStatus(msgabc.Subscriber):
         mailer.post(source, ServerStatus.NOTIFY_DETAILS, value)
 
     def __init__(self, context: contextsvc.Context):
+        super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,
+                                        ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
         self._context = context
         self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'INIT', 'details': {}}
-
-    def accepts(self, message):
-        return ServerStatus.FILTER.accepts(message)
 
     async def handle(self, message):
         action = message.name()

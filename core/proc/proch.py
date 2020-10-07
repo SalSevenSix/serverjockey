@@ -226,7 +226,7 @@ class ServerProcess:
             self._process = None
 
 
-class ShellJob(msgabc.Subscriber):
+class ShellJob(msgabc.AbcSubscriber):
     STDERR_LINE = 'ShellJob.StdErrLine'
     STDOUT_LINE = 'ShellJob.StdOutLine'
     START_JOB = 'ShellJob.StartJob'
@@ -234,11 +234,9 @@ class ShellJob(msgabc.Subscriber):
     STATE_EXCEPTION = 'ShellJob.StateException'
     STATE_COMPLETE = 'ShellJob.StateComplete'
     JOB_DONE = (STATE_EXCEPTION, STATE_COMPLETE)
-
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
     FILTER_JOB_DONE = msgftr.NameIn(JOB_DONE)
-    FILTER = msgftr.NameIs(START_JOB)
 
     @staticmethod
     async def start_job(
@@ -250,10 +248,8 @@ class ShellJob(msgabc.Subscriber):
         return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(msgftr.NameIs(ShellJob.START_JOB))
         self._mailer = mailer
-
-    def accepts(self, message):
-        return ShellJob.FILTER.accepts(message)
 
     async def handle(self, message):
         stderr, stdout, replied = None, None, False

@@ -16,9 +16,11 @@ class Message:
             return vargs[0]
         return Message(*vargs)
 
-    def __init__(
-            self, source: typing.Any, name: str, data: typing.Any = None,
-            reply_to: typing.Optional[Message] = None):
+    def __init__(self,
+                 source: typing.Any,
+                 name: str,
+                 data: typing.Any = None,
+                 reply_to: typing.Optional[Message] = None):
         self._identity = uuid.uuid4()
         self._created = time.time()
         self._source = source
@@ -98,6 +100,18 @@ class Producer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def next_message(self) -> typing.Optional[Message]:
         pass
+
+
+class AbcSubscriber(Subscriber):
+
+    def __init__(self, msg_filter: Filter):
+        self._msg_filter = msg_filter
+
+    def accepts(self, message):
+        return self._msg_filter.accepts(message)
+
+    async def handle(self, message):
+        raise NotImplemented()
 
 
 async def try_handle(source: str, handler: Handler, message: Message) -> typing.Any:

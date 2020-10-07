@@ -1,4 +1,3 @@
-import inspect
 import logging
 import asyncio
 import typing
@@ -66,7 +65,7 @@ class TaskMailer(msgabc.Mailer):
 class TaskMulticastMailer(msgabc.MulticastMailer):
 
     def __init__(self, msg_filter: msgabc.Filter = msgftr.AcceptAll()):
-        self._subscriber = self._Subscriber(self, msg_filter)
+        self._subscriber = _TaskMulticastSubscriber(self, msg_filter)
         self._mailer = TaskMailer(self._subscriber)
 
     def start(self) -> asyncio.Task:
@@ -84,25 +83,24 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
         for mailer in iter(expired):
             await mailer.stop()   # This may post STOP again but they will just be ignored
 
-    class _Subscriber(msgabc.Subscriber):
-        def __init__(self, mailer: msgabc.Mailer, msg_filter: msgabc.Filter):
-            self.mailer = mailer
-            self.msg_filter = msg_filter
-            self.mailers = []
 
-        def add_mailer(self, subscriber: msgabc.Subscriber) -> TaskMailer:
-            mailer = TaskMailer(subscriber)
-            self.mailers.append(mailer)
-            return mailer
+class _TaskMulticastSubscriber(msgabc.AbcSubscriber):
 
-        def accepts(self, message):
-            return message is msgabc.STOP or self.msg_filter.accepts(message)
+    def __init__(self, mailer: msgabc.Mailer, msg_filter: msgabc.Filter):
+        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
+        self.mailer = mailer
+        self.mailers = []
 
-        def handle(self, message):
-            expired = []
-            for mailer in iter(self.mailers):
-                if not mailer.post(message):
-                    expired.append(mailer)
-            for mailer in iter(expired):
-                self.mailers.remove(mailer)
-            return None
+    def add_mailer(self, subscriber: msgabc.Subscriber) -> TaskMailer:
+        mailer = TaskMailer(subscriber)
+        self.mailers.append(mailer)
+        return mailer
+
+    def handle(self, message):
+        expired = []
+        for mailer in iter(self.mailers):
+            if not mailer.post(message):
+                expired.append(mailer)
+        for mailer in iter(expired):
+            self.mailers.remove(mailer)
+        return None

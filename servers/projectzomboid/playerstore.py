@@ -58,7 +58,7 @@ class PlayerEvent:
         return {'created': self._created, 'event': self._event, 'player': self._player.asdict()}
 
 
-class _PlayerEventSubscriber(msgabc.Subscriber):
+class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
     LOGIN_KEY = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
@@ -67,15 +67,12 @@ class _PlayerEventSubscriber(msgabc.Subscriber):
     LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
     LOGOUT_KEY = 'Disconnected player'
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
-    FILTER = msgftr.And(
-        proch.ServerProcess.FILTER_STDOUT_LINE,
-        msgftr.Or(LOGIN_KEY_FILTER, LOGOUT_KEY_FILTER))
 
     def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.And(
+            proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER, _PlayerEventSubscriber.LOGOUT_KEY_FILTER)))
         self._mailer = mailer
-
-    def accepts(self, message):
-        return _PlayerEventSubscriber.FILTER.accepts(message)
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
@@ -92,23 +89,20 @@ class _PlayerEventSubscriber(msgabc.Subscriber):
         return None
 
 
-class _CaptureSteamidSubscriber(msgabc.Subscriber):
+class _CaptureSteamidSubscriber(msgabc.AbcSubscriber):
     REQUEST = 'CaptureSteadIdSubscriber.Request'
     RESPONSE = 'CaptureSteadIdSubscriber.Response'
-    REQUEST_FILTER = msgftr.NameIs(REQUEST)
-    FILTER = msgftr.Or(REQUEST_FILTER, _PlayerEventSubscriber.LOGIN_FILTER)
 
     def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.Or(msgftr.NameIs(_CaptureSteamidSubscriber.REQUEST),
+                                   _PlayerEventSubscriber.LOGIN_FILTER))
         self._mailer = mailer
         self._playerstore = PlayerStore()
 
-    def accepts(self, message):
-        return _CaptureSteamidSubscriber.FILTER.accepts(message)
-
     def handle(self, message):
-        if _CaptureSteamidSubscriber.REQUEST_FILTER.accepts(message):
+        if message.name() is _CaptureSteamidSubscriber.REQUEST:
             self._mailer.post(self, _CaptureSteamidSubscriber.RESPONSE, self._playerstore, message)
-        if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
+        else:
             self._playerstore.add_player(message.data().player())
         return None
 

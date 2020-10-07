@@ -232,7 +232,7 @@ class WebResource(httpabc.Resource):
             return isinstance(self._handler, (httpabc.PostHandler, httpabc.AsyncPostHandler))
         return False
 
-    async def handle_get(self, path: str, secure: bool = False) -> httpabc.ABC_RESPONSE:
+    async def handle_get(self, path: str, secure: bool) -> httpabc.ABC_RESPONSE:
         data = _PathProcessor(self).extract_args(path)
         if secure:
             httpabc.make_secure(data)

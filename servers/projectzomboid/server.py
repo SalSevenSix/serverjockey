@@ -3,7 +3,7 @@ from core.msg import msgabc, msgext, msgftr, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httpext, httpsubs
 from core.proc import proch
-from core.system import svrabc, svrsvc
+from core.system import svrabc, svrsvc, svrext
 from servers.projectzomboid import deployment as dep, playerstore as pls, console as con, messaging as msg
 
 
@@ -30,9 +30,9 @@ class Server(svrabc.Server):
         self._deployment.resources(resource)
         self._console.resources(resource)
         httpext.ResourceBuilder(resource) \
-            .push('server', httpext.ServerStatusHandler(self._context)) \
+            .push('server', svrext.ServerStatusHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .append('{command}', httpext.ServerCommandHandler(self._context)) \
+            .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
             .push('players') \
             .append('subscribe', self._httpsubs.handler(pls.PLAYER_EVENT_FILTER, msgtrf.DataAsDict())) \
@@ -41,14 +41,13 @@ class Server(svrabc.Server):
             .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .push('subscriptions') \
-            .append('{identity}', self._httpsubs.subscriptions_handler())
+            .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
-        await proch.ServerProcess(self._context, self._deployment.executable()) \
-            .append_arg('-cachedir=' + self._deployment.world_dir()) \
+        await self._deployment.new_server_process() \
             .use_pipeinsvc(self._pipeinsvc) \
             .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=60)) \
-            .run()   # sync
+            .run()
 
     async def stop(self):
         await proch.PipeInLineService.request(self._context, self, 'quit')

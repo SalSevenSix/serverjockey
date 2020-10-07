@@ -1,11 +1,10 @@
 from __future__ import annotations
 import logging
-import re
 import typing
+import re
 from core.util import util
-from core.msg import msgabc
-from core.http import httpabc, httpsvc
-from core.system import svrsvc   # TODO no no
+from core.msg import msgabc, msgext, msgftr
+from core.http import httpabc, httpsvc, httpsubs
 
 
 class ResourceBuilder:
@@ -49,31 +48,114 @@ class ResourceBuilder:
         return signature, httpabc.ResourceKind.PATH
 
 
-class ServerStatusHandler(httpabc.AsyncGetHandler):
+class MessengerHandler(httpabc.AsyncPostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self,
+                 mailer: msgabc.MulticastMailer,
+                 name: str,
+                 data: typing.Optional[httpabc.ABC_DATA_GET] = None,
+                 selector: typing.Optional[httpsubs.Selector] = None):
         self._mailer = mailer
+        self._name = name
+        self._data = data
+        self._selector = selector
+
+    async def handle_post(self, resource, data):
+        messenger = msgext.SynchronousMessenger(self._mailer)
+        url, source = None, util.obj_to_str(messenger)
+        if isinstance(data, dict):
+            data['resource'] = resource.name()
+            if self._data:
+                data = {**self._data, **data}
+        if self._selector:
+            url = await httpsubs.HttpSubscriptionService.subscribe(self._mailer, source, httpsubs.Selector(
+                msg_filter=msgftr.And(msgftr.SourceIs(source), self._selector.msg_filter),
+                completed_filter=msgftr.And(msgftr.SourceIs(source), self._selector.completed_filter),
+                transformer=self._selector.transformer, aggregator=self._selector.aggregator))
+        response = await messenger.request(source, self._name, data)
+        result = response.data()
+        if isinstance(result, Exception):
+            httpsubs.HttpSubscriptionService.unsubscribe(self._mailer, source, url)
+            return {'error': str(result)}
+        if url:
+            return {'url': url}
+        if result is False:
+            return httpabc.ResponseBody.BAD_REQUEST
+        if result is None:
+            return httpabc.ResponseBody.NOT_FOUND
+        if result is True:
+            return httpabc.ResponseBody.NO_CONTENT
+        return result
+
+
+class DirectoryListHandler(httpabc.AsyncGetHandler):
+
+    def __init__(self, path: str):
+        self._path = path
 
     async def handle_get(self, resource, data):
-        return await svrsvc.ServerStatus.get_status(self._mailer, self)
+        return await util.directory_list_dict(self._path)
 
 
-class ServerCommandHandler(httpabc.PostHandler):
-    COMMANDS = util.callable_dict(
-        svrsvc.ServerService,
-        ('signal_start', 'signal_restart', 'signal_stop', 'signal_delete'))
+class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.MulticastMailer, filename: str, protected: bool = False, text: bool = True):
         self._mailer = mailer
+        self._filename = filename
+        self._protected = protected
+        self._text = text
 
-    def handle_post(self, resource, data):
-        command = 'signal_' + str(util.get('command', data))
-        if command not in ServerCommandHandler.COMMANDS:
-            return httpabc.ResponseBody.BAD_REQUEST
-        ServerCommandHandler.COMMANDS[command](self._mailer, self)
+    async def handle_get(self, resource, data):
+        if self._protected and not httpabc.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        if not await util.file_exists(self._filename):
+            return httpabc.ResponseBody.NOT_FOUND
+        result = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename, self._text)
+        if isinstance(result, Exception):
+            return {'error': str(result)}
+        return result
+
+    async def handle_post(self, resource, data):
+        result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, data, self._text)
+        if isinstance(result, Exception):
+            return {'error': str(result)}
         return httpabc.ResponseBody.NO_CONTENT
 
 
+class ConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, filename: str, excludes: typing.Collection[str]):
+        self._mailer = mailer
+        self._filename = filename
+        self._patterns = [re.compile(r) for r in excludes]
+
+    async def handle_get(self, resource, data):
+        if not await util.file_exists(self._filename):
+            return httpabc.ResponseBody.NOT_FOUND
+        file = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename)
+        if isinstance(file, Exception):
+            return {'error': str(file)}
+        if httpabc.is_secure(data):
+            return file
+        file = file.split('\n')
+        result = []
+        for line in iter(file):
+            exclude = False
+            for pattern in iter(self._patterns):
+                if pattern.match(line) is not None:
+                    exclude = True
+            if not exclude:
+                result.append(line)
+        return '\n'.join(result)
+
+    async def handle_post(self, resource, data):
+        result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, data)
+        if isinstance(result, Exception):
+            return {'error': str(result)}
+        return httpabc.ResponseBody.NO_CONTENT
+
+
+'''
 class ReadWriteFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
     def __init__(self, filename: str, protected: bool = False, text: bool = True):
@@ -97,9 +179,7 @@ class ProtectedLineConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandl
 
     def __init__(self, filename: str, excludes: typing.Collection[str]):
         self._filename = filename
-        self._patterns: typing.List[re.Pattern] = []
-        for regex in iter(excludes):
-            self._patterns.append(re.compile(regex))
+        self._patterns = [re.compile(r) for r in excludes]
 
     async def handle_get(self, resource, data):
         if not await util.file_exists(self._filename):
@@ -121,3 +201,4 @@ class ProtectedLineConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandl
     async def handle_post(self, resource, data):
         await util.write_file(self._filename, data)
         return httpabc.ResponseBody.NO_CONTENT
+'''

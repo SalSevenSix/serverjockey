@@ -38,23 +38,22 @@ class _ConsoleLogFilter(msgabc.Filter):
 CONSOLE_LOG_FILTER = _ConsoleLogFilter()
 
 
-class _ServerDetailsSubscriber(msgabc.Subscriber):
+class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION = 'versionNumber='
     VERSION_FILTER = msgftr.DataStrContains(VERSION)
     PORT = 'server is listening on port'
     PORT_FILTER = msgftr.DataStrContains(PORT)
     STEAMID = 'Server Steam ID'
     STEAMID_FILTER = msgftr.DataStrContains(STEAMID)
-    FILTER = msgftr.And(
-        proch.ServerProcess.FILTER_STDOUT_LINE,
-        msgftr.Or(VERSION_FILTER, PORT_FILTER, STEAMID_FILTER))
 
     def __init__(self, mailer: msgabc.MulticastMailer, host: str):
+        super().__init__(msgftr.And(
+            proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER,
+                      _ServerDetailsSubscriber.PORT_FILTER,
+                      _ServerDetailsSubscriber.STEAMID_FILTER)))
         self._mailer = mailer
         self._host = host
-
-    def accepts(self, message):
-        return _ServerDetailsSubscriber.FILTER.accepts(message)
 
     def handle(self, message):
         data = None
@@ -73,19 +72,15 @@ class _ServerDetailsSubscriber(msgabc.Subscriber):
         return None
 
 
-class _ProvideAdminPasswordSubscriber(msgabc.Subscriber):
-    FILTER = msgftr.And(
-        proch.ServerProcess.FILTER_STDOUT_LINE,
-        msgftr.Or(
-            msgftr.DataStrContains('Enter new administrator password'),
-            msgftr.DataStrContains('Confirm the password')))
+class _ProvideAdminPasswordSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer, pwd: str):
+        super().__init__(msgftr.And(
+            proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(msgftr.DataStrContains('Enter new administrator password'),
+                      msgftr.DataStrContains('Confirm the password'))))
         self._mailer = mailer
         self._pwd = pwd
-
-    def accepts(self, message):
-        return _ProvideAdminPasswordSubscriber.FILTER.accepts(message)
 
     async def handle(self, message):
         await proch.PipeInLineService.request(self._mailer, self, self._pwd, force=True)

@@ -18,12 +18,12 @@ class _Tasker:
     def task_start(self, coro: typing.Coroutine, name: str) -> asyncio.Task:
         task = asyncio.create_task(coro, name=name)
         self._task_count = self._task_count + 1
-        logging.debug('Task START ({}) : {}'.format(self._task_count, task))
+        logging.debug('tsk> START ({}) : {}'.format(self._task_count, task))
         return task
 
     def task_end(self, task: asyncio.Task):
         self._task_count = self._task_count - 1
-        logging.debug('Task END   ({}) : {}'.format(self._task_count, task))
+        logging.debug('tsk> END   ({}) : {}'.format(self._task_count, task))
 
 
 def task_start(coro: typing.Coroutine, name: str) -> asyncio.Task:

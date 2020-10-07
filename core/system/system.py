@@ -104,14 +104,12 @@ class SystemService:
         raise Exception('Server class implementation not found in module: ' + repr(module))
 
 
-class _Subscriber(msgabc.Subscriber):
+class _Subscriber(msgabc.AbcSubscriber):
     FILTER = msgftr.NameIs(svrsvc.ServerService.DELETE_ME)
 
     def __init__(self, system: SystemService):
+        super().__init__(_Subscriber.FILTER)
         self._system = system
-
-    def accepts(self, message):
-        return _Subscriber.FILTER.accepts(message)
 
     async def handle(self, message):
         await self._system.delete_instance(message.data())
@@ -119,6 +117,7 @@ class _Subscriber(msgabc.Subscriber):
 
 
 class _InstancesHandler(httpabc.AsyncPostHandler):
+
     def __init__(self, system: SystemService):
         self._system = system
 
@@ -128,6 +127,7 @@ class _InstancesHandler(httpabc.AsyncPostHandler):
 
 
 class _ShutdownHandler(httpabc.AsyncPostHandler):
+
     def __init__(self, system: SystemService):
         self._system = system
 

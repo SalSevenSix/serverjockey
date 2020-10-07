@@ -202,55 +202,57 @@ class SetSubscriber(msgabc.Subscriber):
                     expired.append(delegate)
         for delegate in iter(expired):
             self._delegates.remove(delegate)
-        if len(self._delegates) == 0 or message is msgabc.STOP:
-            return True
-        return None
+        return None if len(self._delegates) > 0 else True
 
 
-class MonitorReply(enum.Enum):
+class DelegateReply(enum.Enum):
     AT_START = enum.auto(),
     AT_END = enum.auto(),
     NEVER = enum.auto()
 
 
-class MonitorSubscriber(msgabc.Subscriber):
-    START = 'MonitorSubscriber.Start'
-    END = 'MonitorSubscriber.End'
+class DelegateSubscriber(msgabc.AbcSubscriber):
+    START = 'DelegateSubscriber.Start'
+    END = 'DelegateSubscriber.End'
 
     def __init__(self,
                  mailer: msgabc.Mailer,
-                 delegate: msgabc.Subscriber,
-                 reply: MonitorReply = MonitorReply.NEVER):
+                 msg_filter: typing.Union[msgabc.Subscriber, msgabc.Filter],
+                 reply: DelegateReply = DelegateReply.NEVER,
+                 handler: typing.Optional[msgabc.Handler] = None):
+        super().__init__(msg_filter)
         self._mailer = mailer
-        self._delegate = delegate
         self._reply = reply
-
-    def accepts(self, message):
-        return self._delegate.accepts(message)
+        self._handler = handler
+        if self._handler is None and isinstance(msg_filter, msgabc.Subscriber):
+            self._handler = msg_filter
 
     async def handle(self, message):
+        handler = self._handler
+        if isinstance(message.data(), msgabc.Handler):
+            handler = message.data()
+        if handler is None:
+            return None
         source = message.source()
-        self._mailer.post(source, MonitorSubscriber.START, self._delegate,
-                          message if self._reply is MonitorReply.AT_START else None)
-        result = await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
-        self._mailer.post(source, MonitorSubscriber.END, result,
-                          message if self._reply is MonitorReply.AT_END else None)
+        self._mailer.post(source, DelegateSubscriber.START, True,
+                          message if self._reply is DelegateReply.AT_START else None)
+        result = await msgabc.try_handle('MonitorSubscriber', handler, message)
+        self._mailer.post(source, DelegateSubscriber.END, True if result is None else result,
+                          message if self._reply is DelegateReply.AT_END else None)
         return result
 
 
-class TimeoutSubscriber(msgabc.Subscriber):
+class TimeoutSubscriber(msgabc.AbcSubscriber):
     EXCEPTION = 'TimeoutSubscriber.Exception'
 
     def __init__(self, mailer: msgabc.Mailer, delegate: msgabc.Subscriber, timeout: float = 1.0):
+        super().__init__(msgftr.Or(delegate, msgftr.IsStop()))
         self._mailer = mailer
         self._delegate = delegate
         self._timeout = timeout
         self._queue = asyncio.Queue(maxsize=2)
         self._task = tasks.task_start(self._run(), name=util.obj_to_str(self))
         self._running = True
-
-    def accepts(self, message):
-        return self._delegate.accepts(message) or message is msgabc.STOP
 
     async def handle(self, message):
         if message is msgabc.STOP:
@@ -282,14 +284,65 @@ class TimeoutSubscriber(msgabc.Subscriber):
         tasks.task_end(self._task)
 
 
-class RelaySubscriber(msgabc.Subscriber):
+class ReadWriteFileSubscriber(msgabc.AbcSubscriber):
+    READ = 'ReadWriteFileSubscriber.Read'
+    WRITE = 'ReadWriteFileSubscriber.Write'
+    RESPONSE = 'ReadWriteFileSubscriber.Response'
+
+    @staticmethod
+    async def read(mailer: msgabc.MulticastMailer, filename: str, text: bool = True):
+        messenger = SynchronousMessenger(mailer)
+        response = await messenger.request(
+            util.obj_to_str(messenger),
+            ReadWriteFileSubscriber.READ,
+            {'filename': filename, 'text': text})
+        return response.data()
+
+    @staticmethod
+    async def write(mailer: msgabc.MulticastMailer, filename: str, data: typing.Union[str, bytes], text: bool = True):
+        messenger = SynchronousMessenger(mailer)
+        response = await messenger.request(
+            util.obj_to_str(messenger),
+            ReadWriteFileSubscriber.WRITE,
+            {'filename': filename, 'data': data, 'text': text})
+        return response.data()
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.NameIn((ReadWriteFileSubscriber.READ, ReadWriteFileSubscriber.WRITE)))
+        self._mailer = mailer
+
+    async def handle(self, message):
+        source, name, data = message.source(), message.name(), message.data()
+        if name is ReadWriteFileSubscriber.READ:
+            file = await util.read_file(data['filename'], text=util.get('text', data))
+            self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, file, message)
+        if name is ReadWriteFileSubscriber.WRITE:
+            await util.write_file(data['filename'], data['data'], text=util.get('text', data))
+            self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, True, message)
+        return None
+
+
+class Archiver(msgabc.AbcSubscriber):
+    REQUEST = 'Archiver.Request'
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.NameIs(Archiver.REQUEST))
+        self._mailer = mailer
+
+    async def handle(self, message):
+        path = util.get('path', message.data())
+        if path is None:
+            raise Exception('No path given')
+        logger = LoggingPublisher(self._mailer, message.source())
+        await util.archive_directory(path, logger)
+        return None
+
+
+class RelaySubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, msg_filter: msgabc.Filter = msgftr.AcceptAll()):
+        super().__init__(msg_filter)
         self._mailer = mailer
-        self._msg_filter = msg_filter
-
-    def accepts(self, message):
-        return self._msg_filter.accepts(message)
 
     def handle(self, message):
         return None if self._mailer.post(message) else True
@@ -342,38 +395,33 @@ class RollingLogSubscriber(msgabc.Subscriber):
         return None
 
 
-class LoggerSubscriber(msgabc.Subscriber):
+class LoggerSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self,
+                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  level: int = logging.DEBUG,
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
-                 msg_filter: msgabc.Filter = msgftr.AcceptAll()):
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
+        super().__init__(msg_filter)
         self._level = level
         self._transformer = transformer
         self._msg_filter = msg_filter
-
-    def accepts(self, message):
-        return self._msg_filter.accepts(message)
 
     def handle(self, message):
         logging.log(self._level, self._transformer.transform(message))
         return None
 
 
-class PrintSubscriber(msgabc.Subscriber):
+class PrintSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self,
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
                  file: typing.Optional[str] = None,
                  flush: bool = False):
+        super().__init__(msg_filter)
         self._transformer = transformer
-        self._msg_filter = msg_filter
         self._file = file
         self._flush = flush
-
-    def accepts(self, message):
-        return self._msg_filter.accepts(message)
 
     def handle(self, message):
         print(self._transformer.transform(message), file=self._file, flush=self._flush)
