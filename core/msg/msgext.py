@@ -205,40 +205,32 @@ class SetSubscriber(msgabc.Subscriber):
         return None if len(self._delegates) > 0 else True
 
 
-class DelegateReply(enum.Enum):
+class SyncReply(enum.Enum):
     AT_START = enum.auto(),
     AT_END = enum.auto(),
     NEVER = enum.auto()
 
 
-class DelegateSubscriber(msgabc.AbcSubscriber):
-    START = 'DelegateSubscriber.Start'
-    END = 'DelegateSubscriber.End'
+class SyncWrapper(msgabc.AbcSubscriber):
+    START = 'SyncWrapper.Start'
+    END = 'SyncWrapper.End'
 
     def __init__(self,
                  mailer: msgabc.Mailer,
-                 msg_filter: typing.Union[msgabc.Subscriber, msgabc.Filter],
-                 reply: DelegateReply = DelegateReply.NEVER,
-                 handler: typing.Optional[msgabc.Handler] = None):
-        super().__init__(msg_filter)
+                 delegate: msgabc.Subscriber,
+                 reply: SyncReply = SyncReply.NEVER):
+        super().__init__(delegate)
         self._mailer = mailer
+        self._delegate = delegate
         self._reply = reply
-        self._handler = handler
-        if self._handler is None and isinstance(msg_filter, msgabc.Subscriber):
-            self._handler = msg_filter
 
     async def handle(self, message):
-        handler = self._handler
-        if isinstance(message.data(), msgabc.Handler):
-            handler = message.data()
-        if handler is None:
-            return None
         source = message.source()
-        self._mailer.post(source, DelegateSubscriber.START, True,
-                          message if self._reply is DelegateReply.AT_START else None)
-        result = await msgabc.try_handle('MonitorSubscriber', handler, message)
-        self._mailer.post(source, DelegateSubscriber.END, True if result is None else result,
-                          message if self._reply is DelegateReply.AT_END else None)
+        self._mailer.post(source, SyncWrapper.START, True,
+                          message if self._reply is SyncReply.AT_START else None)
+        result = await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
+        self._mailer.post(source, SyncWrapper.END, True if result is None else result,
+                          message if self._reply is SyncReply.AT_END else None)
         return result
 
 

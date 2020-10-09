@@ -27,3 +27,19 @@ class ServerCommandHandler(httpabc.PostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         ServerCommandHandler.COMMANDS[command](self._mailer, self)
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class ServerRunningLock(msgabc.AbcSubscriber):
+    BLOCK = 'ServerRunningLock.Block'
+
+    def __init__(self, mailer: msgabc.MulticastMailer, delegate: msgabc.Subscriber):
+        super().__init__(delegate)
+        self._mailer = mailer
+        self._delegate = delegate
+
+    async def handle(self, message):
+        source = message.source()
+        if await svrsvc.ServerStatus.is_running(self._mailer, source):
+            self._mailer.post(source, ServerRunningLock.BLOCK, Exception('Server is running'), message)
+            return None
+        return await msgabc.try_handle('MonitorSubscriber', self._delegate, message)

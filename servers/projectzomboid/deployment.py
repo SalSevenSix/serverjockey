@@ -3,6 +3,7 @@ from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpsubs, httpext
 from core.proc import proch, shell
+from core.system import svrext
 
 
 class Deployment:
@@ -28,13 +29,12 @@ class Deployment:
     async def initialise(self):
         await self.build_world()
         self._mailer.register(msgext.TimeoutSubscriber(self._mailer, msgext.SetSubscriber(
-            proch.ShellJob(self._mailer),
-            msgext.DelegateSubscriber(
-                self._mailer, msgext.ReadWriteFileSubscriber(self._mailer), msgext.DelegateReply.AT_END),
-            msgext.DelegateSubscriber(
-                self._mailer, msgext.Archiver(self._mailer), msgext.DelegateReply.AT_START),
-            msgext.DelegateSubscriber(
-                self._mailer, _DeploymentWiper(self), msgext.DelegateReply.AT_END)
+            svrext.ServerRunningLock(self._mailer, proch.ShellJob(self._mailer)),
+            msgext.SyncWrapper(self._mailer, msgext.ReadWriteFileSubscriber(self._mailer), msgext.SyncReply.AT_END),
+            svrext.ServerRunningLock(
+                self._mailer, msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START)),
+            svrext.ServerRunningLock(
+                self._mailer, msgext.SyncWrapper(self._mailer, _DeploymentWiper(self), msgext.SyncReply.AT_END))
         )))
 
     def resources(self, resource: httpabc.Resource):
