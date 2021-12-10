@@ -14,6 +14,7 @@ from aiofiles import os as aiofilesos
 _isdir = aiofilesos.wrap(os.path.isdir)
 _isfile = aiofilesos.wrap(os.path.isfile)
 _listdir = aiofilesos.wrap(os.listdir)
+_filestats = aiofilesos.wrap(os.stat)
 _make_archive = aiofilesos.wrap(shutil.make_archive)
 _rmtree = aiofilesos.wrap(shutil.rmtree)
 
@@ -205,6 +206,11 @@ async def file_exists(file: typing.Optional[str]) -> bool:
     return await _isfile(file)
 
 
+async def file_size(file: str) -> int:
+    stats = await _filestats(file)
+    return stats.st_size
+
+
 async def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
     if not path.endswith('/'):
         path = path + '/'
@@ -278,6 +284,25 @@ async def write_file(filename: str, data: typing.Union[str, bytes], text: bool =
 async def copy_file(source_file: str, target_file: str):
     data = await read_file(source_file, text=False)
     await write_file(target_file, data, text=False)
+
+
+async def stream_write_file(stream, filename: str, chunk_size: int = 10240):
+    async with aiofiles.open(filename, mode='wb') as file:
+        pumping = True
+        while pumping:
+            chunk = await stream.read(chunk_size)
+            pumping = chunk is not None and chunk != b''
+            if pumping:
+                await file.write(chunk)
+
+
+async def copy_bytes(source, target, chunk_size: int = 10240):
+    pumping = True
+    while pumping:
+        chunk = await source.read(chunk_size)
+        pumping = chunk is not None and chunk != b''
+        if pumping:
+            await target.write(chunk)
 
 
 def signal_interrupt(pid: typing.Optional[int] = None):

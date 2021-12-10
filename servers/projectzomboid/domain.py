@@ -80,7 +80,7 @@ class PlayerLoader:
         response = await proch.PipeInLineService.request(
             self._mailer, self._source, 'players', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
-                start_filter=msgftr.DataMatches('Players connected.*'), include_start=False,
+                start_filter=msgftr.DataMatches('.*> Players connected.*'), include_start=False,
                 stop_filter=msgftr.DataEquals(''), include_stop=False))
         players = []
         if not response:

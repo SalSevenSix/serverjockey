@@ -44,9 +44,23 @@ class ResponseBody:
     ERRORS = (NOT_FOUND, BAD_REQUEST, UNAVAILABLE, UNAUTHORISED)
 
 
+class ByteStream(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def name(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    async def content_length(self) -> typing.Optional[int]:
+        pass
+
+    @abc.abstractmethod
+    async def read(self, length: int = -1) -> bytes:
+        pass
+
+
 ABC_DATA_GET = typing.Dict[str, typing.Union[str, int, float, bool]]
-ABC_DATA_POST = typing.Union[ABC_DATA_GET, tuple, list, str, bytes]
-ABC_RESPONSE = typing.Union[dict, tuple, list, str, bytes, we.HTTPException]
+ABC_DATA_POST = typing.Dict[str, typing.Union[ABC_DATA_GET, str, int, float, bool, tuple, list, ByteStream]]
+ABC_RESPONSE = typing.Union[dict, tuple, list, str, ByteStream, we.HTTPException]
 
 
 class Resource:
@@ -96,7 +110,7 @@ class Resource:
         pass
 
     @abc.abstractmethod
-    async def handle_post(self, path: str, body: ABC_DATA_POST) -> ABC_RESPONSE:
+    async def handle_post(self, path: str, body: typing.Union[str, ABC_DATA_GET, ByteStream]) -> ABC_RESPONSE:
         pass
 
 

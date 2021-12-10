@@ -1,7 +1,7 @@
 from __future__ import annotations
 import gzip
 import typing
-from aiohttp import web, abc as webabc, web_exceptions as h
+from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util
 from core.context import contextsvc
 from core.http import httpabc, blobs
@@ -22,6 +22,7 @@ HOST = 'Host'
 CONTENT_TYPE = 'Content-Type'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
+CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'
 ACCEPT_ENCODING = 'Accept-Encoding'
 X_SECRET = 'X-Secret'
@@ -73,7 +74,7 @@ class _RequestHandler:
         if resource is None:
             return self._static_response()
         if not resource.allows(self._method):
-            raise h.HTTPMethodNotAllowed(
+            raise err.HTTPMethodNotAllowed(
                 str(self._method),
                 httpabc.Method.GET.value if self._method is httpabc.Method.POST else httpabc.Method.POST.value)
 
@@ -81,8 +82,8 @@ class _RequestHandler:
         if self._method is httpabc.Method.GET:
             response_body = await resource.handle_get(self._request.path, self._secure)
             if response_body is None:
-                raise h.HTTPNotFound
-            return self._build_response(response_body)
+                raise err.HTTPNotFound
+            return await self._build_response(response_body)
 
         # POST
         if not self._secure:
@@ -91,22 +92,25 @@ class _RequestHandler:
         if self._request.can_read_body:
             mime, encoding = self._headers.get_content_type()
             if mime is None or mime not in ACCEPTED_MIME_TYPES:
-                raise h.HTTPUnsupportedMediaType
-            request_body = await self._request.content.read()
+                raise err.HTTPUnsupportedMediaType
+            if mime == APPLICATION_BIN:
+                request_body = _RequestByteStream(self._request.content, self._headers.get_content_length())
+            else:
+                request_body = await self._request.content.read()
         if mime != APPLICATION_BIN:
             encoding = UTF8 if encoding is None else encoding
             request_body = request_body.decode(encoding).strip()
             if mime == APPLICATION_JSON:
                 request_body = util.json_to_dict(request_body)
                 if request_body is None:
-                    raise h.HTTPBadRequest
+                    raise err.HTTPBadRequest
         response_body = await resource.handle_post(self._request.path, request_body)
-        return self._build_response(response_body)
+        return await self._build_response(response_body)
 
-    def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
+    async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:
             raise body
-        response = web.Response()
+        response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
             response.headers.add(CONTENT_TYPE, APPLICATION_JSON)
@@ -121,24 +125,32 @@ class _RequestHandler:
             body = util.obj_to_json(body)
             body = body.encode(UTF8)
         response.headers.add(CONTENT_TYPE, content_type)
-        if len(body) > 1024 and self._headers.accepts_encoding(GZIP):
+        if isinstance(body, bytes) and len(body) > 1024 and self._headers.accepts_encoding(GZIP):
             body = gzip.compress(body)
             response.headers.add(CONTENT_ENCODING, GZIP)
-        response.headers.add(CONTENT_LENGTH, str(len(body)))
-        response.body = body
+        if isinstance(body, httpabc.ByteStream):
+            response.headers.add(CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
+            content_length = await body.content_length()
+            if content_length is None:
+                response.enable_chunked_encoding(10240)
+            else:
+                response.headers.add(CONTENT_LENGTH, str(content_length))
+            await response.prepare(self._request)
+            await util.copy_bytes(body, response)
+        else:
+            response.headers.add(CONTENT_LENGTH, str(len(body)))
+            response.body = body
         return response
 
     def _static_response(self) -> web.Response:
-        if self._method is httpabc.Method.POST:
-            raise h.HTTPNotFound
-        if self._request.path.endswith('favicon.ico'):
+        if self._method is httpabc.Method.GET and self._request.path.endswith('favicon.ico'):
             response = web.Response()
             response.headers.add(CONTENT_TYPE, 'image/x-icon')
             response.headers.add(CONTENT_LENGTH, str(len(blobs.FAVICON)))
             response.headers.add(CACHE_CONTROL, 'max-age=315360000')
             response.body = blobs.FAVICON
             return response
-        raise h.HTTPNotFound
+        raise err.HTTPNotFound
 
 
 class _HeadersTool:
@@ -153,6 +165,10 @@ class _HeadersTool:
         value = self.get(X_SECRET)
         return value is not None and value == secret
 
+    def get_content_length(self) -> int:
+        content_length = self.get(CONTENT_LENGTH)
+        return None if content_length is None else int(content_length)
+
     def get_content_type(self) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
         content_type = self.get(CONTENT_TYPE)
         if content_type is None:
@@ -166,6 +182,22 @@ class _HeadersTool:
     def accepts_encoding(self, encoding) -> bool:
         accepts = self.get(ACCEPT_ENCODING)
         return accepts is not None and accepts.find(encoding) != -1
+
+
+class _RequestByteStream(httpabc.ByteStream):
+
+    def __init__(self, stream: streams.StreamReader, content_length: int):
+        self._stream = stream
+        self._content_length = content_length
+
+    def name(self) -> str:
+        return 'RequestByteStream'
+
+    async def content_length(self) -> int:
+        return self._content_length
+
+    async def read(self, length: int = -1) -> bytes:
+        return await self._stream.read(length)
 
 
 class WebResource(httpabc.Resource):
@@ -240,13 +272,16 @@ class WebResource(httpabc.Resource):
             return self._handler.handle_get(self, data)
         return await self._handler.handle_get(self, data)
 
-    async def handle_post(self, path: str, body: httpabc.ABC_DATA_POST) -> httpabc.ABC_RESPONSE:
+    async def handle_post(self, path: str, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]
+                          ) -> httpabc.ABC_RESPONSE:
+        data = _PathProcessor(self).extract_args(path)
         if isinstance(body, dict):
-            data = _PathProcessor(self).extract_args(path)
-            body = {**data, **body}
+            data.update(body)
+        else:
+            data.update({'body': body})
         if isinstance(self._handler, httpabc.PostHandler):
-            return self._handler.handle_post(self, body)
-        return await self._handler.handle_post(self, body)
+            return self._handler.handle_post(self, data)
+        return await self._handler.handle_post(self, data)
 
 
 class _PathProcessor:

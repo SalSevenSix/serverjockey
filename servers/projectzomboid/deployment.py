@@ -32,9 +32,11 @@ class Deployment:
             svrext.ServerRunningLock(self._mailer, proch.ShellJob(self._mailer)),
             msgext.SyncWrapper(self._mailer, msgext.ReadWriteFileSubscriber(self._mailer), msgext.SyncReply.AT_END),
             svrext.ServerRunningLock(
-                self._mailer, msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START)),
+                self._mailer,
+                msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START)),
             svrext.ServerRunningLock(
-                self._mailer, msgext.SyncWrapper(self._mailer, _DeploymentWiper(self), msgext.SyncReply.AT_END))
+                self._mailer,
+                msgext.SyncWrapper(self._mailer, _DeploymentWiper(self), msgext.SyncReply.AT_END))
         )))
 
     def resources(self, resource: httpabc.Resource):
@@ -58,10 +60,11 @@ class Deployment:
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._config_dir})) \
             .append('wipe-world-save', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
+            .append('{filename}', httpext.DirectoryStreamHandler(self._home_dir, protected=True)) \
             .pop() \
             .push('config') \
             .append('jvm', httpext.FileHandler(self._mailer, self._jvm_config_file)) \
-            .append('db', httpext.FileHandler(self._mailer, self._playerdb_file, protected=True, text=False)) \
+            .append('db', httpext.FileStreamHandler(self._playerdb_file, protected=True)) \
             .append('ini', httpext.ConfigHandler(self._mailer, conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
             .append('sandbox', httpext.FileHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
             .append('spawnpoints', httpext.FileHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
