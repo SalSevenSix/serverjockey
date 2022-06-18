@@ -37,7 +37,7 @@ check_dependencies() {
         echo "  $ sudo add-apt-repository multiverse"
         echo "  $ sudo dpkg --add-architecture i386"
         echo "  $ sudo apt update"
-        echo "  $ sudo apt install lib32gcc1 steamcmd"
+        echo "  $ sudo apt install lib32gcc-s1 steamcmd"
         echo "For RedHat/CentOS;"
         echo "  $ sudo yum install steamcmd"
         exit 1
