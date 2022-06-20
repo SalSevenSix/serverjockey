@@ -47,6 +47,7 @@ class Deployment:
             aggregator=aggtrf.StrJoin('\n'))
         httpext.ResourceBuilder(resource) \
             .push('deployment', httpext.DirectoryListHandler(self._home_dir)) \
+            .append('{filename}', httpext.DirectoryStreamHandler(self._home_dir, protected=True)) \
             .append('install-runtime', _InstallRuntimeHandler(self._mailer, self._runtime_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST, {'path': self._runtime_dir}, archive_selector)) \
@@ -60,7 +61,6 @@ class Deployment:
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._config_dir})) \
             .append('wipe-world-save', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
-            .append('{filename}', httpext.DirectoryStreamHandler(self._home_dir, protected=True)) \
             .pop() \
             .push('config') \
             .append('jvm', httpext.FileHandler(self._mailer, self._jvm_config_file)) \

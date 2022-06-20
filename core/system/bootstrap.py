@@ -52,21 +52,20 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
+        self._syssvc = None
 
     async def initialise(self) -> httpabc.Resource:
         self._context.start()
         if self._context.is_debug():
             self._context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
         self._context.post(self, 'Logging.File', self._context.config('logfile'))
-        syssvc = system.SystemService(self._context)
-        await syssvc.initialise()
-        return syssvc.resources()
+        self._syssvc = system.SystemService(self._context)
+        await self._syssvc.initialise()
+        return self._syssvc.resources()
 
     async def shutdown(self):
-        # shutting down the context here doesn't work
-        # because the stupid aiohttp webserver cancels
-        # all the tasks before calling this!
-        pass
+        await util.silently_cleanup(self._syssvc)
+        await util.silently_cleanup(self._context)
 
 
 def main(args: typing.Optional[typing.Collection] = None) -> int:

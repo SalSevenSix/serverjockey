@@ -21,6 +21,7 @@ class _PipeOutLineProducer(msgabc.Producer):
 
     async def next_message(self):
         line = None
+        # noinspection PyBroadException
         try:
             line = await self._pipe.readline()   # blocking
         except Exception:

@@ -81,7 +81,7 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
         expired = self._subscriber.mailers.copy()
         await self._mailer.stop()
         for mailer in iter(expired):
-            await mailer.stop()   # This may post STOP again but they will just be ignored
+            await mailer.stop()   # This may post STOP again, but they will just be ignored
 
 
 class _TaskMulticastSubscriber(msgabc.AbcSubscriber):

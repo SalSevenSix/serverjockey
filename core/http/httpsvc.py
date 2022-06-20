@@ -46,9 +46,11 @@ class HttpService:
     def run(self):
         web.run_app(self._app, port=self._context.config('port'), shutdown_timeout=100.0)
 
+    # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
         self._resources = await self._callbacks.initialise()
 
+    # noinspection PyUnusedLocal
     async def _shutdown(self, app: web.Application):
         await self._callbacks.shutdown()
 

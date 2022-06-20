@@ -160,6 +160,7 @@ class LoggingPublisher:
         self._mailer = mailer
         self._source = source
 
+    # noinspection PyUnusedLocal
     def log(self, level, msg, *args, **kwargs):
         self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args)
 

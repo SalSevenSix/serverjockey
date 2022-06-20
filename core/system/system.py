@@ -4,7 +4,7 @@ import importlib
 import inspect
 import logging
 import uuid
-from core.util import util
+from core.util import util, signals
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpsvc, httpext
@@ -48,6 +48,14 @@ class SystemService:
                 await self._initialise_instance(configuration)
         return self
 
+    async def shutdown(self):
+        subcontexts = self._context.subcontexts()
+        for subcontext in iter(subcontexts):
+            self._instances.remove(subcontext.config('identity'))
+        for subcontext in iter(subcontexts):
+            await svrsvc.ServerService.shutdown(subcontext, self)
+            await self._context.destroy_subcontext(subcontext)
+
     async def create_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
         identity = str(uuid.uuid4())
         home_dir = self._home_dir + '/' + identity
@@ -66,16 +74,6 @@ class SystemService:
         await self._context.destroy_subcontext(subcontext)
         await util.delete_directory(subcontext.config('home'))
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
-
-    async def shutdown(self):
-        subcontexts = self._context.subcontexts()
-        for subcontext in iter(subcontexts):
-            self._instances.remove(subcontext.config('identity'))
-        for subcontext in iter(subcontexts):
-            await svrsvc.ServerService.shutdown(subcontext, self)
-            await self._context.destroy_subcontext(subcontext)
-        await self._context.shutdown()
-        util.signal_interrupt()
 
     async def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
@@ -132,5 +130,5 @@ class _ShutdownHandler(httpabc.AsyncPostHandler):
         self._system = system
 
     async def handle_post(self, resource, data):
-        await self._system.shutdown()
+        signals.interrupt()
         return httpabc.ResponseBody.NO_CONTENT

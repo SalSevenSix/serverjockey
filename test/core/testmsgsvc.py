@@ -1,5 +1,5 @@
 import asyncio
-from core import msgsvc, msgext, msgftr
+from core.msg import msgsvc, msgext, msgftr
 
 
 def test():
@@ -19,7 +19,7 @@ async def send_test_messages(mailer):
 
 async def test_mailer():
     subscriber = msgext.PrintSubscriber()
-    mailer = msgsvc.Mailer(subscriber)
+    mailer = msgsvc.TaskMailer(subscriber)
     mailer.start()
     test_messages = asyncio.create_task(send_test_messages(mailer))
     await test_messages
@@ -27,7 +27,7 @@ async def test_mailer():
 
 
 async def test_multicastmailer():
-    mailer = msgsvc.MulticastMailer()
+    mailer = msgsvc.TaskMulticastMailer()
     mailer.start()
     mailer.register(msgext.PrintSubscriber())
     mailer.register(msgext.PrintSubscriber())
@@ -37,7 +37,7 @@ async def test_multicastmailer():
 
 
 async def test_catching():
-    mailer = msgsvc.MulticastMailer()
+    mailer = msgsvc.TaskMulticastMailer()
     mailer.start()
     mailer.register(msgext.PrintSubscriber())
     catcher = msgext.SingleCatcher(msgftr.NameEquals('bon'))
@@ -45,5 +45,5 @@ async def test_catching():
     test_messages = asyncio.create_task(send_test_messages(mailer))
     message = await catcher.get()
     await test_messages
-    assert message.get_name() == 'bon'
+    assert message.name() == 'bon'
     await mailer.stop()

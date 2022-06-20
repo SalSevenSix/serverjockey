@@ -1,22 +1,29 @@
 import inspect
 import os
-import signal
 import shutil
 import logging
 import json
 import time
 import uuid
 import typing
+import asyncio
 import aiofiles
-from aiofiles import os as aiofilesos
+from aiofiles import os as aioos
+from functools import partial, wraps
 
 
-_isdir = aiofilesos.wrap(os.path.isdir)
-_isfile = aiofilesos.wrap(os.path.isfile)
-_listdir = aiofilesos.wrap(os.listdir)
-_filestats = aiofilesos.wrap(os.stat)
-_make_archive = aiofilesos.wrap(shutil.make_archive)
-_rmtree = aiofilesos.wrap(shutil.rmtree)
+def _wrap(func):
+    @wraps(func)
+    async def run(*args, loop=None, executor=None, **kwargs):
+        if loop is None:
+            loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(executor, partial(func, *args, **kwargs))
+    return run
+
+
+_listdir = _wrap(os.listdir)
+_islinkfile = _wrap(os.path.islink)
+_make_archive = _wrap(shutil.make_archive)
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -203,11 +210,11 @@ def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]
 async def file_exists(file: typing.Optional[str]) -> bool:
     if file is None:
         return False
-    return await _isfile(file)
+    return await aioos.path.isfile(file)
 
 
 async def file_size(file: str) -> int:
-    stats = await _filestats(file)
+    stats = await aioos.stat(file)
     return stats.st_size
 
 
@@ -218,20 +225,20 @@ async def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
     for name in iter(await _listdir(path)):
         file = path + name
         ftype = 'unknown'
-        if os.path.isfile(file):
-            ftype = 'file'
-        elif os.path.isdir(file):
-            ftype = 'directory'
-        elif os.path.islink(file):
+        if await _islinkfile(file):
             ftype = 'link'
-        updated = time.ctime(os.path.getmtime(file))
+        elif await aioos.path.isfile(file):
+            ftype = 'file'
+        elif await aioos.path.isdir(file):
+            ftype = 'directory'
+        updated = time.ctime(await aioos.path.getmtime(file))
         result.append({'type': ftype, 'name': name, 'updated': updated})
     return result
 
 
 async def create_directory(path: str):
-    if not await _isdir(path):
-        await aiofilesos.mkdir(path)
+    if not await aioos.path.isdir(path):
+        await aioos.mkdir(path)
 
 
 async def archive_directory(path: str, logger=None) -> str:
@@ -255,17 +262,18 @@ async def wipe_directory(path: str):
 
 
 async def delete_directory(path: str):
-    await _rmtree(path, ignore_errors=True)
+    # TODO test this, previously used shutil.rmtree()
+    await aioos.removedirs(path)
 
 
 async def delete_file(file: str):
     if await file_exists(file):
-        await aiofilesos.remove(file)
+        await aioos.remove(file)
 
 
 async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
-    mode = 'r' if text else 'rb'
-    async with aiofiles.open(filename, mode=mode) as file:
+    # noinspection PyTypeChecker
+    async with aiofiles.open(file=filename, mode='r' if text else 'rb') as file:
         try:
             return await file.read()
         finally:
@@ -273,8 +281,8 @@ async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes
 
 
 async def write_file(filename: str, data: typing.Union[str, bytes], text: bool = True):
-    mode = 'w' if text else 'wb'
-    async with aiofiles.open(filename, mode=mode) as file:
+    # noinspection PyTypeChecker
+    async with aiofiles.open(filename, mode='w' if text else 'wb') as file:
         try:
             await file.write(data)
         finally:
@@ -303,9 +311,3 @@ async def copy_bytes(source, target, chunk_size: int = 10240):
         pumping = chunk is not None and chunk != b''
         if pumping:
             await target.write(chunk)
-
-
-def signal_interrupt(pid: typing.Optional[int] = None):
-    if pid is None:
-        pid = os.getpid()
-    os.kill(pid, signal.SIGINT)
