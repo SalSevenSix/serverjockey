@@ -74,6 +74,7 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
     _setup_logging(context)
     try:
         logging.info('*** START Serverjockey ***')
+        logging.info('Secret {}'.format(context.config('secret')))
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:
