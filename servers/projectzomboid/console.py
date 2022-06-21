@@ -39,6 +39,8 @@ class _WorldCommandHandler(httpabc.AsyncPostHandler):
         'save': 'save',
         'chopper': 'chopper',
         'gunshot': 'gunshot',
+        'start-storm': 'startstorm',
+        'stop-weather': 'stopweather',
         'start-rain': 'startrain',
         'stop-rain': 'stoprain'})
 
@@ -112,10 +114,14 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
         'set-access-level': 'setaccesslevel "{player}" "{level}"',
         'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],
+        'give-xp': 'addxp "{player}" {skill}={xp}',
         'spawn-vehicle': 'addvehicle "{module}.{item}" "{player}"',
         'spawn-horde': 'createhorde {count} "{player}"',
-        'kick': ['kickuser "{player}"', {'reason': '-r "{}"'}],
-        'whitelist': 'addusertowhitelist "{player}"'})
+        'tele-to': 'teleport "{player}" "{toplayer}"',
+        'tele-at': 'teleportto "{player}" {location}',
+        'lightning': 'lightning "{player}"',
+        'thunder': 'thunder "{player}"',
+        'kick': ['kickuser "{player}"', {'reason': '-r "{}"'}]})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -123,6 +129,9 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
     async def handle_post(self, resource, data):
         if not await dom.PlayerLoader(self._mailer, self).get(util.get('player', data)):
             return httpabc.ResponseBody.NOT_FOUND
+        toplayer = util.get('toplayer', data)
+        if toplayer:
+            data['toplayer'] = util.b10str_to_str(toplayer)
         cmdline = _PlayerCommandHandler.COMMANDS.get(data)
         if not cmdline:
             return httpabc.ResponseBody.BAD_REQUEST
@@ -132,7 +141,6 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
 
 class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
     COMMANDS = cmdutil.CommandLines({
-        'add-all': 'addalltowhitelist',
         'add': 'adduser "{player}" "{password}"',
         'remove': 'removeuserfromwhitelist "{player}"'})
 

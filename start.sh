@@ -2,11 +2,9 @@
 
 wait_file() {
     local file="$1"
-    shift
-    local wait_seconds="${1:-10}"
-    shift
+    local wait_seconds=$2
     until [ -f "$file" ]; do
-        if [ "$wait_seconds" -eq 0 ]; then
+        if [ $wait_seconds -eq 0 ]; then
             echo "Timeout waiting for file: $file"
             exit 1
         fi
@@ -23,12 +21,11 @@ find_steamcmd() {
 }
 
 check_dependencies() {
-    echo
-    echo "Checking dependencies..."
+    echo "CHECKING dependencies..."
 
     echo
     echo "Checking for steamcmd."
-    $STEAMCMD +quit >/dev/null 2>&1
+    $(find_steamcmd) +quit > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Steamcmd not found."
         echo "If you have any installation issues, please consult the website;"
@@ -44,7 +41,7 @@ check_dependencies() {
     fi
 
     echo
-    echo "Checking for python. Python 3.8 or higher required."
+    echo "Checking for python. Python 3.10 or higher required."
     python3 --version
     if [ $? -ne 0 ]; then
         echo "Python3 not found."
@@ -114,7 +111,7 @@ check_dependencies() {
             echo "  \"BOT_TOKEN\": \"YOUR DISCORD LOGIN TOKEN HERE\","
             echo "  \"EVENTS_CHANNEL_ID\": \"YOUR DISCORD CHANNEL ID HERE\""
             echo "}"
-        } >"$DISCORD_CONF"
+        } > "$DISCORD_CONF"
         echo "Discord configuration file not found. A template has been created."
         echo "You need to edit this file to provide details about your Discord bot and server."
         echo "  $ nano $DISCORD_CONF"
@@ -126,9 +123,9 @@ check_dependencies() {
     if [ ! -d "$DISCORD_DIR/node_modules" ]; then
         # TODO Get this to to install needed packages from package-lock.json
         echo "Discord Bot package dependencies not found. Installing dependencies."
-        cd "$DISCORD_DIR" || exit 1
-        npm install discord.js || exit 1
-        npm install node-fetch || exit 1
+        #cd "$DISCORD_DIR" || exit 1
+        #npm install discord.js@12.3.1 || exit 1
+        #npm install node-fetch@2.6.1 || exit 1
     fi
 
     echo
@@ -145,28 +142,26 @@ check_dependencies() {
 }
 
 
-echo "Paths init..."
+# MAIN
+
+echo "INITIALISING..."
+INITIAL_DIR="$(pwd)"
 cd "$(dirname $0)" || exit 1
 JOCKEY_DIR="$(pwd)"
-cd "$JOCKEY_DIR/.." || exit 1
-HOME_DIR="$(pwd)/servers"
-DEPENDENCIES_FILE="$JOCKEY_DIR/dependencies.ok"
-JOCKEY_LOG="$JOCKEY_DIR/serverjockey.log"
 DISCORD_DIR="$JOCKEY_DIR/client/discord"
-DISCORD_CONF="$JOCKEY_DIR/serverlink.json"
-DISCORD_LOG="$JOCKEY_DIR/serverlink.log"
-CLIENT_CONF="$JOCKEY_DIR/serverjockey-client.json"
-STEAMCMD=$(find_steamcmd)
-rm "$CLIENT_CONF" >/dev/null 2>&1
-if [ ! -f "$DEPENDENCIES_FILE" ]; then
-    check_dependencies
-fi
-
-echo "Environment init..."
+HOME_DIR="$JOCKEY_DIR"
 HOST="localhost"
 PORT="6164"
+
+cd "$INITIAL_DIR" || exit 1
 for i in "$@"; do
     case $i in
+        -d=*|--home=*)
+        HOME_DIR="${i#*=}"
+        cd "$HOME_DIR" || exit 1
+        HOME_DIR="$(pwd)"
+        shift
+        ;;
         -h=*|--host=*)
         HOST="${i#*=}"
         shift
@@ -180,25 +175,39 @@ for i in "$@"; do
         ;;
     esac
 done
-if [ "$HOST" != "localhost" ]; then
-    my_ip=$(curl -s https://ip6.seeip.org)
-    host_ip=$(host "$HOST" | grep IPv6 | grep -oE '[^[:space:]]+$' | tr -d '\n')
-    if [ "$my_ip" != "$host_ip" ]; then
-        echo "WARNING: host name provided does not match ip address, using localhost instead"
-        HOST="localhost"
-    fi
-fi
+
+cd "$HOME_DIR" || exit 1
+DISCORD_CONF="$HOME_DIR/serverlink.json"
+CLIENT_CONF="$HOME_DIR/serverjockey-client.json"
+rm $CLIENT_CONF > /dev/null 2>&1
+DEPENDENCIES_FILE="$HOME_DIR/dependencies.ok"
+[ -f "$DEPENDENCIES_FILE" ] || check_dependencies
 
 
-echo "Starting serverjockey webservice..."
+echo "STARTING serverjockey webservice..."
 cd "$JOCKEY_DIR" || exit 1
-python3 -m pipenv run python3 -m core.system --host "$HOST" --port "$PORT" --logfile "$JOCKEY_LOG" --clientfile "$CLIENT_CONF" "$HOME_DIR" >/dev/null 2>&1 &
+python3 -m pipenv run python3 -m core.system --host "$HOST" --port "$PORT" \
+        --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" "$HOME_DIR" > /dev/null 2>&1 &
 [ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting serverjockey"
 
-echo "Starting serverlink discord bot..."
+echo "STARTING serverlink discord bot..."
 cd "$DISCORD_DIR" || exit 1
+sleep 1
 wait_file "$CLIENT_CONF" 5 || exit 1
-node index.js "$DISCORD_CONF" "$CLIENT_CONF" >"$DISCORD_LOG" 2>&1 &
+node index.js "$DISCORD_CONF" "$CLIENT_CONF" > "$HOME_DIR/serverlink.log" 2>&1 &
 [ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting serverlink"
 
+
+cd "$INITIAL_DIR"
 exit 0
+
+
+# If needed in the future
+#if [ "$HOST" != "localhost" ]; then
+#    my_ip=$(curl -s https://ip6.seeip.org)
+#    host_ip=$(host "$HOST" | grep IPv6 | grep -oE '[^[:space:]]+$' | tr -d '\n')
+#    if [ "$my_ip" != "$host_ip" ]; then
+#        echo "WARNING: host name provided does not match ip address, using localhost instead"
+#        HOST="localhost"
+#    fi
+#fi

@@ -17,22 +17,19 @@ class Messaging:
 
 
 class _ConsoleLogFilter(msgabc.Filter):
-    COMMANDS = (
-        'save', 'servermsg', 'chopper', 'gunshot', 'startrain', 'stoprain',
-        'players', 'setaccesslevel', 'kickuser', 'additem', 'addvehicle', 'createhorde',
-        'addusertowhitelist', 'addxp', 'godmod', 'invisible', 'noclip',
-        'addalltowhitelist', 'adduser', 'removeuserfromwhitelist',
-        'banuser', 'unbanuser', 'banid', 'unbanid',
-        'showoptions', 'changeoption', 'reloadoptions',
-        'alarm', 'teleport', 'teleportto', 'voiceban',
-        'releasesafehouse', 'reloadlua', 'sendpulse')
 
     def accepts(self, message):
         if not (proch.ServerProcess.FILTER_STDOUT_LINE.accepts(message)
                 or proch.ServerProcess.FILTER_STDERR_LINE.accepts(message)):
             return False
-        value = util.right_chop_and_strip(message.data(), ' ')
-        return value not in _ConsoleLogFilter.COMMANDS
+        value = message.data().lower()
+        if value.find('password') != -1:
+            return False
+        if value.find('token') != -1:
+            return False
+        if value.find('command entered via server console') != -1:
+            return False
+        return True
 
 
 CONSOLE_LOG_FILTER = _ConsoleLogFilter()
@@ -45,11 +42,14 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     PORT_FILTER = msgftr.DataStrContains(PORT)
     STEAMID = 'Server Steam ID'
     STEAMID_FILTER = msgftr.DataStrContains(STEAMID)
+    INGAMETIME = '> IngameTime'
+    INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
 
     def __init__(self, mailer: msgabc.MulticastMailer, host: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER,
+            msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
+                      _ServerDetailsSubscriber.VERSION_FILTER,
                       _ServerDetailsSubscriber.PORT_FILTER,
                       _ServerDetailsSubscriber.STEAMID_FILTER)))
         self._mailer = mailer
@@ -57,7 +57,10 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         data = None
-        if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
+        if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.INGAMETIME)
+            data = {'ingametime': value}
+        elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
             value = util.right_chop_and_strip(value, 'demo=')
             data = {'version': value}

@@ -57,7 +57,11 @@ class SystemService:
             await self._context.destroy_subcontext(subcontext)
 
     async def create_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
-        identity = str(uuid.uuid4())
+        identity = util.get('identity', configuration)
+        if identity:
+            configuration.pop('identity')
+        else:
+            identity = str(uuid.uuid4())
         home_dir = self._home_dir + '/' + identity
         await util.create_directory(home_dir)
         config_file = home_dir + '/' + 'instance.json'
