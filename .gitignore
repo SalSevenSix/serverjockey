@@ -1,14 +1,12 @@
 # My junk
 TODO.*
 *.ok
-*.json
 
 # PyCharm IDE
 .idea/
 
 # Nodejs
 node_modules/
-package-lock.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

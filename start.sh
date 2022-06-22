@@ -121,11 +121,9 @@ check_dependencies() {
     echo
     echo "Checking for serverlink node_modules."
     if [ ! -d "$DISCORD_DIR/node_modules" ]; then
-        # TODO Get this to to install needed packages from package-lock.json
         echo "Discord Bot package dependencies not found. Installing dependencies."
-        #cd "$DISCORD_DIR" || exit 1
-        #npm install discord.js@12.3.1 || exit 1
-        #npm install node-fetch@2.6.1 || exit 1
+        cd "$DISCORD_DIR" || exit 1
+        npm ci || exit 1
     fi
 
     echo
