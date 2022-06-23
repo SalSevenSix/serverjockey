@@ -34,8 +34,8 @@ class Script:
 
     def include_steamcmd_app_update(self, **kwargs: typing.Union[str, int, float]) -> Script:
         line = ['$(find_steamcmd)',
-                '+login anonymous',
                 '+force_install_dir {install_dir}',
+                '+login anonymous',
                 '+app_update {app_id}']
         if util.get('beta', kwargs):
             line.append('-beta {beta}')

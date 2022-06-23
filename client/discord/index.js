@@ -7,6 +7,7 @@ function infoLogger(text) {
 }
 
 infoLogger('*** START ServerLink Bot ***');
+var systemrunning = false;
 const config = { ...require(process.argv[2]), ...require(process.argv[3]) };
 const fs = require('fs');
 const fetch = require('node-fetch');
@@ -16,8 +17,24 @@ const client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAG
 
 // UTILS
 
+function errorLogger(error) {
+  if (error == null) return null;
+  console.error(error);
+  return null;
+}
+
+function errorHandler(error, message) {
+  errorLogger(error);
+  message.react('⛔');
+}
+
 function sleep(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
+}
+
+function isEmptyObject(value) {
+  if (value == null) return false;
+  return (typeof value === 'object' && value.constructor === Object && Object.keys(value).length === 0);
 }
 
 function stringToBase10(string) {
@@ -59,8 +76,39 @@ function isAuthorAdmin(message) {
   return admin != null;
 }
 
+function shutdownSystem(source = 'UNKNOWN') {
+  systemrunning = false;
+  infoLogger('*** END ServerLink Bot (' + source + ') ***');
+  client.destroy();
+}
+
 
 // WEBSERVICE CLIENT
+
+async function pollSubscription(url, dataHandler) {
+  var polling = (url != null);
+  while (systemrunning && polling) {
+    polling = await fetch(url)
+      .then(function(response) {
+        if (response.status === 404) return null;
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        if (response.status === 204) return {};
+        var ct = response.headers.get('Content-Type');
+        if (ct.startsWith('text/plain')) return response.text();
+        return response.json();
+      })
+      .then(function(data) {
+        if (data == null) return false;
+        if (isEmptyObject(data)) return true;
+        dataHandler(data);
+        return true;
+      })
+      .catch(function(error) {
+        errorLogger(error);
+        return false;
+      });
+  }
+}
 
 function newPostRequest(ct) {
   return {
@@ -72,23 +120,18 @@ function newPostRequest(ct) {
   };
 }
 
-function errorLogger(error) {
-  console.error(error);
-}
-
-function errorHandler(error, message) {
-  errorLogger(error);
-  message.react('⛔');
-}
-
 function doGet(message, path, tostring) {
   fetch(config.SERVER_URL + path)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       return response.json();
     })
-    .then(function(json) { message.channel.send(tostring(json)); })
-    .catch(function(error) { errorHandler(error, message); });
+    .then(function(json) {
+      message.channel.send(tostring(json));
+    })
+    .catch(function(error) {
+      errorHandler(error, message);
+    });
 }
 
 function doPost(message, path, request) {
@@ -101,16 +144,37 @@ function doPost(message, path, request) {
   fetch(url, request)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
-      message.react('✅');
+      if (response.status === 204) return null;
+      return response.json();
+    })
+    .then(function(json) {
+      if (json == null || !json.url) {
+        message.react('✅');
+        return;
+      }
+      message.react('⌛');
+      var fname = message.id + '.text';
+      var fpath = '/tmp/' + fname;
+      var fstream = fs.createWriteStream(fpath);
+      fstream.on('error', errorLogger);
+      pollSubscription(json.url, function(data) {
+        fstream.write(data);
+        fstream.write('\n');
+      }).then(function() {
+          fstream.end();
+          message.reactions.removeAll()
+            .then(function() { message.react('✅'); })
+            .catch(errorLogger);
+          message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+            .then(function() { fs.unlink(fpath, errorLogger); });
+        });
     })
     .catch(function(error) {
       errorHandler(error, message);
     })
     .finally(function() {
       if (message.content === '!shutdown') {
-        infoLogger('*** END ServerLink Bot (SHUTDOWN) ***');
-        client.destroy();
-        sleep(2000).then(function() { process.exit(); } );
+        shutdownSystem('SHUTDOWN');
       }
     });
   return true;
@@ -118,18 +182,14 @@ function doPost(message, path, request) {
 
 function doPostJson(message, path, body = null) {
   var request = newPostRequest('application/json');
-  if (body != null) {
-    request.body = JSON.stringify(body);
-  }
+  if (body != null) { request.body = JSON.stringify(body); }
   return doPost(message, path, request);
 }
 
 function doPostText(message, path, body) {
-  var request = newPostRequest('text/plain');
-  if (body == null) {
-    body = 'null';
-  }
+  if (body == null) { body = 'null'; }
   body = body.replace(/\r\n/g, '\n');
+  var request = newPostRequest('text/plain');
   request.body = body;
   return doPost(message, path, request);
 }
@@ -155,8 +215,7 @@ const handlers = {
         result += 'DOWN```';
         return result;
       }
-      result += 'UP\n';
-      result += 'State:    ' + body.state + '\n';
+      result += 'body.state + '\n';
       var dtl = body.details;
       if (dtl.hasOwnProperty('version')) { result += 'Version:  ' + dtl.version + '\n'; }
       if (dtl.hasOwnProperty('host')) { result += 'Host:     ' + dtl.host + '\n'; }
@@ -390,52 +449,37 @@ const handlers = {
 }
 
 
-// EVENT HOOKS
-
-async function newSubscription() {
-  infoLogger(config.SERVER_URL + '/players/subscribe');
-  return await fetch(config.SERVER_URL + '/players/subscribe', newPostRequest('application/json'))
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) {
-      infoLogger('Subscribed to player events at ' + json.url);
-      return json.url;
-    })
-    .catch(errorLogger);
-}
+// PLAYER EVENTS
 
 async function playerEventHook(channel) {
-  var url = await newSubscription();
-  if (url == null) return;
-  while (url != null) {
-    url = await fetch(url)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        if (response.status == 204) return null;
-        return response.json();
-      })
-      .then(function(json) {
-        if (json == null) return url;
+  var url = null;
+  while (systemrunning) {
+    while (systemrunning && url == null) {
+      url = await fetch(config.SERVER_URL + '/players/subscribe', newPostRequest('application/json'))
+        .then(function(response) {
+          if (!response.ok) throw new Error('Status: ' + response.status);
+          return response.json();
+        })
+        .then(function(json) {
+          infoLogger('Subscribed to player events at ' + json.url);
+          return json.url;
+        })
+        .catch(errorLogger);
+      if (systemrunning && url == null) {
+        await sleep(12000);
+      }
+    }
+    if (systemrunning && url != null) {
+      await pollSubscription(url, function(json) {
         var result = '';
-        if (json.event == 'login') { result += 'LOGIN '; }
-        if (json.event == 'logout') { result += 'LOGOUT '; }
-        if (json.event == 'trap') { result += 'TRAP '; }
+        if (json.event === 'login') { result += 'LOGIN '; }
+        if (json.event === 'logout') { result += 'LOGOUT '; }
         result += json.player.name;
         if (json.player.steamid != null) { result += ' [' + json.player.steamid + ']'; }
-        if (json.message != null) { result += ' (' + json.message + ')'; }
         channel.send(result);
-        return url;
-      })
-      .catch(function(error) {
-        errorLogger(error);
-        return null;
       });
-    while (url == null) {
-      await sleep(10000);
-      url = await newSubscription();
     }
+    url = null;
   }
 }
 
@@ -453,6 +497,7 @@ client.on('messageCreate', function(message) {
 });
 
 client.once('ready', function() {
+  systemrunning = true;
   infoLogger('Logged in as ' + client.user.tag);
   client.channels.fetch(config.EVENTS_CHANNEL_ID)
     .then(function(channel) {
@@ -464,7 +509,7 @@ client.once('ready', function() {
             infoLogger('Sending startup report.');
             channel.send({
               content: '**Startup Report**',
-              files: [{ attachment: config.STARTUP_REPORT, name: 'report.text' }] })
+              files: [{ attachment: config.STARTUP_REPORT, name: 'report.text' }] });
           })
           .catch(function() { infoLogger('No startup report found.'); });
       }
@@ -476,9 +521,7 @@ client.once('ready', function() {
 // SHUTDOWN HOOK
 
 process.on('SIGTERM', function() {
-  infoLogger('*** END ServerLink Bot (SIGTERM) ***');
-  client.destroy();
-  sleep(2000).then(function() { process.exit(); } );
+  shutdownSystem('SIGTERM');
 });
 
 
