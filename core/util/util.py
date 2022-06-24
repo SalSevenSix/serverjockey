@@ -218,9 +218,11 @@ async def file_size(file: str) -> int:
     return stats.st_size
 
 
-async def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
+async def directory_list_dict(path: str, base: str = '') -> typing.List[typing.Dict[str, str]]:
     if not path.endswith('/'):
-        path = path + '/'
+        path += '/'
+    if base and not base.endswith('/'):
+        base += '/'
     result = []
     for name in iter(await _listdir(path)):
         file = path + name
@@ -232,7 +234,7 @@ async def directory_list_dict(path: str) -> typing.List[typing.Dict[str, str]]:
         elif await aioos.path.isdir(file):
             ftype = 'directory'
         updated = time.ctime(await aioos.path.getmtime(file))
-        result.append({'type': ftype, 'name': name, 'updated': updated})
+        result.append({'type': ftype, 'name': base + name, 'updated': updated})
     return result
 
 

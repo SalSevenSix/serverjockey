@@ -21,8 +21,7 @@ class ResourceBuilder:
             resource = httpsvc.WebResource(name, kind, handler)
         self._current.append(resource)
         self._current = resource
-        if handler:
-            logging.debug(resource.path() + ' => ' + util.obj_to_str(handler))
+        ResourceBuilder._log_binding(resource, handler)
         return self
 
     def pop(self) -> ResourceBuilder:
@@ -36,8 +35,7 @@ class ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
         resource = httpsvc.WebResource(name, kind, handler)
         self._current.append(resource)
-        if handler:
-            logging.debug(resource.path() + ' => ' + util.obj_to_str(handler))
+        ResourceBuilder._log_binding(resource, handler)
         return self
 
     @staticmethod
@@ -48,6 +46,18 @@ class ResourceBuilder:
             if signature.startswith('x{'):
                 return signature[2:-1], httpabc.ResourceKind.ARG_ENCODED
         return signature, httpabc.ResourceKind.PATH
+
+    @staticmethod
+    def _log_binding(resource: httpabc.Resource, handler: typing.Optional[httpabc.ABC_HANDLER]):
+        if handler is None:
+            return
+        allows = ''
+        if resource.allows(httpabc.Method.GET):
+            allows += httpabc.Method.GET.value
+        if resource.allows(httpabc.Method.POST):
+            allows += '|' if allows else ''
+            allows += httpabc.Method.POST.value
+        logging.debug('trs> BIND {} {} => {}'.format(resource.path(), allows, util.obj_to_str(handler)))
 
 
 class MessengerHandler(httpabc.AsyncPostHandler):
@@ -96,7 +106,7 @@ class DirectoryListHandler(httpabc.AsyncGetHandler):
         self._path = path
 
     async def handle_get(self, resource, data):
-        return await util.directory_list_dict(self._path)
+        return await util.directory_list_dict(self._path, resource.path())
 
 
 class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
@@ -195,9 +205,15 @@ class DirectoryStreamHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
     async def handle_post(self, resource, data):
         filename, body = util.get('filename', data), util.get('body', data)
-        if filename is None or not isinstance(body, httpabc.ByteStream):
+        if filename is None:
             return httpabc.ResponseBody.BAD_REQUEST
-        await util.stream_write_file(body, self._directory + '/' + filename)
+        if body and not isinstance(body, httpabc.ByteStream):
+            return httpabc.ResponseBody.BAD_REQUEST
+        path = self._directory + '/' + filename
+        if body is None:
+            await util.delete_file(path)
+            return httpabc.ResponseBody.NO_CONTENT
+        await util.stream_write_file(body, path)
         return httpabc.ResponseBody.NO_CONTENT
 
 
