@@ -148,6 +148,9 @@ class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
         self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _WhitelistCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
+        player = util.get('player', data)
+        if player:
+            data['player'] = util.b10str_to_str(player)
         return await self._handler.handle_post(resource, data)
 
 

@@ -96,6 +96,9 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
                 validate=util.get('validate', data)) \
             .include_softlink_steamclient_lib(self._path) \
             .build()
+        if util.get('wipe', data):
+            # Not checking is server is running but all that will change later
+            await util.delete_directory(self._path)
         return await self._handler.handle_post(resource, script)
 
 

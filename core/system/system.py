@@ -87,7 +87,7 @@ class SystemService:
             subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
         server = self._create_server(subcontext)
         await server.initialise()
-        resource = httpsvc.WebResource(subcontext.config('identity'))
+        resource = httpsvc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))
         server.resources(resource)
         self._instances.append(resource)
         svrsvc.ServerService(subcontext, server).start()
@@ -116,6 +116,17 @@ class _Subscriber(msgabc.AbcSubscriber):
     async def handle(self, message):
         await self._system.delete_instance(message.data())
         return None
+
+
+class _InstanceHandler(httpabc.GetHandler):
+
+    def __init__(self, configuration: typing.Dict[str, str]):
+        self._configuration = configuration.copy()
+
+    def handle_get(self, resource, data):
+        if not httpabc.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        return self._configuration
 
 
 class _InstancesHandler(httpabc.AsyncPostHandler):

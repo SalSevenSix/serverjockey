@@ -215,13 +215,13 @@ const handlers = {
         result += 'DOWN```';
         return result;
       }
-      result += 'body.state + '\n';
+      result += body.state + '\n';
       var dtl = body.details;
       if (dtl.hasOwnProperty('version')) { result += 'Version:  ' + dtl.version + '\n'; }
-      if (dtl.hasOwnProperty('host')) { result += 'Host:     ' + dtl.host + '\n'; }
-      if (dtl.hasOwnProperty('port')) { result += 'Port:     ' + dtl.port + '\n'; }
+      //if (dtl.hasOwnProperty('host')) { result += 'Host:     ' + dtl.host + '\n'; }
+      //if (dtl.hasOwnProperty('port')) { result += 'Port:     ' + dtl.port + '\n'; }
       if (dtl.hasOwnProperty('ingametime')) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
-      if (dtl.hasOwnProperty('steamid')) { result += 'SteamID:  ' + dtl.steamid + '\n'; }
+      //if (dtl.hasOwnProperty('steamid')) { result += 'SteamID:  ' + dtl.steamid + '\n'; }
       return result + '```';
     });
   },
@@ -271,7 +271,7 @@ const handlers = {
     var command = data.shift();
     var body = null;
     if (command === 'install-runtime') {
-      body = { validate: true };
+      body = { wipe: true, validate: true };
       if (data.length > 0) { body.beta = data[0]; }
     }
     doPostJson(message, '/deployment/' + command, body);

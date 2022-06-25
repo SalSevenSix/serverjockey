@@ -23,6 +23,7 @@ def _wrap(func):
 
 _listdir = _wrap(os.listdir)
 _islinkfile = _wrap(os.path.islink)
+_rmtree = _wrap(shutil.rmtree)
 _make_archive = _wrap(shutil.make_archive)
 
 
@@ -207,10 +208,16 @@ def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]
     return base + '/' + path
 
 
-async def file_exists(file: typing.Optional[str]) -> bool:
-    if file is None:
+async def directory_exists(path: typing.Optional[str]) -> bool:
+    if path is None:
         return False
-    return await aioos.path.isfile(file)
+    return await aioos.path.isdir(path)
+
+
+async def file_exists(path: typing.Optional[str]) -> bool:
+    if path is None:
+        return False
+    return await aioos.path.isfile(path)
 
 
 async def file_size(file: str) -> int:
@@ -244,18 +251,19 @@ async def create_directory(path: str):
 
 
 async def archive_directory(path: str, logger=None) -> str:
+    assert await directory_exists(path)
     parts = path.split('/')
     if parts[-1] == '':
         del parts[-1]   # chop trailing '/'
     root_dir = '/'.join(parts)
-    file = parts.copy()
-    file.append('..')
-    file.append(parts[-1] + '-' + str(now_millis()))
-    file = '/'.join(file)
-    await _make_archive(file, 'zip', root_dir=root_dir, logger=logger)
+    filename = parts[-1] + '-' + str(now_millis())
+    del parts[-1]  # chop leaf dir
+    parts.append(filename)
+    filepath = '/'.join(parts)
+    await _make_archive(filepath, 'zip', root_dir=root_dir, logger=logger)
     if logger:
-        logger.info('Archive created: ' + file)
-    return file
+        logger.info('Archive created: ' + filepath + '.zip')
+    return filepath
 
 
 async def wipe_directory(path: str):
@@ -264,8 +272,7 @@ async def wipe_directory(path: str):
 
 
 async def delete_directory(path: str):
-    # TODO test this, previously used shutil.rmtree()
-    await aioos.removedirs(path)
+    await _rmtree(path)
 
 
 async def delete_file(file: str):
