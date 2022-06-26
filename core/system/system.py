@@ -32,6 +32,12 @@ class SystemService:
     def resources(self):
         return self._resource
 
+    def list_instances(self) -> typing.List[typing.Dict[str, str]]:
+        result = []
+        for child in self._instances.children():
+            result.append({'identity': child.name(), 'url': child.path()})
+        return result
+
     async def initialise(self) -> SystemService:
         ls = await util.directory_list_dict(self._home_dir)
         for directory in iter([o for o in ls if o['type'] == 'directory']):
@@ -124,15 +130,16 @@ class _InstanceHandler(httpabc.GetHandler):
         self._configuration = configuration.copy()
 
     def handle_get(self, resource, data):
-        if not httpabc.is_secure(data):
-            return httpabc.ResponseBody.UNAUTHORISED
         return self._configuration
 
 
-class _InstancesHandler(httpabc.AsyncPostHandler):
+class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
 
     def __init__(self, system: SystemService):
         self._system = system
+
+    def handle_get(self, resource, data):
+        return self._system.list_instances()
 
     async def handle_post(self, resource, data):
         subcontext = await self._system.create_instance(data)

@@ -1,60 +1,66 @@
 'use strict';
 
-// SETUP
 
-function infoLogger(text) {
-  console.log(new Date().getTime() + ' ' + text);
-}
+class Logger {
 
-infoLogger('*** START ServerLink Bot ***');
-var systemrunning = false;
-const config = { ...require(process.argv[2]), ...require(process.argv[3]) };
-const fs = require('fs');
-const fetch = require('node-fetch');
-const { Client, Intents } = require('discord.js');
-const client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'], partials: ['CHANNEL'] });
-
-
-// UTILS
-
-function errorLogger(error) {
-  if (error == null) return null;
-  console.error(error);
-  return null;
-}
-
-function errorHandler(error, message) {
-  errorLogger(error);
-  message.react('⛔');
-}
-
-function sleep(millis) {
-  return new Promise(function(resolve) { setTimeout(resolve, millis); });
-}
-
-function isEmptyObject(value) {
-  if (value == null) return false;
-  return (typeof value === 'object' && value.constructor === Object && Object.keys(value).length === 0);
-}
-
-function stringToBase10(string) {
-  var utf8 = unescape(encodeURIComponent(string));
-  var result = '';
-  for (var i = 0; i < utf8.length; i++) {
-    result += utf8.charCodeAt(i).toString().padStart(3, '0');
+  #timestamp() {
+    return new Date().getTime().toString() + ' ';
   }
-  return result;
+
+  raw(value) {
+    console.log(value);
+  }
+
+  info(value) {
+    console.log(this.#timestamp() + value);
+  }
+
+  error(value) {
+    if (value == null) return null;
+    console.error(value);
+    return null;
+  }
+
+  messageError(value, message) {
+    console.error(value);
+    message.react('⛔');
+  }
+
 }
 
-function base10ToString(number) {
-  var character;
-  var result = '';
-  for (var i = 0; i < number.length; i += 3) {
-    character = parseInt(number.substr(i, 3), 10).toString(16);
-    result += '%' + ((character.length % 2 == 0) ? character : '0' + character);
+
+class Utils {
+
+  sleep(millis) {
+    return new Promise(function(resolve) { setTimeout(resolve, millis); });
   }
-  return decodeURIComponent(result);
+
+  isEmptyObject(value) {
+    if (value == null) return false;
+    return (typeof value === 'object' && value.constructor === Object && Object.keys(value).length === 0);
+  }
+
+  stringToBase10(string) {
+    var utf8 = unescape(encodeURIComponent(string));
+    var result = '';
+    for (var i = 0; i < utf8.length; i++) {
+      result += utf8.charCodeAt(i).toString().padStart(3, '0');
+    }
+    return result;
+  }
+
+  base10ToString(number) {
+    var character;
+    var result = '';
+    for (var i = 0; i < number.length; i += 3) {
+      character = parseInt(number.substr(i, 3), 10).toString(16);
+      result += '%' + ((character.length % 2 == 0) ? character : '0' + character);
+    }
+    return decodeURIComponent(result);
+  }
+
 }
+
 
 function parse(message) {
   message = message.slice(1);
@@ -76,18 +82,12 @@ function isAuthorAdmin(message) {
   return admin != null;
 }
 
-function shutdownSystem(source = 'UNKNOWN') {
-  systemrunning = false;
-  infoLogger('*** END ServerLink Bot (' + source + ') ***');
-  client.destroy();
-}
-
 
 // WEBSERVICE CLIENT
 
 async function pollSubscription(url, dataHandler) {
   var polling = (url != null);
-  while (systemrunning && polling) {
+  while (running && polling) {
     polling = await fetch(url)
       .then(function(response) {
         if (response.status === 404) return null;
@@ -99,12 +99,12 @@ async function pollSubscription(url, dataHandler) {
       })
       .then(function(data) {
         if (data == null) return false;
-        if (isEmptyObject(data)) return true;
+        if (util.isEmptyObject(data)) return true;
         dataHandler(data);
         return true;
       })
       .catch(function(error) {
-        errorLogger(error);
+        logger.error(error);
         return false;
       });
   }
@@ -130,7 +130,7 @@ function doGet(message, path, tostring) {
       message.channel.send(tostring(json));
     })
     .catch(function(error) {
-      errorHandler(error, message);
+      logger.messageError(error, message);
     });
 }
 
@@ -156,7 +156,7 @@ function doPost(message, path, request) {
       var fname = message.id + '.text';
       var fpath = '/tmp/' + fname;
       var fstream = fs.createWriteStream(fpath);
-      fstream.on('error', errorLogger);
+      fstream.on('error', logger.error);
       pollSubscription(json.url, function(data) {
         fstream.write(data);
         fstream.write('\n');
@@ -164,17 +164,17 @@ function doPost(message, path, request) {
           fstream.end();
           message.reactions.removeAll()
             .then(function() { message.react('✅'); })
-            .catch(errorLogger);
+            .catch(logger.error);
           message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-            .then(function() { fs.unlink(fpath, errorLogger); });
+            .then(function() { fs.unlink(fpath, logger.error); });
         });
     })
     .catch(function(error) {
-      errorHandler(error, message);
+      logger.messageError(error, message);
     })
     .finally(function() {
-      if (message.content === '!shutdown') {
-        shutdownSystem('SHUTDOWN');
+      if (message.content === config.CMD_PREFIX + 'shutdown') {
+        shutdown();
       }
     });
   return true;
@@ -249,7 +249,7 @@ const handlers = {
       .then(function(body) {
         doPostText(message, '/config/' + command, body);
       })
-      .catch(function(error) { errorHandler(error, message); });
+      .catch(function(error) { logger.messageError(error, message); });
   },
 
   log: function(message, data) {
@@ -294,14 +294,14 @@ const handlers = {
 
   player: function(message, data) {
     if (data.length < 2) return;
-    var name = stringToBase10(data.shift());
+    var name = util.stringToBase10(data.shift());
     var command = data.shift();
     var body = null;
     if (data.length > 0) {
       if (command === 'set-access-level') {
         body = { level: data[0] };
       } else if (command === 'tele-to') {
-        body = { toplayer: stringToBase10(data[0]) };
+        body = { toplayer: util.stringToBase10(data[0]) };
       } else if (command === 'tele-at') {
         body = { location: data[0] };
       } else if (command === 'spawn-horde') {
@@ -324,35 +324,30 @@ const handlers = {
     var name = null;
     var body = null;
     if (command === 'add-name') {
-      body = { player: stringToBase10(data[0]), password: data[1] };
+      body = { player: util.stringToBase10(data[0]), password: data[1] };
       doPostJson(message, '/whitelist/add', body);
     } else if (command === 'remove-name') {
-      body = { player: stringToBase10(data[0]) };
+      body = { player: util.stringToBase10(data[0]) };
       doPostJson(message, '/whitelist/remove', body);
     } else if (command === 'add-id') {
       client.users.fetch(data[0], true, true)
         .then(function(user) {
           var pwd = Math.random().toString(16).substr(2, 8);
           name = user.tag.replace(/ /g, '').replace('#', '');
-          infoLogger('Add user: ' + data[0] + ' ' + name);
-          body = { player: stringToBase10(name), password: pwd };
+          logger.info('Add user: ' + data[0] + ' ' + name);
+          body = { player: util.stringToBase10(name), password: pwd };
           if (doPostJson(message, '/whitelist/add', body)) {
-            var text = 'Welcome to the New Hope PZ server.\n';
-            text += 'You have been added to the server whitelist.\n';
-            text += 'User: ' + name + ' Pass: ' + pwd;
-            text += '\nPlease see the #servers channel for information';
-            text += ' about how to connect to the server.';
-            user.send(text);
+            user.send(config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd));
           }
-        }).catch(function(error) { errorHandler(error, message); });
+        }).catch(function(error) { logger.messageError(error, message); });
     } else if (command === 'remove-id') {
       client.users.fetch(data[0], true, true)
         .then(function(user) {
           name = user.tag.replace(/ /g, '').replace('#', '');
-          infoLogger('Remove user: ' + data[0] + ' ' + name);
-          body = { player: stringToBase10(name) };
+          logger.info('Remove user: ' + data[0] + ' ' + name);
+          body = { player: util.stringToBase10(name) };
           doPostJson(message, '/whitelist/remove', body);
-        }).catch(function(error) { errorHandler(error, message); });
+        }).catch(function(error) { logger.messageError(error, message); });
     }
   },
 
@@ -364,58 +359,59 @@ const handlers = {
   },
 
   help: function(message, data) {
+    var pre = config.CMD_PREFIX;
     var msg = 'No more help available.';
     if (data.length === 0) {
       msg = '```';
-      msg += '!help {command} {action}   : Show help\n';
-      msg += '!server                    : Server status\n';
-      msg += '!server start              : Start server\n';
-      msg += '!server restart            : Save world and restart server\n';
-      msg += '!server stop               : Save world and stop server\n';
-      msg += '!config                    : Show configuration file URLs\n';
-      msg += '!log                       : Show log file URL\n';
-      msg += '!world save                : Save the game world\n';
-      msg += '!world broadcast {message} : Broadcast message to all players\n';
-      msg += '!world chopper             : Trigger chopper event\n';
-      msg += '!world gunshot             : Trigger gunshot event\n';
-      msg += '!world start-storm         : Start a storm\n';
-      msg += '!world stop-weather        : Stop current weather\n';
-      msg += '!world start-rain          : Start rain\n';
-      msg += '!world stop-rain           : Stop rain\n';
+      msg += pre + 'help {command} {action}   : Show help\n';
+      msg += pre + 'server                    : Server status\n';
+      msg += pre + 'server start              : Start server\n';
+      msg += pre + 'server restart            : Save world and restart server\n';
+      msg += pre + 'server stop               : Save world and stop server\n';
+      msg += pre + 'config                    : Show configuration file URLs\n';
+      msg += pre + 'log                       : Show log file URL\n';
+      msg += pre + 'world save                : Save the game world\n';
+      msg += pre + 'world broadcast {message} : Broadcast message to all players\n';
+      msg += pre + 'world chopper             : Trigger chopper event\n';
+      msg += pre + 'world gunshot             : Trigger gunshot event\n';
+      msg += pre + 'world start-storm         : Start a storm\n';
+      msg += pre + 'world stop-weather        : Stop current weather\n';
+      msg += pre + 'world start-rain          : Start rain\n';
+      msg += pre + 'world stop-rain           : Stop rain\n';
       msg += '```';
       message.channel.send(msg);
       msg = '```';
-      msg += '!players                   : Show players currently online\n';
-      msg += '!player "{name}" kick      : Kick from server\n';
-      msg += '!player "{name}" set-access-level {level} : Set access level\n';
-      msg += '!player "{name}" tele-to "{toplayer}"     : Teleport to player\n';
-      msg += '!player "{name}" tele-at {x,y,z}          : Teleport to location\n';
-      msg += '!player "{name}" give-xp {skill} {xp}     : Give XP\n';
-      msg += '!player "{name}" give-item {module} {item} {count} : Give item\n';
-      msg += '!player "{name}" spawn-vehicle {module} {item} : Spawn vehicle\n';
-      msg += '!player "{name}" spawn-horde {count}      : Spawn zombies\n';
-      msg += '!player "{name}" lightning           : Trigger lightning\n';
-      msg += '!player "{name}" thunder             : Trigger thunder\n';
-      msg += '!whitelist add-name "{name}" "{pwd}" : Add player by name\n';
-      msg += '!whitelist remove-name "{name}"      : Remove player by name\n';
-      msg += '!whitelist add-id {discordid}        : Add player by discord id\n';
-      msg += '!whitelist remove-id {discordid}     : Remove player by discord id\n';
-      msg += '!banlist add {steamid}     : Add player SteamID to banlist\n';
-      msg += '!banlist remove {steamid}  : Remove player SteamID from banlist\n';
+      msg += pre + 'players                   : Show players currently online\n';
+      msg += pre + 'player "{name}" kick      : Kick from server\n';
+      msg += pre + 'player "{name}" set-access-level {level} : Set access level\n';
+      msg += pre + 'player "{name}" tele-to "{toplayer}"     : Teleport to player\n';
+      msg += pre + 'player "{name}" tele-at {x,y,z}          : Teleport to location\n';
+      msg += pre + 'player "{name}" give-xp {skill} {xp}     : Give XP\n';
+      msg += pre + 'player "{name}" give-item {module} {item} {count} : Give item\n';
+      msg += pre + 'player "{name}" spawn-vehicle {module} {item} : Spawn vehicle\n';
+      msg += pre + 'player "{name}" spawn-horde {count}      : Spawn zombies\n';
+      msg += pre + 'player "{name}" lightning           : Trigger lightning\n';
+      msg += pre + 'player "{name}" thunder             : Trigger thunder\n';
+      msg += pre + 'whitelist add-name "{name}" "{pwd}" : Add player by name\n';
+      msg += pre + 'whitelist remove-name "{name}"      : Remove player by name\n';
+      msg += pre + 'whitelist add-id {discordid}        : Add player by discord id\n';
+      msg += pre + 'whitelist remove-id {discordid}     : Remove player by discord id\n';
+      msg += pre + 'banlist add {steamid}     : Add player SteamID to banlist\n';
+      msg += pre + 'banlist remove {steamid}  : Remove player SteamID from banlist\n';
       msg += '```';
       message.channel.send(msg);
       msg = '```';
-      msg += '!setconfig ini             : Update INI using attached file\n';
-      msg += '!setconfig sandbox         : Update Sandbox using attached file\n';
-      msg += '!setconfig spawnregions    : Update Spawnregions using attached file\n';
-      msg += '!setconfig jvm             : Update JVM json using attached file\n';
-      msg += '!deployment backup-world        : Backup game world to zip file\n';
-      msg += '!deployment wipe-world-all      : Delete game world folder\n';
-      msg += '!deployment wipe-world-playerdb : Delete only player DB\n';
-      msg += '!deployment wipe-world-config   : Delete only config files\n';
-      msg += '!deployment wipe-world-save     : Delete only map files\n';
-      msg += '!deployment install-runtime {beta} : Install game server\n';
-      msg += '!shutdown                  : Shutdown server management system\n';
+      msg += pre + 'setconfig ini             : Update INI using attached file\n';
+      msg += pre + 'setconfig sandbox         : Update Sandbox using attached file\n';
+      msg += pre + 'setconfig spawnregions    : Update Spawnregions using attached file\n';
+      msg += pre + 'setconfig jvm             : Update JVM json using attached file\n';
+      msg += pre + 'deployment backup-world        : Backup game world to zip file\n';
+      msg += pre + 'deployment wipe-world-all      : Delete game world folder\n';
+      msg += pre + 'deployment wipe-world-playerdb : Delete only player DB\n';
+      msg += pre + 'deployment wipe-world-config   : Delete only config files\n';
+      msg += pre + 'deployment wipe-world-save     : Delete only map files\n';
+      msg += pre + 'deployment install-runtime {beta} : Install game server\n';
+      msg += pre + 'shutdown                  : Shutdown server management system\n';
       msg += '```';
       message.channel.send(msg);
     } else {
@@ -449,27 +445,25 @@ const handlers = {
 }
 
 
-// PLAYER EVENTS
-
 async function playerEventHook(channel) {
   var url = null;
-  while (systemrunning) {
-    while (systemrunning && url == null) {
+  while (running) {
+    while (running && url == null) {
       url = await fetch(config.SERVER_URL + '/players/subscribe', newPostRequest('application/json'))
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           return response.json();
         })
         .then(function(json) {
-          infoLogger('Subscribed to player events at ' + json.url);
+          logger.info('Subscribed to player events at ' + json.url);
           return json.url;
         })
-        .catch(errorLogger);
-      if (systemrunning && url == null) {
-        await sleep(12000);
+        .catch(logger.error);
+      if (running && url == null) {
+        await util.sleep(12000);
       }
     }
-    if (systemrunning && url != null) {
+    if (running && url != null) {
       await pollSubscription(url, function(json) {
         var result = '';
         if (json.event === 'login') { result += 'LOGIN '; }
@@ -484,49 +478,58 @@ async function playerEventHook(channel) {
 }
 
 
-// DISCORD HOOKS
-
-client.on('messageCreate', function(message) {
-  //if (message.author.bot) return;
-  if (!message.content.startsWith('!')) return;
-  var data = parse(message.content);
-  var command = data.shift().toLowerCase();
-  if (!handlers.hasOwnProperty(command)) return;
-  infoLogger(message.member.user.tag + ' ' + message.content)
-  handlers[command](message, data);
-});
-
-client.once('ready', function() {
-  systemrunning = true;
-  infoLogger('Logged in as ' + client.user.tag);
+function startup() {
+  running = true;
+  logger.info('Logged in as ' + client.user.tag);
   client.channels.fetch(config.EVENTS_CHANNEL_ID)
     .then(function(channel) {
-      infoLogger('Publishing events to ' + channel);
+      logger.info('Publishing events to ' + channel);
       playerEventHook(channel);   // fork
       if (config.hasOwnProperty('STARTUP_REPORT')) {
         fs.promises.access(config.STARTUP_REPORT, fs.constants.F_OK)
           .then(function() {
-            infoLogger('Sending startup report.');
+            logger.info('Sending startup report.');
             channel.send({
               content: '**Startup Report**',
               files: [{ attachment: config.STARTUP_REPORT, name: 'report.text' }] });
           })
-          .catch(function() { infoLogger('No startup report found.'); });
+          .catch(function() { logger.info('No startup report found.'); });
       }
     })
-    .catch(errorLogger);
-});
+    .catch(logger.error);
+}
 
+function handleMessage(message) {
+  //if (message.author.bot) return;
+  if (!message.content.startsWith(config.CMD_PREFIX)) return;
+  var data = parse(message.content);
+  var command = data.shift().toLowerCase();
+  if (!handlers.hasOwnProperty(command)) return;
+  logger.info(message.member.user.tag + ' ' + message.content)
+  handlers[command](message, data);
+}
 
-// SHUTDOWN HOOK
-
-process.on('SIGTERM', function() {
-  shutdownSystem('SIGTERM');
-});
+function shutdown() {
+  running = false;
+  logger.info('*** END ServerLink Bot ***');
+  client.destroy();
+}
 
 
 // MAIN
 
-infoLogger('Initialised with config...');
-console.log(config);
+var running = false;
+const logger = new Logger();
+logger.info('*** START ServerLink Bot ***');
+const util = new Utils();
+const config = { ...require(process.argv[2]), ...require(process.argv[3]) };
+const fs = require('fs');
+const fetch = require('node-fetch');
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'], partials: ['CHANNEL'] });
+client.once('ready', startup);
+client.on('messageCreate', handleMessage);
+process.on('SIGTERM', shutdown);
+logger.info('Initialised with config...');
+logger.raw(config);
 client.login(config.BOT_TOKEN);

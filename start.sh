@@ -81,8 +81,10 @@ check_dependencies_common() {
     if [ ! -f "$DISCORD_CONF" ]; then
         {
             echo "{"
+            echo "  \"CMD_PREFIX\": \"!\","
             echo "  \"BOT_TOKEN\": \"YOUR DISCORD LOGIN TOKEN HERE\","
-            echo "  \"EVENTS_CHANNEL_ID\": \"YOUR DISCORD CHANNEL ID HERE\""
+            echo "  \"EVENTS_CHANNEL_ID\": \"YOUR DISCORD CHANNEL ID HERE\","
+            echo "  \"WHITELIST_DM\": \"Welcome to our server. User: \${user} Pass: \${pass}\""
             echo "}"
         } > "$DISCORD_CONF"
         chmod 644 "$DISCORD_CONF"

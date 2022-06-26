@@ -14,11 +14,19 @@ process.on('SIGTERM', function() {
   sleep(2000).then(function() { process.exit(); } );
 });
 
-const fs = require('fs');
-var stream = fs.createWriteStream('/tmpx/foo.text');
-stream.on('error', function(error) { infoLogger('ERR ' + error); } );
-stream.write('Hello\n');
-stream.write('World\n');
-stream.end();
+class Logger {
+  #foo = 'Hello';
+  #name;
+  constructor(name) {
+    this.#name = name;
+  }
+  sayHello(age) {
+    console.log(this.#foo + ' ' + this.#name + ' age: ' + age);
+  }
+}
+
+const logger = new Logger('Bowden');
+logger.sayHello(12);
+
 
 
