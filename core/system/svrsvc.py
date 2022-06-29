@@ -43,7 +43,6 @@ class ServerService(msgabc.AbcSubscriber):
                                         ServerService.DELETE, ServerService.SHUTDOWN)))
         self._context = context
         self._server = server
-        self._clientfile = _ClientFile(context)
         self._queue = asyncio.Queue(maxsize=1)
         self._running = False
         self._task = None
@@ -55,12 +54,10 @@ class ServerService(msgabc.AbcSubscriber):
         return self._task
 
     async def run(self):
-        await self._clientfile.write()
         try:
             await self._run()
         finally:
             tasks.task_end(self._task)
-            await self._clientfile.delete()
 
     async def _run(self):
         keep_running = True
@@ -175,24 +172,3 @@ class ServerStatus(msgabc.AbcSubscriber):
         status = self._status.copy()
         status['details'] = self._status['details'].copy()
         return status
-
-
-class _ClientFile:
-    WRITTEN = 'ClientFile.Written'
-
-    def __init__(self, context: contextsvc.Context):
-        self._context = context
-        self._clientfile = util.overridable_full_path(context.config('home'), context.config('clientfile'))
-
-    async def write(self):
-        data = util.obj_to_json({
-            'SERVER_URL': self._context.config('url'),
-            'SERVER_TOKEN': self._context.config('secret')
-        })
-        if self._clientfile:
-            await util.write_file(self._clientfile, data)
-            self._context.post(self, _ClientFile.WRITTEN, self._clientfile)
-        logging.debug('Client config: ' + data)
-
-    async def delete(self):
-        await util.delete_file(self._clientfile)

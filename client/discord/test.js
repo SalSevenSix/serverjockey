@@ -14,19 +14,27 @@ process.on('SIGTERM', function() {
   sleep(2000).then(function() { process.exit(); } );
 });
 
-class Logger {
-  #foo = 'Hello';
-  #name;
-  constructor(name) {
-    this.#name = name;
-  }
-  sayHello(age) {
-    console.log(this.#foo + ' ' + this.#name + ' age: ' + age);
+class HandlerProjectZomboid {
+  isString(value) {
+    return (value != null && typeof value === 'string');
   }
 }
+/*
+const handler = new HandlerProjectZomboid();
+console.log(handler.hasOwnProperty('isString'));
+console.log(typeof handler.isString === 'function');
+console.log(typeof handler.fooBar);
+console.log(Object.getOwnPropertyNames(HandlerProjectZomboid.prototype))
+console.log(Object.getOwnPropertyNames(HandlerProjectZomboid.prototype).includes('isString'))
+console.log(handler['isString']({}))
+console.log('pz.server'.split('.'));
+console.log('server'.split('.'));
+*/
 
-const logger = new Logger('Bowden');
-logger.sayHello(12);
+const value = { yay: { foo: 'xxx', bar: 'yyy' } };
+
+console.log(value.hasOwnProperty('yayx'));
+
 
 
 

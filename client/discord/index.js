@@ -3,44 +3,62 @@
 
 class Logger {
 
-  #timestamp() {
-    return new Date().getTime().toString() + ' ';
-  }
-
-  raw(value) {
+  static raw(value) {
     console.log(value);
   }
 
-  info(value) {
-    console.log(this.#timestamp() + value);
+  static info(value) {
+    console.log(new Date().getTime().toString() + ' ' + value);
   }
 
-  error(value) {
+  static error(value) {
     if (value == null) return null;
     console.error(value);
     return null;
   }
 
-  messageError(value, message) {
-    console.error(value);
-    message.react('⛔');
-  }
-
 }
 
 
-class Utils {
+class Util {
 
-  sleep(millis) {
+  static sleep(millis) {
     return new Promise(function(resolve) { setTimeout(resolve, millis); });
   }
 
-  isEmptyObject(value) {
+  static isString(value) {
+    return (value != null && typeof value === 'string');
+  }
+
+  static isEmptyObject(value) {
     if (value == null) return false;
     return (typeof value === 'object' && value.constructor === Object && Object.keys(value).length === 0);
   }
 
-  stringToBase10(string) {
+  static getFirstKey(value) {
+    if (value == null) return null;
+    var keys = Object.keys(value);
+    if (keys.length === 0) return null;
+    return keys[0];
+  }
+
+  static prototypeIncludesProperty(prot, prop) {
+    return Object.getOwnPropertyNames(prot).includes(prop);
+  }
+
+  static commandLineToList(line) {
+    var regexp = /[^\s"]+|"([^"]*)"/gi;
+    var result = [];
+    do {
+      var match = regexp.exec(line);
+      if (match != null) {
+        result.push(match[1] ? match[1] : match[0]);
+      }
+    } while (match != null);
+    return result;
+  }
+
+  static stringToBase10(string) {
     var utf8 = unescape(encodeURIComponent(string));
     var result = '';
     for (var i = 0; i < utf8.length; i++) {
@@ -49,7 +67,7 @@ class Utils {
     return result;
   }
 
-  base10ToString(number) {
+  static base10ToString(number) {
     var character;
     var result = '';
     for (var i = 0; i < number.length; i += 3) {
@@ -59,157 +77,361 @@ class Utils {
     return decodeURIComponent(result);
   }
 
-}
+  static newPostRequest(ct) {
+    return {
+      method: 'post',
+      headers: {
+        'Content-Type': ct,
+        'X-Secret': config.SERVER_TOKEN
+      }
+    };
+  }
 
-
-function parse(message) {
-  message = message.slice(1);
-  var regexp = /[^\s"]+|"([^"]*)"/gi;
-  var result = [];
-  do {
-    var match = regexp.exec(message);
-    if (match != null) {
-      result.push(match[1] ? match[1] : match[0]);
+  static checkAdmin(message) {
+    var isAdmin = message.member.roles.cache.find(function(role) {
+      return role.name.toLowerCase() === 'pzadmin';
+    });
+    if (isAdmin == null) {
+      message.react('🔒');
+      return false;
     }
-  } while (match != null);
-  return result;
-}
+    return true;
+  }
 
-function isAuthorAdmin(message) {
-  var admin = message.member.roles.cache.find(function(role) {
-    return role.name.toLowerCase() === 'pzadmin';
-  });
-  return admin != null;
 }
 
 
-// WEBSERVICE CLIENT
+class SubsHelper {
 
-async function pollSubscription(url, dataHandler) {
-  var polling = (url != null);
-  while (running && polling) {
-    polling = await fetch(url)
+  static async daemon(subscribeUrl, dataHandler) {
+    var url = null;
+    while (running && url == null) {
+      while (running && url == null) {
+        url = await fetch(subscribeUrl, Util.newPostRequest('application/json'))
+          .then(function(response) {
+            if (response.status === 404) return false;
+            if (!response.ok) throw new Error('Status: ' + response.status);
+            return response.json();
+          })
+          .then(function(json) {
+            if (json == false) return false;
+            Logger.info(subscribeUrl + ' => ' + json.url);
+            return json.url;
+          })
+          .catch(Logger.error);  // returns null
+        if (running && url == null) {
+          await Util.sleep(12000);
+        }
+      }
+      if (running && url != null && url != false) {
+        await SubsHelper.poll(url, dataHandler);
+      }
+      if (url != false) {
+        url = null;
+      }
+    }
+  }
+
+  static async poll(url, dataHandler) {
+    var polling = (url != null);
+    while (running && polling) {
+      polling = await fetch(url)
+        .then(function(response) {
+          if (response.status === 404) return null;
+          if (!response.ok) throw new Error('Status: ' + response.status);
+          if (response.status === 204) return {};
+          var ct = response.headers.get('Content-Type');
+          if (ct.startsWith('text/plain')) return response.text();
+          return response.json();
+        })
+        .then(function(data) {
+          if (data == null) return false;
+          if (Util.isEmptyObject(data)) return true;
+          dataHandler(data);
+          return true;
+        })
+        .catch(function(error) {
+          Logger.error(error);
+          return false;
+        });
+    }
+  }
+
+}
+
+
+class InstancesService {
+  #channel = null;
+  #current = null;
+  #instances = {};
+
+  async startup(channel) {
+    this.#channel = channel;
+    this.#instances = await fetch(config.SERVER_URL + '/instances')
       .then(function(response) {
-        if (response.status === 404) return null;
         if (!response.ok) throw new Error('Status: ' + response.status);
-        if (response.status === 204) return {};
-        var ct = response.headers.get('Content-Type');
-        if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
-      .then(function(data) {
-        if (data == null) return false;
-        if (util.isEmptyObject(data)) return true;
-        dataHandler(data);
-        return true;
+      .then(function(json) {
+        return json;
+      })
+      .catch(Logger.error);
+    this.#current = Util.getFirstKey(this.#instances);
+    Logger.info('Instances...');
+    Logger.raw(this.#instances);
+    for (var instance in this.#instances) {
+      if (this.#instances[instance].module === 'projectzomboid') {
+         HandlerProjectZomboid.startup(channel, instance, this.#instances[instance].url);
+      }
+    }
+  }
+
+  currentInstance() {
+    return this.#current;
+  }
+
+  createInstance(data) {
+    var instance = data.identity;
+    this.#instances[instance] = {
+      module: data.module,
+      url: config.SERVER_URL + '/instances/' + instance
+    };
+    this.#current = instance;
+    if (this.#instances[instance].module === 'projectzomboid') {
+       HandlerProjectZomboid.startup(this.#channel, instance, this.#instances[instance].url);
+    }
+  }
+
+  useInstance(instance) {
+    if (this.#instances.hasOwnProperty(instance)) {
+      this.#current = instance;
+    }
+  }
+
+  deleteInstance(instance) {
+    if (this.#instances.hasOwnProperty(instance)) {
+      delete this.#instances[instance]
+      if (instance === this.#current) {
+        this.#current = Util.getFirstKey(this.#instances);
+      }
+    }
+  }
+
+  getInstancesText() {
+    var instances = Object.keys(this.#instances);
+    if (instances.length === 0) {
+      return '```No instances found.```';
+    }
+    var result = '```';
+    for (var i = 0; i < instances.length; i++) {
+      if (instances[i] === instancesService.currentInstance()) {
+        result += '=> ';
+      } else {
+        result += '   ';
+      }
+      result += instances[i] + '\n';
+    }
+    result += '```';
+    return result;
+  }
+
+  createHandler(message, instance, command, data) {
+    if (instance == null) {
+      instance = this.#current;
+    }
+    if (instance == null) return null;
+    if (!this.#instances.hasOwnProperty(instance)) return null;
+    if (this.#instances[instance].module === 'projectzomboid'
+          && Util.prototypeIncludesProperty(HandlerProjectZomboid.prototype, command)) {
+       return new HandlerProjectZomboid(message, this.#instances[instance].url, data);
+    }
+    return null;
+  }
+
+}
+
+
+class MessageHttpTool {
+  #message;
+  #baseurl;
+
+  constructor(message, baseurl) {
+    this.#message = message;
+    this.#baseurl = baseurl;
+  }
+
+  get baseurl() {
+    return this.#baseurl;
+  }
+
+  error(value, message) {
+    Logger.error(value);
+    message.react('⛔');
+  }
+
+  doGet(path, tostring) {
+    var self = this;
+    var message = this.#message;
+    fetch(this.#baseurl + path)
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) {
+        message.channel.send(tostring(json));
       })
       .catch(function(error) {
-        logger.error(error);
-        return false;
+        self.error(error, message);
       });
   }
-}
 
-function newPostRequest(ct) {
-  return {
-    method: 'post',
-    headers: {
-      'Content-Type': ct,
-      'X-Secret': config.SERVER_TOKEN
+  doPost(path, body = null, dataHandler = null) {
+    var self = this;
+    var message = this.#message;
+    if (!Util.checkAdmin(message)) return;
+    var request = Util.newPostRequest('application/json');
+    if (Util.isString(body)) {
+      request = Util.newPostRequest('text/plain');
+      request.body = body.replace(/\r\n/g, '\n');
+    } else if (body != null) {
+      request.body = JSON.stringify(body);
     }
-  };
-}
-
-function doGet(message, path, tostring) {
-  fetch(config.SERVER_URL + path)
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) {
-      message.channel.send(tostring(json));
-    })
-    .catch(function(error) {
-      logger.messageError(error, message);
-    });
-}
-
-function doPost(message, path, request) {
-  if (!isAuthorAdmin(message)) {
-    message.react('🔒');
-    return false;
+    fetch(this.#baseurl + path, request)
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        if (response.status === 204) return null;
+        return response.json();
+      })
+      .then(function(json) {
+        if (json != null && json.hasOwnProperty('error')) {
+          throw new Error(json.error);
+        }
+        if (dataHandler == null) {
+          message.react('✅');
+        } else {
+          dataHandler(message, json);
+        }
+      })
+      .catch(function(error) {
+        self.error(error, message);
+      })
+      .finally(function() {
+        if (message.content === config.CMD_PREFIX + 'shutdown') {
+          shutdown();
+        }
+      });
+    return true;
   }
-  var url = config.SERVER_URL + path;
-  if (path.startsWith('http')) { url = path; }
-  fetch(url, request)
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      if (response.status === 204) return null;
-      return response.json();
-    })
-    .then(function(json) {
-      if (json == null || !json.url) {
-        message.react('✅');
-        return;
-      }
-      message.react('⌛');
-      var fname = message.id + '.text';
-      var fpath = '/tmp/' + fname;
-      var fstream = fs.createWriteStream(fpath);
-      fstream.on('error', logger.error);
-      pollSubscription(json.url, function(data) {
-        fstream.write(data);
-        fstream.write('\n');
-      }).then(function() {
-          fstream.end();
-          message.reactions.removeAll()
-            .then(function() { message.react('✅'); })
-            .catch(logger.error);
-          message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-            .then(function() { fs.unlink(fpath, logger.error); });
-        });
-    })
-    .catch(function(error) {
-      logger.messageError(error, message);
-    })
-    .finally(function() {
-      if (message.content === config.CMD_PREFIX + 'shutdown') {
-        shutdown();
-      }
-    });
-  return true;
-}
 
-function doPostJson(message, path, body = null) {
-  var request = newPostRequest('application/json');
-  if (body != null) { request.body = JSON.stringify(body); }
-  return doPost(message, path, request);
-}
-
-function doPostText(message, path, body) {
-  if (body == null) { body = 'null'; }
-  body = body.replace(/\r\n/g, '\n');
-  var request = newPostRequest('text/plain');
-  request.body = body;
-  return doPost(message, path, request);
-}
-
-
-// COMMAND HANDLERS
-
-const handlers = {
-
-  shutdown: function(message, data) {
-    var baseurl = config.SERVER_URL.split('/', 3).join('/');
-    doPostJson(message, baseurl + '/system/shutdown');
-  },
-
-  server: function(message, data) {
-    if (data.length === 1) {
-      doPostJson(message, '/server/' + data[0]);
+  static subsToFileDataHandler(message, json) {
+    if (json == null || !json.hasOwnProperty('url')) {
+      message.react('✅');
       return;
     }
-    doGet(message, '/server', function(body) {
+    message.react('⌛');
+    var fname = message.id + '.text';
+    var fpath = '/tmp/' + fname;
+    var fstream = fs.createWriteStream(fpath);
+    fstream.on('error', Logger.error);
+    SubsHelper.poll(json.url, function(data) {
+      fstream.write(data);
+      fstream.write('\n');
+    }).then(function() {
+        fstream.end();
+        message.reactions.removeAll()
+          .then(function() { message.react('✅'); })
+          .catch(Logger.error);
+        message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+          .then(function() { fs.unlink(fpath, Logger.error); });
+      });
+  }
+
+}
+
+
+class HandlerSystem {
+  #httptool;
+  #message;
+  #data;
+
+  constructor(message, data) {
+    this.#httptool = new MessageHttpTool(message, config.SERVER_URL);
+    this.#message = message;
+    this.#data = data;
+  }
+
+  instances() {
+    this.#message.channel.send(instancesService.getInstancesText());
+  }
+
+  use() {
+    if (!Util.checkAdmin(this.#message)) return;
+    if (this.#data.length > 0) {
+      instancesService.useInstance(this.#data[0]);
+      this.#message.channel.send(instancesService.getInstancesText());
+    }
+  }
+
+  create() {
+    if (this.#data.length < 2) return;
+    var body = { identity: this.#data[0], module: this.#data[1] };
+    this.#httptool.doPost('/instances', body, function(message, json) {
+      instancesService.createInstance(body);
+      message.channel.send(instancesService.getInstancesText());
+    });
+  }
+
+  shutdown() {
+    this.#httptool.doPost('/system/shutdown');
+  }
+
+  help() {
+    if (this.#data.length === 0) {
+      var result = '```SYSTEM COMMANDS\n' + config.CMD_PREFIX;
+      result += staticData.system.help.join('\n' + config.CMD_PREFIX);
+      this.#message.channel.send(result + '```');
+    }
+  }
+
+}
+
+
+class HandlerProjectZomboid {
+  #instance;
+  #httptool;
+  #message;
+  #data;
+
+  constructor(message, baseurl, data) {
+    var parts = baseurl.split('/');
+    this.#instance = parts[parts.length - 1];
+    this.#httptool = new MessageHttpTool(message, baseurl);
+    this.#message = message;
+    this.#data = data;
+  }
+
+  static startup(channel, instance, url) {
+    SubsHelper.daemon(url + '/players/subscribe', function(json) {
+      var result = '';
+      if (json.event === 'login') { result += 'LOGIN '; }
+      if (json.event === 'logout') { result += 'LOGOUT '; }
+      result += json.player.name;
+      if (json.player.steamid != null) {
+        result += ' [' + json.player.steamid + '] ' + instance;
+      }
+      channel.send(result);
+    });
+  }
+
+  server() {
+    if (this.#data.length === 1) {
+      this.#httptool.doPost('/server/' + this.#data[0]);
+      if (this.#data[0] === 'delete') {
+        instancesService.deleteInstance(this.#instance);
+      }
+      return;
+    }
+    this.#httptool.doGet('/server', function(body) {
       var result = '```Server is ';
       if (!body.running) {
         result += 'DOWN```';
@@ -218,67 +440,72 @@ const handlers = {
       result += body.state + '\n';
       var dtl = body.details;
       if (dtl.hasOwnProperty('version')) { result += 'Version:  ' + dtl.version + '\n'; }
-      //if (dtl.hasOwnProperty('host')) { result += 'Host:     ' + dtl.host + '\n'; }
-      //if (dtl.hasOwnProperty('port')) { result += 'Port:     ' + dtl.port + '\n'; }
       if (dtl.hasOwnProperty('ingametime')) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
-      //if (dtl.hasOwnProperty('steamid')) { result += 'SteamID:  ' + dtl.steamid + '\n'; }
       return result + '```';
     });
-  },
+  }
 
-  config: function(message, data) {
-    var prefix = config.SERVER_URL + '/config/'
+  config() {
+    var prefix = this.#httptool.baseurl + '/config/';
     var result = prefix + 'jvm\n';
     result += prefix + 'options\n';
     result += prefix + 'ini\n';
     result += prefix + 'sandbox\n';
     result += prefix + 'spawnpoints\n';
     result += prefix + 'spawnregions\n';
-    message.channel.send(result);
-  },
+    this.#message.channel.send(result);
+  }
 
-  setconfig: function(message, data) {
+  setconfig() {
+    var httptool = this.#httptool;
+    var message = this.#message;
+    var data = [...this.#data];
     if (data.length < 1) return;
     if (message.attachments.length < 1) return;
-    var command = data.shift();
     fetch(message.attachments.first().url)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
       })
       .then(function(body) {
-        doPostText(message, '/config/' + command, body);
+        if (body != null) {
+          httptool.doPost('/config/' + data.shift(), body);
+        }
       })
-      .catch(function(error) { logger.messageError(error, message); });
-  },
+      .catch(function(error) {
+        httptool.error(error, message);
+      });
+  }
 
-  log: function(message, data) {
-    message.channel.send(config.SERVER_URL + '/log');
-  },
+  log() {
+    this.#message.channel.send(this.#httptool.baseurl + '/log');
+  }
 
-  world: function(message, data) {
+  world() {
+    var data = [...this.#data];
     if (data.length < 1) return;
-    var command = data.shift();
+    var cmd = data.shift();
     var body = null;
-    if (data.length > 0 && command === 'broadcast') {
+    if (data.length > 0 && cmd === 'broadcast') {
       body = { message: data.join(' ') };
     }
-    doPostJson(message, '/world/' + command, body);
-  },
+    this.#httptool.doPost('/world/' + cmd, body);
+  }
 
-  deployment: function(message, data) {
+  deployment() {
+    var data = [...this.#data];
     if (data.length < 1) return;
-    var command = data.shift();
+    var cmd = data.shift();
     var body = null;
-    if (command === 'install-runtime') {
+    if (cmd === 'install-runtime') {
       body = { wipe: true, validate: true };
       if (data.length > 0) { body.beta = data[0]; }
     }
-    doPostJson(message, '/deployment/' + command, body);
-  },
+    this.#httptool.doPost('/deployment/' + cmd, body, MessageHttpTool.subsToFileDataHandler);
+  }
 
-  players: function(message, data) {
-    doGet(message, '/players', function(body) {
+  players() {
+    this.#httptool.doGet('/players', function(body) {
       var result = '```Players currently online: ' + body.length + '\n';
       for (var i = 0; i < body.length; i++) {
         if (body[i].steamid == null) {
@@ -290,228 +517,162 @@ const handlers = {
       }
       return result + '```';
     });
-  },
+  }
 
-  player: function(message, data) {
+  player() {
+    var data = [...this.#data];
     if (data.length < 2) return;
-    var name = util.stringToBase10(data.shift());
-    var command = data.shift();
+    var name = Util.stringToBase10(data.shift());
+    var cmd = data.shift();
     var body = null;
     if (data.length > 0) {
-      if (command === 'set-access-level') {
+      if (cmd === 'set-access-level') {
         body = { level: data[0] };
-      } else if (command === 'tele-to') {
-        body = { toplayer: util.stringToBase10(data[0]) };
-      } else if (command === 'tele-at') {
+      } else if (cmd === 'tele-to') {
+        body = { toplayer: Util.stringToBase10(data[0]) };
+      } else if (cmd === 'tele-at') {
         body = { location: data[0] };
-      } else if (command === 'spawn-horde') {
+      } else if (cmd === 'spawn-horde') {
         body = { count: data[0] };
-      } else if (command === 'spawn-vehicle') {
+      } else if (cmd === 'spawn-vehicle') {
         body = { module: data[0], item: data[1] };
-      } else if (command === 'give-xp') {
+      } else if (cmd === 'give-xp') {
         body = { skill: data[0], xp: data[1] };
-      } else if (command === 'give-item') {
+      } else if (cmd === 'give-item') {
         body = { module: data[0], item: data[1] };
         if (data.length > 2) { body.count = data[2]; }
       }
     }
-    doPostJson(message, '/players/' + name + '/' + command, body);
-  },
+    this.#httptool.doPost('/players/' + name + '/' + cmd, body);
+  }
 
-  whitelist: function(message, data) {
+  whitelist() {
+    var httptool = this.#httptool;
+    var message = this.#message;
+    var data = [...this.#data];
     if (data.length < 1) return;
-    var command = data.shift();
+    var cmd = data.shift();
     var name = null;
     var body = null;
-    if (command === 'add-name') {
-      body = { player: util.stringToBase10(data[0]), password: data[1] };
-      doPostJson(message, '/whitelist/add', body);
-    } else if (command === 'remove-name') {
-      body = { player: util.stringToBase10(data[0]) };
-      doPostJson(message, '/whitelist/remove', body);
-    } else if (command === 'add-id') {
+    if (cmd === 'add-name') {
+      body = { player: Util.stringToBase10(data[0]), password: data[1] };
+      httptool.doPost('/whitelist/add', body);
+    } else if (cmd === 'remove-name') {
+      body = { player: Util.stringToBase10(data[0]) };
+      httptool.doPost('/whitelist/remove', body);
+    } else if (cmd === 'add-id') {
       client.users.fetch(data[0], true, true)
         .then(function(user) {
           var pwd = Math.random().toString(16).substr(2, 8);
           name = user.tag.replace(/ /g, '').replace('#', '');
-          logger.info('Add user: ' + data[0] + ' ' + name);
-          body = { player: util.stringToBase10(name), password: pwd };
-          if (doPostJson(message, '/whitelist/add', body)) {
+          Logger.info('Add user: ' + data[0] + ' ' + name);
+          body = { player: Util.stringToBase10(name), password: pwd };
+          if (httptool.doPost('/whitelist/add', body)) {
             user.send(config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd));
           }
-        }).catch(function(error) { logger.messageError(error, message); });
-    } else if (command === 'remove-id') {
+        })
+        .catch(function(error) {
+          httptool.error(error, message);
+        });
+    } else if (cmd === 'remove-id') {
       client.users.fetch(data[0], true, true)
         .then(function(user) {
           name = user.tag.replace(/ /g, '').replace('#', '');
-          logger.info('Remove user: ' + data[0] + ' ' + name);
-          body = { player: util.stringToBase10(name) };
-          doPostJson(message, '/whitelist/remove', body);
-        }).catch(function(error) { logger.messageError(error, message); });
+          Logger.info('Remove user: ' + data[0] + ' ' + name);
+          body = { player: Util.stringToBase10(name) };
+          httptool.doPost('/whitelist/remove', body);
+        })
+        .catch(function(error) {
+          httptool.error(error, message);
+        });
     }
-  },
+  }
 
-  banlist: function(message, data) {
+  banlist() {
+    var data = [...this.#data];
     if (data.length < 2) return;
-    var command = data.shift() + '-id';
+    var cmd = data.shift() + '-id';
     var body = { steamid: data.shift() };
-    doPostJson(message, '/banlist/' + command, body);
-  },
+    this.#httptool.doPost('/banlist/' + cmd, body);
+  }
 
-  help: function(message, data) {
-    var pre = config.CMD_PREFIX;
-    var msg = 'No more help available.';
-    if (data.length === 0) {
-      msg = '```';
-      msg += pre + 'help {command} {action}   : Show help\n';
-      msg += pre + 'server                    : Server status\n';
-      msg += pre + 'server start              : Start server\n';
-      msg += pre + 'server restart            : Save world and restart server\n';
-      msg += pre + 'server stop               : Save world and stop server\n';
-      msg += pre + 'config                    : Show configuration file URLs\n';
-      msg += pre + 'log                       : Show log file URL\n';
-      msg += pre + 'world save                : Save the game world\n';
-      msg += pre + 'world broadcast {message} : Broadcast message to all players\n';
-      msg += pre + 'world chopper             : Trigger chopper event\n';
-      msg += pre + 'world gunshot             : Trigger gunshot event\n';
-      msg += pre + 'world start-storm         : Start a storm\n';
-      msg += pre + 'world stop-weather        : Stop current weather\n';
-      msg += pre + 'world start-rain          : Start rain\n';
-      msg += pre + 'world stop-rain           : Stop rain\n';
-      msg += '```';
-      message.channel.send(msg);
-      msg = '```';
-      msg += pre + 'players                   : Show players currently online\n';
-      msg += pre + 'player "{name}" kick      : Kick from server\n';
-      msg += pre + 'player "{name}" set-access-level {level} : Set access level\n';
-      msg += pre + 'player "{name}" tele-to "{toplayer}"     : Teleport to player\n';
-      msg += pre + 'player "{name}" tele-at {x,y,z}          : Teleport to location\n';
-      msg += pre + 'player "{name}" give-xp {skill} {xp}     : Give XP\n';
-      msg += pre + 'player "{name}" give-item {module} {item} {count} : Give item\n';
-      msg += pre + 'player "{name}" spawn-vehicle {module} {item} : Spawn vehicle\n';
-      msg += pre + 'player "{name}" spawn-horde {count}      : Spawn zombies\n';
-      msg += pre + 'player "{name}" lightning           : Trigger lightning\n';
-      msg += pre + 'player "{name}" thunder             : Trigger thunder\n';
-      msg += pre + 'whitelist add-name "{name}" "{pwd}" : Add player by name\n';
-      msg += pre + 'whitelist remove-name "{name}"      : Remove player by name\n';
-      msg += pre + 'whitelist add-id {discordid}        : Add player by discord id\n';
-      msg += pre + 'whitelist remove-id {discordid}     : Remove player by discord id\n';
-      msg += pre + 'banlist add {steamid}     : Add player SteamID to banlist\n';
-      msg += pre + 'banlist remove {steamid}  : Remove player SteamID from banlist\n';
-      msg += '```';
-      message.channel.send(msg);
-      msg = '```';
-      msg += pre + 'setconfig ini             : Update INI using attached file\n';
-      msg += pre + 'setconfig sandbox         : Update Sandbox using attached file\n';
-      msg += pre + 'setconfig spawnregions    : Update Spawnregions using attached file\n';
-      msg += pre + 'setconfig jvm             : Update JVM json using attached file\n';
-      msg += pre + 'deployment backup-world        : Backup game world to zip file\n';
-      msg += pre + 'deployment wipe-world-all      : Delete game world folder\n';
-      msg += pre + 'deployment wipe-world-playerdb : Delete only player DB\n';
-      msg += pre + 'deployment wipe-world-config   : Delete only config files\n';
-      msg += pre + 'deployment wipe-world-save     : Delete only map files\n';
-      msg += pre + 'deployment install-runtime {beta} : Install game server\n';
-      msg += pre + 'shutdown                  : Shutdown server management system\n';
-      msg += '```';
-      message.channel.send(msg);
+  help() {
+    var channel = this.#message.channel;
+    if (this.#data.length === 0) {
+      var s = '```PROJECT ZOMBOID COMMANDS\n' + config.CMD_PREFIX;
+      channel.send(s + staticData.projectzomboid.help1.join('\n' + config.CMD_PREFIX) + '```');
+      channel.send(s + staticData.projectzomboid.help2.join('\n' + config.CMD_PREFIX) + '```');
+      channel.send(s + staticData.projectzomboid.help3.join('\n' + config.CMD_PREFIX) + '```');
+      return;
+    }
+    var query = this.#data.join('').replaceAll('-', '');
+    if (staticData.projectzomboid.hasOwnProperty(query)) {
+      channel.send(staticData.projectzomboid[query].join('\n'));
     } else {
-      var query = data.join(' ');
-      if (query === 'help') {
-        msg = 'Show help text. Use {command} and {action} for more detailed information. Both optional.';
-      } else if (query === 'player set-access-level') {
-        msg = 'Set access level for online player. Level options:\n';
-        msg += '`admin, moderator, overseer, gm, observer, none`';
-      } else if (query === 'player give-xp') {
-        msg = 'Give XP to online player. Skill options:\n';
-        msg += '```Fitness, Strength,\n';
-        msg += 'Combat, Axe, Blunt, SmallBlunt, LongBlade, SmallBlade,\n';
-        msg += 'Spear, Maintenance, Firearm, Aiming, Reloading,\n';
-        msg += 'Agility, Sprinting, Lightfoot, Nimble, Sneak,\n';
-        msg += 'Crafting, Woodwork, Cooking, Farming, Doctor,\n';
-        msg += 'Electricity, MetalWelding, Mechanics, Tailoring,\n';
-        msg += 'Survivalist, Fishing, Trapping, PlantScavenging```';
-      } else if (query === 'player give-item') {
-        msg = 'Give item to player, {count} is optional.';
-      } else if (query === 'player spawn-vehicle') {
-        msg = 'Spawn a vehicle next to player. Condition will vary.';
-      } else if (query === 'deployment install-runtime') {
-        msg = 'Install game server, {beta} optional\n';
-        msg += 'Only works on Linux. This process takes time to complete';
-      }
-      message.channel.send(msg);
+      channel.send('No more help available.');
     }
   }
 
-}
-
-
-async function playerEventHook(channel) {
-  var url = null;
-  while (running) {
-    while (running && url == null) {
-      url = await fetch(config.SERVER_URL + '/players/subscribe', newPostRequest('application/json'))
-        .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
-          return response.json();
-        })
-        .then(function(json) {
-          logger.info('Subscribed to player events at ' + json.url);
-          return json.url;
-        })
-        .catch(logger.error);
-      if (running && url == null) {
-        await util.sleep(12000);
-      }
-    }
-    if (running && url != null) {
-      await pollSubscription(url, function(json) {
-        var result = '';
-        if (json.event === 'login') { result += 'LOGIN '; }
-        if (json.event === 'logout') { result += 'LOGOUT '; }
-        result += json.player.name;
-        if (json.player.steamid != null) { result += ' [' + json.player.steamid + ']'; }
-        channel.send(result);
-      });
-    }
-    url = null;
-  }
 }
 
 
 function startup() {
   running = true;
-  logger.info('Logged in as ' + client.user.tag);
+  Logger.info('Logged in as ' + client.user.tag);
   client.channels.fetch(config.EVENTS_CHANNEL_ID)
     .then(function(channel) {
-      logger.info('Publishing events to ' + channel);
-      playerEventHook(channel);   // fork
+      Logger.info('Publishing events to ' + channel.id);
+      instancesService.startup(channel);
       if (config.hasOwnProperty('STARTUP_REPORT')) {
         fs.promises.access(config.STARTUP_REPORT, fs.constants.F_OK)
           .then(function() {
-            logger.info('Sending startup report.');
+            Logger.info('Sending startup report.');
             channel.send({
               content: '**Startup Report**',
               files: [{ attachment: config.STARTUP_REPORT, name: 'report.text' }] });
           })
-          .catch(function() { logger.info('No startup report found.'); });
+          .catch(function() {
+            Logger.info('No startup report found.');
+          });
       }
     })
-    .catch(logger.error);
+    .catch(Logger.error);
 }
 
 function handleMessage(message) {
   //if (message.author.bot) return;
   if (!message.content.startsWith(config.CMD_PREFIX)) return;
-  var data = parse(message.content);
+  var data = Util.commandLineToList(message.content.slice(1));
   var command = data.shift().toLowerCase();
-  if (!handlers.hasOwnProperty(command)) return;
-  logger.info(message.member.user.tag + ' ' + message.content)
-  handlers[command](message, data);
+  var instance = null;
+  var parts = command.split('.');
+  if (parts.length === 1) {
+    command = parts[0];
+  } else {
+    instance = parts[0];
+    command = parts[1];
+  }
+  var handlers = [];
+  if (Util.prototypeIncludesProperty(HandlerSystem.prototype, command)) {
+    handlers.push(new HandlerSystem(message, data));
+  }
+  var handler = instancesService.createHandler(message, instance, command, data);
+  if (handler != null) {
+    handlers.push(handler);
+  }
+  if (handlers.length === 0) {
+    message.react('⛔');
+    return;
+  }
+  Logger.info(message.member.user.tag + ' ' + message.content);
+  for (var i = 0; i < handlers.length; i++) {
+    handlers[i][command]();
+  }
 }
 
 function shutdown() {
   running = false;
-  logger.info('*** END ServerLink Bot ***');
+  Logger.info('*** END ServerLink Bot ***');
   client.destroy();
 }
 
@@ -519,17 +680,19 @@ function shutdown() {
 // MAIN
 
 var running = false;
-const logger = new Logger();
-logger.info('*** START ServerLink Bot ***');
-const util = new Utils();
+Logger.info('*** START ServerLink Bot ***');
 const config = { ...require(process.argv[2]), ...require(process.argv[3]) };
+Logger.info('Initialised with config...');
+Logger.raw(config);
+
+const staticData = require('./constants.json');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const instancesService = new InstancesService();
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'], partials: ['CHANNEL'] });
+
 client.once('ready', startup);
 client.on('messageCreate', handleMessage);
 process.on('SIGTERM', shutdown);
-logger.info('Initialised with config...');
-logger.raw(config);
 client.login(config.BOT_TOKEN);

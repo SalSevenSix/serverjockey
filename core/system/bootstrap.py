@@ -21,7 +21,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
                    help='Port number to use, default is 6164')
     p.add_argument('--logfile', type=str,
                    help='Log file to use, relative to "home" unless starts with "/" or "."')
-    p.add_argument('--clientfile', type=str,
+    p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to instance dir unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
@@ -73,7 +73,7 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
     _setup_logging(context)
     try:
         logging.info('*** START Serverjockey ***')
-        logging.info('Secret {}'.format(context.config('secret')))
+        logging.debug('Secret {}'.format(context.config('secret')))
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:

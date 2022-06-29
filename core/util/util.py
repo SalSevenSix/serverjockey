@@ -272,7 +272,8 @@ async def wipe_directory(path: str):
 
 
 async def delete_directory(path: str):
-    await _rmtree(path)
+    if await aioos.path.isdir(path):
+        await _rmtree(path)
 
 
 async def delete_file(file: str):

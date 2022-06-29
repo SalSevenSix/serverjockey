@@ -20,6 +20,7 @@ class SystemService:
         self._modules = {}
         self._home_dir = context.config('home')
         self._url = context.config('url')
+        self._clientfile = _ClientFile(context)
         self._resource = httpsvc.WebResource(self._url)
         httpext.ResourceBuilder(self._resource) \
             .push('system') \
@@ -32,10 +33,12 @@ class SystemService:
     def resources(self):
         return self._resource
 
-    def list_instances(self) -> typing.List[typing.Dict[str, str]]:
-        result = []
+    def instances_dict(self) -> typing.Dict:
+        result = {}
         for child in self._instances.children():
-            result.append({'identity': child.name(), 'url': child.path()})
+            for subcontext in self._context.subcontexts():
+                if child.name() == subcontext.config('identity'):
+                    result[child.name()] = {'module': subcontext.config('module'), 'url': child.path()}
         return result
 
     async def initialise(self) -> SystemService:
@@ -52,9 +55,11 @@ class SystemService:
                     'home': self._home_dir + '/' + identity
                 })
                 await self._initialise_instance(configuration)
+        await self._clientfile.write()
         return self
 
     async def shutdown(self):
+        await self._clientfile.delete()
         subcontexts = self._context.subcontexts()
         for subcontext in iter(subcontexts):
             self._instances.remove(subcontext.config('identity'))
@@ -112,6 +117,28 @@ class SystemService:
         raise Exception('Server class implementation not found in module: ' + repr(module))
 
 
+class _ClientFile:
+    WRITTEN = 'ClientFile.Written'
+
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
+        self._clientfile = util.overridable_full_path(context.config('home'), context.config('clientfile'))
+
+    async def write(self):
+        data = util.obj_to_json({
+            'SERVER_URL': self._context.config('url'),
+            'SERVER_TOKEN': self._context.config('secret')
+        })
+        if self._clientfile:
+            await util.write_file(self._clientfile, data)
+            self._context.post(self, _ClientFile.WRITTEN, self._clientfile)
+        logging.debug('Client config: ' + data)
+
+    async def delete(self):
+        # TODO silently delete?
+        await util.delete_file(self._clientfile)
+
+
 class _Subscriber(msgabc.AbcSubscriber):
     FILTER = msgftr.NameIs(svrsvc.ServerService.DELETE_ME)
 
@@ -139,7 +166,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
         self._system = system
 
     def handle_get(self, resource, data):
-        return self._system.list_instances()
+        return self._system.instances_dict()
 
     async def handle_post(self, resource, data):
         subcontext = await self._system.create_instance(data)
