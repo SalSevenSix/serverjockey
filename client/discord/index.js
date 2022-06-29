@@ -107,18 +107,9 @@ class SubsHelper {
     var url = null;
     while (running && url == null) {
       while (running && url == null) {
-        url = await fetch(subscribeUrl, Util.newPostRequest('application/json'))
-          .then(function(response) {
-            if (response.status === 404) return false;
-            if (!response.ok) throw new Error('Status: ' + response.status);
-            return response.json();
-          })
-          .then(function(json) {
-            if (json == false) return false;
-            Logger.info(subscribeUrl + ' => ' + json.url);
-            return json.url;
-          })
-          .catch(Logger.error);  // returns null
+        url = await SubsHelper.subscribe(subscribeUrl, function(pollUrl) {
+          Logger.info(subscribeUrl + ' => ' + pollUrl);
+        });
         if (running && url == null) {
           await Util.sleep(12000);
         }
@@ -130,6 +121,21 @@ class SubsHelper {
         url = null;
       }
     }
+  }
+
+  static async subscribe(subscribeUrl, dataHandler) {
+    return await fetch(subscribeUrl, Util.newPostRequest('application/json'))
+      .then(function(response) {
+        if (response.status === 404) return false;
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) {
+        if (json === false) return false;
+        dataHandler(json.url);
+        return json.url;
+      })
+      .catch(Logger.error);  // return null
   }
 
   static async poll(url, dataHandler) {
@@ -147,8 +153,7 @@ class SubsHelper {
         .then(function(data) {
           if (data == null) return false;
           if (Util.isEmptyObject(data)) return true;
-          dataHandler(data);
-          return true;
+          return dataHandler(data);
         })
         .catch(function(error) {
           Logger.error(error);
@@ -336,6 +341,7 @@ class MessageHttpTool {
     SubsHelper.poll(json.url, function(data) {
       fstream.write(data);
       fstream.write('\n');
+      return true;
     }).then(function() {
         fstream.end();
         message.reactions.removeAll()
@@ -420,15 +426,36 @@ class HandlerProjectZomboid {
         result += ' [' + json.player.steamid + '] ' + instance;
       }
       channel.send(result);
+      return true;
     });
   }
 
   server() {
-    if (this.#data.length === 1) {
-      this.#httptool.doPost('/server/' + this.#data[0]);
-      if (this.#data[0] === 'delete') {
-        instancesService.deleteInstance(this.#instance);
-      }
+    var instance = this.#instance;
+    var data = this.#data;
+    if (data.length === 1) {
+      var baseurl = this.#httptool.baseurl;
+      this.#httptool.doPost('/server/' + data[0], null, function(message, json) {
+        if (data[0] === 'start' || data[0] === 'restart') {
+          message.react('⌛');
+          SubsHelper.subscribe(baseurl + '/server/subscribe', function(pollUrl) {
+            SubsHelper.poll(pollUrl, function(data) {
+              if (data != null && data.running && data.state === 'STARTED') {
+                message.reactions.removeAll()
+                  .then(function() { message.react('✅'); })
+                  .catch(Logger.error);
+                return false;
+              }
+              return true;
+            });
+          });
+        } else if (data[0] === 'delete') {
+          instancesService.deleteInstance(instance);
+          message.react('✅');
+        } else {
+          message.react('✅');
+        }
+      });
       return;
     }
     this.#httptool.doGet('/server', function(body) {

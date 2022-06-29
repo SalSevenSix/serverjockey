@@ -1,7 +1,7 @@
 # serverjockey
 
 ## Install
-* **Recommended**: Update your linux system first
+* **Recommended**: Update your system first
 ```bash
 sudo apt update
 sudo apt upgrade
@@ -10,13 +10,11 @@ sudo apt upgrade
 * Install [cURL](https://curl.haxx.se/) if not installed
 ```bash
 sudo apt install curl
-curl --version
 ```
 
 * Install `unzip` if not installed
 ```bash
 sudo apt install unzip
-unzip -v | head -1
 ```
 
 * Now download and unzip the

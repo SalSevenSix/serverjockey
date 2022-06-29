@@ -245,11 +245,11 @@ cd "$JOCKEY_DIR" || exit 1
 if [ -f "$JOCKEY_EXE" ]; then
     $JOCKEY_EXE --host "$HOST" --port "$PORT" \
         --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
-        "$HOME_DIR" > /dev/null 2>&1 &
+        --home "$HOME_DIR" > /dev/null 2>&1 &
 else
     python3 -m pipenv run python3 -m core.system --host "$HOST" --port "$PORT" \
         --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
-        "$HOME_DIR" > /dev/null 2>&1 &
+        --home "$HOME_DIR" > /dev/null 2>&1 &
 fi
 [ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting ServerJockey"
 

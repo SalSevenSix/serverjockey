@@ -205,7 +205,9 @@ def insert_filename_suffix(filename: str, suffix: str) -> str:
 def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
     if base is None or path is None or path[0] in ('.', '/'):
         return path
-    return base + '/' + path
+    if not base.endswith('/'):
+        base += '/'
+    return base + path
 
 
 async def directory_exists(path: typing.Optional[str]) -> bool:
@@ -243,6 +245,10 @@ async def directory_list_dict(path: str, base: str = '') -> typing.List[typing.D
         updated = time.ctime(await aioos.path.getmtime(file))
         result.append({'type': ftype, 'name': base + name, 'updated': updated})
     return result
+
+
+def current_directory():
+    return os.getcwd()
 
 
 async def create_directory(path: str):
