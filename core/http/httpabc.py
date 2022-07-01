@@ -2,10 +2,31 @@ from __future__ import annotations
 import abc
 import enum
 import typing
-from aiohttp import web_exceptions as we
+from aiohttp import abc as webabc, web_exceptions as we
 from core.util import util
 
+
 SECURE = '_SECURE'
+
+REQUEST = 'REQUEST'
+RESPONSE = 'RESPONSE'
+UTF8 = 'UTF-8'
+GZIP = 'gzip'
+CHARSET_STRING = ';charset='
+TEXT_PLAIN = 'text/plain'
+TEXT_PLAIN_UTF8 = TEXT_PLAIN + CHARSET_STRING + UTF8
+APPLICATION_JSON = 'application/json'
+APPLICATION_BIN = 'application/octet-stream'
+ACCEPTED_MIME_TYPES = (TEXT_PLAIN, APPLICATION_JSON, APPLICATION_BIN)
+
+HOST = 'Host'
+CONTENT_TYPE = 'Content-Type'
+CONTENT_LENGTH = 'Content-Length'
+CONTENT_ENCODING = 'Content-Encoding'
+CONTENT_DISPOSITION = 'Content-Disposition'
+CACHE_CONTROL = 'Cache-Control'
+ACCEPT_ENCODING = 'Accept-Encoding'
+X_SECRET = 'X-Secret'
 
 
 def make_secure(data: ABC_DATA_GET):
@@ -149,3 +170,34 @@ class HttpServiceCallbacks(metaclass=abc.ABCMeta):
 
 
 ABC_HANDLER = typing.Union[GetHandler, AsyncGetHandler, PostHandler, AsyncPostHandler]
+
+
+class HeadersTool:
+
+    def __init__(self, request: webabc.Request):
+        self._headers = request.headers
+
+    def get(self, key: str) -> str:
+        return self._headers.getone(key) if key in self._headers else None
+
+    def is_secure(self, secret: str) -> bool:
+        value = self.get(X_SECRET)
+        return value is not None and value == secret
+
+    def get_content_length(self) -> int:
+        content_length = self.get(CONTENT_LENGTH)
+        return None if content_length is None else int(content_length)
+
+    def get_content_type(self) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
+        content_type = self.get(CONTENT_TYPE)
+        if content_type is None:
+            return None, None
+        content_type = str(content_type).replace(' ', '')
+        result = str(content_type).split(CHARSET_STRING)
+        if len(result) == 1:
+            return result[0], None
+        return result[0], result[1]
+
+    def accepts_encoding(self, encoding) -> bool:
+        accepts = self.get(ACCEPT_ENCODING)
+        return accepts is not None and accepts.find(encoding) != -1

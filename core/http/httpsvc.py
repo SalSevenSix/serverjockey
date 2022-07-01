@@ -4,28 +4,7 @@ import typing
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util
 from core.context import contextsvc
-from core.http import httpabc, blobs
-
-
-REQUEST = 'REQUEST'
-RESPONSE = 'RESPONSE'
-UTF8 = 'UTF-8'
-GZIP = 'gzip'
-CHARSET_STRING = ';charset='
-TEXT_PLAIN = 'text/plain'
-TEXT_PLAIN_UTF8 = TEXT_PLAIN + CHARSET_STRING + UTF8
-APPLICATION_JSON = 'application/json'
-APPLICATION_BIN = 'application/octet-stream'
-ACCEPTED_MIME_TYPES = (TEXT_PLAIN, APPLICATION_JSON, APPLICATION_BIN)
-
-HOST = 'Host'
-CONTENT_TYPE = 'Content-Type'
-CONTENT_LENGTH = 'Content-Length'
-CONTENT_ENCODING = 'Content-Encoding'
-CONTENT_DISPOSITION = 'Content-Disposition'
-CACHE_CONTROL = 'Cache-Control'
-ACCEPT_ENCODING = 'Accept-Encoding'
-X_SECRET = 'X-Secret'
+from core.http import httpabc, httpstatics
 
 
 class HttpService:
@@ -35,6 +14,7 @@ class HttpService:
     def __init__(self, context: contextsvc.Context, callbacks: httpabc.HttpServiceCallbacks):
         self._context = context
         self._callbacks = callbacks
+        self._statics = httpstatics.Statics(context)
         self._resources = None
         self._app = web.Application()
         self._app.on_startup.append(self._initialise)
@@ -57,24 +37,29 @@ class HttpService:
     async def _handle(self, request: webabc.Request) -> web.Response:
         if self._resources is None:
             raise httpabc.ResponseBody.UNAVAILABLE
-        handler = _RequestHandler(self._context, self._resources, request)
+        handler = _RequestHandler(self._context, self._statics, self._resources, request)
         return await handler.handle()
 
 
 class _RequestHandler:
     REQUEST_RECEIVED = 'RequestHandler.RequestReceived'
 
-    def __init__(self, context: contextsvc.Context, resources: httpabc.Resource, request: webabc.Request):
+    def __init__(self, context: contextsvc.Context, statics: httpstatics.Statics,
+                 resources: httpabc.Resource, request: webabc.Request):
+        self._statics = statics
         self._resources = resources
         self._request = request
-        self._headers = _HeadersTool(request)
+        self._headers = httpabc.HeadersTool(request)
         self._secure = context.is_debug() or self._headers.is_secure(context.config('secret'))
         self._method = httpabc.Method.resolve(self._request.method)
 
     async def handle(self) -> web.Response:
         resource = self._resources.lookup(self._request.path)
         if resource is None:
-            return self._static_response()
+            if self._method is httpabc.Method.GET:
+                return self._statics.handle(self._headers, self._request)
+            else:
+                raise err.HTTPNotFound
         if not resource.allows(self._method):
             raise err.HTTPMethodNotAllowed(
                 str(self._method),
@@ -90,19 +75,19 @@ class _RequestHandler:
         # POST
         if not self._secure:
             raise httpabc.ResponseBody.UNAUTHORISED
-        request_body, mime, encoding = b'{}', APPLICATION_JSON, None
+        request_body, mime, encoding = b'{}', httpabc.APPLICATION_JSON, None
         if self._request.can_read_body:
             mime, encoding = self._headers.get_content_type()
-            if mime is None or mime not in ACCEPTED_MIME_TYPES:
+            if mime is None or mime not in httpabc.ACCEPTED_MIME_TYPES:
                 raise err.HTTPUnsupportedMediaType
-            if mime == APPLICATION_BIN:
+            if mime == httpabc.APPLICATION_BIN:
                 request_body = _RequestByteStream(self._request.content, self._headers.get_content_length())
             else:
                 request_body = await self._request.content.read()
-        if mime != APPLICATION_BIN:
-            encoding = UTF8 if encoding is None else encoding
+        if mime != httpabc.APPLICATION_BIN:
+            encoding = httpabc.UTF8 if encoding is None else encoding
             request_body = request_body.decode(encoding).strip()
-            if mime == APPLICATION_JSON:
+            if mime == httpabc.APPLICATION_JSON:
                 request_body = util.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
@@ -115,75 +100,34 @@ class _RequestHandler:
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
-            response.headers.add(CONTENT_TYPE, APPLICATION_JSON)
-            response.headers.add(CONTENT_LENGTH, '0')
+            response.headers.add(httpabc.CONTENT_TYPE, httpabc.APPLICATION_JSON)
+            response.headers.add(httpabc.CONTENT_LENGTH, '0')
             return response
-        content_type = APPLICATION_BIN
+        content_type = httpabc.APPLICATION_BIN
         if isinstance(body, str):
-            content_type = TEXT_PLAIN_UTF8
-            body = body.encode(UTF8)
+            content_type = httpabc.TEXT_PLAIN_UTF8
+            body = body.encode(httpabc.UTF8)
         if isinstance(body, (dict, tuple, list)):
-            content_type = APPLICATION_JSON
+            content_type = httpabc.APPLICATION_JSON
             body = util.obj_to_json(body)
-            body = body.encode(UTF8)
-        response.headers.add(CONTENT_TYPE, content_type)
-        if isinstance(body, bytes) and len(body) > 1024 and self._headers.accepts_encoding(GZIP):
+            body = body.encode(httpabc.UTF8)
+        response.headers.add(httpabc.CONTENT_TYPE, content_type)
+        if isinstance(body, bytes) and len(body) > 1024 and self._headers.accepts_encoding(httpabc.GZIP):
             body = gzip.compress(body)
-            response.headers.add(CONTENT_ENCODING, GZIP)
+            response.headers.add(httpabc.CONTENT_ENCODING, httpabc.GZIP)
         if isinstance(body, httpabc.ByteStream):
-            response.headers.add(CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
+            response.headers.add(httpabc.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
             content_length = await body.content_length()
             if content_length is None:
                 response.enable_chunked_encoding(10240)
             else:
-                response.headers.add(CONTENT_LENGTH, str(content_length))
+                response.headers.add(httpabc.CONTENT_LENGTH, str(content_length))
             await response.prepare(self._request)
             await util.copy_bytes(body, response)
         else:
-            response.headers.add(CONTENT_LENGTH, str(len(body)))
+            response.headers.add(httpabc.CONTENT_LENGTH, str(len(body)))
             response.body = body
         return response
-
-    def _static_response(self) -> web.Response:
-        if self._method is httpabc.Method.GET and self._request.path.endswith('favicon.ico'):
-            response = web.Response()
-            response.headers.add(CONTENT_TYPE, 'image/x-icon')
-            response.headers.add(CONTENT_LENGTH, str(len(blobs.FAVICON)))
-            response.headers.add(CACHE_CONTROL, 'max-age=315360000')
-            response.body = blobs.FAVICON
-            return response
-        raise err.HTTPNotFound
-
-
-class _HeadersTool:
-
-    def __init__(self, request: webabc.Request):
-        self._headers = request.headers
-
-    def get(self, key: str) -> str:
-        return self._headers.getone(key) if key in self._headers else None
-
-    def is_secure(self, secret: str) -> bool:
-        value = self.get(X_SECRET)
-        return value is not None and value == secret
-
-    def get_content_length(self) -> int:
-        content_length = self.get(CONTENT_LENGTH)
-        return None if content_length is None else int(content_length)
-
-    def get_content_type(self) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
-        content_type = self.get(CONTENT_TYPE)
-        if content_type is None:
-            return None, None
-        content_type = str(content_type).replace(' ', '')
-        result = str(content_type).split(CHARSET_STRING)
-        if len(result) == 1:
-            return result[0], None
-        return result[0], result[1]
-
-    def accepts_encoding(self, encoding) -> bool:
-        accepts = self.get(ACCEPT_ENCODING)
-        return accepts is not None and accepts.find(encoding) != -1
 
 
 class _RequestByteStream(httpabc.ByteStream):

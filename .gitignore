@@ -2,6 +2,10 @@
 TODO.*
 *.ok
 
+# Web deployment root
+/web/
+/client/test-demo/
+
 # PyCharm IDE
 .idea/
 
