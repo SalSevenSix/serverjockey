@@ -75,7 +75,8 @@ class _Loader:
             path += 'index.html'
         content_type = util.get(path.split('.')[-1], MIMES, httpabc.APPLICATION_BIN)
         try:
-            return _Resource(content_type, pkgutil.get_data('web', path))
+            data = pkgutil.get_data('web', path)
+            return _Resource(content_type, data) if data else None
         except IsADirectoryError:
             return self.load(path + '/')
         except FileNotFoundError:

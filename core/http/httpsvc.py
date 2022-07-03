@@ -46,6 +46,7 @@ class _RequestHandler:
 
     def __init__(self, context: contextsvc.Context, statics: httpstatics.Statics,
                  resources: httpabc.Resource, request: webabc.Request):
+        self._context = context
         self._statics = statics
         self._resources = resources
         self._request = request
@@ -98,6 +99,8 @@ class _RequestHandler:
         if body in httpabc.ResponseBody.ERRORS:
             raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
+        if self._context.is_debug():
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
             response.headers.add(httpabc.CONTENT_TYPE, httpabc.APPLICATION_JSON)

@@ -1,6 +1,8 @@
-<script context="module">
+<script>
 	export const prerender = true;
+
+	import Instances from '$lib/Instances.svelte';
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<h1>ServerJockey Console</h1>
+<Instances path='/instances' />

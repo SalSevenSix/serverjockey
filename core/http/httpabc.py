@@ -26,6 +26,7 @@ CONTENT_ENCODING = 'Content-Encoding'
 CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'
 ACCEPT_ENCODING = 'Accept-Encoding'
+ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
 X_SECRET = 'X-Secret'
 
 
