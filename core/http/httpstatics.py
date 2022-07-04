@@ -71,6 +71,8 @@ class _CacheLoader:
 class _Loader:
 
     def load(self, path: str) -> typing.Optional[_Resource]:
+        if path is None or path == '':
+            path = '/'
         if path[-1] == '/':
             path += 'index.html'
         content_type = util.get(path.split('.')[-1], MIMES, httpabc.APPLICATION_BIN)
@@ -81,6 +83,10 @@ class _Loader:
             return self.load(path + '/')
         except FileNotFoundError:
             return None
+        except OSError:
+            if path.endswith('/index.html'):
+                return None
+            return self.load(path + '/index.html')
 
 
 class _Resource:
