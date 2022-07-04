@@ -176,12 +176,6 @@ class ServerProcess:
         self._mailer.register(catcher)
         return self
 
-    def terminate(self):
-        if self._process is None or self._process.returncode is not None:
-            return
-        self._process.terminate()
-        self._mailer.post(self, ServerProcess.STATE_TERMINATED, self._process)
-
     async def run(self):
         cmdline, stderr, stdout = self._command.build_str(), None, None
         try:
@@ -199,7 +193,7 @@ class ServerProcess:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
             if self._started_catcher is not None:
-                await self._started_catcher.get()   # blocking
+                await self._started_catcher.get()   # blocks throws TimeoutError
             rc = self._process.returncode
             if rc is not None:
                 raise Exception('Process {} exit after STARTING, rc={}'.format(self._process, rc))
@@ -210,13 +204,15 @@ class ServerProcess:
             self._mailer.post(self, ServerProcess.STATE_COMPLETE, self._process)
         except asyncio.TimeoutError:
             rc = self._process.returncode
-            if rc is not None:   # It's dead Jim
+            if rc is None:   # Zombie process
+                logging.error('Timeout waiting for STARTED but process still running, terminating now')
+                self._mailer.post(self, ServerProcess.STATE_TIMEOUT, self._process)
+                self._process.terminate()
+                self._mailer.post(self, ServerProcess.STATE_TERMINATED, self._process)
+            else:   # It's dead Jim
                 logging.error('Timeout waiting for STARTED because process exit rc=' + str(rc))
                 self._mailer.post(self, ServerProcess.STATE_EXCEPTION,
                                   Exception('Process {} exit during STARTING, rc={}'.format(self._process, rc)))
-            else:
-                logging.error('Timeout waiting for STARTED but process still running, terminating now')
-                self._mailer.post(self, ServerProcess.STATE_TIMEOUT, self._process)
         except Exception as e:
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
             self._mailer.post(self, ServerProcess.STATE_EXCEPTION, e)

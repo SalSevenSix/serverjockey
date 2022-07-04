@@ -3,6 +3,7 @@
 wait_file() {
     local file="$1"
     local wait_seconds=$2
+    sleep 1
     until [ -f "$file" ]; do
         if [ $wait_seconds -eq 0 ]; then
             echo "Timeout waiting for file: $file"
@@ -164,8 +165,8 @@ check_dependencies() {
     echo
     echo "CHECKING dependencies."
     check_dependencies_common
-    [ -f "$JOCKEY_EXE" ] || check_dependencies_jockey
-    [ -f "$DISCORD_EXE" ] || check_dependencies_discord
+    [ -f $JOCKEY_EXE ] || check_dependencies_jockey
+    [ -f $DISCORD_EXE ] || check_dependencies_discord
     echo
     echo "  all dependencies installed, creating a file to skip these checks;"
     date > "$DEPENDENCIES_FILE"
@@ -183,7 +184,7 @@ JOCKEY_DIR="$(pwd)"
 JOCKEY_EXE="$JOCKEY_DIR/serverjockey.pyz"
 DISCORD_DIR="$JOCKEY_DIR/client/discord"
 DISCORD_EXE="$JOCKEY_DIR/serverlink"
-[ -f "$DISCORD_EXE" ] && DISCORD_DIR="$JOCKEY_DIR"
+[ -f $DISCORD_EXE ] && DISCORD_DIR="$JOCKEY_DIR"
 HOME_DIR="$JOCKEY_DIR"
 HOST="localhost"
 PORT="6164"
@@ -217,20 +218,32 @@ if [ $(netstat --tcp --listen --numeric-ports | grep ":$PORT " | wc -l) -gt 0 ];
 fi
 
 cd "$HOME_DIR" || exit 1
-DISCORD_CONF="$HOME_DIR/serverlink.json"
 CLIENT_CONF="$HOME_DIR/serverjockey-client.json"
+DISCORD_CONF="$HOME_DIR/serverlink.json"
+DISCORD_INST="$HOME_DIR/serverlink/instance.json"
+if [ -f $DISCORD_INST ]; then
+    DISCORD_DIR="$HOME_DIR/serverlink"
+    DISCORD_CONF="$DISCORD_DIR/serverlink.json"
+    DISCORD_EXE="$DISCORD_DIR/serverlink"
+fi
 
 echo "  home dir      $HOME_DIR"
 echo "  jockey dir    $JOCKEY_DIR"
-echo "  jockey exe    $([ -f $JOCKEY_EXE ] || echo 'NOT ')FOUND"
+[ -f $JOCKEY_EXE ] || echo "  jockey exe    source"
+[ -f $JOCKEY_EXE ] && echo "  jockey exe    binary"
 echo "  discord dir   $DISCORD_DIR"
-echo "  discord exe   $([ -f $DISCORD_EXE ] || echo 'NOT ')FOUND"
+if [ -f $DISCORD_INST ]; then
+    echo "  discord exe   instance"
+else
+    [ -f $DISCORD_EXE ] || echo "  discord exe   source"
+    [ -f $DISCORD_EXE ] && echo "  discord exe   binary"
+fi
 echo "  discord conf  $DISCORD_CONF"
 echo "  client conf   $CLIENT_CONF"
 echo "  host:port     $HOST:$PORT"
 
 DEPENDENCIES_FILE="$HOME_DIR/dependencies.ok"
-[ -f "$DEPENDENCIES_FILE" ] || check_dependencies
+[ -f $DEPENDENCIES_FILE ] || check_dependencies
 
 jq . $DISCORD_CONF > /dev/null 2>&1
 if [ $? -ne 0 ]; then
@@ -242,27 +255,21 @@ fi
 echo "STARTING ServerJockey webservice."
 rm $CLIENT_CONF > /dev/null 2>&1
 cd "$JOCKEY_DIR" || exit 1
-if [ -f "$JOCKEY_EXE" ]; then
-    $JOCKEY_EXE --host "$HOST" --port "$PORT" \
-        --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
-        --home "$HOME_DIR" > /dev/null 2>&1 &
-else
-    python3 -m pipenv run python3 -m core.system --host "$HOST" --port "$PORT" \
-        --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
-        --home "$HOME_DIR" > /dev/null 2>&1 &
-fi
-[ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting ServerJockey"
+[ -f $JOCKEY_EXE ] || JOCKEY_EXE="python3 -m pipenv run python3 -m core.system"
+$JOCKEY_EXE --host "$HOST" --port "$PORT" \
+    --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
+    --home "$HOME_DIR" > /dev/null 2>&1 &
+wait_file "$CLIENT_CONF" 5
 
 echo "STARTING ServerLink discord bot."
 cd "$DISCORD_DIR" || exit 1
-sleep 1
-wait_file "$CLIENT_CONF" 5 || exit 1
-if [ -f "$DISCORD_EXE" ]; then
-    $DISCORD_EXE "$DISCORD_CONF" "$CLIENT_CONF" > "$HOME_DIR/serverlink.log" 2>&1 &
+if [ -f $DISCORD_INST ]; then
+    curl -s -X POST -H "Content-Type: application/json" \
+        -H "X-Secret: $(jq -r '.SERVER_TOKEN' $CLIENT_CONF)" \
+        "$(jq -r '.SERVER_URL' $CLIENT_CONF)/instances/serverlink/server/start"
 else
-    node index.js "$DISCORD_CONF" "$CLIENT_CONF" > "$HOME_DIR/serverlink.log" 2>&1 &
+    [ -f $DISCORD_EXE ] || DISCORD_EXE="node index.js"
+    $DISCORD_EXE "$DISCORD_CONF" "$CLIENT_CONF" > "$HOME_DIR/serverlink.log" 2>&1 &
 fi
-[ $? -eq 0 ] && ps -f -o pid,cmd -p $! | tail -1 || echo "Failed starting ServerLink"
-
 
 exit 0

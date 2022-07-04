@@ -13,3 +13,15 @@ export async function loadInstances() {
   });
   instances.set(data);
 }
+
+export async function fetchServerStatus(instance) {
+  return await fetch(instance.url + '/server')
+    .then(function(response) { return response.json(); })
+    .catch(function(error) { return 'Error ' + error; });
+}
+
+export async function fetchPlayers(instance) {
+  return await fetch(instance.url + '/players')
+    .then(function(response) { return response.json(); })
+    .catch(function(error) { return 'Error ' + error; });
+}

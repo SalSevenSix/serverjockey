@@ -8,7 +8,7 @@ from core.util import util, signals
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpsvc, httpext
-from core.system import svrabc, svrsvc
+from core.system import svrabc, svrsvc, svrext
 
 
 class SystemService:
@@ -20,7 +20,8 @@ class SystemService:
         self._modules = {}
         self._home_dir = context.config('home')
         self._url = context.config('url')
-        self._clientfile = _ClientFile(context)
+        self._clientfile = svrext.ClientFile(
+            context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
         self._resource = httpsvc.WebResource(self._url)
         httpext.ResourceBuilder(self._resource) \
             .push('system') \
@@ -37,7 +38,7 @@ class SystemService:
         result = {}
         for child in self._instances.children():
             for subcontext in self._context.subcontexts():
-                if child.name() == subcontext.config('identity'):
+                if child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
                     result[child.name()] = {'module': subcontext.config('module'), 'url': child.path()}
         return result
 
@@ -115,28 +116,6 @@ class SystemService:
             if inspect.isclass(member) and svrabc.Server in inspect.getmro(member):
                 return member(subcontext)
         raise Exception('Server class implementation not found in module: ' + repr(module))
-
-
-class _ClientFile:
-    WRITTEN = 'ClientFile.Written'
-
-    def __init__(self, context: contextsvc.Context):
-        self._context = context
-        self._clientfile = util.overridable_full_path(context.config('home'), context.config('clientfile'))
-
-    async def write(self):
-        data = util.obj_to_json({
-            'SERVER_URL': self._context.config('url'),
-            'SERVER_TOKEN': self._context.config('secret')
-        })
-        if self._clientfile:
-            await util.write_file(self._clientfile, data)
-            self._context.post(self, _ClientFile.WRITTEN, self._clientfile)
-        logging.debug('Client config: ' + data)
-
-    async def delete(self):
-        # TODO silently delete?
-        await util.delete_file(self._clientfile)
 
 
 class _Subscriber(msgabc.AbcSubscriber):

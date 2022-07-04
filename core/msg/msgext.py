@@ -5,6 +5,7 @@ import time
 import uuid
 import collections
 import typing
+import aiofiles
 from core.util import aggtrf, tasks, util
 from core.msg import msgabc, msgftr, msgtrf
 
@@ -388,16 +389,43 @@ class RollingLogSubscriber(msgabc.Subscriber):
         return None
 
 
+class LogfileSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self,
+                 filename: str,
+                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
+        super().__init__(msg_filter)
+        self._transformer = transformer
+        self._filename = filename
+        self._file = None
+
+    async def handle(self, message):
+        if message is msgabc.STOP:
+            await util.silently_cleanup(self._file)
+            return True
+        try:
+            if self._file is None:
+                self._file = await aiofiles.open(self._filename, mode='w')
+            await self._file.write(self._transformer.transform(message))
+            await self._file.write('\n')
+            await self._file.flush()
+        except Exception as e:
+            await util.silently_cleanup(self._file)
+            logging.error('LogfileSubscriber raised: %s', repr(e))
+            return False
+        return None
+
+
 class LoggerSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  level: int = logging.DEBUG,
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msg_filter)
+        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
         self._level = level
         self._transformer = transformer
-        self._msg_filter = msg_filter
 
     def handle(self, message):
         logging.log(self._level, self._transformer.transform(message))
@@ -408,14 +436,10 @@ class PrintSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
-                 file: typing.Optional[str] = None,
-                 flush: bool = False):
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
         super().__init__(msg_filter)
         self._transformer = transformer
-        self._file = file
-        self._flush = flush
 
     def handle(self, message):
-        print(self._transformer.transform(message), file=self._file, flush=self._flush)
+        print(self._transformer.transform(message))
         return None

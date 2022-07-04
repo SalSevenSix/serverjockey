@@ -1,4 +1,5 @@
 from core.util import util
+from core.context import contextsvc
 from core.msg import msgabc
 from core.http import httpabc
 from core.system import svrsvc
@@ -43,3 +44,26 @@ class ServerRunningLock(msgabc.AbcSubscriber):
             self._mailer.post(source, ServerRunningLock.BLOCK, Exception('Server is running'), message)
             return None
         return await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
+
+
+class ClientFile:
+    WRITTEN = 'ClientFile.Written'
+
+    def __init__(self, context: contextsvc.Context, clientfile: str):
+        self._context = context
+        self._clientfile = clientfile
+
+    def path(self):
+        return self._clientfile
+
+    async def write(self):
+        data = util.obj_to_json({
+            'SERVER_URL': self._context.config('baseurl'),
+            'SERVER_TOKEN': self._context.config('secret')
+        })
+        await util.write_file(self._clientfile, data)
+        self._context.post(self, ClientFile.WRITTEN, self._clientfile)
+
+    async def delete(self):
+        # TODO silently delete?
+        await util.delete_file(self._clientfile)

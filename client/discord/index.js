@@ -13,7 +13,11 @@ class Logger {
 
   static error(value) {
     if (value == null) return null;
-    console.error(value);
+    if (value.name === 'AbortError') {
+      Logger.info(value);
+    } else {
+      console.error(value);
+    }
     return null;
   }
 
@@ -141,7 +145,7 @@ class SubsHelper {
   static async poll(url, dataHandler) {
     var polling = (url != null);
     while (running && polling) {
-      polling = await fetch(url)
+      polling = await fetch(url, { signal })
         .then(function(response) {
           if (response.status === 404) return null;
           if (!response.ok) throw new Error('Status: ' + response.status);
@@ -698,9 +702,11 @@ function handleMessage(message) {
 }
 
 function shutdown() {
+  if (!running) return;
   running = false;
-  Logger.info('*** END ServerLink Bot ***');
+  controller.abort();
   client.destroy();
+  Logger.info('*** END ServerLink Bot ***');
 }
 
 
@@ -714,6 +720,8 @@ Logger.raw(config);
 
 const staticData = require('./constants.json');
 const fs = require('fs');
+const controller = new AbortController();
+const signal = controller.signal;
 const fetch = require('node-fetch');
 const instancesService = new InstancesService();
 const { Client, Intents } = require('discord.js');

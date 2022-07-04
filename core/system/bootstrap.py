@@ -25,11 +25,12 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
                    help='Log file to use, relative to "home" unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
+    baseurl = util.build_url(args.host, args.port)
     return contextsvc.Context(
         debug=args.debug, secret=util.generate_token(),
         home=util.current_directory() if args.home == '.' else args.home,
         logfile=args.logfile, clientfile=args.clientfile,
-        url=util.build_url(args.host, args.port),
+        baseurl=baseurl, url=baseurl,
         host=args.host, port=args.port)
 
 

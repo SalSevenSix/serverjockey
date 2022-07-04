@@ -63,12 +63,13 @@ class Deployment:
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
             .pop() \
             .push('config') \
-            .append('jvm', httpext.FileHandler(self._mailer, self._jvm_config_file)) \
+            .append('jvm', httpext.MessengerFileHandler(self._mailer, self._jvm_config_file)) \
             .append('db', httpext.FileStreamHandler(self._playerdb_file, protected=True)) \
-            .append('ini', httpext.ConfigHandler(self._mailer, conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
-            .append('sandbox', httpext.FileHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
-            .append('spawnpoints', httpext.FileHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
-            .append('spawnregions', httpext.FileHandler(self._mailer, conf_pre + '_spawnregions.lua'))
+            .append('ini', httpext.MessengerConfigHandler(
+                self._mailer, conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
+            .append('sandbox', httpext.MessengerFileHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
+            .append('spawnpoints', httpext.MessengerFileHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
+            .append('spawnregions', httpext.MessengerFileHandler(self._mailer, conf_pre + '_spawnregions.lua'))
 
     async def build_world(self):
         await util.create_directory(self._world_dir)

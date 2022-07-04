@@ -109,7 +109,7 @@ class DirectoryListHandler(httpabc.AsyncGetHandler):
         return await util.directory_list_dict(self._path, resource.path())
 
 
-class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+class MessengerFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, filename: str, protected: bool = False, text: bool = True):
         self._mailer = mailer
@@ -134,7 +134,7 @@ class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class ConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, filename: str, excludes: typing.Collection[str]):
         self._mailer = mailer
@@ -164,6 +164,25 @@ class ConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, data['body'])
         if isinstance(result, Exception):
             return {'error': str(result)}
+        return httpabc.ResponseBody.NO_CONTENT
+
+
+class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+
+    def __init__(self, filename: str, protected: bool = False, text: bool = True):
+        self._filename = filename
+        self._protected = protected
+        self._text = text
+
+    async def handle_get(self, resource, data):
+        if self._protected and not httpabc.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        if not await util.file_exists(self._filename):
+            return httpabc.ResponseBody.NOT_FOUND
+        return await util.read_file(self._filename, self._text)
+
+    async def handle_post(self, resource, data):
+        await util.write_file(self._filename, data['body'], self._text)
         return httpabc.ResponseBody.NO_CONTENT
 
 
