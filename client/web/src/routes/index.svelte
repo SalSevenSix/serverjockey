@@ -1,6 +1,6 @@
 <script>
-	import Instances from '$lib/Instances.svelte';
+  import ServerLink from '$lib/ServerLink.svelte';
 </script>
 
-<h1>ServerJockey Console</h1>
-<Instances />
+<h1>Welcome to ServerJockey</h1>
+<ServerLink />

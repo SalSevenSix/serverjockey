@@ -1,8 +1,8 @@
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httpabc, httpsubs, httpext
 from core.msg import msgext, msgftr, msgtrf
 from core.proc import proch, prcext
-from core.system import svrabc, svrext
+from core.system import svrabc, svrsvc, svrext
 from core.util import util
 
 
@@ -15,6 +15,7 @@ class Server(svrabc.Server):
         self._clientfile = svrext.ClientFile(context, self._context.config('home') + '/serverjockey-client.json')
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._process_subscriber = prcext.ServerProcessSubscriber()
+        self._httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
 
     async def initialise(self):
         await self._server_process_factory.initialise()
@@ -27,9 +28,12 @@ class Server(svrabc.Server):
     def resources(self, resource: httpabc.Resource):
         httpext.ResourceBuilder(resource) \
             .push('server', svrext.ServerStatusHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
-            .append('config', httpext.FileHandler(self._config, True))
+            .append('config', httpext.FileHandler(self._config, True)) \
+            .push('subscriptions') \
+            .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._clientfile.write()

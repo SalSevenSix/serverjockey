@@ -20,6 +20,7 @@ class HttpService:
         self._app.on_startup.append(self._initialise)
         self._app.on_shutdown.append(self._shutdown)
         self._app.add_routes([
+            web.options('/{tail:.*}', self._handle),
             web.get('/{tail:.*}', self._handle),
             web.post('/{tail:.*}', self._handle)])
 
@@ -66,6 +67,10 @@ class _RequestHandler:
                 str(self._method),
                 httpabc.Method.GET.value if self._method is httpabc.Method.POST else httpabc.Method.POST.value)
 
+        # OPTIONS
+        if self._method is httpabc.Method.OPTIONS:
+            return self._build_options_response(resource)
+
         # GET
         if self._method is httpabc.Method.GET:
             response_body = await resource.handle_get(self._request.path, self._secure)
@@ -100,7 +105,7 @@ class _RequestHandler:
             raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         if self._context.is_debug():
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.DEBUG_WEB_ORIGIN)
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
             response.headers.add(httpabc.CONTENT_TYPE, httpabc.APPLICATION_JSON)
@@ -130,6 +135,19 @@ class _RequestHandler:
         else:
             response.headers.add(httpabc.CONTENT_LENGTH, str(len(body)))
             response.body = body
+        return response
+
+    def _build_options_response(self, resource: httpabc.Resource) -> web.Response:
+        response = web.Response()
+        methods = httpabc.Method.GET.value + ',' if resource.allows(httpabc.Method.GET) else ''
+        methods += httpabc.Method.POST.value + ',' if resource.allows(httpabc.Method.POST) else ''
+        methods += httpabc.Method.OPTIONS.value
+        response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
+        response.headers.add(httpabc.ALLOW, methods)
+        if self._context.is_debug():
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.DEBUG_WEB_ORIGIN)
+        response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_METHODS, methods)
+        response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_HEADERS, httpabc.CONTENT_TYPE)
         return response
 
 
@@ -207,6 +225,8 @@ class WebResource(httpabc.Resource):
     def allows(self, method: httpabc.Method) -> bool:
         if self._handler is None:
             return False
+        if method is httpabc.Method.OPTIONS:
+            return True
         if method is httpabc.Method.GET:
             return isinstance(self._handler, (httpabc.GetHandler, httpabc.AsyncGetHandler))
         if method is httpabc.Method.POST:

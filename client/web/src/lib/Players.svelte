@@ -11,8 +11,8 @@
 
 
 <div>
-  <span>Players currently online: {data.length}</span>
+  <p>Players currently online: {data.length}</p>
   {#each data as player}
-    <span>{player.name} ({player.steamid ? player.steamid : 'LOGGING IN'})</span>
+    <p>{player.name} ({player.steamid ? player.steamid : 'LOGGING IN'})</p>
   {/each}
 </div>

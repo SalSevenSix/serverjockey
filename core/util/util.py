@@ -10,6 +10,7 @@ import asyncio
 import aiofiles
 from aiofiles import os as aioos
 from functools import partial, wraps
+from collections.abc import Iterable
 
 
 def _wrap(func):
@@ -69,6 +70,10 @@ def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
         return None
     for message in iter(collection):
         return message
+
+
+def iterable(value: typing.Any) -> bool:
+    return value is not None and isinstance(value, Iterable)
 
 
 def obj_to_str(obj: typing.Any) -> str:

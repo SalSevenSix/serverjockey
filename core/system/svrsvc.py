@@ -66,14 +66,18 @@ class ServerService(msgabc.AbcSubscriber):
             self._running = keep_running
             ServerStatus.notify_running(self._context, self, self._running)
             self._queue.task_done()
-            exception = None
+            start_time, up_time, exception = 0, 0, None
             if keep_running:
                 try:
+                    start_time = util.now_millis()
                     await self._server.run()
                 except Exception as e:
                     exception = e
+                finally:
+                    up_time = util.now_millis() - start_time
+                    logging.debug('Server process ran %s millis', repr(up_time))
             self._running = False
-            ServerStatus.notify_running(self._context, self, self._running)
+            ServerStatus.notify_running(self._context, self, False)
             if exception:
                 ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                 ServerStatus.notify_details(self._context, self, {'exception': repr(exception)})

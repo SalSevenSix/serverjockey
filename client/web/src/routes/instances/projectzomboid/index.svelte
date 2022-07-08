@@ -7,9 +7,9 @@
 
 {#if $instance.name}
   <h1>{$instance.name} ({$instance.module})</h1>
-  <ServerStatus instance={$instance} />
-  <Players instance={$instance} />
+  <ServerStatus />
+  <Players />
 {:else}
   <p>No instance set</p>
 {/if}
-<p><a href="/">BACK</a></p>
+<p><a href="/instances">BACK</a> to Instances</p>

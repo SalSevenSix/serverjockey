@@ -26,7 +26,11 @@ CONTENT_ENCODING = 'Content-Encoding'
 CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'
 ACCEPT_ENCODING = 'Accept-Encoding'
+ALLOW = 'Allow'
+ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
+ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
+DEBUG_WEB_ORIGIN = 'http://localhost:3000'
 X_SECRET = 'X-Secret'
 
 
@@ -40,6 +44,7 @@ def is_secure(data: ABC_DATA_GET) -> bool:
 
 
 class Method(enum.Enum):
+    OPTIONS = 'OPTIONS'
     GET = 'GET'
     POST = 'POST'
 

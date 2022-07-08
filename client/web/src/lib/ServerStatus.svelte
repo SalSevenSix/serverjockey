@@ -1,22 +1,15 @@
 <script>
-  import { onMount } from 'svelte';
 	import { capitalize } from '$lib/util';
-	import { fetchServerStatus } from '$lib/serverjockeyapi';
-
-  export let instance;
-  let data = { running: 'UNKNOWN', state: 'UNKNOWN' };
-	onMount(async function() {
-	  data = await fetchServerStatus(instance);
-	});
+	import { serverStatus } from '$lib/serverjockeyapi';
 </script>
 
 
 <div>
-  <span>Running: {data.running}</span>
-  <span>State: {data.state}</span>
-  {#if data.details}
-    {#each Object.keys(data.details) as key}
-      <span>{capitalize(key)}: {data.details[key]}</span>
+  <p>Running: {$serverStatus.running}</p>
+  <p>State: {$serverStatus.state}</p>
+  {#if $serverStatus.details}
+    {#each Object.keys($serverStatus.details) as key}
+      <p>{capitalize(key)}: {$serverStatus.details[key]}</p>
     {/each}
   {/if}
 </div>
