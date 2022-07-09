@@ -2,10 +2,11 @@ import { writable } from 'svelte/store';
 
 export const instances = writable([]);
 export const instance = writable({});
-export const serverStatus = writable({ running: false, state: 'UNKNOWN' });
+export const serverStatus = writable({});
 
 
 export async function loadInstances() {
+  serverStatus.set({ running: false, state: 'UNKNOWN' });
   const result = await fetch('http://localhost:6164/instances')
     .then(function(response) { return response.json(); })
     .catch(function(error) { return 'Error ' + error; });
@@ -14,6 +15,14 @@ export async function loadInstances() {
     data.push({ name: key, module: result[key].module, url: result[key].url });
   });
   instances.set(data);
+}
+
+export function postText(url, body, callback = noop) {
+  let request = newPostRequest('text/plain');
+  request.body = body;
+  fetch(url, request)
+    .then(callback)
+    .catch(function(error) { alert('Error ' + error); });
 }
 
 export function postServerCommand(instance, command) {
@@ -31,6 +40,12 @@ export async function subscribeServerStatus(instance, dataHandler) {
   subscribe(instance.url + '/server/subscribe')
     .then(function(url) { poll(url, dataHandler); });
   return await fetchServerStatus(instance);
+}
+
+export async function fetchJson(url) {
+  return await fetch(url)
+    .then(function(response) { return response.json(); })
+    .catch(function(error) { return 'Error ' + error; });
 }
 
 
@@ -80,4 +95,8 @@ function newPostRequest(ct = 'application/json') {
       'Content-Type': ct
     }
   };
+}
+
+function noop() {
+  return null;
 }

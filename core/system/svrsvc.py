@@ -66,21 +66,19 @@ class ServerService(msgabc.AbcSubscriber):
             self._running = keep_running
             ServerStatus.notify_running(self._context, self, self._running)
             self._queue.task_done()
-            start_time, up_time, exception = 0, 0, None
+            start_time, up_time = 0, 0
             if keep_running:
                 try:
                     start_time = util.now_millis()
                     await self._server.run()
                 except Exception as e:
-                    exception = e
+                    ServerStatus.notify_state(self._context, self, 'EXCEPTION')
+                    ServerStatus.notify_details(self._context, self, {'error': repr(e)})
                 finally:
                     up_time = util.now_millis() - start_time
                     logging.debug('Server process ran %s millis', repr(up_time))
-            self._running = False
-            ServerStatus.notify_running(self._context, self, False)
-            if exception:
-                ServerStatus.notify_state(self._context, self, 'EXCEPTION')
-                ServerStatus.notify_details(self._context, self, {'exception': repr(exception)})
+                    self._running = False
+                    ServerStatus.notify_running(self._context, self, self._running)
 
     async def handle(self, message):
         action = message.name()
@@ -147,7 +145,7 @@ class ServerStatus(msgabc.AbcSubscriber):
         super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,
                                         ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
         self._context = context
-        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'INIT', 'details': {}}
+        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'INITIALISED', 'details': {}}
 
     async def handle(self, message):
         action = message.name()
@@ -158,8 +156,8 @@ class ServerStatus(msgabc.AbcSubscriber):
             running = message.data()
             if self._status['running'] != running:
                 self._status['running'] = running
-                if not running:
-                    self._status.update({'state': None, 'details': {}})
+                if running:
+                    self._status['details'] = {}
                 updated = True
         elif action is ServerStatus.NOTIFY_STATE:
             self._status['state'] = message.data()

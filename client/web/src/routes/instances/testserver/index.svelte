@@ -7,7 +7,7 @@
   let polling = true;
 	onMount(async function() {
 	  serverStatus.set(await subscribeServerStatus($instance, function(data) {
-	    if (data == null) return polling;
+	    if (data == null || !polling) return polling;
 	    serverStatus.set(data);
 	    return polling;
 	  }));

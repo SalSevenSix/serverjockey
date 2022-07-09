@@ -12,8 +12,8 @@ def p(line):
 
 def fork():
     while True:
-        p('### Ingametime ' + repr(time.time()))
-        time.sleep(12)
+        p('### Ingametime ' + repr(int(time.time() * 1000.0) + 1))
+        time.sleep(10)
 
 
 def main():
@@ -66,7 +66,7 @@ def main():
             p('### messaging players')
             time.sleep(1)
             p('### goodbye')
-            return
+            return 0
         else:
             p('### NOOP')
 

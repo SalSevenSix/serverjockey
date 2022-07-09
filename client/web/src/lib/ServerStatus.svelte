@@ -6,7 +6,9 @@
 
 <div>
   <p>Running: {$serverStatus.running}</p>
-  <p>State: {$serverStatus.state}</p>
+  {#if $serverStatus.state}
+    <p>State: {$serverStatus.state}</p>
+  {/if}
   {#if $serverStatus.details}
     {#each Object.keys($serverStatus.details) as key}
       <p>{capitalize(key)}: {$serverStatus.details[key]}</p>
