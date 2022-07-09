@@ -17,7 +17,7 @@ class ServerStatusHandler(httpabc.AsyncGetHandler):
 class ServerCommandHandler(httpabc.PostHandler):
     COMMANDS = util.callable_dict(
         svrsvc.ServerService,
-        ('signal_start', 'signal_restart', 'signal_stop', 'signal_delete'))
+        ('signal_start', 'signal_daemon', 'signal_restart', 'signal_stop', 'signal_delete'))
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -64,6 +64,9 @@ class ClientFile:
         await util.write_file(self._clientfile, data)
         self._context.post(self, ClientFile.WRITTEN, self._clientfile)
 
+    # noinspection PyBroadException
     async def delete(self):
-        # TODO silently delete?
-        await util.delete_file(self._clientfile)
+        try:
+            await util.delete_file(self._clientfile)
+        except Exception:
+            pass  # ignore

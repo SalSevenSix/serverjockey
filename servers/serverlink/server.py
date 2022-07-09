@@ -20,6 +20,7 @@ class Server(svrabc.Server):
     async def initialise(self):
         await self._server_process_factory.initialise()
         self._context.register(self._process_subscriber)
+        self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(msgext.LogfileSubscriber(
             self._log,
             msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),

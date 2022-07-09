@@ -44,7 +44,6 @@ class Server(svrabc.Server):
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
-        # TODO test termination on timeout
         await self._deployment.new_server_process() \
             .use_pipeinsvc(self._pipeinsvc) \
             .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=900)) \
