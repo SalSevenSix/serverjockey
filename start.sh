@@ -83,6 +83,7 @@ check_dependencies_common() {
         {
             echo "{"
             echo "  \"CMD_PREFIX\": \"!\","
+            echo "  \"ADMIN_ROLE\": \"pzadmin\","
             echo "  \"BOT_TOKEN\": \"YOUR DISCORD LOGIN TOKEN HERE\","
             echo "  \"EVENTS_CHANNEL_ID\": \"YOUR DISCORD CHANNEL ID HERE\","
             echo "  \"WHITELIST_DM\": \"Welcome to our server. User: \${user} Pass: \${pass}\""
@@ -186,7 +187,7 @@ DISCORD_DIR="$JOCKEY_DIR/client/discord"
 DISCORD_EXE="$JOCKEY_DIR/serverlink"
 [ -f $DISCORD_EXE ] && DISCORD_DIR="$JOCKEY_DIR"
 HOME_DIR="$JOCKEY_DIR"
-HOST="localhost"
+HOST="0.0.0.0"
 PORT="6164"
 
 cd "$INITIAL_DIR" || exit 1

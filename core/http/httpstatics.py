@@ -82,9 +82,13 @@ class _Loader:
         except IsADirectoryError:
             return self.load(path + '/')
         except FileNotFoundError:
+            if path.endswith('/index.html'):
+                return self.load('/'.join(path.split('/')[:-1]) + '.html')
             return None
         except OSError:
             if path.endswith('/index.html'):
+                return self.load('/'.join(path.split('/')[:-1]) + '.html')
+            if path.endswith('.html'):
                 return None
             return self.load(path + '/index.html')
 

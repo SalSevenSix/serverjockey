@@ -29,7 +29,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
         debug=args.debug, secret=util.generate_token(),
         home=util.current_directory() if args.home == '.' else args.home,
         logfile=args.logfile, clientfile=args.clientfile,
-        host=None if args.host == '' else args.host, port=args.port)
+        host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 
 
 def _setup_logging(context: contextsvc.Context):
