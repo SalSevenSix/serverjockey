@@ -15,7 +15,7 @@ class Server(svrabc.Server):
         self._clientfile = svrext.ClientFile(context, self._context.config('home') + '/serverjockey-client.json')
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._process_subscriber = prcext.ServerProcessSubscriber()
-        self._httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
+        self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
         await self._server_process_factory.initialise()
@@ -33,7 +33,7 @@ class Server(svrabc.Server):
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
             .append('config', httpext.FileHandler(self._config, True)) \
-            .push('subscriptions') \
+            .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):

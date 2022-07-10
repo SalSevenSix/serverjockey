@@ -1,6 +1,7 @@
 # My junk
 TODO.*
 *.ok
+scratch.py
 
 # Web deployment root
 /web/

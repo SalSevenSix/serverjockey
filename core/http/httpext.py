@@ -74,23 +74,25 @@ class MessengerHandler(httpabc.AsyncPostHandler):
 
     async def handle_post(self, resource, data):
         messenger = msgext.SynchronousMessenger(self._mailer)
-        url, source = None, util.obj_to_str(messenger)
+        subscription_path, source = None, util.obj_to_str(messenger)
         if isinstance(data, dict):
             data['resource'] = resource.name()
             if self._data:
                 data = {**self._data, **data}
         if self._selector:
-            url = await httpsubs.HttpSubscriptionService.subscribe(self._mailer, source, httpsubs.Selector(
-                msg_filter=msgftr.And(msgftr.SourceIs(source), self._selector.msg_filter),
-                completed_filter=msgftr.And(msgftr.SourceIs(source), self._selector.completed_filter),
-                transformer=self._selector.transformer, aggregator=self._selector.aggregator))
+            subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
+                self._mailer, source, httpsubs.Selector(
+                    msg_filter=msgftr.And(msgftr.SourceIs(source), self._selector.msg_filter),
+                    completed_filter=msgftr.And(msgftr.SourceIs(source), self._selector.completed_filter),
+                    transformer=self._selector.transformer, aggregator=self._selector.aggregator))
         response = await messenger.request(source, self._name, data)
         result = response.data()
         if isinstance(result, Exception):
-            httpsubs.HttpSubscriptionService.unsubscribe(self._mailer, source, url)
+            if subscription_path:
+                httpsubs.HttpSubscriptionService.unsubscribe(self._mailer, source, subscription_path)
             return {'error': str(result)}
-        if url:
-            return {'url': url}
+        if subscription_path:
+            return {'url': util.get('baseurl', data, '') + subscription_path}
         if result is False:
             return httpabc.ResponseBody.BAD_REQUEST
         if result is None:

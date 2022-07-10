@@ -46,6 +46,7 @@ class ServerRunningLock(msgabc.AbcSubscriber):
         return await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
 
 
+# TODO Move to context extensions
 class ClientFile:
     WRITTEN = 'ClientFile.Written'
 
@@ -57,8 +58,11 @@ class ClientFile:
         return self._clientfile
 
     async def write(self):
+        host = self._context.config('host')
+        host = host if host else 'localhost'
+        port = self._context.config('port')
         data = util.obj_to_json({
-            'SERVER_URL': self._context.config('baseurl'),
+            'SERVER_URL': util.build_url(host, port),
             'SERVER_TOKEN': self._context.config('secret')
         })
         await util.write_file(self._clientfile, data)

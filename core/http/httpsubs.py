@@ -52,15 +52,19 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
 
     @staticmethod
     def unsubscribe(mailer: msgabc.Mailer, source: typing.Any, identity: str):
-        mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity)
+        mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity.split('/')[-1])
 
-    def __init__(self, mailer: msgabc.MulticastMailer, subscriptions_url: str):
+    def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.NameIn((HttpSubscriptionService.SUBSCRIBE, HttpSubscriptionService.UNSUBSCRIBE)))
         self._mailer = mailer
-        self._subscriptions_url = subscriptions_url
+        self._subscriptions_path = '/subscriptions'
         self._subscriptions: typing.Dict[str, _Subscriber] = {}
         mailer.register(_InactivityCheck(mailer))
         mailer.register(self)
+
+    def resource(self, resource: httpabc.Resource, name: str) -> str:
+        self._subscriptions_path = resource.path() + '/' + name
+        return name
 
     def lookup(self, identity: str) -> _Subscriber:
         return util.get(identity, self._subscriptions)
@@ -69,12 +73,12 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         name = message.name()
         if name is HttpSubscriptionService.SUBSCRIBE:
             identity = str(uuid.uuid4())
-            url = self._subscriptions_url + '/' + identity
+            path = self._subscriptions_path + '/' + identity
             selector = message.data()
             subscriber = _Subscriber(self._mailer, identity, selector)
             self._subscriptions.update({identity: subscriber})
             self._mailer.register(subscriber)
-            self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, url, message)
+            self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, path, message)
         if name is HttpSubscriptionService.UNSUBSCRIBE:
             identity = message.data()
             if identity:
@@ -117,6 +121,7 @@ class _Subscriber(msgabc.AbcSubscriber):
             logging.info('Http subscription inactive, unsubscribing ' + self._identity)
             HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
             return True
+        # noinspection PyBroadException
         try:
             self._queue.put_nowait(message)
             return None
@@ -215,8 +220,8 @@ class _SubscribeHandler(httpabc.AsyncPostHandler):
         self._selector = selector
 
     async def handle_post(self, resource, data):
-        url = await HttpSubscriptionService.subscribe(self._mailer, self, self._selector)
-        return {'url': url}
+        path = await HttpSubscriptionService.subscribe(self._mailer, self, self._selector)
+        return {'url': util.get('baseurl', data, '') + path}
 
 
 class _InactivityCheck(msgabc.AbcSubscriber):

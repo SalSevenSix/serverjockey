@@ -12,7 +12,7 @@ class Messaging:
 
     def initialise(self):
         self._context.register(prcext.ServerStateSubscriber(self._context))
-        self._context.register(_ServerDetailsSubscriber(self._context, self._context.config('host')))
+        self._context.register(_ServerDetailsSubscriber(self._context))
         self._context.register(_ProvideAdminPasswordSubscriber(self._context, self._context.config('secret')))
 
 
@@ -45,7 +45,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     INGAMETIME = '> IngameTime'
     INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
 
-    def __init__(self, mailer: msgabc.MulticastMailer, host: str):
+    def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
@@ -53,8 +53,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
                       _ServerDetailsSubscriber.PORT_FILTER,
                       _ServerDetailsSubscriber.STEAMID_FILTER)))
         self._mailer = mailer
-        self._host = host
 
+    # TODO grab IP
     def handle(self, message):
         data = None
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
@@ -66,7 +66,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             data = {'version': value}
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT)
-            data = {'host': self._host, 'port': int(value)}
+            data = {'port': int(value)}
         elif _ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.STEAMID)
             data = {'steamid': int(value)}

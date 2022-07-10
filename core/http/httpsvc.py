@@ -1,6 +1,8 @@
 from __future__ import annotations
 import gzip
 import typing
+import logging
+from yarl import URL
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util
 from core.context import contextsvc
@@ -25,7 +27,11 @@ class HttpService:
             web.post('/{tail:.*}', self._handle)])
 
     def run(self):
-        web.run_app(self._app, port=self._context.config('port'), shutdown_timeout=100.0)
+        web.run_app(
+            self._app,
+            host=self._context.config('host'),
+            port=self._context.config('port'),
+            shutdown_timeout=100.0)
 
     # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
@@ -73,7 +79,7 @@ class _RequestHandler:
 
         # GET
         if self._method is httpabc.Method.GET:
-            response_body = await resource.handle_get(self._request.path, self._secure)
+            response_body = await resource.handle_get(self._request.url, self._secure)
             if response_body is None:
                 raise err.HTTPNotFound
             return await self._build_response(response_body)
@@ -97,7 +103,7 @@ class _RequestHandler:
                 request_body = util.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
-        response_body = await resource.handle_post(self._request.path, request_body)
+        response_body = await resource.handle_post(self._request.url, request_body)
         return await self._build_response(response_body)
 
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
@@ -233,17 +239,18 @@ class WebResource(httpabc.Resource):
             return isinstance(self._handler, (httpabc.PostHandler, httpabc.AsyncPostHandler))
         return False
 
-    async def handle_get(self, path: str, secure: bool) -> httpabc.ABC_RESPONSE:
-        data = _PathProcessor(self).extract_args(path)
+    async def handle_get(self, url: URL, secure: bool) -> httpabc.ABC_RESPONSE:
+        data = _PathProcessor(self).extract_args(url)
+        logging.info(util.obj_to_json(data))
         if secure:
             httpabc.make_secure(data)
         if isinstance(self._handler, httpabc.GetHandler):
             return self._handler.handle_get(self, data)
         return await self._handler.handle_get(self, data)
 
-    async def handle_post(self, path: str, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]
+    async def handle_post(self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]
                           ) -> httpabc.ABC_RESPONSE:
-        data = _PathProcessor(self).extract_args(path)
+        data = _PathProcessor(self).extract_args(url)
         if isinstance(body, dict):
             data.update(body)
         else:
@@ -261,8 +268,10 @@ class _PathProcessor:
     def build_path(self, args: typing.Optional[typing.Dict[str, str]] = None) -> str:
         return _PathProcessor._build(self._resource, args if args else {})
 
-    def extract_args(self, path: str) -> httpabc.ABC_DATA_GET:
-        return _PathProcessor._extract(self._resource, _PathProcessor._split(path), {})
+    def extract_args(self, url: URL) -> httpabc.ABC_DATA_GET:
+        data = _PathProcessor._extract(self._resource, _PathProcessor._split(url.path), {})
+        data.update({'baseurl': util.build_url(url.host, url.port)})
+        return data
 
     def lookup_resource(self, path: str) -> typing.Optional[httpabc.Resource]:
         return _PathProcessor._lookup(self._resource, _PathProcessor._split(path), 0)

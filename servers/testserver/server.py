@@ -14,7 +14,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
-        self._httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
+        self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
         self._context.register(prcext.ServerStateSubscriber(self._context))
@@ -31,7 +31,7 @@ class Server(svrabc.Server):
             .push('console') \
             .append('{command}', _ConsoleHandler(self._context)) \
             .pop() \
-            .push('subscriptions') \
+            .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):

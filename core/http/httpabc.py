@@ -3,6 +3,7 @@ import abc
 import enum
 import typing
 from aiohttp import abc as webabc, web_exceptions as we
+from yarl import URL
 from core.util import util
 
 
@@ -134,11 +135,11 @@ class Resource:
         pass
 
     @abc.abstractmethod
-    async def handle_get(self, path: str, secure: bool) -> ABC_RESPONSE:
+    async def handle_get(self, url: URL, secure: bool) -> ABC_RESPONSE:
         pass
 
     @abc.abstractmethod
-    async def handle_post(self, path: str, body: typing.Union[str, ABC_DATA_GET, ByteStream]) -> ABC_RESPONSE:
+    async def handle_post(self, url: URL, body: typing.Union[str, ABC_DATA_GET, ByteStream]) -> ABC_RESPONSE:
         pass
 
 
@@ -178,6 +179,7 @@ class HttpServiceCallbacks(metaclass=abc.ABCMeta):
 ABC_HANDLER = typing.Union[GetHandler, AsyncGetHandler, PostHandler, AsyncPostHandler]
 
 
+# TODO doesn't belong here
 class HeadersTool:
 
     def __init__(self, request: webabc.Request):

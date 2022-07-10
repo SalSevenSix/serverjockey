@@ -19,10 +19,9 @@ class SystemService:
         self._context = context
         self._modules = {}
         self._home_dir = context.config('home')
-        self._url = context.config('url')
         self._clientfile = svrext.ClientFile(
             context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
-        self._resource = httpsvc.WebResource(self._url)
+        self._resource = httpsvc.WebResource()
         httpext.ResourceBuilder(self._resource) \
             .push('system') \
             .append('shutdown', _ShutdownHandler(self)) \
@@ -34,12 +33,12 @@ class SystemService:
     def resources(self):
         return self._resource
 
-    def instances_dict(self) -> typing.Dict:
+    def instances_dict(self, baseurl: str) -> typing.Dict:
         result = {}
         for child in self._instances.children():
             for subcontext in self._context.subcontexts():
                 if child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
-                    result[child.name()] = {'module': subcontext.config('module'), 'url': child.path()}
+                    result[child.name()] = {'module': subcontext.config('module'), 'url': baseurl + child.path()}
         return result
 
     async def initialise(self) -> SystemService:
@@ -50,11 +49,7 @@ class SystemService:
             if await util.file_exists(config_file):
                 configuration = await util.read_file(config_file)
                 configuration = util.json_to_dict(configuration)
-                configuration.update({
-                    'identity': identity,
-                    'url': self._url + '/instances/' + identity,
-                    'home': self._home_dir + '/' + identity
-                })
+                configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
                 await self._initialise_instance(configuration)
         await self._clientfile.write()
         return self
@@ -78,11 +73,7 @@ class SystemService:
         await util.create_directory(home_dir)
         config_file = home_dir + '/' + 'instance.json'
         await util.write_file(config_file, util.obj_to_json(configuration))
-        configuration.update({
-            'identity': identity,
-            'url': self._url + '/instances/' + identity,
-            'home': home_dir
-        })
+        configuration.update({'identity': identity, 'home': home_dir})
         return await self._initialise_instance(configuration)
 
     async def delete_instance(self, subcontext: contextsvc.Context):
@@ -100,8 +91,8 @@ class SystemService:
         server = self._create_server(subcontext)
         await server.initialise()
         resource = httpsvc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))
-        server.resources(resource)
         self._instances.append(resource)
+        server.resources(resource)
         svrsvc.ServerService(subcontext, server).start()
         self._context.post(self, SystemService.SERVER_INITIALISED, subcontext)
         return subcontext
@@ -145,11 +136,11 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
         self._system = system
 
     def handle_get(self, resource, data):
-        return self._system.instances_dict()
+        return self._system.instances_dict(util.get('baseurl', data, ''))
 
     async def handle_post(self, resource, data):
         subcontext = await self._system.create_instance(data)
-        return {'url': subcontext.config('url')}
+        return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
 
 
 class _ShutdownHandler(httpabc.AsyncPostHandler):

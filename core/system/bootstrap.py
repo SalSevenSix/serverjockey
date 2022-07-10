@@ -13,10 +13,10 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     p = argparse.ArgumentParser(description='Start serverjockey.')
     p.add_argument('--debug', action='store_true',
                    help='Debug mode')
-    p.add_argument('--host', type=str, default='localhost',
-                   help='Host name to use, default is "localhost"')
+    p.add_argument('--host', type=str,
+                   help='Host or IP to bind http service, default is open to all')
     p.add_argument('--port', type=int, default=6164,
-                   help='Port number to use, default is 6164')
+                   help='Port for http service, default is 6164')
     p.add_argument('--home', type=str, default='.',
                    help='Home directory to use for server instances, default is current working directory')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
@@ -25,13 +25,11 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
                    help='Log file to use, relative to "home" unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
-    baseurl = util.build_url(args.host, args.port)
     return contextsvc.Context(
         debug=args.debug, secret=util.generate_token(),
         home=util.current_directory() if args.home == '.' else args.home,
         logfile=args.logfile, clientfile=args.clientfile,
-        baseurl=baseurl, url=baseurl,
-        host=args.host, port=args.port)
+        host=None if args.host == '' else args.host, port=args.port)
 
 
 def _setup_logging(context: contextsvc.Context):

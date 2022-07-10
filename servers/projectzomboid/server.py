@@ -19,7 +19,7 @@ class Server(svrabc.Server):
         self._console = con.Console(context)
         self._messaging = msg.Messaging(context)
         self._pipeinsvc = proch.PipeInLineService(context)
-        self._httpsubs = httpsubs.HttpSubscriptionService(context, context.config('url') + '/subscriptions')
+        self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
         self._messaging.initialise()
@@ -40,7 +40,7 @@ class Server(svrabc.Server):
             .push('log', _ConsoleLogHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
-            .push('subscriptions') \
+            .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
