@@ -93,7 +93,7 @@ class Util {
 
   static checkAdmin(message) {
     var isAdmin = message.member.roles.cache.find(function(role) {
-      return role.name.toLowerCase() === 'pzadmin';
+      return role.name === config.ADMIN_ROLE;
     });
     if (isAdmin == null) {
       message.react('🔒');

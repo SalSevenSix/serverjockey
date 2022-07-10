@@ -395,7 +395,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
                  filename: str,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msg_filter)
+        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
         self._transformer = transformer
         self._filename = filename
         self._file = None

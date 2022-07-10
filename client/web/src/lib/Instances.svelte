@@ -6,7 +6,7 @@
 	function viewInstance() {
 	  let selected = $instances[this.name];
 		instance.set(selected);
-		goto('/instances/' + selected.module);
+		goto('/servers/' + selected.module);
 	}
 
 	function deleteInstance() {

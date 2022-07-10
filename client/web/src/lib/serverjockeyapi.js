@@ -1,5 +1,7 @@
+import { dev } from '$app/env';
 import { writable } from 'svelte/store';
 
+export const baseurl = (dev ? 'http://localhost:6164' : '');
 export const instances = writable([]);
 export const instance = writable({});
 export const serverStatus = writable({});
@@ -7,7 +9,7 @@ export const serverStatus = writable({});
 
 export async function loadInstances() {
   serverStatus.set({ running: false, state: 'UNKNOWN' });
-  const result = await fetch('http://localhost:6164/instances')
+  const result = await fetch(baseurl + '/instances')
     .then(function(response) { return response.json(); })
     .catch(function(error) { return 'Error ' + error; });
   let data = [];
