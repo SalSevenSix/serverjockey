@@ -28,4 +28,4 @@
 {:else}
   <p>No instance set</p>
 {/if}
-<p><a href="/instances">BACK</a> to Instances</p>
+<p><a href="/servers">BACK</a> to Instances</p>
