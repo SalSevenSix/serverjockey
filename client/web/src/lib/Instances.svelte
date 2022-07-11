@@ -21,8 +21,8 @@
   {#each $instances as instance, index}
     <li>
       {instance.name} ({instance.module})
-      <button id="view-{index}" name={index} on:click={viewInstance}>View</button>
-      <button id="delete-{index}" name={index} on:click={deleteInstance}>Delete</button>
+      <button id="view-{index}" name={index} class="button is-small is-primary" on:click={viewInstance}>View</button>
+      <button id="delete-{index}" name={index} class="button is-small is-danger" on:click={deleteInstance}>Delete</button>
     </li>
   {:else}
     <li>loading...</li>

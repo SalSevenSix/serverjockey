@@ -16,11 +16,41 @@
 	}
 </script>
 
-<div>
-  <p>Token <input style="width: 66%" bind:value={data.BOT_TOKEN} /></p>
-  <p>Channel ID <input style="width: 66%" bind:value={data.EVENTS_CHANNEL_ID} /></p>
-  <p>Command Character <input style="width: 33%" bind:value={data.CMD_PREFIX} /></p>
-  <p>Admin Role <input style="width: 33%" bind:value={data.ADMIN_ROLE} /></p>
-  <p>Whitelist DM <input style="width: 80%" bind:value={data.WHITELIST_DM} /></p>
-  <button id="apply" disabled={applying} name="apply" on:click={apply}>Apply</button>
+
+<div class="block">
+  <div class="field">
+    <label class="label">Discord Token</label>
+    <div class="control">
+      <input class="input" type="text" bind:value={data.BOT_TOKEN}>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Log Channel ID</label>
+    <div class="control">
+      <input class="input" type="text" bind:value={data.EVENTS_CHANNEL_ID}>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Command Character</label>
+    <div class="control">
+      <input class="input" type="text" bind:value={data.CMD_PREFIX}>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Admin Role</label>
+    <div class="control">
+      <input class="input" type="text" bind:value={data.ADMIN_ROLE}>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Whitelist DM</label>
+    <div class="control">
+      <textarea class="textarea" bind:value={data.WHITELIST_DM}></textarea>
+    </div>
+  </div>
+  <div class="field">
+    <div class="control">
+      <button id="apply" disabled={applying} name="apply" class="button is-primary is-fullwidth" on:click={apply}>Apply</button>
+    </div>
+  </div>
 </div>

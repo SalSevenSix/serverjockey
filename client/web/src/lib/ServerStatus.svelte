@@ -4,7 +4,7 @@
 </script>
 
 
-<div>
+<div class="block">
   <p>Running: {$serverStatus.running}</p>
   {#if $serverStatus.state}
     <p>State: {$serverStatus.state}</p>

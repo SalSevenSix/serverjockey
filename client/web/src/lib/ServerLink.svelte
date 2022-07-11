@@ -22,8 +22,9 @@
 </script>
 
 
-<div>
-  <ServerLinkConfig />
-  <ServerStatus />
-  <ServerControls />
+<div class="block">
+  <h2 class="subtitle">ServerLink</h2>
 </div>
+<ServerLinkConfig />
+<ServerStatus />
+<ServerControls />
