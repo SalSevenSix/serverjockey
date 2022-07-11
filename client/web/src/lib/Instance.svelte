@@ -22,9 +22,7 @@
   <h1>{$instance.name} ({$instance.module})</h1>
   <ServerStatus />
   <ServerControls />
-
   <slot />
-
 {:else}
   <p>No instance set</p>
 {/if}

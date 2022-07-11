@@ -21,6 +21,7 @@ APPLICATION_BIN = 'application/octet-stream'
 ACCEPTED_MIME_TYPES = (TEXT_PLAIN, APPLICATION_JSON, APPLICATION_BIN)
 
 HOST = 'Host'
+ORIGIN = 'Origin'
 CONTENT_TYPE = 'Content-Type'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
@@ -31,7 +32,7 @@ ALLOW = 'Allow'
 ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
 ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
-DEBUG_WEB_ORIGIN = 'http://localhost:3000'
+WEBDEV_ORIGIN = 'http://localhost:3000'
 X_SECRET = 'X-Secret'
 
 

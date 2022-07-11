@@ -1,11 +1,12 @@
 import { dev } from '$app/env';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
+
 
 export const baseurl = (dev ? 'http://localhost:6164' : '');
+export const securityToken = writable();
 export const instances = writable([]);
 export const instance = writable({});
 export const serverStatus = writable({});
-
 
 export async function loadInstances() {
   serverStatus.set({ running: false, state: 'UNKNOWN' });
@@ -45,7 +46,7 @@ export async function subscribeServerStatus(instance, dataHandler) {
 }
 
 export async function fetchJson(url) {
-  return await fetch(url)
+  return await fetch(url, newGetRequest())
     .then(function(response) { return response.json(); })
     .catch(function(error) { return 'Error ' + error; });
 }
@@ -90,11 +91,20 @@ async function poll(url, dataHandler) {
   }
 }
 
+function newGetRequest() {
+  return {
+    method: 'get',
+    headers: {
+      'X-Secret': get(securityToken)
+    }
+  };
+}
+
 function newPostRequest(ct = 'application/json') {
   return {
     method: 'post',
     headers: {
-      'Content-Type': ct
+      'Content-Type': ct, 'X-Secret': get(securityToken)
     }
   };
 }

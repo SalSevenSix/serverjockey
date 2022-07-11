@@ -109,7 +109,9 @@ class _RequestHandler:
             raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         if self._context.is_debug():
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.DEBUG_WEB_ORIGIN)
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
+        elif httpabc.WEBDEV_ORIGIN == self._headers.get(httpabc.ORIGIN):
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.WEBDEV_ORIGIN)
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
             response.headers.add(httpabc.CONTENT_TYPE, httpabc.APPLICATION_JSON)
@@ -149,9 +151,11 @@ class _RequestHandler:
         response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
         response.headers.add(httpabc.ALLOW, methods)
         if self._context.is_debug():
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.DEBUG_WEB_ORIGIN)
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
+        elif httpabc.WEBDEV_ORIGIN == self._headers.get(httpabc.ORIGIN):
+            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.WEBDEV_ORIGIN)
         response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_METHODS, methods)
-        response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_HEADERS, httpabc.CONTENT_TYPE)
+        response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_HEADERS, httpabc.CONTENT_TYPE + ',' + httpabc.X_SECRET)
         return response
 
 

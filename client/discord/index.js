@@ -41,7 +41,7 @@ class Util {
 
   static getFirstKey(value) {
     if (value == null) return null;
-    var keys = Object.keys(value);
+    let keys = Object.keys(value);
     if (keys.length === 0) return null;
     return keys[0];
   }
@@ -51,10 +51,11 @@ class Util {
   }
 
   static commandLineToList(line) {
-    var regexp = /[^\s"]+|"([^"]*)"/gi;
-    var result = [];
+    let regexp = /[^\s"]+|"([^"]*)"/gi;
+    let result = [];
+    let match = null;
     do {
-      var match = regexp.exec(line);
+      match = regexp.exec(line);
       if (match != null) {
         result.push(match[1] ? match[1] : match[0]);
       }
@@ -63,18 +64,18 @@ class Util {
   }
 
   static stringToBase10(string) {
-    var utf8 = unescape(encodeURIComponent(string));
-    var result = '';
-    for (var i = 0; i < utf8.length; i++) {
+    let utf8 = unescape(encodeURIComponent(string));
+    let result = '';
+    for (let i = 0; i < utf8.length; i++) {
       result += utf8.charCodeAt(i).toString().padStart(3, '0');
     }
     return result;
   }
 
   static base10ToString(number) {
-    var character;
-    var result = '';
-    for (var i = 0; i < number.length; i += 3) {
+    let character;
+    let result = '';
+    for (let i = 0; i < number.length; i += 3) {
       character = parseInt(number.substr(i, 3), 10).toString(16);
       result += '%' + ((character.length % 2 == 0) ? character : '0' + character);
     }
@@ -101,7 +102,7 @@ class Util {
   }
 
   static checkAdmin(message) {
-    var isAdmin = message.member.roles.cache.find(function(role) {
+    let isAdmin = message.member.roles.cache.find(function(role) {
       return role.name === config.ADMIN_ROLE;
     });
     if (isAdmin == null) {
@@ -117,7 +118,7 @@ class Util {
 class SubsHelper {
 
   static async daemon(subscribeUrl, dataHandler) {
-    var url = null;
+    let url = null;
     while (running && url == null) {
       while (running && url == null) {
         url = await SubsHelper.subscribe(subscribeUrl, function(pollUrl) {
@@ -152,14 +153,14 @@ class SubsHelper {
   }
 
   static async poll(url, dataHandler) {
-    var polling = (url != null);
+    let polling = (url != null);
     while (running && polling) {
       polling = await fetch(url, { signal })
         .then(function(response) {
           if (response.status === 404) return null;
           if (!response.ok) throw new Error('Status: ' + response.status);
           if (response.status === 204) return {};
-          var ct = response.headers.get('Content-Type');
+          let ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })
@@ -197,7 +198,7 @@ class InstancesService {
     this.#current = Util.getFirstKey(this.#instances);
     Logger.info('Instances...');
     Logger.raw(this.#instances);
-    for (var instance in this.#instances) {
+    for (let instance in this.#instances) {
       if (this.#instances[instance].module === 'projectzomboid') {
          HandlerProjectZomboid.startup(channel, instance, this.#instances[instance].url);
       }
@@ -209,7 +210,7 @@ class InstancesService {
   }
 
   createInstance(data) {
-    var instance = data.identity;
+    let instance = data.identity;
     this.#instances[instance] = {
       module: data.module,
       url: config.SERVER_URL + '/instances/' + instance
@@ -236,12 +237,12 @@ class InstancesService {
   }
 
   getInstancesText() {
-    var instances = Object.keys(this.#instances);
+    let instances = Object.keys(this.#instances);
     if (instances.length === 0) {
       return '```No instances found.```';
     }
-    var result = '```';
-    for (var i = 0; i < instances.length; i++) {
+    let result = '```';
+    for (let i = 0; i < instances.length; i++) {
       if (instances[i] === instancesService.currentInstance()) {
         result += '=> ';
       } else {
@@ -288,17 +289,17 @@ class MessageHttpTool {
   }
 
   doGet(path, dataHandler) {
-    var self = this;
-    var message = this.#message;
+    let self = this;
+    let message = this.#message;
     fetch(this.#baseurl + path, Util.newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
-        var ct = response.headers.get('Content-Type');
+        let ct = response.headers.get('Content-Type');
         if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
       .then(function(data) {
-        var text = dataHandler(data)
+        let text = dataHandler(data)
         if (text) {
           message.channel.send(text);
         }
@@ -309,10 +310,10 @@ class MessageHttpTool {
   }
 
   doPost(path, body = null, dataHandler = null) {
-    var self = this;
-    var message = this.#message;
+    let self = this;
+    let message = this.#message;
     if (!Util.checkAdmin(message)) return;
-    var request = Util.newPostRequest('application/json');
+    let request = Util.newPostRequest('application/json');
     if (Util.isString(body)) {
       request = Util.newPostRequest('text/plain');
       request.body = body.replace(/\r\n/g, '\n');
@@ -352,9 +353,9 @@ class MessageHttpTool {
       return;
     }
     message.react('⌛');
-    var fname = message.id + '.text';
-    var fpath = '/tmp/' + fname;
-    var fstream = fs.createWriteStream(fpath);
+    let fname = message.id + '.text';
+    let fpath = '/tmp/' + fname;
+    let fstream = fs.createWriteStream(fpath);
     fstream.on('error', Logger.error);
     SubsHelper.poll(json.url, function(data) {
       fstream.write(data);
@@ -398,7 +399,7 @@ class HandlerSystem {
 
   create() {
     if (this.#data.length < 2) return;
-    var body = { identity: this.#data[0], module: this.#data[1] };
+    let body = { identity: this.#data[0], module: this.#data[1] };
     this.#httptool.doPost('/instances', body, function(message, json) {
       instancesService.createInstance(body);
       message.channel.send(instancesService.getInstancesText());
@@ -411,7 +412,7 @@ class HandlerSystem {
 
   help() {
     if (this.#data.length === 0) {
-      var result = '```SYSTEM COMMANDS\n' + config.CMD_PREFIX;
+      let result = '```SYSTEM COMMANDS\n' + config.CMD_PREFIX;
       result += staticData.system.help.join('\n' + config.CMD_PREFIX);
       this.#message.channel.send(result + '```');
     }
@@ -427,7 +428,7 @@ class HandlerProjectZomboid {
   #data;
 
   constructor(message, baseurl, data) {
-    var parts = baseurl.split('/');
+    let parts = baseurl.split('/');
     this.#instance = parts[parts.length - 1];
     this.#httptool = new MessageHttpTool(message, baseurl);
     this.#message = message;
@@ -436,7 +437,7 @@ class HandlerProjectZomboid {
 
   static startup(channel, instance, url) {
     SubsHelper.daemon(url + '/players/subscribe', function(json) {
-      var result = '';
+      let result = '';
       if (json.event === 'login') { result += 'LOGIN '; }
       if (json.event === 'logout') { result += 'LOGOUT '; }
       result += json.player.name;
@@ -449,10 +450,10 @@ class HandlerProjectZomboid {
   }
 
   server() {
-    var instance = this.#instance;
-    var data = this.#data;
+    let instance = this.#instance;
+    let data = this.#data;
     if (data.length === 1) {
-      var baseurl = this.#httptool.baseurl;
+      let baseurl = this.#httptool.baseurl;
       this.#httptool.doPost('/server/' + data[0], null, function(message, json) {
         if (data[0] === 'start' || data[0] === 'restart') {
           message.react('⌛');
@@ -477,13 +478,13 @@ class HandlerProjectZomboid {
       return;
     }
     this.#httptool.doGet('/server', function(body) {
-      var result = '```Server is ';
+      let result = '```Server is ';
       if (!body.running) {
         result += 'DOWN```';
         return result;
       }
       result += body.state + '\n';
-      var dtl = body.details;
+      let dtl = body.details;
       if (dtl.hasOwnProperty('version')) { result += 'Version:  ' + dtl.version + '\n'; }
       if (dtl.hasOwnProperty('ingametime')) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
       return result + '```';
@@ -491,8 +492,8 @@ class HandlerProjectZomboid {
   }
 
   config() {
-    var prefix = this.#httptool.baseurl + '/config/';
-    var result = prefix + 'jvm\n';
+    let prefix = this.#httptool.baseurl + '/config/';
+    let result = prefix + 'jvm\n';
     result += prefix + 'options\n';
     result += prefix + 'ini\n';
     result += prefix + 'sandbox\n';
@@ -503,11 +504,11 @@ class HandlerProjectZomboid {
 
   getconfig() {
     if (this.#data.length < 1) return;
-    var message = this.#message;
-    var name = this.#data[0];
+    let message = this.#message;
+    let name = this.#data[0];
     this.#httptool.doGet('/config/' + name, function(body) {
-      var fname = name + '-' + message.id + '.text';
-      var fpath = '/tmp/' + fname;
+      let fname = name + '-' + message.id + '.text';
+      let fpath = '/tmp/' + fname;
       fs.writeFile(fpath, body, function(error) {
         if (error) return Logger.error(error);
         message.channel.send({ files: [{ attachment: fpath, name: fname }] });
@@ -516,9 +517,9 @@ class HandlerProjectZomboid {
   }
 
   setconfig() {
-    var httptool = this.#httptool;
-    var message = this.#message;
-    var data = [...this.#data];
+    let httptool = this.#httptool;
+    let message = this.#message;
+    let data = [...this.#data];
     if (data.length < 1) return;
     if (message.attachments.length < 1) return;
     fetch(message.attachments.first().url)
@@ -540,10 +541,10 @@ class HandlerProjectZomboid {
   }
 
   world() {
-    var data = [...this.#data];
+    let data = [...this.#data];
     if (data.length < 1) return;
-    var cmd = data.shift();
-    var body = null;
+    let cmd = data.shift();
+    let body = null;
     if (data.length > 0 && cmd === 'broadcast') {
       body = { message: data.join(' ') };
     }
@@ -551,10 +552,10 @@ class HandlerProjectZomboid {
   }
 
   deployment() {
-    var data = [...this.#data];
+    let data = [...this.#data];
     if (data.length < 1) return;
-    var cmd = data.shift();
-    var body = null;
+    let cmd = data.shift();
+    let body = null;
     if (cmd === 'install-runtime') {
       body = { wipe: true, validate: true };
       if (data.length > 0) { body.beta = data[0]; }
@@ -564,8 +565,8 @@ class HandlerProjectZomboid {
 
   players() {
     this.#httptool.doGet('/players', function(body) {
-      var result = '```Players currently online: ' + body.length + '\n';
-      for (var i = 0; i < body.length; i++) {
+      let result = '```Players currently online: ' + body.length + '\n';
+      for (let i = 0; i < body.length; i++) {
         if (body[i].steamid == null) {
           result += 'LOGGING IN        ';
         } else {
@@ -578,11 +579,11 @@ class HandlerProjectZomboid {
   }
 
   player() {
-    var data = [...this.#data];
+    let data = [...this.#data];
     if (data.length < 2) return;
-    var name = Util.stringToBase10(data.shift());
-    var cmd = data.shift();
-    var body = null;
+    let name = Util.stringToBase10(data.shift());
+    let cmd = data.shift();
+    let body = null;
     if (data.length > 0) {
       if (cmd === 'set-access-level') {
         body = { level: data[0] };
@@ -605,13 +606,13 @@ class HandlerProjectZomboid {
   }
 
   whitelist() {
-    var httptool = this.#httptool;
-    var message = this.#message;
-    var data = [...this.#data];
+    let httptool = this.#httptool;
+    let message = this.#message;
+    let data = [...this.#data];
     if (data.length < 1) return;
-    var cmd = data.shift();
-    var name = null;
-    var body = null;
+    let cmd = data.shift();
+    let name = null;
+    let body = null;
     if (cmd === 'add-name') {
       body = { player: Util.stringToBase10(data[0]), password: data[1] };
       httptool.doPost('/whitelist/add', body);
@@ -621,7 +622,7 @@ class HandlerProjectZomboid {
     } else if (cmd === 'add-id') {
       client.users.fetch(data[0], true, true)
         .then(function(user) {
-          var pwd = Math.random().toString(16).substr(2, 8);
+          let pwd = Math.random().toString(16).substr(2, 8);
           name = user.tag.replace(/ /g, '').replace('#', '');
           Logger.info('Add user: ' + data[0] + ' ' + name);
           body = { player: Util.stringToBase10(name), password: pwd };
@@ -647,23 +648,23 @@ class HandlerProjectZomboid {
   }
 
   banlist() {
-    var data = [...this.#data];
+    let data = [...this.#data];
     if (data.length < 2) return;
-    var cmd = data.shift() + '-id';
-    var body = { steamid: data.shift() };
+    let cmd = data.shift() + '-id';
+    let body = { steamid: data.shift() };
     this.#httptool.doPost('/banlist/' + cmd, body);
   }
 
   help() {
-    var channel = this.#message.channel;
+    let channel = this.#message.channel;
     if (this.#data.length === 0) {
-      var s = '```PROJECT ZOMBOID COMMANDS\n' + config.CMD_PREFIX;
+      let s = '```PROJECT ZOMBOID COMMANDS\n' + config.CMD_PREFIX;
       channel.send(s + staticData.projectzomboid.help1.join('\n' + config.CMD_PREFIX) + '```');
       channel.send(s + staticData.projectzomboid.help2.join('\n' + config.CMD_PREFIX) + '```');
       channel.send(s + staticData.projectzomboid.help3.join('\n' + config.CMD_PREFIX) + '```');
       return;
     }
-    var query = this.#data.join('').replaceAll('-', '');
+    let query = this.#data.join('').replaceAll('-', '');
     if (staticData.projectzomboid.hasOwnProperty(query)) {
       channel.send(staticData.projectzomboid[query].join('\n'));
     } else {
@@ -700,21 +701,21 @@ function startup() {
 function handleMessage(message) {
   //if (message.author.bot) return;
   if (!message.content.startsWith(config.CMD_PREFIX)) return;
-  var data = Util.commandLineToList(message.content.slice(1));
-  var command = data.shift().toLowerCase();
-  var instance = null;
-  var parts = command.split('.');
+  let data = Util.commandLineToList(message.content.slice(1));
+  let command = data.shift().toLowerCase();
+  let instance = null;
+  let parts = command.split('.');
   if (parts.length === 1) {
     command = parts[0];
   } else {
     instance = parts[0];
     command = parts[1];
   }
-  var handlers = [];
+  let handlers = [];
   if (Util.prototypeIncludesProperty(HandlerSystem.prototype, command)) {
     handlers.push(new HandlerSystem(message, data));
   }
-  var handler = instancesService.createHandler(message, instance, command, data);
+  let handler = instancesService.createHandler(message, instance, command, data);
   if (handler != null) {
     handlers.push(handler);
   }
@@ -723,7 +724,7 @@ function handleMessage(message) {
     return;
   }
   Logger.info(message.member.user.tag + ' ' + message.content);
-  for (var i = 0; i < handlers.length; i++) {
+  for (let i = 0; i < handlers.length; i++) {
     handlers[i][command]();
   }
 }
