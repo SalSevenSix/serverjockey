@@ -1,7 +1,6 @@
 from __future__ import annotations
 import gzip
 import typing
-import logging
 from yarl import URL
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util
@@ -66,8 +65,7 @@ class _RequestHandler:
         if resource is None:
             if self._method is httpabc.Method.GET:
                 return self._statics.handle(self._headers, self._request)
-            else:
-                raise err.HTTPNotFound
+            raise err.HTTPNotFound
         if not resource.allows(self._method):
             raise err.HTTPMethodNotAllowed(
                 str(self._method),
@@ -241,7 +239,6 @@ class WebResource(httpabc.Resource):
 
     async def handle_get(self, url: URL, secure: bool) -> httpabc.ABC_RESPONSE:
         data = _PathProcessor(self).extract_args(url)
-        logging.info(util.obj_to_json(data))
         if secure:
             httpabc.make_secure(data)
         if isinstance(self._handler, httpabc.GetHandler):

@@ -4,7 +4,6 @@ import shutil
 import logging
 import json
 import time
-import uuid
 import typing
 import asyncio
 import aiofiles
@@ -193,11 +192,6 @@ def right_chop_and_strip(line: str, keyword: str) -> str:
     if index == -1:
         return line
     return line[:index].strip()
-
-
-def generate_token() -> str:
-    identity = str(uuid.uuid4())
-    return identity[:6] + identity[-6:]
 
 
 def insert_filename_suffix(filename: str, suffix: str) -> str:

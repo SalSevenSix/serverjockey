@@ -46,10 +46,14 @@
       "banlist remove {steamid}  : Remove player SteamID from banlist"
     ],
     "help3": [
+      "getconfig ini             : Get INI config as attachment",
+      "getconfig sandbox         : Get Sandbox config as attachment",
+      "getconfig spawnregions    : Get Spawnregions config as attachment",
+      "getconfig jvm             : Get JVM config as attachment",
       "setconfig ini             : Update INI using attached file",
       "setconfig sandbox         : Update Sandbox using attached file",
       "setconfig spawnregions    : Update Spawnregions using attached file",
-      "setconfig jvm             : Update JVM json using attached file",
+      "setconfig jvm             : Update JVM config using attached file",
       "deployment backup-world        : Backup game world to zip file",
       "deployment wipe-world-all      : Delete game world folder",
       "deployment wipe-world-playerdb : Delete only player DB",

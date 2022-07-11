@@ -80,7 +80,9 @@ class _Loader:
             data = pkgutil.get_data('web', path)
             return _Resource(content_type, data) if data else None
         except IsADirectoryError:
-            return self.load(path + '/')
+            if not path.endswith('.html'):
+                return self.load(path + '/')
+            return None
         except FileNotFoundError:
             if path.endswith('/index.html'):
                 return self.load('/'.join(path.split('/')[:-1]) + '.html')
@@ -90,7 +92,7 @@ class _Loader:
                 return self.load('/'.join(path.split('/')[:-1]) + '.html')
             if path.endswith('.html'):
                 return None
-            return self.load(path + '/index.html')
+            return self.load(path + '/')
 
 
 class _Resource:

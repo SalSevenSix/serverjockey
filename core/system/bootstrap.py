@@ -2,6 +2,7 @@ import logging
 import argparse
 import sys
 import typing
+import secrets
 from core.util import util
 from core.msg import msgext
 from core.context import contextsvc
@@ -26,7 +27,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     return contextsvc.Context(
-        debug=args.debug, secret=util.generate_token(),
+        debug=args.debug, secret=secrets.token_hex(5),
         home=util.current_directory() if args.home == '.' else args.home,
         logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)

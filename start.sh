@@ -246,7 +246,7 @@ echo "  host:port     $HOST:$PORT"
 DEPENDENCIES_FILE="$HOME_DIR/dependencies.ok"
 [ -f $DEPENDENCIES_FILE ] || check_dependencies
 
-jq . $DISCORD_CONF > /dev/null 2>&1
+jq "." $DISCORD_CONF > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "ERROR Invalid JSON in $DISCORD_CONF"
     exit 1
@@ -261,6 +261,7 @@ $JOCKEY_EXE --host "$HOST" --port "$PORT" \
     --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
     --home "$HOME_DIR" > /dev/null 2>&1 &
 wait_file "$CLIENT_CONF" 5
+jq -r ".SERVER_TOKEN" $CLIENT_CONF > $HOME_DIR/token.text
 
 echo "STARTING ServerLink discord bot."
 cd "$DISCORD_DIR" || exit 1

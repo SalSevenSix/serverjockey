@@ -81,6 +81,15 @@ class Util {
     return decodeURIComponent(result);
   }
 
+  static newGetRequest() {
+    return {
+      method: 'get',
+      headers: {
+        'X-Secret': config.SERVER_TOKEN
+      }
+    };
+  }
+
   static newPostRequest(ct) {
     return {
       method: 'post',
@@ -278,16 +287,21 @@ class MessageHttpTool {
     message.react('⛔');
   }
 
-  doGet(path, tostring) {
+  doGet(path, dataHandler) {
     var self = this;
     var message = this.#message;
-    fetch(this.#baseurl + path)
+    fetch(this.#baseurl + path, Util.newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
+        var ct = response.headers.get('Content-Type');
+        if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
-      .then(function(json) {
-        message.channel.send(tostring(json));
+      .then(function(data) {
+        var text = dataHandler(data)
+        if (text) {
+          message.channel.send(text);
+        }
       })
       .catch(function(error) {
         self.error(error, message);
@@ -487,6 +501,20 @@ class HandlerProjectZomboid {
     this.#message.channel.send(result);
   }
 
+  getconfig() {
+    if (this.#data.length < 1) return;
+    var message = this.#message;
+    var name = this.#data[0];
+    this.#httptool.doGet('/config/' + name, function(body) {
+      var fname = name + '-' + message.id + '.text';
+      var fpath = '/tmp/' + fname;
+      fs.writeFile(fpath, body, function(error) {
+        if (error) return Logger.error(error);
+        message.channel.send({ files: [{ attachment: fpath, name: fname }] });
+      });
+    });
+  }
+
   setconfig() {
     var httptool = this.#httptool;
     var message = this.#message;
@@ -499,9 +527,8 @@ class HandlerProjectZomboid {
         return response.text();
       })
       .then(function(body) {
-        if (body != null) {
-          httptool.doPost('/config/' + data.shift(), body);
-        }
+        if (body == null) return;
+        httptool.doPost('/config/' + data.shift(), body);
       })
       .catch(function(error) {
         httptool.error(error, message);
