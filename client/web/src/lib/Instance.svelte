@@ -20,8 +20,8 @@
 
 {#if $instance.name}
   <h1>{$instance.name} ({$instance.module})</h1>
-  <ServerStatus />
   <ServerControls />
+  <ServerStatus />
   <slot />
 {:else}
   <p>No instance set</p>

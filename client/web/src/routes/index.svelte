@@ -5,13 +5,8 @@
 </script>
 
 
-<div>
-  {#if $securityToken}
-    <ServerLink />
-  {:else}
-    <Login />
-  {/if}
-  <div class="block">
-    <p>Take me to <a href="/servers">Servers</a></p>
-  </div>
-</div>
+{#if $securityToken}
+  <ServerLink />
+{:else}
+  <Login />
+{/if}

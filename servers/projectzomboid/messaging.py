@@ -33,11 +33,16 @@ class _ConsoleLogFilter(msgabc.Filter):
 
 
 CONSOLE_LOG_FILTER = _ConsoleLogFilter()
+SERVER_STARTED_FILTER = msgftr.And(
+    proch.ServerProcess.FILTER_STDOUT_LINE,
+    msgftr.DataStrContains('*** SERVER STARTED ***'))
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION = 'versionNumber='
     VERSION_FILTER = msgftr.DataStrContains(VERSION)
+    IP = 'Public IP:'
+    IP_FILTER = msgftr.DataStrContains(IP)
     PORT = 'server is listening on port'
     PORT_FILTER = msgftr.DataStrContains(PORT)
     STEAMID = 'Server Steam ID'
@@ -48,30 +53,35 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General")),
             msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
                       _ServerDetailsSubscriber.VERSION_FILTER,
+                      _ServerDetailsSubscriber.IP_FILTER,
                       _ServerDetailsSubscriber.PORT_FILTER,
                       _ServerDetailsSubscriber.STEAMID_FILTER)))
         self._mailer = mailer
 
-    # TODO grab IP
     def handle(self, message):
-        data = None
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.INGAMETIME)
-            data = {'ingametime': value}
-        elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
+            return None
+        if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
             value = util.right_chop_and_strip(value, 'demo=')
-            data = {'version': value}
-        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            return None
+        if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.IP)
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
+            return None
+        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT)
-            data = {'port': int(value)}
-        elif _ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': int(value)})
+            return None
+        if _ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.STEAMID)
-            data = {'steamid': int(value)}
-        if data:
-            svrsvc.ServerStatus.notify_details(self._mailer, self, data)
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'steamid': int(value)})
         return None
 
 
@@ -80,11 +90,14 @@ class _ProvideAdminPasswordSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.MulticastMailer, pwd: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(msgftr.DataStrContains('Enter new administrator password'),
+            msgftr.Or(SERVER_STARTED_FILTER,
+                      msgftr.DataStrContains('Enter new administrator password'),
                       msgftr.DataStrContains('Confirm the password'))))
         self._mailer = mailer
         self._pwd = pwd
 
     async def handle(self, message):
+        if SERVER_STARTED_FILTER.accepts(message):
+            return True
         await proch.PipeInLineService.request(self._mailer, self, self._pwd, force=True)
         return None

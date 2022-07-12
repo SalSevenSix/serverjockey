@@ -26,6 +26,7 @@ class SystemService:
             .push('system') \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
+            .append('check', httpext.NoopPostHandler()) \
             .append('instances', _InstancesHandler(self))
         self._instances = self._resource.child('instances')
         context.register(_Subscriber(self))
@@ -143,11 +144,11 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
 
 
-class _ShutdownHandler(httpabc.AsyncPostHandler):
+class _ShutdownHandler(httpabc.PostHandler):
 
     def __init__(self, system: SystemService):
         self._system = system
 
-    async def handle_post(self, resource, data):
+    def handle_post(self, resource, data):
         signals.interrupt()
         return httpabc.ResponseBody.NO_CONTENT

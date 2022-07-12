@@ -5,13 +5,17 @@
 
 
 <div class="block">
-  <p>Running: {$serverStatus.running}</p>
-  {#if $serverStatus.state}
-    <p>State: {$serverStatus.state}</p>
-  {/if}
-  {#if $serverStatus.details}
-    {#each Object.keys($serverStatus.details) as key}
-      <p>{capitalize(key)}: {$serverStatus.details[key]}</p>
-    {/each}
-  {/if}
+  <table class="table">
+    <tbody>
+      <tr><td><strong>Running</strong></td><td>{$serverStatus.running}</td></tr>
+      {#if $serverStatus.state}
+        <tr><td><strong>State</strong></td><td>{$serverStatus.state}</td></tr>
+      {/if}
+      {#if $serverStatus.details}
+        {#each Object.keys($serverStatus.details) as key}
+          <tr><td><strong>{capitalize(key)}</strong></td><td>{$serverStatus.details[key]}</td></tr>
+        {/each}
+      {/if}
+    </tbody>
+  </table>
 </div>

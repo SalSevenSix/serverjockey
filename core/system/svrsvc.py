@@ -113,7 +113,7 @@ class ServerService(msgabc.AbcSubscriber):
                 await self._server.stop()
             await self._queue.join()
             if self._task:
-                await self._task
+                await self._task  # TODO consider timeout and cancel
             if action is ServerService.DELETE:
                 self._context.post(self, ServerService.DELETE_ME, self._context)
             if action is ServerService.SHUTDOWN:

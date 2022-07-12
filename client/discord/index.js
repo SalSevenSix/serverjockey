@@ -451,11 +451,11 @@ class HandlerProjectZomboid {
 
   server() {
     let instance = this.#instance;
-    let data = this.#data;
-    if (data.length === 1) {
+    if (this.#data.length === 1) {
+      let cmd = this.#data[0];
       let baseurl = this.#httptool.baseurl;
-      this.#httptool.doPost('/server/' + data[0], null, function(message, json) {
-        if (data[0] === 'start' || data[0] === 'restart') {
+      this.#httptool.doPost('/server/' + cmd, null, function(message, json) {
+        if (cmd === 'daemon' || cmd === 'start' || cmd === 'restart') {
           message.react('⌛');
           SubsHelper.subscribe(baseurl + '/server/subscribe', function(pollUrl) {
             SubsHelper.poll(pollUrl, function(data) {
@@ -468,7 +468,7 @@ class HandlerProjectZomboid {
               return true;
             });
           });
-        } else if (data[0] === 'delete') {
+        } else if (cmd === 'delete') {
           instancesService.deleteInstance(instance);
           message.react('✅');
         } else {
@@ -678,6 +678,7 @@ class HandlerProjectZomboid {
 function startup() {
   running = true;
   Logger.info('Logged in as ' + client.user.tag);
+  if (!config.EVENTS_CHANNEL_ID) return;
   client.channels.fetch(config.EVENTS_CHANNEL_ID)
     .then(function(channel) {
       Logger.info('Publishing events to ' + channel.id);
@@ -743,6 +744,7 @@ function shutdown() {
 var running = false;
 Logger.info('*** START ServerLink Bot ***');
 const config = { ...require(process.argv[2]), ...require(process.argv[3]) };
+if (!config.BOT_TOKEN) throw new Error('BOT_TOKEN not set');
 Logger.info('Initialised with config...');
 Logger.raw(config);
 

@@ -51,7 +51,18 @@ export async function fetchJson(url) {
     .catch(function(error) { return 'Error ' + error; });
 }
 
-
+export function doLogin(token) {
+  if (!token) return;
+  fetch(baseurl + '/check', { method: 'post', headers: { 'X-Secret': token } })
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      securityToken.set(token);
+    })
+    .catch(function(error) {
+      alert('Login failed');
+      securityToken.set(null);
+    });
+}
 
 async function fetchServerStatus(instance) {
   return await fetch(instance.url + '/server')

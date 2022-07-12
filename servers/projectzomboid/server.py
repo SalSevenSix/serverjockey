@@ -1,5 +1,5 @@
 from core.util import aggtrf
-from core.msg import msgabc, msgext, msgftr, msgtrf
+from core.msg import msgabc, msgext, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httpext, httpsubs
 from core.proc import proch
@@ -8,18 +8,15 @@ from servers.projectzomboid import deployment as dep, playerstore as pls, consol
 
 
 class Server(svrabc.Server):
-    STARTED_FILTER = msgftr.And(
-        proch.ServerProcess.FILTER_STDOUT_LINE,
-        msgftr.DataStrContains('SERVER STARTED'))
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._deployment = dep.Deployment(context)
-        self._playerstore = pls.PlayerStoreService(context)
-        self._console = con.Console(context)
-        self._messaging = msg.Messaging(context)
         self._pipeinsvc = proch.PipeInLineService(context)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
+        self._deployment = dep.Deployment(context)
+        self._console = con.Console(context)
+        self._messaging = msg.Messaging(context)
+        self._playerstore = pls.PlayerStoreService(context)
 
     async def initialise(self):
         self._messaging.initialise()
@@ -46,10 +43,11 @@ class Server(svrabc.Server):
     async def run(self):
         await self._deployment.new_server_process() \
             .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=900)) \
+            .wait_for_started(msgext.SingleCatcher(msg.SERVER_STARTED_FILTER, timeout=900)) \
             .run()
 
     async def stop(self):
+        # TODO consider timeout and terminate
         await proch.PipeInLineService.request(self._context, self, 'quit')
 
 

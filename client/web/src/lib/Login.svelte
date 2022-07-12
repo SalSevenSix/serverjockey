@@ -1,14 +1,27 @@
 <script>
-  import { securityToken } from '$lib/serverjockeyapi';
+  import { doLogin } from '$lib/serverjockeyapi';
 
   let value = '';
-	function apply() {
-	  securityToken.set(value);
+	function login() {
+	  doLogin(value);
 	}
 </script>
 
 
-<div>
-  <p>Enter token: <input style="width: 50%" bind:value={value} /></p>
-  <button id="apply" name="apply" on:click={apply}>Apply</button>
+<div class="columns is-centered">
+  <div class="column is-half">
+    <div class="box">
+      <div class="field">
+        <label for="login-token" class="label">Enter Login Token</label>
+        <div class="control">
+          <input id="login-token" class="input" type="text" bind:value={value} />
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <button id="login" name="login" class="button is-primary is-fullwidth" on:click={login}>Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

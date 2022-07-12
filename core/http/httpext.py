@@ -60,6 +60,12 @@ class ResourceBuilder:
         logging.debug('trs> BIND {} {} => {}'.format(resource.path(), allows, util.obj_to_str(handler)))
 
 
+class NoopPostHandler(httpabc.PostHandler):
+
+    def handle_post(self, resource, data):
+        return httpabc.ResponseBody.NO_CONTENT
+
+
 class MessengerHandler(httpabc.AsyncPostHandler):
 
     def __init__(self,
