@@ -19,7 +19,7 @@
 
 <div class="block">
   <div class="field">
-    <label for="bot-token" class="label">Discord Token</label>
+    <label for="bot-token" class="label">Discord Bot Token</label>
     <div class="control">
       <input id="bot-token" class="input" type="text" bind:value={data.BOT_TOKEN}>
     </div>

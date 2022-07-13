@@ -250,10 +250,16 @@ class ShellJob(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         stderr, stdout, replied = None, None, False
-        source = message.source()
+        source, script = message.source(), None
+        if isinstance(message.data(), str):
+            script = message.data()
+        elif isinstance(message.data(), dict):
+            script = util.get('script', message.data())
+        if not script:
+            raise Exception('Invalid script')
         try:
             process = await asyncio.create_subprocess_shell(
-                message.data(),
+                script,
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE)

@@ -1,4 +1,8 @@
 
 body {
-  background-color: #FFFEF8;
+  background-color: #FFFDF8;
+}
+
+a[target="_blank"] {
+  font-weight: bold;
 }

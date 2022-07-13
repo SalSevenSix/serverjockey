@@ -89,7 +89,7 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
                 aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
-        script = shell.Script() \
+        data['script'] = shell.Script() \
             .include_steamcmd_app_update(
                 app_id=380870,
                 install_dir=self._path,
@@ -100,7 +100,7 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
         if util.get('wipe', data):
             # Not checking is server is running but all that will change later
             await util.delete_directory(self._path)
-        return await self._handler.handle_post(resource, script)
+        return await self._handler.handle_post(resource, data)
 
 
 class _DeploymentWiper(msgabc.AbcSubscriber):

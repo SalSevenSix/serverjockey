@@ -485,8 +485,15 @@ class HandlerProjectZomboid {
       }
       result += body.state + '\n';
       let dtl = body.details;
-      if (dtl.hasOwnProperty('version')) { result += 'Version:  ' + dtl.version + '\n'; }
-      if (dtl.hasOwnProperty('ingametime')) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
+      if (dtl.hasOwnProperty('version')) {
+        result += 'Version:  ' + dtl.version + '\n';
+      }
+      if (dtl.hasOwnProperty('ip') && dtl.hasOwnProperty('port')) {
+        result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n';
+      }
+      if (dtl.hasOwnProperty('ingametime')) {
+        result += 'Ingame:   ' + dtl.ingametime + '\n';
+      }
       return result + '```';
     });
   }

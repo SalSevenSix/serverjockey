@@ -81,10 +81,9 @@ class MessengerHandler(httpabc.AsyncPostHandler):
     async def handle_post(self, resource, data):
         messenger = msgext.SynchronousMessenger(self._mailer)
         subscription_path, source = None, util.obj_to_str(messenger)
-        if isinstance(data, dict):
-            data['resource'] = resource.name()
-            if self._data:
-                data = {**self._data, **data}
+        data['resource'] = resource.name()
+        if self._data:
+            data = {**self._data, **data}
         if self._selector:
             subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
                 self._mailer, source, httpsubs.Selector(
