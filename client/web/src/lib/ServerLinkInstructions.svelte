@@ -28,7 +28,7 @@
   <p>
     Although this guide will walk you through process carefully, some prerequisite game server knowledge is
     still required. You will need to be familiar with editing Project Zomboid server configuration files.
-    Also you will have to know how to redirect ports on your router.
+    Also you will have to know how to forward ports on your router.
     However <a href="#additionalinformation" use:scrollto={'#additionalinformation'}>additional information</a>
     is included at the end of the guide to help with these.
   </p>
@@ -509,10 +509,100 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 <hr />
 <div class="content" id="additionalinformation">
   <h2 class="title is-3">Additional Information</h2>
-  <p>
-    TODO More help on PZ config files, ports redirects, VirtualBox config.
-  </p>
 </div>
+
+<div class="content">
+  <h3 class="title is-4">Configuration Files</h3>
+  <p>
+    For help understanding Project Zomboid server configuration files. Please see the
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">excellent guide on Steam</a>
+    by Aiteron.
+    All of the configuration files can be downloaded using Discord using the commands shown below.
+    Use the corresponding <span class="is-family-monospace">!setconfig</span> command to upload files.
+  </p>
+  <table class="table">
+    <thead>
+      <tr><th>Download Command</th><th>Config File</th></tr>
+    </thead>
+    <tbody class="is-family-monospace">
+      <tr><td>!getconfig ini</td><td>settings.ini</td></tr>
+      <tr><td>!getconfig sandbox</td><td>settings_SandboxVars.lua</td></tr>
+      <tr><td>!getconfig spawnregions</td><td>settings_spawnregions.lua</td></tr>
+      <tr><td>!getconfig spawnpoints</td><td>settings_spawnpoints.lua</td></tr>
+      <tr><td>!getconfig jvm</td><td>ProjectZomboid64.json</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="content">
+  <h3 class="title is-4">Port Forwarding</h3>
+  <p>
+    In order for people to connect to your server over the internet. You will need to login to your home
+    router (internet gateway / "modem") to forward ports to the ZomBox virtual machine.
+    The ports that need forwarding are shown below. Use of the IP address as shown on the ZomBox console.
+    Note that the Players port range is for player connections, one port per player.
+  </p>
+  <table class="table">
+    <thead>
+      <tr><th>Purpose</th><th>Ports</th><th>Protocal</th></tr>
+    </thead>
+    <tbody class="is-family-monospace">
+      <tr><td>Handshake</td><td>16261</td><td>UDP</td></tr>
+      <tr><td>Players</td><td>16262-16294</td><td>TCP</td></tr>
+      <tr><td>Steam</td><td>8766-8767</td><td>UDP</td></tr>
+    </tbody>
+  </table>
+  <p><span class="has-text-weight-bold">Important:</span>
+    In the <span class="is-family-monospace">settings.ini</span>
+    configuration file. The default setting for UPnP is true. It is recommended to set this to false.
+    Reason being that routers commonly will not automatically forward ports correctly to a virtual machine
+    on your network.
+  </p>
+  <pre class="pre"># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules. The server will fall back to default ports if this fails
+UPnP=false</pre>
+</div>
+
+<div class="content">
+  <h3 class="title is-4">Memory Allocations</h3>
+  <p>
+    ZomBox is a <a href="https://www.virtualbox.org" target="_blank">VirtualBox</a> virtual machine application.
+    You can configure how much of your real machine memory and CPU the virtual machine is allowed to use.
+    To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
+  </p>
+  <figure><img src="/instructions/vb_main.png" alt="VirtualBox Main" /></figure>
+  <p>
+    Select the <span class="has-text-weight-bold">System</span> section on the left panel,
+    then the <span class="has-text-weight-bold">Motherboard</span> tab.
+    By default 9Gb of memory is allocated to ZomBox. This value should not be more
+    than how much free memory your real machine has.
+  </p>
+  <figure><img src="/instructions/vb_sysmem.png" alt="ZomBox Memory" /></figure>
+  <p>
+    On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much CPU is allowed.
+  </p>
+  <figure><img src="/instructions/vb_syscpu.png" alt="ZomBox CPU" /></figure>
+  <p>
+    The Project Zomboid server that runs inside ZomBox also as a memory allocation.
+    You can find this in the <span class="is-family-monospace">ProjectZomboid64.json</span> file.
+    Find the <span class="has-text-weight-bold">-Xmx</span>
+    argument under <span class="has-text-weight-bold">vmArgs</span>.
+    By default 8Gb is allocated. You can adjust as needed.
+    As a general rule, the memory required is 2Gb + 500Mb per player.
+    Whatever value is set, the ZomBox memory allocation should be 1Gb more.
+  </p>
+  <pre class="pre">"vmArgs": [
+    "-Djava.awt.headless=true",
+    "-Xmx8g",
+    "-Dzomboid.steam=1",
+    "-Dzomboid.znetlog=1",
+    "-Djava.library.path=linux64/:natives/",
+    "-Djava.security.egd=file:/dev/urandom",
+    "-XX:+UseZGC",
+    "-XX:-OmitStackTraceInFastThrow"
+]</pre>
+</div>
+
+<hr />
 
 
 <style>
@@ -523,5 +613,10 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 
   .pre {
     margin: 0em 2.3em;
+  }
+
+  .table {
+    margin: 0em 1.5em;
+    width: 90%;
   }
 </style>

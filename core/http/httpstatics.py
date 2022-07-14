@@ -90,11 +90,11 @@ class _Resource:
         if not self._content_type.allow_compress():
             self._compressed = False
             return False
-        compressed = gzip.compress(self._data)
-        if len(self._data) < len(compressed):
+        data = gzip.compress(self._data)
+        if len(self._data) < len(data):
             self._compressed = False
         else:
-            self._data = compressed
+            self._data = data
             self._compressed = True
         return self._compressed
 
@@ -137,7 +137,8 @@ CONTENT_TYPES = {
     'html': _ContentType('text/html'),
     'xml': _ContentType('application/xml'),
     'css': _ContentType('text/css'),
-    'js': _ContentType('text/javascript'),
+    'js': _ContentType('application/javascript'),
+    'ts': _ContentType('application/typescript'),
     'svg': _ContentType('image/svg+xml'),
     'ico': _ContentType('image/x-icon', False),
     'gif': _ContentType('image/gif', False, False),
