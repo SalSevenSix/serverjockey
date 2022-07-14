@@ -261,7 +261,7 @@ $JOCKEY_EXE --host "$HOST" --port "$PORT" \
     --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
     --home "$HOME_DIR" > /dev/null 2>&1 &
 wait_file "$CLIENT_CONF" 5
-jq -r ".SERVER_TOKEN" $CLIENT_CONF > $HOME_DIR/token.text
+jq -r ".SERVER_TOKEN" $CLIENT_CONF > /tmp/token.text
 
 echo "STARTING ServerLink discord bot."
 cd "$DISCORD_DIR" || exit 1
