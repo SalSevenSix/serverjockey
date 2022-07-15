@@ -1,7 +1,7 @@
 from core.util import aggtrf, util
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httpsubs, httpext
+from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, shell
 from core.system import svrext
 
@@ -45,9 +45,9 @@ class Deployment:
             msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
             completed_filter=msgftr.DataStrContains('Archive created'),
             aggregator=aggtrf.StrJoin('\n'))
-        httpext.ResourceBuilder(resource) \
+        httprsc.ResourceBuilder(resource) \
             .push('deployment', httpext.DirectoryListHandler(self._home_dir)) \
-            .append('{filename}', httpext.DirectoryStreamHandler(self._home_dir, protected=True)) \
+            .append('{/}', httpext.DirectoryStreamHandler(self._home_dir, protected=True)) \
             .append('install-runtime', _InstallRuntimeHandler(self._mailer, self._runtime_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST, {'path': self._runtime_dir}, archive_selector)) \

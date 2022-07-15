@@ -1,7 +1,7 @@
 from core.util import aggtrf
 from core.msg import msgabc, msgext, msgtrf
 from core.context import contextsvc
-from core.http import httpabc, httpext, httpsubs
+from core.http import httpabc, httprsc, httpsubs
 from core.proc import proch
 from core.system import svrabc, svrsvc, svrext
 from servers.projectzomboid import deployment as dep, playerstore as pls, console as con, messaging as msg
@@ -26,7 +26,7 @@ class Server(svrabc.Server):
     def resources(self, resource: httpabc.Resource):
         self._deployment.resources(resource)
         self._console.resources(resource)
-        httpext.ResourceBuilder(resource) \
+        httprsc.ResourceBuilder(resource) \
             .push('server', svrext.ServerStatusHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', svrext.ServerCommandHandler(self._context)) \

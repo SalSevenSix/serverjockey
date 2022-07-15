@@ -1,6 +1,6 @@
 from core.util import cmdutil, util
 from core.msg import msgabc
-from core.http import httpabc, httpext
+from core.http import httpabc, httprsc
 from core.proc import proch, prcext
 from servers.projectzomboid import playerstore as pls, domain as dom
 
@@ -11,7 +11,7 @@ class Console:
         self._mailer = mailer
 
     def resources(self, resource: httpabc.Resource):
-        httpext.ResourceBuilder(resource) \
+        httprsc.ResourceBuilder(resource) \
             .push('world') \
             .append('{command}', _WorldCommandHandler(self._mailer)) \
             .pop() \

@@ -12,6 +12,9 @@ from functools import partial, wraps
 from collections.abc import Iterable
 
 
+DEFAULT_CHUNK_SIZE = 10240
+
+
 def _wrap(func):
     @wraps(func)
     async def run(*args, loop=None, executor=None, **kwargs):
@@ -309,7 +312,7 @@ async def copy_file(source_file: str, target_file: str):
     await write_file(target_file, data, text=False)
 
 
-async def stream_write_file(stream, filename: str, chunk_size: int = 10240):
+async def stream_write_file(stream, filename: str, chunk_size: int = DEFAULT_CHUNK_SIZE):
     async with aiofiles.open(filename, mode='wb') as file:
         pumping = True
         while pumping:
@@ -319,7 +322,7 @@ async def stream_write_file(stream, filename: str, chunk_size: int = 10240):
                 await file.write(chunk)
 
 
-async def copy_bytes(source, target, chunk_size: int = 10240):
+async def copy_bytes(source, target, chunk_size: int = DEFAULT_CHUNK_SIZE):
     pumping = True
     while pumping:
         chunk = await source.read(chunk_size)

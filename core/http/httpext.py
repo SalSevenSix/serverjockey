@@ -1,63 +1,10 @@
-from __future__ import annotations
 import asyncio
-import logging
 import typing
 import re
 import aiofiles
 from core.util import util, tasks
 from core.msg import msgabc, msgext, msgftr
-from core.http import httpabc, httpsvc, httpsubs
-
-
-class ResourceBuilder:
-
-    def __init__(self, resource: httpabc.Resource):
-        self._current = resource
-
-    def push(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
-        name, kind = ResourceBuilder._unpack(signature)
-        resource = self._current.child(name)
-        if resource is None:
-            resource = httpsvc.WebResource(name, kind, handler)
-        self._current.append(resource)
-        self._current = resource
-        ResourceBuilder._log_binding(resource, handler)
-        return self
-
-    def pop(self) -> ResourceBuilder:
-        parent = self._current.parent()
-        if not parent:
-            raise Exception('Cannot pop() root')
-        self._current = parent
-        return self
-
-    def append(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
-        name, kind = ResourceBuilder._unpack(signature)
-        resource = httpsvc.WebResource(name, kind, handler)
-        self._current.append(resource)
-        ResourceBuilder._log_binding(resource, handler)
-        return self
-
-    @staticmethod
-    def _unpack(signature: str) -> typing.Tuple[str, httpabc.ResourceKind]:
-        if signature.endswith('}'):
-            if signature.startswith('{'):
-                return signature[1:-1], httpabc.ResourceKind.ARG
-            if signature.startswith('x{'):
-                return signature[2:-1], httpabc.ResourceKind.ARG_ENCODED
-        return signature, httpabc.ResourceKind.PATH
-
-    @staticmethod
-    def _log_binding(resource: httpabc.Resource, handler: typing.Optional[httpabc.ABC_HANDLER]):
-        if handler is None:
-            return
-        allows = ''
-        if resource.allows(httpabc.Method.GET):
-            allows += httpabc.Method.GET.value
-        if resource.allows(httpabc.Method.POST):
-            allows += '|' if allows else ''
-            allows += httpabc.Method.POST.value
-        logging.debug('trs> BIND {} {} => {}'.format(resource.path(), allows, util.obj_to_str(handler)))
+from core.http import httpabc, httpsubs
 
 
 class NoopPostHandler(httpabc.PostHandler):
@@ -105,15 +52,6 @@ class MessengerHandler(httpabc.AsyncPostHandler):
         if result is True:
             return httpabc.ResponseBody.NO_CONTENT
         return result
-
-
-class DirectoryListHandler(httpabc.AsyncGetHandler):
-
-    def __init__(self, path: str):
-        self._path = path
-
-    async def handle_get(self, resource, data):
-        return await util.directory_list_dict(self._path, resource.path())
 
 
 class MessengerFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
@@ -210,6 +148,15 @@ class FileStreamHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
     async def handle_post(self, resource, data):
         await util.stream_write_file(data['body'], self._filename)
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class DirectoryListHandler(httpabc.AsyncGetHandler):
+
+    def __init__(self, root: str):
+        self._root = root
+
+    async def handle_get(self, resource, data):
+        return await util.directory_list_dict(self._root, data['baseurl'] + resource.path())
 
 
 class DirectoryStreamHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):

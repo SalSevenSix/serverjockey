@@ -1,5 +1,5 @@
 from core.context import contextsvc
-from core.http import httpabc, httpsubs, httpext
+from core.http import httpabc, httpsubs, httprsc, httpext
 from core.msg import msgext, msgftr, msgtrf
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
@@ -27,7 +27,7 @@ class Server(svrabc.Server):
             msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
-        httpext.ResourceBuilder(resource) \
+        httprsc.ResourceBuilder(resource) \
             .push('server', svrext.ServerStatusHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', svrext.ServerCommandHandler(self._context)) \

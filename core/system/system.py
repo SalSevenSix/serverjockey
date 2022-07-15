@@ -7,7 +7,7 @@ import uuid
 from core.util import util, signals
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httpsvc, httpext
+from core.http import httpabc, httprsc, httpext
 from core.system import svrabc, svrsvc, svrext
 
 
@@ -21,8 +21,8 @@ class SystemService:
         self._home_dir = context.config('home')
         self._clientfile = svrext.ClientFile(
             context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
-        self._resource = httpsvc.WebResource()
-        httpext.ResourceBuilder(self._resource) \
+        self._resource = httprsc.WebResource()
+        httprsc.ResourceBuilder(self._resource) \
             .push('system') \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
@@ -91,7 +91,7 @@ class SystemService:
             subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
         server = self._create_server(subcontext)
         await server.initialise()
-        resource = httpsvc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))
+        resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))
         self._instances.append(resource)
         server.resources(resource)
         svrsvc.ServerService(subcontext, server).start()

@@ -2,12 +2,6 @@ import asyncio
 from core.msg import msgsvc, msgext, msgftr
 
 
-def test():
-    asyncio.run(test_mailer())
-    asyncio.run(test_multicastmailer())
-    asyncio.run(test_catching())
-
-
 async def send_test_messages(mailer):
     mailer.post('test-message', 'mot')
     mailer.post('test-message', 'hai')
@@ -47,3 +41,9 @@ async def test_catching():
     await test_messages
     assert message.name() == 'bon'
     await mailer.stop()
+
+
+if __name__ == '__main__':
+    asyncio.run(test_mailer())
+    asyncio.run(test_multicastmailer())
+    asyncio.run(test_catching())
