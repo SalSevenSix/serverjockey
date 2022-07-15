@@ -18,7 +18,7 @@ wget "https://github.com/SalSevenSix/$SERVERJOCKEY/archive/refs/heads/$BRANCH.zi
 [ $? -eq 0 ] || exit 1
 
 echo "Unpacking zip"
-unzip "$BRANCH.zip"
+unzip "$BRANCH.zip" > /dev/null 2>&1
 [ $? -eq 0 ] || exit 1
 mv "$SERVERJOCKEY-$BRANCH" "$SERVERJOCKEY"
 [ $? -eq 0 ] || exit 1
@@ -48,7 +48,7 @@ cp -r $SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages/* "$SERVERJOCKEY_DIR"
 [ $? -eq 0 ] || exit 1
 
 echo "Removing Serverjockey junk"
-rm -rf .venv client test *.sh .gitignore > /dev/null 2>&1
+rm -rf .venv bin client test *.sh README.md .gitignore > /dev/null 2>&1
 
 echo "Building Serverjockey zipapp"
 cd $HOME_DIR || exit 1
