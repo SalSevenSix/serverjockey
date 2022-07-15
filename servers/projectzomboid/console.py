@@ -110,7 +110,6 @@ class _PlayersHandler(httpabc.AsyncGetHandler):
 
 
 class _PlayerCommandHandler(httpabc.AsyncPostHandler):
-    # LEVELS = ('admin', 'moderator', 'overseer', 'gm', 'observer', 'none')
     COMMANDS = cmdutil.CommandLines({
         'set-access-level': 'setaccesslevel "{player}" "{level}"',
         'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],

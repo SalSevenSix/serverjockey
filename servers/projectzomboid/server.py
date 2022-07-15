@@ -34,7 +34,8 @@ class Server(svrabc.Server):
             .push('players') \
             .append('subscribe', self._httpsubs.handler(pls.PLAYER_EVENT_FILTER, msgtrf.DataAsDict())) \
             .pop() \
-            .push('log', _ConsoleLogHandler(self._context)) \
+            .push('log') \
+            .append('tail', _ConsoleLogHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .push(self._httpsubs.resource(resource, 'subscriptions')) \

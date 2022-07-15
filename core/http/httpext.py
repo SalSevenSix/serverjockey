@@ -114,20 +114,20 @@ class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
 class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, filename: str, protected: bool = False, text: bool = True):
+    def __init__(self, filename: str, protected: bool = False, is_text: bool = True):
         self._filename = filename
         self._protected = protected
-        self._text = text
+        self._is_text = is_text
 
     async def handle_get(self, resource, data):
         if self._protected and not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         if not await util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
-        return await util.read_file(self._filename, self._text)
+        return await util.read_file(self._filename, self._is_text)
 
     async def handle_post(self, resource, data):
-        await util.write_file(self._filename, data['body'], self._text)
+        await util.write_file(self._filename, data['body'], self._is_text)
         return httpabc.ResponseBody.NO_CONTENT
 
 
@@ -150,42 +150,41 @@ class FileStreamHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class DirectoryListHandler(httpabc.AsyncGetHandler):
+class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, root: str):
+    def __init__(self, root: str, tail: str = None, protected: bool = False):
         self._root = root
-
-    async def handle_get(self, resource, data):
-        return await util.directory_list_dict(self._root, data['baseurl'] + resource.path())
-
-
-class DirectoryStreamHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
-
-    def __init__(self, directory: str, protected: bool = False):
-        self._directory = directory
+        self._tail = tail
         self._protected = protected
 
     async def handle_get(self, resource, data):
         if self._protected and not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        filename = util.get('filename', data)
-        if filename is None:
-            return httpabc.ResponseBody.BAD_REQUEST
-        path = self._directory + '/' + filename
-        if not await util.file_exists(path):
-            return httpabc.ResponseBody.NOT_FOUND
-        return _FileByteStream(filename, path)
+        if self._tail is None:
+            if not await util.directory_exists(self._root):
+                return httpabc.ResponseBody.NOT_FOUND
+            return await util.directory_list_dict(self._root, data['baseurl'] + resource.path(data))
+        path = self._root + '/' + util.get(self._tail, data)
+        if await util.file_exists(path):
+            return _FileByteStream(path.split('/')[-1], path)
+        if await util.directory_exists(path):
+            return await util.directory_list_dict(path, data['baseurl'] + resource.path(data))
+        return httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):
-        filename, body = util.get('filename', data), util.get('body', data)
-        if filename is None:
+        if self._tail is None:
             return httpabc.ResponseBody.BAD_REQUEST
-        if body and not isinstance(body, httpabc.ByteStream):
-            return httpabc.ResponseBody.BAD_REQUEST
-        path = self._directory + '/' + filename
+        path = self._root + '/' + util.get(self._tail, data)
+        body = util.get('body', data)
         if body is None:
-            await util.delete_file(path)
+            if await util.file_exists(path):
+                await util.delete_file(path)
             return httpabc.ResponseBody.NO_CONTENT
+        if not isinstance(body, httpabc.ByteStream):
+            return httpabc.ResponseBody.BAD_REQUEST
+        if await util.directory_exists(path):
+            return httpabc.ResponseBody.BAD_REQUEST
+        # TODO check leaf directory exists
         await util.stream_write_file(body, path)
         return httpabc.ResponseBody.NO_CONTENT
 

@@ -236,16 +236,19 @@ async def directory_list_dict(path: str, base: str = '') -> typing.List[typing.D
         base += '/'
     result = []
     for name in iter(await _listdir(path)):
-        file = path + name
-        ftype = 'unknown'
+        file, ftype, size, entry = path + name, 'unknown', -1, {}
         if await _islinkfile(file):
             ftype = 'link'
         elif await aioos.path.isfile(file):
             ftype = 'file'
+            size = await file_size(file)
         elif await aioos.path.isdir(file):
             ftype = 'directory'
         updated = time.ctime(await aioos.path.getmtime(file))
-        result.append({'type': ftype, 'name': base + name, 'updated': updated})
+        entry.update({'type': ftype, 'name': base + name, 'updated': updated})
+        if size > -1:
+            entry.update({'size': size})
+        result.append(entry)
     return result
 
 

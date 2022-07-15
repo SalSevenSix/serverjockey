@@ -20,6 +20,8 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._playerdb_dir = self._world_dir + '/db'
         self._playerdb_file = self._playerdb_dir + '/' + self._world_name + '.db'
+        self._console_log = self._world_dir + '/server-console.txt'
+        self._logs_dir = self._world_dir + '/Logs'
         self._config_dir = self._world_dir + '/Server'
         self._save_dir = self._world_dir + '/Saves'
 
@@ -46,8 +48,7 @@ class Deployment:
             completed_filter=msgftr.DataStrContains('Archive created'),
             aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
-            .push('deployment', httpext.DirectoryListHandler(self._home_dir)) \
-            .append('{/}', httpext.DirectoryStreamHandler(self._home_dir, protected=True)) \
+            .push('deployment') \
             .append('install-runtime', _InstallRuntimeHandler(self._mailer, self._runtime_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST, {'path': self._runtime_dir}, archive_selector)) \
@@ -62,7 +63,11 @@ class Deployment:
             .append('wipe-world-save', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
             .pop() \
-            .push('config') \
+            .append('log', httpext.FileStreamHandler(self._console_log, protected=True)) \
+            .push('logs', httpext.FileSystemHandler(self._logs_dir, protected=True)) \
+            .append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path', protected=True)) \
+            .pop() \
+            .push('config', ) \
             .append('jvm', httpext.MessengerFileHandler(self._mailer, self._jvm_config_file)) \
             .append('db', httpext.FileStreamHandler(self._playerdb_file, protected=True)) \
             .append('ini', httpext.MessengerConfigHandler(

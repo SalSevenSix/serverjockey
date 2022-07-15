@@ -544,7 +544,7 @@ class HandlerProjectZomboid {
   }
 
   log() {
-    this.#message.channel.send(this.#httptool.baseurl + '/log');
+    this.#message.channel.send(this.#httptool.baseurl + '/log/tail');
   }
 
   world() {

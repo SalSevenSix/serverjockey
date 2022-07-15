@@ -38,13 +38,13 @@ class Server(svrabc.Server):
 
     async def run(self):
         await self._clientfile.write()
-        await self._server_process_factory.build().run()
-
-    async def stop(self):
         try:
-            self._process_subscriber.terminate_process()
+            await self._server_process_factory.build().run()
         finally:
             await self._clientfile.delete()
+
+    async def stop(self):
+        self._process_subscriber.terminate_process()
 
 
 class _ServerProcessFactory:
