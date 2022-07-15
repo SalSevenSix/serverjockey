@@ -64,6 +64,13 @@ class ResourceKind(enum.Enum):
     PATH = enum.auto()
     ARG = enum.auto()
     ARG_ENCODED = enum.auto()
+    ARG_TAIL = enum.auto()
+
+    def is_path(self) -> bool:
+        return self is ResourceKind.PATH
+
+    def is_arg(self) -> bool:
+        return self in (ResourceKind.ARG, ResourceKind.ARG_ENCODED, ResourceKind.ARG_TAIL)
 
 
 class ResponseBody:
