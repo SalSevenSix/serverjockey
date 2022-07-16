@@ -229,11 +229,9 @@ async def file_size(file: str) -> int:
     return stats.st_size
 
 
-async def directory_list_dict(path: str, base: str = '') -> typing.List[typing.Dict[str, str]]:
+async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typing.Dict[str, str]]:
     if not path.endswith('/'):
         path += '/'
-    if base and not base.endswith('/'):
-        base += '/'
     result = []
     for name in iter(await _listdir(path)):
         file, ftype, size, entry = path + name, 'unknown', -1, {}
@@ -245,9 +243,11 @@ async def directory_list_dict(path: str, base: str = '') -> typing.List[typing.D
         elif await aioos.path.isdir(file):
             ftype = 'directory'
         updated = time.ctime(await aioos.path.getmtime(file))
-        entry.update({'type': ftype, 'name': base + name, 'updated': updated})
+        entry.update({'type': ftype, 'name': name, 'updated': updated})
         if size > -1:
             entry.update({'size': size})
+        if baseurl:
+            entry.update({'url': baseurl + '/' + name})
         result.append(entry)
     return result
 
@@ -295,19 +295,13 @@ async def delete_file(file: str):
 async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
     # noinspection PyTypeChecker
     async with aiofiles.open(file=filename, mode='r' if text else 'rb') as file:
-        try:
-            return await file.read()
-        finally:
-            await silently_cleanup(file)
+        return await file.read()
 
 
 async def write_file(filename: str, data: typing.Union[str, bytes], text: bool = True):
     # noinspection PyTypeChecker
     async with aiofiles.open(filename, mode='w' if text else 'wb') as file:
-        try:
-            await file.write(data)
-        finally:
-            await silently_cleanup(file)
+        await file.write(data)
 
 
 async def copy_file(source_file: str, target_file: str):
@@ -315,14 +309,10 @@ async def copy_file(source_file: str, target_file: str):
     await write_file(target_file, data, text=False)
 
 
-async def stream_write_file(stream, filename: str, chunk_size: int = DEFAULT_CHUNK_SIZE):
+# TODO no stream type defined
+async def stream_write_file(filename: str, stream, chunk_size: int = DEFAULT_CHUNK_SIZE):
     async with aiofiles.open(filename, mode='wb') as file:
-        pumping = True
-        while pumping:
-            chunk = await stream.read(chunk_size)
-            pumping = chunk is not None and chunk != b''
-            if pumping:
-                await file.write(chunk)
+        await copy_bytes(stream, file, chunk_size)
 
 
 async def copy_bytes(source, target, chunk_size: int = DEFAULT_CHUNK_SIZE):

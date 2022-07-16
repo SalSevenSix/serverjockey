@@ -8,25 +8,18 @@ from core.util import util
 
 
 SECURE = '_SECURE'
-
-REQUEST = 'REQUEST'
-RESPONSE = 'RESPONSE'
-UTF8 = 'UTF-8'
-GZIP = 'gzip'
-CHARSET_STRING = ';charset='
-TEXT_PLAIN = 'text/plain'
-TEXT_PLAIN_UTF8 = TEXT_PLAIN + CHARSET_STRING + UTF8
-APPLICATION_JSON = 'application/json'
-APPLICATION_BIN = 'application/octet-stream'
-ACCEPTED_MIME_TYPES = (TEXT_PLAIN, APPLICATION_JSON, APPLICATION_BIN)
+X_SECRET = 'X-Secret'
 
 HOST = 'Host'
 ORIGIN = 'Origin'
 CONTENT_TYPE = 'Content-Type'
+UTF8 = 'UTF-8'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
+GZIP = 'gzip'
 CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'
+CACHE_CONTROL_NO_CACHE = 'no-cache'
 CACHE_CONTROL_MAXIMUM = 'max-age=315360000'
 ACCEPT_ENCODING = 'Accept-Encoding'
 ALLOW = 'Allow'
@@ -34,7 +27,6 @@ ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
 ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
 WEBDEV_ORIGIN = 'http://localhost:3000'
-X_SECRET = 'X-Secret'
 
 
 def make_secure(data: ABC_DATA_GET):
@@ -85,6 +77,10 @@ class ResponseBody:
 class ByteStream(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def name(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def content_type(self) -> ContentType:
         pass
 
     @abc.abstractmethod
@@ -188,6 +184,71 @@ class HttpServiceCallbacks(metaclass=abc.ABCMeta):
 ABC_HANDLER = typing.Union[GetHandler, AsyncGetHandler, PostHandler, AsyncPostHandler]
 
 
+class ContentType:
+    def __init__(self, content_type: str):
+        self._content_type = content_type
+        self._mime_type, self._encoding = ContentType._parse(content_type)
+        self._text_type = self._mime_type in _TEXT_TYPES or self._encoding
+
+    @staticmethod
+    def lookup(path: str) -> ContentType:
+        return util.get(path.split('.')[-1], _CONTENT_TYPES, CONTENT_TYPE_APPLICATION_BIN)
+
+    def content_type(self) -> str:
+        return self._content_type
+
+    def mime_type(self) -> str:
+        return self._mime_type
+
+    def encoding(self) -> str:
+        return self._encoding
+
+    def is_text_type(self) -> bool:
+        return self._text_type
+
+    @staticmethod
+    def _parse(content_type: str) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
+        result = content_type.replace(' ', '').split(_CHARSET.replace(' ', ''))
+        if len(result) == 1:
+            return result[0], None
+        return result[0], result[1]
+
+
+MIME_TEXT_PLAIN = 'text/plain'
+MIME_APPLICATION_JSON = 'application/json'
+MIME_APPLICATION_BIN = 'application/octet-stream'
+_TEXT_TYPES = (MIME_TEXT_PLAIN, MIME_APPLICATION_JSON, 'text/html', 'application/xml',
+               'text/css', 'application/javascript', 'application/typescript',
+               'image/svg+xml')
+_CHARSET = '; charset='
+CONTENT_TYPE_TEXT_PLAIN = ContentType(MIME_TEXT_PLAIN)
+CONTENT_TYPE_TEXT_PLAIN_UTF8 = ContentType(MIME_TEXT_PLAIN + _CHARSET + UTF8)
+CONTENT_TYPE_APPLICATION_JSON = ContentType(MIME_APPLICATION_JSON)
+CONTENT_TYPE_APPLICATION_BIN = ContentType(MIME_APPLICATION_BIN)
+_CONTENT_TYPES = {
+    'txt': CONTENT_TYPE_TEXT_PLAIN,
+    'text': CONTENT_TYPE_TEXT_PLAIN,
+    'log': CONTENT_TYPE_TEXT_PLAIN,
+    'lua': CONTENT_TYPE_TEXT_PLAIN,
+    'json': CONTENT_TYPE_APPLICATION_JSON,
+    'html': ContentType('text/html'),
+    'xml': ContentType('application/xml'),
+    'css': ContentType('text/css'),
+    'js': ContentType('application/javascript'),
+    'ts': ContentType('application/typescript'),
+    'svg': ContentType('image/svg+xml'),
+    'ico': ContentType('image/x-icon'),
+    'gif': ContentType('image/gif'),
+    'jpg': ContentType('image/jpeg'),
+    'jpeg': ContentType('image/jpeg'),
+    'png': ContentType('image/png'),
+    'webp': ContentType('image/webp'),
+    'woff': ContentType('font/woff'),
+    'woff2': ContentType('font/woff2'),
+    'zip': ContentType('application/zip')
+}
+
+
 # TODO doesn't belong here
 class HeadersTool:
 
@@ -203,18 +264,12 @@ class HeadersTool:
 
     def get_content_length(self) -> int:
         content_length = self.get(CONTENT_LENGTH)
-        return None if content_length is None else int(content_length)
+        return int(content_length) if content_length else None
 
-    def get_content_type(self) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
+    def get_content_type(self) -> typing.Optional[ContentType]:
         content_type = self.get(CONTENT_TYPE)
-        if content_type is None:
-            return None, None
-        content_type = str(content_type).replace(' ', '')
-        result = str(content_type).split(CHARSET_STRING)
-        if len(result) == 1:
-            return result[0], None
-        return result[0], result[1]
+        return ContentType(content_type) if content_type else None
 
     def accepts_encoding(self, encoding) -> bool:
         accepts = self.get(ACCEPT_ENCODING)
-        return accepts is not None and accepts.find(encoding) != -1
+        return accepts and accepts.find(encoding) != -1

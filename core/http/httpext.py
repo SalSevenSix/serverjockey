@@ -54,49 +54,27 @@ class MessengerHandler(httpabc.AsyncPostHandler):
         return result
 
 
-class MessengerFileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, filename: str, protected: bool = False, text: bool = True):
+    def __init__(self, mailer: msgabc.MulticastMailer, filename: str,
+                 protection: typing.Union[bool, typing.Collection[str]] = False):
         self._mailer = mailer
         self._filename = filename
-        self._protected = protected
-        self._text = text
+        self._protected = protection if isinstance(protection, bool) else False
+        self._patterns = [] if isinstance(protection, bool) else [re.compile(r) for r in protection]
 
     async def handle_get(self, resource, data):
         if self._protected and not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         if not await util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
-        result = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename, self._text)
-        if isinstance(result, Exception):
-            return {'error': str(result)}
-        return result
-
-    async def handle_post(self, resource, data):
-        result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, data['body'], self._text)
-        if isinstance(result, Exception):
-            return {'error': str(result)}
-        return httpabc.ResponseBody.NO_CONTENT
-
-
-class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer, filename: str, excludes: typing.Collection[str]):
-        self._mailer = mailer
-        self._filename = filename
-        self._patterns = [re.compile(r) for r in excludes]
-
-    async def handle_get(self, resource, data):
-        if not await util.file_exists(self._filename):
-            return httpabc.ResponseBody.NOT_FOUND
-        file = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename)
-        if isinstance(file, Exception):
-            return {'error': str(file)}
-        if httpabc.is_secure(data):
-            return file
-        file = file.split('\n')
+        content = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename)
+        if isinstance(content, Exception):
+            return {'error': str(content)}
+        if len(self._patterns) == 0:
+            return content
         result = []
-        for line in iter(file):
+        for line in iter(content.split('\n')):
             exclude = False
             for pattern in iter(self._patterns):
                 if pattern.match(line) is not None:
@@ -106,100 +84,68 @@ class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         return '\n'.join(result)
 
     async def handle_post(self, resource, data):
-        result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, data['body'])
+        body = util.get('body', data)
+        if not isinstance(body, str):
+            return httpabc.ResponseBody.BAD_REQUEST
+        result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, body)
         if isinstance(result, Exception):
             return {'error': str(result)}
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class FileHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
-
-    def __init__(self, filename: str, protected: bool = False, is_text: bool = True):
-        self._filename = filename
-        self._protected = protected
-        self._is_text = is_text
-
-    async def handle_get(self, resource, data):
-        if self._protected and not httpabc.is_secure(data):
-            return httpabc.ResponseBody.UNAUTHORISED
-        if not await util.file_exists(self._filename):
-            return httpabc.ResponseBody.NOT_FOUND
-        return await util.read_file(self._filename, self._is_text)
-
-    async def handle_post(self, resource, data):
-        await util.write_file(self._filename, data['body'], self._is_text)
-        return httpabc.ResponseBody.NO_CONTENT
-
-
-class FileStreamHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
-
-    def __init__(self, filename: str, protected: bool = False):
-        self._name = filename.split('/')[-1]
-        self._filename = filename
-        self._protected = protected
-
-    async def handle_get(self, resource, data):
-        if self._protected and not httpabc.is_secure(data):
-            return httpabc.ResponseBody.UNAUTHORISED
-        if not await util.file_exists(self._filename):
-            return httpabc.ResponseBody.NOT_FOUND
-        return _FileByteStream(self._name, self._filename)
-
-    async def handle_post(self, resource, data):
-        await util.stream_write_file(data['body'], self._filename)
-        return httpabc.ResponseBody.NO_CONTENT
-
-
 class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
 
-    def __init__(self, root: str, tail: str = None, protected: bool = False):
-        self._root = root
+    def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True):
+        self._path = path
         self._tail = tail
         self._protected = protected
 
     async def handle_get(self, resource, data):
         if self._protected and not httpabc.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        if self._tail is None:
-            if not await util.directory_exists(self._root):
-                return httpabc.ResponseBody.NOT_FOUND
-            return await util.directory_list_dict(self._root, data['baseurl'] + resource.path(data))
-        path = self._root + '/' + util.get(self._tail, data)
+        path = self._path + '/' + data[self._tail] if self._tail else self._path
         if await util.file_exists(path):
-            return _FileByteStream(path.split('/')[-1], path)
+            content_type = httpabc.ContentType.lookup(path)
+            size = await util.file_size(path)
+            if content_type.is_text_type() and size < 1048576:
+                return await util.read_file(path)
+            return _FileByteStream(path)
         if await util.directory_exists(path):
             return await util.directory_list_dict(path, data['baseurl'] + resource.path(data))
         return httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):
-        if self._tail is None:
-            return httpabc.ResponseBody.BAD_REQUEST
-        path = self._root + '/' + util.get(self._tail, data)
         body = util.get('body', data)
-        if body is None:
-            if await util.file_exists(path):
-                await util.delete_file(path)
-            return httpabc.ResponseBody.NO_CONTENT
-        if not isinstance(body, httpabc.ByteStream):
+        if not body:
             return httpabc.ResponseBody.BAD_REQUEST
+        path = self._path + '/' + data[self._tail] if self._tail else self._path
         if await util.directory_exists(path):
             return httpabc.ResponseBody.BAD_REQUEST
         # TODO check leaf directory exists
-        await util.stream_write_file(body, path)
-        return httpabc.ResponseBody.NO_CONTENT
+        if isinstance(body, str):
+            await util.write_file(path, body)
+            return httpabc.ResponseBody.NO_CONTENT
+        if isinstance(body, httpabc.ByteStream):
+            await util.stream_write_file(path, body)
+            return httpabc.ResponseBody.NO_CONTENT
+        return httpabc.ResponseBody.BAD_REQUEST
 
 
 class _FileByteStream(httpabc.ByteStream):
 
-    def __init__(self, name: str, filename: str):
-        self._name = name
+    def __init__(self, filename: str):
+        self._name = filename.split('/')[-1]
         self._filename = filename
+        self._content_type = httpabc.ContentType.lookup(filename)
         self._queue = asyncio.Queue(maxsize=1)
         self._task = None
         self._length = -1
 
     def name(self) -> str:
         return self._name
+
+    def content_type(self) -> httpabc.ContentType:
+        return self._content_type
 
     async def content_length(self) -> int:
         return await util.file_size(self._filename)

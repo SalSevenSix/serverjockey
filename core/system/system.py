@@ -140,7 +140,10 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
         return self._system.instances_dict(util.get('baseurl', data, ''))
 
     async def handle_post(self, resource, data):
-        subcontext = await self._system.create_instance(data)
+        module, identity = util.get('module', data), util.get('identity', data)
+        if not module:
+            return httpabc.ResponseBody.BAD_REQUEST
+        subcontext = await self._system.create_instance({'module': module, 'identity': identity})
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
 
 

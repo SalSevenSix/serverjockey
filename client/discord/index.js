@@ -327,9 +327,7 @@ class MessageHttpTool {
         return response.json();
       })
       .then(function(json) {
-        if (json != null && json.hasOwnProperty('error')) {
-          throw new Error(json.error);
-        }
+        if (json != null && json.hasOwnProperty('error')) throw new Error(json.error);
         if (dataHandler == null) {
           message.react('✅');
         } else {

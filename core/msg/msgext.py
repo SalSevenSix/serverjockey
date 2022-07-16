@@ -284,21 +284,17 @@ class ReadWriteFileSubscriber(msgabc.AbcSubscriber):
     RESPONSE = 'ReadWriteFileSubscriber.Response'
 
     @staticmethod
-    async def read(mailer: msgabc.MulticastMailer, filename: str, text: bool = True):
+    async def read(mailer: msgabc.MulticastMailer, filename: str) -> str:
         messenger = SynchronousMessenger(mailer)
         response = await messenger.request(
-            util.obj_to_str(messenger),
-            ReadWriteFileSubscriber.READ,
-            {'filename': filename, 'text': text})
+            util.obj_to_str(messenger), ReadWriteFileSubscriber.READ, {'filename': filename})
         return response.data()
 
     @staticmethod
-    async def write(mailer: msgabc.MulticastMailer, filename: str, data: typing.Union[str, bytes], text: bool = True):
+    async def write(mailer: msgabc.MulticastMailer, filename: str, data: str) -> bool:
         messenger = SynchronousMessenger(mailer)
         response = await messenger.request(
-            util.obj_to_str(messenger),
-            ReadWriteFileSubscriber.WRITE,
-            {'filename': filename, 'data': data, 'text': text})
+            util.obj_to_str(messenger), ReadWriteFileSubscriber.WRITE, {'filename': filename, 'data': data})
         return response.data()
 
     def __init__(self, mailer: msgabc.Mailer):
@@ -308,10 +304,10 @@ class ReadWriteFileSubscriber(msgabc.AbcSubscriber):
     async def handle(self, message):
         source, name, data = message.source(), message.name(), message.data()
         if name is ReadWriteFileSubscriber.READ:
-            file = await util.read_file(data['filename'], text=util.get('text', data))
+            file = await util.read_file(data['filename'])
             self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, file, message)
         if name is ReadWriteFileSubscriber.WRITE:
-            await util.write_file(data['filename'], data['data'], text=util.get('text', data))
+            await util.write_file(data['filename'], data['data'])
             self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, True, message)
         return None
 

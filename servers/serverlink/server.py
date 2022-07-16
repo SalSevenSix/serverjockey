@@ -9,10 +9,11 @@ from core.util import util
 class Server(svrabc.Server):
 
     def __init__(self, context: contextsvc.Context):
+        home = context.config('home')
         self._context = context
-        self._log = self._context.config('home') + '/serverlink.log'
-        self._config = context.config('home') + '/serverlink.json'
-        self._clientfile = svrext.ClientFile(context, self._context.config('home') + '/serverjockey-client.json')
+        self._log = home + '/serverlink.log'
+        self._config = home + '/serverlink.json'
+        self._clientfile = svrext.ClientFile(context, home + '/serverjockey-client.json')
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._process_subscriber = prcext.ServerProcessSubscriber()
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
@@ -32,7 +33,7 @@ class Server(svrabc.Server):
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
-            .append('config', httpext.FileHandler(self._config, True)) \
+            .append('config', httpext.FileSystemHandler(self._config)) \
             .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 

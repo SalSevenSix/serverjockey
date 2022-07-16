@@ -63,18 +63,18 @@ class Deployment:
             .append('wipe-world-save', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
             .pop() \
-            .append('log', httpext.FileStreamHandler(self._console_log, protected=True)) \
-            .push('logs', httpext.FileSystemHandler(self._logs_dir, protected=True)) \
-            .append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path', protected=True)) \
+            .append('log', httpext.FileSystemHandler(self._console_log)) \
+            .push('logs', httpext.FileSystemHandler(self._logs_dir)) \
+            .append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path')) \
             .pop() \
             .push('config', ) \
-            .append('jvm', httpext.MessengerFileHandler(self._mailer, self._jvm_config_file)) \
-            .append('db', httpext.FileStreamHandler(self._playerdb_file, protected=True)) \
+            .append('jvm', httpext.MessengerConfigHandler(self._mailer, self._jvm_config_file)) \
+            .append('db', httpext.FileSystemHandler(self._playerdb_file)) \
             .append('ini', httpext.MessengerConfigHandler(
                 self._mailer, conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
-            .append('sandbox', httpext.MessengerFileHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
-            .append('spawnpoints', httpext.MessengerFileHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
-            .append('spawnregions', httpext.MessengerFileHandler(self._mailer, conf_pre + '_spawnregions.lua'))
+            .append('sandbox', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
+            .append('spawnpoints', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
+            .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua'))
 
     async def build_world(self):
         await util.create_directory(self._world_dir)
