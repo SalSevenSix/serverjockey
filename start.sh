@@ -257,7 +257,7 @@ echo "STARTING ServerJockey webservice."
 rm $CLIENT_CONF > /dev/null 2>&1
 cd "$JOCKEY_DIR" || exit 1
 [ -f $JOCKEY_EXE ] || JOCKEY_EXE="python3 -m pipenv run python3 -m core.system"
-$JOCKEY_EXE --host "$HOST" --port "$PORT" \
+$JOCKEY_EXE --debug --host "$HOST" --port "$PORT" \
     --logfile "$HOME_DIR/serverjockey.log" --clientfile "$CLIENT_CONF" \
     --home "$HOME_DIR" > /dev/null 2>&1 &
 wait_file "$CLIENT_CONF" 5

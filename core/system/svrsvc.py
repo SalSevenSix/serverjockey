@@ -114,8 +114,8 @@ class ServerService(msgabc.AbcSubscriber):
             await self._queue.join()
             return None
         if action in (ServerService.DELETE, ServerService.SHUTDOWN):
-            logging.debug('###> HANDLE for ' + repr(action))
             try:
+                logging.debug('###> HANDLE for ' + repr(action))
                 self._queue.put_nowait(_RunController(False, False, False))
                 if self._running:
                     logging.debug('###> HANDLE server stop')
@@ -132,7 +132,8 @@ class ServerService(msgabc.AbcSubscriber):
                     self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
                 return True
             except Exception as e:
-                logging.debug('###> HANDLE exception ' + repr(e))
+                logging.debug('###> HANDLE error ' + repr(e))
+                await asyncio.sleep(10)
                 return False
         return None
 
