@@ -121,8 +121,6 @@ class WebResource(httpabc.Resource):
     def allows(self, method: httpabc.Method) -> bool:
         if self._handler is None:
             return False
-        if method is httpabc.Method.OPTIONS:
-            return True
         if method is httpabc.Method.GET:
             return isinstance(self._handler, (httpabc.GetHandler, httpabc.AsyncGetHandler))
         if method is httpabc.Method.POST:

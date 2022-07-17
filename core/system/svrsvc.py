@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import typing
+import logging
 from core.util import tasks, util
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
@@ -71,24 +72,29 @@ class ServerService(msgabc.AbcSubscriber):
             if controller.daemon() and self._queue.qsize() == 0:
                 self._running = controller.call_run()
             else:
+                logging.debug('###> RUN wait queue')
                 controller.update(await self._queue.get())  # blocking
+                logging.debug('###> RUN wait queue end')
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
                 ServerStatus.notify_running(self._context, self, self._running)
                 start = util.now_millis()
                 try:
+                    logging.debug('###> RUN starting run')
                     await self._server.run()
                 except Exception as e:
                     ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                     ServerStatus.notify_details(self._context, self, {'error': repr(e)})
                 finally:
+                    logging.debug('###> RUN completed')
                     self._running = False
                     controller.check_uptime(util.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
 
     async def handle(self, message):
         action = message.name()
+        logging.debug('###> HANDLE start ' + repr(action))
         if not self._running and action is ServerService.DAEMON:
             self._queue.put_nowait(_RunController(True, True, True))
             await self._queue.join()
@@ -108,17 +114,26 @@ class ServerService(msgabc.AbcSubscriber):
             await self._queue.join()
             return None
         if action in (ServerService.DELETE, ServerService.SHUTDOWN):
-            self._queue.put_nowait(_RunController(False, False, False))
-            if self._running:
-                await self._server.stop()
-            await self._queue.join()
-            if self._task:
-                await self._task  # TODO consider timeout and cancel
-            if action is ServerService.DELETE:
-                self._context.post(self, ServerService.DELETE_ME, self._context)
-            if action is ServerService.SHUTDOWN:
-                self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
-            return True
+            logging.debug('###> HANDLE for ' + repr(action))
+            try:
+                self._queue.put_nowait(_RunController(False, False, False))
+                if self._running:
+                    logging.debug('###> HANDLE server stop')
+                    await self._server.stop()
+                logging.debug('###> HANDLE queue join')
+                await self._queue.join()
+                if self._task:
+                    logging.debug('###> HANDLE task join')
+                    await self._task  # TODO consider timeout and cancel
+                if action is ServerService.DELETE:
+                    self._context.post(self, ServerService.DELETE_ME, self._context)
+                if action is ServerService.SHUTDOWN:
+                    logging.debug('###> HANDLE responding to shutdown')
+                    self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
+                return True
+            except Exception as e:
+                logging.debug('###> HANDLE exception ' + repr(e))
+                return False
         return None
 
 

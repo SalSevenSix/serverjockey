@@ -66,11 +66,13 @@ class _RequestHandler:
             if self._method is httpabc.Method.GET:
                 return self._statics.handle(self._headers, self._request)
             raise err.HTTPNotFound
-        if not resource.allows(self._method):
-            # TODO fix allowed methods, since we now allow OPTIONS
-            raise err.HTTPMethodNotAllowed(
-                str(self._method),
-                httpabc.Method.GET.value if self._method is httpabc.Method.POST else httpabc.Method.POST.value)
+        if self._method is not httpabc.Method.OPTIONS and not resource.allows(self._method):
+            allowed = [httpabc.Method.OPTIONS.value]
+            if resource.allows(httpabc.Method.GET):
+                allowed.append(httpabc.Method.GET.value)
+            if resource.allows(httpabc.Method.POST):
+                allowed.append(httpabc.Method.POST.value)
+            raise err.HTTPMethodNotAllowed(str(self._method), allowed)
 
         # OPTIONS
         if self._method is httpabc.Method.OPTIONS:
