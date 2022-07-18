@@ -1,3 +1,4 @@
+import logging
 from core.util import aggtrf, util
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
@@ -102,6 +103,7 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
                 validate=util.get('validate', data)) \
             .include_softlink_steamclient_lib(self._path) \
             .build()
+        logging.debug(data['script'])
         if util.get('wipe', data):
             # Not checking is server is running but all that will change later
             await util.delete_directory(self._path)

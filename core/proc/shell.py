@@ -26,13 +26,13 @@ class Script:
     def include_find_steamcmd(self) -> Script:
         return self.include('include_find_steamcmd', (
             'find_steamcmd() {',
-            '  steamcmd +quit >/dev/null 2>&1 && echo steamcmd && return 0',
-            '  steamcmd.sh +quit >/dev/null 2>&1 && echo steamcmd.sh && return 0',
+            '  /usr/games/steamcmd +quit >/dev/null 2>&1 && echo /usr/games/steamcmd && return 0',
             '  ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0',
             '  echo steamcmd && return 1',
             '}'))
 
     def include_steamcmd_app_update(self, **kwargs: typing.Union[str, int, float]) -> Script:
+        self.include_find_steamcmd()
         line = ['$(find_steamcmd)',
                 '+force_install_dir {install_dir}',
                 '+login anonymous',
@@ -42,7 +42,6 @@ class Script:
         if util.get('validate', kwargs):
             line.append('validate')
         line.append('+quit')
-        self.include_find_steamcmd()
         return self.include('include_steamcmd_app_update', ' '.join(line).format(**kwargs))
 
     def include_softlink_steamclient_lib(self, directory: str) -> Script:
