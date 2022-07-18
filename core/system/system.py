@@ -43,7 +43,7 @@ class SystemService:
         return result
 
     async def initialise(self) -> SystemService:
-        ls = await util.directory_list_dict(self._home_dir)
+        autos, ls = [], await util.directory_list_dict(self._home_dir)
         for directory in iter([o for o in ls if o['type'] == 'directory']):
             identity = directory['name']
             config_file = self._home_dir + '/' + identity + '/instance.json'
@@ -51,8 +51,15 @@ class SystemService:
                 configuration = await util.read_file(config_file)
                 configuration = util.json_to_dict(configuration)
                 configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
-                await self._initialise_instance(configuration)
+                subcontext = await self._initialise_instance(configuration)
+                if subcontext.config('auto'):
+                    autos.append(subcontext)
         await self._clientfile.write()
+        for subcontext in iter(autos):
+            if subcontext.config('auto') == 'daemon':
+                svrsvc.ServerService.signal_daemon(subcontext, self)
+            if subcontext.config('auto') == 'start':
+                svrsvc.ServerService.signal_start(subcontext, self)
         return self
 
     async def shutdown(self):

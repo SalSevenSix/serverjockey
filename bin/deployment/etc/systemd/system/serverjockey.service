@@ -1,0 +1,12 @@
+[Unit]
+Description=ServerJockey game server management system
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=steam
+ExecStart=/home/steam/serverjockey/serverjockey.pyz --home "/home/steam/serverjockey" --logfile "serverjockey.log" --clientfile "serverjockey-client.json"
+
+[Install]
+WantedBy=multi-user.target

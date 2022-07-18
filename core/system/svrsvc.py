@@ -84,6 +84,7 @@ class ServerService(msgabc.AbcSubscriber):
                     logging.debug('###> RUN starting run')
                     await self._server.run()
                 except Exception as e:
+                    logging.debug('###> RUN exception ' + repr(e))
                     ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                     ServerStatus.notify_details(self._context, self, {'error': repr(e)})
                 finally:
@@ -92,6 +93,7 @@ class ServerService(msgabc.AbcSubscriber):
                     controller.check_uptime(util.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
 
+    # TODO should wait_for server.stop() then SIGKILL if needed
     async def handle(self, message):
         action = message.name()
         logging.debug('###> HANDLE start ' + repr(action))
@@ -114,27 +116,33 @@ class ServerService(msgabc.AbcSubscriber):
             await self._queue.join()
             return None
         if action in (ServerService.DELETE, ServerService.SHUTDOWN):
-            try:
-                logging.debug('###> HANDLE for ' + repr(action))
-                self._queue.put_nowait(_RunController(False, False, False))
-                if self._running:
+            logging.debug('###> HANDLE for ' + repr(action))
+            self._queue.put_nowait(_RunController(False, False, False))
+            if self._running:
+                try:
                     logging.debug('###> HANDLE server stop')
-                    await self._server.stop()
+                    await asyncio.wait_for(self._server.stop(), timeout=20)
+                except Exception as e:
+                    logging.debug('###> HANDLE server stop fail ' + repr(e))
+            try:
                 logging.debug('###> HANDLE queue join')
-                await self._queue.join()
-                if self._task:
-                    logging.debug('###> HANDLE task join')
-                    await self._task  # TODO consider timeout and cancel
-                if action is ServerService.DELETE:
-                    self._context.post(self, ServerService.DELETE_ME, self._context)
-                if action is ServerService.SHUTDOWN:
-                    logging.debug('###> HANDLE responding to shutdown')
-                    self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
-                return True
+                await asyncio.wait_for(self._queue.join(), timeout=2)
             except Exception as e:
-                logging.debug('###> HANDLE error ' + repr(e))
-                await asyncio.sleep(10)
-                return False
+                logging.debug('###> HANDLE queue join fail ' + repr(e))
+            logging.debug('###> HANDLE queue join end')
+            if self._task:
+                try:
+                    logging.debug('###> HANDLE task join')
+                    await asyncio.wait_for(self._task, timeout=2)
+                except Exception as e:
+                    logging.debug('###> HANDLE task join fail ' + repr(e))
+            if action is ServerService.DELETE:
+                self._context.post(self, ServerService.DELETE_ME, self._context)
+            if action is ServerService.SHUTDOWN:
+                logging.debug('###> HANDLE responding to shutdown')
+                self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
+            logging.debug('###> HANDLE finished')
+            return True
         return None
 
 

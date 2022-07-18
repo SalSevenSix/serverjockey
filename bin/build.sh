@@ -57,7 +57,7 @@ python3 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3" -m "core.system.bootst
 
 echo "Preparing ServerLink target"
 mkdir $SERVERLINK_TRG || exit 1
-echo "{ \"module\": \"serverlink\", \"hidden\": true }" > $SERVERLINK_TRG/instance.json
+echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > $SERVERLINK_TRG/instance.json
 
 echo "Downloading Serverlink dependencies"
 cd $SERVERLINK_DIR || exit 1

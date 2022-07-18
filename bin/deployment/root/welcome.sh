@@ -7,19 +7,18 @@ until [ "$(/sbin/runlevel)" == "N 5" ]; do
   ((wait_seconds = wait_seconds - 1))
 done
 
-TOKEN_FILE="/tmp/token.text"
-wait_seconds=20
-until [ -f "$TOKEN_FILE" ]; do
+CLIENT_FILE="/home/steam/serverjockey/serverjockey-client.json"
+wait_seconds=10
+until [ -f "$CLIENT_FILE" ]; do
   [ $wait_seconds -eq 0 ] && exit 1
   sleep 1
   ((wait_seconds = wait_seconds - 1))
 done
-sleep 2
+sleep 1
 
-TOKEN="$(cat $TOKEN_FILE)"
-rm $TOKEN_FILE > /dev/null 2>&1
 IPV4="$(hostname -I | awk {'print$1'})"
 PORT="6164"
+TOKEN="$(jq -r '.SERVER_TOKEN' $CLIENT_FILE)"
 
 {
   echo
