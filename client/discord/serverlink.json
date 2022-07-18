@@ -1,7 +1,0 @@
-{
-  "CMD_PREFIX": "!",
-  "ADMIN_ROLE": "pzadmin",
-  "BOT_TOKEN": null,
-  "EVENTS_CHANNEL_ID": null,
-  "WHITELIST_DM": "Welcome to our PZ server.\nYour login is ${user} and password is ${pass}"
-}

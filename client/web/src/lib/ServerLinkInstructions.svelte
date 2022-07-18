@@ -28,7 +28,7 @@
   <p>
     Although this guide will walk you through process carefully, some prerequisite game server knowledge is
     still required. You will need to be familiar with editing Project Zomboid server configuration files.
-    Also you will have to know how to forward ports on your router.
+    Also you may have to know how to forward ports on your router.
     However <a href="#additionalinformation" use:scrollto={'#additionalinformation'}>additional information</a>
     is included at the end of the guide to help with these.
   </p>
@@ -537,10 +537,15 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 <div class="content">
   <h3 class="title is-4">Port Forwarding</h3>
   <p>
-    In order for people to connect to your server over the internet. You will need to login to your home
-    router (internet gateway / "modem") to forward ports to the ZomBox virtual machine.
-    The ports that need forwarding are shown below. Use of the IP address as shown on the ZomBox console.
-    Note that the Players port range is for player connections, one port per player.
+    In order for people to connect to your Project Zomboid server over the internet, your home
+    router (internet gateway / "modem") needs to be configured to forward ports to the server.
+    By default the server will automatically forward ports using UPnP. However, if this is not
+    working on your LAN, you can manually add the port forwarding.
+  </p>
+  <p>
+    To do this, login to your router then forward ports as shown below.
+    Use of the IP address as shown on the ZomBox console. Note that the
+    Players port range is for player connections, one port per player.
   </p>
   <table class="table">
     <thead>
@@ -552,11 +557,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
       <tr><td>Steam</td><td>8766-8767</td><td>UDP</td></tr>
     </tbody>
   </table>
-  <p><span class="has-text-weight-bold">Important:</span>
-    In the <span class="is-family-monospace">settings.ini</span>
-    configuration file. The default setting for UPnP is true. It is recommended to set this to false.
-    Reason being that routers commonly will not automatically forward ports correctly to a virtual machine
-    on your network.
+  <p>
+    If using manual port forwarding you should also disable UPnP in the
+    <span class="is-family-monospace">settings.ini</span> configuration file.
   </p>
   <pre class="pre"># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules. The server will fall back to default ports if this fails
 UPnP=false</pre>

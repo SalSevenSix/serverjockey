@@ -7,6 +7,8 @@ After=network.target
 Type=simple
 User=steam
 ExecStart=/home/steam/serverjockey/serverjockey.pyz --home "/home/steam/serverjockey" --logfile "serverjockey.log" --clientfile "serverjockey-client.json"
+KillMode=mixed
+TimeoutStopSec=60
 
 [Install]
 WantedBy=multi-user.target

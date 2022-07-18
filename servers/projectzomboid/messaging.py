@@ -143,14 +143,12 @@ class _ProvideAdminPasswordSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.MulticastMailer, pwd: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(SERVER_STARTED_FILTER,
-                      msgftr.DataStrContains('Enter new administrator password'),
+            NOT_CHAT_MESSAGE,
+            msgftr.Or(msgftr.DataStrContains('Enter new administrator password'),
                       msgftr.DataStrContains('Confirm the password'))))
         self._mailer = mailer
         self._pwd = pwd
 
     async def handle(self, message):
-        if SERVER_STARTED_FILTER.accepts(message):
-            return True
         await proch.PipeInLineService.request(self._mailer, self, self._pwd, force=True)
         return None
