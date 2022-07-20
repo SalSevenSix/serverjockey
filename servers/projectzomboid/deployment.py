@@ -43,6 +43,7 @@ class Deployment:
         )))
 
     def resources(self, resource: httpabc.Resource):
+        ini_filter = ('.*Password.*', '.*Token.*')
         conf_pre = self._config_dir + '/' + self._world_name
         archive_selector = httpsubs.Selector(
             msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
@@ -69,10 +70,9 @@ class Deployment:
             .append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path')) \
             .pop() \
             .push('config', ) \
-            .append('jvm', httpext.MessengerConfigHandler(self._mailer, self._jvm_config_file)) \
             .append('db', httpext.FileSystemHandler(self._playerdb_file)) \
-            .append('ini', httpext.MessengerConfigHandler(
-                self._mailer, conf_pre + '.ini', ('.*Password.*', '.*Token.*'))) \
+            .append('jvm', httpext.MessengerConfigHandler(self._mailer, self._jvm_config_file)) \
+            .append('ini', httpext.MessengerConfigHandler(self._mailer, conf_pre + '.ini', ini_filter)) \
             .append('sandbox', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
             .append('spawnpoints', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
             .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua'))
@@ -95,18 +95,18 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
                 aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
-        data['script'] = shell.Script() \
-            .include_steamcmd_app_update(
-                app_id=380870,
-                install_dir=self._path,
-                beta=util.script_escape(util.get('beta', data)),
-                validate=util.get('validate', data)) \
-            .include_softlink_steamclient_lib(self._path) \
-            .build()
-        logging.debug(data['script'])
+        script = shell.Script()
         if util.get('wipe', data):
-            # Not checking is server is running but all that will change later
-            await util.delete_directory(self._path)
+            script.include_delete_path(self._path)
+        script.include_steamcmd_app_update(
+            app_id=380870,
+            install_dir=self._path,
+            beta=util.script_escape(util.get('beta', data)),
+            validate=util.get('validate', data))
+        script.include_softlink_steamclient_lib(self._path)
+        script = script.build()
+        logging.debug('SCRIPT\n' + script)
+        data['script'] = script
         return await self._handler.handle_post(resource, data)
 
 

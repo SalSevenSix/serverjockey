@@ -252,15 +252,6 @@ async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typ
     return result
 
 
-def current_directory():
-    return os.getcwd()
-
-
-async def create_directory(path: str):
-    if not await aioos.path.isdir(path):
-        await aioos.mkdir(path)
-
-
 async def archive_directory(path: str, logger=None) -> str:
     assert await directory_exists(path)
     parts = path.split('/')
@@ -277,9 +268,13 @@ async def archive_directory(path: str, logger=None) -> str:
     return filepath
 
 
-async def wipe_directory(path: str):
-    await delete_directory(path)
-    await create_directory(path)
+def current_directory():
+    return os.getcwd()
+
+
+async def create_directory(path: str):
+    if not await aioos.path.isdir(path):
+        await aioos.mkdir(path)
 
 
 async def delete_directory(path: str):
@@ -298,18 +293,13 @@ async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes
         return await file.read()
 
 
-async def write_file(filename: str, data: typing.Union[str, bytes], text: bool = True):
+async def write_file(filename: str, data: typing.Union[str, bytes]):
     # noinspection PyTypeChecker
-    async with aiofiles.open(filename, mode='w' if text else 'wb') as file:
+    async with aiofiles.open(filename, mode='w' if isinstance(data, str) else 'wb') as file:
         await file.write(data)
 
 
-async def copy_file(source_file: str, target_file: str):
-    data = await read_file(source_file, text=False)
-    await write_file(target_file, data, text=False)
-
-
-# TODO no stream type defined
+# TODO no stream class defined
 async def stream_write_file(filename: str, stream, chunk_size: int = DEFAULT_CHUNK_SIZE):
     async with aiofiles.open(filename, mode='wb') as file:
         await copy_bytes(stream, file, chunk_size)

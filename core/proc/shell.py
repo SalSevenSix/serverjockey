@@ -51,3 +51,6 @@ class Script:
             '[ -f $SRC_FILE ] || SRC_FILE=~/.steam/steamcmd/linux64/steamclient.so',
             '[ -f $SRC_FILE ] || SRC_FILE=~/Steam/linux64/steamclient.so',
             '[ -f $TRG_FILE ] || ln -s $SRC_FILE $TRG_FILE'))
+
+    def include_delete_path(self, path: str) -> Script:
+        return self.include('include_delete_path', 'rm -rf ' + path)
