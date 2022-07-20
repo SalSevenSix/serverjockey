@@ -1,6 +1,8 @@
 import inspect
 import os
 import shutil
+import lzma
+import tarfile
 import logging
 import json
 import time
@@ -98,13 +100,15 @@ def obj_to_dict(obj: typing.Any) -> typing.Optional[dict]:
     raise Exception('obj_to_dict() failed converting {} to dict'.format(obj))
 
 
-def obj_to_json(obj: typing.Any) -> typing.Optional[str]:
+def obj_to_json(obj: typing.Any, pretty: bool = False) -> typing.Optional[str]:
     if obj is None:
         return None
     encoder = None if isinstance(obj, dict) else _JsonEncoder
     if hasattr(obj, '__dict__'):
         obj = obj.__dict__
     try:
+        if pretty:
+            return json.dumps(obj, cls=encoder, indent=2, separators=(',', ': '))
         return json.dumps(obj, cls=encoder)
     except Exception as e:
         logging.warning('Not serializable to JSON. raised: %s', e)
@@ -277,6 +281,10 @@ async def create_directory(path: str):
         await aioos.mkdir(path)
 
 
+async def rename_path(source: str, target: str):
+    await aioos.rename(source, target)
+
+
 async def delete_directory(path: str):
     if await aioos.path.isdir(path):
         await _rmtree(path)
@@ -299,6 +307,12 @@ async def write_file(filename: str, data: typing.Union[str, bytes]):
         await file.write(data)
 
 
+async def copy_text_file(from_path: str, to_path: str) -> int:
+    data = await read_file(from_path)
+    await write_file(to_path, data)
+    return len(data)
+
+
 # TODO no stream class defined
 async def stream_write_file(filename: str, stream, chunk_size: int = DEFAULT_CHUNK_SIZE):
     async with aiofiles.open(filename, mode='wb') as file:
@@ -312,3 +326,12 @@ async def copy_bytes(source, target, chunk_size: int = DEFAULT_CHUNK_SIZE):
         pumping = chunk is not None and chunk != b''
         if pumping:
             await target.write(chunk)
+
+
+def _unpack_tarxz(file_path: str, target_directory: str):
+    with lzma.open(file_path) as fd:
+        with tarfile.open(fileobj=fd) as tar:
+            tar.extractall(target_directory)
+
+
+unpack_tarxz = _wrap(_unpack_tarxz)

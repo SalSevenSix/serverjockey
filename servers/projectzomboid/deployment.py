@@ -14,9 +14,7 @@ class Deployment:
         self._world_name = 'servertest'
         self._home_dir = context.config('home')
         self._runtime_dir = self._home_dir + '/runtime'
-        self._executable = util.overridable_full_path(self._home_dir, context.config('executable'))
-        if self._executable is None:
-            self._executable = self._runtime_dir + '/start-server.sh'
+        self._executable = self._runtime_dir + '/start-server.sh'
         self._jvm_config_file = self._runtime_dir + '/ProjectZomboid64.json'
         self._world_dir = self._home_dir + '/world'
         self._playerdb_dir = self._world_dir + '/db'
@@ -32,7 +30,7 @@ class Deployment:
     async def initialise(self):
         await self.build_world()
         self._mailer.register(msgext.TimeoutSubscriber(self._mailer, msgext.SetSubscriber(
-            svrext.ServerRunningLock(self._mailer, proch.ShellJob(self._mailer)),
+            svrext.ServerRunningLock(self._mailer, proch.JobProcess(self._mailer)),
             msgext.SyncWrapper(self._mailer, msgext.ReadWriteFileSubscriber(self._mailer), msgext.SyncReply.AT_END),
             svrext.ServerRunningLock(
                 self._mailer,
@@ -89,9 +87,9 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
     def __init__(self, mailer: msgabc.MulticastMailer, path: str):
         self._mailer = mailer
         self._path = path
-        self._handler = httpext.MessengerHandler(self._mailer, proch.ShellJob.START_JOB, selector=httpsubs.Selector(
-                msg_filter=proch.ShellJob.FILTER_STDOUT_LINE,
-                completed_filter=proch.ShellJob.FILTER_JOB_DONE,
+        self._handler = httpext.MessengerHandler(self._mailer, proch.JobProcess.START, selector=httpsubs.Selector(
+                msg_filter=proch.JobProcess.FILTER_STDOUT_LINE,
+                completed_filter=proch.JobProcess.FILTER_JOB_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):

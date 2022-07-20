@@ -223,13 +223,13 @@ class ServerProcess:
             self._process = None
 
 
-class ShellJob(msgabc.AbcSubscriber):
-    STDERR_LINE = 'ShellJob.StdErrLine'
-    STDOUT_LINE = 'ShellJob.StdOutLine'
-    START_JOB = 'ShellJob.StartJob'
-    STATE_STARTED = 'ShellJob.StateStarted'
-    STATE_EXCEPTION = 'ShellJob.StateException'
-    STATE_COMPLETE = 'ShellJob.StateComplete'
+class JobProcess(msgabc.AbcSubscriber):
+    STDERR_LINE = 'JobProcess.StdErrLine'
+    STDOUT_LINE = 'JobProcess.StdOutLine'
+    START = 'JobProcess.Start'
+    STATE_STARTED = 'JobProcess.StateStarted'
+    STATE_EXCEPTION = 'JobProcess.StateException'
+    STATE_COMPLETE = 'JobProcess.StateComplete'
     JOB_DONE = (STATE_EXCEPTION, STATE_COMPLETE)
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
@@ -239,39 +239,41 @@ class ShellJob(msgabc.AbcSubscriber):
     async def start_job(
             mailer: msgabc.MulticastMailer,
             source: typing.Any,
-            script: str) -> typing.Union[subprocess.Process, Exception]:
+            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, ShellJob.START_JOB, script)
+        response = await messenger.request(source, JobProcess.START, command)
         return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.NameIs(ShellJob.START_JOB))
+        super().__init__(msgftr.NameIs(JobProcess.START))
         self._mailer = mailer
 
     async def handle(self, message):
+        source, command = message.source(), message.data()
+        if isinstance(command, dict):
+            command = util.get('command', command, util.get('script', command))
+        if not (isinstance(command, str) or util.iterable(command)):
+            self._mailer.post(source, JobProcess.STATE_EXCEPTION, Exception('Invalid job request'), message)
+            return None
         stderr, stdout, replied = None, None, False
-        source, script = message.source(), None
-        if isinstance(message.data(), str):
-            script = message.data()
-        elif isinstance(message.data(), dict):
-            script = util.get('script', message.data())
-        if not script:
-            raise Exception('Invalid script')
         try:
-            process = await asyncio.create_subprocess_shell(
-                script,
-                stdin=asyncio.subprocess.DEVNULL,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE)
-            stderr = _PipeOutLineProducer(self._mailer, source, ShellJob.STDERR_LINE, process.stderr)
-            stdout = _PipeOutLineProducer(self._mailer, source, ShellJob.STDOUT_LINE, process.stdout)
-            replied = self._mailer.post(source, ShellJob.STATE_STARTED, process, message)
+            if isinstance(command, str):
+                process = await asyncio.create_subprocess_shell(
+                    command,
+                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            else:
+                process = await asyncio.create_subprocess_exec(
+                    command[0], *command[1:],
+                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            stderr = _PipeOutLineProducer(self._mailer, source, JobProcess.STDERR_LINE, process.stderr)
+            stdout = _PipeOutLineProducer(self._mailer, source, JobProcess.STDOUT_LINE, process.stdout)
+            replied = self._mailer.post(source, JobProcess.STATE_STARTED, process, message)
             rc = await process.wait()
             if rc != 0:
                 raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(process, rc))
-            self._mailer.post(source, ShellJob.STATE_COMPLETE, process)
+            self._mailer.post(source, JobProcess.STATE_COMPLETE, process)
         except Exception as e:
-            self._mailer.post(source, ShellJob.STATE_EXCEPTION, e, None if replied else message)
+            self._mailer.post(source, JobProcess.STATE_EXCEPTION, e, None if replied else message)
         finally:
             await util.silently_cleanup(stdout)
             await util.silently_cleanup(stderr)
