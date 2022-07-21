@@ -37,7 +37,6 @@ class Deployment:
             .pop() \
             .push('deployment') \
             .append('install-runtime', _InstallRuntimeHandler(self)) \
-            .append('create-map', _CreateMapHandler(self)) \
             .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
             .append('wipe-world-config', _WipeHandler(self, self._save_dir)) \
             .append('wipe-world-save', _WipeHandler(self, self._config_dir))
@@ -46,6 +45,18 @@ class Deployment:
         return proch.ServerProcess(self._mailer, self._executable) \
             .append_arg('--start-server').append_arg(self._map_file) \
             .append_arg('--server-settings').append_arg(self._server_settings)
+
+    async def build_world(self):
+        await util.create_directory(self._world_dir)
+        await util.create_directory(self._save_dir)
+        await util.create_directory(self._config_dir)
+        if await util.directory_exists(self._runtime_dir):
+            if not await util.file_exists(self._server_settings):
+                await util.copy_text_file(self._server_settings_def, self._server_settings)
+            if not await util.file_exists(self._map_settings):
+                await util.copy_text_file(self._map_settings_def, self._map_settings)
+            if not await util.file_exists(self._map_gen_settings):
+                await util.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
 
     async def install_runtime(self):
         url = 'https://factorio.com/get-download/stable/headless/linux64'
@@ -62,27 +73,18 @@ class Deployment:
         await util.delete_file(self._install_package)
         await self.build_world()
 
-    async def create_map(self):
+    async def ensure_map(self):
+        if not await util.file_exists(self._map_file):
+            await self._create_map()
+
+    async def _create_map(self):
         await util.delete_directory(self._save_dir)
         await util.create_directory(self._save_dir)
-        await proch.JobProcess.start_job(self._mailer, self, (
+        await proch.JobProcess.run_job(self._mailer, self, (
             self._executable,
             '--create', self._map_file,
             '--map-gen-settings', self._map_gen_settings,
-            '--map-settings', self._map_settings
-        ))
-
-    async def build_world(self):
-        await util.create_directory(self._world_dir)
-        await util.create_directory(self._save_dir)
-        await util.create_directory(self._config_dir)
-        if await util.directory_exists(self._runtime_dir):
-            if not await util.file_exists(self._server_settings):
-                await util.copy_text_file(self._server_settings_def, self._server_settings)
-            if not await util.file_exists(self._map_settings):
-                await util.copy_text_file(self._map_settings_def, self._map_settings)
-            if not await util.file_exists(self._map_gen_settings):
-                await util.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
+            '--map-settings', self._map_settings))
 
 
 class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
@@ -92,16 +94,6 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
 
     async def handle_post(self, resource, data):
         await self._deployment.install_runtime()
-        return httpabc.ResponseBody.NO_CONTENT
-
-
-class _CreateMapHandler(httpabc.AsyncPostHandler):
-
-    def __init__(self, deployment: Deployment):
-        self._deployment = deployment
-
-    async def handle_post(self, resource, data):
-        await self._deployment.create_map()
         return httpabc.ResponseBody.NO_CONTENT
 
 

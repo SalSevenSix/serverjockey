@@ -9,6 +9,7 @@ from core.util import util
 
 SECURE = '_SECURE'
 X_SECRET = 'X-Secret'
+RESOURCES_READY = 'RESOURCES_READY'
 
 HOST = 'Host'
 ORIGIN = 'Origin'

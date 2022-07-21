@@ -244,6 +244,15 @@ class JobProcess(msgabc.AbcSubscriber):
         response = await messenger.request(source, JobProcess.START, command)
         return response.data()
 
+    @staticmethod
+    async def run_job(
+            mailer: msgabc.MulticastMailer,
+            source: typing.Any,
+            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
+        messenger = msgext.SynchronousMessenger(mailer, catcher=msgext.SingleCatcher(JobProcess.FILTER_JOB_DONE))
+        response = await messenger.request(source, JobProcess.START, command)
+        return response.data()
+
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.NameIs(JobProcess.START))
         self._mailer = mailer

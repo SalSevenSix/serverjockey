@@ -29,7 +29,8 @@ class SystemService:
             .append('check', httpext.NoopPostHandler()) \
             .append('instances', _InstancesHandler(self))
         self._instances = self._resource.child('instances')
-        context.register(_Subscriber(self))
+        context.register(_DeleteInstanceSubscriber(self))
+        context.register(_AutoStartsSubscriber(self._context))
 
     def resources(self):
         return self._resource
@@ -55,12 +56,7 @@ class SystemService:
                 if subcontext.config('auto'):
                     autos.append(subcontext)
         await self._clientfile.write()
-        # TODO post and capture autos in a subscriber, signal after http resources are set
-        for subcontext in iter(autos):
-            if subcontext.config('auto') == 'daemon':
-                svrsvc.ServerService.signal_daemon(subcontext, self)
-            if subcontext.config('auto') == 'start':
-                svrsvc.ServerService.signal_start(subcontext, self)
+        self._context.post(self, _AutoStartsSubscriber.AUTOS, autos)
         return self
 
     async def shutdown(self):
@@ -94,7 +90,7 @@ class SystemService:
     async def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
         subcontext.start()
-        subcontext.register(msgext.RelaySubscriber(self._context, _Subscriber.FILTER))
+        subcontext.register(msgext.RelaySubscriber(self._context, _DeleteInstanceSubscriber.FILTER))
         if subcontext.is_debug():
             subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
         server = self._create_server(subcontext)
@@ -118,11 +114,34 @@ class SystemService:
         raise Exception('Server class implementation not found in module: ' + repr(module))
 
 
-class _Subscriber(msgabc.AbcSubscriber):
+class _AutoStartsSubscriber(msgabc.AbcSubscriber):
+    AUTOS = 'AutoStartsSubscriber.Autos'
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.Or(
+            msgftr.NameIs(_AutoStartsSubscriber.AUTOS),
+            msgftr.NameIs(httpabc.RESOURCES_READY)
+        ))
+        self._mailer = mailer
+        self._autos = None
+
+    async def handle(self, message):
+        if message.name() is _AutoStartsSubscriber.AUTOS:
+            self._autos = message.data()
+            return None
+        for subcontext in iter(self._autos):
+            if subcontext.config('auto') == 'daemon':
+                svrsvc.ServerService.signal_daemon(subcontext, self)
+            if subcontext.config('auto') == 'start':
+                svrsvc.ServerService.signal_start(subcontext, self)
+        return True
+
+
+class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
     FILTER = msgftr.NameIs(svrsvc.ServerService.DELETE_ME)
 
     def __init__(self, system: SystemService):
-        super().__init__(_Subscriber.FILTER)
+        super().__init__(_DeleteInstanceSubscriber.FILTER)
         self._system = system
 
     async def handle(self, message):

@@ -33,7 +33,7 @@ class HttpService:
     # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
         self._resources = await self._callbacks.initialise()
-        # TODO post message to indicate resources are set
+        self._context.post(self, httpabc.RESOURCES_READY)
 
     # noinspection PyUnusedLocal
     async def _shutdown(self, app: web.Application):

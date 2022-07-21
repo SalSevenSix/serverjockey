@@ -45,7 +45,7 @@ function handleMessage(message) {
       system.help(args);
     }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
-    server[command](args);
+    instanceData.server[command](args);
     return;
   }
   if (system.hasOwnProperty(command)) {
