@@ -55,6 +55,7 @@ class SystemService:
                 if subcontext.config('auto'):
                     autos.append(subcontext)
         await self._clientfile.write()
+        # TODO post and capture autos in a subscriber, signal after http resources are set
         for subcontext in iter(autos):
             if subcontext.config('auto') == 'daemon':
                 svrsvc.ServerService.signal_daemon(subcontext, self)

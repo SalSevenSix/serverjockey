@@ -9,8 +9,6 @@ ACCEPTED_MIME_TYPES = (httpabc.MIME_TEXT_PLAIN, httpabc.MIME_APPLICATION_JSON, h
 
 
 class HttpService:
-    STARTING = 'HttpService.ServerStarting'
-    COMPLETE = 'HttpService.ServerComplete'
 
     def __init__(self, context: contextsvc.Context, callbacks: httpabc.HttpServiceCallbacks):
         self._context = context
@@ -35,6 +33,7 @@ class HttpService:
     # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
         self._resources = await self._callbacks.initialise()
+        # TODO post message to indicate resources are set
 
     # noinspection PyUnusedLocal
     async def _shutdown(self, app: web.Application):
@@ -48,7 +47,6 @@ class HttpService:
 
 
 class _RequestHandler:
-    REQUEST_RECEIVED = 'RequestHandler.RequestReceived'
 
     def __init__(self, context: contextsvc.Context, statics: httpstatics.Statics,
                  resources: httpabc.Resource, request: webabc.Request):
