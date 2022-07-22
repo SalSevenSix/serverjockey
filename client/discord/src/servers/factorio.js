@@ -1,7 +1,7 @@
 'use strict';
 
-const commons = require('./commons.js');
-const subs = require('./subs.js');
+const commons = require('../commons.js');
+const subs = require('../subs.js');
 
 exports.startup = function(context, channel, instance, url) {
   if (!channel) return;
