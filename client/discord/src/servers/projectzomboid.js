@@ -6,6 +6,7 @@ const subs = require('../subs.js');
 const commons = require('../commons.js');
 
 exports.startup = function(context, channel, instance, url) {
+  if (!channel) return;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     let result = '';
     if (json.event === 'login') { result += 'LOGIN '; }

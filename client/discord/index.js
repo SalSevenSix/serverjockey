@@ -3,7 +3,10 @@
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  if (!context.config.EVENTS_CHANNEL_ID) return;
+  if (!context.config.EVENTS_CHANNEL_ID) {
+    context.instancesService.startup(null);
+    return;
+  };
   context.client.channels.fetch(context.config.EVENTS_CHANNEL_ID)
     .then(function(channel) {
       logger.info('Publishing events to ' + channel.id);

@@ -1,6 +1,7 @@
 import typing
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
+from core.proc import proch
 from servers.factorio import messaging as msg
 
 
@@ -11,9 +12,9 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
+            msg.PLAYER_EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
-            msg.SERVER_STARTED_FILTER,
-            msg.PLAYER_EVENT_FILTER))
+            proch.ServerProcess.FILTER_STATE_DOWN))
         self._mailer = mailer
         self._players = []
 
@@ -24,7 +25,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         return response.data()
 
     def handle(self, message):
-        if msg.SERVER_STARTED_FILTER.accepts(message):
+        if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
             self._players = []
             return None
         if msg.PLAYER_EVENT_FILTER.accepts(message):
