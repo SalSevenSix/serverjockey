@@ -8,6 +8,11 @@
 </script>
 
 
+<div class="block">
+  <h1 class="title is-2">ZomBox</h1>
+  <h1 class="subtitle">ServerJockey system v0.1</h1>
+</div>
+
 <div class="columns is-centered">
   <div class="column is-half">
     <div class="box">

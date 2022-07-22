@@ -3,5 +3,4 @@
 </script>
 
 
-<h1>ServerJockey Instances</h1>
 <Instances />

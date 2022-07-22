@@ -1,8 +1,23 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { scrollto } from 'svelte-scrollto-element';
+  import { baseurl, instance, serverStatus, subscribeServerStatus } from '$lib/serverjockeyapi';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
+
+  instance.set({ url: baseurl + '/instances/serverlink' });
+  let polling = true;
+	onMount(async function() {
+	  serverStatus.set(await subscribeServerStatus($instance, function(data) {
+	    if (data == null || !polling) return polling;
+	    serverStatus.set(data);
+	    return polling;
+	  }));
+	});
+	onDestroy(function() {
+		polling = false;
+	});
 </script>
 
 
@@ -15,7 +30,7 @@
 <div class="content">
   <h2 class="title is-3">Welcome</h2>
   <p>
-    <span class="has-text-weight-bold">ZombBox</span> is a self contained game server management system
+    <span class="has-text-weight-bold">ZomBox</span> is a self contained game server management system
     for <span class="has-text-weight-bold">Project Zomboid</span>. It is designed to be an easy to use
     self-hosting option for multiplayer servers. Allowing you to create and remotely manage your servers.
     Currently the <span class="has-text-weight-bold">Discord</span> platform is used to manage the servers

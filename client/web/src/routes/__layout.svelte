@@ -1,14 +1,12 @@
 <script>
-	import '../bulma.min.css';
+  import 'bulma/css/bulma.css'
 	import '../app.css';
+  import Navbar from '$lib/Navbar.svelte';
 </script>
 
 <section class="section">
   <div class="container">
-    <div class="block">
-      <h1 class="title is-2">ZomBox</h1>
-      <h1 class="subtitle">ServerJockey system v0.1</h1>
-    </div>
+    <Navbar />
     <slot />
   </div>
 </section>
