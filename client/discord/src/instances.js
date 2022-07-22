@@ -27,7 +27,7 @@ exports.Service = class Service {
       .catch(logger.error);
     this.#current = util.getFirstKey(this.#instances);
     for (let instance in this.#instances) {
-      this.#instances[instance].server = require('./servers/' + this.#instances[instance].module + '.js');
+      this.#instances[instance].server = require('./' + this.#instances[instance].module + '.js');
       this.#instances[instance].server.startup(this.#context, channel, instance, this.#instances[instance].url);
     }
     logger.info('Instances...');
@@ -42,7 +42,7 @@ exports.Service = class Service {
     let instance = data.identity;
     this.#instances[instance] = {
       module: data.module,
-      server: require('./servers/' + data.module + '.js'),
+      server: require('./' + data.module + '.js'),
       url: this.#context.config.SERVER_URL + '/instances/' + instance
     };
     this.#current = instance;

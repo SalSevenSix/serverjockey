@@ -1,9 +1,9 @@
 'use strict';
 
-const logger = require('../logger.js');
-const util = require('../util.js');
-const subs = require('../subs.js');
-const commons = require('../commons.js');
+const logger = require('./logger.js');
+const util = require('./util.js');
+const subs = require('./subs.js');
+const commons = require('./commons.js');
 
 exports.startup = function(context, channel, instance, url) {
   if (!channel) return;
