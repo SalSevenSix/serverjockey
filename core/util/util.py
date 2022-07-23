@@ -272,10 +272,6 @@ async def archive_directory(path: str, logger=None) -> str:
     return filepath
 
 
-def current_directory():
-    return os.getcwd()
-
-
 async def create_directory(path: str):
     if not await aioos.path.isdir(path):
         await aioos.mkdir(path)

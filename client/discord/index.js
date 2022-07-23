@@ -44,7 +44,7 @@ function handleMessage(message) {
   let args = { context: context, instance: instance, message: message, data: data };
   let instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && command != 'startup' && instanceData.server.hasOwnProperty(command)) {
-    if (command === 'help') {
+    if (command === 'help' && data.length === 0) {
       system.help(args);
     }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);

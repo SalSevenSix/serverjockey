@@ -1,6 +1,7 @@
 import logging
 import argparse
 import sys
+import os
 import typing
 import secrets
 from core.util import util
@@ -8,6 +9,16 @@ from core.msg import msgext
 from core.context import contextsvc
 from core.http import httpabc, httpsvc
 from core.system import system
+
+
+def _get_token() -> str:
+    token = secrets.token_hex(5)
+    path = '/tmp/serverjockey.token'
+    if not os.path.exists(path):
+        return token
+    with open(path) as file:
+        token = file.readline().strip()
+    return token
 
 
 def _create_context(args: typing.Collection) -> contextsvc.Context:
@@ -27,8 +38,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     return contextsvc.Context(
-        debug=args.debug, secret=secrets.token_hex(5),
-        home=util.current_directory() if args.home == '.' else args.home,
+        debug=args.debug, secret=_get_token(),
+        home=os.getcwd() if args.home == '.' else args.home,
         logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 

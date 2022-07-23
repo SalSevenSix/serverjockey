@@ -2,6 +2,7 @@
 
 const logger = require('./logger.js');
 const util = require('./util.js');
+const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
