@@ -5,15 +5,16 @@ import inspect
 import logging
 import uuid
 from core.util import util, signals
-from core.msg import msgabc, msgext, msgftr
+from core.msg import msgabc, msgext, msgftr, msgtrf
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext
+from core.http import httpabc, httprsc, httpext, httpsubs
 from core.system import svrabc, svrsvc, svrext
 
 
 class SystemService:
     SERVER_INITIALISED = 'SystemService.ServerInitialised'
     SERVER_DELETED = 'SystemService.ServerDestroyed'
+    SERVER_FILTER = msgftr.NameIn((SERVER_INITIALISED, SERVER_DELETED))
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -21,13 +22,18 @@ class SystemService:
         self._home_dir = context.config('home')
         self._clientfile = svrext.ClientFile(
             context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
+        subs = httpsubs.HttpSubscriptionService(context)
         self._resource = httprsc.WebResource()
         httprsc.ResourceBuilder(self._resource) \
             .push('system') \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
             .append('check', httpext.NoopPostHandler()) \
-            .append('instances', _InstancesHandler(self))
+            .push('instances', _InstancesHandler(self)) \
+            .append('subscribe', subs.handler(SystemService.SERVER_FILTER, msgtrf.DataAsDict())) \
+            .pop() \
+            .push(subs.resource(self._resource, 'subscriptions')) \
+            .append('{identity}', subs.subscriptions_handler('identity'))
         self._instances = self._resource.child('instances')
         context.register(_DeleteInstanceSubscriber(self))
         context.register(_AutoStartsSubscriber(self._context))

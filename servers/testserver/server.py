@@ -72,7 +72,7 @@ class _PlayersHandler(httpabc.AsyncGetHandler):
         if not util.iterable(response):
             return result
         for line in iter([m.data() for m in response]):
-            result.append(line[1:])
+            result.append({'steamid': str(util.now_millis()), 'name': line[1:]})
         return result
 
 

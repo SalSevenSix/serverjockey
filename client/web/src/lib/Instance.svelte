@@ -18,12 +18,25 @@
 </script>
 
 
-{#if $instance.name}
-  <h1>{$instance.name} ({$instance.module})</h1>
-  <ServerControls />
-  <ServerStatus />
-  <slot />
+{#if $instance.identity}
+  <div class="columns is-centered">
+    <div class="column is-half">
+      <h1 class="title is-3">{$instance.identity} ({$instance.module})</h1>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="column">
+      <ServerControls />
+      <ServerStatus />
+    </div>
+    <slot />
+  </div>
 {:else}
-  <p>No instance set</p>
+  <div class="block">
+    <p>No instance set</p>
+  </div>
 {/if}
-<p><a href="/servers">BACK</a> to Servers</p>
+
+<div class="content">
+  <p><a href="/servers">BACK</a> to Servers</p>
+</div>

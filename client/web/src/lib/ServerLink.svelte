@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import { baseurl, instance, serverStatus, subscribeServerStatus } from '$lib/serverjockeyapi';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
@@ -8,11 +9,16 @@
   instance.set({ url: baseurl + '/instances/serverlink' });
   let polling = true;
 	onMount(async function() {
-	  serverStatus.set(await subscribeServerStatus($instance, function(data) {
+	  let initialStatus = await subscribeServerStatus($instance, function(data) {
 	    if (data == null || !polling) return polling;
 	    serverStatus.set(data);
 	    return polling;
-	  }));
+	  });
+	  if (initialStatus.state === 'EXCEPTION') {
+		  goto('/setup');
+	  } else {
+	    serverStatus.set(initialStatus);
+	  }
 	});
 	onDestroy(function() {
 		polling = false;
@@ -20,6 +26,14 @@
 </script>
 
 
-<ServerControls />
-<ServerStatus />
-<ServerLinkConfig />
+<div class="columns">
+  <div class="column">
+    <ServerLinkConfig />
+  </div>
+  <div class="column">
+    <div class="mt-5">
+      <ServerControls />
+      <ServerStatus />
+    </div>
+  </div>
+</div>

@@ -6,6 +6,7 @@
 	}
 </script>
 
+
 <div class="block">
   <button id="daemon" name="daemon" class="button is-success" disabled={$serverStatus.running} on:click={executeCommand}>Daemon</button>
   <button id="start" name="start" class="button is-primary" disabled={$serverStatus.running} on:click={executeCommand}>Start</button>

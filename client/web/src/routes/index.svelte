@@ -6,7 +6,9 @@
 
 
 {#if $securityToken}
+  <hr />
   <ServerLink />
+  <hr />
 {:else}
   <Login />
 {/if}

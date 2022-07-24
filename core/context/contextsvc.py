@@ -48,3 +48,6 @@ class Context(msgabc.MulticastMailer):
         for subcontext in iter(self.subcontexts()):
             await self.destroy_subcontext(subcontext)
         await util.silently_cleanup(self._mailer)
+
+    def asdict(self):
+        return self._configuration.copy()

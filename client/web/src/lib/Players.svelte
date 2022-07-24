@@ -1,18 +1,48 @@
 <script>
-  import { onMount } from 'svelte';
-	import { fetchPlayers } from '$lib/serverjockeyapi';
+  import { onMount, onDestroy } from 'svelte';
+	import { instance, subscribeAndPoll } from '$lib/serverjockeyapi';
 
-  export let instance;
-  let data = [];
+  let polling = true;
+  let players = [];
 	onMount(async function() {
-	  data = await fetchPlayers(instance);
+	  players = await fetch($instance.url + '/players')
+      .then(function(response) { return response.json(); })
+      .catch(function(error) { alert(error); });
+    subscribeAndPoll($instance.url + '/players/subscribe', function(data) {
+	    if (data == null || !polling) return polling;
+	      if (data.event === 'login') {
+	        players = [...players, data.player];
+	      } else if (data.event === 'logout') {
+	        players = players.filter(function(value) {
+	          return value.name != data.player.name;
+	        });
+	      }
+	    return polling;
+	  });
+	});
+
+	onDestroy(function() {
+		polling = false;
 	});
 </script>
 
 
-<div>
-  <p>Players currently online: {data.length}</p>
-  {#each data as player}
-    <p>{player.name} ({player.steamid ? player.steamid : 'LOGGING IN'})</p>
-  {/each}
+<div class="column">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Steam ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each players as player}
+        <tr>
+          <td>{player.name}</td>
+          <td>{(player.steamid == false) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+  <p>{players.length} players currently online</p>
 </div>

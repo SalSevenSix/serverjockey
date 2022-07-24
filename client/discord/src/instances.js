@@ -19,6 +19,7 @@ exports.Service = class Service {
   }
 
   async startup(channel) {
+    // TODO subscribe for instance updates
     this.#channel = channel;
     this.#instances = await fetch(this.#context.config.SERVER_URL + '/instances')
       .then(function(response) {

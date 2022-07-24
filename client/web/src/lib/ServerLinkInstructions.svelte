@@ -21,36 +21,36 @@
 </script>
 
 
-<div class="columns is-mobile is-centered">
-  <div class="column is-half">
+<div class="columns">
+  <div class="column">
     <figure><img src="/assets/box.svg" alt="Welcome Box" /></figure>
+  </div>
+  <div class="column content">
+    <h2 class="title is-3 mt-2">Welcome</h2>
+    <p>
+      <span class="has-text-weight-bold">ZomBox</span> is a self contained game server management system
+      for <span class="has-text-weight-bold">Project Zomboid</span>. It is designed to be an easy to use
+      self-hosting option for multiplayer servers. Allowing you to create and remotely manage your servers.
+      Currently the <span class="has-text-weight-bold">Discord</span> platform is used to manage the servers
+      with the help of a discord bot. Webapp support to be added in the future.
+    </p>
+    <p>
+      If you are reading this, you have already successfully installed and started ZomBox on VirtualBox. Congratulations!
+      This page will guide you through the rest of the setup process and how to create, configure and start a server.
+    </p>
+    <p>
+      Although this guide will walk you through process carefully, some prerequisite game server knowledge is
+      still required. You will need to be familiar with editing Project Zomboid server configuration files.
+      Also you may have to know how to forward ports on your router.
+      However <a href="#additionalinformation" use:scrollto={'#additionalinformation'}>additional information</a>
+      is included at the end of the guide to help with these.
+    </p>
   </div>
 </div>
 
-<div class="content">
-  <h2 class="title is-3">Welcome</h2>
-  <p>
-    <span class="has-text-weight-bold">ZomBox</span> is a self contained game server management system
-    for <span class="has-text-weight-bold">Project Zomboid</span>. It is designed to be an easy to use
-    self-hosting option for multiplayer servers. Allowing you to create and remotely manage your servers.
-    Currently the <span class="has-text-weight-bold">Discord</span> platform is used to manage the servers
-    with the help of a discord bot. Webapp support to be added in the future.
-  </p>
-  <p>
-    If you are reading this, you have already successfully installed and started ZomBox on VirtualBox. Congratulations!
-    This page will guide you through the rest of the setup process and how to create, configure and start a server.
-  </p>
-  <p>
-    Although this guide will walk you through process carefully, some prerequisite game server knowledge is
-    still required. You will need to be familiar with editing Project Zomboid server configuration files.
-    Also you may have to know how to forward ports on your router.
-    However <a href="#additionalinformation" use:scrollto={'#additionalinformation'}>additional information</a>
-    is included at the end of the guide to help with these.
-  </p>
-  <hr />
-</div>
 
 <div class="content">
+  <hr />
   <p><span class="step-title">01.</span>
     First step is to <a href="https://discord.com/login" target="_blank">login to Discord</a> in your browser.
     If you don't have an account then <a href="https://discord.com/register" target="_blank">register</a> a new one.

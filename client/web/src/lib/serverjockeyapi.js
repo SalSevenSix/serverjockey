@@ -1,24 +1,11 @@
 import { dev } from '$app/env';
 import { writable, get } from 'svelte/store';
 
-
 export const baseurl = (dev ? 'http://localhost:6164' : '');
 export const securityToken = writable();
-export const instances = writable([]);
 export const instance = writable({});
 export const serverStatus = writable({});
 
-export async function loadInstances() {
-  serverStatus.set({ running: false, state: 'UNKNOWN' });
-  const result = await fetch(baseurl + '/instances')
-    .then(function(response) { return response.json(); })
-    .catch(function(error) { return 'Error ' + error; });
-  let data = [];
-  Object.keys(result).forEach(function(key) {
-    data.push({ name: key, module: result[key].module, url: result[key].url });
-  });
-  instances.set(data);
-}
 
 export function postText(url, body, callback = noop) {
   let request = newPostRequest('text/plain');
@@ -33,10 +20,12 @@ export function postServerCommand(instance, command) {
     .catch(function(error) { alert('Error ' + error); });
 }
 
-export async function fetchPlayers(instance) {
-  return await fetch(instance.url + '/players')
-    .then(function(response) { return response.json(); })
-    .catch(function(error) { return 'Error ' + error; });
+export function createInstance(body, callback = noop) {
+  let request = newPostRequest();
+  request.body = JSON.stringify(body);
+  fetch(baseurl + '/instances', request)
+    .then(callback)
+    .catch(function(error) { alert('Error ' + error); });
 }
 
 export async function subscribeServerStatus(instance, dataHandler) {
@@ -68,6 +57,19 @@ async function fetchServerStatus(instance) {
   return await fetch(instance.url + '/server')
     .then(function(response) { return response.json(); })
     .catch(function(error) { return 'Error ' + error; });
+}
+
+export async function subscribeAndPoll(url, dataHandler) {
+  let pollingUrl = await fetch(url, newPostRequest())
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      return response.json();
+    })
+    .then(function(json) {
+      return json.url;
+    })
+    .catch(function(error) { alert('Error ' + error); });
+    poll(pollingUrl, dataHandler);
 }
 
 async function subscribe(url) {
