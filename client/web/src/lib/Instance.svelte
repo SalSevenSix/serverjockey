@@ -1,16 +1,17 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { instance, serverStatus, subscribeServerStatus } from '$lib/serverjockeyapi';
-  import ServerStatus from '$lib/ServerStatus.svelte';
-  import ServerControls from '$lib/ServerControls.svelte';
+
+  serverStatus.set({});
 
   let polling = true;
 	onMount(async function() {
-	  serverStatus.set(await subscribeServerStatus($instance, function(data) {
+	  let status = await subscribeServerStatus($instance, function(data) {
 	    if (data == null || !polling) return polling;
 	    serverStatus.set(data);
 	    return polling;
-	  }));
+	  });
+	  serverStatus.set(status);
 	});
 	onDestroy(function() {
 		polling = false;
@@ -24,13 +25,7 @@
       <h1 class="title is-3">{$instance.identity} ({$instance.module})</h1>
     </div>
   </div>
-  <div class="columns">
-    <div class="column">
-      <ServerControls />
-      <ServerStatus />
-    </div>
-    <slot />
-  </div>
+  <slot />
 {:else}
   <div class="block">
     <p>No instance set</p>

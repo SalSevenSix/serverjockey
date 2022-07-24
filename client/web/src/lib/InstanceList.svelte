@@ -1,12 +1,14 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-	import { baseurl, instance, subscribeAndPoll } from '$lib/serverjockeyapi';
+	import { baseurl, instance, subscribeAndPoll, serverStatus } from '$lib/serverjockeyapi';
+
+  instance.set({});
+  serverStatus.set({});
 
   let instances = [];
   let polling = true;
 	onMount(async function loadInstances() {
-	  instance.set({});
     const result = await fetch(baseurl + '/instances')
       .then(function(response) { return response.json(); })
       .catch(function(error) { alert(error); });

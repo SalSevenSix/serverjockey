@@ -7,6 +7,8 @@
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
 
   instance.set({ url: baseurl + '/instances/serverlink' });
+  serverStatus.set({});
+
   let polling = true;
 	onMount(async function() {
 	  let initialStatus = await subscribeServerStatus($instance, function(data) {
@@ -20,6 +22,7 @@
 	    serverStatus.set(initialStatus);
 	  }
 	});
+
 	onDestroy(function() {
 		polling = false;
 	});
