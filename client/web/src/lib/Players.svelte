@@ -1,28 +1,31 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-	import { instance, subscribeAndPoll } from '$lib/serverjockeyapi';
+	import { instance, SubscriptionHelper } from '$lib/serverjockeyapi';
 
-  let polling = true;
+  let subs = new SubscriptionHelper();
   let players = [];
+
 	onMount(async function() {
 	  players = await fetch($instance.url + '/players')
-      .then(function(response) { return response.json(); })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
       .catch(function(error) { alert(error); });
-    subscribeAndPoll($instance.url + '/players/subscribe', function(data) {
-	    if (data == null || !polling) return polling;
-	      if (data.event === 'login') {
-	        players = [...players, data.player];
-	      } else if (data.event === 'logout') {
-	        players = players.filter(function(value) {
-	          return value.name != data.player.name;
-	        });
-	      }
-	    return polling;
+    await subs.start($instance.url + '/players/subscribe', function(data) {
+      if (data.event === 'login') {
+        players = [...players, data.player];
+      } else if (data.event === 'logout') {
+        players = players.filter(function(value) {
+          return value.name != data.player.name;
+        });
+      }
+	    return true;
 	  });
 	});
 
 	onDestroy(function() {
-		polling = false;
+		subs.stop();
 	});
 </script>
 

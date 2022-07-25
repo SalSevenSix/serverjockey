@@ -1,22 +1,25 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-	import { baseurl, instance, subscribeAndPoll, serverStatus } from '$lib/serverjockeyapi';
+	import { baseurl, instance, newGetRequest, serverStatus, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   instance.set({});
   serverStatus.set({});
 
   let instances = [];
-  let polling = true;
-	onMount(async function loadInstances() {
-    const result = await fetch(baseurl + '/instances')
-      .then(function(response) { return response.json(); })
+  let subs = new SubscriptionHelper();
+
+	onMount(async function() {
+    const result = await fetch(baseurl + '/instances', newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
       .catch(function(error) { alert(error); });
     Object.keys(result).forEach(function(key) {
       instances = [...instances, { identity: key, module: result[key].module, url: result[key].url }];
     });
-    subscribeAndPoll(baseurl + '/instances/subscribe', function(data) {
-	    if (data == null || !polling) return polling;
+    await subs.start(baseurl + '/instances/subscribe', function(data) {
 	    data.url = baseurl + '/instances/' + data.identity;
 	    let found = false;
 	    let newInstances = [];
@@ -31,12 +34,12 @@
 	      newInstances.push(data);
 	    }
 	    instances = newInstances;
-	    return polling;
+	    return true;
 	  });
   });
 
 	onDestroy(function() {
-		polling = false;
+		subs.stop();
 	});
 
 	function viewInstance() {
@@ -61,7 +64,7 @@
         <tr>
           <td>{instance.identity}</td>
           <td>{instance.module}</td>
-          <td><button id="view-{index}" name={index} class="button is-small is-primary" on:click={viewInstance}>View</button></td>
+          <td><button id="instancelist-view-{index}" name={index} class="button is-small is-primary" on:click={viewInstance}>View</button></td>
         </tr>
       {/each}
     </tbody>

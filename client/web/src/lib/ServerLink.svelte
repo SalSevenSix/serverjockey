@@ -1,30 +1,35 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-  import { baseurl, instance, serverStatus, subscribeServerStatus } from '$lib/serverjockeyapi';
-  import ServerControls from '$lib/ServerControls.svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { baseurl, instance, serverStatus, SubscriptionHelper } from '$lib/serverjockeyapi';
   import ServerStatus from '$lib/ServerStatus.svelte';
+  import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
 
-  instance.set({ url: baseurl + '/instances/serverlink' });
-  serverStatus.set({});
+  instance.set({ url: baseurl + '/instances/serverlink' }); // used by ServerControls
+  serverStatus.set({}); // used by ServerControls
+  let subs = new SubscriptionHelper();
 
-  let polling = true;
 	onMount(async function() {
-	  let initialStatus = await subscribeServerStatus($instance, function(data) {
-	    if (data == null || !polling) return polling;
-	    serverStatus.set(data);
-	    return polling;
-	  });
-	  if (initialStatus.state === 'EXCEPTION') {
+    const result = await fetch(baseurl + '/instances/serverlink/server')
+      .then(function(response) {
+         if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .catch(function(error) { alert('Error: ' + error); });
+	  if (result.state === 'EXCEPTION') {
 		  goto('/setup');
 	  } else {
-	    serverStatus.set(initialStatus);
+	    serverStatus.set(result);
 	  }
+    await subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
+      serverStatus.set(data);
+	    return true;
+	  });
 	});
 
 	onDestroy(function() {
-		polling = false;
+		subs.stop();
 	});
 </script>
 

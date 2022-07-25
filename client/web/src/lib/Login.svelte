@@ -1,9 +1,15 @@
 <script>
-  import { doLogin } from '$lib/serverjockeyapi';
+  import { baseurl, securityToken } from '$lib/serverjockeyapi';
 
-  let value = '';
+  let token = '';
 	function login() {
-	  doLogin(value);
+    if (!token) return;
+    fetch(baseurl + '/check', { method: 'post', headers: { 'X-Secret': token } })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        securityToken.set(token);
+      })
+      .catch(function(error) { alert('Wrong'); });
 	}
 </script>
 
@@ -19,7 +25,7 @@
       <div class="field">
         <label for="login-token" class="label">Enter Login Token</label>
         <div class="control">
-          <input id="login-token" class="input" type="text" bind:value={value} />
+          <input id="login-token" class="input" type="text" bind:value={token} />
         </div>
       </div>
       <div class="field">

@@ -7,104 +7,69 @@ export const instance = writable({});
 export const serverStatus = writable({});
 
 
-export function postText(url, body, callback = noop) {
-  let request = newPostRequest('text/plain');
-  request.body = body;
-  fetch(url, request)
-    .then(callback)
-    .catch(function(error) { alert('Error ' + error); });
-}
+export class SubscriptionHelper {
+  #controller;
+  #running;
 
-export function postServerCommand(instance, command) {
-  fetch(instance.url + '/server/' + command, newPostRequest())
-    .catch(function(error) { alert('Error ' + error); });
-}
+  constructor() {
+    this.#controller = new AbortController();
+    this.#running = false;
+  }
 
-export function createInstance(body, callback = noop) {
-  let request = newPostRequest();
-  request.body = JSON.stringify(body);
-  fetch(baseurl + '/instances', request)
-    .then(callback)
-    .catch(function(error) { alert('Error ' + error); });
-}
+  async start(url, dataHandler) {
+    let pollingUrl = await this.#subscribe(url);
+    this.#running = (pollingUrl != null);
+    this.#poll(pollingUrl, this.#controller.signal, dataHandler);
+  }
 
-export async function subscribeServerStatus(instance, dataHandler) {
-  subscribe(instance.url + '/server/subscribe')
-    .then(function(url) { poll(url, dataHandler); });
-  return await fetchServerStatus(instance);
-}
+  stop() {
+    this.#running = false;
+    this.#controller.abort();
+  }
 
-export async function fetchJson(url) {
-  return await fetch(url, newGetRequest())
-    .then(function(response) { return response.json(); })
-    .catch(function(error) { return 'Error ' + error; });
-}
+  running() {
+    return this.#running;
+  }
 
-export function doLogin(token) {
-  if (!token) return;
-  fetch(baseurl + '/check', { method: 'post', headers: { 'X-Secret': token } })
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      securityToken.set(token);
-    })
-    .catch(function(error) {
-      alert('Login failed');
-      securityToken.set(null);
-    });
-}
-
-async function fetchServerStatus(instance) {
-  return await fetch(instance.url + '/server')
-    .then(function(response) { return response.json(); })
-    .catch(function(error) { return 'Error ' + error; });
-}
-
-export async function subscribeAndPoll(url, dataHandler) {
-  let pollingUrl = await fetch(url, newPostRequest())
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) {
-      return json.url;
-    })
-    .catch(function(error) { alert('Error ' + error); });
-    poll(pollingUrl, dataHandler);
-}
-
-async function subscribe(url) {
-  return await fetch(url, newPostRequest())
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) {
-      return json.url;
-    })
-    .catch(function(error) { alert('Error ' + error); });
-}
-
-async function poll(url, dataHandler) {
-  var polling = (url != null);
-  while (polling) {
-    polling = await fetch(url)
+  async #subscribe(url) {
+    return await fetch(url, newPostRequest())
       .then(function(response) {
-        if (response.status === 404) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);
-        if (response.status === 204) return null;
-        var ct = response.headers.get('Content-Type');
-        if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
-      .then(function(data) {
-        if (data === false) return false;
-        return dataHandler(data);
+      .then(function(json) {
+        return json.url;
       })
-      .catch(function(error) { return false } );
+      .catch(function(error) { alert('Error ' + error); });
+  }
+
+  async #poll(url, signal, dataHandler) {
+    let polling = (url != null);
+    while (this.#running && polling) {
+      polling = await fetch(url, { signal })
+        .then(function(response) {
+          if (response.status === 404) return false;
+          if (!response.ok) throw new Error('Status: ' + response.status);
+          if (response.status === 204) return null;
+          var ct = response.headers.get('Content-Type');
+          if (ct.startsWith('text/plain')) return response.text();
+          return response.json();
+        })
+        .then(function(data) {
+          if (data === false) return false;
+          if (data == null) return true;
+          return dataHandler(data);
+        })
+        .catch(function(error) {
+          return false;
+        });
+    }
+    this.#running = false;
   }
 }
 
-function newGetRequest() {
+
+export function newGetRequest() {
   return {
     method: 'get',
     headers: {
@@ -113,15 +78,11 @@ function newGetRequest() {
   };
 }
 
-function newPostRequest(ct = 'application/json') {
+export function newPostRequest(ct = 'application/json') {
   return {
     method: 'post',
     headers: {
       'Content-Type': ct, 'X-Secret': get(securityToken)
     }
   };
-}
-
-function noop() {
-  return null;
 }

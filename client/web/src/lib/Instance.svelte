@@ -1,20 +1,26 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { instance, serverStatus, subscribeServerStatus } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   serverStatus.set({});
+  let subs = new SubscriptionHelper();
 
-  let polling = true;
 	onMount(async function() {
-	  let status = await subscribeServerStatus($instance, function(data) {
-	    if (data == null || !polling) return polling;
-	    serverStatus.set(data);
-	    return polling;
+    let result = await fetch($instance.url + '/server')
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .catch(function(error) { alert('Error: ' + error); });
+    serverStatus.set(result);
+    await subs.start($instance.url + '/server/subscribe', function(data) {
+      serverStatus.set(data);
+	    return true;
 	  });
-	  serverStatus.set(status);
 	});
+
 	onDestroy(function() {
-		polling = false;
+		subs.stop();
 	});
 </script>
 

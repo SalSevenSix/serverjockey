@@ -1,18 +1,28 @@
 <script>
   import { onMount } from 'svelte';
-  import { instance, fetchJson, postText } from '$lib/serverjockeyapi';
+  import { instance, newPostRequest } from '$lib/serverjockeyapi';
 
-  let data = {};
+  let serverLinkForm = {};
+  let applying = false;
+
 	onMount(async function() {
-    data = await fetchJson($instance.url + '/config');
+    serverLinkForm = await fetch($instance.url + '/config')
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .catch(function(error) { alert('Error: ' + error); });
 	});
 
-  let applying = false;
 	function apply() {
-	  applying = true;
-	  postText($instance.url + '/config', JSON.stringify(data), function() {
-	    applying = false;
-	  });
+    let request = newPostRequest('text/plain');
+    request.body = JSON.stringify(serverLinkForm);
+    fetch($instance.url + '/config', request)
+      .then(function(response) {
+        applying = false;
+        if (!response.ok) throw new Error('Status: ' + response.status);
+      })
+      .catch(function(error) { alert('Error ' + error); });
 	}
 </script>
 
@@ -21,31 +31,31 @@
   <div class="field">
     <label for="bot-token" class="label">Discord Bot Token</label>
     <div class="control">
-      <input id="bot-token" class="input" type="text" bind:value={data.BOT_TOKEN}>
+      <input id="bot-token" class="input" type="text" bind:value={serverLinkForm.BOT_TOKEN}>
     </div>
   </div>
   <div class="field">
     <label for="log-channel" class="label">Log Channel ID</label>
     <div class="control">
-      <input id="log-channel" class="input" type="text" bind:value={data.EVENTS_CHANNEL_ID}>
+      <input id="log-channel" class="input" type="text" bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
     </div>
   </div>
   <div class="field">
     <label for="command-character" class="label">Command Character</label>
     <div class="control">
-      <input id="command-character" class="input" type="text" bind:value={data.CMD_PREFIX}>
+      <input id="command-character" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
     </div>
   </div>
   <div class="field">
     <label for="admin-role" class="label">Admin Role</label>
     <div class="control">
-      <input id="admin-role" class="input" type="text" bind:value={data.ADMIN_ROLE}>
+      <input id="admin-role" class="input" type="text" bind:value={serverLinkForm.ADMIN_ROLE}>
     </div>
   </div>
   <div class="field">
     <label for="whitelist-dm" class="label">Whitelist DM</label>
     <div class="control">
-      <textarea id="whitelist-dm" class="textarea" bind:value={data.WHITELIST_DM}></textarea>
+      <textarea id="whitelist-dm" class="textarea" bind:value={serverLinkForm.WHITELIST_DM}></textarea>
     </div>
   </div>
   <div class="field">

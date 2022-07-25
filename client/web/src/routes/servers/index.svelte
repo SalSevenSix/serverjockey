@@ -1,6 +1,14 @@
 <script>
-	import Instances from '$lib/Instances.svelte';
+  import CreateInstance from '$lib/CreateInstance.svelte';
+  import InstanceList from '$lib/InstanceList.svelte';
 </script>
 
 
-<Instances />
+<div class="columns">
+  <div class="column">
+    <CreateInstance />
+  </div>
+  <div class="column">
+    <InstanceList />
+  </div>
+</div>
