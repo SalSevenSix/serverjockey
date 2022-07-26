@@ -19,7 +19,7 @@ class Statics:
             raise err.HTTPNotFound
         response = web.Response()
         response.headers.add(httpabc.CONTENT_TYPE, resource.content_type().content_type())
-        response.headers.add(httpabc.CACHE_CONTROL, httpabc.CACHE_CONTROL_MAXIMUM)
+        response.headers.add(httpabc.CACHE_CONTROL, 'max-age=3600')   # One hour
         if headers.accepts_encoding(httpabc.GZIP) and resource.compress():
             response.headers.add(httpabc.CONTENT_ENCODING, httpabc.GZIP)
             body = resource.compressed()

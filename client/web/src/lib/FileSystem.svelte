@@ -31,11 +31,8 @@
         return response.json();
       })
       .catch(function(error) {
-        if (url === root) {
-          alert(error);
-        } else {
-          update(root);
-        }
+        if (url === root) return [];
+        update(root);
       });
       pwd = url;
   }
@@ -64,10 +61,17 @@
       </tr>
     </thead>
     <tbody>
+      {#if pwd === root && paths.length === 0}
+        <tr>
+          <td></td>
+          <td><button name="reload" class="button is-small" on:click={rootDirectory}>RELOAD</button></td>
+          <td></td>
+        </tr>
+      {/if}
       {#if pwd != root}
         <tr>
-          <td><a href="#" on:click|preventDefault={upDirectory}>[ROOT]</a></td>
-          <td><a href="#" on:click|preventDefault={upDirectory}>[UP]</a> {pwd.substring(root.length)}</td>
+          <td><button name="root" class="button is-small" on:click={rootDirectory}>ROOT</button></td>
+          <td><button name="up" class="button is-small" on:click={upDirectory}>UP</button> {pwd.substring(root.length)}</td>
           <td></td>
         </tr>
       {/if}

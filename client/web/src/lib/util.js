@@ -1,6 +1,15 @@
 
+export function sleep(millis) {
+  return new Promise(function(resolve) { setTimeout(resolve, millis); });
+}
+
+export function capitalizeKebabCase(value) {
+  if (typeof value != 'string') return '';
+  return value.split('-').map(capitalize).join(' ');
+}
+
 export function capitalize(value) {
-  if (typeof value !== 'string') return '';
+  if (typeof value != 'string') return '';
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
@@ -20,4 +29,31 @@ export function humanFileSize(bytes, si=false, dp=1) {
     ++u;
   } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
   return bytes.toFixed(dp) + ' ' + units[u];
+}
+
+export class ReverseRollingLog {
+  #lines;
+
+  constructor() {
+    this.#lines = [];
+  }
+
+  set(text) {
+    this.#lines = text.split('\n');
+    this.#lines.reverse();
+    return this;
+  }
+
+  append(text) {
+    let newLines = text.split('\n');
+    newLines.reverse();
+    this.#lines = [...newLines, ...this.#lines];
+    newLines = null;   // free memory
+    while (this.#lines.length > 200) { this.#lines.pop(); }
+    return this;
+  }
+
+  toText() {
+    return this.#lines.join('\n');
+  }
 }

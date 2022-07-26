@@ -34,7 +34,7 @@ export function openFileInNewTab(url) {
     .then(function(blob) {
       window.open(window.URL.createObjectURL(blob)).focus();
     })
-    .catch(function(error) { alert(error); });
+    .catch(function(error) { alert('No data!'); });
 }
 
 export class SubscriptionHelper {
@@ -48,8 +48,12 @@ export class SubscriptionHelper {
 
   async start(url, dataHandler) {
     let pollingUrl = await this.#subscribe(url);
+    return this.poll(pollingUrl, dataHandler);
+  }
+
+  poll(pollingUrl, dataHandler) {
     this.#running = (pollingUrl != null);
-    this.#poll(pollingUrl, this.#controller.signal, dataHandler);
+    return this.#doPoll(pollingUrl, this.#controller.signal, dataHandler);
   }
 
   stop() {
@@ -73,7 +77,7 @@ export class SubscriptionHelper {
       .catch(function(error) { alert('Error ' + error); });
   }
 
-  async #poll(url, signal, dataHandler) {
+  async #doPoll(url, signal, dataHandler) {
     let polling = (url != null);
     while (this.#running && polling) {
       polling = await fetch(url, { signal })

@@ -8,16 +8,27 @@
   let configText = '';
 
 	onMount(async function() {
-	  configText = await fetch($instance.url + path, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.text();
-      })
-      .catch(function(error) { alert(error); });
+	  reload();
 	});
 
 	function openConfigFile() {
 	  openFileInNewTab($instance.url + path);
+	}
+
+	function clear() {
+	  configText = '';
+	}
+
+	function reload() {
+	  updating = true;
+	  fetch($instance.url + path, newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.text();
+      })
+      .then(function(text) { configText = text; })
+      .catch(function(error) { clear(); })
+      .finally(function() { updating = false; });
 	}
 
 	function update() {
@@ -40,7 +51,9 @@
     </div>
   </div>
   <div class="field">
-    <div class="control">
+    <div class="control buttons">
+      <button disabled={updating} name="clear" class="button is-danger" on:click={clear}>Clear</button>
+      <button disabled={updating} name="reload" class="button is-warning" on:click={reload}>Reload</button>
       <button disabled={updating} name="update" class="button is-primary" on:click={update}>Update</button>
     </div>
   </div>

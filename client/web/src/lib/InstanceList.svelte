@@ -64,7 +64,7 @@
         <tr>
           <td>{instance.identity}</td>
           <td>{instance.module}</td>
-          <td><button id="instancelist-view-{index}" name={index} class="button is-small is-primary" on:click={viewInstance}>View</button></td>
+          <td><button id="instancelist-view-{index}" name={index} class="button is-primary" on:click={viewInstance}>View</button></td>
         </tr>
       {/each}
     </tbody>

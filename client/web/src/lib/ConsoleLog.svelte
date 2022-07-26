@@ -1,9 +1,10 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { ReverseRollingLog } from '$lib/util';
 	import { instance, SubscriptionHelper, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
-  let logLines = [];
+  let logLines = new ReverseRollingLog();
   let logText = '';
 
 	onMount(async function() {
@@ -13,15 +14,9 @@
         return response.text();
       })
       .catch(function(error) { alert(error); });
-    logLines = result.split('\n');
-    logLines.reverse();
-    logText = logLines.join('\n');
+    logText = logLines.set(result).toText();
     await subs.start($instance.url + '/log/subscribe', function(data) {
-	    let newLines = data.split('\n');
-	    newLines.reverse();
-	    logLines = [...newLines, ...logLines];
-	    while (logLines.length > 200) { logLines.pop(); }
-	    logText = logLines.join('\n');
+	    logText = logLines.append(data).toText();
 	    return true;
 	  });
 	});
