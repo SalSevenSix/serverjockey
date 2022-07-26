@@ -1,4 +1,6 @@
+import logging
 import gzip
+import re
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util
 from core.context import contextsvc
@@ -24,10 +26,13 @@ class HttpService:
             web.post('/{tail:.*}', self._handle)])
 
     def run(self):
+        access_logger = logging.getLogger('aiohttp.access')
+        access_logger.addFilter(_AccessLogFilter())
         web.run_app(
             self._app,
             host=self._context.config('host'),
             port=self._context.config('port'),
+            access_log=access_logger,
             shutdown_timeout=100.0)
 
     # noinspection PyUnusedLocal
@@ -179,3 +184,10 @@ class _RequestByteStream(httpabc.ByteStream):
 
     async def read(self, length: int = -1) -> bytes:
         return await self._stream.read(length)
+
+
+class _AccessLogFilter(logging.Filter):
+    REGEX = re.compile('.*GET.*/subscriptions/.*HTTP/1.1" (204|200).*')
+
+    def filter(self, record):
+        return _AccessLogFilter.REGEX.match(record.getMessage()) is None

@@ -67,7 +67,7 @@
       {#if pwd != root}
         <tr>
           <td><a href="#" on:click|preventDefault={upDirectory}>[ROOT]</a></td>
-          <td><a href="#" on:click|preventDefault={upDirectory}>[UP]</a></td>
+          <td><a href="#" on:click|preventDefault={upDirectory}>[UP]</a> {pwd.substring(root.length)}</td>
           <td></td>
         </tr>
       {/if}

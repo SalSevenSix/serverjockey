@@ -9,7 +9,7 @@
 </script>
 
 
-<div class="block">
+<div class="block buttons">
   <button id="servercontrols-daemon" name="daemon" class="button is-success" disabled={$serverStatus.running} on:click={executeCommand}>Daemon</button>
   <button id="servercontrols-start" name="start" class="button is-primary" disabled={$serverStatus.running} on:click={executeCommand}>Start</button>
   <button id="servercontrols-restart" name="restart" class="button is-warning" disabled={!$serverStatus.running} on:click={executeCommand}>Restart</button>

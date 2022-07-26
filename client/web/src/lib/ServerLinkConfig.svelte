@@ -15,14 +15,13 @@
 	});
 
 	function apply() {
+	  applying = true;
     let request = newPostRequest('text/plain');
     request.body = JSON.stringify(serverLinkForm);
     fetch($instance.url + '/config', request)
-      .then(function(response) {
-        applying = false;
-        if (!response.ok) throw new Error('Status: ' + response.status);
-      })
-      .catch(function(error) { alert('Error ' + error); });
+      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .catch(function(error) { alert('Error ' + error); })
+      .finally(function() { applying = false; });
 	}
 </script>
 

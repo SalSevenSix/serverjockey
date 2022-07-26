@@ -7,6 +7,36 @@ export const instance = writable({});
 export const serverStatus = writable({});
 
 
+export function newGetRequest() {
+  return {
+    method: 'get',
+    headers: {
+      'X-Secret': get(securityToken)
+    }
+  };
+}
+
+export function newPostRequest(ct = 'application/json') {
+  return {
+    method: 'post',
+    headers: {
+      'Content-Type': ct, 'X-Secret': get(securityToken)
+    }
+  };
+}
+
+export function openFileInNewTab(url) {
+  fetch(url, newGetRequest())
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      return response.blob();
+    })
+    .then(function(blob) {
+      window.open(window.URL.createObjectURL(blob)).focus();
+    })
+    .catch(function(error) { alert(error); });
+}
+
 export class SubscriptionHelper {
   #controller;
   #running;
@@ -66,23 +96,4 @@ export class SubscriptionHelper {
     }
     this.#running = false;
   }
-}
-
-
-export function newGetRequest() {
-  return {
-    method: 'get',
-    headers: {
-      'X-Secret': get(securityToken)
-    }
-  };
-}
-
-export function newPostRequest(ct = 'application/json') {
-  return {
-    method: 'post',
-    headers: {
-      'Content-Type': ct, 'X-Secret': get(securityToken)
-    }
-  };
 }

@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-	import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+	import { instance, SubscriptionHelper, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let logLines = [];
@@ -31,20 +31,16 @@
 	});
 
 	function openConsoleLog() {
-    fetch($instance.url + '/log', newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.blob();
-      })
-      .then(function(blob) {
-        window.open(window.URL.createObjectURL(blob)).focus();
-      })
-      .catch(function(error) { alert(error); });
-  }
+	  openFileInNewTab($instance.url + '/log');
+	}
 </script>
 
 
 <div class="block">
-  <h5 class="title is-5"><a href="#" on:click|preventDefault={openConsoleLog}>Console Log</a></h5>
-  <textarea class="textarea" readonly>{logText}</textarea>
+  <div class="field">
+    <label for="console-log" class="label"><a href="#" on:click|preventDefault={openConsoleLog}>Console Log</a></label>
+    <div class="control pr-6">
+      <textarea id="console-log" class="textarea" readonly>{logText}</textarea>
+    </div>
+  </div>
 </div>
