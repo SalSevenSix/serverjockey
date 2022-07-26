@@ -4,6 +4,7 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
+  import FileSystem from '$lib/FileSystem.svelte';
 </script>
 
 
@@ -20,6 +21,7 @@
         </div>
       </div>
       <ConsoleLog />
+      <FileSystem />
     </div>
   </div>
 </Instance>

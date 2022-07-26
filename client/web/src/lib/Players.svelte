@@ -1,12 +1,12 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-	import { instance, SubscriptionHelper } from '$lib/serverjockeyapi';
+	import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let players = [];
 
 	onMount(async function() {
-	  players = await fetch($instance.url + '/players')
+	  players = await fetch($instance.url + '/players', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -30,7 +30,7 @@
 </script>
 
 
-<div class="column">
+<div class="block">
   <table class="table">
     <thead>
       <tr>

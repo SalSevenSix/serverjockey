@@ -1,13 +1,13 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-	import { instance, SubscriptionHelper } from '$lib/serverjockeyapi';
+	import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let logLines = [];
   let logText = '';
 
 	onMount(async function() {
-	  let result = await fetch($instance.url + '/log/tail')
+	  let result = await fetch($instance.url + '/log/tail', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
@@ -29,9 +29,22 @@
 	onDestroy(function() {
 		subs.stop();
 	});
+
+	function openConsoleLog() {
+    fetch($instance.url + '/log', newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.blob();
+      })
+      .then(function(blob) {
+        window.open(window.URL.createObjectURL(blob)).focus();
+      })
+      .catch(function(error) { alert(error); });
+  }
 </script>
 
 
-<div class="column">
+<div class="block">
+  <h5 class="title is-5"><a href="#" on:click|preventDefault={openConsoleLog}>Console Log</a></h5>
   <textarea class="textarea" readonly>{logText}</textarea>
 </div>

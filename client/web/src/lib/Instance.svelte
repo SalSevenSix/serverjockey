@@ -1,12 +1,12 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { instance, serverStatus, SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   serverStatus.set({});
   let subs = new SubscriptionHelper();
 
 	onMount(async function() {
-    let result = await fetch($instance.url + '/server')
+    let result = await fetch($instance.url + '/server', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -37,7 +37,3 @@
     <p>No instance set</p>
   </div>
 {/if}
-
-<div class="content">
-  <p><a href="/servers">BACK</a> to Servers</p>
-</div>

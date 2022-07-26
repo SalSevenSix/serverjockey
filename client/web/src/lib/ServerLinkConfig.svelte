@@ -1,12 +1,12 @@
 <script>
   import { onMount } from 'svelte';
-  import { instance, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
   let serverLinkForm = {};
   let applying = false;
 
 	onMount(async function() {
-    serverLinkForm = await fetch($instance.url + '/config')
+    serverLinkForm = await fetch($instance.url + '/config', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();

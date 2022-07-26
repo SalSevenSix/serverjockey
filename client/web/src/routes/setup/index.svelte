@@ -1,7 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import { onMount, onDestroy } from 'svelte';
-  import { baseurl, instance, serverStatus, SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { baseurl, instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
@@ -11,7 +11,7 @@
   let subs = new SubscriptionHelper();
 
 	onMount(async function() {
-    const result = await fetch(baseurl + '/instances/serverlink/server')
+    const result = await fetch(baseurl + '/instances/serverlink/server', newGetRequest())
       .then(function(response) {
          if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
