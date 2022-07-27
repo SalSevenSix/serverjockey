@@ -115,10 +115,13 @@ class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         return httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):
+        path = self._path + '/' + data[self._tail] if self._tail else self._path
         body = util.get('body', data)
         if not body:
+            if await util.file_exists(path):
+                await util.delete_file(path)
+                return httpabc.ResponseBody.NO_CONTENT
             return httpabc.ResponseBody.BAD_REQUEST
-        path = self._path + '/' + data[self._tail] if self._tail else self._path
         if await util.directory_exists(path):
             return httpabc.ResponseBody.BAD_REQUEST
         # TODO check leaf directory exists

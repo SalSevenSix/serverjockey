@@ -13,6 +13,7 @@ class Deployment:
         self._mailer = context
         self._world_name = 'servertest'
         self._home_dir = context.config('home')
+        self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._executable = self._runtime_dir + '/start-server.sh'
         self._jvm_config_file = self._runtime_dir + '/ProjectZomboid64.json'
@@ -37,6 +38,9 @@ class Deployment:
                 msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START)),
             svrext.ServerRunningLock(
                 self._mailer,
+                msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START)),
+            svrext.ServerRunningLock(
+                self._mailer,
                 msgext.SyncWrapper(self._mailer, _DeploymentWiper(self), msgext.SyncReply.AT_END))
         )))
 
@@ -45,15 +49,24 @@ class Deployment:
         conf_pre = self._config_dir + '/' + self._world_name
         archive_selector = httpsubs.Selector(
             msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
-            completed_filter=msgftr.DataStrContains('Archive created'),
+            completed_filter=msgftr.DataEquals('END Archive Directory'),
+            aggregator=aggtrf.StrJoin('\n'))
+        unpacker_selector = httpsubs.Selector(
+            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
+            completed_filter=msgftr.DataEquals('END Unpack Directory'),
             aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
             .push('deployment') \
             .append('install-runtime', _InstallRuntimeHandler(self._mailer, self._runtime_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST, {'path': self._runtime_dir}, archive_selector)) \
+                self._mailer, msgext.Archiver.REQUEST,
+                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
             .append('backup-world', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST, {'path': self._world_dir}, archive_selector)) \
+                self._mailer, msgext.Archiver.REQUEST,
+                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, archive_selector)) \
+            .append('restore-backup', httpext.MessengerHandler(
+                self._mailer, msgext.Unpacker.REQUEST,
+                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, unpacker_selector)) \
             .append('wipe-world-all', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._world_dir})) \
             .append('wipe-world-playerdb', httpext.MessengerHandler(
@@ -67,6 +80,9 @@ class Deployment:
             .push('logs', httpext.FileSystemHandler(self._logs_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path')) \
             .pop() \
+            .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
+            .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path')) \
+            .pop() \
             .push('config', ) \
             .append('db', httpext.FileSystemHandler(self._playerdb_file)) \
             .append('jvm', httpext.MessengerConfigHandler(self._mailer, self._jvm_config_file)) \
@@ -76,6 +92,7 @@ class Deployment:
             .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua'))
 
     async def build_world(self):
+        await util.create_directory(self._backups_dir)
         await util.create_directory(self._world_dir)
         await util.create_directory(self._playerdb_dir)
         await util.create_directory(self._config_dir)

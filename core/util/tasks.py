@@ -32,3 +32,12 @@ def task_start(coro: typing.Coroutine, name: str) -> asyncio.Task:
 
 def task_end(task: asyncio.Task):
     _Tasker.instance().task_end(task)
+
+
+async def wait_for(task: asyncio.Task, timeout: float):
+    if not task:
+        return
+    try:
+        await asyncio.wait_for(task, timeout)
+    except asyncio.TimeoutError:
+        task.cancel()

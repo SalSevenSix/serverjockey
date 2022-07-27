@@ -13,7 +13,7 @@ def p(line):
 def fork():
     while True:
         p('### Ingametime ' + repr(int(time.time() * 1000.0) + 1))
-        time.sleep(10)
+        time.sleep(60)
 
 
 def main():

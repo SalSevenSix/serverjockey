@@ -8,6 +8,7 @@
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
+  import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
 
   let deploymentActions = {
     'wipe-world-save': 'Reset the game world save only.',
@@ -45,6 +46,9 @@
       <h2 class="title is-5">Deployment</h2>
       <InstallRuntime qualifierName="Beta" showLog />
       <DeploymentActions actions={deploymentActions} />
+      <hr />
+      <h2 class="title is-5">Backups</h2>
+      <BackupRestoreActions />
       <hr />
     </div>
   </div>

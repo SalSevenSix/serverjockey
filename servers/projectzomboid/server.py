@@ -48,7 +48,7 @@ class Server(svrabc.Server):
             .run()
 
     async def stop(self):
-        # TODO consider timeout and terminate
+        # TODO consider how a terminate could work
         await proch.PipeInLineService.request(self._context, self, 'quit')
 
 

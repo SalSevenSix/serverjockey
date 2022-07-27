@@ -68,7 +68,7 @@ class ServerService(msgabc.AbcSubscriber):
     async def _run(self):
         controller = _RunController(True, False, False)
         while controller.looping():
-            if controller.daemon() and self._queue.qsize() == 0:
+            if controller.daemon() and self._queue.empty():
                 self._running = controller.call_run()
             else:
                 controller.update(await self._queue.get())  # blocking
@@ -87,40 +87,59 @@ class ServerService(msgabc.AbcSubscriber):
                     controller.check_uptime(util.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
 
-    # TODO should wait_for server.stop() then SIGKILL if needed
     async def handle(self, message):
         action = message.name()
         if not self._running and action is ServerService.DAEMON:
             self._queue.put_nowait(_RunController(True, True, True))
-            await self._queue.join()
+            await self._queue_join()
             return None
         if not self._running and action is ServerService.START:
             self._queue.put_nowait(_RunController(True, True, False))
-            await self._queue.join()
+            await self._queue_join()
             return None
         if self._running and action is ServerService.RESTART:
             self._queue.put_nowait(_RunController(True, True, None))
-            await self._server.stop()
-            await self._queue.join()
+            await self._server_stop()
+            await self._queue_join()
             return None
         if self._running and action is ServerService.STOP:
             self._queue.put_nowait(_RunController(True, False, False))
-            await self._server.stop()
-            await self._queue.join()
+            await self._server_stop()
+            await self._queue_join()
             return None
         if action in (ServerService.DELETE, ServerService.SHUTDOWN):
             self._queue.put_nowait(_RunController(False, False, False))
-            if self._running:
-                await self._server.stop()
-            await self._queue.join()
-            if self._task:
-                await self._task
+            await self._server_stop()
+            await self._queue_join()
+            await tasks.wait_for(self._task, 20.0)
             if action is ServerService.DELETE:
                 self._context.post(self, ServerService.DELETE_ME, self._context)
             if action is ServerService.SHUTDOWN:
                 self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
             return True
         return None
+
+    async def _server_stop(self):
+        if not self._running:
+            return
+        try:
+            await asyncio.wait_for(self._server.stop(), 20.0)
+        except asyncio.TimeoutError:
+            pass
+
+    async def _queue_join(self):
+        try:
+            await asyncio.wait_for(self._queue.join(), 20.0)
+        except asyncio.TimeoutError:
+            self._queue_clear()
+
+    def _queue_clear(self):
+        # noinspection PyBroadException
+        try:
+            self._queue.get_nowait()
+            self._queue.task_done()
+        except Exception:
+            pass
 
 
 class ServerStatus(msgabc.AbcSubscriber):

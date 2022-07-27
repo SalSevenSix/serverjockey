@@ -609,8 +609,8 @@ UPnP=false</pre>
   </p>
   <figure><img src="/instructions/vb_syscpu.png" alt="ZomBox CPU" /></figure>
   <p>
-    The Project Zomboid server that runs inside ZomBox also as a memory allocation.
-    You can find this in the <span class="is-family-monospace">ProjectZomboid64.json</span> file.
+    The Project Zomboid server that runs inside ZomBox also has a memory allocation.
+    This is defined in the <span class="is-family-monospace">ProjectZomboid64.json</span> file.
     Find the <span class="has-text-weight-bold">-Xmx</span>
     argument under <span class="has-text-weight-bold">vmArgs</span>.
     By default 8Gb is allocated. You can adjust as needed.

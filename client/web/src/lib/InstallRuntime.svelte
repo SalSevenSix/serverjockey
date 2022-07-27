@@ -23,7 +23,7 @@
 	function install() {
 	  if (!confirm('Are you sure you want to Install Runtime ?')) return;
 	  installing = true;
-	  logText = '';
+	  logText = logLines.reset().toText();
     let request = newPostRequest();
     let body = { wipe: true, validate: true };
     if (qualifier) { body.beta = qualifier; }

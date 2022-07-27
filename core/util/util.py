@@ -30,6 +30,7 @@ _listdir = _wrap(os.listdir)
 _islinkfile = _wrap(os.path.islink)
 _rmtree = _wrap(shutil.rmtree)
 _make_archive = _wrap(shutil.make_archive)
+_unpack_archive = _wrap(shutil.unpack_archive)
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -256,20 +257,35 @@ async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typ
     return result
 
 
-async def archive_directory(path: str, logger=None) -> str:
-    assert await directory_exists(path)
-    parts = path.split('/')
-    if parts[-1] == '':
-        del parts[-1]   # chop trailing '/'
-    root_dir = '/'.join(parts)
-    filename = parts[-1] + '-' + str(now_millis())
-    del parts[-1]  # chop leaf dir
-    parts.append(filename)
-    filepath = '/'.join(parts)
-    await _make_archive(filepath, 'zip', root_dir=root_dir, logger=logger)
+async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -> str:
+    if unpacked_dir[-1] == '/':
+        unpacked_dir = unpacked_dir[:-1]
+    assert await directory_exists(unpacked_dir)
+    if archives_dir[-1] == '/':
+        archives_dir = archives_dir[:-1]
+    assert await directory_exists(archives_dir)
+    archive = archives_dir + '/' + unpacked_dir.split('/')[-1] + '-' + str(now_millis())
     if logger:
-        logger.info('Archive created: ' + filepath + '.zip')
-    return filepath
+        logger.info('START Archive Directory')
+    result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)
+    if logger:
+        logger.info('Created ' + result)
+        logger.info('END Archive Directory')
+    return result
+
+
+async def unpack_directory(archive: str, unpack_dir: str, logger=None):
+    assert await file_exists(archive)
+    if unpack_dir[-1] == '/':
+        unpack_dir = unpack_dir[:-1]
+    if await directory_exists(unpack_dir):
+        await delete_directory(unpack_dir)
+    await create_directory(unpack_dir)
+    if logger:
+        logger.info('START Unpack Directory')
+    await _unpack_archive(archive, unpack_dir)
+    if logger:
+        logger.info('END Unpack Directory')
 
 
 async def create_directory(path: str):

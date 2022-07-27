@@ -38,6 +38,11 @@ export class ReverseRollingLog {
     this.#lines = [];
   }
 
+  reset() {
+    this.#lines = [];
+    return this;
+  }
+
   set(text) {
     this.#lines = text.split('\n');
     this.#lines.reverse();
@@ -46,14 +51,21 @@ export class ReverseRollingLog {
 
   append(text) {
     let newLines = text.split('\n');
+    if (newLines.length > 200) {
+      this.#lines = newLines.slice(-200);
+      this.#lines.reverse();
+      return this;
+    }
     newLines.reverse();
     this.#lines = [...newLines, ...this.#lines];
-    newLines = null;   // free memory
-    while (this.#lines.length > 200) { this.#lines.pop(); }
+    if (this.#lines > 200) {
+      this.#lines = this.#lines.slice(0, 200);
+    }
     return this;
   }
 
   toText() {
+    if (this.#lines === 0) return '';
     return this.#lines.join('\n');
   }
 }

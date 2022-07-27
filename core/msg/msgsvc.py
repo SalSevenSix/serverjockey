@@ -32,7 +32,7 @@ class TaskMailer(msgabc.Mailer):
             if message is msgabc.STOP or self._subscriber.accepts(message):
                 self._queue.put_nowait(message)
         except Exception as e:
-            logging.warning('Posting exception. raised: %s', e)
+            logging.warning('Posting exception. raised: %s', repr(e))
         return self.is_running()
 
     async def stop(self):

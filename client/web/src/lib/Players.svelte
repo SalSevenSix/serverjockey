@@ -1,9 +1,14 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-	import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+	import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let players = [];
+
+  $: serverRunningChange($serverStatus.running);
+  function serverRunningChange(running) {
+    players = [];
+  }
 
 	onMount(async function() {
 	  players = await fetch($instance.url + '/players', newGetRequest())

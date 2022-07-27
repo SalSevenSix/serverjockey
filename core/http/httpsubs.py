@@ -109,7 +109,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         self._completed_filter = selector.completed_filter
         self._poll_timeout = 60.0
         self._inactivity_timeout = 120.0
-        self._queue = asyncio.Queue(maxsize=1000)
+        self._queue = asyncio.Queue(maxsize=10000)
         self._time_last_activity = time.time()
 
     def handle(self, message):

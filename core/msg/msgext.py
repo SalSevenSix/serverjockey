@@ -320,11 +320,38 @@ class Archiver(msgabc.AbcSubscriber):
         self._mailer = mailer
 
     async def handle(self, message):
-        path = util.get('path', message.data())
-        if path is None:
-            raise Exception('No path given')
+        source_dir = util.get('source_dir', message.data())
+        if source_dir is None:
+            raise Exception('No source_dir')
+        backups_dir = util.get('backups_dir', message.data())
+        if backups_dir is None:
+            raise Exception('No backups_dir')
         logger = LoggingPublisher(self._mailer, message.source())
-        await util.archive_directory(path, logger)
+        await util.archive_directory(source_dir, backups_dir, logger)
+        return None
+
+
+class Unpacker(msgabc.AbcSubscriber):
+    REQUEST = 'Unpacker.Request'
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.NameIs(Unpacker.REQUEST))
+        self._mailer = mailer
+
+    async def handle(self, message):
+        root_dir = util.get('root_dir', message.data())
+        if root_dir is None or not await util.directory_exists(root_dir):
+            raise Exception('No root_dir')
+        backups_dir = util.get('backups_dir', message.data())
+        if backups_dir is None or not await util.directory_exists(backups_dir):
+            raise Exception('No backups_dir')
+        filename = util.get('filename', message.data())
+        if filename is None:
+            raise Exception('No filename')
+        archive = backups_dir + '/' + filename
+        unpack_dir = root_dir + '/' + filename.split('.')[0].split('-')[0]
+        logger = LoggingPublisher(self._mailer, message.source())
+        await util.unpack_directory(archive, unpack_dir, logger)
         return None
 
 
