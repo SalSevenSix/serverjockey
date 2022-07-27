@@ -33,9 +33,9 @@ class OptionLoader:
             self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('List of Server Options:'), include_start=False,
-                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True))
+                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True, timeout=10.0))
         options = []
-        if not response:
+        if not util.iterable(response):
             return options
         for line in iter([m.data() for m in response]):
             if line.startswith('* '):
@@ -81,9 +81,9 @@ class PlayerLoader:
             self._mailer, self._source, 'players', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
-                stop_filter=msgftr.DataEquals(''), include_stop=False))
+                stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=10.0))
         players = []
-        if not response:
+        if not util.iterable(response):
             return players
         playerstore = await pls.PlayerStoreService.get(self._mailer, self._source)
         for line in iter([m.data() for m in response]):

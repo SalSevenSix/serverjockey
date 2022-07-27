@@ -43,6 +43,7 @@ def main():
             p('Players connected ({}):'.format(len(players)))
             for player in players:
                 p('-{}'.format(player))
+                time.sleep(5)
             p('')
             p('### some more junk')
         elif line == 'showoptions':

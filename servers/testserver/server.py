@@ -67,7 +67,7 @@ class _PlayersHandler(httpabc.AsyncGetHandler):
             self._context, self, 'players', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
-                stop_filter=msgftr.DataEquals(''), include_stop=False))
+                stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=5.0))
         result = []
         if not util.iterable(response):
             return result
