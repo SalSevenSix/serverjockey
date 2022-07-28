@@ -28,7 +28,7 @@ class SystemService:
             .push('system') \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
-            .append('check', httpext.NoopPostHandler()) \
+            .append('login', httpext.LoginHandler(context.config('secret'))) \
             .push('instances', _InstancesHandler(self)) \
             .append('subscribe', subs.handler(SystemService.SERVER_FILTER, msgtrf.DataAsDict())) \
             .pop() \

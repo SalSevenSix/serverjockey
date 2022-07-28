@@ -119,6 +119,9 @@ class _RequestHandler:
             response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
         elif httpabc.WEBDEV_ORIGIN == self._headers.get(httpabc.ORIGIN):
             response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.WEBDEV_ORIGIN)
+        if body == self._context.config('secret'):   # TODO Do this properly
+            response.set_cookie('secret', body, max_age=36000, httponly=True)
+            body = httpabc.ResponseBody.NO_CONTENT
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
             response.headers.add(httpabc.CONTENT_TYPE, httpabc.MIME_APPLICATION_JSON)

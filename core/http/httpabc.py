@@ -253,6 +253,7 @@ _CONTENT_TYPES = {
 class HeadersTool:
 
     def __init__(self, request: webabc.Request):
+        self._request = request
         self._headers = request.headers
 
     def get(self, key: str) -> str:
@@ -260,6 +261,8 @@ class HeadersTool:
 
     def is_secure(self, secret: str) -> bool:
         value = self.get(X_SECRET)
+        if value is None:
+            value = self._request.cookies.get('secret')
         return value is not None and value == secret
 
     def get_content_length(self) -> int:

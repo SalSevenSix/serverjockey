@@ -7,10 +7,13 @@ from core.msg import msgabc, msgext, msgftr
 from core.http import httpabc, httpsubs
 
 
-class NoopPostHandler(httpabc.PostHandler):
+class LoginHandler(httpabc.PostHandler):
+
+    def __init__(self, secret: str):
+        self._secret = secret
 
     def handle_post(self, resource, data):
-        return httpabc.ResponseBody.NO_CONTENT
+        return self._secret
 
 
 class MessengerHandler(httpabc.AsyncPostHandler):

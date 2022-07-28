@@ -4,7 +4,7 @@
   let token = '';
 	function login() {
     if (!token) return;
-    fetch(baseurl + '/check', { method: 'post', headers: { 'X-Secret': token } })
+    fetch(baseurl + '/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);
