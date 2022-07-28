@@ -1,30 +1,8 @@
 <script>
-  import { capitalizeKebabCase } from '$lib/util';
+  import { capitalizeKebabCase, stringToBase10 } from '$lib/util';
+	import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
 
-  let commands = {
-    'world': {
-      'broadcast': [
-        {input: 'text', type: 'string', name: 'message'}
-      ],
-      'chopper': []
-    },
-    'player': {
-      'give-xp': [
-        {input: 'text', type: 'string', name: 'player', as: 'action'},
-        {input: 'radio', type: 'string', name: 'skill', options: ['Aim', 'Carpentry', 'Cooking']},
-        {input: 'text', type: 'number', name: 'xp'}
-      ],
-      'kick': [
-        {input: 'text', type: 'string', name: 'player'}
-      ],
-      'tele-to': []
-    },
-    'whitelist': {
-      'add': [],
-      'remove': []
-    },
-  };
-
+  export let commands;
 	let command = null;
 	let action = null;
 	let args = [null, null, null, null, null, null, null, null, null, null];
@@ -41,25 +19,35 @@
 	}
 
 	function send() {
-	  let url = '/' + command + '/' + action;
-	  let data = {};
+	  let path = '/' + command;
+	  let body = {};
     commands[command][action].forEach(function(value, index) {
-      if (value.type === 'number') {
-        data[value.name] = parseInt(args[index]);
+      if (value.type === 'item') {
+        path += '/' + stringToBase10(args[index]);
+      } else if (value.type === 'encoded') {
+        body[value.name] = stringToBase10(args[index]);
+      } else if (value.type === 'number') {
+        body[value.name] = parseInt(args[index]);
       } else {
-        data[value.name] = args[index];
+        body[value.name] = args[index];
       }
     });
-	  alert(url + ' ' + JSON.stringify(data));
+    path +=  '/' + action;
+    let request = newPostRequest();
+    request.body = JSON.stringify(body);
+    fetch($instance.url + path, request)
+      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .catch(function(error) { alert('Error ' + error); });
 	}
 </script>
 
 
-<div class="block">
+<div class="content">
+  <p class="has-text-weight-bold">Command</p>
   <div class="field">
     <div class="control">
       {#each Object.keys(commands) as commandOption}
-        <label class="radio has-text-weight-bold">
+        <label class="radio">
           <input type=radio bind:group={command} name="command" value="{commandOption}">
           {capitalizeKebabCase(commandOption)}
         </label>
@@ -67,10 +55,11 @@
     </div>
   </div>
   {#if command}
+    <p class="has-text-weight-bold">Action</p>
     <div class="field">
       <div class="control">
         {#each Object.keys(commands[command]) as actionOption}
-          <label class="radio has-text-weight-bold">
+          <label class="radio">
             <input type=radio bind:group={action} name="action" value="{actionOption}">
             {capitalizeKebabCase(actionOption)}
           </label>
@@ -79,7 +68,6 @@
     </div>
     {#if action}
       {#each commands[command][action] as arg}
-
         {#if arg.input === 'text'}
           <div class="field">
             <label for="{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
@@ -88,23 +76,23 @@
             </div>
           </div>
         {/if}
-
         {#if arg.input === 'radio'}
+          <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
           <div class="field">
             <div class="control">
               {#each arg.options as option}
-                <label class="radio has-text-weight-bold">
-                  <input type=radio bind:group={args[commands[command][action].indexOf(arg)]} name="{arg.name}" value="{option}"> {capitalizeKebabCase(option)}
+                <label class="radio">
+                  <input type=radio bind:group={args[commands[command][action].indexOf(arg)]} name="{arg.name}" value="{option}">
+                  {capitalizeKebabCase(option)}
                 </label>
               {/each}
             </div>
           </div>
         {/if}
-
       {/each}
       <div class="field">
         <div class="control">
-          <button id="send" name="send" class="button is-primary" on:click={send}>Send</button>
+          <button id="send" name="send" class="button is-primary" disabled={!$serverStatus.running} on:click={send}>Send</button>
         </div>
       </div>
     {/if}

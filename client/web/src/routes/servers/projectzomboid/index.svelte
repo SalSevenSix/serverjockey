@@ -9,12 +9,87 @@
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = {
     'wipe-world-save': 'Reset the game world save only.',
     'wipe-world-playerdb': 'Reset the player database only.',
     'wipe-world-config': 'Reset the configuration files only.',
     'wipe-world-all': 'Reset all of the above.'
+  };
+
+  let consoleCommands = {
+    'world': {
+      'broadcast': [
+        {input: 'text', type: 'string', name: 'message'}
+      ],
+      'chopper': [],
+      'gunshot': [],
+      'start-storm': [],
+      'stop-weather': [],
+      'start-rain': [],
+      'stop-rain': []
+    },
+    'players': {
+      'kick': [
+        {input: 'text', type: 'item', name: 'player'}
+      ],
+      'set-access-level': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'radio', type: 'string', name: 'level', options: ['none', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
+      ],
+      'tele-to': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'text', type: 'encoded', name: 'toplayer'}
+      ],
+      'tele-at': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'text', type: 'string', name: 'location'}
+      ],
+      'give-xp': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'radio', type: 'string', name: 'skill', options: ['Combat', 'Axe', 'Blunt', 'SmallBlunt', 'LongBlade', 'SmallBlade', 'Spear', 'Maintenance', 'Firearm', 'Aiming', 'Reloading', 'Agility', 'Sprinting', 'Lightfoot', 'Nimble', 'Sneak', 'Crafting', 'Woodwork', 'Cooking', 'Farming', 'Doctor', 'Electricity', 'MetalWelding', 'Mechanics', 'Tailoring', 'Survivalist', 'Fishing', 'Trapping', 'PlantScavenging']},
+        {input: 'text', type: 'number', name: 'xp'}
+      ],
+      'give-item': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'text', type: 'string', name: 'module'},
+        {input: 'text', type: 'string', name: 'item'},
+        {input: 'text', type: 'number', name: 'count'}
+      ],
+      'spawn-vehicle': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'text', type: 'string', name: 'module'},
+        {input: 'text', type: 'string', name: 'item'}
+      ],
+      'spawn-horde': [
+        {input: 'text', type: 'item', name: 'player'},
+        {input: 'text', type: 'number', name: 'count'}
+      ],
+      'lightning': [
+        {input: 'text', type: 'item', name: 'player'}
+      ],
+      'thunder': [
+        {input: 'text', type: 'item', name: 'player'}
+      ]
+    },
+    'whitelist': {
+      'add': [
+        {input: 'text', type: 'encoded', name: 'player'},
+        {input: 'text', type: 'string', name: 'password'}
+      ],
+      'remove': [
+        {input: 'text', type: 'encoded', name: 'player'}
+      ]
+    },
+    'banlist': {
+      'add-id': [
+        {input: 'text', type: 'string', name: 'steamid'}
+      ],
+      'remove-id': [
+        {input: 'text', type: 'string', name: 'steamid'}
+      ]
+    }
   };
 </script>
 
@@ -49,6 +124,9 @@
       <hr />
       <h2 class="title is-5">Backups</h2>
       <BackupRestoreActions />
+      <hr />
+      <h2 class="title is-5">Console</h2>
+      <CommandBuilder commands={consoleCommands} />
       <hr />
     </div>
   </div>

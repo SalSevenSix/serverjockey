@@ -120,9 +120,9 @@
     </div>
   </div>
   <div class="field">
-    <label for="install-runtime-log" class="label">Backups Log</label>
+    <label for="backups-log" class="label">Backups Log</label>
     <div class="control pr-6">
-      <textarea id="install-runtime-log" class="textarea" readonly>{logText}</textarea>
+      <textarea id="backups-log" class="textarea" readonly>{logText}</textarea>
     </div>
   </div>
 </div>
