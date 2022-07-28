@@ -98,7 +98,6 @@
         <th>Size</th>
         <th>Backup</th>
         <th></th>
-        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -107,8 +106,10 @@
           <td>{path.updated}</td>
           <td>{humanFileSize(path.size)}</td>
           <td><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
-          <td><button disabled={$serverStatus.running || processing} name="{path.name}" class="button is-warning" on:click={restoreBackup}>Restore</button></td>
-          <td><button disabled={$serverStatus.running || processing} name="{path.name}" class="button is-danger" on:click={deleteBackup}>Delete</button></td>
+          <td class="buttons">
+            <button disabled={$serverStatus.running || processing} name="{path.name}" class="button is-warning" on:click={restoreBackup}>Restore</button>
+            <button disabled={$serverStatus.running || processing} name="{path.name}" class="button is-danger" on:click={deleteBackup}>Delete</button>
+          </td>
         </tr>
       {/each}
     </tbody>

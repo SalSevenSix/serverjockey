@@ -1,6 +1,7 @@
 import inspect
 import os
 import shutil
+import psutil
 import lzma
 import tarfile
 import logging
@@ -31,6 +32,9 @@ _islinkfile = _wrap(os.path.islink)
 _rmtree = _wrap(shutil.rmtree)
 _make_archive = _wrap(shutil.make_archive)
 _unpack_archive = _wrap(shutil.unpack_archive)
+_disk_usage = _wrap(shutil.disk_usage)
+_virtual_memory = _wrap(psutil.virtual_memory)
+_cpu_percent = _wrap(psutil.cpu_percent)
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -338,6 +342,30 @@ async def copy_bytes(source, target, chunk_size: int = DEFAULT_CHUNK_SIZE):
         pumping = chunk is not None and chunk != b''
         if pumping:
             await target.write(chunk)
+
+
+async def system_load() -> dict:
+    disk = await _disk_usage('/')
+    memory = await _virtual_memory()
+    cpu = await _cpu_percent(1)
+    return {
+        'cpu': {
+            'percent': cpu
+        },
+        'memory': {
+            'total': memory[0],
+            'used': memory[3],
+            'available': memory[1],
+            'free': memory[4],
+            'percent': memory[2]
+        },
+        'disk': {
+            'total': disk[0],
+            'used': disk[1],
+            'free': disk[2],
+            'percent': round((disk[1] / disk[0]) * 100, 1)
+        }
+    }
 
 
 def _unpack_tarxz(file_path: str, target_directory: str):

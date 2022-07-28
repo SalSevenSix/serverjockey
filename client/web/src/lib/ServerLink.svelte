@@ -13,7 +13,7 @@
 	onMount(async function() {
     const result = await fetch(baseurl + '/instances/serverlink/server', newGetRequest())
       .then(function(response) {
-         if (!response.ok) throw new Error('Status: ' + response.status);
+        if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .catch(function(error) { alert('Error: ' + error); });
@@ -36,12 +36,12 @@
 
 <div class="columns">
   <div class="column">
-    <ServerLinkConfig />
+    <h2 class="title is-5">ServerLink Controls</h2>
+    <ServerControls />
+    <ServerStatus />
   </div>
   <div class="column">
-    <div class="mt-5">
-      <ServerControls />
-      <ServerStatus />
-    </div>
+    <h2 class="title is-5">ServerLink Configuration</h2>
+    <ServerLinkConfig />
   </div>
 </div>

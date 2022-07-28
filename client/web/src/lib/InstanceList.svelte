@@ -51,6 +51,7 @@
 
 
 <div class="block">
+  <h2 class="title is-5">Instances</h2>
   <table class="table">
     <thead>
       <tr>

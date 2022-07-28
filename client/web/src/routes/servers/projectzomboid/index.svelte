@@ -1,5 +1,6 @@
 <script>
   import Instance from '$lib/Instance.svelte';
+  import Collapsible from '$lib/Collapsible.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
@@ -106,27 +107,27 @@
           <Players />
         </div>
       </div>
-      <hr />
-      <h2 class="title is-5">Logging</h2>
-      <ConsoleLog />
-      <FileSystem />
-      <hr />
-      <h2 class="title is-5">Configuration</h2>
-      <ConfigFile name="INI Settings" path="/config/ini" />
-      <ConfigFile name="Sandbox Settings" path="/config/sandbox" />
-      <ConfigFile name="Spawn Regions" path="/config/spawnregions" />
-      <ConfigFile name="Spawn Points" path="/config/spawnpoints" />
-      <ConfigFile name="JRE Settings" path="/config/jvm" />
-      <hr />
-      <h2 class="title is-5">Deployment</h2>
-      <InstallRuntime qualifierName="Beta" showLog />
-      <DeploymentActions actions={deploymentActions} />
-      <hr />
-      <h2 class="title is-5">Backups</h2>
-      <BackupRestoreActions />
-      <hr />
-      <h2 class="title is-5">Console</h2>
-      <CommandBuilder commands={consoleCommands} />
+      <Collapsible title="Logging">
+        <ConsoleLog />
+        <FileSystem />
+      </Collapsible>
+      <Collapsible title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
+      <Collapsible title="Configuration">
+        <ConfigFile name="INI Settings" path="/config/ini" />
+        <ConfigFile name="Sandbox Settings" path="/config/sandbox" />
+        <ConfigFile name="Spawn Regions" path="/config/spawnregions" />
+        <ConfigFile name="Spawn Points" path="/config/spawnpoints" />
+        <ConfigFile name="JRE Settings" path="/config/jvm" />
+      </Collapsible>
+      <Collapsible title="Deployment">
+        <InstallRuntime qualifierName="Beta" showLog />
+        <DeploymentActions actions={deploymentActions} />
+      </Collapsible>
+      <Collapsible title="Backups">
+        <BackupRestoreActions />
+      </Collapsible>
       <hr />
     </div>
   </div>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" viewBox="0 0 470 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <style type="text/css">.st0{fill:#F2F2F2;stroke:#000;stroke-linejoin:round}
+	.st1{fill:#999;stroke:#000;stroke-linejoin:round}
+	.st2{fill:url(#j);stroke:#000;stroke-linejoin:round}
+	.st3{fill:url(#k);stroke:#000;stroke-linejoin:round}
+	.st4{fill:#4D4D4D;stroke:#000;stroke-linejoin:round}
+	.st5{fill:url(#l);stroke:#000;stroke-linejoin:round}
+	.st6{fill:#E6E6E6;stroke:#000;stroke-linejoin:round}
+	.st7{fill:#ccc;stroke:#000;stroke-linejoin:round}
+	.st8{clip-path:url(#n);fill:#4D4D4D;}</style>
+ <path class="st0" d="m449.9 109.9l-174.5-98.8-25.7 6.2-234.3 56.4 159.5 108.3v0.5l275-72.6zm-384-32.4l204-48.1 0.1-0.3 133.3 77.7h0.2l-216.5 55.5-121.1-84.8z"/>
+ <polygon class="st1" points="449.9 109.9 174.9 182 177.4 278.3 206.8 270.3 205.2 207.3 449.9 139"/>
+ <linearGradient id="j" x1="269.8" x2="403.24" y1="208.5" y2="208.5" gradientUnits="userSpaceOnUse">
+  <stop stop-color="#4D4D4D" offset="0"/>
+  <stop stop-color="#B3B3B3" offset="1"/>
+ </linearGradient>
+ <polygon class="st2" points="294.8 260.7 294.8 72.7 269.8 58 269.8 269.3 403.2 359 403.2 333"/>
+ <radialGradient id="k" cx="213.17" cy="287.79" r="160.78" gradientTransform="matrix(1 0 0 1.8024 0 -230.94)" gradientUnits="userSpaceOnUse">
+  <stop stop-color="#B3B3B3" offset=".2028"/>
+  <stop stop-color="#B0B0B0" offset=".418"/>
+  <stop stop-color="#A7A7A7" offset=".5669"/>
+  <stop stop-color="#989898" offset=".6958"/>
+  <stop stop-color="#828282" offset=".8132"/>
+  <stop stop-color="#666" offset=".922"/>
+  <stop stop-color="#4D4D4D" offset="1"/>
+ </radialGradient>
+ <polygon class="st3" points="252.6 258 252.6 62.7 269.8 58 269.8 269.3 68.6 324 68.1 307.9"/>
+ <polygon class="st4" points="68.6 324 42.2 332 34.2 115.7 62.8 135.6"/>
+ <polygon class="st4" points="95.3 345 269.8 294.3 269.8 269.3 68.6 324"/>
+ <linearGradient id="l" x1="42.24" x2="163.47" y1="379.45" y2="379.45" gradientUnits="userSpaceOnUse">
+  <stop stop-color="#4D4D4D" offset="0"/>
+  <stop stop-color="#B3B3B3" offset="1"/>
+ </linearGradient>
+ <polygon class="st5" points="162.8 399.1 163.5 434.9 42.2 332 68.6 324"/>
+ <polygon class="st6" points="416.6 367.7 208.9 435.3 208.7 419.2 403.2 359"/>
+ <defs>
+  <polygon id="i" points="372.3 368.5 269.8 294.3 269.8 269.3 403.2 359"/>
+ </defs>
+ <linearGradient id="m" x1="269.8" x2="403.24" y1="318.93" y2="318.93" gradientUnits="userSpaceOnUse">
+  <stop stop-color="#4D4D4D" offset="0"/>
+  <stop stop-color="#B3B3B3" offset="1"/>
+ </linearGradient>
+ <use fill="url(#m)" xlink:href="#i"/>
+ <clipPath>
+  <use xlink:href="#i"/>
+ </clipPath>
+ <use fill="none" stroke="#000" stroke-linejoin="round" xlink:href="#i"/>
+ <polygon class="st1" points="209.2 465.3 181.6 475 178.6 320.8 207.3 312.5"/>
+ <polygon class="st6" points="416.6 367.7 403.2 359 405.9 151.5 421.2 146.8"/>
+ <polygon class="st7" points="421.2 146.8 417.2 368.1 416.6 367.7 208.9 435.3 209.2 465.3 444.2 390.6 449.9 139"/>
+ <polygon class="st4" points="269.8 29.3 65.9 77.5 97.7 99.7 269.8 58"/>
+ <defs>
+  <polygon id="h" points="367.6 115.6 269.8 58 269.8 29.3 403.2 106.7"/>
+ </defs>
+ <use fill="#E6E6E6" xlink:href="#h"/>
+ <clipPath id="n">
+  <use xlink:href="#h"/>
+ </clipPath>
+ <polygon class="st8" points="294.8 72.7 269.8 58 269.8 29.3"/>
+ <use fill="none" stroke="#000" stroke-linejoin="round" xlink:href="#h"/>
+ <polygon class="st7" points="178.6 320.8 161.6 325.8 163.5 434.9 42.2 332 34.2 115.7 157.9 202 158 201.9 160.3 282.9 177.4 278.3 174.9 182 15.4 73.7 27.8 347.8 163.9 459.8 181.6 475"/>
+</svg>

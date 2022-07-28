@@ -77,7 +77,7 @@
       {/if}
       {#each paths as path}
         <tr>
-          <td>{path.type}</td>
+          <td>{path.type === 'file' ? 'file' : 'dir'}</td>
           {#if path.type === 'directory'}
             <td><a href="#" name="{path.url}" on:click|preventDefault={openDirectory}>{path.name}</a></td>
           {/if}

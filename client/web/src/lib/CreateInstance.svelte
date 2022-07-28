@@ -21,6 +21,7 @@
 
 
 <div class="block">
+  <h2 class="title is-5">New Instance</h2>
   <div class="field">
     <label for="module" class="label">Instance Type</label>
     <div class="control">

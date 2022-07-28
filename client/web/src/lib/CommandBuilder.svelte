@@ -47,7 +47,7 @@
   <div class="field">
     <div class="control">
       {#each Object.keys(commands) as commandOption}
-        <label class="radio">
+        <label class="radio box p-2">
           <input type=radio bind:group={command} name="command" value="{commandOption}">
           {capitalizeKebabCase(commandOption)}
         </label>
@@ -59,7 +59,7 @@
     <div class="field">
       <div class="control">
         {#each Object.keys(commands[command]) as actionOption}
-          <label class="radio">
+          <label class="radio box p-2">
             <input type=radio bind:group={action} name="action" value="{actionOption}">
             {capitalizeKebabCase(actionOption)}
           </label>
@@ -81,7 +81,7 @@
           <div class="field">
             <div class="control">
               {#each arg.options as option}
-                <label class="radio">
+                <label class="radio box p-2">
                   <input type=radio bind:group={args[commands[command][action].indexOf(arg)]} name="{arg.name}" value="{option}">
                   {capitalizeKebabCase(option)}
                 </label>
@@ -98,3 +98,8 @@
     {/if}
   {/if}
 </div>
+
+
+<style>
+
+</style>

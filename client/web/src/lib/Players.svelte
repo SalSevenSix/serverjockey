@@ -36,6 +36,7 @@
 
 
 <div class="block">
+  <h2 class="title is-5">{players.length} Players Online</h2>
   <table class="table">
     <thead>
       <tr>
@@ -52,5 +53,4 @@
       {/each}
     </tbody>
   </table>
-  <p>{players.length} players currently online</p>
 </div>

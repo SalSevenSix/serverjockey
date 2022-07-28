@@ -14,6 +14,7 @@ export function capitalize(value) {
 }
 
 export function humanFileSize(bytes, si=false, dp=1) {
+  if (bytes === 0) return '0 B';
   if (!bytes) return '';
   const thresh = si ? 1000 : 1024;
   if (Math.abs(bytes) < thresh) {

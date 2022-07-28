@@ -26,6 +26,7 @@ class SystemService:
         self._resource = httprsc.WebResource()
         httprsc.ResourceBuilder(self._resource) \
             .push('system') \
+            .append('load', _SystemLoadHandler()) \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
             .append('login', httpext.LoginHandler(context.config('secret'))) \
@@ -178,6 +179,12 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         subcontext = await self._system.create_instance({'module': module, 'identity': identity})
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
+
+
+class _SystemLoadHandler(httpabc.AsyncGetHandler):
+
+    async def handle_get(self, resource, data):
+        return await util.system_load()
 
 
 class _ShutdownHandler(httpabc.PostHandler):

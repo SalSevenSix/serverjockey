@@ -9,10 +9,10 @@
 </script>
 
 
-<nav class="navbar mb-3" role="navigation" aria-label="main navigation">
+<nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item">
-      <img src="/assets/box.svg" alt="ZomBox" width="28" height="28" />
+      <img src="/assets/cube-ornate.svg" alt="ZomBox" width="28" height="28" />
       <span class="ml-1 is-size-5 has-text-weight-bold">ZomBox</span>
     </div>
     <a role="button" on:click={menuToggle} class:is-active={menuOpen} class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
@@ -29,3 +29,4 @@
     </div>
   </div>
 </nav>
+<hr />
