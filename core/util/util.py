@@ -1,7 +1,7 @@
 import inspect
 import os
 import shutil
-import psutil
+#import psutil  # TODO fix how this is broken in deploy
 import lzma
 import tarfile
 import logging
@@ -33,8 +33,8 @@ _rmtree = _wrap(shutil.rmtree)
 _make_archive = _wrap(shutil.make_archive)
 _unpack_archive = _wrap(shutil.unpack_archive)
 _disk_usage = _wrap(shutil.disk_usage)
-_virtual_memory = _wrap(psutil.virtual_memory)
-_cpu_percent = _wrap(psutil.cpu_percent)
+#_virtual_memory = _wrap(psutil.virtual_memory)
+#_cpu_percent = _wrap(psutil.cpu_percent)
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -345,6 +345,8 @@ async def copy_bytes(source, target, chunk_size: int = DEFAULT_CHUNK_SIZE):
 
 
 async def system_load() -> dict:
+    return {}
+    """
     disk = await _disk_usage('/')
     memory = await _virtual_memory()
     cpu = await _cpu_percent(1)
@@ -366,6 +368,7 @@ async def system_load() -> dict:
             'percent': round((disk[1] / disk[0]) * 100, 1)
         }
     }
+    """
 
 
 def _unpack_tarxz(file_path: str, target_directory: str):

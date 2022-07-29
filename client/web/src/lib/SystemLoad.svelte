@@ -23,12 +23,14 @@
   };
 
 	onMount(async function() {
+	  /*
 	  systemLoad = await fetch(baseurl + '/system/load', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .catch(function(error) { alert('Error: ' + error); });
+    */
   });
 
 </script>
