@@ -13,6 +13,21 @@ export function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+export function humanDuration(millis) {
+    var data = {};
+    var units = [
+      {label: 'millis', mod: 1000},
+      {label: 'seconds', mod: 60},
+      {label: 'minutes', mod: 60},
+      {label: 'hours', mod: 24},
+      {label: 'days', mod: 31}
+    ];
+    units.forEach(function(unit) {
+      millis = (millis - (data[unit.label] = (millis % unit.mod))) / unit.mod;
+    });
+    return data.days + 'd ' + data.hours + 'h ' + data.minutes + 'm';
+}
+
 export function humanFileSize(bytes, si=false, dp=1) {
   if (bytes === 0) return '0 B';
   if (!bytes) return '';

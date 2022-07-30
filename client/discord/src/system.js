@@ -2,6 +2,21 @@
 
 const util = require('./util.js');
 
+exports.system = function($) {
+  $.httptool.doGet('/system/info', function(info) {
+    let result = '```';
+    result += 'CPU    : ' + info.cpu.percent + '%\n';
+    result += 'Memory : ' + util.humanFileSize(info.memory.used);
+    result += ' / '       + util.humanFileSize(info.memory.total);
+    result += ' ('        + info.memory.percent + '%)\n';
+    result += 'Disk   : ' + util.humanFileSize(info.disk.used);
+    result += ' / '       + util.humanFileSize(info.disk.total);
+    result += ' ('        + info.disk.percent + '%)\n';
+    result += 'Uptime : ' + util.humanDuration(info.uptime) + '```';
+    return result;
+  });
+}
+
 exports.instances = function($) {
   $.message.channel.send($.context.instancesService.getInstancesText());
 }

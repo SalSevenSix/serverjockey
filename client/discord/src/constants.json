@@ -2,10 +2,11 @@
   "system": {
     "help": [
       "help {command} {action}    : Show help",
+      "system                     : Show system information",
       "instances                  : Show server instances list",
       "use {instance}             : Switch default instance",
       "create {instance} {module} : Create new instance",
-      "shutdown                   : Shutdown server management system"
+      "shutdown                   : Shutdown system"
     ]
   },
   "projectzomboid": {
