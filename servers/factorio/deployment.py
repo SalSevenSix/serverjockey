@@ -16,6 +16,8 @@ class Deployment:
         self._runtime_dir = self._home_dir + '/runtime'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
         self._current_log = self._runtime_dir + '/factorio-current.log'
+        self._live_mods_dir = self._runtime_dir + '/mods'
+        self._live_mods_list = self._live_mods_dir + '/mod-list.json'
         self._server_settings_def = self._runtime_dir + '/data/server-settings.example.json'
         self._map_settings_def = self._runtime_dir + '/data/map-settings.example.json'
         self._map_gen_settings_def = self._runtime_dir + '/data/map-gen-settings.example.json'
@@ -23,9 +25,14 @@ class Deployment:
         self._save_dir = self._world_dir + '/saves'
         self._map_file = self._save_dir + '/map.zip'
         self._config_dir = self._world_dir + '/config'
+        self._cmdargs_settings = self._config_dir + '/cmdargs-settings.json'
         self._server_settings = self._config_dir + '/server-settings.json'
         self._map_settings = self._config_dir + '/map-settings.json'
         self._map_gen_settings = self._config_dir + '/map-gen-settings.json'
+        self._mods_list = self._config_dir + '/mod-list.json'
+        self._server_whitelist = self._config_dir + '/server-whitelist.json'
+        self._server_banlist = self._config_dir + '/server-banlist.json'
+        self._server_adminlist = self._config_dir + '/server-adminlist.json'
 
     async def initialise(self):
         await self.build_world()
@@ -47,15 +54,20 @@ class Deployment:
         httprsc.ResourceBuilder(resource) \
             .append('log', httpext.FileSystemHandler(self._current_log)) \
             .push('config') \
+            .append('cmdargs', httpext.FileSystemHandler(self._cmdargs_settings)) \
             .append('server', httpext.FileSystemHandler(self._server_settings)) \
             .append('map', httpext.FileSystemHandler(self._map_settings)) \
             .append('mapgen', httpext.FileSystemHandler(self._map_gen_settings)) \
+            .append('modslist', httpext.FileSystemHandler(self._mods_list)) \
+            .append('adminlist', httpext.FileSystemHandler(self._server_adminlist)) \
+            .append('whitelist', httpext.FileSystemHandler(self._server_whitelist)) \
+            .append('banlist', httpext.FileSystemHandler(self._server_banlist)) \
             .pop() \
             .push('deployment') \
             .append('install-runtime', _InstallRuntimeHandler(self)) \
             .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
-            .append('wipe-world-config', _WipeHandler(self, self._save_dir)) \
-            .append('wipe-world-save', _WipeHandler(self, self._config_dir)) \
+            .append('wipe-world-config', _WipeHandler(self, self._config_dir)) \
+            .append('wipe-world-save', _WipeHandler(self, self._save_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
                 {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
@@ -69,23 +81,54 @@ class Deployment:
             .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
 
-    def new_server_process(self):
-        return proch.ServerProcess(self._mailer, self._executable) \
-            .append_arg('--start-server').append_arg(self._map_file) \
-            .append_arg('--server-settings').append_arg(self._server_settings)
+    async def new_server_process(self) -> proch.ServerProcess:
+        await util.copy_text_file(self._mods_list, self._live_mods_list)
+        cmdargs = util.json_to_dict(await util.read_file(self._cmdargs_settings))
+        server = proch.ServerProcess(self._mailer, self._executable)
+        if cmdargs['port']:
+            server.append_arg('--port').append_arg(cmdargs['port'])
+        if cmdargs['rcon-port']:
+            server.append_arg('--rcon-port').append_arg(cmdargs['rcon-port'])
+        if cmdargs['rcon-password']:
+            server.append_arg('--rcon-password').append_arg(cmdargs['rcon-password'])
+        if cmdargs['use-authserver-bans']:
+            server.append_arg('--use-authserver-bans')
+        if cmdargs['use-server-whitelist']:
+            server.append_arg('--use-server-whitelist')
+            server.append_arg('--server-whitelist').append_arg(self._server_whitelist)
+        server.append_arg('--server-banlist').append_arg(self._server_banlist)
+        server.append_arg('--server-adminlist').append_arg(self._server_adminlist)
+        server.append_arg('--server-settings').append_arg(self._server_settings)
+        server.append_arg('--start-server').append_arg(self._map_file)
+        return server
 
     async def build_world(self):
+        await util.create_directory(self._live_mods_dir)
         await util.create_directory(self._backups_dir)
         await util.create_directory(self._world_dir)
         await util.create_directory(self._save_dir)
         await util.create_directory(self._config_dir)
-        if await util.directory_exists(self._runtime_dir):
-            if not await util.file_exists(self._server_settings):
-                await util.copy_text_file(self._server_settings_def, self._server_settings)
-            if not await util.file_exists(self._map_settings):
-                await util.copy_text_file(self._map_settings_def, self._map_settings)
-            if not await util.file_exists(self._map_gen_settings):
-                await util.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
+        if not await util.directory_exists(self._runtime_dir):
+            return
+        if not await util.file_exists(self._server_settings):
+            await util.copy_text_file(self._server_settings_def, self._server_settings)
+        if not await util.file_exists(self._map_settings):
+            await util.copy_text_file(self._map_settings_def, self._map_settings)
+        if not await util.file_exists(self._map_gen_settings):
+            await util.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
+        if not await util.file_exists(self._server_whitelist):
+            await util.write_file(self._server_whitelist, '[]')
+        if not await util.file_exists(self._server_banlist):
+            await util.write_file(self._server_banlist, '[]')
+        if not await util.file_exists(self._server_adminlist):
+            await util.write_file(self._server_adminlist, '[]')
+        if not await util.file_exists(self._cmdargs_settings):
+            await util.write_file(self._cmdargs_settings, util.obj_to_json({
+                'port': None, 'rcon-port': None, 'rcon-password': None,
+                'use-server-whitelist': False, 'use-authserver-bans': None}, pretty=True))
+        if not await util.file_exists(self._mods_list):
+            await util.write_file(self._mods_list, util.obj_to_json({
+                'mods': [{'name': 'base', 'enabled': True}]}, pretty=True))
 
     async def install_runtime(self):
         url = 'https://factorio.com/get-download/stable/headless/linux64'

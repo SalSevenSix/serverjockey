@@ -34,9 +34,14 @@
         <ConsoleLog />
       </Collapsible>
       <Collapsible title="Configuration">
+        <ConfigFile name="Command Line Args" path="/config/cmdargs" />
         <ConfigFile name="Server" path="/config/server" />
         <ConfigFile name="Map" path="/config/map" />
         <ConfigFile name="Map Gen" path="/config/mapgen" />
+        <ConfigFile name="Mods List" path="/config/modslist" />
+        <ConfigFile name="Admin List" path="/config/adminlist" />
+        <ConfigFile name="White List" path="/config/whitelist" />
+        <ConfigFile name="Ban List" path="/config/banlist" />
       </Collapsible>
       <Collapsible title="Deployment">
         <InstallRuntime />

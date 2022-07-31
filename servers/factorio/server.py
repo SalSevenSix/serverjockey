@@ -40,10 +40,10 @@ class Server(svrabc.Server):
 
     async def run(self):
         await self._deployment.ensure_map()
-        await self._deployment.new_server_process() \
-            .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(msgext.SingleCatcher(msg.SERVER_STARTED_FILTER, timeout=90)) \
-            .run()
+        server = await self._deployment.new_server_process()
+        server.use_pipeinsvc(self._pipeinsvc)
+        server.wait_for_started(msgext.SingleCatcher(msg.SERVER_STARTED_FILTER, timeout=60))
+        await server.run()
 
     async def stop(self):
         await proch.PipeInLineService.request(self._context, self, '/quit')

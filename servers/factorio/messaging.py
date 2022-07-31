@@ -60,12 +60,16 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.JOIN)
             value = util.right_chop_and_strip(value, 'joined the game')
-            self._mailer.post(self, _PlayerEventSubscriber.PLAYER_EVENT, {'event': 'login', 'name': value})
+            self._mailer.post(
+                self, _PlayerEventSubscriber.PLAYER_EVENT,
+                {'event': 'login', 'player': {'steamid': False, 'name': value}})
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LEAVE)
             value = util.right_chop_and_strip(value, 'left the game')
-            self._mailer.post(self, _PlayerEventSubscriber.PLAYER_EVENT, {'event': 'logout', 'name': value})
+            self._mailer.post(
+                self, _PlayerEventSubscriber.PLAYER_EVENT,
+                {'event': 'logout', 'player': {'steamid': False, 'name': value}})
             return None
         return None
 
