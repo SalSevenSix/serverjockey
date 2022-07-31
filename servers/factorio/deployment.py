@@ -1,7 +1,8 @@
 import aiohttp
-from core.util import util
+from core.util import util, aggtrf
+from core.msg import msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext
+from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch
 
 
@@ -10,9 +11,11 @@ class Deployment:
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
         self._home_dir = context.config('home')
+        self._backups_dir = self._home_dir + '/backups'
         self._install_package = self._home_dir + '/factorio.tar.xz'
         self._runtime_dir = self._home_dir + '/runtime'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
+        self._current_log = self._runtime_dir + '/factorio-current.log'
         self._server_settings_def = self._runtime_dir + '/data/server-settings.example.json'
         self._map_settings_def = self._runtime_dir + '/data/map-settings.example.json'
         self._map_gen_settings_def = self._runtime_dir + '/data/map-gen-settings.example.json'
@@ -27,9 +30,22 @@ class Deployment:
     async def initialise(self):
         await self.build_world()
         self._mailer.register(proch.JobProcess(self._mailer))
+        self._mailer.register(
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
+        self._mailer.register(
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
+        archive_selector = httpsubs.Selector(
+            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
+            completed_filter=msgftr.DataEquals('END Archive Directory'),
+            aggregator=aggtrf.StrJoin('\n'))
+        unpacker_selector = httpsubs.Selector(
+            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
+            completed_filter=msgftr.DataEquals('END Unpack Directory'),
+            aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
+            .append('log', httpext.FileSystemHandler(self._current_log)) \
             .push('config') \
             .append('server', httpext.FileSystemHandler(self._server_settings)) \
             .append('map', httpext.FileSystemHandler(self._map_settings)) \
@@ -39,7 +55,19 @@ class Deployment:
             .append('install-runtime', _InstallRuntimeHandler(self)) \
             .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
             .append('wipe-world-config', _WipeHandler(self, self._save_dir)) \
-            .append('wipe-world-save', _WipeHandler(self, self._config_dir))
+            .append('wipe-world-save', _WipeHandler(self, self._config_dir)) \
+            .append('backup-runtime', httpext.MessengerHandler(
+                self._mailer, msgext.Archiver.REQUEST,
+                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
+            .append('backup-world', httpext.MessengerHandler(
+                self._mailer, msgext.Archiver.REQUEST,
+                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, archive_selector)) \
+            .append('restore-backup', httpext.MessengerHandler(
+                self._mailer, msgext.Unpacker.REQUEST,
+                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, unpacker_selector)) \
+            .pop() \
+            .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
+            .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
 
     def new_server_process(self):
         return proch.ServerProcess(self._mailer, self._executable) \
@@ -47,6 +75,7 @@ class Deployment:
             .append_arg('--server-settings').append_arg(self._server_settings)
 
     async def build_world(self):
+        await util.create_directory(self._backups_dir)
         await util.create_directory(self._world_dir)
         await util.create_directory(self._save_dir)
         await util.create_directory(self._config_dir)

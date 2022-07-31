@@ -3,7 +3,7 @@
   import { ReverseRollingLog } from '$lib/util';
   import { instance, serverStatus, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
-  export let qualifierName = 'Qualifier';
+  export let qualifierName = null;
   export let showLog = false;
 
   let subs = new SubscriptionHelper();
@@ -54,12 +54,14 @@
 
 
 <div class="block">
-  <div class="field">
-    <label for="install-runtime-qualifier" class="label">{qualifierName}</label>
-    <div class="control">
-      <input id="install-runtime-qualifier" class="input" type="text" bind:value={qualifier}>
+  {#if qualifierName}
+    <div class="field">
+      <label for="install-runtime-qualifier" class="label">{qualifierName}</label>
+      <div class="control">
+        <input id="install-runtime-qualifier" class="input" type="text" bind:value={qualifier}>
+      </div>
     </div>
-  </div>
+  {/if}
   <div class="field">
     <div class="control">
       <button id="install-runtime" disabled={$serverStatus.running || installing} name="install" class="button is-primary" on:click={install}>Install Runtime</button>
@@ -72,5 +74,7 @@
         <textarea id="install-runtime-log" class="textarea" readonly>{logText}</textarea>
       </div>
     </div>
+  {:else}
+    <p>Please be patient during install. Button will be enabled again when complete.</p>
   {/if}
 </div>

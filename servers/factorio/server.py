@@ -1,4 +1,5 @@
-from core.msg import msgext
+from core.util import aggtrf
+from core.msg import msgabc, msgftr, msgtrf, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs
 from core.proc import proch
@@ -30,6 +31,10 @@ class Server(svrabc.Server):
             .push('players', pls.PlayersHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(msg.PLAYER_EVENT_FILTER)) \
             .pop() \
+            .push('log') \
+            .append('tail', _ConsoleLogHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(_ConsoleLogHandler.FILTER, aggtrf.StrJoin('\n'))) \
+            .pop() \
             .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
@@ -42,3 +47,19 @@ class Server(svrabc.Server):
 
     async def stop(self):
         await proch.PipeInLineService.request(self._context, self, '/quit')
+
+
+class _ConsoleLogHandler(httpabc.AsyncGetHandler):
+    FILTER = msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE)
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+        self._subscriber = msgext.RollingLogSubscriber(
+            mailer, size=100,
+            msg_filter=_ConsoleLogHandler.FILTER,
+            transformer=msgtrf.GetData(),
+            aggregator=aggtrf.StrJoin('\n'))
+        mailer.register(self._subscriber)
+
+    async def handle_get(self, resource, data):
+        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())
