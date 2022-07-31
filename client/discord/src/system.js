@@ -33,8 +33,8 @@ exports.create = function($) {
   if ($.data.length < 2) return;
   let body = { identity: $.data[0], module: $.data[1] };
   $.httptool.doPost('/instances', body, function(message, json) {
-    $.context.instancesService.createInstance(body);
-    message.channel.send($.context.instancesService.getInstancesText());
+    $.context.instancesService.setInstance(body.identity);
+    message.react('✅');
   });
 }
 

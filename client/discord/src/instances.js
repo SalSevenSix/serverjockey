@@ -3,6 +3,7 @@
 const fetch = require('node-fetch');
 const logger = require('./logger.js');
 const util = require('./util.js');
+const subs = require('./subs.js');
 const servers = {
   projectzomboid: require('./servers/projectzomboid.js'),
   factorio: require('./servers/factorio.js')
@@ -19,9 +20,11 @@ exports.Service = class Service {
   }
 
   async startup(channel) {
-    // TODO subscribe for instance updates
     this.#channel = channel;
-    this.#instances = await fetch(this.#context.config.SERVER_URL + '/instances')
+    let self = this;
+    let context = this.#context;
+    let baseurl = context.config.SERVER_URL;
+    let instances = await fetch(baseurl + '/instances')
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -30,33 +33,41 @@ exports.Service = class Service {
         return json;
       })
       .catch(logger.error);
-    this.#current = util.getFirstKey(this.#instances);
-    for (let instance in this.#instances) {
-      this.#instances[instance].server = servers[this.#instances[instance].module];
-      this.#instances[instance].server.startup(this.#context, channel, instance, this.#instances[instance].url);
+    this.#instances = instances;
+    this.setInstance(util.getFirstKey(instances));
+    for (let instance in instances) {
+      instances[instance].server = servers[instances[instance].module];
+      instances[instance].server.startup(context, channel, instance, instances[instance].url);
     }
     logger.info('Instances...');
-    logger.raw(this.#instances);
+    logger.raw(instances);
+    new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
+      if (data.event === 'created') {
+        data.instance.url = baseurl + '/instances/' + data.instance.identity;
+        data.instance.server = servers[data.instance.module];
+        instances[data.instance.identity] = data.instance;
+        data.instance.server.startup(context, channel, data.instance.identity, data.instance.url);
+      } else if (data.event === 'deleted') {
+        delete instances[data.instance.identity];
+        if (data.instance.identity === self.currentInstance()) {
+          self.setInstance(util.getFirstKey(instances));
+        }
+      }
+      return true;
+    });
   }
 
   currentInstance() {
     return this.#current;
   }
 
-  createInstance(data) {
-    let instance = data.identity;
-    this.#instances[instance] = {
-      module: data.module,
-      server: servers[data.module],
-      url: this.#context.config.SERVER_URL + '/instances/' + instance
-    };
+  setInstance(instance) {
     this.#current = instance;
-    this.#instances[instance].server.startup(this.#context, this.#channel, instance, this.#instances[instance].url);
   }
 
   useInstance(instance) {
     if (this.#instances.hasOwnProperty(instance)) {
-      this.#current = instance;
+      this.setInstance(instance);
     }
   }
 
@@ -64,15 +75,6 @@ exports.Service = class Service {
     if (instance == null) return null;
     if (!this.#instances.hasOwnProperty(instance)) return null;
     return this.#instances[instance];
-  }
-
-  deleteInstance(instance) {
-    if (this.#instances.hasOwnProperty(instance)) {
-      delete this.#instances[instance]
-      if (instance === this.#current) {
-        this.#current = util.getFirstKey(this.#instances);
-      }
-    }
   }
 
   getInstancesText() {

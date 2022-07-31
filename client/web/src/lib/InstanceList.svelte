@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-	import { baseurl, instance, newGetRequest, serverStatus, SubscriptionHelper } from '$lib/serverjockeyapi';
+	import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   instance.set({});
   serverStatus.set({});
@@ -20,20 +20,14 @@
       instances = [...instances, { identity: key, module: result[key].module, url: result[key].url }];
     });
     await subs.start(baseurl + '/instances/subscribe', function(data) {
-	    data.url = baseurl + '/instances/' + data.identity;
-	    let found = false;
-	    let newInstances = [];
-	    instances.forEach(function(value) {
-	      if (data.identity === value.identity) {
-	        found = true;
-	      } else {
-	        newInstances.push(value);
-	      }
-	    });
-	    if (!found) {
-	      newInstances.push(data);
-	    }
-	    instances = newInstances;
+      if (data.event === 'created') {
+        data.instance.url = baseurl + '/instances/' + data.instance.identity;
+        instances = [...instances, data.instance];
+      } else if (data.event === 'deleted') {
+        instances = instances.filter(function(value) {
+          return value.identity != data.instance.identity;
+        });
+      }
 	    return true;
 	  });
   });
@@ -46,6 +40,14 @@
 	  let selected = instances[this.name];
 		instance.set(selected);
 		goto('/servers/' + selected.module);
+	}
+
+	function deleteInstance() {
+	  let selected = instances[this.name];
+	  if (!confirm('Delete ' + selected.identity + ' ?')) return;
+    fetch(selected.url + '/server/delete', newPostRequest())
+      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .catch(function(error) { alert('Error ' + error); });
 	}
 </script>
 
@@ -65,7 +67,10 @@
         <tr>
           <td>{instance.identity}</td>
           <td>{instance.module}</td>
-          <td><button id="instancelist-view-{index}" name={index} class="button is-primary" on:click={viewInstance}>View</button></td>
+          <td class="buttons">
+            <button id="instancelist-view-{index}" name={index} class="button is-primary" on:click={viewInstance}>View</button>
+            <button id="instancelist-delete-{index}" name={index} class="button is-danger" on:click={deleteInstance}>Delete</button>
+          </td>
         </tr>
       {/each}
     </tbody>

@@ -5,7 +5,7 @@ import inspect
 import logging
 import uuid
 from core.util import util, signals
-from core.msg import msgabc, msgext, msgftr, msgtrf
+from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.system import svrabc, svrsvc, svrext
@@ -31,7 +31,7 @@ class SystemService:
             .pop() \
             .append('login', httpext.LoginHandler(context.config('secret'))) \
             .push('instances', _InstancesHandler(self)) \
-            .append('subscribe', subs.handler(SystemService.SERVER_FILTER, msgtrf.DataAsDict())) \
+            .append('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer())) \
             .pop() \
             .push(subs.resource(self._resource, 'subscriptions')) \
             .append('{identity}', subs.subscriptions_handler('identity'))
@@ -199,3 +199,10 @@ class _ShutdownHandler(httpabc.PostHandler):
     def handle_post(self, resource, data):
         signals.interrupt()
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class _InstanceEventTransformer(msgabc.Transformer):
+
+    def transform(self, message):
+        event = 'created' if message.name() is SystemService.SERVER_INITIALISED else 'deleted'
+        return {'event': event, 'instance': util.obj_to_dict(message.data())}

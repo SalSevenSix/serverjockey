@@ -23,9 +23,6 @@ exports.server = function($) {
             return true;
           });
         });
-      } else if (cmd === 'delete') {
-        $.context.instancesService.deleteInstance($.instance);
-        message.react('✅');
       } else {
         message.react('✅');
       }
