@@ -4,10 +4,10 @@ import re
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util
 from core.context import contextsvc
-from core.http import httpabc, httpstatics
+from core.http import httpabc, httpcnt, httpstatics
 
 
-ACCEPTED_MIME_TYPES = (httpabc.MIME_TEXT_PLAIN, httpabc.MIME_APPLICATION_JSON, httpabc.MIME_APPLICATION_BIN)
+ACCEPTED_MIME_TYPES = (httpcnt.MIME_TEXT_PLAIN, httpcnt.MIME_APPLICATION_JSON, httpcnt.MIME_APPLICATION_BIN)
 
 
 class HttpService:
@@ -38,7 +38,7 @@ class HttpService:
     # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
         self._resources = await self._callbacks.initialise()
-        self._context.post(self, httpabc.RESOURCES_READY)
+        self._context.post(self, httpcnt.RESOURCES_READY)
 
     # noinspection PyUnusedLocal
     async def _shutdown(self, app: web.Application):
@@ -59,7 +59,7 @@ class _RequestHandler:
         self._statics = statics
         self._resources = resources
         self._request = request
-        self._headers = httpabc.HeadersTool(request)
+        self._headers = httpcnt.HeadersTool(request)
         self._secure = context.is_debug() or self._headers.is_secure(context.config('secret'))
         self._method = httpabc.Method.resolve(self._request.method)
 
@@ -91,19 +91,19 @@ class _RequestHandler:
         # POST
         if not self._secure:
             raise httpabc.ResponseBody.UNAUTHORISED
-        request_body, content_type = b'{}', httpabc.CONTENT_TYPE_APPLICATION_JSON
+        request_body, content_type = b'{}', httpcnt.CONTENT_TYPE_APPLICATION_JSON
         if self._request.can_read_body:
             content_type = self._headers.get_content_type()
             if content_type is None or content_type.mime_type() not in ACCEPTED_MIME_TYPES:
                 raise err.HTTPUnsupportedMediaType
-            if content_type.mime_type() == httpabc.MIME_APPLICATION_BIN:
+            if content_type.mime_type() == httpcnt.MIME_APPLICATION_BIN:
                 request_body = _RequestByteStream(self._request.content, self._headers.get_content_length())
             else:
                 request_body = await self._request.content.read()
-        if content_type.mime_type() != httpabc.MIME_APPLICATION_BIN:
-            encoding = content_type.encoding() if content_type.encoding() else httpabc.UTF8
+        if content_type.mime_type() != httpcnt.MIME_APPLICATION_BIN:
+            encoding = content_type.encoding() if content_type.encoding() else httpcnt.UTF8
             request_body = request_body.decode(encoding).strip()
-            if content_type.mime_type() == httpabc.MIME_APPLICATION_JSON:
+            if content_type.mime_type() == httpcnt.MIME_APPLICATION_JSON:
                 request_body = util.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
@@ -114,43 +114,43 @@ class _RequestHandler:
         if body in httpabc.ResponseBody.ERRORS:
             raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
-        response.headers.add(httpabc.CACHE_CONTROL, httpabc.CACHE_CONTROL_NO_CACHE)
+        response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_CACHE)
         if self._context.is_debug():
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
-        elif httpabc.WEBDEV_ORIGIN == self._headers.get(httpabc.ORIGIN):
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.WEBDEV_ORIGIN)
-        if body == self._context.config('secret'):   # TODO Do this properly
+            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
+        elif httpcnt.WEBDEV_ORIGIN == self._headers.get(httpcnt.ORIGIN):
+            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.WEBDEV_ORIGIN)
+        if body == self._context.config('secret'):
             response.set_cookie('secret', body, max_age=36000, httponly=True)
             body = httpabc.ResponseBody.NO_CONTENT
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
-            response.headers.add(httpabc.CONTENT_TYPE, httpabc.MIME_APPLICATION_JSON)
-            response.headers.add(httpabc.CONTENT_LENGTH, '0')
+            response.headers.add(httpcnt.CONTENT_TYPE, httpcnt.MIME_APPLICATION_JSON)
+            response.headers.add(httpcnt.CONTENT_LENGTH, '0')
             return response
-        content_type = httpabc.CONTENT_TYPE_APPLICATION_BIN
+        content_type = httpcnt.CONTENT_TYPE_APPLICATION_BIN
         if isinstance(body, str):
-            content_type = httpabc.CONTENT_TYPE_TEXT_PLAIN_UTF8
-            body = body.encode(httpabc.UTF8)
+            content_type = httpcnt.CONTENT_TYPE_TEXT_PLAIN_UTF8
+            body = body.encode(httpcnt.UTF8)
         if isinstance(body, (dict, tuple, list)):
-            content_type = httpabc.CONTENT_TYPE_APPLICATION_JSON
+            content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = util.obj_to_json(body)
-            body = body.encode(httpabc.UTF8)
-        if isinstance(body, bytes) and len(body) > 1024 and self._headers.accepts_encoding(httpabc.GZIP):
+            body = body.encode(httpcnt.UTF8)
+        if isinstance(body, bytes) and len(body) > 1024 and self._headers.accepts_encoding(httpcnt.GZIP):
             body = gzip.compress(body)
-            response.headers.add(httpabc.CONTENT_ENCODING, httpabc.GZIP)
+            response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
         if isinstance(body, httpabc.ByteStream):
-            response.headers.add(httpabc.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
-            response.headers.add(httpabc.CONTENT_TYPE, body.content_type().content_type())
+            response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
+            response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
             content_length = await body.content_length()
             if content_length is None:
                 response.enable_chunked_encoding(util.DEFAULT_CHUNK_SIZE)
             else:
-                response.headers.add(httpabc.CONTENT_LENGTH, str(content_length))
+                response.headers.add(httpcnt.CONTENT_LENGTH, str(content_length))
             await response.prepare(self._request)
             await util.copy_bytes(body, response, util.DEFAULT_CHUNK_SIZE)
             return response
-        response.headers.add(httpabc.CONTENT_TYPE, content_type.content_type())
-        response.headers.add(httpabc.CONTENT_LENGTH, str(len(body)))
+        response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
+        response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))
         response.body = body
         return response
 
@@ -160,13 +160,13 @@ class _RequestHandler:
         methods += httpabc.Method.POST.value + ',' if resource.allows(httpabc.Method.POST) else ''
         methods += httpabc.Method.OPTIONS.value
         response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
-        response.headers.add(httpabc.ALLOW, methods)
+        response.headers.add(httpcnt.ALLOW, methods)
         if self._context.is_debug():
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
-        elif httpabc.WEBDEV_ORIGIN == self._headers.get(httpabc.ORIGIN):
-            response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_ORIGIN, httpabc.WEBDEV_ORIGIN)
-        response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_METHODS, methods)
-        response.headers.add(httpabc.ACCESS_CONTROL_ALLOW_HEADERS, httpabc.CONTENT_TYPE + ',' + httpabc.X_SECRET)
+            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
+        elif httpcnt.WEBDEV_ORIGIN == self._headers.get(httpcnt.ORIGIN):
+            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.WEBDEV_ORIGIN)
+        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_METHODS, methods)
+        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS, httpcnt.CONTENT_TYPE + ',' + httpcnt.X_SECRET)
         return response
 
 
@@ -180,7 +180,7 @@ class _RequestByteStream(httpabc.ByteStream):
         return 'RequestByteStream'
 
     def content_type(self) -> httpabc.ContentType:
-        return httpabc.CONTENT_TYPE_APPLICATION_JSON
+        return httpcnt.CONTENT_TYPE_APPLICATION_JSON
 
     async def content_length(self) -> int:
         return self._content_length

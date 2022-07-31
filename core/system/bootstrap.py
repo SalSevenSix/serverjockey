@@ -75,7 +75,6 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         return self._syssvc.resources()
 
     async def shutdown(self):
-        # TODO should have timeout then kill tasks
         await util.silently_cleanup(self._syssvc)
         await util.silently_cleanup(self._context)
 

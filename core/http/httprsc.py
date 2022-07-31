@@ -3,7 +3,7 @@ import logging
 import typing
 from yarl import URL
 from core.util import util
-from core.http import httpabc
+from core.http import httpabc, httpcnt
 
 
 ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL)
@@ -130,7 +130,7 @@ class WebResource(httpabc.Resource):
     async def handle_get(self, url: URL, secure: bool) -> httpabc.ABC_RESPONSE:
         data = PathProcessor(self).extract_args_url(url)
         if secure:
-            httpabc.make_secure(data)
+            httpcnt.make_secure(data)
         if isinstance(self._handler, httpabc.GetHandler):
             return self._handler.handle_get(self, data)
         return await self._handler.handle_get(self, data)

@@ -4,7 +4,7 @@ import pkgutil
 import gzip
 from aiohttp import web, abc as webabc, web_exceptions as err
 from core.util import util
-from core.http import httpabc
+from core.http import httpabc, httpcnt
 from core.context import contextsvc
 
 
@@ -13,19 +13,19 @@ class Statics:
     def __init__(self, context: contextsvc.Context):
         self._loader = _Loader() if context.is_debug() else _CacheLoader()
 
-    def handle(self, headers: httpabc.HeadersTool, request: webabc.Request) -> web.Response:
+    def handle(self, headers: httpcnt.HeadersTool, request: webabc.Request) -> web.Response:
         resource = self._loader.load(request.path)
         if resource is None:
             raise err.HTTPNotFound
         response = web.Response()
-        response.headers.add(httpabc.CONTENT_TYPE, resource.content_type().content_type())
-        response.headers.add(httpabc.CACHE_CONTROL, 'max-age=3600')   # One hour
-        if headers.accepts_encoding(httpabc.GZIP) and resource.compress():
-            response.headers.add(httpabc.CONTENT_ENCODING, httpabc.GZIP)
+        response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
+        response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')   # One hour
+        if headers.accepts_encoding(httpcnt.GZIP) and resource.compress():
+            response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()
         else:
             body = resource.uncompressed()
-        response.headers.add(httpabc.CONTENT_LENGTH, str(len(body)))
+        response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))
         response.body = body
         return response
 
@@ -57,7 +57,7 @@ class _Loader:
             path += 'index.html'
         try:
             data = pkgutil.get_data('web', path)
-            return _Resource(httpabc.ContentType.lookup(path), data) if data else None
+            return _Resource(httpcnt.ContentTypeImpl.lookup(path), data) if data else None
         except IsADirectoryError:
             if not path.endswith('.html'):
                 return self.load(path + '/')

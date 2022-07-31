@@ -4,7 +4,7 @@ import re
 import aiofiles
 from core.util import util, tasks
 from core.msg import msgabc, msgext, msgftr
-from core.http import httpabc, httpsubs
+from core.http import httpabc, httpcnt, httpsubs
 
 
 class LoginHandler(httpabc.PostHandler):
@@ -67,7 +67,7 @@ class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         self._patterns = [] if isinstance(protection, bool) else [re.compile(r) for r in protection]
 
     async def handle_get(self, resource, data):
-        if self._protected and not httpabc.is_secure(data):
+        if self._protected and not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         if not await util.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
@@ -104,11 +104,11 @@ class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         self._protected = protected
 
     async def handle_get(self, resource, data):
-        if self._protected and not httpabc.is_secure(data):
+        if self._protected and not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         path = self._path + '/' + data[self._tail] if self._tail else self._path
         if await util.file_exists(path):
-            content_type = httpabc.ContentType.lookup(path)
+            content_type = httpcnt.ContentTypeImpl.lookup(path)
             size = await util.file_size(path)
             if content_type.is_text_type() and size < 1048576:
                 return await util.read_file(path)
@@ -127,7 +127,8 @@ class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         if await util.directory_exists(path):
             return httpabc.ResponseBody.BAD_REQUEST
-        # TODO check leaf directory exists
+        if not await util.directory_exists('/'.join(path.split('/')[0:-1])):
+            return httpabc.ResponseBody.BAD_REQUEST
         if isinstance(body, str):
             await util.write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
@@ -142,7 +143,7 @@ class _FileByteStream(httpabc.ByteStream):
     def __init__(self, filename: str):
         self._name = filename.split('/')[-1]
         self._filename = filename
-        self._content_type = httpabc.ContentType.lookup(filename)
+        self._content_type = httpcnt.ContentTypeImpl.lookup(filename)
         self._queue = asyncio.Queue(maxsize=1)
         self._task = None
         self._length = -1

@@ -7,7 +7,7 @@ import uuid
 from core.util import util, signals
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpsubs
+from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
 from core.system import svrabc, svrsvc, svrext
 
 
@@ -127,7 +127,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
             msgftr.NameIs(_AutoStartsSubscriber.AUTOS),
-            msgftr.NameIs(httpabc.RESOURCES_READY)
+            msgftr.NameIs(httpcnt.RESOURCES_READY)
         ))
         self._mailer = mailer
         self._autos = None

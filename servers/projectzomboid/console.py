@@ -1,6 +1,6 @@
 from core.util import cmdutil, util
 from core.msg import msgabc
-from core.http import httpabc, httprsc
+from core.http import httpabc, httpcnt, httprsc
 from core.proc import proch, prcext
 from servers.projectzomboid import playerstore as pls, domain as dom
 
@@ -93,7 +93,7 @@ class _SteamidsHandler(httpabc.AsyncGetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        if not httpabc.is_secure(data):
+        if not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         playerstore = await pls.PlayerStoreService.get(self._mailer, self)
         return playerstore.asdict()
