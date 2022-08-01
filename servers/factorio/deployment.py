@@ -16,8 +16,7 @@ class Deployment:
         self._runtime_dir = self._home_dir + '/runtime'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
         self._current_log = self._runtime_dir + '/factorio-current.log'
-        self._live_mods_dir = self._runtime_dir + '/mods'
-        self._live_mods_list = self._live_mods_dir + '/mod-list.json'
+        self._mods_dir = self._runtime_dir + '/mods'
         self._server_settings_def = self._runtime_dir + '/data/server-settings.example.json'
         self._map_settings_def = self._runtime_dir + '/data/map-settings.example.json'
         self._map_gen_settings_def = self._runtime_dir + '/data/map-gen-settings.example.json'
@@ -29,10 +28,10 @@ class Deployment:
         self._server_settings = self._config_dir + '/server-settings.json'
         self._map_settings = self._config_dir + '/map-settings.json'
         self._map_gen_settings = self._config_dir + '/map-gen-settings.json'
-        self._mods_list = self._config_dir + '/mod-list.json'
         self._server_whitelist = self._config_dir + '/server-whitelist.json'
         self._server_banlist = self._config_dir + '/server-banlist.json'
         self._server_adminlist = self._config_dir + '/server-adminlist.json'
+        self._mods_list = self._config_dir + '/mod-list.json'
 
     async def initialise(self):
         await self.build_world()
@@ -82,7 +81,7 @@ class Deployment:
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
 
     async def new_server_process(self) -> proch.ServerProcess:
-        await util.copy_text_file(self._mods_list, self._live_mods_list)
+        await self._sync_mods()
         cmdargs = util.json_to_dict(await util.read_file(self._cmdargs_settings))
         server = proch.ServerProcess(self._mailer, self._executable)
         if cmdargs['port']:
@@ -103,13 +102,13 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await util.create_directory(self._live_mods_dir)
         await util.create_directory(self._backups_dir)
         await util.create_directory(self._world_dir)
         await util.create_directory(self._save_dir)
         await util.create_directory(self._config_dir)
         if not await util.directory_exists(self._runtime_dir):
             return
+        await util.create_directory(self._mods_dir)
         if not await util.file_exists(self._server_settings):
             await util.copy_text_file(self._server_settings_def, self._server_settings)
         if not await util.file_exists(self._map_settings):
@@ -128,6 +127,7 @@ class Deployment:
                 'use-server-whitelist': False, 'use-authserver-bans': None}, pretty=True))
         if not await util.file_exists(self._mods_list):
             await util.write_file(self._mods_list, util.obj_to_json({
+                'service-username': None, 'service-token': None,
                 'mods': [{'name': 'base', 'enabled': True}]}, pretty=True))
 
     async def install_runtime(self):
@@ -157,6 +157,36 @@ class Deployment:
             '--create', self._map_file,
             '--map-gen-settings', self._map_gen_settings,
             '--map-settings', self._map_settings))
+
+    async def _sync_mods(self):
+        mods = util.json_to_dict(await util.read_file(self._mods_list))
+        if not mods.get('service-username') or not mods.get('service-token'):
+            return
+        mod_files, mod_list, chunk_size = [], [], 65536
+        baseurl = 'https://mods.factorio.com'
+        credentials = '?username=' + mods['service-username'] + '&token=' + mods['service-token']
+        async with aiohttp.ClientSession() as session:
+            for mod in mods['mods']:
+                if mod['name'] != 'base':
+                    mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
+                    async with session.get(baseurl + '/api/mods/' + mod['name']) as meta_response:
+                        assert meta_response.status == 200
+                        meta = await meta_response.json()
+                        if not mod.get('version'):
+                            mod['version'] = meta['releases'][-1]['version']
+                    for release in meta['releases']:
+                        if release['version'] == mod['version']:
+                            mod_files.append(release['file_name'])
+                            filename = self._mods_dir + '/' + release['file_name']
+                            if not await util.file_exists(filename):
+                                url = baseurl + release['download_url'] + credentials
+                                async with session.get(url, read_bufsize=chunk_size) as modfile_response:
+                                    assert modfile_response.status == 200
+                                    await util.stream_write_file(filename, modfile_response.content, chunk_size)
+        for file in await util.directory_list_dict(self._mods_dir):
+            if file['type'] == 'file' and file['name'] not in mod_files:
+                await util.delete_file(self._mods_dir + '/' + file['name'])
+        await util.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
 
 
 class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
