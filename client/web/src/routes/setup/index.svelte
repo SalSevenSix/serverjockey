@@ -31,18 +31,11 @@
 
 
 <div class="columns">
-  <div class="column">
+  <div class="column is-one-third">
     <figure><img src="/assets/box.svg" alt="Welcome Box" /></figure>
   </div>
   <div class="column content">
     <h2 class="title is-3 mt-2">Welcome</h2>
-    <p>
-      <span class="has-text-weight-bold">ZomBox</span> is a self contained game server management system
-      for <span class="has-text-weight-bold">Project Zomboid</span>. It is designed to be an easy to use
-      self-hosting option for multiplayer servers. Allowing you to create and remotely manage your servers.
-      Currently the <span class="has-text-weight-bold">Discord</span> platform is used to manage the servers
-      with the help of a discord bot. Webapp support to be added in the future.
-    </p>
     <p>
       If you are reading this, you have already successfully installed and started ZomBox on VirtualBox. Congratulations!
       This page will guide you through the rest of the setup process and how to create, configure and start a server.

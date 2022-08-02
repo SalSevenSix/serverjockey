@@ -26,6 +26,7 @@
       <a on:click={menuClose} class="navbar-item" href="/">Home</a>
       <a on:click={menuClose} class="navbar-item" href="/servers">Instances</a>
       <a on:click={menuClose} class="navbar-item" href="/setup">Setup</a>
+      <a on:click={menuClose} class="navbar-item" href="/about">About</a>
     </div>
   </div>
 </nav>

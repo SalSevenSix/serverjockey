@@ -31,6 +31,7 @@ check_dependencies_common() {
         echo "  https://developer.valvesoftware.com/wiki/SteamCMD"
         echo "For Ubuntu/Debian;"
         echo "  $ sudo add-apt-repository multiverse"
+        echo "  $ sudo apt install software-properties-common"
         echo "  $ sudo dpkg --add-architecture i386"
         echo "  $ sudo apt update"
         echo "  $ sudo apt install lib32gcc-s1 steamcmd"
