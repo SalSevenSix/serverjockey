@@ -4,6 +4,7 @@ from core.msg import msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch
+from servers.factorio import messaging as msg
 
 
 class Deployment:
@@ -81,7 +82,6 @@ class Deployment:
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
 
     async def new_server_process(self) -> proch.ServerProcess:
-        await self._sync_mods()
         cmdargs = util.json_to_dict(await util.read_file(self._cmdargs_settings))
         server = proch.ServerProcess(self._mailer, self._executable)
         if cmdargs['port']:
@@ -124,7 +124,7 @@ class Deployment:
         if not await util.file_exists(self._cmdargs_settings):
             await util.write_file(self._cmdargs_settings, util.obj_to_json({
                 'port': None, 'rcon-port': None, 'rcon-password': None,
-                'use-server-whitelist': False, 'use-authserver-bans': None}, pretty=True))
+                'use-server-whitelist': False, 'use-authserver-bans': False}, pretty=True))
         if not await util.file_exists(self._mods_list):
             await util.write_file(self._mods_list, util.obj_to_json({
                 'service-username': None, 'service-token': None,
@@ -158,7 +158,8 @@ class Deployment:
             '--map-gen-settings', self._map_gen_settings,
             '--map-settings', self._map_settings))
 
-    async def _sync_mods(self):
+    async def sync_mods(self):
+        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods')
         mods = util.json_to_dict(await util.read_file(self._mods_list))
         if not mods.get('service-username') or not mods.get('service-token'):
             return
@@ -179,12 +180,13 @@ class Deployment:
                             mod_files.append(release['file_name'])
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await util.file_exists(filename):
+                                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
                                 url = baseurl + release['download_url'] + credentials
                                 async with session.get(url, read_bufsize=chunk_size) as modfile_response:
                                     assert modfile_response.status == 200
                                     await util.stream_write_file(filename, modfile_response.content, chunk_size)
         for file in await util.directory_list_dict(self._mods_dir):
-            if file['type'] == 'file' and file['name'] not in mod_files:
+            if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
                 await util.delete_file(self._mods_dir + '/' + file['name'])
         await util.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
 

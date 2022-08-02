@@ -1,5 +1,5 @@
 from core.util import aggtrf
-from core.msg import msgabc, msgftr, msgtrf, msgext
+from core.msg import msgabc, msgtrf, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs
 from core.proc import proch
@@ -33,12 +33,13 @@ class Server(svrabc.Server):
             .pop() \
             .push('log') \
             .append('tail', _ConsoleLogHandler(self._context)) \
-            .append('subscribe', self._httpsubs.handler(_ConsoleLogHandler.FILTER, aggtrf.StrJoin('\n'))) \
+            .append('subscribe', self._httpsubs.handler(msg.CONSOLE_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
+        await self._deployment.sync_mods()
         await self._deployment.ensure_map()
         server = await self._deployment.new_server_process()
         server.use_pipeinsvc(self._pipeinsvc)
@@ -50,13 +51,12 @@ class Server(svrabc.Server):
 
 
 class _ConsoleLogHandler(httpabc.AsyncGetHandler):
-    FILTER = msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
         self._subscriber = msgext.RollingLogSubscriber(
             mailer, size=100,
-            msg_filter=_ConsoleLogHandler.FILTER,
+            msg_filter=msg.CONSOLE_FILTER,
             transformer=msgtrf.GetData(),
             aggregator=aggtrf.StrJoin('\n'))
         mailer.register(self._subscriber)

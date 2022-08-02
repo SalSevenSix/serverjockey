@@ -6,6 +6,13 @@ from core.system import svrsvc
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches('.* Info .* Own address is IP ADDR.*confirmed by pingpong.*'))
+DEPLOYMENT_MSG = 'Deployment.Message'
+CONSOLE_FILTER = msgftr.Or(
+    proch.ServerProcess.FILTER_STDOUT_LINE,
+    proch.ServerProcess.FILTER_STDERR_LINE,
+    proch.JobProcess.FILTER_STDOUT_LINE,
+    msgftr.NameIs(DEPLOYMENT_MSG)
+)
 
 
 class Messaging:
