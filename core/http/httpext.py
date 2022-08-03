@@ -74,7 +74,7 @@ class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         content = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename)
         if isinstance(content, Exception):
             return {'error': str(content)}
-        if len(self._patterns) == 0:
+        if len(self._patterns) == 0 or httpcnt.is_secure(data):
             return content
         result = []
         for line in iter(content.split('\n')):

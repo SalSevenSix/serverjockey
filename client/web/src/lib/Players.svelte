@@ -5,9 +5,12 @@
   let subs = new SubscriptionHelper();
   let players = [];
 
+  let lastRunning = $serverStatus.running;
   $: serverRunningChange($serverStatus.running);
   function serverRunningChange(running) {
+    if (lastRunning === $serverStatus.running) return;
     players = [];
+    lastRunning = $serverStatus.running;
   }
 
 	onMount(async function() {
