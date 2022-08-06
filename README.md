@@ -1,5 +1,7 @@
 # serverjockey
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D4E4ZYZ)
+
 ## Install
 * **Recommended**: Update your system first
 ```bash

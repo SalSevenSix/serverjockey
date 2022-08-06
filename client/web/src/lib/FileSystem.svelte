@@ -79,10 +79,10 @@
         <tr>
           <td>{path.type === 'file' ? 'file' : 'dir'}</td>
           {#if path.type === 'directory'}
-            <td><a href="#" name="{path.url}" on:click|preventDefault={openDirectory}>{path.name}</a></td>
+            <td><a href="javascript:void(0);" name="{path.url}" on:click|preventDefault={openDirectory}>{path.name}</a></td>
           {/if}
           {#if path.type === 'file'}
-            <td><a href="#" name="{path.url}" on:click|preventDefault={openFile}>{path.name}</a></td>
+            <td><a href="javascript:void(0);" name="{path.url}" on:click|preventDefault={openFile}>{path.name}</a></td>
           {/if}
           <td>{humanFileSize(path.size)}</td>
         </tr>

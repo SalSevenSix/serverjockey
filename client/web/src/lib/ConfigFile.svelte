@@ -45,7 +45,7 @@
 
 <div class="block">
   <div class="field">
-    <label class="label"><a href="#" on:click|preventDefault={openConfigFile}>{name}</a></label>
+    <label class="label"><a href="javascript:void(0);" on:click|preventDefault={openConfigFile}>{name}</a></label>
     <div class="control pr-6">
       <textarea class="textarea" bind:value={configText}></textarea>
     </div>
