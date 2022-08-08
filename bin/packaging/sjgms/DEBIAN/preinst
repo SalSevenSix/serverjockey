@@ -1,0 +1,5 @@
+#!/bin/bash
+
+systemctl stop serverjockey
+
+exit 0

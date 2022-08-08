@@ -58,10 +58,12 @@ class _ServerProcessFactory:
         self._exe_exists = False
 
     async def initialise(self):
-        executable = self._context.config('home') + '/serverlink'
-        if await util.file_exists(executable):
-            self._executable = executable
-            self._exe_exists = True
+        alternates = [self._context.config('home') + '/serverlink', '/usr/local/bin/serverlink']
+        for executable in alternates:
+            if await util.file_exists(executable):
+                self._executable = executable
+                self._exe_exists = True
+                return
 
     def build(self) -> proch.ServerProcess:
         server_process = proch.ServerProcess(self._context, self._executable)

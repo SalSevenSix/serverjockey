@@ -1,0 +1,15 @@
+[Unit]
+Description=ServerJockey game server management system
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=sjgms
+ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/sjgms" --logfile "serverjockey.log" --clientfile "serverjockey-client.json"
+KillMode=mixed
+TimeoutStopSec=90
+OOMScoreAdjust=-800
+
+[Install]
+WantedBy=multi-user.target

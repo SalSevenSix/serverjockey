@@ -1,0 +1,10 @@
+Package: sjgms
+Version: 0.0.1
+Section: custom
+Priority: optional
+Architecture: amd64
+Depends: lib32gcc-s1, steamcmd, python3 (>= 3.10)
+Maintainer: Bowden Salis <bsalis76@gmail.com>
+Description: ServerJockey Game Management System
+ Server management system for game servers.
+ Under development. Use at your own risk.

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+HOME_DIR="/home/sjgms"
+SERVERLINK_DIR="$HOME_DIR/serverlink"
+
+
+setup_sjgms() {
+  rm -rf $HOME_DIR > /dev/null 2>&1
+  adduser --system sjgms
+  [ $? -eq 0 ] || exit 1
+
+  mkdir $SERVERLINK_DIR
+  echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > $SERVERLINK_DIR/instance.json
+  {
+    echo "{"
+    echo "  \"CMD_PREFIX\": \"!\","
+    echo "  \"ADMIN_ROLE\": \"pzadmin\","
+    echo "  \"BOT_TOKEN\": null,"
+    echo "  \"EVENTS_CHANNEL_ID\": null,"
+    echo "  \"WHITELIST_DM\": \"Welcome to our server.\nYour login is \${user} and password is \${pass}\""
+    echo "}"
+  } > $SERVERLINK_DIR/serverlink.json
+
+  find $HOME_DIR -type d -exec chmod 755 {} +
+  find $HOME_DIR -type f -exec chmod 600 {} +
+  chown -R sjgms $HOME_DIR
+  chgrp -R nogroup $HOME_DIR
+
+  runuser - sjgms -s /bin/bash -c "steamcmd +quit"
+  [ -d "$HOME_DIR/.steam" ] || exit 1
+}
+
+
+# TODO test the exit condition
+id -u sjgms > /dev/null 2>&1
+[ $? -eq 0 ] || setup_sjgms
+
+systemctl daemon-reload
+systemctl enable serverjockey
+systemctl start serverjockey
+
+
+exit 0
