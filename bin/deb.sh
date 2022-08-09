@@ -16,8 +16,8 @@ chgrp -R root $TARGET_DIR
 dpkg-deb --build sjgms
 [ $? -eq 0 ] || exit 1
 [ -f "sjgms.deb" ] || exit 1
-chown bsalis sjgms.deb
-chgrp bsalis sjgms.deb
+chown $SUDO_USER sjgms.deb
+chgrp $SUDO_USER sjgms.deb
 
 rm -rf $TARGET_DIR > /dev/null 2>&1
 

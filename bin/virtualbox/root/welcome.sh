@@ -7,7 +7,7 @@ until [ "$(/sbin/runlevel)" == "N 5" ]; do
   ((wait_seconds = wait_seconds - 1))
 done
 
-CLIENT_FILE="/home/steam/serverjockey/serverjockey-client.json"
+CLIENT_FILE="/home/sjgms/serverjockey-client.json"
 wait_seconds=10
 until [ -f "$CLIENT_FILE" ]; do
   [ $wait_seconds -eq 0 ] && exit 1
