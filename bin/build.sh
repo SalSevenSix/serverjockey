@@ -32,6 +32,8 @@ echo "Copying target directory into build directory"
 cp -r "$SERVERJOCKEY_DIR/bin/packaging/sjgms" "$HOME_DIR"
 [ $? -eq 0 ] || exit 1
 [ -d "$TARGET_DIR" ] || exit 1
+find $TARGET_DIR -type f -name ".deleteme" -delete
+[ $? -eq 0 ] || exit 1
 
 echo "Copying Serverlink into build directory"
 cp -r "$SERVERJOCKEY_DIR/client/discord" "$SERVERLINK_DIR"
