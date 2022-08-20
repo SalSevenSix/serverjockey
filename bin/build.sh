@@ -9,6 +9,8 @@ TARGET_DIR="$HOME_DIR/sjgms"
 SERVERLINK="serverlink"
 SERVERJOCKEY_DIR="$HOME_DIR/$SERVERJOCKEY"
 SERVERLINK_DIR="$HOME_DIR/discord"
+LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages"
+LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
 
 cd $HOME_DIR || exit 1
@@ -52,7 +54,9 @@ pipenv install
 [ -d ".venv" ] || exit 1
 
 echo "Merging ServerJockey dependencies"
-cp -r $SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages/* "$SERVERJOCKEY_DIR"
+[ -d "$LIB32_DIR" ] && cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR"
+[ $? -eq 0 ] || exit 1
+[ -d "$LIB64_DIR" ] && cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR"
 [ $? -eq 0 ] || exit 1
 
 echo "Move out libraries with natives"

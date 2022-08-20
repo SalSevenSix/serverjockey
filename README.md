@@ -1,16 +1,20 @@
 # ServerJockey
 
+ServerJockey is a game server management system. It is designed to be an easy
+to use self-hosting option for multiplayer servers. Allowing you to create
+and remotely manage your servers. A webapp and Discord bot are used as clients.
+
+If your like using this system, please consider supporting me on Ko-fi.
+
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D4E4ZYZ)
+
 
 ## Source Repository
 [ServerJockey](https://github.com/SalSevenSix/serverjockey) project on GitHub
 
+
 ## Ubuntu/Debian Install
-* **Recommended**. Update your system first
-```bash
-sudo apt update
-sudo apt upgrade
-```
+Arch x86_64 only. Tested and works on Ubuntu 22.04
 
 * Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed
 ```bash
@@ -23,8 +27,35 @@ sudo apt install lib32gcc-s1 steamcmd
 
 * Download and install the deb package
 ```bash
-wget -O sjgms.deb https://4sas.short.gy/sjgms-latest
+wget -O sjgms.deb https://4sas.short.gy/sjgms-deb-latest
 sudo apt install ./sjgms.deb
+```
+
+* The ServerJockey system should automatically be started.
+Find login details for the webapp in the `serverjockey-client.json` file.
+Use the IP of the machine in place of `localhost` in the URL.
+Enter the token to login to the webapp on the home page.
+```bash
+cat /home/sjgms/serverjockey-client.json
+```
+
+
+## Fedora/CentOS Install
+Arch x86_64 only. Tested and works on Fedora 36
+
+* Download and install the rpm package
+```bash
+wget -O sjgms.rpm https://4sas.short.gy/sjgms-rpm-latest
+sudo yum install ./sjgms.rpm
+```
+
+* Manually install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD)
+```bash
+sudo yum install glibc.i686 libstdc++.i686
+sudo su - sjgms
+mkdir ~/Steam && cd ~/Steam
+curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
+./steamcmd.sh +quit
 ```
 
 * The ServerJockey system should automatically be started.

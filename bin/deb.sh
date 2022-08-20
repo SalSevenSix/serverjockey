@@ -1,5 +1,6 @@
 #!/bin/bash
 
+[ "$(whoami)" == "root" ] || exit 1
 HOME_DIR="$(pwd)"
 TARGET_DIR="$HOME_DIR/sjgms"
 [ -d $TARGET_DIR ] || exit 1

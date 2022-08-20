@@ -9,7 +9,7 @@ setup_sjgms() {
   adduser --system sjgms
   [ $? -eq 0 ] || exit 1
 
-  mkdir $SERVERLINK_DIR
+  mkdir -p $SERVERLINK_DIR
   echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > $SERVERLINK_DIR/instance.json
   {
     echo "{"
@@ -31,7 +31,6 @@ setup_sjgms() {
 }
 
 
-# TODO test the exit condition
 id -u sjgms > /dev/null 2>&1
 [ $? -eq 0 ] || setup_sjgms
 
