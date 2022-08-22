@@ -14,6 +14,7 @@ LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
 
 cd $HOME_DIR || exit 1
+rm -rf $SERVERJOCKEY_DIR > /dev/null 2>&1
 if [ "$BRANCH" == "local" ]; then
   echo "Copying local source files to build"
   cp -r ~/projects/$SERVERJOCKEY $SERVERJOCKEY
@@ -28,6 +29,17 @@ else
   mv "$SERVERJOCKEY-$BRANCH" "$SERVERJOCKEY"
   [ $? -eq 0 ] || exit 1
   rm "$BRANCH.zip" > /dev/null 2>&1
+fi
+
+if [ -d "$HOME/rpmbuild" ]; then
+  echo "Updating Fedora scripts and spec file"
+  if [ $(diff $SERVERJOCKEY_DIR/bin/build.sh $HOME_DIR/build.sh | wc -l) -ne 0 ]; then
+    cp "$SERVERJOCKEY_DIR/bin/build.sh" "$HOME_DIR/build.sh"
+    echo "Build script updated. Please run again."
+    exit 1
+  fi
+  cp "$SERVERJOCKEY_DIR/bin/rpm.sh" "$HOME_DIR/rpm.sh"
+  cp "$SERVERJOCKEY_DIR/bin/packaging/rpmbuild/sjgms.spec" "$HOME/rpmbuild/SPECS/sjgms.spec"
 fi
 
 echo "Copying target directory into build directory"

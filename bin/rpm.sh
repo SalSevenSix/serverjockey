@@ -1,11 +1,13 @@
 #!/bin/bash
 
-VERSION="$1"
 HOME_DIR="$(pwd)"
 RPMBUILD_DIR="$HOME/rpmbuild"
 [ -d $RPMBUILD_DIR ] || exit 1
+VERSION="$(grep 'Version:' $RPMBUILD_DIR/SPECS/sjgms.spec | awk {'print$2'})"
 TARGET_DIR="$HOME_DIR/sjgms"
 [ -d $TARGET_DIR ] || exit 1
+OSVER="fc$(cat /etc/fedora-release | awk {'print$3'})"
+RPM_FILE="$RPMBUILD_DIR/RPMS/x86_64/sjgms-$VERSION-1.$OSVER.x86_64.rpm"
 TAR_DIR="$TARGET_DIR-$VERSION"
 rm -rf $TAR_DIR > /dev/null 2>&1
 
@@ -29,9 +31,9 @@ rm -rf $RPMBUILD_DIR/SOURCES/*
 mv $HOME_DIR/sjgms-$VERSION.tar.gz $RPMBUILD_DIR/SOURCES
 rpmbuild -bb $RPMBUILD_DIR/SPECS/sjgms.spec
 [ $? -eq 0 ] || exit 1
-[ -f "$RPMBUILD_DIR/RPMS/x86_64/sjgms-$VERSION-1.fc36.x86_64.rpm" ] || exit 1
+[ -f "$RPM_FILE" ] || exit 1
 
-mv $RPMBUILD_DIR/RPMS/x86_64/sjgms-$VERSION-1.fc36.x86_64.rpm $HOME_DIR
+mv $RPM_FILE $HOME_DIR
 rm -rf $TAR_DIR > /dev/null 2>&1
 
 exit 0
