@@ -1,5 +1,5 @@
 import aiohttp
-from core.util import util, aggtrf
+from core.util import util, io, pack, aggtrf
 from core.msg import msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -82,7 +82,7 @@ class Deployment:
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
 
     async def new_server_process(self) -> proch.ServerProcess:
-        cmdargs = util.json_to_dict(await util.read_file(self._cmdargs_settings))
+        cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_settings))
         server = proch.ServerProcess(self._mailer, self._executable)
         if cmdargs['port']:
             server.append_arg('--port').append_arg(cmdargs['port'])
@@ -102,56 +102,56 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await util.create_directory(self._backups_dir)
-        await util.create_directory(self._world_dir)
-        await util.create_directory(self._save_dir)
-        await util.create_directory(self._config_dir)
-        if not await util.directory_exists(self._runtime_dir):
+        await io.create_directory(self._backups_dir)
+        await io.create_directory(self._world_dir)
+        await io.create_directory(self._save_dir)
+        await io.create_directory(self._config_dir)
+        if not await io.directory_exists(self._runtime_dir):
             return
-        await util.create_directory(self._mods_dir)
-        if not await util.file_exists(self._server_settings):
-            await util.copy_text_file(self._server_settings_def, self._server_settings)
-        if not await util.file_exists(self._map_settings):
-            await util.copy_text_file(self._map_settings_def, self._map_settings)
-        if not await util.file_exists(self._map_gen_settings):
-            await util.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
-        if not await util.file_exists(self._server_whitelist):
-            await util.write_file(self._server_whitelist, '[]')
-        if not await util.file_exists(self._server_banlist):
-            await util.write_file(self._server_banlist, '[]')
-        if not await util.file_exists(self._server_adminlist):
-            await util.write_file(self._server_adminlist, '[]')
-        if not await util.file_exists(self._cmdargs_settings):
-            await util.write_file(self._cmdargs_settings, util.obj_to_json({
+        await io.create_directory(self._mods_dir)
+        if not await io.file_exists(self._server_settings):
+            await io.copy_text_file(self._server_settings_def, self._server_settings)
+        if not await io.file_exists(self._map_settings):
+            await io.copy_text_file(self._map_settings_def, self._map_settings)
+        if not await io.file_exists(self._map_gen_settings):
+            await io.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
+        if not await io.file_exists(self._server_whitelist):
+            await io.write_file(self._server_whitelist, '[]')
+        if not await io.file_exists(self._server_banlist):
+            await io.write_file(self._server_banlist, '[]')
+        if not await io.file_exists(self._server_adminlist):
+            await io.write_file(self._server_adminlist, '[]')
+        if not await io.file_exists(self._cmdargs_settings):
+            await io.write_file(self._cmdargs_settings, util.obj_to_json({
                 'port': None, 'rcon-port': None, 'rcon-password': None,
                 'use-server-whitelist': False, 'use-authserver-bans': False}, pretty=True))
-        if not await util.file_exists(self._mods_list):
-            await util.write_file(self._mods_list, util.obj_to_json({
+        if not await io.file_exists(self._mods_list):
+            await io.write_file(self._mods_list, util.obj_to_json({
                 'service-username': None, 'service-token': None,
                 'mods': [{'name': 'base', 'enabled': True}]}, pretty=True))
 
     async def install_runtime(self):
         url = 'https://factorio.com/get-download/stable/headless/linux64'
         unpack_dir, chunk_size = self._home_dir + '/factorio', 65536
-        await util.delete_file(self._install_package)
-        await util.delete_directory(unpack_dir)
-        await util.delete_directory(self._runtime_dir)
+        await io.delete_file(self._install_package)
+        await io.delete_directory(unpack_dir)
+        await io.delete_directory(self._runtime_dir)
         async with aiohttp.ClientSession() as session:
             async with session.get(url, read_bufsize=chunk_size) as response:
                 assert response.status == 200
-                await util.stream_write_file(self._install_package, response.content, chunk_size)
-        await util.unpack_tarxz(self._install_package, self._home_dir)
-        await util.rename_path(unpack_dir, self._runtime_dir)
-        await util.delete_file(self._install_package)
+                await io.stream_write_file(self._install_package, io.WrapReader(response.content), chunk_size)
+        await pack.unpack_tarxz(self._install_package, self._home_dir)
+        await io.rename_path(unpack_dir, self._runtime_dir)
+        await io.delete_file(self._install_package)
         await self.build_world()
 
     async def ensure_map(self):
-        if not await util.file_exists(self._map_file):
+        if not await io.file_exists(self._map_file):
             await self._create_map()
 
     async def _create_map(self):
-        await util.delete_directory(self._save_dir)
-        await util.create_directory(self._save_dir)
+        await io.delete_directory(self._save_dir)
+        await io.create_directory(self._save_dir)
         await proch.JobProcess.run_job(self._mailer, self, (
             self._executable,
             '--create', self._map_file,
@@ -160,7 +160,7 @@ class Deployment:
 
     async def sync_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods')
-        mods = util.json_to_dict(await util.read_file(self._mods_list))
+        mods = util.json_to_dict(await io.read_file(self._mods_list))
         if not mods.get('service-username') or not mods.get('service-token'):
             return
         mod_files, mod_list, chunk_size = [], [], 65536
@@ -179,16 +179,17 @@ class Deployment:
                         if release['version'] == mod['version']:
                             mod_files.append(release['file_name'])
                             filename = self._mods_dir + '/' + release['file_name']
-                            if not await util.file_exists(filename):
+                            if not await io.file_exists(filename):
                                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
                                 url = baseurl + release['download_url'] + credentials
                                 async with session.get(url, read_bufsize=chunk_size) as modfile_response:
                                     assert modfile_response.status == 200
-                                    await util.stream_write_file(filename, modfile_response.content, chunk_size)
-        for file in await util.directory_list_dict(self._mods_dir):
+                                    await io.stream_write_file(
+                                        filename, io.WrapReader(modfile_response.content), chunk_size)
+        for file in await io.directory_list_dict(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
-                await util.delete_file(self._mods_dir + '/' + file['name'])
-        await util.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
+                await io.delete_file(self._mods_dir + '/' + file['name'])
+        await io.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
 
 
 class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
@@ -208,6 +209,6 @@ class _WipeHandler(httpabc.AsyncPostHandler):
         self._path = path
 
     async def handle_post(self, resource, data):
-        await util.delete_directory(self._path)
+        await io.delete_directory(self._path)
         await self._deployment.build_world()
         return httpabc.ResponseBody.NO_CONTENT

@@ -48,7 +48,7 @@ class TaskMailer(msgabc.Mailer):
         result, running = None, True
         while running:
             result = None
-            message = await self._queue.get()   # blocking
+            message = await self._queue.get()
             if (message is not msgabc.STOP) or (message is msgabc.STOP and self._subscriber.accepts(msgabc.STOP)):
                 result = await msgabc.try_handle('TaskMailer', self._subscriber, message)
             if result is not None or message is msgabc.STOP:
@@ -80,7 +80,7 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
         expired = self._subscriber.mailers.copy()
         await self._mailer.stop()
         for mailer in iter(expired):
-            await mailer.stop()   # This may post STOP again, but they will just be ignored
+            await mailer.stop()  # This may post STOP again, but they will just be ignored
 
 
 class _TaskMulticastSubscriber(msgabc.AbcSubscriber):

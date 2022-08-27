@@ -1,11 +1,10 @@
 from __future__ import annotations
 import typing
-import pkgutil
 import gzip
 from aiohttp import web, abc as webabc, web_exceptions as err
-from core.util import util
 from core.http import httpabc, httpcnt
 from core.context import contextsvc
+from core.util import util, io
 
 
 class Statics:
@@ -13,13 +12,13 @@ class Statics:
     def __init__(self, context: contextsvc.Context):
         self._loader = _Loader() if context.is_debug() else _CacheLoader()
 
-    def handle(self, headers: httpcnt.HeadersTool, request: webabc.Request) -> web.Response:
-        resource = self._loader.load(request.path)
+    async def handle(self, headers: httpcnt.HeadersTool, request: webabc.Request) -> web.Response:
+        resource = await self._loader.load(request.path)
         if resource is None:
             raise err.HTTPNotFound
         response = web.Response()
         response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
-        response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')   # One hour
+        response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')  # One hour
         if headers.accepts_encoding(httpcnt.GZIP) and resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()
@@ -36,11 +35,11 @@ class _CacheLoader:
         self._loader = _Loader()
         self._cache = {}
 
-    def load(self, path: str) -> typing.Optional[_Resource]:
+    async def load(self, path: str) -> typing.Optional[_Resource]:
         resource = util.get(path, self._cache)
         if resource is not None:
             return resource
-        resource = self._loader.load(path)
+        resource = await self._loader.load(path)
         if resource is None:
             return None
         if resource.content_type().is_text_type():
@@ -50,28 +49,28 @@ class _CacheLoader:
 
 class _Loader:
 
-    def load(self, path: str) -> typing.Optional[_Resource]:
+    async def load(self, path: str) -> typing.Optional[_Resource]:
         if path is None or path == '':
             path = '/'
         if path[-1] == '/':
             path += 'index.html'
         try:
-            data = pkgutil.get_data('web', path)
+            data = await io.pkg_load('web', path)
             return _Resource(httpcnt.ContentTypeImpl.lookup(path), data) if data else None
         except IsADirectoryError:
             if not path.endswith('.html'):
-                return self.load(path + '/')
+                return await self.load(path + '/')
             return None
         except FileNotFoundError:
             if path.endswith('/index.html'):
-                return self.load('/'.join(path.split('/')[:-1]) + '.html')
+                return await self.load('/'.join(path.split('/')[:-1]) + '.html')
             return None
         except OSError:
             if path.endswith('/index.html'):
-                return self.load('/'.join(path.split('/')[:-1]) + '.html')
+                return await self.load('/'.join(path.split('/')[:-1]) + '.html')
             if path.endswith('.html'):
                 return None
-            return self.load(path + '/')
+            return await self.load(path + '/')
 
 
 class _Resource:

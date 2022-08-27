@@ -1,5 +1,5 @@
 import logging
-from core.util import aggtrf, util
+from core.util import aggtrf, util, io
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -83,7 +83,7 @@ class Deployment:
             .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path')) \
             .pop() \
-            .push('config', ) \
+            .push('config') \
             .append('db', httpext.FileSystemHandler(self._playerdb_file)) \
             .append('jvm', httpext.MessengerConfigHandler(self._mailer, self._jvm_config_file)) \
             .append('ini', httpext.MessengerConfigHandler(self._mailer, conf_pre + '.ini', ini_filter)) \
@@ -92,11 +92,11 @@ class Deployment:
             .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua'))
 
     async def build_world(self):
-        await util.create_directory(self._backups_dir)
-        await util.create_directory(self._world_dir)
-        await util.create_directory(self._playerdb_dir)
-        await util.create_directory(self._config_dir)
-        await util.create_directory(self._save_dir)
+        await io.create_directory(self._backups_dir)
+        await io.create_directory(self._world_dir)
+        await io.create_directory(self._playerdb_dir)
+        await io.create_directory(self._config_dir)
+        await io.create_directory(self._save_dir)
 
 
 class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
@@ -105,9 +105,9 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
         self._mailer = mailer
         self._path = path
         self._handler = httpext.MessengerHandler(self._mailer, proch.JobProcess.START, selector=httpsubs.Selector(
-                msg_filter=proch.JobProcess.FILTER_STDOUT_LINE,
-                completed_filter=proch.JobProcess.FILTER_JOB_DONE,
-                aggregator=aggtrf.StrJoin('\n')))
+            msg_filter=proch.JobProcess.FILTER_STDOUT_LINE,
+            completed_filter=proch.JobProcess.FILTER_JOB_DONE,
+            aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
         script = shell.Script()
@@ -134,6 +134,6 @@ class _DeploymentWiper(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         path = util.get('path', message.data())
-        await util.delete_directory(path)
+        await io.delete_directory(path)
         await self._deployment.build_world()
         return None

@@ -2,10 +2,9 @@ import logging
 import gzip
 import re
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
-from core.util import util
+from core.util import util, io
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics
-
 
 ACCEPTED_MIME_TYPES = (httpcnt.MIME_TEXT_PLAIN, httpcnt.MIME_APPLICATION_JSON, httpcnt.MIME_APPLICATION_BIN)
 
@@ -67,14 +66,14 @@ class _RequestHandler:
         resource = self._resources.lookup(self._request.path)
         if resource is None:
             if self._method is httpabc.Method.GET:
-                return self._statics.handle(self._headers, self._request)
+                return await self._statics.handle(self._headers, self._request)
             raise err.HTTPNotFound
         if self._method is not httpabc.Method.OPTIONS and not resource.allows(self._method):
-            allowed = [httpabc.Method.OPTIONS.value]
+            allowed = [str(httpabc.Method.OPTIONS.value)]
             if resource.allows(httpabc.Method.GET):
-                allowed.append(httpabc.Method.GET.value)
+                allowed.append(str(httpabc.Method.GET.value))
             if resource.allows(httpabc.Method.POST):
-                allowed.append(httpabc.Method.POST.value)
+                allowed.append(str(httpabc.Method.POST.value))
             raise err.HTTPMethodNotAllowed(str(self._method), allowed)
 
         # OPTIONS
@@ -143,11 +142,11 @@ class _RequestHandler:
             response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
             content_length = await body.content_length()
             if content_length is None:
-                response.enable_chunked_encoding(util.DEFAULT_CHUNK_SIZE)
+                response.enable_chunked_encoding(io.DEFAULT_CHUNK_SIZE)
             else:
                 response.headers.add(httpcnt.CONTENT_LENGTH, str(content_length))
             await response.prepare(self._request)
-            await util.copy_bytes(body, response, util.DEFAULT_CHUNK_SIZE)
+            await io.copy_bytes(body, response, io.DEFAULT_CHUNK_SIZE)
             return response
         response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
         response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))

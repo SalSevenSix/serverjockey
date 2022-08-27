@@ -1,5 +1,4 @@
 from core.util import util
-from core.context import contextsvc
 from core.msg import msgabc
 from core.http import httpabc
 from core.system import svrsvc
@@ -44,33 +43,3 @@ class ServerRunningLock(msgabc.AbcSubscriber):
             self._mailer.post(source, ServerRunningLock.BLOCK, Exception('Server is running'), message)
             return None
         return await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
-
-
-# TODO Move to context extensions
-class ClientFile:
-    WRITTEN = 'ClientFile.Written'
-
-    def __init__(self, context: contextsvc.Context, clientfile: str):
-        self._context = context
-        self._clientfile = clientfile
-
-    def path(self):
-        return self._clientfile
-
-    async def write(self):
-        host = self._context.config('host')
-        host = host if host else 'localhost'
-        port = self._context.config('port')
-        data = util.obj_to_json({
-            'SERVER_URL': util.build_url(host, port),
-            'SERVER_TOKEN': self._context.config('secret')
-        })
-        await util.write_file(self._clientfile, data)
-        self._context.post(self, ClientFile.WRITTEN, self._clientfile)
-
-    # noinspection PyBroadException
-    async def delete(self):
-        try:
-            await util.delete_file(self._clientfile)
-        except Exception:
-            pass  # ignore

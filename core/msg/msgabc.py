@@ -21,7 +21,7 @@ class Message:
                  name: str,
                  data: typing.Any = None,
                  reply_to: typing.Optional[Message] = None):
-        self._identity = uuid.uuid4()
+        self._identity = uuid.uuid4()  # TODO Do we need this?
         self._created = time.time()
         self._source = source
         self._name = name

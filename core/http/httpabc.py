@@ -4,6 +4,7 @@ import enum
 import typing
 from aiohttp import web_exceptions as we
 from yarl import URL
+from core.util import io
 
 
 class Method(enum.Enum):
@@ -61,7 +62,7 @@ class ContentType(metaclass=abc.ABCMeta):
         pass
 
 
-class ByteStream(metaclass=abc.ABCMeta):
+class ByteStream(io.Readable):
     @abc.abstractmethod
     def name(self) -> str:
         pass
@@ -72,10 +73,6 @@ class ByteStream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def content_length(self) -> typing.Optional[int]:
-        pass
-
-    @abc.abstractmethod
-    async def read(self, length: int = -1) -> bytes:
         pass
 
 

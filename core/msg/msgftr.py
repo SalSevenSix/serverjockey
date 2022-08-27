@@ -68,7 +68,6 @@ class SourceClassIs(msgabc.Filter):
         self._source_class = source_class
 
     def accepts(self, message):
-        # noinspection PyPep8
         return self._source_class is type(message.source())
 
 

@@ -4,11 +4,11 @@ import importlib
 import inspect
 import logging
 import uuid
-from core.util import util, signals
+from core.util import util, io, signals
 from core.msg import msgabc, msgext, msgftr
-from core.context import contextsvc
+from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
-from core.system import svrabc, svrsvc, svrext
+from core.system import svrabc, svrsvc
 
 
 class SystemService:
@@ -20,7 +20,7 @@ class SystemService:
         self._context = context
         self._modules = {}
         self._home_dir = context.config('home')
-        self._clientfile = svrext.ClientFile(
+        self._clientfile = contextext.ClientFile(
             context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
         subs = httpsubs.HttpSubscriptionService(context)
         self._resource = httprsc.WebResource()
@@ -51,12 +51,12 @@ class SystemService:
         return result
 
     async def initialise(self) -> SystemService:
-        autos, ls = [], await util.directory_list_dict(self._home_dir)
+        autos, ls = [], await io.directory_list_dict(self._home_dir)
         for directory in iter([o for o in ls if o['type'] == 'directory']):
             identity = directory['name']
             config_file = self._home_dir + '/' + identity + '/instance.json'
-            if await util.file_exists(config_file):
-                configuration = await util.read_file(config_file)
+            if await io.file_exists(config_file):
+                configuration = await io.read_file(config_file)
                 configuration = util.json_to_dict(configuration)
                 configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
                 subcontext = await self._initialise_instance(configuration)
@@ -82,16 +82,16 @@ class SystemService:
         else:
             identity = str(uuid.uuid4())
         home_dir = self._home_dir + '/' + identity
-        await util.create_directory(home_dir)
+        await io.create_directory(home_dir)
         config_file = home_dir + '/' + 'instance.json'
-        await util.write_file(config_file, util.obj_to_json(configuration))
+        await io.write_file(config_file, util.obj_to_json(configuration))
         configuration.update({'identity': identity, 'home': home_dir})
         return await self._initialise_instance(configuration)
 
     async def delete_instance(self, subcontext: contextsvc.Context):
         self._instances.remove(subcontext.config('identity'))
         await self._context.destroy_subcontext(subcontext)
-        await util.delete_directory(subcontext.config('home'))
+        await io.delete_directory(subcontext.config('home'))
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
 
     async def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:

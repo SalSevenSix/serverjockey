@@ -23,7 +23,7 @@ class _PipeOutLineProducer(msgabc.Producer):
         line = None
         # noinspection PyBroadException
         try:
-            line = await self._pipe.readline()   # blocking
+            line = await self._pipe.readline()
         except Exception:
             pass
         if line is None or line == b'':
@@ -193,23 +193,23 @@ class ServerProcess:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
             if self._started_catcher is not None:
-                await self._started_catcher.get()   # blocks throws TimeoutError
+                await self._started_catcher.get()  # blocks throws TimeoutError
             rc = self._process.returncode
             if rc is not None:
                 raise Exception('Process {} exit after STARTING, rc={}'.format(self._process, rc))
             self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
-            rc = await self._process.wait()   # blocking
+            rc = await self._process.wait()  # blocking
             if rc != 0:
                 raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self._process, rc))
             self._mailer.post(self, ServerProcess.STATE_COMPLETE, self._process)
         except asyncio.TimeoutError:
             rc = self._process.returncode
-            if rc is None:   # Zombie process
+            if rc is None:  # Zombie process
                 logging.error('Timeout waiting for STARTED but process still running, terminating now')
                 self._mailer.post(self, ServerProcess.STATE_TIMEOUT, self._process)
                 self._process.terminate()
                 self._mailer.post(self, ServerProcess.STATE_TERMINATED, self._process)
-            else:   # It's dead Jim
+            else:  # It's dead Jim
                 logging.error('Timeout waiting for STARTED because process exit rc=' + str(rc))
                 self._mailer.post(self, ServerProcess.STATE_EXCEPTION,
                                   Exception('Process {} exit during STARTING, rc={}'.format(self._process, rc)))

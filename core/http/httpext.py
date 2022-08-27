@@ -2,7 +2,7 @@ import asyncio
 import typing
 import re
 import aiofiles
-from core.util import util, tasks
+from core.util import util, io, tasks
 from core.msg import msgabc, msgext, msgftr
 from core.http import httpabc, httpcnt, httpsubs
 
@@ -69,7 +69,7 @@ class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
     async def handle_get(self, resource, data):
         if self._protected and not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        if not await util.file_exists(self._filename):
+        if not await io.file_exists(self._filename):
             return httpabc.ResponseBody.NOT_FOUND
         content = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename)
         if isinstance(content, Exception):
@@ -107,33 +107,33 @@ class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
         if self._protected and not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         path = self._path + '/' + data[self._tail] if self._tail else self._path
-        if await util.file_exists(path):
+        if await io.file_exists(path):
             content_type = httpcnt.ContentTypeImpl.lookup(path)
-            size = await util.file_size(path)
+            size = await io.file_size(path)
             if content_type.is_text_type() and size < 1048576:
-                return await util.read_file(path)
+                return await io.read_file(path)
             return _FileByteStream(path)
-        if await util.directory_exists(path):
-            return await util.directory_list_dict(path, data['baseurl'] + resource.path(data))
+        if await io.directory_exists(path):
+            return await io.directory_list_dict(path, data['baseurl'] + resource.path(data))
         return httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):
         path = self._path + '/' + data[self._tail] if self._tail else self._path
         body = util.get('body', data)
         if not body:
-            if await util.file_exists(path):
-                await util.delete_file(path)
+            if await io.file_exists(path):
+                await io.delete_file(path)
                 return httpabc.ResponseBody.NO_CONTENT
             return httpabc.ResponseBody.BAD_REQUEST
-        if await util.directory_exists(path):
+        if await io.directory_exists(path):
             return httpabc.ResponseBody.BAD_REQUEST
-        if not await util.directory_exists('/'.join(path.split('/')[0:-1])):
+        if not await io.directory_exists('/'.join(path.split('/')[0:-1])):
             return httpabc.ResponseBody.BAD_REQUEST
         if isinstance(body, str):
-            await util.write_file(path, body)
+            await io.write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
         if isinstance(body, httpabc.ByteStream):
-            await util.stream_write_file(path, body)
+            await io.stream_write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
         return httpabc.ResponseBody.BAD_REQUEST
 
@@ -155,7 +155,7 @@ class _FileByteStream(httpabc.ByteStream):
         return self._content_type
 
     async def content_length(self) -> int:
-        return await util.file_size(self._filename)
+        return await io.file_size(self._filename)
 
     async def read(self, length: int = -1) -> bytes:
         if self._task is None:

@@ -4,7 +4,6 @@ from core.util import util
 from core.http import httpabc
 import typing
 
-
 SECURE = '_SECURE'
 X_SECRET = 'X-Secret'
 RESOURCES_READY = 'RESOURCES_READY'

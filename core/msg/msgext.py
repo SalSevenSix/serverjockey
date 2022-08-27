@@ -6,7 +6,7 @@ import uuid
 import collections
 import typing
 import aiofiles
-from core.util import aggtrf, tasks, util
+from core.util import aggtrf, tasks, util, io, pack
 from core.msg import msgabc, msgftr, msgtrf
 
 
@@ -304,10 +304,10 @@ class ReadWriteFileSubscriber(msgabc.AbcSubscriber):
     async def handle(self, message):
         source, name, data = message.source(), message.name(), message.data()
         if name is ReadWriteFileSubscriber.READ:
-            file = await util.read_file(data['filename'])
+            file = await io.read_file(data['filename'])
             self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, file, message)
         if name is ReadWriteFileSubscriber.WRITE:
-            await util.write_file(data['filename'], data['data'])
+            await io.write_file(data['filename'], data['data'])
             self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, True, message)
         return None
 
@@ -327,7 +327,7 @@ class Archiver(msgabc.AbcSubscriber):
         if backups_dir is None:
             raise Exception('No backups_dir')
         logger = LoggingPublisher(self._mailer, message.source())
-        await util.archive_directory(source_dir, backups_dir, logger)
+        await pack.archive_directory(source_dir, backups_dir, logger)
         return None
 
 
@@ -340,10 +340,10 @@ class Unpacker(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         root_dir = util.get('root_dir', message.data())
-        if root_dir is None or not await util.directory_exists(root_dir):
+        if root_dir is None or not await io.directory_exists(root_dir):
             raise Exception('No root_dir')
         backups_dir = util.get('backups_dir', message.data())
-        if backups_dir is None or not await util.directory_exists(backups_dir):
+        if backups_dir is None or not await io.directory_exists(backups_dir):
             raise Exception('No backups_dir')
         filename = util.get('filename', message.data())
         if filename is None:
@@ -351,7 +351,7 @@ class Unpacker(msgabc.AbcSubscriber):
         archive = backups_dir + '/' + filename
         unpack_dir = root_dir + '/' + filename.split('.')[0].split('-')[0]
         logger = LoggingPublisher(self._mailer, message.source())
-        await util.unpack_directory(archive, unpack_dir, logger)
+        await pack.unpack_directory(archive, unpack_dir, logger)
         return None
 
 

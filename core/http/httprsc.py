@@ -5,7 +5,6 @@ from yarl import URL
 from core.util import util
 from core.http import httpabc, httpcnt
 
-
 ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL)
 
 

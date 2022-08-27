@@ -1,40 +1,28 @@
 import inspect
-import os
 import shutil
 import psutil
-import lzma
-import tarfile
 import logging
 import json
 import time
 import typing
 import asyncio
-import aiofiles
-from aiofiles import os as aioos
 from functools import partial, wraps
 from collections.abc import Iterable
 
 
-DEFAULT_CHUNK_SIZE = 10240
-
-
-def _wrap(func):
+def to_async(func):
     @wraps(func)
     async def run(*args, loop=None, executor=None, **kwargs):
         if loop is None:
             loop = asyncio.get_event_loop()
         return await loop.run_in_executor(executor, partial(func, *args, **kwargs))
+
     return run
 
 
-_listdir = _wrap(os.listdir)
-_islinkfile = _wrap(os.path.islink)
-_rmtree = _wrap(shutil.rmtree)
-_make_archive = _wrap(shutil.make_archive)
-_unpack_archive = _wrap(shutil.unpack_archive)
-_disk_usage = _wrap(shutil.disk_usage)
-_virtual_memory = _wrap(psutil.virtual_memory)
-_cpu_percent = _wrap(psutil.cpu_percent)
+_disk_usage = to_async(shutil.disk_usage)
+_virtual_memory = to_async(psutil.virtual_memory)
+_cpu_percent = to_async(psutil.cpu_percent)
 
 
 class _JsonEncoder(json.JSONEncoder):
@@ -45,7 +33,7 @@ class _JsonEncoder(json.JSONEncoder):
 
 
 _SCRIPT_SPECIALS = str.maketrans({
-    '#':  r'\#', '$':  r'\$', '=':  r'\=', '[':  r'\[', ']':  r'\]',
+    '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
     '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
     ';': r'\;', '|': r'\|', '~': r'\~', '(': r'\(', ')': r'\)',
     '*': r'\*', '?': r'\?', '&': r'\&'
@@ -166,7 +154,7 @@ def str_to_b10str(value: str) -> str:
 
 
 def b10str_to_str(value: str) -> str:
-    chunks = [value[b:b+3] for b in range(0, len(value), 3)]
+    chunks = [value[b:b + 3] for b in range(0, len(value), 3)]
     return bytes([int(b) for b in chunks]).decode('utf-8')
 
 
@@ -221,129 +209,6 @@ def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]
     return base + path
 
 
-async def directory_exists(path: typing.Optional[str]) -> bool:
-    if path is None:
-        return False
-    return await aioos.path.isdir(path)
-
-
-async def file_exists(path: typing.Optional[str]) -> bool:
-    if path is None:
-        return False
-    return await aioos.path.isfile(path)
-
-
-async def file_size(file: str) -> int:
-    stats = await aioos.stat(file)
-    return stats.st_size
-
-
-async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typing.Dict[str, str]]:
-    if not path.endswith('/'):
-        path += '/'
-    result = []
-    for name in iter(await _listdir(path)):
-        file, ftype, size, entry = path + name, 'unknown', -1, {}
-        if await _islinkfile(file):
-            ftype = 'link'
-        elif await aioos.path.isfile(file):
-            ftype = 'file'
-            size = await file_size(file)
-        elif await aioos.path.isdir(file):
-            ftype = 'directory'
-        updated = time.ctime(await aioos.path.getmtime(file))
-        entry.update({'type': ftype, 'name': name, 'updated': updated})
-        if size > -1:
-            entry.update({'size': size})
-        if baseurl:
-            entry.update({'url': baseurl + '/' + name})
-        result.append(entry)
-    return result
-
-
-async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -> str:
-    if unpacked_dir[-1] == '/':
-        unpacked_dir = unpacked_dir[:-1]
-    assert await directory_exists(unpacked_dir)
-    if archives_dir[-1] == '/':
-        archives_dir = archives_dir[:-1]
-    assert await directory_exists(archives_dir)
-    archive = archives_dir + '/' + unpacked_dir.split('/')[-1] + '-' + str(now_millis())
-    if logger:
-        logger.info('START Archive Directory')
-    result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)
-    if logger:
-        logger.info('Created ' + result)
-        logger.info('END Archive Directory')
-    return result
-
-
-async def unpack_directory(archive: str, unpack_dir: str, logger=None):
-    assert await file_exists(archive)
-    if unpack_dir[-1] == '/':
-        unpack_dir = unpack_dir[:-1]
-    if await directory_exists(unpack_dir):
-        await delete_directory(unpack_dir)
-    await create_directory(unpack_dir)
-    if logger:
-        logger.info('START Unpack Directory')
-    await _unpack_archive(archive, unpack_dir)
-    if logger:
-        logger.info('END Unpack Directory')
-
-
-async def create_directory(path: str):
-    if not await aioos.path.isdir(path):
-        await aioos.mkdir(path)
-
-
-async def rename_path(source: str, target: str):
-    await aioos.rename(source, target)
-
-
-async def delete_directory(path: str):
-    if await aioos.path.isdir(path):
-        await _rmtree(path)
-
-
-async def delete_file(file: str):
-    if await file_exists(file):
-        await aioos.remove(file)
-
-
-async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
-    # noinspection PyTypeChecker
-    async with aiofiles.open(file=filename, mode='r' if text else 'rb') as file:
-        return await file.read()
-
-
-async def write_file(filename: str, data: typing.Union[str, bytes]):
-    # noinspection PyTypeChecker
-    async with aiofiles.open(filename, mode='w' if isinstance(data, str) else 'wb') as file:
-        await file.write(data)
-
-
-async def copy_text_file(from_path: str, to_path: str) -> int:
-    data = await read_file(from_path)
-    await write_file(to_path, data)
-    return len(data)
-
-
-# TODO no stream class defined
-async def stream_write_file(filename: str, stream, chunk_size: int = DEFAULT_CHUNK_SIZE):
-    async with aiofiles.open(filename, mode='wb') as file:
-        await copy_bytes(stream, file, chunk_size)
-
-
-async def copy_bytes(source, target, chunk_size: int = DEFAULT_CHUNK_SIZE):
-    pumping = True
-    while pumping:
-        chunk = await source.read(chunk_size)
-        pumping = chunk is not None and chunk != b''
-        if pumping:
-            await target.write(chunk)
-
-
 async def system_info() -> dict:
     disk = await _disk_usage('/')
     memory = await _virtual_memory()
@@ -366,12 +231,3 @@ async def system_info() -> dict:
             'percent': round((disk[1] / disk[0]) * 100, 1)
         }
     }
-
-
-def _unpack_tarxz(file_path: str, target_directory: str):
-    with lzma.open(file_path) as fd:
-        with tarfile.open(fileobj=fd) as tar:
-            tar.extractall(target_directory)
-
-
-unpack_tarxz = _wrap(_unpack_tarxz)

@@ -1,9 +1,9 @@
-from core.context import contextsvc
+from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
 from core.msg import msgext, msgftr, msgtrf
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
-from core.util import util
+from core.util import io
 
 
 class Server(svrabc.Server):
@@ -13,7 +13,7 @@ class Server(svrabc.Server):
         self._context = context
         self._log = home + '/serverlink.log'
         self._config = home + '/serverlink.json'
-        self._clientfile = svrext.ClientFile(context, home + '/serverjockey-client.json')
+        self._clientfile = contextext.ClientFile(context, home + '/serverjockey-client.json')
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._process_subscriber = prcext.ServerProcessSubscriber()
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
@@ -60,7 +60,7 @@ class _ServerProcessFactory:
     async def initialise(self):
         alternates = [self._context.config('home') + '/serverlink', '/usr/local/bin/serverlink']
         for executable in alternates:
-            if await util.file_exists(executable):
+            if await io.file_exists(executable):
                 self._executable = executable
                 self._exe_exists = True
                 return
