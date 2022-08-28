@@ -111,7 +111,7 @@ class ServerService(msgabc.AbcSubscriber):
             self._queue.put_nowait(_RunController(False, False, False))
             await self._server_stop()
             await self._queue_join()
-            await tasks.wait_for(self._task, 20.0)
+            await tasks.wait_for(self._task, 10.0)
             if action is ServerService.DELETE:
                 self._context.post(self, ServerService.DELETE_ME, self._context)
             if action is ServerService.SHUTDOWN:
@@ -123,13 +123,13 @@ class ServerService(msgabc.AbcSubscriber):
         if not self._running:
             return
         try:
-            await asyncio.wait_for(self._server.stop(), 20.0)
+            await asyncio.wait_for(self._server.stop(), 30.0)
         except asyncio.TimeoutError:
             pass
 
     async def _queue_join(self):
         try:
-            await asyncio.wait_for(self._queue.join(), 20.0)
+            await asyncio.wait_for(self._queue.join(), 10.0)
         except asyncio.TimeoutError:
             self._queue_clear()
 

@@ -15,12 +15,11 @@ class Server(svrabc.Server):
         self._config = home + '/serverlink.json'
         self._clientfile = contextext.ClientFile(context, home + '/serverjockey-client.json')
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
-        self._process_subscriber = prcext.ServerProcessSubscriber()
+        self._stopper = prcext.ServerProcessStopper(context, 10.0)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
         await self._server_process_factory.initialise()
-        self._context.register(self._process_subscriber)
         self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(msgext.LogfileSubscriber(
             self._log,
@@ -45,7 +44,7 @@ class Server(svrabc.Server):
             await self._clientfile.delete()
 
     async def stop(self):
-        self._process_subscriber.terminate_process()
+        await self._stopper.stop()
 
 
 class _ServerProcessFactory:

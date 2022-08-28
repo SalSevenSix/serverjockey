@@ -2,7 +2,7 @@ from core.util import aggtrf
 from core.msg import msgabc, msgtrf, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs
-from core.proc import proch
+from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
 from servers.factorio import deployment as dep, messaging as msg, playerstore as pls
 
@@ -12,6 +12,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
+        self._stopper = prcext.ServerProcessStopper(context, 15.0, '/quit')
         self._deployment = dep.Deployment(context)
         self._messaging = msg.Messaging(context)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
@@ -47,7 +48,7 @@ class Server(svrabc.Server):
         await server.run()
 
     async def stop(self):
-        await proch.PipeInLineService.request(self._context, self, '/quit')
+        await self._stopper.stop()
 
 
 class _ConsoleLogHandler(httpabc.AsyncGetHandler):

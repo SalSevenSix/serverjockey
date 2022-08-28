@@ -62,7 +62,7 @@ class ContentType(metaclass=abc.ABCMeta):
         pass
 
 
-class ByteStream(io.Readable):
+class ByteStream(io.Readable, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def name(self) -> str:
         pass

@@ -30,6 +30,7 @@ function startup() {
 function handleMessage(message) {
   //if (message.author.bot) return;
   if (!message.content.startsWith(context.config.CMD_PREFIX)) return;
+  if (!message.member || !message.member.user) return;  // broken message
   logger.info(message.member.user.tag + ' ' + message.content);
   let data = util.commandLineToList(message.content.slice(1))
   let command = data.shift().toLowerCase();

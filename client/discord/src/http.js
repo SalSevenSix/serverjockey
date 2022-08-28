@@ -37,10 +37,12 @@ exports.MessageHttpTool = class MessageHttpTool {
         return response.json();
       })
       .then(function(data) {
-        let text = dataHandler(data)
-        if (text) {
+        let result = dataHandler(data);
+        if (!result) return;
+        if (!!!result.forEach) { result = [result]; }
+        result.forEach(function(text) {
           message.channel.send(text);
-        }
+        });
       })
       .catch(function(error) {
         self.error(error, message);

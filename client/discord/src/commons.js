@@ -93,19 +93,29 @@ exports.deployment = function($) {
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
-    let result = '```Players currently online: ' + body.length + '\n';
+    let line = 'Players currently online: ' + body.length;
+    let chars = line.length;
+    let chunk = [line];
+    let result = [];
     for (let i = 0; i < body.length; i++) {
       if (body[i].steamid == false) {
-        result += body[i].name + '\n';
+        line = body[i].name;
       } else {
-        if (body[i].steamid == null) {
-          result += 'LOGGING IN        ';
-        } else {
-          result += body[i].steamid + ' ';
-        }
-        result += body[i].name + '\n';
+        line = 'LOGGING IN        ';
+        if (body[i].steamid != null) { line = body[i].steamid; }
+        line += ' ' + body[i].name;
+      }
+      chunk.push(line);
+      chars += line.length;
+      if (chars > 1600) {
+        result.push('```\n' + chunk.join('\n') + '\n```');
+        chars = 0;
+        chunk = [];
       }
     }
-    return result + '```';
+    if (chunk.length > 0) {
+      result.push('```\n' + chunk.join('\n') + '\n```');
+    }
+    return result;
   });
 }

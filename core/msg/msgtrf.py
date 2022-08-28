@@ -39,7 +39,6 @@ class ToString(msgabc.Transformer):
 
     def transform(self, message):
         line = [str(util.to_millis(message.created())),
-                str(message.identity()),
                 repr(message.source()),
                 str(message.name()),
                 util.obj_to_str(message.data())]

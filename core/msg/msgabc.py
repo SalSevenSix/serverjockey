@@ -4,7 +4,6 @@ import asyncio
 import inspect
 import logging
 import time
-import uuid
 import typing
 
 
@@ -21,15 +20,11 @@ class Message:
                  name: str,
                  data: typing.Any = None,
                  reply_to: typing.Optional[Message] = None):
-        self._identity = uuid.uuid4()  # TODO Do we need this?
         self._created = time.time()
         self._source = source
         self._name = name
         self._data = data
         self._reply_to = reply_to
-
-    def identity(self):
-        return self._identity
 
     def created(self):
         return self._created

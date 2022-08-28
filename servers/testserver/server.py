@@ -14,6 +14,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
+        self._stopper = prcext.ServerProcessStopper(context, 10.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
@@ -42,7 +43,7 @@ class Server(svrabc.Server):
             .run()
 
     async def stop(self):
-        await proch.PipeInLineService.request(self._context, self, 'quit')
+        await self._stopper.stop()
 
 
 class _ConsoleHandler(httpabc.AsyncPostHandler):

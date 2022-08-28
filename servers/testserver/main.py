@@ -43,7 +43,7 @@ def main():
             p('Players connected ({}):'.format(len(players)))
             for player in players:
                 p('-{}'.format(player))
-                time.sleep(5)
+                time.sleep(1)
             p('')
             p('### some more junk')
         elif line == 'showoptions':
@@ -65,7 +65,7 @@ def main():
         elif line == 'quit':
             p('### shutting down')
             p('### messaging players')
-            time.sleep(1)
+            time.sleep(20)
             p('### goodbye')
             return 0
         else:

@@ -2,7 +2,7 @@ from core.util import aggtrf
 from core.msg import msgabc, msgext, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs
-from core.proc import proch
+from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
 from servers.projectzomboid import deployment as dep, playerstore as pls, console as con, messaging as msg
 
@@ -12,6 +12,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
+        self._stopper = prcext.ServerProcessStopper(context, 20.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
         self._deployment = dep.Deployment(context)
         self._console = con.Console(context)
@@ -48,8 +49,7 @@ class Server(svrabc.Server):
             .run()
 
     async def stop(self):
-        # TODO consider how a terminate could work
-        await proch.PipeInLineService.request(self._context, self, 'quit')
+        await self._stopper.stop()
 
 
 class _ConsoleLogHandler(httpabc.AsyncGetHandler):

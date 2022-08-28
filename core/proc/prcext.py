@@ -1,6 +1,9 @@
 import typing
+import logging
+import asyncio
+from asyncio import subprocess
 from core.util import cmdutil, util
-from core.msg import msgabc
+from core.msg import msgabc, msgext
 from core.http import httpabc
 from core.proc import proch
 from core.system import svrsvc
@@ -30,24 +33,6 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class ServerProcessSubscriber(msgabc.AbcSubscriber):
-
-    def __init__(self):
-        super().__init__(proch.ServerProcess.FILTER_STATE_ALL)
-        self._process = None
-
-    def terminate_process(self):
-        if self._process:
-            self._process.terminate()
-
-    def handle(self, message):
-        if proch.ServerProcess.FILTER_STATE_STARTED:
-            self._process = message.data()
-        elif proch.ServerProcess.FILTER_STATE_DOWN:
-            self._process = None
-        return None
-
-
 class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any, commands: cmdutil.CommandLines):
@@ -61,3 +46,48 @@ class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         await proch.PipeInLineService.request(self._mailer, self._source, cmdline.build())
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class ServerProcessStopper:
+
+    def __init__(self, mailer: msgabc.MulticastMailer, timeout: float, quit_command: typing.Optional[str] = None):
+        self._mailer = mailer
+        self._timeout = timeout
+        self._quit_command = quit_command
+        self._process_subscriber = _ServerProcessSubscriber()
+        mailer.register(self._process_subscriber)
+
+    async def stop(self):
+        process = self._process_subscriber.get()
+        if not process:
+            return
+        catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATE_DOWN, self._timeout)
+        self._mailer.register(catcher)
+        if self._quit_command:
+            await proch.PipeInLineService.request(self._mailer, self, self._quit_command)
+        else:
+            process.terminate()
+        try:
+            await catcher.get()
+        except asyncio.TimeoutError:
+            logging.info('Timeout waiting for server process ' + str(process.pid) + ' to stop, killing now')
+            process.kill()
+
+
+class _ServerProcessSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self):
+        super().__init__(proch.ServerProcess.FILTER_STATE_ALL)
+        self._process = None
+
+    def get(self) -> subprocess.Process:
+        return self._process
+
+    def handle(self, message):
+        if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+            self._process = message.data()
+            return None
+        if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
+            self._process = None
+            return None
+        return None
