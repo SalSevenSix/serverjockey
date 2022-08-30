@@ -1,5 +1,5 @@
 <script>
-  import { capitalizeKebabCase, stringToBase10 } from '$lib/util';
+  import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
 	import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
 
   export let commands;
@@ -23,9 +23,9 @@
 	  let body = {};
     commands[command][action].forEach(function(value, index) {
       if (value.type === 'item') {
-        path += '/' + stringToBase10(args[index]);
+        path += '/' + urlSafeB64encode(args[index]);
       } else if (value.type === 'encoded') {
-        body[value.name] = stringToBase10(args[index]);
+        body[value.name] = urlSafeB64encode(args[index]);
       } else if (value.type === 'number') {
         body[value.name] = parseInt(args[index]);
       } else {

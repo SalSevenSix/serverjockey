@@ -55,14 +55,14 @@ exports.world = function($) {
 exports.player = function($) {
   let data = [...$.data];
   if (data.length < 2) return;
-  let name = util.stringToBase10(data.shift());
+  let name = util.urlSafeB64encode(data.shift());
   let cmd = data.shift();
   let body = null;
   if (data.length > 0) {
     if (cmd === 'set-access-level') {
       body = { level: data[0] };
     } else if (cmd === 'tele-to') {
-      body = { toplayer: util.stringToBase10(data[0]) };
+      body = { toplayer: util.urlSafeB64encode(data[0]) };
     } else if (cmd === 'tele-at') {
       body = { location: data[0] };
     } else if (cmd === 'spawn-horde') {
@@ -86,10 +86,10 @@ exports.whitelist = function($) {
   let name = null;
   let body = null;
   if (cmd === 'add-name') {
-    body = { player: util.stringToBase10(data[0]), password: data[1] };
+    body = { player: util.urlSafeB64encode(data[0]), password: data[1] };
     $.httptool.doPost('/whitelist/add', body);
   } else if (cmd === 'remove-name') {
-    body = { player: util.stringToBase10(data[0]) };
+    body = { player: util.urlSafeB64encode(data[0]) };
     $.httptool.doPost('/whitelist/remove', body);
   } else if (cmd === 'add-id') {
     $.context.client.users.fetch(data[0], true, true)
@@ -97,7 +97,7 @@ exports.whitelist = function($) {
         let pwd = Math.random().toString(16).substr(2, 8);
         name = user.tag.replace(/ /g, '').replace('#', '');
         logger.info('Add user: ' + data[0] + ' ' + name);
-        body = { player: util.stringToBase10(name), password: pwd };
+        body = { player: util.urlSafeB64encode(name), password: pwd };
         if ($.httptool.doPost('/whitelist/add', body)) {
           user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd));
         }
@@ -110,7 +110,7 @@ exports.whitelist = function($) {
       .then(function(user) {
         name = user.tag.replace(/ /g, '').replace('#', '');
         logger.info('Remove user: ' + data[0] + ' ' + name);
-        body = { player: util.stringToBase10(name) };
+        body = { player: util.urlSafeB64encode(name) };
         $.httptool.doPost('/whitelist/remove', body);
       })
       .catch(function(error) {

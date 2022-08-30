@@ -67,23 +67,9 @@ exports.humanFileSize = function(bytes, si=false, dp=1) {
   return bytes.toFixed(dp) + ' ' + units[u];
 }
 
-exports.stringToBase10 = function(string) {
-  let utf8 = unescape(encodeURIComponent(string));
-  let result = '';
-  for (let i = 0; i < utf8.length; i++) {
-    result += utf8.charCodeAt(i).toString().padStart(3, '0');
-  }
-  return result;
-}
-
-exports.base10ToString = function(number) {
-  let character;
-  let result = '';
-  for (let i = 0; i < number.length; i += 3) {
-    character = parseInt(number.substr(i, 3), 10).toString(16);
-    result += '%' + ((character.length % 2 == 0) ? character : '0' + character);
-  }
-  return decodeURIComponent(result);
+exports.urlSafeB64encode = function(value) {
+  let data = unescape(encodeURIComponent(value));
+  return btoa(data).replaceAll('+', '-').replaceAll('/', '_');
 }
 
 exports.newGetRequest = function(token) {

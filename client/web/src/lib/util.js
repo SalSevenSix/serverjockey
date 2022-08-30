@@ -47,13 +47,9 @@ export function humanFileSize(bytes, si=false, dp=1) {
   return bytes.toFixed(dp) + ' ' + units[u];
 }
 
-export function stringToBase10(string) {
-  let utf8 = unescape(encodeURIComponent(string));
-  let result = '';
-  for (let i = 0; i < utf8.length; i++) {
-    result += utf8.charCodeAt(i).toString().padStart(3, '0');
-  }
-  return result;
+export function urlSafeB64encode(value) {
+  let data = unescape(encodeURIComponent(value));
+  return btoa(data).replaceAll('+', '-').replaceAll('/', '_');
 }
 
 

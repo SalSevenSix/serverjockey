@@ -20,6 +20,7 @@ class CommandLine:
         return self
 
     def build_list(self, args: typing.Optional[dict] = None) -> list:
+        # TODO Integrate b10str decoding
         args = {**self._args, **args} if args else self._args
         cmdline = []
         for part in iter(self._command):

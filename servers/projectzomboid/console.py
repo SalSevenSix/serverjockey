@@ -130,7 +130,7 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
             return httpabc.ResponseBody.NOT_FOUND
         toplayer = util.get('toplayer', data)
         if toplayer:
-            data['toplayer'] = util.b10str_to_str(toplayer)
+            data['toplayer'] = util.urlsafe_b64decode(toplayer)
         cmdline = _PlayerCommandHandler.COMMANDS.get(data)
         if not cmdline:
             return httpabc.ResponseBody.BAD_REQUEST
@@ -149,7 +149,7 @@ class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
     async def handle_post(self, resource, data):
         player = util.get('player', data)
         if player:
-            data['player'] = util.b10str_to_str(player)
+            data['player'] = util.urlsafe_b64decode(player)
         return await self._handler.handle_post(resource, data)
 
 

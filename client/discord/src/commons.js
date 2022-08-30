@@ -59,6 +59,7 @@ exports.getconfig = function($) {
       if (error) return logger.error(error);
       $.message.channel.send({ files: [{ attachment: fpath, name: fname }] });
     });
+    // TODO Delete file if possible
   });
 }
 

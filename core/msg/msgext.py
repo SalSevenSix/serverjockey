@@ -108,10 +108,10 @@ class SingleCatcher(msgabc.Catcher):
         return self._catcher.accepts(message)
 
     def handle(self, message):
-        messages = self._catcher.handle(message)
-        if not isinstance(messages, tuple):
-            return messages
-        return util.single(messages)
+        result = self._catcher.handle(message)
+        if isinstance(result, tuple):
+            return util.single(result)
+        return result
 
 
 class Publisher:

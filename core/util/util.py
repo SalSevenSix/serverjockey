@@ -2,6 +2,7 @@ import inspect
 import shutil
 import psutil
 import logging
+import base64
 import json
 import time
 import typing
@@ -149,13 +150,15 @@ async def silently_call(invokable: typing.Callable):
         logging.debug('silently_call failed: ' + repr(e))
 
 
-def str_to_b10str(value: str) -> str:
-    return ''.join([str(b).zfill(3) for b in value.encode('utf-8')])
+def urlsafe_b64encode(value: str) -> str:
+    value = value.encode('utf-8')
+    value = base64.urlsafe_b64encode(value)
+    return str(value, 'utf-8')
 
 
-def b10str_to_str(value: str) -> str:
-    chunks = [value[b:b + 3] for b in range(0, len(value), 3)]
-    return bytes([int(b) for b in chunks]).decode('utf-8')
+def urlsafe_b64decode(value: str) -> str:
+    value = base64.urlsafe_b64decode(value)
+    return str(value, 'utf-8')
 
 
 def build_url(

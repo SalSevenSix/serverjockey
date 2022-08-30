@@ -177,7 +177,7 @@ class PathProcessor:
             elif name in args and kind in (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_TAIL):
                 path.append(args[name])
             elif name in args and kind is httpabc.ResourceKind.ARG_ENCODED:
-                path.append(util.str_to_b10str(args[name]))
+                path.append(util.urlsafe_b64encode(args[name]))
             elif name not in args and kind is not httpabc.ResourceKind.ARG_TAIL:
                 path.append(name)
             if parent is None:
@@ -204,7 +204,7 @@ class PathProcessor:
         path.reverse()
         for element in iter(path):
             if current.kind() is httpabc.ResourceKind.ARG_ENCODED:
-                data.update({current.name(): util.b10str_to_str(element)})
+                data.update({current.name(): util.urlsafe_b64decode(element)})
             elif current.kind() is httpabc.ResourceKind.ARG:
                 data.update({current.name(): element})
             current = current.parent()

@@ -113,7 +113,7 @@ class SystemService:
         module_name = subcontext.config('module')
         module = util.get(module_name, self._modules)
         if not module:
-            module = importlib.import_module('servers.{}.server'.format(module_name))
+            module = importlib.import_module('servers.{}.server'.format(module_name))  # TODO blocking io
             self._modules.update({module_name: module})
         for name, member in inspect.getmembers(module):
             if inspect.isclass(member) and svrabc.Server in inspect.getmro(member):
