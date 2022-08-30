@@ -8,9 +8,9 @@ class CommandLine:
     def __init__(self, command: typing.Any = None, args: typing.Optional[dict] = None):
         self._args = args if args else {}
         self._command = []
-        self.append_command(command)
+        self.append(command)
 
-    def append_command(self, command: typing.Any) -> CommandLine:
+    def append(self, command: typing.Any) -> CommandLine:
         if isinstance(command, (tuple, list)):
             self._command.extend(command)
         elif isinstance(command, dict):
@@ -20,7 +20,6 @@ class CommandLine:
         return self
 
     def build_list(self, args: typing.Optional[dict] = None) -> list:
-        # TODO Integrate b10str decoding
         args = {**self._args, **args} if args else self._args
         cmdline = []
         for part in iter(self._command):

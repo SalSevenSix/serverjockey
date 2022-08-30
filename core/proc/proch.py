@@ -168,7 +168,7 @@ class ServerProcess:
         return self
 
     def append_arg(self, arg: typing.Any) -> ServerProcess:
-        self._command.append_command(arg)
+        self._command.append(arg)
         return self
 
     def wait_for_started(self, catcher: msgabc.Catcher) -> ServerProcess:

@@ -41,7 +41,7 @@
       ],
       'tele-to': [
         {input: 'text', type: 'item', name: 'player'},
-        {input: 'text', type: 'encoded', name: 'toplayer'}
+        {input: 'text', type: 'string', name: 'toplayer'}
       ],
       'tele-at': [
         {input: 'text', type: 'item', name: 'player'},
@@ -76,11 +76,11 @@
     },
     'whitelist': {
       'add': [
-        {input: 'text', type: 'encoded', name: 'player'},
+        {input: 'text', type: 'string', name: 'player'},
         {input: 'text', type: 'string', name: 'password'}
       ],
       'remove': [
-        {input: 'text', type: 'encoded', name: 'player'}
+        {input: 'text', type: 'string', name: 'player'}
       ]
     },
     'banlist': {

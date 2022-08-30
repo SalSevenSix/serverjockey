@@ -124,18 +124,12 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
+        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _PlayerCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         if not await dom.PlayerLoader(self._mailer, self).get(util.get('player', data)):
             return httpabc.ResponseBody.NOT_FOUND
-        toplayer = util.get('toplayer', data)
-        if toplayer:
-            data['toplayer'] = util.urlsafe_b64decode(toplayer)
-        cmdline = _PlayerCommandHandler.COMMANDS.get(data)
-        if not cmdline:
-            return httpabc.ResponseBody.BAD_REQUEST
-        await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
-        return httpabc.ResponseBody.NO_CONTENT
+        return await self._handler.handle_post(resource, data)
 
 
 class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
@@ -147,9 +141,6 @@ class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
         self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _WhitelistCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
-        player = util.get('player', data)
-        if player:
-            data['player'] = util.urlsafe_b64decode(player)
         return await self._handler.handle_post(resource, data)
 
 

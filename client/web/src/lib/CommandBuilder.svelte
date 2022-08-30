@@ -24,8 +24,6 @@
     commands[command][action].forEach(function(value, index) {
       if (value.type === 'item') {
         path += '/' + urlSafeB64encode(args[index]);
-      } else if (value.type === 'encoded') {
-        body[value.name] = urlSafeB64encode(args[index]);
       } else if (value.type === 'number') {
         body[value.name] = parseInt(args[index]);
       } else {
@@ -98,8 +96,3 @@
     {/if}
   {/if}
 </div>
-
-
-<style>
-
-</style>
