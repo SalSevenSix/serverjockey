@@ -23,10 +23,10 @@
 <div class="block">
   <h2 class="title is-5">New Instance</h2>
   <div class="field">
-    <label for="module" class="label">Instance Type</label>
+    <label for="createinstance-module" class="label">Instance Type</label>
     <div class="control">
       <div class="select">
-        <select id="module" bind:value={serverForm.module}>
+        <select id="createinstance-module" bind:value={serverForm.module}>
           {#if dev}<option>testserver</option>{/if}
           <option>projectzomboid</option>
           <option>factorio</option>
@@ -35,7 +35,7 @@
     </div>
   </div>
   <div class="field">
-    <label for="instance" class="label">Instance Name</label>
+    <label for="createinstance-instance" class="label">Instance Name</label>
     <div class="control">
       <input id="createinstance-instance" class="input" type="text" bind:value={serverForm.identity}>
     </div>

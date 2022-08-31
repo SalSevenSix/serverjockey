@@ -45,8 +45,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
 
 
 def _setup_logging(context: contextsvc.Context):
-    logfmt = '%(asctime)s %(levelname)05s %(message)s'
-    datefmt = '%Y%m%d%H%M%S'
+    logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y%m%d%H%M%S'
     level = logging.DEBUG if context.is_debug() else logging.INFO
     filename = util.overridable_full_path(context.config('home'), context.config('logfile'))
     if filename:

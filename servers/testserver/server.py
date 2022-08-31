@@ -27,7 +27,10 @@ class Server(svrabc.Server):
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
-            .append('log', _ConsoleLogHandler(self._context)) \
+            .push('log') \
+            .append('tail', _ConsoleLogHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(proch.ServerProcess.FILTER_STDOUT_LINE, aggtrf.StrJoin('\n'))) \
+            .pop() \
             .append('players', _PlayersHandler(self._context)) \
             .push('console') \
             .append('{command}', _ConsoleHandler(self._context)) \

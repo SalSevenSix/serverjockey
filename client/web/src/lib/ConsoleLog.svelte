@@ -33,7 +33,7 @@
 
 <div class="block">
   <div class="field">
-    <label for="console-log" class="label"><a href="javascript:void(0);" on:click|preventDefault={openConsoleLog}>Console Log</a></label>
+    <label for="console-log" class="label"><a href={'#'} on:click|preventDefault={openConsoleLog}>Console Log</a></label>
     <div class="control pr-6">
       <textarea id="console-log" class="textarea" readonly>{logText}</textarea>
     </div>

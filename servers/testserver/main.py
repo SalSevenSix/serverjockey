@@ -65,7 +65,7 @@ def main():
         elif line == 'quit':
             p('### shutting down')
             p('### messaging players')
-            time.sleep(20)
+            time.sleep(5)
             p('### goodbye')
             return 0
         else:
