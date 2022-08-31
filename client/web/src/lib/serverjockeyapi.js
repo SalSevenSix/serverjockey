@@ -16,6 +16,13 @@ export function newGetRequest() {
   };
 }
 
+export function rawPostRequest() {
+  return {
+    method: 'post',
+    headers: { 'X-Secret': get(securityToken) }
+  };
+}
+
 export function newPostRequest(ct = 'application/json') {
   return {
     method: 'post',

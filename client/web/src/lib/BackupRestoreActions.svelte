@@ -1,13 +1,15 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { humanFileSize, ReverseRollingLog } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest,
+           SubscriptionHelper } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
   let logText = '';
   let processing = false;
   let paths = [];
+  let uploadFiles = [];
 
 	onMount(reload);
 
@@ -87,6 +89,29 @@
       .catch(function(error) { alert('Error ' + error); })
       .finally(processingDone);
   }
+
+  function uploadFile() {
+    if (uploadFiles.length === 0) {
+      alert('No file specified.');
+      return;
+    }
+    let filename = uploadFiles[0].name;
+    if (!(filename === filename.replaceAll(' ', '')
+        && filename === filename.toLowerCase()
+        && (filename.startsWith('runtime-') || filename.startsWith('world-'))
+        && filename.endsWith('.zip'))) {
+      alert('Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
+      return;
+    }
+    processing = true;
+    let request = rawPostRequest();
+    request.body = new FormData();
+    request.body.append('file', uploadFiles[0]);
+    fetch($instance.url + '/backups/' + filename, request)
+      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .catch(function(error) { alert('Error ' + error); })
+      .finally(processingDone);
+  }
 </script>
 
 
@@ -107,17 +132,29 @@
           <td>{humanFileSize(path.size)}</td>
           <td><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
           <td class="buttons">
-            <button disabled={$serverStatus.running || processing} name="{path.name}" class="button is-warning" on:click={restoreBackup}>Restore</button>
-            <button disabled={$serverStatus.running || processing} name="{path.name}" class="button is-danger" on:click={deleteBackup}>Delete</button>
+            <button disabled={$serverStatus.running || processing}
+                    name="{path.name}" class="button is-warning" on:click={restoreBackup}>Restore</button>
+            <button disabled={$serverStatus.running || processing}
+                    name="{path.name}" class="button is-danger" on:click={deleteBackup}>Delete</button>
           </td>
         </tr>
       {/each}
     </tbody>
   </table>
   <div class="field">
+    <label for="upload-files" class="label">Upload File</label>
+    <div class="control pr-6">
+      <input id="upload-files" class="input" type="file" bind:files={uploadFiles}>
+    </div>
+  </div>
+  <div class="field">
     <div class="control buttons">
-      <button id="backup-runtime" disabled={$serverStatus.running || processing} name="runtime" class="button is-success" on:click={createBackup}>Backup Runtime</button>
-      <button id="backup-world" disabled={$serverStatus.running || processing} name="world" class="button is-primary" on:click={createBackup}>Backup World</button>
+      <button id="upload-file" disabled={processing}
+              name="upload" class="button is-warning" on:click={uploadFile}>Upload File</button>
+      <button id="backup-runtime" disabled={$serverStatus.running || processing}
+              name="runtime" class="button is-success" on:click={createBackup}>Backup Runtime</button>
+      <button id="backup-world" disabled={$serverStatus.running || processing}
+              name="world" class="button is-primary" on:click={createBackup}>Backup World</button>
     </div>
   </div>
   <div class="field">

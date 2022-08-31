@@ -59,10 +59,12 @@ class ContentTypeImpl(httpabc.ContentType):
 
     @staticmethod
     def _parse(content_type: str) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
-        result = content_type.replace(' ', '').split(_CHARSET.replace(' ', ''))
+        result = content_type.replace(' ', '').split(';')
         if len(result) == 1:
             return result[0], None
-        return result[0], result[1]
+        if not result[1].startswith(_CHARSET):
+            return result[0], None
+        return result[0], result[1][len(_CHARSET):]
 
 
 class HeadersTool:
@@ -95,13 +97,14 @@ class HeadersTool:
 
 MIME_TEXT_PLAIN = 'text/plain'
 MIME_APPLICATION_JSON = 'application/json'
+MIME_MULTIPART_FORM_DATA = 'multipart/form-data'
 MIME_APPLICATION_BIN = 'application/octet-stream'
 _TEXT_TYPES = (MIME_TEXT_PLAIN, MIME_APPLICATION_JSON, 'text/html', 'application/xml',
                'text/css', 'application/javascript', 'application/typescript',
                'image/svg+xml')
-_CHARSET = '; charset='
+_CHARSET = 'charset='
 CONTENT_TYPE_TEXT_PLAIN = ContentTypeImpl(MIME_TEXT_PLAIN)
-CONTENT_TYPE_TEXT_PLAIN_UTF8 = ContentTypeImpl(MIME_TEXT_PLAIN + _CHARSET + UTF8)
+CONTENT_TYPE_TEXT_PLAIN_UTF8 = ContentTypeImpl(MIME_TEXT_PLAIN + '; ' + _CHARSET + UTF8)
 CONTENT_TYPE_APPLICATION_JSON = ContentTypeImpl(MIME_APPLICATION_JSON)
 CONTENT_TYPE_APPLICATION_BIN = ContentTypeImpl(MIME_APPLICATION_BIN)
 _CONTENT_TYPES = {

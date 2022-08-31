@@ -1,12 +1,20 @@
 import logging
 import gzip
 import re
+import aiohttp
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util, io
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics
 
-ACCEPTED_MIME_TYPES = (httpcnt.MIME_TEXT_PLAIN, httpcnt.MIME_APPLICATION_JSON, httpcnt.MIME_APPLICATION_BIN)
+ACCEPTED_MIME_TYPES = (
+    httpcnt.MIME_TEXT_PLAIN,
+    httpcnt.MIME_APPLICATION_JSON,
+    httpcnt.MIME_MULTIPART_FORM_DATA,
+    httpcnt.MIME_APPLICATION_BIN)
+TEXT_MIME_TYPES = (
+    httpcnt.MIME_TEXT_PLAIN,
+    httpcnt.MIME_APPLICATION_JSON)
 
 
 class HttpService:
@@ -95,11 +103,13 @@ class _RequestHandler:
             content_type = self._headers.get_content_type()
             if content_type is None or content_type.mime_type() not in ACCEPTED_MIME_TYPES:
                 raise err.HTTPUnsupportedMediaType
-            if content_type.mime_type() == httpcnt.MIME_APPLICATION_BIN:
+            if content_type.mime_type() == httpcnt.MIME_MULTIPART_FORM_DATA:
+                request_body = _MultipartFormByteStream(self._request.content, self._request.headers)
+            elif content_type.mime_type() == httpcnt.MIME_APPLICATION_BIN:
                 request_body = _RequestByteStream(self._request.content, self._headers.get_content_length())
             else:
                 request_body = await self._request.content.read()
-        if content_type.mime_type() != httpcnt.MIME_APPLICATION_BIN:
+        if content_type.mime_type() in TEXT_MIME_TYPES:
             encoding = content_type.encoding() if content_type.encoding() else httpcnt.UTF8
             request_body = request_body.decode(encoding).strip()
             if content_type.mime_type() == httpcnt.MIME_APPLICATION_JSON:
@@ -169,6 +179,32 @@ class _RequestHandler:
         return response
 
 
+class _MultipartFormByteStream(httpabc.ByteStream):
+
+    def __init__(self, stream: streams.StreamReader, headers):
+        self._reader = aiohttp.MultipartReader(headers, stream)
+        self._part = None
+
+    def name(self) -> str:
+        raise Exception('name() unsupported method')
+
+    def content_type(self) -> httpabc.ContentType:
+        return httpcnt.CONTENT_TYPE_APPLICATION_BIN
+
+    async def content_length(self) -> int:
+        return -1
+
+    async def read(self, length: int = -1) -> bytes:
+        # TODO to be safe this should iterate through to find first file part
+        if not self._part:
+            self._part = await self._reader.next()
+        chunk = await self._part.read_chunk(length)
+        if chunk is None or chunk == b'':
+            while self._part is not None:
+                self._part = await self._reader.next()
+        return chunk
+
+
 class _RequestByteStream(httpabc.ByteStream):
 
     def __init__(self, stream: streams.StreamReader, content_length: int):
@@ -176,10 +212,10 @@ class _RequestByteStream(httpabc.ByteStream):
         self._content_length = content_length
 
     def name(self) -> str:
-        return 'RequestByteStream'
+        raise Exception('name() unsupported method')
 
     def content_type(self) -> httpabc.ContentType:
-        return httpcnt.CONTENT_TYPE_APPLICATION_JSON
+        return httpcnt.CONTENT_TYPE_APPLICATION_BIN
 
     async def content_length(self) -> int:
         return self._content_length
