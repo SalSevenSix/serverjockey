@@ -1,10 +1,10 @@
 import shutil
 import lzma
 import tarfile
-from core.util import util, io
+from core.util import util, funcutil, io
 
-_make_archive = util.to_async(shutil.make_archive)
-_unpack_archive = util.to_async(shutil.unpack_archive)
+_make_archive = funcutil.to_async(shutil.make_archive)
+_unpack_archive = funcutil.to_async(shutil.unpack_archive)
 
 
 async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -> str:
@@ -44,4 +44,4 @@ def _unpack_tarxz(file_path: str, target_directory: str):
             tar.extractall(target_directory)
 
 
-unpack_tarxz = util.to_async(_unpack_tarxz)
+unpack_tarxz = funcutil.to_async(_unpack_tarxz)

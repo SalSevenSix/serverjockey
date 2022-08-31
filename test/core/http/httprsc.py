@@ -3,6 +3,15 @@ from core.util import util
 from core.http import httprsc
 
 
+def test():
+    test_only_one_arg_allowed()
+    test_basic_build_path()
+    test_basic_path_arg()
+    test_tail_path_cannot_have_children()
+    test_tail_path_arg()
+    test_tail_build_path()
+
+
 def test_only_one_arg_allowed():
     builder = httprsc.ResourceBuilder(httprsc.WebResource())
     try:
@@ -54,12 +63,3 @@ def test_tail_build_path():
     resource = root.lookup(url.path)
     print(resource.path())
     print(resource.path({'bar': 'yay', 'tail': 'x/y/z'}))
-
-
-if __name__ == '__main__':
-    test_only_one_arg_allowed()
-    test_basic_build_path()
-    test_basic_path_arg()
-    test_tail_path_cannot_have_children()
-    test_tail_path_arg()
-    test_tail_build_path()

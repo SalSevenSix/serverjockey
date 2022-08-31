@@ -3,7 +3,7 @@ import logging
 import typing
 import asyncio
 from asyncio import streams, subprocess
-from core.util import cmdutil, util
+from core.util import cmdutil, util, funcutil
 from core.msg import msgabc, msgext, msgftr
 
 
@@ -16,8 +16,8 @@ class _PipeOutLineProducer(msgabc.Producer):
         self._publisher = msgext.Publisher(mailer, self)
 
     async def close(self):
-        await util.silently_cleanup(self._pipe)
-        await util.silently_cleanup(self._publisher)
+        await funcutil.silently_cleanup(self._pipe)
+        await funcutil.silently_cleanup(self._publisher)
 
     async def next_message(self):
         line = None
@@ -47,7 +47,7 @@ class _PipeInLineHandler(msgabc.Handler):
         self._pipe = pipe
 
     async def close(self):
-        await util.silently_cleanup(self._pipe)
+        await funcutil.silently_cleanup(self._pipe)
         self._mailer.post(self, PipeInLineService.PIPE_CLOSE, self._pipe)
 
     async def handle(self, message):
@@ -217,8 +217,8 @@ class ServerProcess:
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
             self._mailer.post(self, ServerProcess.STATE_EXCEPTION, e)
         finally:
-            await util.silently_cleanup(stdout)
-            await util.silently_cleanup(stderr)
+            await funcutil.silently_cleanup(stdout)
+            await funcutil.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
             self._process = None
 
@@ -284,6 +284,6 @@ class JobProcess(msgabc.AbcSubscriber):
         except Exception as e:
             self._mailer.post(source, JobProcess.STATE_EXCEPTION, e, None if replied else message)
         finally:
-            await util.silently_cleanup(stdout)
-            await util.silently_cleanup(stderr)
+            await funcutil.silently_cleanup(stdout)
+            await funcutil.silently_cleanup(stderr)
         return None

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import asyncio
 import typing
-from core.util import util
+from core.util import util, funcutil
 from core.msg import msgabc, msgsvc
 
 
@@ -47,7 +47,7 @@ class Context(msgabc.MulticastMailer):
     async def shutdown(self):
         for subcontext in iter(self.subcontexts()):
             await self.destroy_subcontext(subcontext)
-        await util.silently_cleanup(self._mailer)
+        await funcutil.silently_cleanup(self._mailer)
 
     def asdict(self):
         return self._configuration.copy()

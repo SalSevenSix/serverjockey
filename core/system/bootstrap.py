@@ -4,7 +4,7 @@ import sys
 import os
 import typing
 import secrets
-from core.util import util
+from core.util import util, funcutil
 from core.msg import msgext
 from core.context import contextsvc
 from core.http import httpabc, httpsvc
@@ -74,8 +74,8 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         return self._syssvc.resources()
 
     async def shutdown(self):
-        await util.silently_cleanup(self._syssvc)
-        await util.silently_cleanup(self._context)
+        await funcutil.silently_cleanup(self._syssvc)
+        await funcutil.silently_cleanup(self._context)
 
 
 def main(args: typing.Optional[typing.Collection] = None) -> int:

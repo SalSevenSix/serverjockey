@@ -186,7 +186,7 @@ class _MultipartFormByteStream(httpabc.ByteStream):
         self._part = None
 
     def name(self) -> str:
-        raise Exception('name() unsupported method')
+        raise NotImplemented()
 
     def content_type(self) -> httpabc.ContentType:
         return httpcnt.CONTENT_TYPE_APPLICATION_BIN
@@ -212,7 +212,7 @@ class _RequestByteStream(httpabc.ByteStream):
         self._content_length = content_length
 
     def name(self) -> str:
-        raise Exception('name() unsupported method')
+        raise NotImplemented()
 
     def content_type(self) -> httpabc.ContentType:
         return httpcnt.CONTENT_TYPE_APPLICATION_BIN

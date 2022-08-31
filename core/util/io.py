@@ -6,7 +6,9 @@ import time
 import typing
 import aiofiles
 from aiofiles import os as aioos
-from core.util import util
+from core.util import funcutil
+
+DEFAULT_CHUNK_SIZE = 10240
 
 
 class Readable(metaclass=abc.ABCMeta):
@@ -23,12 +25,10 @@ class WrapReader(Readable):
         return self._delegate.read(length)
 
 
-DEFAULT_CHUNK_SIZE = 10240
-
-_listdir = util.to_async(os.listdir)
-_islinkfile = util.to_async(os.path.islink)
-_rmtree = util.to_async(shutil.rmtree)
-_pkg_load = util.to_async(pkgutil.get_data)
+_listdir = funcutil.to_async(os.listdir)
+_islinkfile = funcutil.to_async(os.path.islink)
+_rmtree = funcutil.to_async(shutil.rmtree)
+_pkg_load = funcutil.to_async(pkgutil.get_data)
 
 
 async def directory_exists(path: typing.Optional[str]) -> bool:

@@ -1,4 +1,4 @@
-from core.util import util
+from core.util import util, funcutil
 from core.msg import msgabc
 from core.http import httpabc
 from core.system import svrsvc
@@ -14,7 +14,7 @@ class ServerStatusHandler(httpabc.AsyncGetHandler):
 
 
 class ServerCommandHandler(httpabc.PostHandler):
-    COMMANDS = util.callable_dict(
+    COMMANDS = funcutil.callable_dict(
         svrsvc.ServerService,
         ('signal_start', 'signal_daemon', 'signal_restart', 'signal_stop', 'signal_delete'))
 

@@ -6,7 +6,7 @@ import uuid
 import collections
 import typing
 import aiofiles
-from core.util import aggtrf, tasks, util, io, pack
+from core.util import aggtrf, tasks, util, funcutil, io, pack
 from core.msg import msgabc, msgftr, msgtrf
 
 
@@ -125,10 +125,7 @@ class Publisher:
         self._mailer.post(self, Publisher.START, producer)
 
     async def stop(self):
-        try:
-            await asyncio.wait_for(self._task, 3.0)
-        except asyncio.TimeoutError:
-            self._task.cancel()
+        await tasks.wait_for(self._task, 3.0)
 
     async def _run(self):
         running = True
@@ -425,7 +422,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         if message is msgabc.STOP:
-            await util.silently_cleanup(self._file)
+            await funcutil.silently_cleanup(self._file)
             return True
         try:
             if self._file is None:
@@ -434,7 +431,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
             await self._file.write('\n')
             await self._file.flush()
         except Exception as e:
-            await util.silently_cleanup(self._file)
+            await funcutil.silently_cleanup(self._file)
             logging.error('LogfileSubscriber raised: %s', repr(e))
             return False
         return None

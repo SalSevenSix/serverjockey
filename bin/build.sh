@@ -66,9 +66,15 @@ pipenv install
 [ -d ".venv" ] || exit 1
 
 echo "Merging ServerJockey dependencies"
-[ -d "$LIB32_DIR" ] && cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR"
-[ $? -eq 0 ] || exit 1
-[ -d "$LIB64_DIR" ] && cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR"
+if [ -d "$LIB32_DIR" ]; then
+  cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
+fi
+if [ -d "$LIB64_DIR" ]; then
+  cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR" || exit 1
+fi
+
+echo "Running tests"
+python3 -m test > /dev/null
 [ $? -eq 0 ] || exit 1
 
 echo "Move out libraries with natives"

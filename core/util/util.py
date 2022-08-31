@@ -1,37 +1,9 @@
-import inspect
-import shutil
-import psutil
 import logging
 import base64
 import json
 import time
 import typing
-import asyncio
-from functools import partial, wraps
 from collections.abc import Iterable
-
-
-def to_async(func):
-    @wraps(func)
-    async def run(*args, loop=None, executor=None, **kwargs):
-        if loop is None:
-            loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(executor, partial(func, *args, **kwargs))
-
-    return run
-
-
-_disk_usage = to_async(shutil.disk_usage)
-_virtual_memory = to_async(psutil.virtual_memory)
-_cpu_percent = to_async(psutil.cpu_percent)
-
-
-class _JsonEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if obj is None or type(obj) in (str, tuple, list, dict):
-            return obj
-        return obj_to_str(obj)
-
 
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
@@ -117,39 +89,6 @@ def json_to_dict(text: str) -> typing.Optional[dict]:
         return None
 
 
-def callable_dict(obj: typing.Any, names: typing.Collection[str]) -> typing.Dict[str, typing.Callable]:
-    result = {}
-    for name in iter(names):
-        if hasattr(obj, name):
-            attribute = getattr(obj, name)
-            if callable(attribute):
-                result.update({name: attribute})
-    return result
-
-
-async def silently_cleanup(obj: typing.Any):
-    if hasattr(obj, 'stop'):
-        await silently_call(obj.stop)
-    if hasattr(obj, 'close'):
-        await silently_call(obj.close)
-    if hasattr(obj, 'shutdown'):
-        await silently_call(obj.shutdown)
-    if hasattr(obj, 'cleanup'):
-        await silently_call(obj.cleanup)
-
-
-async def silently_call(invokable: typing.Callable):
-    if not callable(invokable):
-        return
-    try:
-        if inspect.iscoroutinefunction(invokable):
-            await invokable()
-        else:
-            invokable()
-    except Exception as e:
-        logging.debug('silently_call failed: ' + repr(e))
-
-
 def urlsafe_b64encode(value: str) -> str:
     value = value.encode('utf-8')
     value = base64.urlsafe_b64encode(value)
@@ -212,25 +151,8 @@ def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]
     return base + path
 
 
-async def system_info() -> dict:
-    disk = await _disk_usage('/')
-    memory = await _virtual_memory()
-    cpu = await _cpu_percent(1)
-    return {
-        'cpu': {
-            'percent': cpu
-        },
-        'memory': {
-            'total': memory[0],
-            'used': memory[3],
-            'available': memory[1],
-            'free': memory[4],
-            'percent': memory[2]
-        },
-        'disk': {
-            'total': disk[0],
-            'used': disk[1],
-            'free': disk[2],
-            'percent': round((disk[1] / disk[0]) * 100, 1)
-        }
-    }
+class _JsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if obj is None or type(obj) in (str, tuple, list, dict):
+            return obj
+        return obj_to_str(obj)

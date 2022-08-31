@@ -4,7 +4,7 @@ import importlib
 import inspect
 import logging
 import uuid
-from core.util import util, io, signals
+from core.util import util, io, sysutil, signals
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
@@ -186,7 +186,7 @@ class _SystemInfoHandler(httpabc.AsyncGetHandler):
         self._start_time = util.now_millis()
 
     async def handle_get(self, resource, data):
-        info = await util.system_info()
+        info = await sysutil.system_info()
         info.update({'uptime': util.now_millis() - self._start_time})
         return info
 
