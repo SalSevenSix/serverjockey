@@ -22,7 +22,7 @@ class WrapReader(Readable):
         self._delegate = delegate
 
     async def read(self, length: int = -1) -> bytes:
-        return self._delegate.read(length)
+        return await self._delegate.read(length)
 
 
 _listdir = funcutil.to_async(os.listdir)

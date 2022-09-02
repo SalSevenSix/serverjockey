@@ -30,14 +30,13 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
             return None
         if msg.PLAYER_EVENT_FILTER.accepts(message):
             event = message.data()
-            if event['event'] == 'join':
-                self._players.append(event['name'])
-            if event['event'] == 'leave':
-                self._players.remove(event['name'])
+            if event['event'] == 'login':
+                self._players.append(event['player'])
+            if event['event'] == 'logout':
+                self._players.remove(event['player'])
             return None
         if PlayersSubscriber.GET_FILTER.accepts(message):
-            result = [{'steamid': False, 'name': p} for p in self._players]
-            self._mailer.post(self, PlayersSubscriber.GET_RESPONSE, result, message)
+            self._mailer.post(self, PlayersSubscriber.GET_RESPONSE, tuple(self._players), message)
             return None
         return None
 

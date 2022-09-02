@@ -1,0 +1,13 @@
+[Unit]
+Description=Sync PZ Map files to disk
+Requires=network.target lsyncd.service pzrestore.service
+After=network.target lsyncd.service pzrestore.service
+Before=serverjockey.service
+
+[Service]
+Type=simple
+User=sjgms
+ExecStart=/usr/bin/lsyncd -log scarce -nodaemon -rsync /home/sjgms/newhope/world/Saves /home/sjgms/newhope/savesync
+
+[Install]
+WantedBy=multi-user.target

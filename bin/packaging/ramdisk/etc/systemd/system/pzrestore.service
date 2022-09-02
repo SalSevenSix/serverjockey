@@ -1,0 +1,14 @@
+[Unit]
+Description=Restore PZ Map files to ramdisk
+Requires=basic.target
+After=basic.target
+Before=pzlsyncd.service
+
+[Service]
+Type=oneshot
+User=sjgms
+ExecStart=/home/sjgms/restore.sh /home/sjgms/newhope/world/Saves /home/sjgms/newhope/savesync
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

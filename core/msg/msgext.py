@@ -70,6 +70,7 @@ class MultiCatcher(msgabc.Catcher):
 
     def handle(self, message):
         if self._expired:
+            util.clear_queue(self._queue)
             return False
         starting = not self._started and self._start_filter.accepts(message)
         stopping = self._stop_filter.accepts(message)

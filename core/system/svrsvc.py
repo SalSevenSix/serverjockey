@@ -131,15 +131,7 @@ class ServerService(msgabc.AbcSubscriber):
         try:
             await asyncio.wait_for(self._queue.join(), 10.0)
         except asyncio.TimeoutError:
-            self._queue_clear()
-
-    def _queue_clear(self):
-        # noinspection PyBroadException
-        try:
-            self._queue.get_nowait()
-            self._queue.task_done()
-        except Exception:
-            pass
+            util.clear_queue(self._queue)
 
 
 class ServerStatus(msgabc.AbcSubscriber):

@@ -8,9 +8,10 @@
   let lastRunning = $serverStatus.running;
   $: serverRunningChange($serverStatus.running);
   function serverRunningChange(running) {
-    if (lastRunning === $serverStatus.running) return;
-    players = [];
-    lastRunning = $serverStatus.running;
+    if (lastRunning === true && running === false) {
+      players = [];
+    }
+    lastRunning = running;
   }
 
 	onMount(async function() {

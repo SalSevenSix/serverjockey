@@ -1,4 +1,5 @@
 import logging
+import asyncio
 import base64
 import json
 import time
@@ -149,6 +150,18 @@ def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]
     if not base.endswith('/'):
         base += '/'
     return base + path
+
+
+def clear_queue(queue: asyncio.Queue):
+    if not queue:
+        return
+    # noinspection PyBroadException
+    try:
+        while True:
+            queue.get_nowait()
+            queue.task_done()
+    except Exception:
+        pass
 
 
 class _JsonEncoder(json.JSONEncoder):

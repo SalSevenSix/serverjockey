@@ -99,7 +99,7 @@ exports.players = function($) {
     let chunk = [line];
     let result = [];
     for (let i = 0; i < body.length; i++) {
-      if (body[i].steamid == false) {
+      if (body[i].steamid === false) {
         line = body[i].name;
       } else {
         line = 'LOGGING IN        ';

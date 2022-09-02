@@ -7,10 +7,9 @@ exports.startup = function(context, channel, instance, url) {
   if (!channel) return;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     let result = '';
-    if (json.event === 'join') { result += 'JOIN '; }
-    if (json.event === 'leave') { result += 'LEAVE '; }
-    result += json.name;
-    result += ' (' + instance + ')';
+    if (json.event === 'login') { result += 'JOIN '; }
+    if (json.event === 'logout') { result += 'LEAVE '; }
+    result += json.player.name + ' (' + instance + ')';
     channel.send(result);
     return true;
   });
