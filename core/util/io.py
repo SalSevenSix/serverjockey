@@ -11,6 +11,12 @@ from core.util import funcutil
 DEFAULT_CHUNK_SIZE = 10240
 
 
+class BytesTracker(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def processed(self, chunk: bytes):
+        pass
+
+
 class Readable(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def read(self, length: int = -1) -> bytes:
@@ -108,18 +114,26 @@ async def copy_text_file(from_path: str, to_path: str) -> int:
     return len(data)
 
 
-async def stream_write_file(filename: str, stream: Readable, chunk_size: int = DEFAULT_CHUNK_SIZE):
+async def stream_write_file(
+        filename: str, stream: Readable,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+        tracker: BytesTracker = None):
     async with aiofiles.open(filename, mode='wb') as file:
-        await copy_bytes(stream, file, chunk_size)
+        await copy_bytes(stream, file, chunk_size, tracker)
 
 
-async def copy_bytes(source: Readable, target, chunk_size: int = DEFAULT_CHUNK_SIZE):
+async def copy_bytes(
+        source: Readable, target,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+        tracker: BytesTracker = None):
     pumping = True
     while pumping:
         chunk = await source.read(chunk_size)
         pumping = chunk is not None and chunk != b''
         if pumping:
             await target.write(chunk)
+            if tracker:
+                tracker.processed(chunk)
 
 
 async def pkg_load(package: str, resource: str) -> bytes | None:

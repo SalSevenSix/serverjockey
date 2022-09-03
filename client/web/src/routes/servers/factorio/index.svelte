@@ -44,7 +44,7 @@
         <ConfigFile name="Ban List" path="/config/banlist" />
       </Collapsible>
       <Collapsible title="Deployment">
-        <InstallRuntime />
+        <InstallRuntime showLog />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
       <Collapsible title="Backups">

@@ -27,7 +27,13 @@ class _Tasker:
 
 
 def task_start(coro: typing.Coroutine, name: str) -> asyncio.Task:
-    return _Tasker.instance().task_start(coro, name=name)
+    return _Tasker.instance().task_start(coro, name)
+
+
+def task_fork(coro: typing.Coroutine, name: str) -> asyncio.Task:
+    task = asyncio.create_task(coro, name=name)
+    logging.debug('tsk> FORK       : {}'.format(task))
+    return task
 
 
 def task_end(task: asyncio.Task):

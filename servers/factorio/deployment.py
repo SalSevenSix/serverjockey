@@ -1,6 +1,6 @@
 import aiohttp
-from core.util import util, io, pack, aggtrf
-from core.msg import msgext, msgftr
+from core.util import util, tasks, io, pack, aggtrf
+from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch
@@ -13,7 +13,6 @@ class Deployment:
         self._mailer = context
         self._home_dir = context.config('home')
         self._backups_dir = self._home_dir + '/backups'
-        self._install_package = self._home_dir + '/factorio.tar.xz'
         self._runtime_dir = self._home_dir + '/runtime'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
         self._current_log = self._runtime_dir + '/factorio-current.log'
@@ -64,7 +63,7 @@ class Deployment:
             .append('banlist', httpext.FileSystemHandler(self._server_banlist)) \
             .pop() \
             .push('deployment') \
-            .append('install-runtime', _InstallRuntimeHandler(self)) \
+            .append('install-runtime', _InstallRuntimeHandler(self, self._mailer)) \
             .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
             .append('wipe-world-config', _WipeHandler(self, self._config_dir)) \
             .append('wipe-world-save', _WipeHandler(self, self._save_dir)) \
@@ -132,18 +131,34 @@ class Deployment:
 
     async def install_runtime(self):
         url = 'https://factorio.com/get-download/stable/headless/linux64'
-        unpack_dir, chunk_size = self._home_dir + '/factorio', 65536
-        await io.delete_file(self._install_package)
-        await io.delete_directory(unpack_dir)
-        await io.delete_directory(self._runtime_dir)
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, read_bufsize=chunk_size) as response:
-                assert response.status == 200
-                await io.stream_write_file(self._install_package, io.WrapReader(response.content), chunk_size)
-        await pack.unpack_tarxz(self._install_package, self._home_dir)
-        await io.rename_path(unpack_dir, self._runtime_dir)
-        await io.delete_file(self._install_package)
-        await self.build_world()
+        install_package = self._home_dir + '/factorio.tar.xz'
+        unpack_dir = self._home_dir + '/factorio'
+        chunk_size = 65536
+        try:
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'START Install')
+            await io.delete_file(install_package)
+            await io.delete_directory(unpack_dir)
+            await io.delete_directory(self._runtime_dir)
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'DOWNLOADING ' + url)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, read_bufsize=chunk_size) as response:
+                    assert response.status == 200
+                    tracker = None
+                    content_length = response.headers.get('Content-Length')
+                    if content_length:
+                        tracker = _DownloadTracker(
+                            self._mailer, _InstallRuntimeHandler.INSTALL_MESSAGE, int(content_length), 10)
+                    await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'UNPACKING ' + install_package)
+            await pack.unpack_tarxz(install_package, self._home_dir)
+            await io.rename_path(unpack_dir, self._runtime_dir)
+            await io.delete_file(install_package)
+            await self.build_world()
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'END Install')
+        except Exception as e:
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, repr(e))
+        finally:
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_DONE)
 
     async def ensure_map(self):
         if not await io.file_exists(self._map_file):
@@ -193,13 +208,41 @@ class Deployment:
 
 
 class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
+    INSTALL_MESSAGE = '_InstallRuntimeHandler.Message'
+    INSTALL_DONE = '_InstallRuntimeHandler.Done'
 
-    def __init__(self, deployment: Deployment):
+    def __init__(self, deployment: Deployment, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
         self._deployment = deployment
 
     async def handle_post(self, resource, data):
-        await self._deployment.install_runtime()
-        return httpabc.ResponseBody.NO_CONTENT
+        subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
+            self._mailer, self, httpsubs.Selector(
+                msg_filter=msgftr.NameIs(_InstallRuntimeHandler.INSTALL_MESSAGE),
+                completed_filter=msgftr.NameIs(_InstallRuntimeHandler.INSTALL_DONE),
+                aggregator=aggtrf.StrJoin('\n')))
+        tasks.task_fork(self._deployment.install_runtime(), 'factorio.install_runtime()')
+        return {'url': util.get('baseurl', data, '') + subscription_path}
+
+
+class _DownloadTracker(io.BytesTracker):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, msg_name: str, expected: int, notifications: int):
+        self._mailer = mailer
+        self._msg_name = msg_name
+        self._expected = expected
+        self._progress = 0
+        self._increment = int(expected / notifications)
+        self._next_target = self._increment
+
+    def processed(self, chunk: bytes):
+        self._progress += len(chunk)
+        if self._progress >= self._expected:
+            self._mailer.post(self, self._msg_name, 'downloaded 100%')
+        elif self._progress > self._next_target:
+            self._next_target += self._increment
+            message = 'downloaded  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
+            self._mailer.post(self, self._msg_name, message)
 
 
 class _WipeHandler(httpabc.AsyncPostHandler):
