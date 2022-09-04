@@ -1,4 +1,6 @@
 <script>
+  // TODO Add option to delete file/directory
+
   import { onMount } from 'svelte';
 	import { humanFileSize } from '$lib/util';
 	import { instance, newGetRequest } from '$lib/serverjockeyapi';

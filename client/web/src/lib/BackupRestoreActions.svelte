@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
-  import { humanFileSize, ReverseRollingLog } from '$lib/util';
+  import { sleep, humanFileSize, ReverseRollingLog } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
@@ -100,6 +100,7 @@
       return notifyError('Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
     }
     processing = true;
+    uploadTicker();
     let request = rawPostRequest();
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
@@ -110,6 +111,18 @@
       })
       .catch(function(error) { notifyError('Failed to upload ' + filename); })
       .finally(reload);
+  }
+
+  async function uploadTicker() {
+    let index = 0;
+    let rotators = ['--', '\\', '|', '/'];
+    while (processing) {
+      logText = 'Uploading file  ' + rotators[index];
+      index += 1;
+      if (index > 3) { index = 0; };
+      await sleep(1000);
+    }
+    logText = '';
   }
 </script>
 
