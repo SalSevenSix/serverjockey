@@ -1,5 +1,6 @@
 <script>
   import { onDestroy } from 'svelte';
+  import { notifyInfo, notifyError } from '$lib/notifications';
   import { ReverseRollingLog } from '$lib/util';
   import { instance, serverStatus, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
@@ -15,10 +16,6 @@
 	onDestroy(function() {
 		subs.stop();
 	});
-
-  function installDone() {
-    installing = false;
-  }
 
 	function install() {
 	  if (!confirm('Are you sure you want to Install Runtime ?')) return;
@@ -36,18 +33,20 @@
       })
       .then(function(json) {
         if (!json) {
-          installDone();  // Assuming 204 means it blocked until done
+          notifyInfo('Install Runtime completed.');
+          installing = false;
         } else if (showLog && json.url) {
           subs.poll(json.url, function(data) {
             logText = logLines.append(data).toText();
             return true;
           })
-          .finally(installDone);
+          .then(function() { notifyInfo('Install Runtime completed. Please check log output for details.'); })
+          .finally(function() { installing = false; });
         }
       })
       .catch(function(error) {
-        alert('Error ' + error);
-        installDone();
+        notifyError('Failed to initiate Install Runtime.');
+        installing = false;
       });
 	}
 </script>

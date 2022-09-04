@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { notifyError } from '$lib/notifications';
   import { goto } from '$app/navigation';
 	import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
@@ -9,27 +10,29 @@
   let instances = [];
   let subs = new SubscriptionHelper();
 
-	onMount(async function() {
-    const result = await fetch(baseurl + '/instances', newGetRequest())
+	onMount(function() {
+    fetch(baseurl + '/instances', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert(error); });
-    Object.keys(result).forEach(function(key) {
-      instances = [...instances, { identity: key, module: result[key].module, url: result[key].url }];
-    });
-    await subs.start(baseurl + '/instances/subscribe', function(data) {
-      if (data.event === 'created') {
-        data.instance.url = baseurl + '/instances/' + data.instance.identity;
-        instances = [...instances, data.instance];
-      } else if (data.event === 'deleted') {
-        instances = instances.filter(function(value) {
-          return value.identity != data.instance.identity;
+      .then(function(json) {
+        Object.keys(json).forEach(function(key) {
+          instances = [...instances, { identity: key, module: json[key].module, url: json[key].url }];
         });
-      }
-	    return true;
-	  });
+        subs.start(baseurl + '/instances/subscribe', function(data) {
+          if (data.event === 'created') {
+            data.instance.url = baseurl + '/instances/' + data.instance.identity;
+            instances = [...instances, data.instance];
+          } else if (data.event === 'deleted') {
+            instances = instances.filter(function(value) {
+              return value.identity != data.instance.identity;
+            });
+          }
+          return true;
+        });
+      })
+      .catch(function(error) { notifyError('Failed to load instances.'); });
   });
 
 	onDestroy(function() {
@@ -47,7 +50,7 @@
 	  if (!confirm('Delete ' + selected.identity + ' ?')) return;
     fetch(selected.url + '/server/delete', newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { alert('Error ' + error); });
+      .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
 	}
 </script>
 

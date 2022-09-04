@@ -1,4 +1,5 @@
 <script>
+  import { notifyInfo, notifyError } from '$lib/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
 	import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
 
@@ -30,12 +31,15 @@
         body[value.name] = args[index];
       }
     });
-    path +=  '/' + action;
+    path += '/' + action;
     let request = newPostRequest();
     request.body = JSON.stringify(body);
     fetch($instance.url + path, request)
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { alert('Error ' + error); });
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        notifyInfo(capitalizeKebabCase(command) + ' command sent.');
+      })
+      .catch(function(error) { notifyError('Failed to send command to server.'); });
 	}
 </script>
 

@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { notifyInfo, notifyError } from '$lib/notifications';
 	import { instance, newPostRequest, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let name;
@@ -7,9 +8,7 @@
   let updating = false;
   let configText = '';
 
-	onMount(async function() {
-	  reload();
-	});
+	onMount(reload);
 
 	function openConfigFile() {
 	  openFileInNewTab($instance.url + path);
@@ -27,7 +26,7 @@
         return response.text();
       })
       .then(function(text) { configText = text; })
-      .catch(function(error) { clear(); })
+      .catch(function(error) { notifyError('Failed to load ' + name); })
       .finally(function() { updating = false; });
 	}
 
@@ -36,8 +35,11 @@
     let request = newPostRequest('text/plain');
     request.body = configText;
     fetch($instance.url + path, request)
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { alert('Error ' + error); })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        notifyInfo(name + ' saved.');
+      })
+      .catch(function(error) { notifyError('Failed to update ' + name); })
       .finally(function() { updating = false; });
 	}
 </script>

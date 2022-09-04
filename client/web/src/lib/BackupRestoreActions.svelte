@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { notifyInfo, notifyError } from '$lib/notifications';
   import { humanFileSize, ReverseRollingLog } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest,
-           SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
@@ -17,23 +17,21 @@
 		subs.stop();
 	});
 
-  function processingDone() {
-    processing = false;
-    reload();
-  }
-
-	async function reload() {
-	  let result = await fetch($instance.url + '/backups', newGetRequest())
+	function reload() {
+	  fetch($instance.url + '/backups', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert('Error ' + error); });
-    result.sort(function(a, b) {
-      return a.name.localeCompare(b.name);
-    });
-    result.reverse();
-    paths = result;
+      .then(function(json) {
+        json.sort(function(a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        json.reverse();
+        paths = json;
+      })
+      .catch(function(error) { notifyError('Failed to load Backup File List.'); })
+      .finally(function() { processing = false; });
 	}
 
 	function createBackup() {
@@ -49,11 +47,12 @@
           logText = logLines.append(data).toText();
           return true;
         })
-        .finally(processingDone);
+        .then(function() { notifyInfo('Backup completed. Please check log output for details.'); })
+        .finally(reload);
       })
       .catch(function(error) {
-        alert('Error ' + error);
-        processingDone();
+        notifyError('Failed to create Backup.');
+        processing = false;
       });
 	}
 
@@ -73,11 +72,12 @@
           logText = logLines.append(data).toText();
           return true;
         })
-        .finally(processingDone);
+        .then(function() { notifyInfo('Restore from backup completed.'); })
+        .finally(function() { processing = false; });
       })
       .catch(function(error) {
-        alert('Error ' + error);
-        processingDone();
+        notifyError('Failed to restore Backup.');
+        processing = false;
       });
 	}
 
@@ -86,31 +86,30 @@
     processing = true;
     fetch($instance.url + '/backups/' + this.name, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { alert('Error ' + error); })
-      .finally(processingDone);
+      .catch(function(error) { notifyError('Failed to delete Backup.'); })
+      .finally(reload);
   }
 
   function uploadFile() {
-    if (uploadFiles.length === 0) {
-      alert('No file specified.');
-      return;
-    }
+    if (uploadFiles.length === 0) return notifyError('No file specified.');
     let filename = uploadFiles[0].name;
     if (!(filename === filename.replaceAll(' ', '')
         && filename === filename.toLowerCase()
         && (filename.startsWith('runtime-') || filename.startsWith('world-'))
         && filename.endsWith('.zip'))) {
-      alert('Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
-      return;
+      return notifyError('Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
     }
     processing = true;
     let request = rawPostRequest();
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
     fetch($instance.url + '/backups/' + filename, request)
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { alert('Error ' + error); })
-      .finally(processingDone);
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        notifyInfo(filename + ' uploaded successfully.');
+      })
+      .catch(function(error) { notifyError('Failed to upload ' + filename); })
+      .finally(reload);
   }
 </script>
 

@@ -13,7 +13,7 @@
   </div>
   <div class="column">
     <div class="buttons is-right">
-      <button name="toggler" class="button is-dark" on:click={toggle}>{visible ? 'COLLAPSE' : 'EXPAND'}</button>
+      <button name="toggler" class="button is-dark" on:click={toggle}>{visible ? 'HIDE' : 'SHOW'}</button>
     </div>
   </div>
 </div>

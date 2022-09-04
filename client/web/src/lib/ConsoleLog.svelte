@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { notifyError } from '$lib/notifications';
   import { ReverseRollingLog } from '$lib/util';
 	import { instance, SubscriptionHelper, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
@@ -7,18 +8,20 @@
   let logLines = new ReverseRollingLog();
   let logText = '';
 
-	onMount(async function() {
-	  let result = await fetch($instance.url + '/log/tail', newGetRequest())
+	onMount(function() {
+	  fetch($instance.url + '/log/tail', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
       })
-      .catch(function(error) { alert(error); });
-    logText = logLines.set(result).toText();
-    await subs.start($instance.url + '/log/subscribe', function(data) {
-	    logText = logLines.append(data).toText();
-	    return true;
-	  });
+      .then(function(text) {
+        logText = logLines.set(text).toText();
+        subs.start($instance.url + '/log/subscribe', function(data) {
+          logText = logLines.append(data).toText();
+          return true;
+        });
+      })
+      .catch(function(error) { notifyError('Failed to load Console Log.'); });
 	});
 
 	onDestroy(function() {

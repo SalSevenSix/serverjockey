@@ -1,22 +1,25 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { notifyError } from '$lib/notifications';
   import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   serverStatus.set({});
   let subs = new SubscriptionHelper();
 
-	onMount(async function() {
-    let result = await fetch($instance.url + '/server', newGetRequest())
+	onMount(function() {
+    fetch($instance.url + '/server', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert('Error: ' + error); });
-    serverStatus.set(result);
-    await subs.start($instance.url + '/server/subscribe', function(data) {
-      serverStatus.set(data);
-	    return true;
-	  });
+      .then(function(json) {
+        serverStatus.set(json);
+        subs.start($instance.url + '/server/subscribe', function(data) {
+          serverStatus.set(data);
+          return true;
+        });
+      })
+      .catch(function(error) { notifyError('Failed to load Server Status.'); });
 	});
 
 	onDestroy(function() {

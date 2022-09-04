@@ -1,27 +1,30 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import { onMount, onDestroy } from 'svelte';
+  import { notifyError } from '$lib/notifications';
   import { baseurl, instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
 
-  instance.set({ url: baseurl + '/instances/serverlink' }); // used by ServerControls
-  serverStatus.set({}); // used by ServerControls
+  instance.set({ url: baseurl + '/instances/serverlink' });  // used by ServerControls
+  serverStatus.set({});  // used by ServerControls
   let subs = new SubscriptionHelper();
 
-	onMount(async function() {
-    const result = await fetch(baseurl + '/instances/serverlink/server', newGetRequest())
+	onMount(function() {
+    fetch(baseurl + '/instances/serverlink/server', newGetRequest())
       .then(function(response) {
-         if (!response.ok) throw new Error('Status: ' + response.status);
+        if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert('Error: ' + error); });
-    serverStatus.set(result);
-    await subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
-      serverStatus.set(data);
-	    return true;
-	  });
+      .then(function(json) {
+        serverStatus.set(json);
+        subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
+          serverStatus.set(data);
+          return true;
+        });
+      })
+      .catch(function(error) { notifyError('Failed to load ServerLink Status.'); });
 	});
 
 	onDestroy(function() {

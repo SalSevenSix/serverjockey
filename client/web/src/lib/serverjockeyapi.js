@@ -1,5 +1,6 @@
 import { dev } from '$app/env';
 import { writable, get } from 'svelte/store';
+import { notifyError } from '$lib/notifications';
 
 export const baseurl = (dev ? 'http://localhost:6164' : '');
 export const securityToken = writable();
@@ -41,7 +42,7 @@ export function openFileInNewTab(url) {
     .then(function(blob) {
       window.open(window.URL.createObjectURL(blob)).focus();
     })
-    .catch(function(error) { alert('No data!'); });
+    .catch(function(error) { notifyError('Failed to load data.'); });
 }
 
 export class SubscriptionHelper {
@@ -81,7 +82,7 @@ export class SubscriptionHelper {
       .then(function(json) {
         return json.url;
       })
-      .catch(function(error) { alert('Error ' + error); });
+      .catch(function(error) { notifyError('Subscription failed.'); });
   }
 
   async #doPoll(url, signal, dataHandler) {

@@ -2,6 +2,7 @@
   import 'bulma/css/bulma.css'
 	import '../app.css';
   import Navbar from '$lib/Navbar.svelte';
+  import Notifications from '$lib/Notifications.svelte';
 </script>
 
 <section class="section">
@@ -10,3 +11,5 @@
     <slot />
   </div>
 </section>
+
+<Notifications />

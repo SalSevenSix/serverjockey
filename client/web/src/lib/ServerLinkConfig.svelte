@@ -1,17 +1,19 @@
 <script>
   import { onMount } from 'svelte';
+  import { notifyInfo, notifyError } from '$lib/notifications';
   import { instance, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
   let serverLinkForm = {};
   let applying = false;
 
-	onMount(async function() {
-    serverLinkForm = await fetch($instance.url + '/config', newGetRequest())
+	onMount(function() {
+    fetch($instance.url + '/config', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert('Error: ' + error); });
+      .then(function(json) { serverLinkForm = json; })
+      .catch(function(error) { notifyError('Failed to load ServerLink Config.'); });
 	});
 
 	function apply() {
@@ -19,8 +21,11 @@
     let request = newPostRequest('text/plain');
     request.body = JSON.stringify(serverLinkForm);
     fetch($instance.url + '/config', request)
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { alert('Error ' + error); })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        notifyInfo('ServerLink Config saved.');
+      })
+      .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
       .finally(function() { applying = false; });
 	}
 </script>

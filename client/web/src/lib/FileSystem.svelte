@@ -16,25 +16,30 @@
 	function upDirectory() {
 	  let parts = pwd.split('/');
 	  parts.pop();
-	  pwd = parts.join('/');
-	  update(pwd);
+	  update(parts.join('/'));
+  }
+
+	function update(url) {
+	  fetch(url, newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      }).then(function(json) {
+        paths = json;
+        pwd = url;
+      })
+      .catch(function(error) {
+        if (url === root) {
+          paths = [];
+          pwd = root;
+        } else {
+          rootDirectory();
+        }
+      });
   }
 
 	function openDirectory() {
 	  update(this.name);
-  }
-
-	async function update(url) {
-	  paths = await fetch(url, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .catch(function(error) {
-        if (url === root) return [];
-        update(root);
-      });
-      pwd = url;
   }
 
 	function openFile() {
@@ -46,7 +51,7 @@
       .then(function(blob) {
         window.open(window.URL.createObjectURL(blob)).focus();
       })
-      .catch(function(error) { update(root); });
+      .catch(function(error) { rootDirectory(); });
   }
 </script>
 

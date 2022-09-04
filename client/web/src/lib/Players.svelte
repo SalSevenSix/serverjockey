@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { notifyError } from '$lib/notifications';
 	import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
@@ -14,23 +15,26 @@
     lastRunning = running;
   }
 
-	onMount(async function() {
-	  players = await fetch($instance.url + '/players', newGetRequest())
+	onMount(function() {
+	  fetch($instance.url + '/players', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert(error); });
-    await subs.start($instance.url + '/players/subscribe', function(data) {
-      if (data.event === 'login') {
-        players = [...players, data.player];
-      } else if (data.event === 'logout') {
-        players = players.filter(function(value) {
-          return value.name != data.player.name;
+      .then(function(json) {
+        players = json;
+        subs.start($instance.url + '/players/subscribe', function(data) {
+          if (data.event === 'login') {
+            players = [...players, data.player];
+          } else if (data.event === 'logout') {
+            players = players.filter(function(value) {
+              return value.name != data.player.name;
+            });
+          }
+          return true;
         });
-      }
-	    return true;
-	  });
+      })
+      .catch(function(error) { notifyError('Failed to load Player List.'); });
 	});
 
 	onDestroy(function() {

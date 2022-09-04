@@ -1,21 +1,23 @@
 <script>
   import { dev } from '$app/env';
+  import { notifyError } from '$lib/notifications';
   import { baseurl, newPostRequest } from '$lib/serverjockeyapi';
 
   let serverForm = {};
   let creating = false;
 
 	function create() {
+	  if (!serverForm.identity) return notifyError('Instance Name not set.');
 	  creating = true;
     let request = newPostRequest();
     request.body = JSON.stringify(serverForm);
     fetch(baseurl + '/instances', request)
       .then(function(response) {
-        creating = false;
         if (!response.ok) throw new Error('Status: ' + response.status);
         serverForm.identity = null;
       })
-      .catch(function(error) { alert('Error ' + error); });
+      .catch(function(error) { notifyError('Failed to create new server.'); })
+      .finally(function() { creating = false; });
 	}
 </script>
 

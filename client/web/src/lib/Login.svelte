@@ -1,15 +1,16 @@
 <script>
+  import { notifyError } from '$lib/notifications';
   import { baseurl, securityToken } from '$lib/serverjockeyapi';
 
   let token = '';
 	function login() {
-    if (!token) return;
+    if (!token) return notifyError('No token entered');
     fetch(baseurl + '/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);
       })
-      .catch(function(error) { alert('Wrong'); });
+      .catch(function(error) { notifyError('Wrong.'); });
 	}
 </script>
 

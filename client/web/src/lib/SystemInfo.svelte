@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { notifyError } from '$lib/notifications';
 	import { capitalize, humanFileSize, humanDuration } from '$lib/util';
 	import { baseurl, newGetRequest } from '$lib/serverjockeyapi';
 
@@ -23,13 +24,14 @@
     }
   };
 
-	onMount(async function() {
-	  info = await fetch(baseurl + '/system/info', newGetRequest())
+	onMount(function() {
+	  fetch(baseurl + '/system/info', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .catch(function(error) { alert('Error: ' + error); });
+      .then(function(json) { info = json; })
+      .catch(function(error) { notifyError('Failed to load System Info.'); });
   });
 </script>
 
