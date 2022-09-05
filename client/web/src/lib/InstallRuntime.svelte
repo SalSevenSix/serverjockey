@@ -1,6 +1,7 @@
 <script>
   import { onDestroy } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
+  import { confirmModal } from '$lib/modals';
   import { ReverseRollingLog } from '$lib/util';
   import { instance, serverStatus, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
@@ -18,7 +19,10 @@
 	});
 
 	function install() {
-	  if (!confirm('Are you sure you want to Install Runtime ?')) return;
+	  confirmModal('Are you sure you want to Install Runtime ?\nAny existing install will be overwritten.', doInstall);
+	}
+
+	function doInstall() {
 	  installing = true;
 	  logText = logLines.reset().toText();
     let request = newPostRequest();

@@ -1,7 +1,9 @@
 <script>
-  import 'bulma/css/bulma.css'
+  import 'bulma/css/bulma.css';
 	import '../app.css';
+
   import Navbar from '$lib/Navbar.svelte';
+	import { Modals } from 'svelte-modals';
   import Notifications from '$lib/Notifications.svelte';
 </script>
 
@@ -13,3 +15,7 @@
 </section>
 
 <Notifications />
+
+<Modals>
+  <div slot="backdrop" />
+</Modals>

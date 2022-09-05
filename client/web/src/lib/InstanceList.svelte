@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
+  import { confirmModal } from '$lib/modals';
   import { goto } from '$app/navigation';
 	import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
@@ -47,10 +48,11 @@
 
 	function deleteInstance() {
 	  let selected = instances[this.name];
-	  if (!confirm('Delete ' + selected.identity + ' ?')) return;
-    fetch(selected.url + '/server/delete', newPostRequest())
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
+	  confirmModal('Delete ' + selected.identity + ' ?', function() {
+      fetch(selected.url + '/server/delete', newPostRequest())
+        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
+    });
 	}
 </script>
 

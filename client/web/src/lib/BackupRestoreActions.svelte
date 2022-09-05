@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
+  import { confirmModal } from '$lib/modals';
   import { sleep, humanFileSize, ReverseRollingLog } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
@@ -57,37 +58,41 @@
 	}
 
 	function restoreBackup() {
-	  if (!confirm('Are you sure ?')) return;
-	  processing = true;
-	  logText = logLines.reset().toText();
-    let request = newPostRequest();
-    request.body = JSON.stringify({ filename: this.name });
-    fetch($instance.url + '/deployment/restore-backup', request)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) {
-        subs.poll(json.url, function(data) {
-          logText = logLines.append(data).toText();
-          return true;
+	  let backupName = this.name;
+    confirmModal('Restore ' + backupName + ' ?\nExisting files will be overwritten.', function() {
+      processing = true;
+      logText = logLines.reset().toText();
+      let request = newPostRequest();
+      request.body = JSON.stringify({ filename: backupName });
+      fetch($instance.url + '/deployment/restore-backup', request)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Status: ' + response.status);
+          return response.json();
         })
-        .then(function() { notifyInfo('Restore from backup completed.'); })
-        .finally(function() { processing = false; });
-      })
-      .catch(function(error) {
-        notifyError('Failed to restore Backup.');
-        processing = false;
-      });
+        .then(function(json) {
+          subs.poll(json.url, function(data) {
+            logText = logLines.append(data).toText();
+            return true;
+          })
+          .then(function() { notifyInfo('Restored ' + backupName); })
+          .finally(function() { processing = false; });
+        })
+        .catch(function(error) {
+          notifyError('Failed to restore ' + backupName);
+          processing = false;
+        });
+    });
 	}
 
   function deleteBackup() {
-    if (!confirm('Are you sure ?')) return;
-    processing = true;
-    fetch($instance.url + '/backups/' + this.name, newPostRequest())
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { notifyError('Failed to delete Backup.'); })
-      .finally(reload);
+    let backupName = this.name;
+    confirmModal('Delete ' + backupName + ' ?', function() {
+      processing = true;
+      fetch($instance.url + '/backups/' + backupName, newPostRequest())
+        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .catch(function(error) { notifyError('Failed to delete ' + backupName); })
+        .finally(reload);
+    });
   }
 
   function uploadFile() {
@@ -162,9 +167,9 @@
   <div class="field">
     <div class="control buttons">
       <button id="upload-file" disabled={processing}
-              name="upload" class="button is-warning" on:click={uploadFile}>Upload File</button>
+              name="upload" class="button is-success" on:click={uploadFile}>Upload File</button>
       <button id="backup-runtime" disabled={$serverStatus.running || processing}
-              name="runtime" class="button is-success" on:click={createBackup}>Backup Runtime</button>
+              name="runtime" class="button is-primary" on:click={createBackup}>Backup Runtime</button>
       <button id="backup-world" disabled={$serverStatus.running || processing}
               name="world" class="button is-primary" on:click={createBackup}>Backup World</button>
     </div>

@@ -151,6 +151,7 @@ class Deployment:
                     await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
             self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
+            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'INSTALLING Factorio server')
             await io.rename_path(unpack_dir, self._runtime_dir)
             await io.delete_file(install_package)
             await self.build_world()

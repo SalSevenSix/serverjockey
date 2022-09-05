@@ -9,6 +9,7 @@
 	function create() {
 	  if (!serverForm.identity) return notifyError('Instance Name not set.');
 	  creating = true;
+	  serverForm.identity = serverForm.identity.replaceAll(' ', '-').toLowerCase();
     let request = newPostRequest();
     request.body = JSON.stringify(serverForm);
     fetch(baseurl + '/instances', request)
