@@ -1,10 +1,13 @@
 import shutil
 import lzma
 import tarfile
+import gzip
 from core.util import util, funcutil, io
 
 _make_archive = funcutil.to_async(shutil.make_archive)
 _unpack_archive = funcutil.to_async(shutil.unpack_archive)
+_gzip_compress = funcutil.to_async(gzip.compress)
+_gzip_decompress = funcutil.to_async(gzip.decompress)
 
 
 async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -> str:
@@ -36,6 +39,14 @@ async def unpack_directory(archive: str, unpack_dir: str, logger=None):
     await _unpack_archive(archive, unpack_dir)
     if logger:
         logger.info('END Unpack Directory')
+
+
+async def gzip_compress(data: bytes) -> bytes:
+    return await _gzip_compress(data)
+
+
+async def gzip_decompress(data: bytes) -> bytes:
+    return await _gzip_decompress(data)
 
 
 def _unpack_tarxz(file_path: str, target_directory: str):

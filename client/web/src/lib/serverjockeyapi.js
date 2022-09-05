@@ -42,7 +42,7 @@ export function openFileInNewTab(url) {
     .then(function(blob) {
       window.open(window.URL.createObjectURL(blob)).focus();
     })
-    .catch(function(error) { notifyError('Failed to load data.'); });
+    .catch(function(error) { notifyError('Failed to load. File may not exist.'); });
 }
 
 export class SubscriptionHelper {

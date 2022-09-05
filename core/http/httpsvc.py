@@ -1,9 +1,8 @@
 import logging
-import gzip
 import re
 import aiohttp
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
-from core.util import util, io
+from core.util import util, pack, io
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics
 
@@ -145,7 +144,7 @@ class _RequestHandler:
             body = util.obj_to_json(body)
             body = body.encode(httpcnt.UTF8)
         if isinstance(body, bytes) and len(body) > 1024 and self._headers.accepts_encoding(httpcnt.GZIP):
-            body = gzip.compress(body)
+            body = await pack.gzip_compress(body)
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
         if isinstance(body, httpabc.ByteStream):
             response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')

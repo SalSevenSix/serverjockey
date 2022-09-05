@@ -1,10 +1,9 @@
 from __future__ import annotations
 import typing
-import gzip
 from aiohttp import web, abc as webabc, web_exceptions as err
 from core.http import httpabc, httpcnt
 from core.context import contextsvc
-from core.util import util, io
+from core.util import util, pack, io
 
 
 class Statics:
@@ -19,11 +18,11 @@ class Statics:
         response = web.Response()
         response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
         response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')  # One hour
-        if headers.accepts_encoding(httpcnt.GZIP) and resource.compress():
+        if headers.accepts_encoding(httpcnt.GZIP) and await resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()
         else:
-            body = resource.uncompressed()
+            body = await resource.uncompressed()
         response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))
         response.body = body
         return response
@@ -83,13 +82,13 @@ class _Resource:
     def content_type(self) -> httpabc.ContentType:
         return self._content_type
 
-    def compress(self) -> bool:
+    async def compress(self) -> bool:
         if self._compressed is not None:
             return self._compressed
         if not self._content_type.is_text_type():
             self._compressed = False
             return False
-        data = gzip.compress(self._data)
+        data = await pack.gzip_compress(self._data)
         if len(self._data) < len(data):
             self._compressed = False
         else:
@@ -101,7 +100,7 @@ class _Resource:
         assert self._compressed is True
         return self._data
 
-    def uncompressed(self) -> typing.Any:
+    async def uncompressed(self) -> typing.Any:
         if self._compressed:
-            return gzip.decompress(self._data)
+            return await pack.gzip_decompress(self._data)
         return self._data

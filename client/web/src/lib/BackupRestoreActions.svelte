@@ -96,7 +96,7 @@
   }
 
   function uploadFile() {
-    if (uploadFiles.length === 0) return notifyError('No file specified.');
+    if (uploadFiles.length === 0) return notifyError('No file selected.');
     let filename = uploadFiles[0].name;
     if (!(filename === filename.replaceAll(' ', '')
         && filename === filename.toLowerCase()
@@ -158,16 +158,23 @@
       {/each}
     </tbody>
   </table>
-  <div class="field">
-    <label for="upload-files" class="label">Upload File</label>
-    <div class="control pr-6">
-      <input id="upload-files" class="input" type="file" bind:files={uploadFiles}>
+
+  <div class="file is-fullwidth is-info has-name">
+    <div class="control buttons mr-2">
+      <button id="upload-file" disabled={processing}
+              name="upload" class="button is-success" on:click={uploadFile}>Upload File</button>
     </div>
+    <label class="file-label">
+      <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
+      <span class="file-cta">
+        <!-- span class="file-icon"><i class="fas fa-upload"></i></span -->
+        <span class="file-label">Choose a file…</span>
+      </span>
+      <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected.'}</span>
+    </label>
   </div>
   <div class="field">
     <div class="control buttons">
-      <button id="upload-file" disabled={processing}
-              name="upload" class="button is-success" on:click={uploadFile}>Upload File</button>
       <button id="backup-runtime" disabled={$serverStatus.running || processing}
               name="runtime" class="button is-primary" on:click={createBackup}>Backup Runtime</button>
       <button id="backup-world" disabled={$serverStatus.running || processing}
