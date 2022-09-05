@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
+  import { textAreaModal } from '$lib/modals';
 	import { instance, newPostRequest, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let name;
@@ -16,6 +17,10 @@
 
 	function clear() {
 	  configText = '';
+	}
+
+	function openEditor() {
+    textAreaModal(name, configText, function(updatedText) { configText = updatedText; });
 	}
 
 	function reload() {
@@ -54,6 +59,7 @@
   </div>
   <div class="field">
     <div class="control buttons">
+      <button disabled={updating} name="editor" class="button" on:click={openEditor}>Editor</button>
       <button disabled={updating} name="clear" class="button is-danger" on:click={clear}>Clear</button>
       <button disabled={updating} name="reload" class="button is-warning" on:click={reload}>Reload</button>
       <button disabled={updating} name="update" class="button is-primary" on:click={update}>Update</button>
