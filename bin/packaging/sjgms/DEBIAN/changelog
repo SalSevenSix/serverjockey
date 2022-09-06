@@ -1,3 +1,7 @@
+sjgms (0.0.2) unstable; urgency=low
+* Full test and build for first GitHub release
+-- Bowden Salis <bsalis76@gmail.com>
+
 sjgms (0.0.1) unstable; urgency=low
 * Release for deployment testing
 -- Bowden Salis <bsalis76@gmail.com>
