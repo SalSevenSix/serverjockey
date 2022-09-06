@@ -5,14 +5,14 @@ from core.system import svrsvc
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataMatches('.* Info .* Own address is IP ADDR.*confirmed by pingpong.*'))
+    msgftr.DataMatches(
+        '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
 DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     proch.ServerProcess.FILTER_STDERR_LINE,
     proch.JobProcess.FILTER_STDOUT_LINE,
-    msgftr.NameIs(DEPLOYMENT_MSG)
-)
+    msgftr.NameIs(DEPLOYMENT_MSG))
 
 
 class Messaging:
@@ -28,11 +28,16 @@ class Messaging:
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_FILTER = msgftr.DataMatches('.*; Factorio .*build .* headless.*')
+    PRIVATE_IP_PORT = msgftr.DataStrContains('Hosting game at IP ADDR:')
+    PUBLIC_IP_PORT = msgftr.DataMatches('.*Info.*Own address is IP ADDR.*confirmed by pingpong.*')
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER, SERVER_STARTED_FILTER)))
+            msgftr.Or(
+                _ServerDetailsSubscriber.VERSION_FILTER,
+                _ServerDetailsSubscriber.PRIVATE_IP_PORT,
+                _ServerDetailsSubscriber.PUBLIC_IP_PORT)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -41,7 +46,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.right_chop_and_strip(value, '(build')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
-        if SERVER_STARTED_FILTER.accepts(message):
+        if _ServerDetailsSubscriber.PRIVATE_IP_PORT.accepts(message) \
+                or _ServerDetailsSubscriber.PUBLIC_IP_PORT.accepts(message):
             value = util.left_chop_and_strip(message.data(), '({')
             value = util.right_chop_and_strip(value, '})')
             value = value.split(':')

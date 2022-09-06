@@ -27,6 +27,7 @@
 	  updating = true;
 	  fetch($instance.url + path, newGetRequest())
       .then(function(response) {
+        if (response.status === 404) return '';
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
       })

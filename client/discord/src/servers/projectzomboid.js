@@ -26,21 +26,6 @@ exports.setconfig = commons.setconfig
 exports.deployment = commons.deployment
 exports.players = commons.players
 
-exports.config = function($) {
-  let prefix = $.httptool.baseurl + '/config/';
-  let result = prefix + 'jvm\n';
-  result += prefix + 'options\n';
-  result += prefix + 'ini\n';
-  result += prefix + 'sandbox\n';
-  result += prefix + 'spawnpoints\n';
-  result += prefix + 'spawnregions\n';
-  $.message.channel.send(result);
-}
-
-exports.log = function($) {
-  $.message.channel.send($.httptool.baseurl + '/log/tail');
-}
-
 exports.world = function($) {
   let data = [...$.data];
   if (data.length < 1) return;

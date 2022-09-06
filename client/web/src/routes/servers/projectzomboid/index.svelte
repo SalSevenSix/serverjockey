@@ -21,6 +21,7 @@
 
   let consoleCommands = {
     'world': {
+      'save': [],
       'broadcast': [
         {input: 'text', type: 'string', name: 'message'}
       ],

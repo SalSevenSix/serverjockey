@@ -17,8 +17,6 @@
       "server restart            : Save world and restart server",
       "server stop               : Save world and stop server",
       "server delete             : Delete the server instance",
-      "config                    : Show configuration file URLs",
-      "log                       : Show log file URL",
       "world save                : Save the game world",
       "world broadcast {message} : Broadcast message to all players",
       "world chopper             : Trigger chopper event",
