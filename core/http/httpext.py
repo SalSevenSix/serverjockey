@@ -124,6 +124,9 @@ class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
             if await io.file_exists(path):
                 await io.delete_file(path)
                 return httpabc.ResponseBody.NO_CONTENT
+            if await io.directory_exists(path):
+                await io.delete_directory(path)
+                return httpabc.ResponseBody.NO_CONTENT
             return httpabc.ResponseBody.BAD_REQUEST
         if await io.directory_exists(path):
             return httpabc.ResponseBody.BAD_REQUEST

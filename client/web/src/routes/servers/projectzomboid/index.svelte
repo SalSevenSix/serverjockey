@@ -110,12 +110,17 @@
       </div>
       <Collapsible title="Logging">
         <ConsoleLog />
-        <FileSystem />
+        <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
       <Collapsible title="Configuration">
+        <div class="content">
+          <p>For help understanding Project Zomboid configuration files. Please see the
+          <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">
+          excellent guide on Steam</a> by Aiteron.</p>
+        </div>
         <ConfigFile name="INI Settings" path="/config/ini" />
         <ConfigFile name="Sandbox Settings" path="/config/sandbox" />
         <ConfigFile name="Spawn Regions" path="/config/spawnregions" />

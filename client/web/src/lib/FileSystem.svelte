@@ -1,9 +1,11 @@
 <script>
-  // TODO Add option to delete file/directory
-
   import { onMount } from 'svelte';
+  import { notifyError } from '$lib/notifications';
+  import { confirmModal } from '$lib/modals';
 	import { humanFileSize } from '$lib/util';
-	import { instance, newGetRequest } from '$lib/serverjockeyapi';
+	import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
+
+  export let allowDelete = false;
 
   let root = $instance.url + '/logs';
   let pwd = root;
@@ -55,6 +57,17 @@
       })
       .catch(function(error) { rootDirectory(); });
   }
+
+  function deletePath() {
+    let url = this.name;
+    let path = url.substring(root.length);
+    confirmModal('Delete this folder or file?\n' + path, function() {
+      fetch(url, newPostRequest())
+        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .catch(function(error) { notifyError('Failed to delete ' + path); })
+        .finally(function() { update(pwd); });
+    });
+  }
 </script>
 
 
@@ -65,6 +78,7 @@
         <th>Type</th>
         <th>File</th>
         <th>Size</th>
+        {#if allowDelete}<th></th>{/if}
       </tr>
     </thead>
     <tbody>
@@ -73,6 +87,7 @@
           <td></td>
           <td><button name="reload" class="button is-small" on:click={rootDirectory}>RELOAD</button></td>
           <td></td>
+          {#if allowDelete}<td></td>{/if}
         </tr>
       {/if}
       {#if pwd != root}
@@ -80,6 +95,7 @@
           <td><button name="root" class="button is-small" on:click={rootDirectory}>ROOT</button></td>
           <td><button name="up" class="button is-small" on:click={upDirectory}>UP</button> {pwd.substring(root.length)}</td>
           <td></td>
+          {#if allowDelete}<td></td>{/if}
         </tr>
       {/if}
       {#each paths as path}
@@ -92,6 +108,11 @@
             <td><a href={'#'} name="{path.url}" on:click|preventDefault={openFile}>{path.name}</a></td>
           {/if}
           <td>{humanFileSize(path.size)}</td>
+          {#if allowDelete}
+            <td class="buttons">
+              <button disabled={$serverStatus.running} name="{path.url}" class="button is-danger" on:click={deletePath}>Delete</button>
+            </td>
+          {/if}
         </tr>
       {/each}
     </tbody>
