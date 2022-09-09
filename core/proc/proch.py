@@ -3,6 +3,7 @@ import logging
 import typing
 import asyncio
 from asyncio import streams, subprocess
+from core.proc import procabc
 from core.util import cmdutil, util, funcutil
 from core.msg import msgabc, msgext, msgftr
 
@@ -171,9 +172,10 @@ class ServerProcess:
         self._command.append(arg)
         return self
 
-    def wait_for_started(self, catcher: msgabc.Catcher) -> ServerProcess:
-        self._started_catcher = catcher
-        self._mailer.register(catcher)
+    def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
+        self._started_catcher = msgext.SingleCatcher(
+            msgftr.Or(procabc.SERVER_PROCESS_STOPPING_FILTER, msg_filter), timeout)
+        self._mailer.register(self._started_catcher)
         return self
 
     async def run(self):

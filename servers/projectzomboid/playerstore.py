@@ -61,11 +61,11 @@ class PlayerEvent:
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
-    LOGIN_KEY = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
+    LOGIN_KEY = '> znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
     LOGIN_KEY_FILTER = msgftr.DataStrContains(LOGIN_KEY)
     LOGOUT = 'PlayerActivitySubscriber.Logout'
     LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
-    LOGOUT_KEY = 'Disconnected player'
+    LOGOUT_KEY = '> Disconnected player'
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
 
     def __init__(self, mailer: msgabc.Mailer):

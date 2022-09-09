@@ -45,7 +45,7 @@ class Server(svrabc.Server):
     async def run(self):
         await self._deployment.new_server_process() \
             .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(msgext.SingleCatcher(msg.SERVER_STARTED_FILTER, timeout=900)) \
+            .wait_for_started(msg.SERVER_STARTED_FILTER, 1200) \
             .run()
 
     async def stop(self):

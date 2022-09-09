@@ -1,11 +1,10 @@
 import typing
-import logging
 import asyncio
 from asyncio import subprocess
-from core.util import cmdutil, util
+from core.util import cmdutil, util, signals
 from core.msg import msgabc, msgext
 from core.http import httpabc
-from core.proc import proch
+from core.proc import procabc, proch
 from core.system import svrsvc
 
 
@@ -61,6 +60,7 @@ class ServerProcessStopper:
         process = self._process_subscriber.get()
         if not process:
             return
+        self._mailer.post(self, procabc.SERVER_PROCESS_STOPPING, process.pid)
         catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATE_DOWN, self._timeout)
         self._mailer.register(catcher)
         if self._quit_command:
@@ -70,8 +70,7 @@ class ServerProcessStopper:
         try:
             await catcher.get()
         except asyncio.TimeoutError:
-            logging.info('Timeout waiting for server process ' + str(process.pid) + ' to stop, killing now')
-            process.kill()
+            await signals.kill_tree(process.pid)
 
 
 class _ServerProcessSubscriber(msgabc.AbcSubscriber):

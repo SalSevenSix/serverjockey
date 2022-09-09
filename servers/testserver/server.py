@@ -42,7 +42,7 @@ class Server(svrabc.Server):
         await proch.ServerProcess(self._context, 'python3') \
             .append_arg('../projects/serverjockey/servers/testserver/main.py') \
             .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(msgext.SingleCatcher(Server.STARTED_FILTER, timeout=60)) \
+            .wait_for_started(Server.STARTED_FILTER, 60) \
             .run()
 
     async def stop(self):
