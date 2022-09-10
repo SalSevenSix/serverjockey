@@ -21,11 +21,11 @@ async def kill_tree(pid: int):
 
 
 async def _run_script(script: str):
-    logging.info('SCRIPT\n' + script)
+    logging.debug('SCRIPT\n' + script)
     process = await asyncio.create_subprocess_shell(
         script, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()
     if stdout:
-        logging.info('STDOUT\n' + stdout.decode())
+        logging.debug('STDOUT\n' + stdout.decode())
     if stderr:
         logging.error('STDERR\n' + stderr.decode())

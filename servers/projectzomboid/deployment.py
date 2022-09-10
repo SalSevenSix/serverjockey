@@ -3,7 +3,7 @@ from core.util import aggtrf, util, io
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
-from core.proc import proch, shell
+from core.proc import proch, jobh, shell
 from core.system import svrext
 
 
@@ -31,7 +31,7 @@ class Deployment:
     async def initialise(self):
         await self.build_world()
         self._mailer.register(msgext.TimeoutSubscriber(self._mailer, msgext.SetSubscriber(
-            svrext.ServerRunningLock(self._mailer, proch.JobProcess(self._mailer)),
+            svrext.ServerRunningLock(self._mailer, jobh.JobProcess(self._mailer)),
             msgext.SyncWrapper(self._mailer, msgext.ReadWriteFileSubscriber(self._mailer), msgext.SyncReply.AT_END),
             svrext.ServerRunningLock(
                 self._mailer,
@@ -104,9 +104,9 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
     def __init__(self, mailer: msgabc.MulticastMailer, path: str):
         self._mailer = mailer
         self._path = path
-        self._handler = httpext.MessengerHandler(self._mailer, proch.JobProcess.START, selector=httpsubs.Selector(
-            msg_filter=proch.JobProcess.FILTER_STDOUT_LINE,
-            completed_filter=proch.JobProcess.FILTER_JOB_DONE,
+        self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.START, selector=httpsubs.Selector(
+            msg_filter=jobh.JobProcess.FILTER_STDOUT_LINE,
+            completed_filter=jobh.JobProcess.FILTER_JOB_DONE,
             aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):

@@ -4,7 +4,7 @@ from asyncio import subprocess
 from core.util import cmdutil, util, signals
 from core.msg import msgabc, msgext
 from core.http import httpabc
-from core.proc import procabc, proch
+from core.proc import proch
 from core.system import svrsvc
 
 
@@ -60,7 +60,7 @@ class ServerProcessStopper:
         process = self._process_subscriber.get()
         if not process:
             return
-        self._mailer.post(self, procabc.SERVER_PROCESS_STOPPING, process.pid)
+        self._mailer.post(self, proch.SERVER_PROCESS_STOPPING, process.pid)
         catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATE_DOWN, self._timeout)
         self._mailer.register(catcher)
         if self._quit_command:

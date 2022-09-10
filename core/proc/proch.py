@@ -2,35 +2,13 @@ from __future__ import annotations
 import logging
 import typing
 import asyncio
-from asyncio import streams, subprocess
+from asyncio import streams
 from core.proc import procabc
-from core.util import cmdutil, util, funcutil
+from core.util import cmdutil, funcutil
 from core.msg import msgabc, msgext, msgftr
 
-
-class _PipeOutLineProducer(msgabc.Producer):
-
-    def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str, pipe: streams.StreamReader):
-        self._source = source
-        self._name = name
-        self._pipe = pipe
-        self._publisher = msgext.Publisher(mailer, self)
-
-    async def close(self):
-        await funcutil.silently_cleanup(self._pipe)
-        await funcutil.silently_cleanup(self._publisher)
-
-    async def next_message(self):
-        line = None
-        # noinspection PyBroadException
-        try:
-            line = await self._pipe.readline()
-        except Exception:
-            pass
-        if line is None or line == b'':
-            logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
-            return None
-        return msgabc.Message(self._source, self._name, line.decode().strip())
+SERVER_PROCESS_STOPPING = 'ServerProcessStopper.Stop'
+SERVER_PROCESS_STOPPING_FILTER = msgftr.NameIs(SERVER_PROCESS_STOPPING)
 
 
 class _PipeInLineCommand:
@@ -174,7 +152,7 @@ class ServerProcess:
 
     def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
         self._started_catcher = msgext.SingleCatcher(
-            msgftr.Or(procabc.SERVER_PROCESS_STOPPING_FILTER, msg_filter), timeout)
+            msgftr.Or(SERVER_PROCESS_STOPPING_FILTER, msg_filter), timeout)
         self._mailer.register(self._started_catcher)
         return self
 
@@ -188,8 +166,8 @@ class ServerProcess:
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE)
-            stderr = _PipeOutLineProducer(self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr)
-            stdout = _PipeOutLineProducer(self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout)
+            stderr = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr)
+            stdout = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
             if not self._pipeinsvc:
                 PipeInLineService(self._mailer, self._process.stdin)
@@ -223,69 +201,3 @@ class ServerProcess:
             await funcutil.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
             self._process = None
-
-
-class JobProcess(msgabc.AbcSubscriber):
-    STDERR_LINE = 'JobProcess.StdErrLine'
-    STDOUT_LINE = 'JobProcess.StdOutLine'
-    START = 'JobProcess.Start'
-    STATE_STARTED = 'JobProcess.StateStarted'
-    STATE_EXCEPTION = 'JobProcess.StateException'
-    STATE_COMPLETE = 'JobProcess.StateComplete'
-    JOB_DONE = (STATE_EXCEPTION, STATE_COMPLETE)
-    FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
-    FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
-    FILTER_JOB_DONE = msgftr.NameIn(JOB_DONE)
-
-    @staticmethod
-    async def start_job(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
-            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, JobProcess.START, command)
-        return response.data()
-
-    @staticmethod
-    async def run_job(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
-            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        messenger = msgext.SynchronousMessenger(mailer, catcher=msgext.SingleCatcher(JobProcess.FILTER_JOB_DONE))
-        response = await messenger.request(source, JobProcess.START, command)
-        return response.data()
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.NameIs(JobProcess.START))
-        self._mailer = mailer
-
-    async def handle(self, message):
-        source, command = message.source(), message.data()
-        if isinstance(command, dict):
-            command = util.get('command', command, util.get('script', command))
-        if not (isinstance(command, str) or util.iterable(command)):
-            self._mailer.post(source, JobProcess.STATE_EXCEPTION, Exception('Invalid job request'), message)
-            return None
-        stderr, stdout, replied = None, None, False
-        try:
-            if isinstance(command, str):
-                process = await asyncio.create_subprocess_shell(
-                    command,
-                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            else:
-                process = await asyncio.create_subprocess_exec(
-                    command[0], *command[1:],
-                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = _PipeOutLineProducer(self._mailer, source, JobProcess.STDERR_LINE, process.stderr)
-            stdout = _PipeOutLineProducer(self._mailer, source, JobProcess.STDOUT_LINE, process.stdout)
-            replied = self._mailer.post(source, JobProcess.STATE_STARTED, process, message)
-            rc = await process.wait()
-            if rc != 0:
-                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(process, rc))
-            self._mailer.post(source, JobProcess.STATE_COMPLETE, process)
-        except Exception as e:
-            self._mailer.post(source, JobProcess.STATE_EXCEPTION, e, None if replied else message)
-        finally:
-            await funcutil.silently_cleanup(stdout)
-            await funcutil.silently_cleanup(stderr)
-        return None

@@ -11,6 +11,17 @@
   let pwd = root;
   let paths = [];
 
+  let lastState = $serverStatus.state;
+  $: serverStateChange($serverStatus.state);
+  function serverStateChange(serverState) {
+    if (lastState === 'STARTED' && serverState != 'STARTED') {
+      update(pwd);
+    } else if (lastState != 'STARTED' && serverState === 'STARTED') {
+      update(pwd);
+    }
+    lastState = serverState;
+  }
+
 	onMount(rootDirectory);
 
 	function rootDirectory() {
@@ -82,14 +93,6 @@
       </tr>
     </thead>
     <tbody>
-      {#if pwd === root && paths.length === 0}
-        <tr>
-          <td></td>
-          <td><button name="reload" class="button is-small" on:click={rootDirectory}>RELOAD</button></td>
-          <td></td>
-          {#if allowDelete}<td></td>{/if}
-        </tr>
-      {/if}
       {#if pwd != root}
         <tr>
           <td><button name="root" class="button is-small" on:click={rootDirectory}>ROOT</button></td>

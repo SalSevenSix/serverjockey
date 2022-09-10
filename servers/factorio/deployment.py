@@ -3,7 +3,7 @@ from core.util import util, tasks, io, pack, aggtrf
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
-from core.proc import proch
+from core.proc import proch, jobh
 from servers.factorio import messaging as msg
 
 
@@ -35,7 +35,7 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
-        self._mailer.register(proch.JobProcess(self._mailer))
+        self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(
@@ -168,7 +168,7 @@ class Deployment:
     async def _create_map(self):
         await io.delete_directory(self._save_dir)
         await io.create_directory(self._save_dir)
-        await proch.JobProcess.run_job(self._mailer, self, (
+        await jobh.JobProcess.run_job(self._mailer, self, (
             self._executable,
             '--create', self._map_file,
             '--map-gen-settings', self._map_gen_settings,

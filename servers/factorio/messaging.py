@@ -1,6 +1,6 @@
 from core.util import util
 from core.msg import msgabc, msgftr
-from core.proc import proch, prcext
+from core.proc import proch, jobh, prcext
 from core.system import svrsvc
 
 SERVER_STARTED_FILTER = msgftr.And(
@@ -11,7 +11,7 @@ DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     proch.ServerProcess.FILTER_STDERR_LINE,
-    proch.JobProcess.FILTER_STDOUT_LINE,
+    jobh.JobProcess.FILTER_STDOUT_LINE,
     msgftr.NameIs(DEPLOYMENT_MSG))
 
 
