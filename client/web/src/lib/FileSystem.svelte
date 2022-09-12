@@ -40,6 +40,11 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       }).then(function(json) {
+        json.sort(function(a, b) {
+          let typeCompare = b.type.localeCompare(a.type);
+          if (typeCompare != 0) return typeCompare;
+          return b.name.localeCompare(a.name);
+        });
         paths = json;
         pwd = url;
       })

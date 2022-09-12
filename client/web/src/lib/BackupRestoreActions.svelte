@@ -7,7 +7,7 @@
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
-  let logText = '';
+  let logText = '*** Please wait for Backups and Uploads to complete before closing section or leaving page ***';
   let processing = false;
   let paths = [];
   let uploadFiles = [];
@@ -26,9 +26,8 @@
       })
       .then(function(json) {
         json.sort(function(a, b) {
-          return a.name.localeCompare(b.name);
+          return b.name.localeCompare(a.name);
         });
-        json.reverse();
         paths = json;
       })
       .catch(function(error) { notifyError('Failed to load Backup File List.'); })
@@ -149,16 +148,18 @@
           <td>{humanFileSize(path.size)}</td>
           <td><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
           <td class="buttons">
-            <button disabled={$serverStatus.running || processing}
-                    name="{path.name}" class="button is-warning" on:click={restoreBackup}>Restore</button>
-            <button disabled={$serverStatus.running || processing}
-                    name="{path.name}" class="button is-danger" on:click={deleteBackup}>Delete</button>
+            <button name="{path.name}" class="button is-warning"
+                    disabled={$serverStatus.running || processing} on:click={restoreBackup}>Restore</button>
+            <button name="{path.name}" class="button is-danger"
+                    disabled={processing} on:click={deleteBackup}>Delete</button>
           </td>
         </tr>
       {/each}
     </tbody>
   </table>
+</div>
 
+<div class="block">
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
       <button id="upload-file" disabled={processing}
@@ -184,7 +185,7 @@
   <div class="field">
     <label for="backups-log" class="label">Backups Log</label>
     <div class="control pr-6">
-      <textarea id="backups-log" class="textarea" readonly>{logText}</textarea>
+      <textarea id="backups-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
     </div>
   </div>
 </div>

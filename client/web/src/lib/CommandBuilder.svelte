@@ -94,7 +94,9 @@
       {/each}
       <div class="field">
         <div class="control">
-          <button id="send" name="send" class="button is-primary" disabled={!$serverStatus.running} on:click={send}>Send</button>
+          <button id="send" name="send" class="button is-primary"
+                  disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'}
+                  on:click={send}>Send</button>
         </div>
       </div>
     {/if}

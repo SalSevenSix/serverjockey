@@ -10,7 +10,7 @@
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
-  let logText = '';
+  let logText = '*** Please wait for Install process to complete before closing section or leaving page ***';
   let qualifier = '';
   let installing = false;
 
@@ -74,7 +74,7 @@
     <div class="field">
       <label for="install-runtime-log" class="label">Install Log</label>
       <div class="control pr-6">
-        <textarea id="install-runtime-log" class="textarea" readonly>{logText}</textarea>
+        <textarea id="install-runtime-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
       </div>
     </div>
   {:else}

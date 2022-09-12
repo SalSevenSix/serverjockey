@@ -13,6 +13,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
         proch.ServerProcess.STATE_START: 'START',
         proch.ServerProcess.STATE_STARTING: 'STARTING',
         proch.ServerProcess.STATE_STARTED: 'STARTED',
+        proch.ServerProcess.STATE_STOPPING: 'STOPPING',
         proch.ServerProcess.STATE_TIMEOUT: 'TIMEOUT',
         proch.ServerProcess.STATE_TERMINATED: 'TERMINATED',
         proch.ServerProcess.STATE_EXCEPTION: 'EXCEPTION',
@@ -60,7 +61,7 @@ class ServerProcessStopper:
         process = self._process_subscriber.get()
         if not process:
             return
-        self._mailer.post(self, proch.SERVER_PROCESS_STOPPING, process.pid)
+        self._mailer.post(self, proch.ServerProcess.STATE_STOPPING, process)
         catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATE_DOWN, self._timeout)
         self._mailer.register(catcher)
         if self._quit_command:
