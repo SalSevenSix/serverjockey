@@ -16,6 +16,7 @@ class Deployment:
         self._runtime_dir = self._home_dir + '/runtime'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
         self._current_log = self._runtime_dir + '/factorio-current.log'
+        self._autosave_dir = self._runtime_dir + '/saves'
         self._mods_dir = self._runtime_dir + '/mods'
         self._server_settings_def = self._runtime_dir + '/data/server-settings.example.json'
         self._map_settings_def = self._runtime_dir + '/data/map-settings.example.json'
@@ -164,6 +165,8 @@ class Deployment:
     async def ensure_map(self):
         if not await io.file_exists(self._map_file):
             await self._create_map()
+        if not await io.symlink_exists(self._autosave_dir):
+            await io.create_symlink(self._autosave_dir, self._save_dir)
 
     async def _create_map(self):
         await io.delete_directory(self._save_dir)

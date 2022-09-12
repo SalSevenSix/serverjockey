@@ -38,6 +38,9 @@ async def unpack_directory(archive: str, unpack_dir: str, logger=None):
         logger.info('START Unpack Directory')
     await _unpack_archive(archive, unpack_dir)
     if logger:
+        logger.info('SET file permissions')
+    await io.auto_chmod(unpack_dir)
+    if logger:
         logger.info('END Unpack Directory')
 
 
