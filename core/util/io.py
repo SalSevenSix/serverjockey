@@ -85,7 +85,8 @@ async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typ
             size = await file_size(file)
         elif await aioos.path.isdir(file):
             ftype = 'directory'
-        updated = time.ctime(await aioos.path.getmtime(file))
+        updated = time.localtime(await aioos.path.getmtime(file))
+        updated = time.strftime('%Y-%m-%d %H:%M:%S', updated)
         entry.update({'type': ftype, 'name': name, 'updated': updated})
         if size > -1:
             entry.update({'size': size})

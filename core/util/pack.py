@@ -2,7 +2,8 @@ import shutil
 import lzma
 import tarfile
 import gzip
-from core.util import util, funcutil, io
+import time
+from core.util import funcutil, io
 
 _make_archive = funcutil.to_async(shutil.make_archive)
 _unpack_archive = funcutil.to_async(shutil.unpack_archive)
@@ -17,7 +18,10 @@ async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -
     if archives_dir[-1] == '/':
         archives_dir = archives_dir[:-1]
     assert await io.directory_exists(archives_dir)
-    archive = archives_dir + '/' + unpacked_dir.split('/')[-1] + '-' + str(util.now_millis())
+    archive = archives_dir + '/' + unpacked_dir.split('/')[-1]
+    now = time.localtime(time.time())
+    archive += '-' + time.strftime('%Y%m%d', now)
+    archive += '-' + time.strftime('%H%M%S', now)
     if logger:
         logger.info('START Archive Directory')
     result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)

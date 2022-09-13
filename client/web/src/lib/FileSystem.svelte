@@ -100,25 +100,33 @@
     <tbody>
       {#if pwd != root}
         <tr>
-          <td><button name="root" class="button is-small" on:click={rootDirectory}>ROOT</button></td>
-          <td><button name="up" class="button is-small" on:click={upDirectory}>UP</button> {pwd.substring(root.length)}</td>
-          <td></td>
+          <td>
+            <button name="root" class="button" title="ROOT" on:click={rootDirectory}>
+              &nbsp;<i class="fa fa-angle-double-up"></i>&nbsp;</button>
+          </td>
+          <td colspan="2">
+            <button name="up" class="button" title="UP" on:click={upDirectory}>
+              &nbsp;<i class="fa fa-level-up-alt"></i>&nbsp;</button>
+            {pwd.substring(root.length)}
+          </td>
           {#if allowDelete}<td></td>{/if}
         </tr>
       {/if}
       {#each paths as path}
         <tr>
-          <td>{path.type === 'file' ? 'file' : 'dir'}</td>
           {#if path.type === 'directory'}
+            <td><i class="fa fa-folder fa-2x"></i></td>
             <td><a href={'#'} name="{path.url}" on:click|preventDefault={openDirectory}>{path.name}</a></td>
           {/if}
           {#if path.type === 'file'}
+            <td><i class="fa fa-file-alt fa-2x"></i></td>
             <td><a href={'#'} name="{path.url}" on:click|preventDefault={openFile}>{path.name}</a></td>
           {/if}
           <td>{humanFileSize(path.size)}</td>
           {#if allowDelete}
             <td class="buttons">
-              <button disabled={$serverStatus.running} name="{path.url}" class="button is-danger" on:click={deletePath}>Delete</button>
+              <button name="{path.url}" class="button is-danger" title="Delete"
+                      disabled={$serverStatus.running} on:click={deletePath}><i class="fa fa-trash"></i></button>
             </td>
           {/if}
         </tr>

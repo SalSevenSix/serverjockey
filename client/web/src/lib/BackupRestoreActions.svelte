@@ -148,10 +148,12 @@
           <td>{humanFileSize(path.size)}</td>
           <td><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
           <td class="buttons">
-            <button name="{path.name}" class="button is-warning"
-                    disabled={$serverStatus.running || processing} on:click={restoreBackup}>Restore</button>
-            <button name="{path.name}" class="button is-danger"
-                    disabled={processing} on:click={deleteBackup}>Delete</button>
+            <button name="{path.name}" class="button is-warning" title="Restore"
+                    disabled={$serverStatus.running || processing} on:click={restoreBackup}>
+                    <i class="fa fa-undo"></button>
+            <button name="{path.name}" class="button is-danger" title="Delete"
+                    disabled={processing} on:click={deleteBackup}>
+                    <i class="fa fa-trash"></i></button>
           </td>
         </tr>
       {/each}
@@ -168,7 +170,7 @@
     <label class="file-label">
       <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
       <span class="file-cta">
-        <span class="file-icon"><i class="far fa-upload"></i></span>
+        <span class="file-icon"><i class="fa fa-upload"></i></span>
         <span class="file-label">Choose a file…</span>
       </span>
       <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected.'}</span>
