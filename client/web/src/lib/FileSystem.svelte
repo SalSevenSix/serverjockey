@@ -11,12 +11,19 @@
   let pwd = root;
   let paths = [];
 
+  let lastRunning = $serverStatus.running;
+  $: serverRunningChange($serverStatus.running);
+  function serverRunningChange(running) {
+    if (lastRunning === true && running === false) {
+      update(pwd);
+    }
+    lastRunning = running;
+  }
+
   let lastState = $serverStatus.state;
   $: serverStateChange($serverStatus.state);
   function serverStateChange(serverState) {
-    if (lastState === 'STARTED' && serverState != 'STARTED') {
-      update(pwd);
-    } else if (lastState != 'STARTED' && serverState === 'STARTED') {
+    if (lastState != 'STARTED' && serverState === 'STARTED') {
       update(pwd);
     }
     lastState = serverState;

@@ -7,6 +7,7 @@
   export let name;
   export let path;
   let updating = false;
+  let originalText = '';
   let configText = '';
 
 	onMount(reload);
@@ -31,18 +32,22 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
       })
-      .then(function(text) { configText = text; })
+      .then(function(text) {
+        originalText = text;
+        configText = text;
+      })
       .catch(function(error) { notifyError('Failed to load ' + name); })
       .finally(function() { updating = false; });
 	}
 
-	function update() {
+	function save() {
 	  updating = true;
     let request = newPostRequest('text/plain');
     request.body = configText;
     fetch($instance.url + path, request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
+        originalText = configText;
         notifyInfo(name + ' saved.');
       })
       .catch(function(error) { notifyError('Failed to update ' + name); })
@@ -54,16 +59,21 @@
 <div class="block">
   <div class="field">
     <label for="configfile-text" class="label"><a href={'#'} on:click|preventDefault={openConfigFile}>{name}</a></label>
+    <slot />
     <div class="control pr-6">
       <textarea id="configfile-text" class="textarea" bind:value={configText}></textarea>
     </div>
   </div>
   <div class="field">
     <div class="control buttons">
-      <button disabled={updating} name="editor" class="button" on:click={openEditor}>Editor</button>
-      <button disabled={updating} name="clear" class="button is-danger" on:click={clear}>Clear</button>
-      <button disabled={updating} name="reload" class="button is-warning" on:click={reload}>Reload</button>
-      <button disabled={updating} name="update" class="button is-primary" on:click={update}>Update</button>
+      <button disabled={updating} on:click={openEditor}
+              name="editor" class="button">Editor</button>
+      <button disabled={updating || !configText} on:click={clear}
+              name="clear" class="button is-danger">Clear</button>
+      <button disabled={updating || originalText === configText} on:click={reload}
+              name="reload" class="button is-warning">Reload</button>
+      <button disabled={updating || originalText === configText} on:click={save}
+              name="save" class="button is-primary">Save</button>
     </div>
   </div>
 </div>

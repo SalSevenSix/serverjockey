@@ -112,6 +112,7 @@ _CONTENT_TYPES = {
     'text': CONTENT_TYPE_TEXT_PLAIN,
     'log': CONTENT_TYPE_TEXT_PLAIN,
     'lua': CONTENT_TYPE_TEXT_PLAIN,
+    'acf': CONTENT_TYPE_TEXT_PLAIN,
     'json': CONTENT_TYPE_APPLICATION_JSON,
     'html': ContentTypeImpl('text/html'),
     'xml': ContentTypeImpl('application/xml'),

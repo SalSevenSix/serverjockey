@@ -9,11 +9,35 @@ from servers.factorio import messaging as msg
 
 class Deployment:
 
+    @staticmethod
+    def _default_cmdargs_settings():
+        return {
+            '_comment_port': 'Port for the Factorio server to use. Default 34197 used if null.',
+            'port': None,
+            '_comment_rcon-port': 'Optional RCON port.',
+            'rcon-port': None,
+            '_comment_rcon-password': 'RCON password. Required if RCON port specified.',
+            'rcon-password': None,
+            '_comment_use-server-whitelist': 'If the whitelist should be used.',
+            'use-server-whitelist': False,
+            '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer and inform Factorio.com about ban/unban commands.',
+            'use-authserver-bans': False
+        }
+
+    @staticmethod
+    def _default_mods_list():
+        return {
+            'service-username': None,
+            'service-token': None,
+            'mods': [{'name': 'base', 'enabled': True}]
+        }
+
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
         self._home_dir = context.config('home')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
+        self._runtime_metafile = self._runtime_dir + '/data/changelog.txt'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
         self._current_log = self._runtime_dir + '/factorio-current.log'
         self._autosave_dir = self._runtime_dir + '/saves'
@@ -64,7 +88,9 @@ class Deployment:
             .append('banlist', httpext.FileSystemHandler(self._server_banlist)) \
             .pop() \
             .push('deployment') \
+            .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
             .append('install-runtime', _InstallRuntimeHandler(self, self._mailer)) \
+            .append('wipe-runtime', _WipeHandler(self, self._runtime_dir)) \
             .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
             .append('wipe-world-config', _WipeHandler(self, self._config_dir)) \
             .append('wipe-world-save', _WipeHandler(self, self._save_dir)) \
@@ -122,13 +148,11 @@ class Deployment:
         if not await io.file_exists(self._server_adminlist):
             await io.write_file(self._server_adminlist, '[]')
         if not await io.file_exists(self._cmdargs_settings):
-            await io.write_file(self._cmdargs_settings, util.obj_to_json({
-                'port': None, 'rcon-port': None, 'rcon-password': None,
-                'use-server-whitelist': False, 'use-authserver-bans': False}, pretty=True))
+            await io.write_file(
+                self._cmdargs_settings, util.obj_to_json(Deployment._default_cmdargs_settings(), pretty=True))
         if not await io.file_exists(self._mods_list):
-            await io.write_file(self._mods_list, util.obj_to_json({
-                'service-username': None, 'service-token': None,
-                'mods': [{'name': 'base', 'enabled': True}]}, pretty=True))
+            await io.write_file(
+                self._mods_list, util.obj_to_json(Deployment._default_mods_list(), pretty=True))
 
     async def install_runtime(self):
         url = 'https://factorio.com/get-download/stable/headless/linux64'

@@ -12,3 +12,4 @@
     <InstanceList />
   </div>
 </div>
+<hr />

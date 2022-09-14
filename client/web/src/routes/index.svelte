@@ -13,3 +13,4 @@
 {:else}
   <Login />
 {/if}
+<hr />

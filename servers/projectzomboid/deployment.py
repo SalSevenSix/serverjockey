@@ -15,6 +15,7 @@ class Deployment:
         self._home_dir = context.config('home')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
+        self._runtime_metafile = self._runtime_dir + '/steamapps/appmanifest_380870.acf'
         self._executable = self._runtime_dir + '/start-server.sh'
         self._jvm_config_file = self._runtime_dir + '/ProjectZomboid64.json'
         self._world_dir = self._home_dir + '/world'
@@ -57,7 +58,10 @@ class Deployment:
             aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
             .push('deployment') \
+            .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
             .append('install-runtime', _InstallRuntimeHandler(self._mailer, self._runtime_dir)) \
+            .append('wipe-runtime', httpext.MessengerHandler(
+                self._mailer, _DeploymentWiper.REQUEST, {'path': self._runtime_dir})) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
                 {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
