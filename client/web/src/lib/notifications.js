@@ -27,6 +27,11 @@ export function notifyInfo(message, retval = null) {
   return retval;
 }
 
+export function notifyWarning(message, retval = null) {
+  notify('is-warning', message);
+  return retval;
+}
+
 export function notifyError(message, retval = null) {
   notify('is-danger', message);
   return retval;

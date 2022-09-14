@@ -67,7 +67,7 @@
   <div class="field">
     <div class="control buttons">
       <button disabled={updating} on:click={openEditor}
-              name="editor" class="button">Editor</button>
+              name="editor" class="button">&nbsp;<i class="fa fa-expand-arrows-alt"></i>&nbsp;</button>
       <button disabled={updating || !configText} on:click={clear}
               name="clear" class="button is-danger">Clear</button>
       <button disabled={updating || originalText === configText} on:click={reload}

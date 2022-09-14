@@ -1,6 +1,6 @@
 <script>
   import { onDestroy } from 'svelte';
-  import { notifyInfo, notifyError } from '$lib/notifications';
+  import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { ReverseRollingLog } from '$lib/util';
   import { instance, serverStatus, newPostRequest, SubscriptionHelper, openFileInNewTab } from '$lib/serverjockeyapi';
@@ -19,7 +19,9 @@
 	});
 
   function runtimeMeta() {
-    openFileInNewTab($instance.url + '/deployment/runtime-meta', 'Meta not found. No runtime installed.');
+    openFileInNewTab($instance.url + '/deployment/runtime-meta', function(error) {
+      notifyWarning('Meta not found. No runtime installed.');
+    });
   }
 
   function wipeRuntime() {
@@ -102,6 +104,6 @@
       </div>
     </div>
   {:else}
-    <p>Please be patient during install. Button will be enabled again when complete.</p>
+    <p>Please be patient during install. Buttons will be enabled again when complete.</p>
   {/if}
 </div>

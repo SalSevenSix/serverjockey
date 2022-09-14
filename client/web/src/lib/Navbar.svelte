@@ -1,8 +1,10 @@
 <script>
   let menuOpen = false;
+
 	function menuToggle() {
 	  menuOpen = !menuOpen;
 	}
+
 	function menuClose() {
 	  menuOpen = false;
 	}
@@ -15,7 +17,8 @@
       <img src="/assets/rubiks-cube-white.svg" alt="ZomBox" width="28" height="28" />
       <span class="ml-1 is-size-5 has-text-weight-bold">ZomBox</span>
     </div>
-    <a href={'#'} role="button" on:click={menuToggle} class:is-active={menuOpen} class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
+    <a href={'#'} role="button" on:click={menuToggle} class:is-active={menuOpen}
+       class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>

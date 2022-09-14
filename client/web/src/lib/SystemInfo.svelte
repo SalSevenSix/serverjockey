@@ -49,7 +49,7 @@
         <tr><td>Used</td><td>{humanFileSize(info.memory.used)}</td></tr>
         <tr><td>Available</td><td>{humanFileSize(info.memory.available)}</td></tr>
         <tr><td>Free</td><td>{humanFileSize(info.memory.free)}</td></tr>
-        <tr><td>Percent</td><td>{info.memory.percent}</td></tr>
+        <tr><td>Usage</td><td>{info.memory.percent}%</td></tr>
       </tbody>
     </table>
   </div>
@@ -57,12 +57,12 @@
     <table class="table">
       <tbody>
         <tr><td class="has-text-weight-bold">CPU</td><td></td></tr>
-        <tr><td>Percent</td><td>{info.cpu.percent}</td></tr>
+        <tr><td>Load</td><td>{info.cpu.percent}%</td></tr>
         <tr><td class="has-text-weight-bold">Disk</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
         <tr><td>Used</td><td>{humanFileSize(info.disk.used)}</td></tr>
         <tr><td>Available</td><td>{humanFileSize(info.disk.free)}</td></tr>
-        <tr><td>Percent</td><td>{info.disk.percent}</td></tr>
+        <tr><td>Usage</td><td>{info.disk.percent}%</td></tr>
       </tbody>
     </table>
   </div>

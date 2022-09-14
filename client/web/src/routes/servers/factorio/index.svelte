@@ -49,7 +49,7 @@
         <ConfigFile name="Mods List" path="/config/modslist">
           <p>
             Service username and token are required to download mods. You can find these credentials
-            in your player-data.json file in the Factorio folder in your profile.
+            in your player-data.json file in your Factorio profile.
             i.e. C:\Users\&lt;YOU&gt;\AppData\Roaming\Factorio\player-data.json
           </p>
         </ConfigFile>
