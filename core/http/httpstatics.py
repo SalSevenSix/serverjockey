@@ -56,15 +56,7 @@ class _Loader:
         try:
             data = await io.pkg_load('web', path)
             return _Resource(httpcnt.ContentTypeImpl.lookup(path), data) if data else None
-        except IsADirectoryError:
-            if not path.endswith('.html'):
-                return await self.load(path + '/')
-            return None
-        except FileNotFoundError:
-            if path.endswith('/index.html'):
-                return await self.load('/'.join(path.split('/')[:-1]) + '.html')
-            return None
-        except OSError:
+        except (IsADirectoryError, FileNotFoundError, OSError):
             if path.endswith('/index.html'):
                 return await self.load('/'.join(path.split('/')[:-1]) + '.html')
             if path.endswith('.html'):

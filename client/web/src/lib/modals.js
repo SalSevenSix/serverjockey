@@ -1,7 +1,12 @@
 import { openModal } from 'svelte-modals';
+import LoginModal from '$lib/LoginModal.svelte';
 import ConfirmModal from '$lib/ConfirmModal.svelte';
 import TextAreaModal from '$lib/TextAreaModal.svelte';
 
+
+export function loginModal() {
+  openModal(LoginModal);
+}
 
 export function confirmModal(messageText, confirmCallback) {
   openModal(ConfirmModal, { message: messageText, onConfirm: confirmCallback });

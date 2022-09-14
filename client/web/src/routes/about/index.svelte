@@ -1,7 +1,7 @@
 
 <div class="columns">
   <div class="column is-one-third">
-    <figure class="pl-5 pr-6"><img src="/assets/cube-ornate.svg" alt="ServerJockey box" /></figure>
+    <figure class="pl-5 pr-6"><img src="/assets/rubiks-cube-white.svg" alt="ServerJockey box" /></figure>
   </div>
   <div class="column content">
     <h2 class="title is-3 mt-2">About</h2>

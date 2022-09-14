@@ -8,7 +8,7 @@
   let subs = new SubscriptionHelper();
 
 	onMount(function() {
-	  if (!$instance.identity) return goto('/');
+	  if (!$instance.identity) return goto('/servers');
     fetch($instance.url + '/server', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);

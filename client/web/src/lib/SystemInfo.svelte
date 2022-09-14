@@ -38,7 +38,7 @@
 
 <div class="columns">
   <div class="column">
-    <figure class="pl-5 pr-6"><img src="/assets/cube-ornate.svg" alt="Banner" /></figure>
+    <figure class="pl-5 pr-6"><img src="/assets/rubiks-cube-white.svg" alt="Banner" /></figure>
   </div>
   <div class="column is-one-quarter">
     <table class="table">
