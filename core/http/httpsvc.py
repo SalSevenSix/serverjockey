@@ -1,5 +1,6 @@
 import logging
 import re
+import ssl
 import aiohttp
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 from core.util import util, pack, io
@@ -34,11 +35,17 @@ class HttpService:
     def run(self):
         access_logger = logging.getLogger('aiohttp.access')
         access_logger.addFilter(_AccessLogFilter())
+        ssl_context = None
+        if self._context.config('scheme') == 'https':
+            # noinspection PyTypeChecker
+            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            ssl_context.load_cert_chain(self._context.config('sslcert'), self._context.config('sslkey'))
         web.run_app(
             self._app,
             host=self._context.config('host'),
             port=self._context.config('port'),
             access_log=access_logger,
+            ssl_context=ssl_context,
             shutdown_timeout=100.0)
 
     # noinspection PyUnusedLocal

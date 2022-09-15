@@ -102,15 +102,15 @@ def urlsafe_b64decode(value: str) -> str:
 
 
 def build_url(
-        host: typing.Optional[str] = None,
+        scheme: str = 'http',
+        host: str = 'localhost',
         port: int = 80,
         path: typing.Optional[str] = None) -> str:
-    parts = ['http://', str(host) if host else 'localhost']
+    parts = [scheme, '://', host]
     if port != 80:
         parts.append(':')
         parts.append(str(port))
     if path:
-        path = str(path)
         if not path.startswith('/'):
             parts.append('/')
         parts.append(path)

@@ -13,11 +13,12 @@ class ClientFile:
         return self._clientfile
 
     async def write(self):
+        scheme = self._context.config('scheme')
         host = self._context.config('host')
         host = host if host else 'localhost'
         port = self._context.config('port')
         data = util.obj_to_json({
-            'SERVER_URL': util.build_url(host, port),
+            'SERVER_URL': util.build_url(scheme, host, port),
             'SERVER_TOKEN': self._context.config('secret')
         })
         await io.write_file(self._clientfile, data)
@@ -28,4 +29,4 @@ class ClientFile:
         try:
             await io.delete_file(self._clientfile)
         except Exception:
-            pass  # ignore
+            pass

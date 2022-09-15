@@ -11,18 +11,15 @@ from core.http import httpabc, httpsvc
 from core.system import system
 
 
-def _get_token() -> str:
-    token = secrets.token_hex(5)
-    path = '/tmp/serverjockey.token'
-    if not os.path.exists(path):
-        return token
-    with open(path) as file:
-        token = file.readline().strip()
-    return token
+def _ssl_config(home: str) -> tuple:
+    sslcert, sslkey = home + '/serverjockey.crt', home + '/serverjockey.key'
+    if os.path.isfile(sslcert) and os.path.isfile(sslkey):
+        return 'https', sslcert, sslkey
+    return 'http', None, None
 
 
 def _create_context(args: typing.Collection) -> contextsvc.Context:
-    p = argparse.ArgumentParser(description='Start serverjockey.')
+    p = argparse.ArgumentParser(description='Start ServerJockey.')
     p.add_argument('--debug', action='store_true',
                    help='Debug mode')
     p.add_argument('--host', type=str,
@@ -37,9 +34,11 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
                    help='Log file to use, relative to "home" unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
+    home = os.getcwd() if args.home == '.' else args.home
+    scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
-        debug=args.debug, secret=_get_token(),
-        home=os.getcwd() if args.home == '.' else args.home,
+        debug=args.debug, home=home, secret=secrets.token_hex(5),
+        scheme=scheme, sslcert=sslcert, sslkey=sslkey,
         logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 
