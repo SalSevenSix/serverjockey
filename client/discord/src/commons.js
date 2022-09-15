@@ -57,9 +57,9 @@ exports.getconfig = function($) {
     let fpath = '/tmp/' + fname;
     fs.writeFile(fpath, body, function(error) {
       if (error) return logger.error(error);
-      $.message.channel.send({ files: [{ attachment: fpath, name: fname }] });
+      $.message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+        .finally(function() { fs.unlink(fpath, logger.error); });
     });
-    // TODO Delete file if possible
   });
 }
 

@@ -3,7 +3,7 @@
   import { notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
 	import { humanFileSize } from '$lib/util';
-	import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
+	import { instance, serverStatus, newGetRequest, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let allowDelete = false;
 
@@ -70,15 +70,9 @@
   }
 
 	function openFile() {
-    fetch(this.name, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.blob();
-      })
-      .then(function(blob) {
-        window.open(window.URL.createObjectURL(blob)).focus();
-      })
-      .catch(function(error) { rootDirectory(); });
+    openFileInNewTab(this.name, function(error) {
+      rootDirectory();
+    });
   }
 
   function deletePath() {

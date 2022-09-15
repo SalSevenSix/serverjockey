@@ -123,7 +123,7 @@
     while (processing) {
       logText = 'Uploading file  ' + rotators[index];
       index += 1;
-      if (index > 3) { index = 0; };
+      if (index > 3) { index = 0; }
       await sleep(1000);
     }
     logText = '';

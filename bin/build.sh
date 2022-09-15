@@ -89,7 +89,7 @@ cd $HOME_DIR || exit 1
 python3 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3" -m "core.system.bootstrap:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz"
 [ $? -eq 0 ] || exit 1
 
-echo "Downloading Serverlink dependencies"
+echo "Downloading ServerLink dependencies"
 cd $SERVERLINK_DIR || exit 1
 rm -rf test* > /dev/null 2>&1
 npm ci

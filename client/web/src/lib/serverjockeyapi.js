@@ -33,7 +33,7 @@ export function newPostRequest(ct = 'application/json') {
   };
 }
 
-export function openFileInNewTab(url, errorCallback = null) {
+export function openFileInNewTab(url, errorCallback=null) {
   fetch(url, newGetRequest())
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);

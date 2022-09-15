@@ -1,5 +1,4 @@
 <script>
-  import { goto } from '$app/navigation';
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { baseurl, instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
@@ -7,8 +6,10 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
 
-  instance.set({ url: baseurl + '/instances/serverlink' });  // used by ServerControls
-  serverStatus.set({});  // used by ServerControls
+  // used by ServerControls
+  instance.set({ url: baseurl + '/instances/serverlink' });
+  serverStatus.set({});
+
   let subs = new SubscriptionHelper();
 
 	onMount(function() {
@@ -18,15 +19,11 @@
         return response.json();
       })
       .then(function(json) {
-        if (json.state === 'EXCEPTION') {
-          goto('/setup');
-        } else {
-          serverStatus.set(json);
-          subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
-            serverStatus.set(data);
-            return true;
-          });
-        }
+        serverStatus.set(json);
+        subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
+          serverStatus.set(data);
+          return true;
+        });
       })
       .catch(function(error) { notifyError('Failed to load ServerLink Status.'); });
 	});

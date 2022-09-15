@@ -108,7 +108,7 @@ exports.MessageHttpTool = class MessageHttpTool {
             .then(function() { message.react('✅'); })
             .catch(logger.error);
           message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-            .then(function() { fs.unlink(fpath, logger.error); });
+            .finally(function() { fs.unlink(fpath, logger.error); });
         });
     });
   }
