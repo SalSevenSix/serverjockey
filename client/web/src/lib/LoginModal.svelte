@@ -22,7 +22,7 @@
         }
         closeModal();
       })
-      .catch(function(error) { notifyError('Wrong.'); });
+      .catch(function(error) { notifyError('Wrong. Please wait 5 seconds before trying again.'); });
 	}
 
 	onMount(function() {

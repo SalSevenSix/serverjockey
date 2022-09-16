@@ -107,9 +107,10 @@ class _Subscriber(msgabc.AbcSubscriber):
         self._aggregator = selector.aggregator
         self._collect_filter = selector.msg_filter
         self._completed_filter = selector.completed_filter
+        self._purge_overflow = selector.aggregator is not None
         self._poll_timeout = 60.0
         self._inactivity_timeout = 120.0
-        self._queue = asyncio.Queue(maxsize=10000)
+        self._queue = asyncio.Queue(maxsize=1000)
         self._time_last_activity = time.time()
 
     def handle(self, message):
@@ -123,6 +124,9 @@ class _Subscriber(msgabc.AbcSubscriber):
             return True
         # noinspection PyBroadException
         try:
+            if self._purge_overflow and self._queue.full():
+                self._queue.get_nowait()
+                self._queue.task_done()
             self._queue.put_nowait(message)
             return None
         except Exception:
@@ -169,7 +173,7 @@ class _Subscriber(msgabc.AbcSubscriber):
 
     async def _get_all(self) -> typing.List[msgabc.Message]:
         messages = []
-        if self._queue.qsize() == 0:
+        if self._queue.empty():
             message = await self._get_one()
             if message is not None:
                 messages.append(message)
