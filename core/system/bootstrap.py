@@ -3,7 +3,6 @@ import argparse
 import sys
 import os
 import typing
-import secrets
 from core.util import util, funcutil
 from core.msg import msgext
 from core.context import contextsvc
@@ -37,7 +36,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     home = os.getcwd() if args.home == '.' else args.home
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
-        debug=args.debug, home=home, secret=secrets.token_hex(5),
+        debug=args.debug, home=home, secret=util.generate_token(10),
         scheme=scheme, sslcert=sslcert, sslkey=sslkey,
         logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)

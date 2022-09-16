@@ -11,14 +11,14 @@ class Statics:
     def __init__(self, context: contextsvc.Context):
         self._loader = _Loader() if context.is_debug() else _CacheLoader()
 
-    async def handle(self, headers: httpcnt.HeadersTool, request: webabc.Request) -> web.Response:
+    async def handle(self, request: webabc.Request) -> web.Response:
         resource = await self._loader.load(request.path)
         if resource is None:
             raise err.HTTPNotFound
         response = web.Response()
         response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
         response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')  # One hour
-        if headers.accepts_encoding(httpcnt.GZIP) and await resource.compress():
+        if httpcnt.HeadersTool(request).accepts_encoding(httpcnt.GZIP) and await resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()
         else:

@@ -67,20 +67,47 @@ class ContentTypeImpl(httpabc.ContentType):
         return result[0], result[1][len(_CHARSET):]
 
 
+class SecurityService:
+
+    def __init__(self, secret: str):
+        self._secret = secret
+        self._failures = {}
+
+    def check(self, request: webabc.Request) -> bool:
+        remote, now = request.remote, util.now_millis()
+        last_failure = util.get(remote, self._failures)
+        if last_failure:
+            if (now - last_failure) < 5000:
+                self._failures[remote] = now
+                raise httpabc.ResponseBody.UNAUTHORISED
+            del self._failures[remote]
+        secret = HeadersTool(request).get(X_SECRET)
+        if secret is None:
+            secret = request.cookies.get('secret')
+        if secret is None:
+            return False
+        if secret == self._secret:
+            return True
+        self._clean_failures(now)
+        self._failures[remote] = now
+        raise httpabc.ResponseBody.UNAUTHORISED
+
+    def _clean_failures(self, now: int):
+        delete_keys = []
+        for key, value in self._failures.items():
+            if (now - value) >= 5000:
+                delete_keys.append(key)
+        for key in delete_keys:
+            del self._failures[key]
+
+
 class HeadersTool:
 
     def __init__(self, request: webabc.Request):
-        self._request = request
         self._headers = request.headers
 
     def get(self, key: str) -> str:
         return self._headers.getone(key) if key in self._headers else None
-
-    def is_secure(self, secret: str) -> bool:
-        value = self.get(X_SECRET)
-        if value is None:
-            value = self._request.cookies.get('secret')
-        return value is not None and value == secret
 
     def get_content_length(self) -> int:
         content_length = self.get(CONTENT_LENGTH)

@@ -1,11 +1,13 @@
 import logging
 import asyncio
+import random
 import base64
 import json
 import time
 import typing
 from collections.abc import Iterable
 
+_BASE62_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
     '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
@@ -18,6 +20,13 @@ def script_escape(value: str) -> str:
     if not isinstance(value, str):
         return value
     return value.translate(_SCRIPT_SPECIALS)
+
+
+def generate_token(length: int) -> str:
+    result = []
+    for i in range(length):
+        result.append(_BASE62_CHARS[random.randrange(0, 61)])
+    return ''.join(result)
 
 
 def is_format(text: str) -> bool:
