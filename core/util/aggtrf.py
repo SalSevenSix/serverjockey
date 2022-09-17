@@ -17,7 +17,7 @@ class Noop(Aggregator):
 class StrJoin(Aggregator):
 
     def __init__(self, delim: str = ''):
-        self.delim = delim
+        self._delim = delim
 
     def aggregate(self, collection):
-        return self.delim.join(collection)
+        return self._delim.join(collection)

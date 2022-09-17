@@ -80,7 +80,7 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
     context = _create_context(args if args else sys.argv)
     _setup_logging(context)
     try:
-        logging.info('*** START Serverjockey ***')
+        logging.info('*** START ServerJockey ***')
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:
@@ -89,4 +89,4 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
         logging.error('main() raised %s', repr(e))
         return 1
     finally:
-        logging.info('*** END Serverjockey ***')
+        logging.info('*** END ServerJockey ***')

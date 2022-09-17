@@ -146,13 +146,6 @@ def right_chop_and_strip(line: str, keyword: str) -> str:
     return line[:index].strip()
 
 
-def insert_filename_suffix(filename: str, suffix: str) -> str:
-    index = filename.rfind('.')
-    if index == -1 or filename.rfind('/') > index:
-        return filename + suffix
-    return filename[:index] + suffix + filename[index:]
-
-
 def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
     if base is None or path is None or path[0] in ('.', '/'):
         return path

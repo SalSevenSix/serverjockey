@@ -65,3 +65,14 @@ Enter the token to login to the webapp on the home page.
 ```bash
 cat /home/sjgms/serverjockey-client.json
 ```
+
+
+## VirtualBox Appliance
+ServerJockey is available pre-installed on a virtual machine (VM) image that
+can be imported into VirtualBox. Use this option on Windows systems.
+
+* Download the VM image: https://4sas.short.gy/zombox-latest
+* Install [VirtualBox](https://www.virtualbox.org/) if not installed.
+* Import the VM image file into VirtualBox.
+* Adjust the CPU and memory settings for the VM as desired.
+* Start the VM. Webapp URL and login token will be displayed in the console.
