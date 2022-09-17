@@ -26,6 +26,8 @@ def callable_dict(obj: typing.Any, names: typing.Collection[str]) -> typing.Dict
 
 
 async def silently_cleanup(obj: typing.Any):
+    if obj is None:
+        return
     if hasattr(obj, 'stop'):
         await silently_call(obj.stop)
     if hasattr(obj, 'close'):

@@ -11,7 +11,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         home = context.config('home')
         self._context = context
-        self._log = home + '/serverlink.log'
+        self._log_file = home + '/serverlink.log'
         self._config = home + '/serverlink.json'
         self._clientfile = contextext.ClientFile(context, home + '/serverjockey-client.json')
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
@@ -22,9 +22,9 @@ class Server(svrabc.Server):
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(msgext.LogfileSubscriber(
-            self._log,
+            self._log_file,
             msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),
-            msgtrf.GetData()))
+            transformer=msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
         httprsc.ResourceBuilder(resource) \

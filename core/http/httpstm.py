@@ -2,7 +2,7 @@ import logging
 from core.util import aggtrf, util
 from core.msg import msgabc
 from core.http import httpabc, httpext, httpsubs
-from core.proc import jobh, shell
+from core.proc import jobh, shell   # TODO Should not import proc package in http package
 
 
 class SteamCmdInstallHandler(httpabc.AsyncPostHandler):

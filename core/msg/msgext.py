@@ -415,8 +415,10 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
     def __init__(self,
                  filename: str,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+                 roll_filter: msgabc.Filter = msgftr.AcceptNothing(),
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
+        super().__init__(msgftr.Or(msg_filter, roll_filter, msgftr.IsStop()))
+        self._roll_filter = roll_filter
         self._transformer = transformer
         self._filename = filename
         self._file = None
@@ -425,9 +427,14 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
         if message is msgabc.STOP:
             await funcutil.silently_cleanup(self._file)
             return True
+        if self._roll_filter.accepts(message):
+            await funcutil.silently_cleanup(self._file)
+            self._file = None
+            return None
         try:
             if self._file is None:
-                self._file = await aiofiles.open(self._filename, mode='w')
+                filename = time.strftime(self._filename, time.localtime(time.time()))
+                self._file = await aiofiles.open(filename, mode='w')
             await self._file.write(self._transformer.transform(message))
             await self._file.write('\n')
             await self._file.flush()
