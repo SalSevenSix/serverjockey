@@ -37,7 +37,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
         debug=args.debug, home=home, secret=util.generate_token(10),
-        scheme=scheme, sslcert=sslcert, sslkey=sslkey,
+        scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
         logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 

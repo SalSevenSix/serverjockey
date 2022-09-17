@@ -136,6 +136,7 @@ class ServerProcess:
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
+        self._env = None
         self._process = None
         self._pipeinsvc = None
         self._started_catcher = None
@@ -146,6 +147,10 @@ class ServerProcess:
 
     def append_arg(self, arg: typing.Any) -> ServerProcess:
         self._command.append(arg)
+        return self
+
+    def use_env(self, env: dict[str, str]) -> ServerProcess:
+        self._env = env
         return self
 
     def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
@@ -163,7 +168,8 @@ class ServerProcess:
                 cmdlist[0], *cmdlist[1:],
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE)
+                stderr=asyncio.subprocess.PIPE,
+                env=self._env)
             stderr = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr)
             stdout = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)

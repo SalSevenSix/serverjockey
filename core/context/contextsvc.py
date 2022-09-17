@@ -7,7 +7,7 @@ from core.msg import msgabc, msgsvc
 
 class Context(msgabc.MulticastMailer):
 
-    def __init__(self, **configuration: typing.Union[str, int, float]):
+    def __init__(self, **configuration: typing.Any):
         self._parent: typing.Optional[Context] = None
         self._children: typing.List[Context] = []
         self._configuration = configuration.copy() if configuration else {}
@@ -16,7 +16,7 @@ class Context(msgabc.MulticastMailer):
     def start(self) -> asyncio.Task:
         return self._mailer.start()
 
-    def create_subcontext(self, **configuration: typing.Union[str, int, float]) -> Context:
+    def create_subcontext(self, **configuration: typing.Any) -> Context:
         subcontext = Context(**configuration)
         subcontext._parent = self
         self._children.append(subcontext)

@@ -50,10 +50,15 @@ class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
 
 class ServerProcessStopper:
 
-    def __init__(self, mailer: msgabc.MulticastMailer, timeout: float, quit_command: typing.Optional[str] = None):
+    def __init__(self,
+                 mailer: msgabc.MulticastMailer,
+                 timeout: float,
+                 quit_command: typing.Optional[str] = None,
+                 use_interrupt: bool = False):
         self._mailer = mailer
         self._timeout = timeout
         self._quit_command = quit_command
+        self._use_interrupt = use_interrupt
         self._process_subscriber = _ServerProcessSubscriber()
         mailer.register(self._process_subscriber)
 
@@ -66,6 +71,8 @@ class ServerProcessStopper:
         self._mailer.register(catcher)
         if self._quit_command:
             await proch.PipeInLineService.request(self._mailer, self, self._quit_command)
+        elif self._use_interrupt and process.pid:
+            signals.interrupt(process.pid)
         else:
             process.terminate()
         try:
