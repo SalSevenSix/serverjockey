@@ -1,9 +1,8 @@
-import logging
 from core.util import aggtrf, util, io
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpsubs
-from core.proc import proch, jobh, shell
+from core.http import httpabc, httprsc, httpext, httpstm, httpsubs
+from core.proc import proch, jobh
 from core.system import svrext
 
 
@@ -59,7 +58,7 @@ class Deployment:
         httprsc.ResourceBuilder(resource) \
             .push('deployment') \
             .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
-            .append('install-runtime', _InstallRuntimeHandler(self._mailer, self._runtime_dir)) \
+            .append('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870)) \
             .append('wipe-runtime', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._runtime_dir})) \
             .append('backup-runtime', httpext.MessengerHandler(
@@ -101,32 +100,6 @@ class Deployment:
         await io.create_directory(self._playerdb_dir)
         await io.create_directory(self._config_dir)
         await io.create_directory(self._save_dir)
-
-
-class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer, path: str):
-        self._mailer = mailer
-        self._path = path
-        self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.START, selector=httpsubs.Selector(
-            msg_filter=jobh.JobProcess.FILTER_STDOUT_LINE,
-            completed_filter=jobh.JobProcess.FILTER_JOB_DONE,
-            aggregator=aggtrf.StrJoin('\n')))
-
-    async def handle_post(self, resource, data):
-        script = shell.Script()
-        if util.get('wipe', data):
-            script.include_delete_path(self._path)
-        script.include_steamcmd_app_update(
-            app_id=380870,
-            install_dir=self._path,
-            beta=util.script_escape(util.get('beta', data)),
-            validate=util.get('validate', data))
-        script.include_softlink_steamclient_lib(self._path)
-        script = script.build()
-        logging.debug('SCRIPT\n' + script)
-        data['script'] = script
-        return await self._handler.handle_post(resource, data)
 
 
 class _DeploymentWiper(msgabc.AbcSubscriber):

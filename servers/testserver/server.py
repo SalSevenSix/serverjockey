@@ -1,6 +1,6 @@
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpsubs
-from core.msg import msgabc, msgext, msgtrf, msgftr
+from core.http import httpabc, httprsc, httpsubs, httpext
+from core.msg import msgabc, msgext, msgftr
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
 from core.util import util, cmdutil, aggtrf
@@ -28,7 +28,10 @@ class Server(svrabc.Server):
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
             .push('log') \
-            .append('tail', _ConsoleLogHandler(self._context)) \
+            .append('tail', httpext.RollingLogHandler(
+                self._context,
+                msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),
+                size=200)) \
             .append('subscribe', self._httpsubs.handler(proch.ServerProcess.FILTER_STDOUT_LINE, aggtrf.StrJoin('\n'))) \
             .pop() \
             .append('players', _PlayersHandler(self._context)) \
@@ -78,20 +81,6 @@ class _PlayersHandler(httpabc.AsyncGetHandler):
         for line in iter([m.data() for m in response]):
             result.append({'steamid': str(util.now_millis()), 'name': line[1:]})
         return result
-
-
-class _ConsoleLogHandler(httpabc.AsyncGetHandler):
-
-    def __init__(self, context: contextsvc.Context):
-        self._context = context
-        self._subscriber = msgext.RollingLogSubscriber(
-            context, size=200,
-            msg_filter=msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),
-            transformer=msgtrf.GetData(), aggregator=aggtrf.StrJoin('\n'))
-        context.register(self._subscriber)
-
-    async def handle_get(self, resource, data):
-        return await msgext.RollingLogSubscriber.get_log(self._context, self, self._subscriber.get_identity())
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):

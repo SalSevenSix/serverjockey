@@ -20,7 +20,8 @@ class Deployment:
             'rcon-password': None,
             '_comment_use-server-whitelist': 'If the whitelist should be used.',
             'use-server-whitelist': False,
-            '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer and inform Factorio.com about ban/unban commands.',
+            '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer'
+                                            ' and inform Factorio.com about ban/unban commands.',
             'use-authserver-bans': False
         }
 
@@ -90,10 +91,10 @@ class Deployment:
             .push('deployment') \
             .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
             .append('install-runtime', _InstallRuntimeHandler(self, self._mailer)) \
-            .append('wipe-runtime', _WipeHandler(self, self._runtime_dir)) \
-            .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
-            .append('wipe-world-config', _WipeHandler(self, self._config_dir)) \
-            .append('wipe-world-save', _WipeHandler(self, self._save_dir)) \
+            .append('wipe-runtime', httpext.WipeHandler(self._runtime_dir)) \
+            .append('wipe-world-all', httpext.WipeHandler(self._world_dir, self.build_world)) \
+            .append('wipe-world-config', httpext.WipeHandler(self._config_dir, self.build_world)) \
+            .append('wipe-world-save', httpext.WipeHandler(self._save_dir, self.build_world)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
                 {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
@@ -271,15 +272,3 @@ class _DownloadTracker(io.BytesTracker):
             self._next_target += self._increment
             message = 'downloaded  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
             self._mailer.post(self, self._msg_name, message)
-
-
-class _WipeHandler(httpabc.AsyncPostHandler):
-
-    def __init__(self, deployment: Deployment, path: str):
-        self._deployment = deployment
-        self._path = path
-
-    async def handle_post(self, resource, data):
-        await io.delete_directory(self._path)
-        await self._deployment.build_world()
-        return httpabc.ResponseBody.NO_CONTENT

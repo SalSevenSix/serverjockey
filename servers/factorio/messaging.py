@@ -8,7 +8,7 @@ SERVER_STARTED_FILTER = msgftr.And(
     msgftr.DataMatches(
         '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
 DEPLOYMENT_MSG = 'Deployment.Message'
-CONSOLE_FILTER = msgftr.Or(
+CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     proch.ServerProcess.FILTER_STDERR_LINE,
     jobh.JobProcess.FILTER_STDOUT_LINE,
