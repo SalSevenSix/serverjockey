@@ -4,7 +4,7 @@ import sys
 import os
 import typing
 from core.util import util, funcutil
-from core.msg import msgext
+from core.msg import msglog
 from core.context import contextsvc
 from core.http import httpabc, httpsvc
 from core.system import system
@@ -65,7 +65,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
     async def initialise(self) -> httpabc.Resource:
         self._context.start()
         if self._context.is_debug():
-            self._context.register(msgext.LoggerSubscriber(level=logging.DEBUG))
+            self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         self._context.post(self, 'Logging.File', self._context.config('logfile'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()

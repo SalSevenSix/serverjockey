@@ -67,6 +67,16 @@ async def symlink_exists(path: typing.Optional[str]) -> bool:
     return await _is_symlink(path)
 
 
+async def find_in_env_path(env_path: str | None, executable: str) -> str | None:
+    if env_path is None:
+        return None
+    for path in env_path.split(':'):
+        filename = path + '/' + executable
+        if await file_exists(filename):
+            return filename
+    return None
+
+
 async def file_size(file: str) -> int:
     stats = await aioos.stat(file)
     return stats.st_size

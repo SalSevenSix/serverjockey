@@ -5,7 +5,7 @@ import inspect
 import logging
 import uuid
 from core.util import util, io, sysutil, signals
-from core.msg import msgabc, msgext, msgftr
+from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
 from core.system import svrabc, svrsvc
@@ -99,7 +99,7 @@ class SystemService:
         subcontext.start()
         subcontext.register(msgext.RelaySubscriber(self._context, _DeleteInstanceSubscriber.FILTER))
         if subcontext.is_debug():
-            subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
+            subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         server = self._create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))

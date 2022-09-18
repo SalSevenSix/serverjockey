@@ -9,6 +9,10 @@ from servers.sevendaystodie import deployment as dep
 # INF [Steamworks.NET] GameServer.LogOn successful, SteamID=90163644755735559, public IP=12*.4*.24*.22*'
 SERVER_STARTED_FILTER = msgftr.DataStrContains('INF [Steamworks.NET] GameServer.LogOn successful, SteamID=')
 
+# PLAYERS
+# INF GMSG: Player 'Apollo' joined the game
+# INF GMSG: Player 'Apollo' left the game
+
 
 class Server(svrabc.Server):
 

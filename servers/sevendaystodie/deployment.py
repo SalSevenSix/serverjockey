@@ -1,8 +1,9 @@
 from core.util import io
-from core.msg import msgftr, msgtrf, msgext
+from core.msg import msgftr, msgtrf, msglog
 from core.context import contextsvc
 from core.proc import proch
 from core.system import svrsvc
+
 
 class Deployment:
 
@@ -22,7 +23,7 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
-        self._mailer.register(msgext.LogfileSubscriber(
+        self._mailer.register(msglog.LogfileSubscriber(
             self._log_file,
             msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),
             msgftr.And(msgftr.NameIs(svrsvc.ServerStatus.NOTIFY_RUNNING), msgftr.DataEquals(False)),

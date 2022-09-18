@@ -1,5 +1,5 @@
 from core.util import aggtrf, util, io
-from core.msg import msgabc, msgext, msgftr
+from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpstm, httpsubs
 from core.proc import proch, jobh
@@ -48,11 +48,11 @@ class Deployment:
         ini_filter = ('.*Password.*', '.*Token.*')
         conf_pre = self._config_dir + '/' + self._world_name
         archive_selector = httpsubs.Selector(
-            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
+            msg_filter=msgftr.NameIs(msglog.LoggingPublisher.INFO),
             completed_filter=msgftr.DataEquals('END Archive Directory'),
             aggregator=aggtrf.StrJoin('\n'))
         unpacker_selector = httpsubs.Selector(
-            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
+            msg_filter=msgftr.NameIs(msglog.LoggingPublisher.INFO),
             completed_filter=msgftr.DataEquals('END Unpack Directory'),
             aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
