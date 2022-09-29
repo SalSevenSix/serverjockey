@@ -35,8 +35,7 @@ async def unpack_directory(archive: str, unpack_dir: str, logger=None):
     assert await io.file_exists(archive)
     if unpack_dir[-1] == '/':
         unpack_dir = unpack_dir[:-1]
-    if await io.directory_exists(unpack_dir):
-        await io.delete_directory(unpack_dir)
+    await io.delete_directory(unpack_dir)
     await io.create_directory(unpack_dir)
     if logger:
         logger.info('START Unpack Directory')

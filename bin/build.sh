@@ -74,7 +74,7 @@ if [ -d "$LIB64_DIR" ]; then
 fi
 
 echo "Running tests"
-python3 -m test > /dev/null
+python3.10 -m test > /dev/null
 [ $? -eq 0 ] || exit 1
 
 echo "Move out libraries with natives"
@@ -86,7 +86,7 @@ rm -rf .venv venv bin client test *.sh README.md .gitignore > /dev/null 2>&1
 
 echo "Building ServerJockey zipapp"
 cd $HOME_DIR || exit 1
-python3 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3" -m "core.system.bootstrap:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz"
+python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.bootstrap:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz"
 [ $? -eq 0 ] || exit 1
 
 echo "Downloading ServerLink dependencies"
@@ -97,7 +97,7 @@ npm ci
 [ -d "$SERVERLINK_DIR/node_modules" ] || exit 1
 
 echo "Building Serverlink nexe"
-nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3)
+nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10)
 [ $? -eq 0 ] || exit 1
 
 echo "Cleanup"

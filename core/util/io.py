@@ -67,6 +67,31 @@ async def symlink_exists(path: typing.Optional[str]) -> bool:
     return await _is_symlink(path)
 
 
+async def create_directory(path: str):
+    if not await aioos.path.isdir(path):
+        await aioos.mkdir(path)
+
+
+async def create_symlink(symlink_path: str, target_path: str):
+    await delete_directory(symlink_path)
+    await delete_file(symlink_path)
+    await _create_symlink(target_path, symlink_path)
+
+
+async def rename_path(source: str, target: str):
+    await aioos.rename(source, target)
+
+
+async def delete_directory(path: str):
+    if await directory_exists(path):
+        await _rmtree(path)
+
+
+async def delete_file(file: str):
+    if await file_exists(file):
+        await aioos.remove(file)
+
+
 async def find_in_env_path(env_path: str | None, executable: str) -> str | None:
     if env_path is None:
         return None
@@ -104,31 +129,6 @@ async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typ
             entry.update({'url': baseurl + '/' + name})
         result.append(entry)
     return result
-
-
-async def create_directory(path: str):
-    if not await aioos.path.isdir(path):
-        await aioos.mkdir(path)
-
-
-async def create_symlink(symlink_path: str, target_path: str):
-    await delete_directory(symlink_path)
-    await delete_file(symlink_path)
-    await _create_symlink(target_path, symlink_path)
-
-
-async def rename_path(source: str, target: str):
-    await aioos.rename(source, target)
-
-
-async def delete_directory(path: str):
-    if await aioos.path.isdir(path):
-        await _rmtree(path)
-
-
-async def delete_file(file: str):
-    if await file_exists(file):
-        await aioos.remove(file)
 
 
 async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:

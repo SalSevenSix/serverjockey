@@ -23,6 +23,7 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         await self._deployment.initialise()
+        self._context.register(prcext.ServerStateSubscriber(self._context))
 
     def resources(self, resource: httpabc.Resource):
         httprsc.ResourceBuilder(resource) \
