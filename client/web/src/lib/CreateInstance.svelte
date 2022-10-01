@@ -33,6 +33,7 @@
           {#if dev}<option>testserver</option>{/if}
           <option>projectzomboid</option>
           <option>factorio</option>
+          <option>sevendaystodie</option>
         </select>
       </div>
     </div>

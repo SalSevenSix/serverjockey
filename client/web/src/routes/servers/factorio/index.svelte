@@ -31,7 +31,7 @@
         </div>
       </div>
       <Collapsible title="Logging">
-        <ConsoleLog />
+        <ConsoleLog hasConsoleLogFile />
       </Collapsible>
       <Collapsible title="Configuration">
         <ConfigFile name="Command Line Args" path="/config/cmdargs">

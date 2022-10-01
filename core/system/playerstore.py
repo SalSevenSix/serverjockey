@@ -2,7 +2,9 @@ import typing
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
 from core.proc import proch
-from servers.factorio import messaging as msg
+
+PLAYER_EVENT = 'playerstore.Event'
+PLAYER_EVENT_FILTER = msgftr.NameIs(PLAYER_EVENT)
 
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
@@ -12,7 +14,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
-            msg.PLAYER_EVENT_FILTER,
+            PLAYER_EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
             proch.ServerProcess.FILTER_STATE_DOWN))
         self._mailer = mailer
@@ -28,7 +30,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
             self._players = []
             return None
-        if msg.PLAYER_EVENT_FILTER.accepts(message):
+        if PLAYER_EVENT_FILTER.accepts(message):
             event = message.data()
             if event['event'] == 'login':
                 self._players.append(event['player'])

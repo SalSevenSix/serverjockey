@@ -109,7 +109,7 @@
         </div>
       </div>
       <Collapsible title="Logging">
-        <ConsoleLog />
+        <ConsoleLog hasConsoleLogFile />
         <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Console Commands">

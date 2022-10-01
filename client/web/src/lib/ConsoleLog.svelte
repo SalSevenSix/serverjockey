@@ -4,6 +4,7 @@
   import { ReverseRollingLog } from '$lib/util';
 	import { instance, SubscriptionHelper, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
+  export let hasConsoleLogFile = false;
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
   let logText = '';
@@ -36,7 +37,13 @@
 
 <div class="block">
   <div class="field">
-    <label for="console-log" class="label"><a href={'#'} on:click|preventDefault={openConsoleLog}>Console Log</a></label>
+    <label for="console-log" class="label">
+      {#if hasConsoleLogFile}
+        <a href={'#'} on:click|preventDefault={openConsoleLog}>Console Log</a>
+      {:else}
+        Console Log
+      {/if}
+    </label>
     <div class="control pr-6">
       <textarea id="console-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
     </div>

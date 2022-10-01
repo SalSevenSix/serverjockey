@@ -1,17 +1,9 @@
+from core.util import aggtrf
 from core.context import contextsvc
-from core.msg import msgftr
-from core.http import httpabc, httprsc
+from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import prcext
-from core.system import svrabc, svrext
-from servers.sevendaystodie import deployment as dep
-
-# INF [EOS] Session address: 121.44.241.224'
-# INF [Steamworks.NET] GameServer.LogOn successful, SteamID=90163644755735559, public IP=12*.4*.24*.22*'
-SERVER_STARTED_FILTER = msgftr.DataStrContains('INF [Steamworks.NET] GameServer.LogOn successful, SteamID=')
-
-# PLAYERS
-# INF GMSG: Player 'Apollo' joined the game
-# INF GMSG: Player 'Apollo' left the game
+from core.system import svrabc, svrsvc, svrext, playerstore
+from servers.sevendaystodie import deployment as dep, messaging as msg
 
 
 class Server(svrabc.Server):
@@ -20,19 +12,33 @@ class Server(svrabc.Server):
         self._context = context
         self._stopper = prcext.ServerProcessStopper(context, 20.0, use_interrupt=True)
         self._deployment = dep.Deployment(context)
+        self._messaging = msg.Messaging(context)
+        self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
+        self._messaging.initialise()
         await self._deployment.initialise()
-        self._context.register(prcext.ServerStateSubscriber(self._context))
 
     def resources(self, resource: httpabc.Resource):
+        self._deployment.resources(resource)
         httprsc.ResourceBuilder(resource) \
             .push('server', svrext.ServerStatusHandler(self._context)) \
-            .append('{command}', svrext.ServerCommandHandler(self._context))
+            .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
+            .append('{command}', svrext.ServerCommandHandler(self._context)) \
+            .pop() \
+            .push('log') \
+            .append('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER)) \
+            .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
+            .pop() \
+            .push('players', playerstore.PlayersHandler(self._context)) \
+            .append('subscribe', self._httpsubs.handler(playerstore.PLAYER_EVENT_FILTER)) \
+            .pop() \
+            .push(self._httpsubs.resource(resource, 'subscriptions')) \
+            .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._deployment.new_server_process() \
-            .wait_for_started(SERVER_STARTED_FILTER, 90) \
+            .wait_for_started(msg.SERVER_STARTED_FILTER, 90) \
             .run()
 
     async def stop(self):

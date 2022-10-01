@@ -1,8 +1,8 @@
 import aiohttp
 from core.util import util, tasks, io, pack, aggtrf
-from core.msg import msgabc, msgext, msgftr, msglog
+from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpsubs
+from core.http import httpabc, httprsc, httpext, httpsubs, httpsel
 from core.proc import proch, jobh
 from servers.factorio import messaging as msg
 
@@ -68,14 +68,6 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
-        archive_selector = httpsubs.Selector(
-            msg_filter=msgftr.NameIs(msglog.LoggingPublisher.INFO),
-            completed_filter=msgftr.DataEquals('END Archive Directory'),
-            aggregator=aggtrf.StrJoin('\n'))
-        unpacker_selector = httpsubs.Selector(
-            msg_filter=msgftr.NameIs(msglog.LoggingPublisher.INFO),
-            completed_filter=msgftr.DataEquals('END Unpack Directory'),
-            aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
             .append('log', httpext.FileSystemHandler(self._current_log)) \
             .push('config') \
@@ -97,13 +89,13 @@ class Deployment:
             .append('wipe-world-save', httpext.WipeHandler(self._save_dir, self.build_world)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
+                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, httpsel.archive_selector())) \
             .append('backup-world', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, archive_selector)) \
+                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, httpsel.archive_selector())) \
             .append('restore-backup', httpext.MessengerHandler(
                 self._mailer, msgext.Unpacker.REQUEST,
-                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, unpacker_selector)) \
+                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, httpsel.unpacker_selector())) \
             .pop() \
             .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
