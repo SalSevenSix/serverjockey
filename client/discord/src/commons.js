@@ -5,6 +5,22 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
+exports.startupSubscribePlayers = function(context, channel, instance, url) {
+  if (!channel) return;
+  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
+    let result = '';
+    if (json.event === 'login') { result += 'LOGIN '; }
+    if (json.event === 'logout') { result += 'LOGOUT '; }
+    result += json.player.name;
+    if (json.player.steamid) {
+      result += ' [' + json.player.steamid + ']';
+    }
+    result += ' (' + instance + ')';
+    channel.send(result);
+    return true;
+  });
+}
+
 exports.server = function($) {
   if ($.data.length === 1) {
     let cmd = $.data[0];

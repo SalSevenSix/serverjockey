@@ -6,7 +6,8 @@ const util = require('./util.js');
 const subs = require('./subs.js');
 const servers = {
   projectzomboid: require('./servers/projectzomboid.js'),
-  factorio: require('./servers/factorio.js')
+  factorio: require('./servers/factorio.js'),
+  sevendaystodie: require('./servers/sevendaystodie.js')
 };
 
 exports.Service = class Service {

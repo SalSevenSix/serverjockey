@@ -16,7 +16,7 @@ exports.help = function($) {
     return;
   }
   let x = $.context;
-  let s = '```FACTORIO COMMANDS\n' + x.config.CMD_PREFIX;
-  c.send(s + x.staticData.factorio.help1.join('\n' + x.config.CMD_PREFIX) + '```');
+  let s = '```SEVENDAYSTODIE COMMANDS\n' + x.config.CMD_PREFIX;
+  c.send(s + x.staticData.sevendaystodie.help1.join('\n' + x.config.CMD_PREFIX) + '```');
   return;
 }

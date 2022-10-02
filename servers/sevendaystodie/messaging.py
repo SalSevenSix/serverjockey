@@ -27,6 +27,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     IP_FILTER = msgftr.DataStrContains(IP_PREFIX)
     PORT_PREFIX = 'GamePref.ConnectToServerPort ='
     PORT_FILTER = msgftr.DataStrContains(PORT_PREFIX)
+    CON_PORT_PREFIX = 'GamePref.ControlPanelPort ='
+    CON_PORT_FILTER = msgftr.DataStrContains(CON_PORT_PREFIX)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
@@ -34,7 +36,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             msgftr.Or(
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.IP_FILTER,
-                _ServerDetailsSubscriber.PORT_FILTER)))
+                _ServerDetailsSubscriber.PORT_FILTER,
+                _ServerDetailsSubscriber.CON_PORT_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -50,6 +53,10 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': value})
+            return None
+        if _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'cport': value})
             return None
         return None
 

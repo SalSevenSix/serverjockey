@@ -2,29 +2,14 @@
 
 const logger = require('../logger.js');
 const util = require('../util.js');
-const subs = require('../subs.js');
 const commons = require('../commons.js');
 
-exports.startup = function(context, channel, instance, url) {
-  if (!channel) return;
-  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
-    let result = '';
-    if (json.event === 'login') { result += 'LOGIN '; }
-    if (json.event === 'logout') { result += 'LOGOUT '; }
-    result += json.player.name;
-    if (json.player.steamid != null) {
-      result += ' [' + json.player.steamid + '] ' + instance;
-    }
-    channel.send(result);
-    return true;
-  });
-}
-
-exports.server = commons.server
-exports.getconfig = commons.getconfig
-exports.setconfig = commons.setconfig
-exports.deployment = commons.deployment
-exports.players = commons.players
+exports.startup = commons.startupSubscribePlayers;
+exports.server = commons.server;
+exports.getconfig = commons.getconfig;
+exports.setconfig = commons.setconfig;
+exports.deployment = commons.deployment;
+exports.players = commons.players;
 
 exports.world = function($) {
   let data = [...$.data];

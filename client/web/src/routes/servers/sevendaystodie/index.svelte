@@ -6,6 +6,7 @@
   import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
   import FileSystem from '$lib/FileSystem.svelte';
+  import Iframe from '$lib/Iframe.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
@@ -34,6 +35,9 @@
       <Collapsible title="Logging">
         <ConsoleLog />
         <FileSystem allowDelete />
+      </Collapsible>
+      <Collapsible title="Console Commands">
+         <Iframe />
       </Collapsible>
       <Collapsible title="Configuration">
         <ConfigFile name="Settings" path="/config/settings">

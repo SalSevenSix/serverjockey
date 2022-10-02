@@ -119,5 +119,24 @@
       "deployment wipe-world-save   : Delete only map file",
       "deployment install-runtime   : Install game server"
     ]
+  },
+  "sevendaystodie": {
+    "help1": [
+      "server             : Server status",
+      "server daemon      : Start server with auto-restart",
+      "server start       : Start server",
+      "server restart     : Save world and restart server",
+      "server stop        : Save world and stop server",
+      "server delete      : Delete the server instance",
+      "players            : Show players currently online",
+      "getconfig settings : Get settings as attachment",
+      "getconfig admin    : Get admin settings as attachment",
+      "setconfig settings : Update settings using attached file",
+      "setconfig admin    : Update admin settings using attached file",
+      "deployment wipe-world-all    : Delete game world folder",
+      "deployment wipe-world-config : Delete only config files",
+      "deployment wipe-world-save   : Delete only map file",
+      "deployment install-runtime   : Install game server"
+    ]
   }
 }
