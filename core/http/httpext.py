@@ -2,7 +2,7 @@ import asyncio
 import typing
 import re
 import aiofiles
-from core.util import util, io, tasks, aggtrf, funcutil
+from core.util import util, io, tasks, aggtrf
 from core.msg import msgabc, msgext, msgftr, msgtrf
 from core.http import httpabc, httpcnt, httpsubs
 
@@ -193,12 +193,14 @@ class RollingLogHandler(httpabc.AsyncGetHandler):
 
 
 class WipeHandler(httpabc.AsyncPostHandler):
+    WIPED = 'WipeHandler.WIPED'
+    FILTER = msgftr.NameIs(WIPED)
 
-    def __init__(self, path: str, callback: typing.Callable = None):
+    def __init__(self, mailer: msgabc.MulticastMailer, path: str):
+        self._mailer = mailer
         self._path = path
-        self._callback = callback
 
     async def handle_post(self, resource, data):
         await io.delete_directory(self._path)
-        await funcutil.silently_call(self._callback)
+        self._mailer.post(self, WipeHandler.WIPED, self._path)
         return httpabc.ResponseBody.NO_CONTENT

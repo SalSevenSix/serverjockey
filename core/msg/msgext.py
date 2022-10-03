@@ -5,7 +5,7 @@ import time
 import uuid
 import collections
 import typing
-from core.util import aggtrf, tasks, util, io, pack
+from core.util import aggtrf, tasks, util, io, pack, funcutil
 from core.msg import msgabc, msgftr, msgtrf, msglog
 
 
@@ -365,4 +365,15 @@ class RollingLogSubscriber(msgabc.Subscriber):
             self._container.append(self._transformer.transform(message))
             while len(self._container) > self._size:
                 self._container.popleft()
+        return None
+
+
+class CallableSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, msg_filter: msgabc.Filter, callback: typing.Callable):
+        super().__init__(msg_filter)
+        self._callback = callback
+
+    async def handle(self, message):
+        await funcutil.silently_call(self._callback)
         return None

@@ -32,6 +32,8 @@ class Deployment:
     async def initialise(self):
         await self.build_world()
         self._mailer.register(jobh.JobProcess(self._mailer))
+        self._mailer.register(msgext.CallableSubscriber(
+            msgftr.Or(httpext.WipeHandler.FILTER, jobh.JobProcess.FILTER_JOB_DONE), self.build_world))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(
@@ -54,10 +56,10 @@ class Deployment:
             .push('deployment') \
             .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
             .append('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420)) \
-            .append('wipe-runtime', httpext.WipeHandler(self._runtime_dir)) \
-            .append('wipe-world-all', httpext.WipeHandler(self._world_dir, self.build_world)) \
-            .append('wipe-world-config', httpext.WipeHandler(self._config_dir, self.build_world)) \
-            .append('wipe-world-save', httpext.WipeHandler(self._save_dir, self.build_world)) \
+            .append('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir)) \
+            .append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir)) \
+            .append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir)) \
+            .append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
                 {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, httpsel.archive_selector())) \
