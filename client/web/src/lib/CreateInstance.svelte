@@ -1,12 +1,26 @@
 <script>
-  import { dev } from '$app/env';
+  import { onMount } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { baseurl, newPostRequest } from '$lib/serverjockeyapi';
+  import { baseurl, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
+  let modules = [];
   let serverForm = {};
   let creating = false;
 
+	onMount(function() {
+    fetch(baseurl + '/modules', newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) {
+        modules = json;
+      })
+      .catch(function(error) { notifyError('Failed to load module list.'); });
+  });
+
 	function create() {
+	  if (!serverForm.module) return notifyError('Type not selected.');
 	  if (!serverForm.identity) return notifyError('Instance Name not set.');
 	  creating = true;
 	  serverForm.identity = serverForm.identity.replaceAll(' ', '-').toLowerCase();
@@ -30,10 +44,9 @@
     <div class="control">
       <div class="select">
         <select id="createinstance-module" bind:value={serverForm.module}>
-          {#if dev}<option>testserver</option>{/if}
-          <option>projectzomboid</option>
-          <option>factorio</option>
-          <option>sevendaystodie</option>
+          {#each modules as module}
+            <option>{module}</option>
+          {/each}
         </select>
       </div>
     </div>

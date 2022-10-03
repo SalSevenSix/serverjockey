@@ -1,7 +1,6 @@
 import abc
 import os
 import shutil
-import pkgutil
 import time
 import typing
 import aiofiles
@@ -35,7 +34,6 @@ _listdir = funcutil.to_async(os.listdir)
 _is_symlink = funcutil.to_async(os.path.islink)
 _create_symlink = funcutil.to_async(os.symlink)
 _rmtree = funcutil.to_async(shutil.rmtree)
-_pkg_load = funcutil.to_async(pkgutil.get_data)
 
 
 def _auto_chmod(path: str):
@@ -68,7 +66,7 @@ async def symlink_exists(path: typing.Optional[str]) -> bool:
 
 
 async def create_directory(path: str):
-    if not await aioos.path.isdir(path):
+    if not await directory_exists(path):
         await aioos.mkdir(path)
 
 
@@ -169,7 +167,3 @@ async def copy_bytes(
             await target.write(chunk)
             if tracker:
                 tracker.processed(chunk)
-
-
-async def pkg_load(package: str, resource: str) -> bytes | None:
-    return await _pkg_load(package, resource)

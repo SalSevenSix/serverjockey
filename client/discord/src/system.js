@@ -4,7 +4,8 @@ const util = require('./util.js');
 
 exports.system = function($) {
   $.httptool.doGet('/system/info', function(info) {
-    let result = '```';
+    let result = '```\n';
+    result += 'System : ' + util.humanDuration(info.uptime) + ' UP (v' + info.version + ')\n';
     result += 'CPU    : ' + info.cpu.percent + '%\n';
     result += 'Memory : ' + util.humanFileSize(info.memory.used);
     result += ' / '       + util.humanFileSize(info.memory.total);
@@ -12,7 +13,7 @@ exports.system = function($) {
     result += 'Disk   : ' + util.humanFileSize(info.disk.used);
     result += ' / '       + util.humanFileSize(info.disk.total);
     result += ' ('        + info.disk.percent + '%)\n';
-    result += 'Uptime : ' + util.humanDuration(info.uptime) + '```';
+    result += '```';
     return result;
   });
 }

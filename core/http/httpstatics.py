@@ -3,7 +3,7 @@ import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
 from core.http import httpabc, httpcnt
 from core.context import contextsvc
-from core.util import util, pack, io
+from core.util import util, pack, pkg
 
 
 class Statics:
@@ -54,7 +54,7 @@ class _Loader:
         if path[-1] == '/':
             path += 'index.html'
         try:
-            data = await io.pkg_load('web', path)
+            data = await pkg.pkg_load('web', path)
             return _Resource(httpcnt.ContentTypeImpl.lookup(path), data) if data else None
         except (IsADirectoryError, FileNotFoundError, OSError):
             if path.endswith('/index.html'):

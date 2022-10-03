@@ -5,6 +5,7 @@
 	import { baseurl, newGetRequest } from '$lib/serverjockeyapi';
 
   let info = {
+    version: '0.0.0',
     uptime: 0,
     cpu: {
       percent: 0
@@ -43,7 +44,7 @@
   <div class="column is-one-quarter">
     <table class="table">
       <tbody>
-        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
+        <tr><td class="has-text-weight-bold">Version</td><td>{info.version}</td></tr>
         <tr><td class="has-text-weight-bold">Memory</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.memory.total)}</td></tr>
         <tr><td>Used</td><td>{humanFileSize(info.memory.used)}</td></tr>
@@ -56,8 +57,8 @@
   <div class="column">
     <table class="table">
       <tbody>
-        <tr><td class="has-text-weight-bold">CPU</td><td></td></tr>
-        <tr><td>Load</td><td>{info.cpu.percent}%</td></tr>
+        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
+        <tr><td class="has-text-weight-bold">CPU</td><td>{info.cpu.percent}%</td></tr>
         <tr><td class="has-text-weight-bold">Disk</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
         <tr><td>Used</td><td>{humanFileSize(info.disk.used)}</td></tr>
