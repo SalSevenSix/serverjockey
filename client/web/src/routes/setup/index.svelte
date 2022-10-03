@@ -40,7 +40,8 @@
   <div class="column content">
     <h2 class="title is-3 mt-2">Welcome</h2>
     <p>
-      If you are reading this, you have already successfully installed and started ZomBox on VirtualBox. Congratulations!
+      If you are reading this, you have already successfully installed and started ZomBox on VirtualBox.
+      Congratulations!
       This page will guide you through the rest of the setup process and how to create, configure and start a server.
     </p>
     <p>
@@ -158,10 +159,14 @@
 
 <div class="content">
   <p><span class="step-title">13.</span>
-    Scroll down the bot settings to find the <span class="has-text-weight-bold">PUBLIC BOT</span> switch.
-    Turn it off, then click <span class="has-text-weight-bold">Save Changes</span> button.
+    Scroll down the bot settings to find the <span class="has-text-weight-bold">PUBLIC BOT</span>
+    switch and turn it OFF.
+    Scroll down further to find the <span class="has-text-weight-bold">MESSAGE CONTENT INTENT</span>
+    switch and turn it ON.
+    Then click <span class="has-text-weight-bold">Save Changes</span> button.
   </p>
   <figure><img src="/instructions/13_make_bot_private.png" alt="Make Bot Private" /></figure>
+  <figure><img src="/instructions/13_allow_receive_messages.png" alt="Allow Receive Messages" /></figure>
 </div>
 
 <div class="content">
@@ -535,8 +540,8 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   <h3 class="title is-4">Configuration Files</h3>
   <p>
     For help understanding Project Zomboid server configuration files. Please see the
-    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">excellent guide on Steam</a>
-    by Aiteron.
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">
+    excellent guide on Steam</a> by Aiteron.
     All of the configuration files can be downloaded using Discord using the commands shown below.
     Use the corresponding <span class="is-family-monospace">!setconfig</span> command to upload files.
   </p>
