@@ -35,7 +35,7 @@
 
 <div class="columns">
   <div class="column is-one-third">
-    <figure><img src="/assets/box.svg" alt="Welcome Box" /></figure>
+    <figure><img src="/assets/icons/box.svg" alt="Welcome Box" /></figure>
   </div>
   <div class="column content">
     <h2 class="title is-3 mt-2">Welcome</h2>
@@ -65,7 +65,7 @@
     If not, create a new Discord server in the
     <a href="#newdiscordserver" use:scrollto={'#newdiscordserver'}>next step</a>.
   </p>
-  <figure><img src="/instructions/01_new_account.png" alt="New Discord Account" /></figure>
+  <figure><img src="/assets/setup/01_new_account.png" alt="New Discord Account" /></figure>
 </div>
 
 <div class="content" id="newdiscordserver">
@@ -73,28 +73,28 @@
     Add a new Discord server by clicking the <span class="is-family-monospace is-size-5">+</span> button
     on the left panel.
   </p>
-  <figure><img src="/instructions/02_add_server_button.png" alt="Add a Server" /></figure>
+  <figure><img src="/assets/setup/02_add_server_button.png" alt="Add a Server" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">03.</span>
     Select the <span class="has-text-weight-bold">Create My Own</span> option.
   </p>
-  <figure><img src="/instructions/03_create_server_options.png" alt="Create Server Options" /></figure>
+  <figure><img src="/assets/setup/03_create_server_options.png" alt="Create Server Options" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">04.</span>
     Choose the kind of Discord server you want, or skip to choose later.
   </p>
-  <figure><img src="/instructions/04_choose_server_type.png" alt="Choose Server Type" /></figure>
+  <figure><img src="/assets/setup/04_choose_server_type.png" alt="Choose Server Type" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">05.</span>
     Give your new Discord server a name. Can be anything that Discord allows.
   </p>
-  <figure><img src="/instructions/05_name_server.png" alt="Name the Server" /></figure>
+  <figure><img src="/assets/setup/05_name_server.png" alt="Name the Server" /></figure>
 </div>
 
 <div class="content">
@@ -102,7 +102,7 @@
     You should now have a new Discord server. It should look like the screenshot below.
     For the guide, I called the server ZomBoxGuide. Not very original, I know.
   </p>
-  <figure><img src="/instructions/06_fresh_server.png" alt="Fresh Discord Server" /></figure>
+  <figure><img src="/assets/setup/06_fresh_server.png" alt="Fresh Discord Server" /></figure>
 </div>
 
 <div class="content" id="createbot">
@@ -116,7 +116,7 @@
     Open the <a href="https://discord.com/developers" target="_blank">Discord Developer Portal</a>.
     Then click the <span class="has-text-weight-bold">New Application</span> button.
   </p>
-  <figure><img src="/instructions/07_developers_home.png" alt="Discord Developer Portal" /></figure>
+  <figure><img src="/assets/setup/07_developers_home.png" alt="Discord Developer Portal" /></figure>
 </div>
 
 <div class="content">
@@ -124,14 +124,14 @@
     Give your application a name. It can be anything that Discord allows.
     For the guide, I called it zombox-demo.
   </p>
-  <figure><img src="/instructions/08_name_application.png" alt="Name New App" /></figure>
+  <figure><img src="/assets/setup/08_name_application.png" alt="Name New App" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">09.</span>
     You should now have a new Discord application. It should look like the screenshot below.
   </p>
-  <figure><img src="/instructions/09_fresh_application.png" alt="Fresh App" /></figure>
+  <figure><img src="/assets/setup/09_fresh_application.png" alt="Fresh App" /></figure>
 </div>
 
 <div class="content">
@@ -140,21 +140,21 @@
     select the <span class="has-text-weight-bold">Bot</span> section.
     Then click the <span class="has-text-weight-bold">Add Bot</span> button.
   </p>
-  <figure><img src="/instructions/10_add_bot.png" alt="Add a Bot" /></figure>
+  <figure><img src="/assets/setup/10_add_bot.png" alt="Add a Bot" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">11.</span>
     Click the <span class="has-text-weight-bold">Yes, do it!</span> button to confirm adding the bot to the application.
   </p>
-  <figure><img src="/instructions/11_accept_new_bot.png" alt="Accept New Bot" /></figure>
+  <figure><img src="/assets/setup/11_accept_new_bot.png" alt="Accept New Bot" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">12.</span>
      You should now have a new Discord bot. It should look like the screenshot below.
   </p>
-  <figure><img src="/instructions/12_fresh_bot.png" alt="Fresh Bot" /></figure>
+  <figure><img src="/assets/setup/12_fresh_bot.png" alt="Fresh Bot" /></figure>
 </div>
 
 <div class="content">
@@ -165,8 +165,8 @@
     switch and turn it ON.
     Then click <span class="has-text-weight-bold">Save Changes</span> button.
   </p>
-  <figure><img src="/instructions/13_make_bot_private.png" alt="Make Bot Private" /></figure>
-  <figure><img src="/instructions/13_allow_receive_messages.png" alt="Allow Receive Messages" /></figure>
+  <figure><img src="/assets/setup/13_make_bot_private.png" alt="Make Bot Private" /></figure>
+  <figure><img src="/assets/setup/13_allow_receive_messages.png" alt="Allow Receive Messages" /></figure>
 </div>
 
 <div class="content">
@@ -178,7 +178,7 @@
     Now on the right panel, in <span class="has-text-weight-bold">SCOPES</span>,
     check the <span class="has-text-weight-bold">bot</span> checkbox.
   </p>
-  <figure><img src="/instructions/14_bot_invite_scope.png" alt="Set Bot Scope" /></figure>
+  <figure><img src="/assets/setup/14_bot_invite_scope.png" alt="Set Bot Scope" /></figure>
 </div>
 
 <div class="content">
@@ -188,14 +188,14 @@
     Now click the <span class="has-text-weight-bold">Copy</span> button
     to copy the generated invite URL.
   </p>
-  <figure><img src="/instructions/15_bot_invite_perms.png" alt="Set Bot Perms" /></figure>
+  <figure><img src="/assets/setup/15_bot_invite_perms.png" alt="Set Bot Perms" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">16.</span>
     Open a new tab in your browser. Paste the URL into the address bar and hit enter.
   </p>
-  <figure><img src="/instructions/16_bot_invite_url.png" alt="Invite Bot" /></figure>
+  <figure><img src="/assets/setup/16_bot_invite_url.png" alt="Invite Bot" /></figure>
 </div>
 
 <div class="content">
@@ -203,21 +203,21 @@
     Choose your Discord server from the dropdown list.
     Then click the <span class="has-text-weight-bold">Continue</span> button.
   </p>
-  <figure><img src="/instructions/17_bot_invite_choose_server.png" alt="Choose Server for Bot" /></figure>
+  <figure><img src="/assets/setup/17_bot_invite_choose_server.png" alt="Choose Server for Bot" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">18.</span>
     Click the <span class="has-text-weight-bold">Authorize</span> button to complete the bot invite.
   </p>
-  <figure><img src="/instructions/18_bot_invite_authorize.png" alt="Authorise Bot" /></figure>
+  <figure><img src="/assets/setup/18_bot_invite_authorize.png" alt="Authorise Bot" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">19.</span>
     Your new bot has now joined your Discord server!
   </p>
-  <figure><img src="/instructions/19_bot_invite_authorized.png" alt="Bot Authorised" /></figure>
+  <figure><img src="/assets/setup/19_bot_invite_authorized.png" alt="Bot Authorised" /></figure>
 </div>
 
 <div class="content">
@@ -225,7 +225,7 @@
     Now go to the Discord server browser tab. You should now see the bot as a member on the right panel.
     It will be offline, that is expected.
   </p>
-  <figure><img src="/instructions/20_bot_invite_fresh.png" alt="Bot Invited" /></figure>
+  <figure><img src="/assets/setup/20_bot_invite_fresh.png" alt="Bot Invited" /></figure>
 </div>
 
 <div class="content">
@@ -237,7 +237,7 @@
   <p>
     To enable, open <span class="has-text-weight-bold">User Settings</span> with the cog button.
   </p>
-  <figure><img src="/instructions/21_open_settings.png" alt="Open Discord Settings" /></figure>
+  <figure><img src="/assets/setup/21_open_settings.png" alt="Open Discord Settings" /></figure>
 </div>
 
 <div class="content">
@@ -246,7 +246,7 @@
     Then switch on <span class="has-text-weight-bold">Developer Mode</span>.
     Now click the <span class="has-text-weight-bold">ESC</span> button at the top right to close Settings.
   </p>
-  <figure><img src="/instructions/22_enable_developer_mode.png" alt="Enable Developer Mode" /></figure>
+  <figure><img src="/assets/setup/22_enable_developer_mode.png" alt="Enable Developer Mode" /></figure>
 </div>
 
 <div class="content">
@@ -254,7 +254,7 @@
     With Developer Mode enabled. If you right-click on a Channel, there is now a menu option to Copy ID.
     This will be useful later on.
   </p>
-  <figure><img src="/instructions/23_copy_channel_id.png" alt="Copy Channel ID" /></figure>
+  <figure><img src="/assets/setup/23_copy_channel_id.png" alt="Copy Channel ID" /></figure>
 </div>
 
 <div class="content" id="getbottoken">
@@ -264,14 +264,14 @@
     the <span class="has-text-weight-bold">Reset Token</span> button.
     This will reset and generate a new token.
   </p>
-  <figure><img src="/instructions/24_reset_bot_token.png" alt="Reset Bot Token" /></figure>
+  <figure><img src="/assets/setup/24_reset_bot_token.png" alt="Reset Bot Token" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">25.</span>
     Click the <span class="has-text-weight-bold">Yes, do it!</span> button to confirm.
   </p>
-  <figure><img src="/instructions/25_accept_reset_bot_token.png" alt="Accept Reset Bot Token" /></figure>
+  <figure><img src="/assets/setup/25_accept_reset_bot_token.png" alt="Accept Reset Bot Token" /></figure>
 </div>
 
 <div class="content">
@@ -279,7 +279,7 @@
     Now click the <span class="has-text-weight-bold">Copy</span> button to copy the new token.
     Do not share this token with anyone.
   </p>
-  <figure><img src="/instructions/26_copy_bot_token.png" alt="Copy Bot Token" /></figure>
+  <figure><img src="/assets/setup/26_copy_bot_token.png" alt="Copy Bot Token" /></figure>
 </div>
 
 <div class="content">
@@ -318,7 +318,7 @@
     Go to the Discord server browser tab again. You should now see the bot online on the right panel.
     Congratulations making it this far!
   </p>
-  <figure><img src="/instructions/29_bot_logged_in.png" alt="Bot Logged In" /></figure>
+  <figure><img src="/assets/setup/29_bot_logged_in.png" alt="Bot Logged In" /></figure>
 </div>
 
 <div class="content">
@@ -328,7 +328,7 @@
     The bot should reply with available commands.
   </p>
   <pre class="pre">!help</pre>
-  <figure><img src="/instructions/30_help_system.png" alt="System Help" /></figure>
+  <figure><img src="/assets/setup/30_help_system.png" alt="System Help" /></figure>
 </div>
 
 <div class="content">
@@ -337,7 +337,7 @@
     The response shows none are found because no instance has been created yet.
   </p>
   <pre class="pre">!instances</pre>
-  <figure><img src="/instructions/31_instances_empty.png" alt="Instances Empty" /></figure>
+  <figure><img src="/assets/setup/31_instances_empty.png" alt="Instances Empty" /></figure>
 </div>
 
 <div class="content">
@@ -346,7 +346,7 @@
     This is expected, you aren't authorised to create a server yet. Next steps will remedy this.
   </p>
   <pre class="pre">!create myserver projectzomboid</pre>
-  <figure><img src="/instructions/32_create_instance_locked.png" alt="Create Instances Locked" /></figure>
+  <figure><img src="/assets/setup/32_create_instance_locked.png" alt="Create Instances Locked" /></figure>
 </div>
 
 <div class="content">
@@ -355,14 +355,14 @@
     Find <span class="has-text-weight-bold">Server Settings</span>
     then click on <span class="has-text-weight-bold">Roles</span>.
   </p>
-  <figure><img src="/instructions/33_open_roles.png" alt="Open Roles" /></figure>
+  <figure><img src="/assets/setup/33_open_roles.png" alt="Open Roles" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">34.</span>
     Click the <span class="has-text-weight-bold">Create Role</span> button.
   </p>
-  <figure><img src="/instructions/34_create_role_new.png" alt="Create New Role" /></figure>
+  <figure><img src="/assets/setup/34_create_role_new.png" alt="Create New Role" /></figure>
 </div>
 
 <div class="content">
@@ -371,14 +371,14 @@
     Now <span class="has-text-weight-bold">Save Changes</span>
     then select the <span class="has-text-weight-bold">Manage Members</span> tab.
   </p>
-  <figure><img src="/instructions/35_create_pzadmin_role.png" alt="Create PZAdmin Role" /></figure>
+  <figure><img src="/assets/setup/35_create_pzadmin_role.png" alt="Create PZAdmin Role" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">36.</span>
     Click the <span class="has-text-weight-bold">Add Members</span> button.
   </p>
-  <figure><img src="/instructions/36_add_member.png" alt="Add Members to Role" /></figure>
+  <figure><img src="/assets/setup/36_add_member.png" alt="Add Members to Role" /></figure>
 </div>
 
 <div class="content">
@@ -389,7 +389,7 @@
     and make changes as you want. When done click the <span class="has-text-weight-bold">ESC</span>
     button at the top right to close Settings.
   </p>
-  <figure><img src="/instructions/37_choose_member.png" alt="Choose Members for Role" /></figure>
+  <figure><img src="/assets/setup/37_choose_member.png" alt="Choose Members for Role" /></figure>
 </div>
 
 <div class="content">
@@ -405,7 +405,7 @@
     The arrow will mark the current selected instance.
   </p>
   <pre class="pre">!create myserver projectzomboid</pre>
-  <figure><img src="/instructions/38_create_instance_success.png" alt="Create Instances Success" /></figure>
+  <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
 </div>
 
 <div class="content">
@@ -414,7 +414,7 @@
     you will see all the commands for that type of server.
   </p>
   <pre class="pre">!help</pre>
-  <figure><img src="/instructions/39_help_pz.png" alt="Help PZ" /></figure>
+  <figure><img src="/assets/setup/39_help_pz.png" alt="Help PZ" /></figure>
 </div>
 
 <div class="content">
@@ -427,8 +427,8 @@
     server was installed without issue.
   </p>
   <pre class="pre">!deployment install-runtime</pre>
-  <figure><img src="/instructions/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" /></figure>
-  <figure><img src="/instructions/40_deploy_runtime_success.png" alt="Deploy Runtime Success" /></figure>
+  <figure><img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" /></figure>
+  <figure><img src="/assets/setup/40_deploy_runtime_success.png" alt="Deploy Runtime Success" /></figure>
 </div>
 
 <div class="content">
@@ -437,8 +437,8 @@
     an hourglass emoji is shown then replaced with a green tick when the server has fully started.
   </p>
   <pre class="pre">!server start</pre>
-  <figure><img src="/instructions/41_server_start_hourglass.png" alt="Start Server Hourglass" /></figure>
-  <figure><img src="/instructions/41_server_start_success.png" alt="Start Server Success" /></figure>
+  <figure><img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" /></figure>
+  <figure><img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" /></figure>
 </div>
 
 <div class="content">
@@ -447,7 +447,7 @@
     Now that the server is up, the server version and connection details are shown.
   </p>
   <pre class="pre">!server</pre>
-  <figure><img src="/instructions/42_server_status_up.png" alt="Server Status Up" /></figure>
+  <figure><img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" /></figure>
 </div>
 
 <div class="content">
@@ -457,7 +457,7 @@
     So stop the server with the following command.
   </p>
   <pre class="pre">!server stop</pre>
-  <figure><img src="/instructions/43_server_stop.png" alt="Server Stop" /></figure>
+  <figure><img src="/assets/setup/43_server_stop.png" alt="Server Stop" /></figure>
 </div>
 
 <div class="content">
@@ -466,7 +466,7 @@
     See the server command list for other configuration files that can be downloaded.
   </p>
   <pre class="pre">!getconfig ini</pre>
-  <figure><img src="/instructions/44_getconfig_ini.png" alt="Get Config INI" /></figure>
+  <figure><img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" /></figure>
 </div>
 
 <div class="content">
@@ -487,7 +487,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Once again, the bot will react with a green tick emoji to show that the command was successful.
   </p>
   <pre class="pre">!setconfig ini</pre>
-  <figure><img src="/instructions/46_setconfig_ini.png" alt="Set Config INI" /></figure>
+  <figure><img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" /></figure>
 </div>
 
 <div class="content">
@@ -496,7 +496,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     using the default configuration. You can delete the world with the following command.
   </p>
   <pre class="pre">!deployment wipe-world-save</pre>
-  <figure><img src="/instructions/47_wipe_map.png" alt="Wipe Map" /></figure>
+  <figure><img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" /></figure>
 </div>
 
 <div class="content">
@@ -511,9 +511,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Also, if you set a Log Channel ID in the bot setup you should see a login event in that channel.
   </p>
   <pre class="pre">!server start</pre>
-  <figure><img src="/instructions/48_login_server_details.png" alt="Login Server Details" /></figure>
-  <figure><img src="/instructions/48_login_welcome_message.png" alt="Login Welcome Message" /></figure>
-  <figure><img src="/instructions/48_login_event.png" alt="Login Event" /></figure>
+  <figure><img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" /></figure>
+  <figure><img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" /></figure>
+  <figure><img src="/assets/setup/48_login_event.png" alt="Login Event" /></figure>
 </div>
 
 <div class="content">
@@ -525,9 +525,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   </p>
   <pre class="pre">!world broadcast Hello Everyone</pre>
   <pre class="pre">!player Demo give-item Base Axe 2</pre>
-  <figure><img src="/instructions/49_console_commands.png" alt="Console Commands" /></figure>
-  <figure><img src="/instructions/49_world_broadcast.png" alt="World Broadcast" /></figure>
-  <figure><img src="/instructions/49_give_item.png" alt="Give Item" /></figure>
+  <figure><img src="/assets/setup/49_console_commands.png" alt="Console Commands" /></figure>
+  <figure><img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" /></figure>
+  <figure><img src="/assets/setup/49_give_item.png" alt="Give Item" /></figure>
 </div>
 
 
@@ -597,18 +597,18 @@ UPnP=false</pre>
     You can configure how much of your real machine memory and CPU the virtual machine is allowed to use.
     To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
   </p>
-  <figure><img src="/instructions/vb_main.png" alt="VirtualBox Main" /></figure>
+  <figure><img src="/assets/setup/vb_main.png" alt="VirtualBox Main" /></figure>
   <p>
     Select the <span class="has-text-weight-bold">System</span> section on the left panel,
     then the <span class="has-text-weight-bold">Motherboard</span> tab.
     By default 9Gb of memory is allocated to ZomBox. This value should not be more
     than how much free memory your real machine has.
   </p>
-  <figure><img src="/instructions/vb_sysmem.png" alt="ZomBox Memory" /></figure>
+  <figure><img src="/assets/setup/vb_sysmem.png" alt="ZomBox Memory" /></figure>
   <p>
     On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much CPU is allowed.
   </p>
-  <figure><img src="/instructions/vb_syscpu.png" alt="ZomBox CPU" /></figure>
+  <figure><img src="/assets/setup/vb_syscpu.png" alt="ZomBox CPU" /></figure>
   <p>
     The Project Zomboid server that runs inside ZomBox also has a memory allocation.
     This is defined in the <span class="is-family-monospace">ProjectZomboid64.json</span> file.

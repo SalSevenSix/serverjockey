@@ -88,7 +88,7 @@ class LoggerSubscriber(msgabc.AbcSubscriber):
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  level: int = logging.DEBUG,
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
+        super().__init__(msg_filter)
         self._level = level
         self._transformer = transformer
 

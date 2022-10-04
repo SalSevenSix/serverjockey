@@ -134,8 +134,8 @@ class WebResource(httpabc.Resource):
             return self._handler.handle_get(self, data)
         return await self._handler.handle_get(self, data)
 
-    async def handle_post(self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]
-                          ) -> httpabc.ABC_RESPONSE:
+    async def handle_post(
+            self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]) -> httpabc.ABC_RESPONSE:
         data = PathProcessor(self).extract_args_url(url)
         if isinstance(body, dict):
             data.update(body)

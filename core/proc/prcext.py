@@ -9,7 +9,7 @@ from core.system import svrsvc
 
 
 class ServerStateSubscriber(msgabc.AbcSubscriber):
-    STATE_MAP = {
+    _STATE_MAP = {
         proch.ServerProcess.STATE_START: 'START',
         proch.ServerProcess.STATE_STARTING: 'STARTING',
         proch.ServerProcess.STATE_STARTED: 'STARTED',
@@ -26,7 +26,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         name = message.name()
-        state = util.get(name, ServerStateSubscriber.STATE_MAP)
+        state = util.get(name, ServerStateSubscriber._STATE_MAP)
         svrsvc.ServerStatus.notify_state(self._mailer, self, state if state else 'UNKNOWN')
         if name is proch.ServerProcess.STATE_EXCEPTION:
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'error': repr(message.data())})

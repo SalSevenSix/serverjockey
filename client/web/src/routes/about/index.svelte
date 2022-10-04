@@ -1,7 +1,11 @@
+<script>
+  import RubiksCube from '$lib/RubiksCube.svelte';
+</script>
+
 
 <div class="columns">
   <div class="column is-one-third">
-    <figure class="pl-5 pr-6"><img src="/assets/rubiks-cube-white.svg" alt="ServerJockey box" /></figure>
+    <div class="pl-5 pr-6"><RubiksCube dazzle /></div>
   </div>
   <div class="column content">
     <h2 class="title is-3 mt-2">About</h2>
@@ -18,7 +22,8 @@
       <div class="column is-half">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
           <figure>
-            <img class="ko-fi-img" src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3" alt="Help support me at at ko-fi.com" />
+            <img class="ko-fi-img" src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
+                 alt="Help support me at at ko-fi.com" />
           </figure>
         </a>
       </div>
@@ -30,7 +35,7 @@
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
           <figure>
-            <img class="github-img" src="/assets/GitHub_Logo.png" alt="ServerJockey on GitHub" />
+            <img class="github-img" src="/assets/icons/GitHub_Logo.png" alt="ServerJockey on GitHub" />
           </figure>
         </a>
       </div>

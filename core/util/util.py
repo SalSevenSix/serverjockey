@@ -48,8 +48,8 @@ def now_millis() -> int:
 def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
     if collection is None or len(collection) == 0:
         return None
-    for message in iter(collection):
-        return message
+    for item in iter(collection):
+        return item
 
 
 def iterable(value: typing.Any) -> bool:

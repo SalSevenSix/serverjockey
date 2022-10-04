@@ -20,7 +20,7 @@ class SystemService:
         self._modules = {}
         self._home_dir = context.config('home')
         self._clientfile = contextext.ClientFile(
-            context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
+            context, util.overridable_full_path(self._home_dir, context.config('clientfile')))
         subs = httpsubs.HttpSubscriptionService(context)
         self._resource = httprsc.WebResource()
         httprsc.ResourceBuilder(self._resource) \

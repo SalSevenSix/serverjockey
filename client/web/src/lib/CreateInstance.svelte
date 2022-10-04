@@ -40,7 +40,7 @@
 <div class="block">
   <h2 class="title is-5">New Instance</h2>
   <div class="field">
-    <label for="createinstance-module" class="label">Instance Type</label>
+    <label for="createinstance-module" class="label">Type</label>
     <div class="control">
       <div class="select">
         <select id="createinstance-module" bind:value={serverForm.module}>
@@ -52,14 +52,15 @@
     </div>
   </div>
   <div class="field">
-    <label for="createinstance-instance" class="label">Instance Name</label>
+    <label for="createinstance-instance" class="label">Name</label>
     <div class="control">
       <input id="createinstance-instance" class="input" type="text" bind:value={serverForm.identity}>
     </div>
   </div>
   <div class="field">
     <div class="control">
-      <button id="createinstance-create" disabled={creating} name="create" class="button is-primary is-fullwidth" on:click={create}>Create</button>
+      <button id="createinstance-create" name="create" class="button is-primary is-fullwidth"
+              disabled={creating} on:click={create}>Create</button>
     </div>
   </div>
 </div>

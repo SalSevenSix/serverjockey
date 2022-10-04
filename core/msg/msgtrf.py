@@ -45,9 +45,3 @@ class ToString(msgabc.Transformer):
         if message.has_reply_to():
             line.append('[' + self.transform(message.reply_to()) + ']')
         return '\n'.join(line)
-
-
-class ToJson(msgabc.Transformer):
-
-    def transform(self, message):
-        return util.obj_to_json(message)

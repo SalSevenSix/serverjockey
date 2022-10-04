@@ -3,6 +3,7 @@
   import { notifyError } from '$lib/notifications';
 	import { capitalize, humanFileSize, humanDuration } from '$lib/util';
 	import { baseurl, newGetRequest } from '$lib/serverjockeyapi';
+  import RubiksCube from '$lib/RubiksCube.svelte';
 
   let info = {
     version: '0.0.0',
@@ -39,7 +40,7 @@
 
 <div class="columns">
   <div class="column">
-    <figure class="pl-5 pr-6"><img src="/assets/rubiks-cube-white.svg" alt="Banner" /></figure>
+    <div class="pl-5 pr-6"><RubiksCube /></div>
   </div>
   <div class="column is-one-quarter">
     <table class="table">

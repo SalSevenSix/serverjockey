@@ -62,15 +62,6 @@ class SourceIs(msgabc.Filter):
         return self._source_object is message.source()
 
 
-class SourceClassIs(msgabc.Filter):
-
-    def __init__(self, source_class):
-        self._source_class = source_class
-
-    def accepts(self, message):
-        return self._source_class is type(message.source())
-
-
 class ReplyToIs(msgabc.Filter):
 
     def __init__(self, reply_to):
@@ -127,8 +118,8 @@ class DataStrContains(msgabc.Filter):
 
 class DataMatches(msgabc.Filter):
 
-    def __init__(self, regex):
-        self._pattern = regex if regex is re.Pattern else re.compile(regex)
+    def __init__(self, regex: str | re.Pattern):
+        self._pattern = regex if isinstance(regex, re.Pattern) else re.compile(regex)
 
     def accepts(self, message):
         return self._pattern.match(str(message.data())) is not None

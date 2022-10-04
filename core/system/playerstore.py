@@ -2,6 +2,7 @@ import typing
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
 from core.proc import proch
+# TODO Should move out of system into new package
 
 PLAYER_EVENT = 'playerstore.Event'
 PLAYER_EVENT_FILTER = msgftr.NameIs(PLAYER_EVENT)

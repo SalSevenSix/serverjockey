@@ -7,12 +7,12 @@ from core.util import util, pack, io
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics
 
-ACCEPTED_MIME_TYPES = (
+_ACCEPTED_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
     httpcnt.MIME_APPLICATION_JSON,
     httpcnt.MIME_MULTIPART_FORM_DATA,
     httpcnt.MIME_APPLICATION_BIN)
-TEXT_MIME_TYPES = (
+_TEXT_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
     httpcnt.MIME_APPLICATION_JSON)
 
@@ -109,7 +109,7 @@ class _RequestHandler:
         request_body, content_type = b'{}', httpcnt.CONTENT_TYPE_APPLICATION_JSON
         if self._request.can_read_body:
             content_type = headers.get_content_type()
-            if content_type is None or content_type.mime_type() not in ACCEPTED_MIME_TYPES:
+            if content_type is None or content_type.mime_type() not in _ACCEPTED_MIME_TYPES:
                 raise err.HTTPUnsupportedMediaType
             if content_type.mime_type() == httpcnt.MIME_MULTIPART_FORM_DATA:
                 request_body = _MultipartFormByteStream(self._request.content, self._request.headers)
@@ -117,7 +117,7 @@ class _RequestHandler:
                 request_body = _RequestByteStream(self._request.content, headers.get_content_length())
             else:
                 request_body = await self._request.content.read()
-        if content_type.mime_type() in TEXT_MIME_TYPES:
+        if content_type.mime_type() in _TEXT_MIME_TYPES:
             encoding = content_type.encoding() if content_type.encoding() else httpcnt.UTF8
             request_body = request_body.decode(encoding).strip()
             if content_type.mime_type() == httpcnt.MIME_APPLICATION_JSON:
@@ -153,7 +153,7 @@ class _RequestHandler:
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = util.obj_to_json(body)
             body = body.encode(httpcnt.UTF8)
-        if isinstance(body, bytes) and len(body) > 1024 and headers.accepts_encoding(httpcnt.GZIP):
+        if isinstance(body, bytes) and len(body) > 512 and headers.accepts_encoding(httpcnt.GZIP):
             body = await pack.gzip_compress(body)
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
         if isinstance(body, httpabc.ByteStream):
