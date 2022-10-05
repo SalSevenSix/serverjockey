@@ -42,11 +42,11 @@ SERVER_STARTED_FILTER = msgftr.And(
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION = 'versionNumber='
+    VERSION = '> buildNumber='
     VERSION_FILTER = msgftr.DataStrContains(VERSION)
     IP = 'Public IP:'
     IP_FILTER = msgftr.DataStrContains(IP)
-    PORT = 'server is listening on port'
+    PORT = '> Clients should use'
     PORT_FILTER = msgftr.DataStrContains(PORT)
     STEAMID = 'Server Steam ID'
     STEAMID_FILTER = msgftr.DataStrContains(STEAMID)
@@ -71,7 +71,6 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
-            value = util.right_chop_and_strip(value, 'demo=')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
@@ -80,6 +79,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT)
+            value = util.right_chop_and_strip(value, 'port for connections')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': int(value)})
             return None
         if _ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
