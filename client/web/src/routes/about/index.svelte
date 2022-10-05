@@ -7,7 +7,7 @@
   <div class="column is-one-third">
     <div class="pl-5 pr-6"><RubiksCube dazzle /></div>
   </div>
-  <div class="column content">
+  <div class="column content is-two-thirds">
     <h2 class="title is-3 mt-2">About</h2>
     <p>
       <span class="has-text-weight-bold">ZomBox</span> is a self contained game server management system

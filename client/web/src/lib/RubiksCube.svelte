@@ -7,14 +7,50 @@
 
   let colours = Array(27).fill('#000000');
 
+  function generateSchedule(index) {
+    let actions = [];
+    let clock = 0;
+    let current = false;
+    let on_low = 50;
+    let on_high = 200;
+    let off_low = 100;
+    let off_high = 300;
+    while (clock < 2500 || !current) {
+      if (current) {
+        clock = clock + on_low + Math.floor(Math.random() * on_high);
+        on_low = on_low + 20;
+        on_high = on_high + 200;
+      } else {
+        clock = clock + off_low + Math.floor(Math.random() * off_high);
+        if (off_low > 40) { off_low = off_low - 20; }
+        if (off_high > 200) { off_high = off_high - 100; }
+      }
+      current = !current;
+      actions.push({ index: index, schedule: clock, on: current });
+    }
+    return actions;
+  }
+
+  function generateSchedules() {
+    let actions = [];
+    for (var i = 0; i < 27; i++) {
+       actions.push(...generateSchedule(i));
+    }
+    actions.sort(function(a, b) { return a.schedule - b.schedule });
+    return actions;
+  }
+
 	onMount(async function() {
 	  if (!dazzle) {
 	    colours = colours.fill('#ffffff');
 	    return;
 	  }
-	  for (var i = 0; i < 27; i++) {
-	    await sleep(100);
-	    colours = colours.fill('#ffffff', i, i + 1);
+	  let clock = 0;
+	  let actions = generateSchedules();
+	  for (var i = 0; i < actions.length; i++) {
+	    await sleep(actions[i].schedule - clock);
+	    clock = actions[i].schedule;
+	    colours = colours.fill(actions[i].on ? '#ffffff' : '#000000', actions[i].index, actions[i].index + 1);
 	  }
 	});
 </script>

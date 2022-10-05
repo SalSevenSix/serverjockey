@@ -39,10 +39,10 @@
 
 
 <div class="columns">
-  <div class="column">
+  <div class="column is-one-third">
     <div class="pl-5 pr-6"><RubiksCube /></div>
   </div>
-  <div class="column is-one-quarter">
+  <div class="column is-one-third">
     <table class="table">
       <tbody>
         <tr><td class="has-text-weight-bold">Version</td><td>{info.version}</td></tr>
@@ -55,7 +55,7 @@
       </tbody>
     </table>
   </div>
-  <div class="column">
+  <div class="column is-one-third">
     <table class="table">
       <tbody>
         <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
@@ -69,3 +69,10 @@
     </table>
   </div>
 </div>
+
+
+<style>
+  .table {
+    width: 90%;
+  }
+</style>
