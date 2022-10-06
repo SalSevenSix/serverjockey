@@ -72,21 +72,21 @@ exports.urlSafeB64encode = function(value) {
   return btoa(data).replaceAll('+', '-').replaceAll('/', '_');
 }
 
-exports.newGetRequest = function(token) {
+exports.newGetRequest = function(secret) {
   return {
     method: 'get',
     headers: {
-      'X-Secret': token
+      'X-Secret': secret
     }
   };
 }
 
-exports.newPostRequest = function(ct, token) {
+exports.newPostRequest = function(ct, secret) {
   return {
     method: 'post',
     headers: {
       'Content-Type': ct,
-      'X-Secret': token
+      'X-Secret': secret
     }
   };
 }

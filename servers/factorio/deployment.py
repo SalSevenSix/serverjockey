@@ -2,20 +2,46 @@ import aiohttp
 from core.util import util, tasks, io, pack, aggtrf
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpsubs
-from core.proc import proch
+from core.http import httpabc, httprsc, httpext, httpsubs, httpsel
+from core.proc import proch, jobh
 from servers.factorio import messaging as msg
 
 
 class Deployment:
+
+    @staticmethod
+    def _default_cmdargs_settings():
+        return {
+            '_comment_port': 'Port for the Factorio server to use. Default 34197 used if null.',
+            'port': None,
+            '_comment_rcon-port': 'Optional RCON port.',
+            'rcon-port': None,
+            '_comment_rcon-password': 'RCON password. Required if RCON port specified.',
+            'rcon-password': None,
+            '_comment_use-server-whitelist': 'If the whitelist should be used.',
+            'use-server-whitelist': False,
+            '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer'
+                                            ' and inform Factorio.com about ban/unban commands.',
+            'use-authserver-bans': False
+        }
+
+    @staticmethod
+    def _default_mods_list():
+        return {
+            'service-username': None,
+            'service-token': None,
+            'mods': [{'name': 'base', 'enabled': True}]
+        }
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
         self._home_dir = context.config('home')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
+        self._runtime_metafile = self._runtime_dir + '/data/changelog.txt'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
         self._current_log = self._runtime_dir + '/factorio-current.log'
+        self._autosave_dir = self._runtime_dir + '/saves'
         self._mods_dir = self._runtime_dir + '/mods'
         self._server_settings_def = self._runtime_dir + '/data/server-settings.example.json'
         self._map_settings_def = self._runtime_dir + '/data/map-settings.example.json'
@@ -35,21 +61,14 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
-        self._mailer.register(proch.JobProcess(self._mailer))
+        self._mailer.register(jobh.JobProcess(self._mailer))
+        self._mailer.register(msgext.CallableSubscriber(httpext.WipeHandler.FILTER, self.build_world))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
-        archive_selector = httpsubs.Selector(
-            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
-            completed_filter=msgftr.DataEquals('END Archive Directory'),
-            aggregator=aggtrf.StrJoin('\n'))
-        unpacker_selector = httpsubs.Selector(
-            msg_filter=msgftr.NameIs(msgext.LoggingPublisher.INFO),
-            completed_filter=msgftr.DataEquals('END Unpack Directory'),
-            aggregator=aggtrf.StrJoin('\n'))
         httprsc.ResourceBuilder(resource) \
             .append('log', httpext.FileSystemHandler(self._current_log)) \
             .push('config') \
@@ -63,19 +82,21 @@ class Deployment:
             .append('banlist', httpext.FileSystemHandler(self._server_banlist)) \
             .pop() \
             .push('deployment') \
+            .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
             .append('install-runtime', _InstallRuntimeHandler(self, self._mailer)) \
-            .append('wipe-world-all', _WipeHandler(self, self._world_dir)) \
-            .append('wipe-world-config', _WipeHandler(self, self._config_dir)) \
-            .append('wipe-world-save', _WipeHandler(self, self._save_dir)) \
+            .append('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir)) \
+            .append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir)) \
+            .append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir)) \
+            .append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir)) \
             .append('backup-runtime', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, archive_selector)) \
+                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, httpsel.archive_selector())) \
             .append('backup-world', httpext.MessengerHandler(
                 self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, archive_selector)) \
+                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, httpsel.archive_selector())) \
             .append('restore-backup', httpext.MessengerHandler(
                 self._mailer, msgext.Unpacker.REQUEST,
-                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, unpacker_selector)) \
+                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, httpsel.unpacker_selector())) \
             .pop() \
             .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
@@ -121,13 +142,11 @@ class Deployment:
         if not await io.file_exists(self._server_adminlist):
             await io.write_file(self._server_adminlist, '[]')
         if not await io.file_exists(self._cmdargs_settings):
-            await io.write_file(self._cmdargs_settings, util.obj_to_json({
-                'port': None, 'rcon-port': None, 'rcon-password': None,
-                'use-server-whitelist': False, 'use-authserver-bans': False}, pretty=True))
+            await io.write_file(
+                self._cmdargs_settings, util.obj_to_json(Deployment._default_cmdargs_settings(), pretty=True))
         if not await io.file_exists(self._mods_list):
-            await io.write_file(self._mods_list, util.obj_to_json({
-                'service-username': None, 'service-token': None,
-                'mods': [{'name': 'base', 'enabled': True}]}, pretty=True))
+            await io.write_file(
+                self._mods_list, util.obj_to_json(Deployment._default_mods_list(), pretty=True))
 
     async def install_runtime(self):
         url = 'https://factorio.com/get-download/stable/headless/linux64'
@@ -164,11 +183,13 @@ class Deployment:
     async def ensure_map(self):
         if not await io.file_exists(self._map_file):
             await self._create_map()
+        if not await io.symlink_exists(self._autosave_dir):
+            await io.create_symlink(self._autosave_dir, self._save_dir)
 
     async def _create_map(self):
         await io.delete_directory(self._save_dir)
         await io.create_directory(self._save_dir)
-        await proch.JobProcess.run_job(self._mailer, self, (
+        await jobh.JobProcess.run_job(self._mailer, self, (
             self._executable,
             '--create', self._map_file,
             '--map-gen-settings', self._map_gen_settings,
@@ -244,15 +265,3 @@ class _DownloadTracker(io.BytesTracker):
             self._next_target += self._increment
             message = 'downloaded  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
             self._mailer.post(self, self._msg_name, message)
-
-
-class _WipeHandler(httpabc.AsyncPostHandler):
-
-    def __init__(self, deployment: Deployment, path: str):
-        self._deployment = deployment
-        self._path = path
-
-    async def handle_post(self, resource, data):
-        await io.delete_directory(self._path)
-        await self._deployment.build_world()
-        return httpabc.ResponseBody.NO_CONTENT

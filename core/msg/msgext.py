@@ -5,9 +5,8 @@ import time
 import uuid
 import collections
 import typing
-import aiofiles
-from core.util import aggtrf, tasks, util, funcutil, io, pack
-from core.msg import msgabc, msgftr, msgtrf
+from core.util import aggtrf, tasks, util, io, pack, funcutil
+from core.msg import msgabc, msgftr, msgtrf, msglog
 
 
 class SynchronousMessenger:
@@ -139,47 +138,6 @@ class Publisher:
             running = False if message is None else self._mailer.post(message)
         self._mailer.post(self, Publisher.END, self._producer)
         tasks.task_end(self._task)
-
-
-class LoggingPublisher:
-    CRITICAL = 'LoggingPublisher.CRITICAL'
-    ERROR = 'LoggingPublisher.ERROR'
-    WARNING = 'LoggingPublisher.WARNING'
-    INFO = 'LoggingPublisher.INFO'
-    DEBUG = 'LoggingPublisher.DEBUG'
-    _LEVEL_MAP = {
-        logging.CRITICAL: CRITICAL,
-        logging.ERROR: ERROR,
-        logging.WARNING: WARNING,
-        logging.INFO: INFO,
-        logging.DEBUG: DEBUG
-    }
-
-    def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
-        self._mailer = mailer
-        self._source = source
-
-    # noinspection PyUnusedLocal
-    def log(self, level, msg, *args, **kwargs):
-        self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args)
-
-    def debug(self, msg, *args, **kwargs):
-        self.log(logging.DEBUG, msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        self.log(logging.INFO, msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        self.log(logging.WARNING, msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        self.log(logging.ERROR, msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        self.log(logging.CRITICAL, msg, *args, **kwargs)
-
-    def fatal(self, msg, *args, **kwargs):
-        self.critical(msg, *args, **kwargs)
 
 
 class SetSubscriber(msgabc.Subscriber):
@@ -324,7 +282,7 @@ class Archiver(msgabc.AbcSubscriber):
         backups_dir = util.get('backups_dir', message.data())
         if backups_dir is None:
             raise Exception('No backups_dir')
-        logger = LoggingPublisher(self._mailer, message.source())
+        logger = msglog.LoggingPublisher(self._mailer, message.source())
         await pack.archive_directory(source_dir, backups_dir, logger)
         return None
 
@@ -348,7 +306,7 @@ class Unpacker(msgabc.AbcSubscriber):
             raise Exception('No filename')
         archive = backups_dir + '/' + filename
         unpack_dir = root_dir + '/' + filename.split('.')[0].split('-')[0]
-        logger = LoggingPublisher(self._mailer, message.source())
+        logger = msglog.LoggingPublisher(self._mailer, message.source())
         await pack.unpack_directory(archive, unpack_dir, logger)
         return None
 
@@ -410,57 +368,12 @@ class RollingLogSubscriber(msgabc.Subscriber):
         return None
 
 
-class LogfileSubscriber(msgabc.AbcSubscriber):
+class CallableSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self,
-                 filename: str,
-                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
-        self._transformer = transformer
-        self._filename = filename
-        self._file = None
+    def __init__(self, msg_filter: msgabc.Filter, callback: typing.Callable):
+        super().__init__(msg_filter)
+        self._callback = callback
 
     async def handle(self, message):
-        if message is msgabc.STOP:
-            await funcutil.silently_cleanup(self._file)
-            return True
-        try:
-            if self._file is None:
-                self._file = await aiofiles.open(self._filename, mode='w')
-            await self._file.write(self._transformer.transform(message))
-            await self._file.write('\n')
-            await self._file.flush()
-        except Exception as e:
-            await funcutil.silently_cleanup(self._file)
-            logging.error('LogfileSubscriber raised: %s', repr(e))
-            return False
-        return None
-
-
-class LoggerSubscriber(msgabc.AbcSubscriber):
-
-    def __init__(self,
-                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
-                 level: int = logging.DEBUG,
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
-        self._level = level
-        self._transformer = transformer
-
-    def handle(self, message):
-        logging.log(self._level, self._transformer.transform(message))
-        return None
-
-
-class PrintSubscriber(msgabc.AbcSubscriber):
-
-    def __init__(self,
-                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
-        super().__init__(msg_filter)
-        self._transformer = transformer
-
-    def handle(self, message):
-        print(self._transformer.transform(message))
+        await funcutil.silently_call(self._callback)
         return None

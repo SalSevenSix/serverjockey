@@ -71,7 +71,7 @@ class ServerService(msgabc.AbcSubscriber):
             if controller.daemon() and self._queue.empty():
                 self._running = controller.call_run()
             else:
-                controller.update(await self._queue.get())  # blocking
+                controller.update(await self._queue.get())
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:

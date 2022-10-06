@@ -3,7 +3,7 @@ import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
 from core.http import httpabc, httpcnt
 from core.context import contextsvc
-from core.util import util, pack, io
+from core.util import util, pack, pkg
 
 
 class Statics:
@@ -11,14 +11,14 @@ class Statics:
     def __init__(self, context: contextsvc.Context):
         self._loader = _Loader() if context.is_debug() else _CacheLoader()
 
-    async def handle(self, headers: httpcnt.HeadersTool, request: webabc.Request) -> web.Response:
+    async def handle(self, request: webabc.Request) -> web.Response:
         resource = await self._loader.load(request.path)
         if resource is None:
             raise err.HTTPNotFound
         response = web.Response()
         response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
         response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')  # One hour
-        if headers.accepts_encoding(httpcnt.GZIP) and await resource.compress():
+        if httpcnt.HeadersTool(request).accepts_encoding(httpcnt.GZIP) and await resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()
         else:
@@ -54,17 +54,9 @@ class _Loader:
         if path[-1] == '/':
             path += 'index.html'
         try:
-            data = await io.pkg_load('web', path)
+            data = await pkg.pkg_load('web', path)
             return _Resource(httpcnt.ContentTypeImpl.lookup(path), data) if data else None
-        except IsADirectoryError:
-            if not path.endswith('.html'):
-                return await self.load(path + '/')
-            return None
-        except FileNotFoundError:
-            if path.endswith('/index.html'):
-                return await self.load('/'.join(path.split('/')[:-1]) + '.html')
-            return None
-        except OSError:
+        except (IsADirectoryError, FileNotFoundError, OSError):
             if path.endswith('/index.html'):
                 return await self.load('/'.join(path.split('/')[:-1]) + '.html')
             if path.endswith('.html'):

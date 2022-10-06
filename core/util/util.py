@@ -1,11 +1,13 @@
 import logging
 import asyncio
+import random
 import base64
 import json
 import time
 import typing
 from collections.abc import Iterable
 
+_BASE62_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
     '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
@@ -18,6 +20,13 @@ def script_escape(value: str) -> str:
     if not isinstance(value, str):
         return value
     return value.translate(_SCRIPT_SPECIALS)
+
+
+def generate_token(length: int) -> str:
+    result = []
+    for i in range(length):
+        result.append(_BASE62_CHARS[random.randrange(0, 61)])
+    return ''.join(result)
 
 
 def is_format(text: str) -> bool:
@@ -39,8 +48,8 @@ def now_millis() -> int:
 def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
     if collection is None or len(collection) == 0:
         return None
-    for message in iter(collection):
-        return message
+    for item in iter(collection):
+        return item
 
 
 def iterable(value: typing.Any) -> bool:
@@ -102,15 +111,15 @@ def urlsafe_b64decode(value: str) -> str:
 
 
 def build_url(
-        host: typing.Optional[str] = None,
+        scheme: str = 'http',
+        host: str = 'localhost',
         port: int = 80,
         path: typing.Optional[str] = None) -> str:
-    parts = ['http://', str(host) if host else 'localhost']
+    parts = [scheme, '://', host]
     if port != 80:
         parts.append(':')
         parts.append(str(port))
     if path:
-        path = str(path)
         if not path.startswith('/'):
             parts.append('/')
         parts.append(path)
@@ -135,13 +144,6 @@ def right_chop_and_strip(line: str, keyword: str) -> str:
     if index == -1:
         return line
     return line[:index].strip()
-
-
-def insert_filename_suffix(filename: str, suffix: str) -> str:
-    index = filename.rfind('.')
-    if index == -1 or filename.rfind('/') > index:
-        return filename + suffix
-    return filename[:index] + suffix + filename[index:]
 
 
 def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):

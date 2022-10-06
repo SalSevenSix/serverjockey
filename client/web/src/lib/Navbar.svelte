@@ -1,8 +1,12 @@
 <script>
+  import RubiksCube from '$lib/RubiksCube.svelte';
+
   let menuOpen = false;
+
 	function menuToggle() {
 	  menuOpen = !menuOpen;
 	}
+
 	function menuClose() {
 	  menuOpen = false;
 	}
@@ -12,10 +16,11 @@
 <nav class="navbar is-spaced" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-item">
-      <img src="/assets/cube-ornate.svg" alt="ZomBox" width="28" height="28" />
+      <RubiksCube size="30" />
       <span class="ml-1 is-size-5 has-text-weight-bold">ZomBox</span>
     </div>
-    <a href={'#'} role="button" on:click={menuToggle} class:is-active={menuOpen} class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
+    <a href={'#'} role="button" on:click={menuToggle} class:is-active={menuOpen}
+       class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>

@@ -26,7 +26,10 @@
     <tbody>
       {#each Object.keys(actions) as name}
         <tr>
-          <td><button id="{name}-button" disabled={$serverStatus.running} name="{name}" class="button is-primary is-fullwidth" on:click={doAction}>{capitalizeKebabCase(name)}</button></td>
+          <td>
+            <button id="{name}-button" name="{name}" class="button is-danger is-fullwidth"
+                    disabled={$serverStatus.running} on:click={doAction}>{capitalizeKebabCase(name)}</button>
+          </td>
           <td>{actions[name]}</td>
         </tr>
       {/each}

@@ -33,7 +33,7 @@ export function newPostRequest(ct = 'application/json') {
   };
 }
 
-export function openFileInNewTab(url) {
+export function openFileInNewTab(url, errorCallback=null) {
   fetch(url, newGetRequest())
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
@@ -42,7 +42,13 @@ export function openFileInNewTab(url) {
     .then(function(blob) {
       window.open(window.URL.createObjectURL(blob)).focus();
     })
-    .catch(function(error) { notifyError('Failed to load. File may not exist.'); });
+    .catch(function(error) {
+      if (errorCallback) {
+        errorCallback(error);
+      } else {
+        notifyError('Failed to load. File may not exist.');
+      }
+    });
 }
 
 export class SubscriptionHelper {

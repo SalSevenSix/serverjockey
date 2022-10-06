@@ -1,17 +1,17 @@
 from core.util import util
 from core.msg import msgabc, msgftr
-from core.proc import proch, prcext
-from core.system import svrsvc
+from core.proc import proch, jobh, prcext
+from core.system import svrsvc, playerstore
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches(
         '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
 DEPLOYMENT_MSG = 'Deployment.Message'
-CONSOLE_FILTER = msgftr.Or(
+CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     proch.ServerProcess.FILTER_STDERR_LINE,
-    proch.JobProcess.FILTER_STDOUT_LINE,
+    jobh.JobProcess.FILTER_STDOUT_LINE,
     msgftr.NameIs(DEPLOYMENT_MSG))
 
 
@@ -22,6 +22,7 @@ class Messaging:
 
     def initialise(self):
         self._mailer.register(prcext.ServerStateSubscriber(self._mailer))
+        self._mailer.register(playerstore.PlayersSubscriber(self._mailer))
         self._mailer.register(_ServerDetailsSubscriber(self._mailer))
         self._mailer.register(_PlayerEventSubscriber(self._mailer))
 
@@ -61,7 +62,6 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     JOIN_FILTER = msgftr.DataStrContains(JOIN)
     LEAVE = '[LEAVE]'
     LEAVE_FILTER = msgftr.DataStrContains(LEAVE)
-    PLAYER_EVENT = '_PlayerEventSubscriber.Event'
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
@@ -74,17 +74,14 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.JOIN)
             value = util.right_chop_and_strip(value, 'joined the game')
             self._mailer.post(
-                self, _PlayerEventSubscriber.PLAYER_EVENT,
+                self, playerstore.PLAYER_EVENT,
                 {'event': 'login', 'player': {'steamid': False, 'name': value}})
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LEAVE)
             value = util.right_chop_and_strip(value, 'left the game')
             self._mailer.post(
-                self, _PlayerEventSubscriber.PLAYER_EVENT,
+                self, playerstore.PLAYER_EVENT,
                 {'event': 'logout', 'player': {'steamid': False, 'name': value}})
             return None
         return None
-
-
-PLAYER_EVENT_FILTER = msgftr.NameIs(_PlayerEventSubscriber.PLAYER_EVENT)

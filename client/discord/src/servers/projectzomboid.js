@@ -2,29 +2,14 @@
 
 const logger = require('../logger.js');
 const util = require('../util.js');
-const subs = require('../subs.js');
 const commons = require('../commons.js');
 
-exports.startup = function(context, channel, instance, url) {
-  if (!channel) return;
-  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
-    let result = '';
-    if (json.event === 'login') { result += 'LOGIN '; }
-    if (json.event === 'logout') { result += 'LOGOUT '; }
-    result += json.player.name;
-    if (json.player.steamid != null) {
-      result += ' [' + json.player.steamid + '] ' + instance;
-    }
-    channel.send(result);
-    return true;
-  });
-}
-
-exports.server = commons.server
-exports.getconfig = commons.getconfig
-exports.setconfig = commons.setconfig
-exports.deployment = commons.deployment
-exports.players = commons.players
+exports.startup = commons.startupSubscribePlayers;
+exports.server = commons.server;
+exports.getconfig = commons.getconfig;
+exports.setconfig = commons.setconfig;
+exports.deployment = commons.deployment;
+exports.players = commons.players;
 
 exports.world = function($) {
   let data = [...$.data];
@@ -76,7 +61,7 @@ exports.whitelist = function($) {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
         let pwd = Math.random().toString(16).substr(2, 8);
-        let name = user.tag.replaceAll(' ', '').replaceAll('#', '');
+        let name = user.tag.replaceAll(' ', '_').replaceAll('#', '');
         logger.info('Add user: ' + data[0] + ' ' + name);
         if ($.httptool.doPost('/whitelist/add', { player: name, password: pwd })) {
           user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd));
@@ -88,7 +73,7 @@ exports.whitelist = function($) {
   } else if (cmd === 'remove-id') {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
-        let name = user.tag.replaceAll(' ', '').replaceAll('#', '');
+        let name = user.tag.replaceAll(' ', '_').replaceAll('#', '');
         logger.info('Remove user: ' + data[0] + ' ' + name);
         $.httptool.doPost('/whitelist/remove', { player: name });
       })

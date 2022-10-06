@@ -134,8 +134,8 @@ class WebResource(httpabc.Resource):
             return self._handler.handle_get(self, data)
         return await self._handler.handle_get(self, data)
 
-    async def handle_post(self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]
-                          ) -> httpabc.ABC_RESPONSE:
+    async def handle_post(
+            self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]) -> httpabc.ABC_RESPONSE:
         data = PathProcessor(self).extract_args_url(url)
         if isinstance(body, dict):
             data.update(body)
@@ -189,7 +189,7 @@ class PathProcessor:
 
     def extract_args_url(self, url: URL) -> httpabc.ABC_DATA_GET:
         data = self.extract_args_path(url.path)
-        data.update({'baseurl': util.build_url(url.host, url.port)})
+        data.update({'baseurl': util.build_url(url.scheme, url.host, url.port)})
         return data
 
     def extract_args_path(self, path: str) -> httpabc.ABC_DATA_GET:

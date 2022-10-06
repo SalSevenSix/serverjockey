@@ -1,7 +1,6 @@
 import abc
 import os
 import shutil
-import pkgutil
 import time
 import typing
 import aiofiles
@@ -32,9 +31,20 @@ class WrapReader(Readable):
 
 
 _listdir = funcutil.to_async(os.listdir)
-_islinkfile = funcutil.to_async(os.path.islink)
+_is_symlink = funcutil.to_async(os.path.islink)
+_create_symlink = funcutil.to_async(os.symlink)
 _rmtree = funcutil.to_async(shutil.rmtree)
-_pkg_load = funcutil.to_async(pkgutil.get_data)
+
+
+def _auto_chmod(path: str):
+    for current_dir_path, subdir_names, file_names in os.walk(path):
+        for file_name in file_names:
+            if file_name.endswith('.sh') or file_name.find('.') == -1:
+                file_path = os.path.join(current_dir_path, file_name)
+                os.chmod(file_path, 0o774)
+
+
+auto_chmod = funcutil.to_async(_auto_chmod)
 
 
 async def directory_exists(path: typing.Optional[str]) -> bool:
@@ -49,6 +59,47 @@ async def file_exists(path: typing.Optional[str]) -> bool:
     return await aioos.path.isfile(path)
 
 
+async def symlink_exists(path: typing.Optional[str]) -> bool:
+    if path is None:
+        return False
+    return await _is_symlink(path)
+
+
+async def create_directory(path: str):
+    if not await directory_exists(path):
+        await aioos.mkdir(path)
+
+
+async def create_symlink(symlink_path: str, target_path: str):
+    await delete_directory(symlink_path)
+    await delete_file(symlink_path)
+    await _create_symlink(target_path, symlink_path)
+
+
+async def rename_path(source: str, target: str):
+    await aioos.rename(source, target)
+
+
+async def delete_directory(path: str):
+    if await directory_exists(path):
+        await _rmtree(path)
+
+
+async def delete_file(file: str):
+    if await file_exists(file):
+        await aioos.remove(file)
+
+
+async def find_in_env_path(env_path: str | None, executable: str) -> str | None:
+    if env_path is None:
+        return None
+    for path in env_path.split(':'):
+        filename = path + '/' + executable
+        if await file_exists(filename):
+            return filename
+    return None
+
+
 async def file_size(file: str) -> int:
     stats = await aioos.stat(file)
     return stats.st_size
@@ -60,14 +111,15 @@ async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typ
     result = []
     for name in iter(await _listdir(path)):
         file, ftype, size, entry = path + name, 'unknown', -1, {}
-        if await _islinkfile(file):
+        if await _is_symlink(file):
             ftype = 'link'
         elif await aioos.path.isfile(file):
             ftype = 'file'
             size = await file_size(file)
         elif await aioos.path.isdir(file):
             ftype = 'directory'
-        updated = time.ctime(await aioos.path.getmtime(file))
+        updated = time.localtime(await aioos.path.getmtime(file))
+        updated = time.strftime('%Y-%m-%d %H:%M:%S', updated)
         entry.update({'type': ftype, 'name': name, 'updated': updated})
         if size > -1:
             entry.update({'size': size})
@@ -75,25 +127,6 @@ async def directory_list_dict(path: str, baseurl: str = None) -> typing.List[typ
             entry.update({'url': baseurl + '/' + name})
         result.append(entry)
     return result
-
-
-async def create_directory(path: str):
-    if not await aioos.path.isdir(path):
-        await aioos.mkdir(path)
-
-
-async def rename_path(source: str, target: str):
-    await aioos.rename(source, target)
-
-
-async def delete_directory(path: str):
-    if await aioos.path.isdir(path):
-        await _rmtree(path)
-
-
-async def delete_file(file: str):
-    if await file_exists(file):
-        await aioos.remove(file)
 
 
 async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
@@ -134,7 +167,3 @@ async def copy_bytes(
             await target.write(chunk)
             if tracker:
                 tracker.processed(chunk)
-
-
-async def pkg_load(package: str, resource: str) -> bytes | None:
-    return await _pkg_load(package, resource)

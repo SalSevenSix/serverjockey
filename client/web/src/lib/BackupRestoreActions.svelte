@@ -7,7 +7,7 @@
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
-  let logText = '';
+  let logText = '*** Please wait for Backups and Uploads to complete before closing section or leaving page ***';
   let processing = false;
   let paths = [];
   let uploadFiles = [];
@@ -26,9 +26,8 @@
       })
       .then(function(json) {
         json.sort(function(a, b) {
-          return a.name.localeCompare(b.name);
+          return b.name.localeCompare(a.name);
         });
-        json.reverse();
         paths = json;
       })
       .catch(function(error) { notifyError('Failed to load Backup File List.'); })
@@ -124,7 +123,7 @@
     while (processing) {
       logText = 'Uploading file  ' + rotators[index];
       index += 1;
-      if (index > 3) { index = 0; };
+      if (index > 3) { index = 0; }
       await sleep(1000);
     }
     logText = '';
@@ -149,16 +148,20 @@
           <td>{humanFileSize(path.size)}</td>
           <td><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
           <td class="buttons">
-            <button disabled={$serverStatus.running || processing}
-                    name="{path.name}" class="button is-warning" on:click={restoreBackup}>Restore</button>
-            <button disabled={$serverStatus.running || processing}
-                    name="{path.name}" class="button is-danger" on:click={deleteBackup}>Delete</button>
+            <button name="{path.name}" class="button is-warning" title="Restore"
+                    disabled={$serverStatus.running || processing} on:click={restoreBackup}>
+                    <i class="fa fa-undo"></button>
+            <button name="{path.name}" class="button is-danger" title="Delete"
+                    disabled={processing} on:click={deleteBackup}>
+                    <i class="fa fa-trash"></i></button>
           </td>
         </tr>
       {/each}
     </tbody>
   </table>
+</div>
 
+<div class="block">
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
       <button id="upload-file" disabled={processing}
@@ -167,7 +170,7 @@
     <label class="file-label">
       <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
       <span class="file-cta">
-        <!-- span class="file-icon"><i class="fas fa-upload"></i></span -->
+        <span class="file-icon"><i class="fa fa-upload"></i></span>
         <span class="file-label">Choose a file…</span>
       </span>
       <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected.'}</span>
@@ -184,7 +187,7 @@
   <div class="field">
     <label for="backups-log" class="label">Backups Log</label>
     <div class="control pr-6">
-      <textarea id="backups-log" class="textarea" readonly>{logText}</textarea>
+      <textarea id="backups-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
     </div>
   </div>
 </div>

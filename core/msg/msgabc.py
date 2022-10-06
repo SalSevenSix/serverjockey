@@ -48,7 +48,7 @@ class Message:
         return self._reply_to
 
 
-STOP = Message(Message, 'msgsvc.STOP', '<internal messaging system stop signal>')
+STOP = Message(Message, 'msgabc.STOP', '<internal messaging system stop signal>')
 
 
 class Transformer(metaclass=abc.ABCMeta):

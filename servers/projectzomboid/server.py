@@ -1,7 +1,7 @@
 from core.util import aggtrf
-from core.msg import msgabc, msgext, msgtrf
+from core.msg import msgtrf
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpsubs
+from core.http import httpabc, httprsc, httpsubs, httpext
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
 from servers.projectzomboid import deployment as dep, playerstore as pls, console as con, messaging as msg
@@ -36,7 +36,7 @@ class Server(svrabc.Server):
             .append('subscribe', self._httpsubs.handler(pls.PLAYER_EVENT_FILTER, msgtrf.DataAsDict())) \
             .pop() \
             .push('log') \
-            .append('tail', _ConsoleLogHandler(self._context)) \
+            .append('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER)) \
             .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .push(self._httpsubs.resource(resource, 'subscriptions')) \
@@ -45,23 +45,8 @@ class Server(svrabc.Server):
     async def run(self):
         await self._deployment.new_server_process() \
             .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(msgext.SingleCatcher(msg.SERVER_STARTED_FILTER, timeout=900)) \
+            .wait_for_started(msg.SERVER_STARTED_FILTER, 1200) \
             .run()
 
     async def stop(self):
         await self._stopper.stop()
-
-
-class _ConsoleLogHandler(httpabc.AsyncGetHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-        self._subscriber = msgext.RollingLogSubscriber(
-            mailer, size=100,
-            msg_filter=msg.CONSOLE_LOG_FILTER,
-            transformer=msgtrf.GetData(),
-            aggregator=aggtrf.StrJoin('\n'))
-        mailer.register(self._subscriber)
-
-    async def handle_get(self, resource, data):
-        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())

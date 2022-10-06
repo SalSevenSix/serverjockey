@@ -70,7 +70,7 @@ function shutdown() {
 
 
 // MAIN
-
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 const context = { running: false };
 const logger = require('./src/logger.js');
 const util = require('./src/util.js');

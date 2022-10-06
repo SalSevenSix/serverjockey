@@ -2,8 +2,8 @@ import asyncio
 import typing
 import re
 import aiofiles
-from core.util import util, io, tasks
-from core.msg import msgabc, msgext, msgftr
+from core.util import util, io, tasks, aggtrf
+from core.msg import msgabc, msgext, msgftr, msgtrf
 from core.http import httpabc, httpcnt, httpsubs
 
 
@@ -124,6 +124,9 @@ class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
             if await io.file_exists(path):
                 await io.delete_file(path)
                 return httpabc.ResponseBody.NO_CONTENT
+            if await io.directory_exists(path):
+                await io.delete_directory(path)
+                return httpabc.ResponseBody.NO_CONTENT
             return httpabc.ResponseBody.BAD_REQUEST
         if await io.directory_exists(path):
             return httpabc.ResponseBody.BAD_REQUEST
@@ -172,3 +175,32 @@ class _FileByteStream(httpabc.ByteStream):
                 pumping = chunk is not None and chunk != b''
         tasks.task_end(self._task)
         self._task = None
+
+
+class RollingLogHandler(httpabc.AsyncGetHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, msg_filter: msgabc.Filter, size: int = 100):
+        self._mailer = mailer
+        self._subscriber = msgext.RollingLogSubscriber(
+            mailer, size=size,
+            msg_filter=msg_filter,
+            transformer=msgtrf.GetData(),
+            aggregator=aggtrf.StrJoin('\n'))
+        mailer.register(self._subscriber)
+
+    async def handle_get(self, resource, data):
+        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())
+
+
+class WipeHandler(httpabc.AsyncPostHandler):
+    WIPED = 'WipeHandler.WIPED'
+    FILTER = msgftr.NameIs(WIPED)
+
+    def __init__(self, mailer: msgabc.MulticastMailer, path: str):
+        self._mailer = mailer
+        self._path = path
+
+    async def handle_post(self, resource, data):
+        await io.delete_directory(self._path)
+        self._mailer.post(self, WipeHandler.WIPED, self._path)
+        return httpabc.ResponseBody.NO_CONTENT

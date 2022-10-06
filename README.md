@@ -14,7 +14,7 @@ If your like using this system, please consider supporting me on Ko-fi.
 
 
 ## Ubuntu/Debian Install
-Arch x86_64 only. Tested and works on Ubuntu 22.04
+Arch x86_64 only. Requires Python 3.10 installed. Tested and works on Ubuntu 22.04
 
 * Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed
 ```bash
@@ -41,7 +41,7 @@ cat /home/sjgms/serverjockey-client.json
 
 
 ## Fedora/CentOS Install
-Arch x86_64 only. Tested and works on Fedora 36
+Arch x86_64 only. Requires Python 3.10 installed. Tested and works on Fedora 36
 
 * Download and install the rpm package
 ```bash
@@ -65,3 +65,14 @@ Enter the token to login to the webapp on the home page.
 ```bash
 cat /home/sjgms/serverjockey-client.json
 ```
+
+
+## VirtualBox Appliance
+ServerJockey is available pre-installed on a virtual machine (VM) image that
+can be imported into VirtualBox. Use this option on Windows systems.
+
+* Download the VM image: https://4sas.short.gy/zombox-latest
+* Install [VirtualBox](https://www.virtualbox.org/) if not installed.
+* Import the VM image file into VirtualBox.
+* Adjust the CPU and memory settings for the VM as desired.
+* Start the VM. Webapp URL and login token will be displayed in the console.

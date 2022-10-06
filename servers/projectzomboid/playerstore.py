@@ -2,7 +2,7 @@ import typing
 from core.util import util
 from core.msg import msgabc, msgext, msgftr
 from core.proc import proch
-from servers.projectzomboid import domain as dom
+from servers.projectzomboid import domain as dom, messaging as msg
 
 
 class PlayerStore:
@@ -61,24 +61,29 @@ class PlayerEvent:
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
-    LOGIN_KEY = 'Java_zombie_core_znet_SteamGameServer_BUpdateUserData'
+    LOGIN_KEY = '> ConnectionManager: [fully-connected]'
     LOGIN_KEY_FILTER = msgftr.DataStrContains(LOGIN_KEY)
     LOGOUT = 'PlayerActivitySubscriber.Logout'
     LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
-    LOGOUT_KEY = 'Disconnected player'
+    LOGOUT_KEY = '> Disconnected player'
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
+            msg.NOT_CHAT_MESSAGE,
             msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER, _PlayerEventSubscriber.LOGOUT_KEY_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
-            line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGIN_KEY)
-            name, steamid = line.split(' id=')
-            event = PlayerEvent('login', dom.Player(steamid, name[1:-1]))
+            steamid = str(message.data())
+            steamid = util.left_chop_and_strip(steamid, 'steam-id=')
+            steamid = util.right_chop_and_strip(steamid, 'access=')
+            name = str(message.data())
+            name = util.left_chop_and_strip(name, 'username="')
+            name = util.right_chop_and_strip(name, '" connection-type=')
+            event = PlayerEvent('login', dom.Player(steamid, name))
             self._mailer.post(self, _PlayerEventSubscriber.LOGIN, event)
         if _PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
             line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT_KEY)

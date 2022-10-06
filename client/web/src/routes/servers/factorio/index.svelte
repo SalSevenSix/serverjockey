@@ -31,17 +31,40 @@
         </div>
       </div>
       <Collapsible title="Logging">
-        <ConsoleLog />
+        <ConsoleLog hasConsoleLogFile />
       </Collapsible>
       <Collapsible title="Configuration">
-        <ConfigFile name="Command Line Args" path="/config/cmdargs" />
-        <ConfigFile name="Server" path="/config/server" />
-        <ConfigFile name="Map" path="/config/map" />
-        <ConfigFile name="Map Gen" path="/config/mapgen" />
-        <ConfigFile name="Mods List" path="/config/modslist" />
-        <ConfigFile name="Admin List" path="/config/adminlist" />
-        <ConfigFile name="White List" path="/config/whitelist" />
-        <ConfigFile name="Ban List" path="/config/banlist" />
+        <ConfigFile name="Command Line Args" path="/config/cmdargs">
+          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+        </ConfigFile>
+        <ConfigFile name="Server" path="/config/server">
+          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+        </ConfigFile>
+        <ConfigFile name="Map" path="/config/map">
+          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+        </ConfigFile>
+        <ConfigFile name="Map Gen" path="/config/mapgen">
+          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+        </ConfigFile>
+        <ConfigFile name="Mods List" path="/config/modslist">
+          <p>
+            Service username and token are required to download mods. You can find these credentials
+            in your player-data.json file in your Factorio profile.
+            i.e. C:\Users\&lt;YOU&gt;\AppData\Roaming\Factorio\player-data.json
+          </p>
+        </ConfigFile>
+        <ConfigFile name="Admin List" path="/config/adminlist">
+          <p>List of user names to grant admin powers.
+             e.g. [&quot;name1&quot;, &quot;name2&quot;]</p>
+        </ConfigFile>
+        <ConfigFile name="White List" path="/config/whitelist">
+          <p>List of user names to allow access to the server if using whitelist.
+             e.g. [&quot;name1&quot;, &quot;name2&quot;]</p>
+        </ConfigFile>
+        <ConfigFile name="Ban List" path="/config/banlist">
+          <p>List of user names banned from server.
+             e.g. [&quot;name1&quot;, &quot;name2&quot;]</p>
+        </ConfigFile>
       </Collapsible>
       <Collapsible title="Deployment">
         <InstallRuntime showLog />

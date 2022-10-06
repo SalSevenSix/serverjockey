@@ -41,16 +41,17 @@ check_dependencies_common() {
     fi
 
     echo
-    echo "  checking for python, version 3.10 or higher required."
-    python3 --version
-    if [ $? -ne 0 ]; then
-        echo "ERROR Python3 not found."
+    echo "  checking for python3, version 3.10 required."
+    local python_check=$(which python3 | wc -l)
+    [ $python_check -ne 0 ] && python_check=$(python3 --version | grep "Python 3\.10" | wc -l)
+    if [ $python_check -eq 0 ]; then
+        echo "ERROR Python3.10 not found."
         echo "For Ubuntu/Debian;"
         echo "  $ sudo apt install software-properties-common"
         echo "  $ sudo add-apt-repository ppa:deadsnakes/ppa"
-        echo "  $ sudo apt install python3"
+        echo "  $ sudo apt install python3.10"
         echo "For RedHat/CentOS;"
-        echo "  $ sudo yum install python3"
+        echo "  $ sudo yum install python3.10"
         exit 1
     fi
 

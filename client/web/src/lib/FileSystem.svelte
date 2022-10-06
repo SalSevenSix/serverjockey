@@ -1,13 +1,33 @@
 <script>
-  // TODO Add option to delete file/directory
-
   import { onMount } from 'svelte';
+  import { notifyError } from '$lib/notifications';
+  import { confirmModal } from '$lib/modals';
 	import { humanFileSize } from '$lib/util';
-	import { instance, newGetRequest } from '$lib/serverjockeyapi';
+	import { instance, serverStatus, newGetRequest, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+
+  export let allowDelete = false;
 
   let root = $instance.url + '/logs';
   let pwd = root;
   let paths = [];
+
+  let lastRunning = $serverStatus.running;
+  $: serverRunningChange($serverStatus.running);
+  function serverRunningChange(running) {
+    if (lastRunning === true && running === false) {
+      update(pwd);
+    }
+    lastRunning = running;
+  }
+
+  let lastState = $serverStatus.state;
+  $: serverStateChange($serverStatus.state);
+  function serverStateChange(serverState) {
+    if (lastState != 'STARTED' && serverState === 'STARTED') {
+      update(pwd);
+    }
+    lastState = serverState;
+  }
 
 	onMount(rootDirectory);
 
@@ -27,6 +47,11 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       }).then(function(json) {
+        json.sort(function(a, b) {
+          let typeCompare = b.type.localeCompare(a.type);
+          if (typeCompare != 0) return typeCompare;
+          return b.name.localeCompare(a.name);
+        });
         paths = json;
         pwd = url;
       })
@@ -45,15 +70,20 @@
   }
 
 	function openFile() {
-    fetch(this.name, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.blob();
-      })
-      .then(function(blob) {
-        window.open(window.URL.createObjectURL(blob)).focus();
-      })
-      .catch(function(error) { rootDirectory(); });
+    openFileInNewTab(this.name, function(error) {
+      rootDirectory();
+    });
+  }
+
+  function deletePath() {
+    let url = this.name;
+    let path = url.substring(root.length);
+    confirmModal('Delete this folder or file?\n' + path, function() {
+      fetch(url, newPostRequest())
+        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .catch(function(error) { notifyError('Failed to delete ' + path); })
+        .finally(function() { update(pwd); });
+    });
   }
 </script>
 
@@ -65,33 +95,41 @@
         <th>Type</th>
         <th>File</th>
         <th>Size</th>
+        {#if allowDelete}<th></th>{/if}
       </tr>
     </thead>
     <tbody>
-      {#if pwd === root && paths.length === 0}
-        <tr>
-          <td></td>
-          <td><button name="reload" class="button is-small" on:click={rootDirectory}>RELOAD</button></td>
-          <td></td>
-        </tr>
-      {/if}
       {#if pwd != root}
         <tr>
-          <td><button name="root" class="button is-small" on:click={rootDirectory}>ROOT</button></td>
-          <td><button name="up" class="button is-small" on:click={upDirectory}>UP</button> {pwd.substring(root.length)}</td>
-          <td></td>
+          <td>
+            <button name="root" class="button" title="ROOT" on:click={rootDirectory}>
+              &nbsp;<i class="fa fa-angle-double-up"></i>&nbsp;</button>
+          </td>
+          <td colspan="2">
+            <button name="up" class="button" title="UP" on:click={upDirectory}>
+              &nbsp;<i class="fa fa-level-up-alt"></i>&nbsp;</button>
+            {pwd.substring(root.length)}
+          </td>
+          {#if allowDelete}<td></td>{/if}
         </tr>
       {/if}
       {#each paths as path}
         <tr>
-          <td>{path.type === 'file' ? 'file' : 'dir'}</td>
           {#if path.type === 'directory'}
+            <td><i class="fa fa-folder fa-2x"></i></td>
             <td><a href={'#'} name="{path.url}" on:click|preventDefault={openDirectory}>{path.name}</a></td>
           {/if}
           {#if path.type === 'file'}
+            <td><i class="fa fa-file-alt fa-2x"></i></td>
             <td><a href={'#'} name="{path.url}" on:click|preventDefault={openFile}>{path.name}</a></td>
           {/if}
           <td>{humanFileSize(path.size)}</td>
+          {#if allowDelete}
+            <td class="buttons">
+              <button name="{path.url}" class="button is-danger" title="Delete"
+                      disabled={$serverStatus.running} on:click={deletePath}><i class="fa fa-trash"></i></button>
+            </td>
+          {/if}
         </tr>
       {/each}
     </tbody>

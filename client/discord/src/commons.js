@@ -5,9 +5,26 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
+exports.startupSubscribePlayers = function(context, channel, instance, url) {
+  if (!channel) return;
+  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
+    let result = '';
+    if (json.event === 'login') { result += 'LOGIN '; }
+    if (json.event === 'logout') { result += 'LOGOUT '; }
+    result += json.player.name;
+    if (json.player.steamid) {
+      result += ' [' + json.player.steamid + ']';
+    }
+    result += ' (' + instance + ')';
+    channel.send(result);
+    return true;
+  });
+}
+
 exports.server = function($) {
   if ($.data.length === 1) {
     let cmd = $.data[0];
+    if (cmd === 'delete') return;
     $.httptool.doPost('/server/' + cmd, null, function(message, json) {
       if (cmd === 'daemon' || cmd === 'start' || cmd === 'restart') {
         message.react('⌛');
@@ -57,9 +74,9 @@ exports.getconfig = function($) {
     let fpath = '/tmp/' + fname;
     fs.writeFile(fpath, body, function(error) {
       if (error) return logger.error(error);
-      $.message.channel.send({ files: [{ attachment: fpath, name: fname }] });
+      $.message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+        .finally(function() { fs.unlink(fpath, logger.error); });
     });
-    // TODO Delete file if possible
   });
 }
 

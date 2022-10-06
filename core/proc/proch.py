@@ -2,34 +2,10 @@ from __future__ import annotations
 import logging
 import typing
 import asyncio
-from asyncio import streams, subprocess
-from core.util import cmdutil, util, funcutil
+from asyncio import streams
+from core.proc import procabc
+from core.util import signals, cmdutil, funcutil
 from core.msg import msgabc, msgext, msgftr
-
-
-class _PipeOutLineProducer(msgabc.Producer):
-
-    def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str, pipe: streams.StreamReader):
-        self._source = source
-        self._name = name
-        self._pipe = pipe
-        self._publisher = msgext.Publisher(mailer, self)
-
-    async def close(self):
-        await funcutil.silently_cleanup(self._pipe)
-        await funcutil.silently_cleanup(self._publisher)
-
-    async def next_message(self):
-        line = None
-        # noinspection PyBroadException
-        try:
-            line = await self._pipe.readline()
-        except Exception:
-            pass
-        if line is None or line == b'':
-            logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
-            return None
-        return msgabc.Message(self._source, self._name, line.decode().strip())
 
 
 class _PipeInLineCommand:
@@ -141,24 +117,26 @@ class ServerProcess:
     STATE_START = 'ServerProcess.StateStart'
     STATE_STARTING = 'ServerProcess.StateStarting'
     STATE_STARTED = 'ServerProcess.StateStarted'
+    STATE_STOPPING = 'ServerProcess.StateStopping'
     STATE_TIMEOUT = 'ServerProcess.StateTimeout'
     STATE_TERMINATED = 'ServerProcess.StateTerminate'
     STATE_EXCEPTION = 'ServerProcess.StateException'
     STATE_COMPLETE = 'ServerProcess.StateComplete'
-    STATES_UP = (STATE_START, STATE_STARTING, STATE_STARTED, STATE_TIMEOUT)
+    STATES_UP = (STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING, STATE_TIMEOUT)
     STATES_DOWN = (STATE_TERMINATED, STATE_EXCEPTION, STATE_COMPLETE)
-    STATES_ALL = STATES_UP + STATES_DOWN
 
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
-    FILTER_STATE_ALL = msgftr.NameIn(STATES_ALL)
+    FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
     FILTER_STATE_UP = msgftr.NameIn(STATES_UP)
     FILTER_STATE_DOWN = msgftr.NameIn(STATES_DOWN)
+    FILTER_STATE_ALL = msgftr.NameIn(STATES_UP + STATES_DOWN)
 
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
+        self._env = None
         self._process = None
         self._pipeinsvc = None
         self._started_catcher = None
@@ -171,9 +149,14 @@ class ServerProcess:
         self._command.append(arg)
         return self
 
-    def wait_for_started(self, catcher: msgabc.Catcher) -> ServerProcess:
-        self._started_catcher = catcher
-        self._mailer.register(catcher)
+    def use_env(self, env: dict[str, str]) -> ServerProcess:
+        self._env = env
+        return self
+
+    def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
+        self._started_catcher = msgext.SingleCatcher(
+            msgftr.Or(ServerProcess.FILTER_STATE_STOPPING, msg_filter), timeout)
+        self._mailer.register(self._started_catcher)
         return self
 
     async def run(self):
@@ -185,29 +168,30 @@ class ServerProcess:
                 cmdlist[0], *cmdlist[1:],
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE)
-            stderr = _PipeOutLineProducer(self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr)
-            stdout = _PipeOutLineProducer(self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout)
+                stderr=asyncio.subprocess.PIPE,
+                env=self._env)
+            stderr = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr)
+            stdout = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
             if not self._pipeinsvc:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
-            if self._started_catcher is not None:
-                await self._started_catcher.get()  # blocks throws TimeoutError
+            started_msg = await self._started_catcher.get() if self._started_catcher else None
             rc = self._process.returncode
             if rc is not None:
                 raise Exception('Process {} exit after STARTING, rc={}'.format(self._process, rc))
-            self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
-            rc = await self._process.wait()  # blocking
+            if started_msg is None or not ServerProcess.FILTER_STATE_STOPPING.accepts(started_msg):
+                self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
+            rc = await self._process.wait()
             if rc != 0:
                 raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self._process, rc))
             self._mailer.post(self, ServerProcess.STATE_COMPLETE, self._process)
         except asyncio.TimeoutError:
             rc = self._process.returncode
             if rc is None:  # Zombie process
-                logging.error('Timeout waiting for STARTED but process still running, terminating now')
+                logging.error('Timeout waiting for STARTED but process is still running, killing now')
                 self._mailer.post(self, ServerProcess.STATE_TIMEOUT, self._process)
-                self._process.terminate()
+                await signals.kill_tree(self._process.pid)
                 self._mailer.post(self, ServerProcess.STATE_TERMINATED, self._process)
             else:  # It's dead Jim
                 logging.error('Timeout waiting for STARTED because process exit rc=' + str(rc))
@@ -221,69 +205,3 @@ class ServerProcess:
             await funcutil.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
             self._process = None
-
-
-class JobProcess(msgabc.AbcSubscriber):
-    STDERR_LINE = 'JobProcess.StdErrLine'
-    STDOUT_LINE = 'JobProcess.StdOutLine'
-    START = 'JobProcess.Start'
-    STATE_STARTED = 'JobProcess.StateStarted'
-    STATE_EXCEPTION = 'JobProcess.StateException'
-    STATE_COMPLETE = 'JobProcess.StateComplete'
-    JOB_DONE = (STATE_EXCEPTION, STATE_COMPLETE)
-    FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
-    FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
-    FILTER_JOB_DONE = msgftr.NameIn(JOB_DONE)
-
-    @staticmethod
-    async def start_job(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
-            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, JobProcess.START, command)
-        return response.data()
-
-    @staticmethod
-    async def run_job(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
-            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        messenger = msgext.SynchronousMessenger(mailer, catcher=msgext.SingleCatcher(JobProcess.FILTER_JOB_DONE))
-        response = await messenger.request(source, JobProcess.START, command)
-        return response.data()
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.NameIs(JobProcess.START))
-        self._mailer = mailer
-
-    async def handle(self, message):
-        source, command = message.source(), message.data()
-        if isinstance(command, dict):
-            command = util.get('command', command, util.get('script', command))
-        if not (isinstance(command, str) or util.iterable(command)):
-            self._mailer.post(source, JobProcess.STATE_EXCEPTION, Exception('Invalid job request'), message)
-            return None
-        stderr, stdout, replied = None, None, False
-        try:
-            if isinstance(command, str):
-                process = await asyncio.create_subprocess_shell(
-                    command,
-                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            else:
-                process = await asyncio.create_subprocess_exec(
-                    command[0], *command[1:],
-                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = _PipeOutLineProducer(self._mailer, source, JobProcess.STDERR_LINE, process.stderr)
-            stdout = _PipeOutLineProducer(self._mailer, source, JobProcess.STDOUT_LINE, process.stdout)
-            replied = self._mailer.post(source, JobProcess.STATE_STARTED, process, message)
-            rc = await process.wait()
-            if rc != 0:
-                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(process, rc))
-            self._mailer.post(source, JobProcess.STATE_COMPLETE, process)
-        except Exception as e:
-            self._mailer.post(source, JobProcess.STATE_EXCEPTION, e, None if replied else message)
-        finally:
-            await funcutil.silently_cleanup(stdout)
-            await funcutil.silently_cleanup(stderr)
-        return None

@@ -47,3 +47,4 @@ async def wait_for(task: asyncio.Task, timeout: float):
         await asyncio.wait_for(task, timeout)
     except asyncio.TimeoutError:
         task.cancel()
+        task_end(task)

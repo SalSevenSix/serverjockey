@@ -1,4 +1,5 @@
 <script>
+  import { goto } from '$app/navigation';
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
@@ -7,6 +8,7 @@
   let subs = new SubscriptionHelper();
 
 	onMount(function() {
+	  if (!$instance.identity) return goto('/servers');
     fetch($instance.url + '/server', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);

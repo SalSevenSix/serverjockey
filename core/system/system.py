@@ -1,14 +1,13 @@
 from __future__ import annotations
 import typing
-import importlib
 import inspect
 import logging
 import uuid
-from core.util import util, io, sysutil, signals
-from core.msg import msgabc, msgext, msgftr
+from core.util import util, io, pkg, sysutil, signals
+from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
-from core.system import svrabc, svrsvc
+from core.system import __version__, svrabc, svrsvc
 
 
 class SystemService:
@@ -21,15 +20,16 @@ class SystemService:
         self._modules = {}
         self._home_dir = context.config('home')
         self._clientfile = contextext.ClientFile(
-            context, util.overridable_full_path(context.config('home'), context.config('clientfile')))
+            context, util.overridable_full_path(self._home_dir, context.config('clientfile')))
         subs = httpsubs.HttpSubscriptionService(context)
         self._resource = httprsc.WebResource()
         httprsc.ResourceBuilder(self._resource) \
+            .append('login', httpext.LoginHandler(context.config('secret'))) \
+            .append('modules', _ModulesHandler()) \
             .push('system') \
             .append('info', _SystemInfoHandler()) \
             .append('shutdown', _ShutdownHandler(self)) \
             .pop() \
-            .append('login', httpext.LoginHandler(context.config('secret'))) \
             .push('instances', _InstancesHandler(self)) \
             .append('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer())) \
             .pop() \
@@ -99,8 +99,8 @@ class SystemService:
         subcontext.start()
         subcontext.register(msgext.RelaySubscriber(self._context, _DeleteInstanceSubscriber.FILTER))
         if subcontext.is_debug():
-            subcontext.register(msgext.LoggerSubscriber(level=logging.DEBUG))
-        server = self._create_server(subcontext)
+            subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
+        server = await self._create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))
         self._instances.append(resource)
@@ -109,11 +109,11 @@ class SystemService:
         self._context.post(self, SystemService.SERVER_INITIALISED, subcontext)
         return subcontext
 
-    def _create_server(self, subcontext: contextsvc.Context) -> svrabc.Server:
+    async def _create_server(self, subcontext: contextsvc.Context) -> svrabc.Server:
         module_name = subcontext.config('module')
         module = util.get(module_name, self._modules)
         if not module:
-            module = importlib.import_module('servers.{}.server'.format(module_name))  # TODO blocking io
+            module = await pkg.import_module('servers.' + module_name + '.server')
             self._modules.update({module_name: module})
         for name, member in inspect.getmembers(module):
             if inspect.isclass(member) and svrabc.Server in inspect.getmro(member):
@@ -156,6 +156,12 @@ class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
         return None
 
 
+class _ModulesHandler(httpabc.GetHandler):
+
+    def handle_get(self, resource, data):
+        return ['projectzomboid', 'factorio', 'sevendaystodie']
+
+
 class _InstanceHandler(httpabc.GetHandler):
 
     def __init__(self, configuration: typing.Dict[str, str]):
@@ -182,12 +188,13 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
 
 
 class _SystemInfoHandler(httpabc.AsyncGetHandler):
+
     def __init__(self):
         self._start_time = util.now_millis()
 
     async def handle_get(self, resource, data):
         info = await sysutil.system_info()
-        info.update({'uptime': util.now_millis() - self._start_time})
+        info.update({'version': __version__, 'uptime': util.now_millis() - self._start_time})
         return info
 
 
