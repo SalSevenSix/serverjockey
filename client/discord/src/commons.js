@@ -24,6 +24,7 @@ exports.startupSubscribePlayers = function(context, channel, instance, url) {
 exports.server = function($) {
   if ($.data.length === 1) {
     let cmd = $.data[0];
+    if (cmd === 'delete') return;
     $.httptool.doPost('/server/' + cmd, null, function(message, json) {
       if (cmd === 'daemon' || cmd === 'start' || cmd === 'restart') {
         message.react('⌛');

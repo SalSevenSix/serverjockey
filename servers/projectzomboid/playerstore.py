@@ -61,11 +61,11 @@ class PlayerEvent:
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
-    LOGIN_KEY = '> ConnectionManager: [receive-packet] "client-connect" connection:'
+    LOGIN_KEY = '> ConnectionManager: [fully-connected]'
     LOGIN_KEY_FILTER = msgftr.DataStrContains(LOGIN_KEY)
     LOGOUT = 'PlayerActivitySubscriber.Logout'
     LOGOUT_FILTER = msgftr.NameIs(LOGOUT)
-    LOGOUT_KEY = '> ConnectionManager: [disconnect] "receive-disconnect" connection:'
+    LOGOUT_KEY = '> Disconnected player'
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
 
     def __init__(self, mailer: msgabc.Mailer):
@@ -77,22 +77,21 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
-            event = PlayerEvent('login', _PlayerEventSubscriber.create_player(message.data()))
+            steamid = str(message.data())
+            steamid = util.left_chop_and_strip(steamid, 'steam-id=')
+            steamid = util.right_chop_and_strip(steamid, 'access=')
+            name = str(message.data())
+            name = util.left_chop_and_strip(name, 'username="')
+            name = util.right_chop_and_strip(name, '" connection-type=')
+            event = PlayerEvent('login', dom.Player(steamid, name))
             self._mailer.post(self, _PlayerEventSubscriber.LOGIN, event)
         if _PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
-            event = PlayerEvent('logout', _PlayerEventSubscriber.create_player(message.data()))
+            line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT_KEY)
+            parts = line.split(' ')
+            steamid, name = parts[-1], ' '.join(parts[:-1])
+            event = PlayerEvent('logout', dom.Player(steamid, name[1:-1]))
             self._mailer.post(self, _PlayerEventSubscriber.LOGOUT, event)
         return None
-
-    @staticmethod
-    def create_player(line: str) -> dom.Player:
-        steamid = str(line)
-        steamid = util.left_chop_and_strip(steamid, 'steam-id=')
-        steamid = util.right_chop_and_strip(steamid, 'access=')
-        name = str(line)
-        name = util.left_chop_and_strip(name, 'username="')
-        name = util.right_chop_and_strip(name, '" connection-type=')
-        return dom.Player(steamid, name)
 
 
 class _CaptureSteamidSubscriber(msgabc.AbcSubscriber):

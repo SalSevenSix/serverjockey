@@ -70,7 +70,7 @@
               name="editor" class="button">&nbsp;<i class="fa fa-expand-arrows-alt"></i>&nbsp;</button>
       <button disabled={updating || !configText} on:click={clear}
               name="clear" class="button is-danger">Clear</button>
-      <button disabled={updating || originalText === configText} on:click={reload}
+      <button disabled={updating} on:click={reload}
               name="reload" class="button is-warning">Reload</button>
       <button disabled={updating || originalText === configText} on:click={save}
               name="save" class="button is-primary">Save</button>
