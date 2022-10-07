@@ -11,10 +11,14 @@ _gzip_compress = funcutil.to_async(gzip.compress)
 _gzip_decompress = funcutil.to_async(gzip.decompress)
 
 
-async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -> str:
+async def archive_directory(unpacked_dir: str, archives_dir: str, logger=None) -> str | None:
     if unpacked_dir[-1] == '/':
         unpacked_dir = unpacked_dir[:-1]
-    assert await io.directory_exists(unpacked_dir)
+    if not await io.directory_exists(unpacked_dir):
+        if logger:
+            logger.info('WARNING No directory to archive')
+            logger.info('END Archive Directory')
+        return None
     if archives_dir[-1] == '/':
         archives_dir = archives_dir[:-1]
     assert await io.directory_exists(archives_dir)

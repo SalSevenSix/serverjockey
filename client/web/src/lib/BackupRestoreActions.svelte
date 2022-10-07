@@ -3,11 +3,12 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { sleep, humanFileSize, ReverseRollingLog } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest,
+           rawPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
-  let logText = '*** Please wait for Backups and Uploads to complete before closing section or leaving page ***';
+  let logText = '';
   let processing = false;
   let paths = [];
   let uploadFiles = [];
@@ -86,7 +87,6 @@
   function deleteBackup() {
     let backupName = this.name;
     confirmModal('Delete ' + backupName + ' ?', function() {
-      processing = true;
       fetch($instance.url + '/backups/' + backupName, newPostRequest())
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
         .catch(function(error) { notifyError('Failed to delete ' + backupName); })
@@ -101,7 +101,8 @@
         && filename === filename.toLowerCase()
         && (filename.startsWith('runtime-') || filename.startsWith('world-'))
         && filename.endsWith('.zip'))) {
-      return notifyError('Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
+      return notifyError(
+        'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
     }
     processing = true;
     uploadTicker();
@@ -185,6 +186,10 @@
     </div>
   </div>
   <div class="field">
+    {#if processing}
+      <p>Please be patient, Backup/Restore/Upload process may take a while. Wait for process to complete before
+         closing this section or leaving page. Check log output below to confirm success.</p>
+    {/if}
     <label for="backups-log" class="label">Backups Log</label>
     <div class="control pr-6">
       <textarea id="backups-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>

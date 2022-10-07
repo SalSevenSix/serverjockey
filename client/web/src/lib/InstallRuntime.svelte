@@ -10,9 +10,11 @@
 
   let subs = new SubscriptionHelper();
   let logLines = new ReverseRollingLog();
-  let logText = '*** Please wait for Install process to complete before closing section or leaving page ***';
+  let logText = '';
   let qualifier = '';
-  let processing = false;
+  let installing = false;
+  let wiping = false;
+  $: processing = installing || wiping;
 
 	onDestroy(function() {
 		subs.stop();
@@ -26,14 +28,14 @@
 
   function wipeRuntime() {
     confirmModal('Are you sure you want to delete runtime ?', function() {
-      processing = true;
+      wiping = true;
       fetch($instance.url + '/deployment/wipe-runtime', newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo('Delete runtime completed.');
         })
         .catch(function(error) { notifyError('Delete runtime failed.'); })
-        .finally(function() { processing = false; });
+        .finally(function() { wiping = false; });
     });
   }
 
@@ -44,7 +46,7 @@
 	}
 
 	function doInstallRuntime() {
-	  processing = true;
+	  installing = true;
 	  logText = logLines.reset().toText();
     let request = newPostRequest();
     let body = { wipe: true, validate: true };
@@ -59,19 +61,19 @@
       .then(function(json) {
         if (!json) {
           notifyInfo('Install Runtime completed.');
-          processing = false;
+          installing = false;
         } else if (showLog && json.url) {
           subs.poll(json.url, function(data) {
             logText = logLines.append(data).toText();
             return true;
           })
           .then(function() { notifyInfo('Install Runtime completed. Please check log output for details.'); })
-          .finally(function() { processing = false; });
+          .finally(function() { installing = false; });
         }
       })
       .catch(function(error) {
         notifyError('Failed to initiate Install Runtime.');
-        processing = false;
+        installing = false;
       });
 	}
 </script>
@@ -98,6 +100,10 @@
   </div>
   {#if showLog}
     <div class="field">
+      {#if installing}
+        <p>Please be patient, Install process may take a while. Wait for Install process to complete before
+           closing this section or leaving page. Check log output below to confirm success.</p>
+      {/if}
       <label for="install-runtime-log" class="label">Install Log</label>
       <div class="control pr-6">
         <textarea id="install-runtime-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>

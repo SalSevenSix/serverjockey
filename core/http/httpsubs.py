@@ -52,7 +52,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
 
     @staticmethod
     def unsubscribe(mailer: msgabc.Mailer, source: typing.Any, identity: str):
-        mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity.split('/')[-1])
+        mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.NameIn((HttpSubscriptionService.SUBSCRIBE, HttpSubscriptionService.UNSUBSCRIBE)))
@@ -80,13 +80,13 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
             self._mailer.register(subscriber)
             self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, path, message)
         if name is HttpSubscriptionService.UNSUBSCRIBE:
-            identity = message.data()
-            if identity:
-                identity = str(identity).split('/')[-1]
-            else:
+            if not message.data():
                 return None
-            if self.lookup(identity):
+            identity = str(message.data()).split('/')[-1]
+            subscriber = self.lookup(identity)
+            if subscriber:
                 self._subscriptions.pop(identity)
+                subscriber.cleanup()
         return None
 
     def subscriptions_handler(self, name: str) -> _SubscriptionsHandler:
@@ -133,6 +133,9 @@ class _Subscriber(msgabc.AbcSubscriber):
             logging.info('Http subscription queue is full, unsubscribing ' + self._identity)
             HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
             return True
+
+    def cleanup(self):
+        util.clear_queue(self._queue)
 
     async def get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
         self._time_last_activity = -1.0
