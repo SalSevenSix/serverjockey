@@ -103,7 +103,7 @@ exports.deployment = function($) {
   let cmd = data.shift();
   let body = null;
   if (cmd === 'install-runtime') {
-    body = { wipe: true, validate: true };
+    body = { wipe: false, validate: true };
     if (data.length > 0) { body.beta = data[0]; }
   }
   $.httptool.doPostToFile('/deployment/' + cmd, body);

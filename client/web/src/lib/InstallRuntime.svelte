@@ -49,7 +49,7 @@
 	  installing = true;
 	  logText = logLines.reset().toText();
     let request = newPostRequest();
-    let body = { wipe: true, validate: true };
+    let body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }
     request.body = JSON.stringify(body);
     fetch($instance.url + '/deployment/install-runtime', request)

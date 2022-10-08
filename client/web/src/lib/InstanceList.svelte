@@ -1,9 +1,10 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { confirmModal } from '$lib/modals';
+  import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
-	import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
+	import { baseurl, instance, serverStatus, newGetRequest, newPostRequest,
+	         SubscriptionHelper } from '$lib/serverjockeyapi';
 
   instance.set({});
   serverStatus.set({});
@@ -48,7 +49,8 @@
 
 	function deleteInstance() {
 	  let selected = instances[this.name];
-	  confirmModal('Delete ' + selected.identity + ' ?', function() {
+	  let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
+	  confirmDangerModal(message, selected.identity, function() {
       fetch(selected.url + '/server/delete', newPostRequest())
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
         .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
