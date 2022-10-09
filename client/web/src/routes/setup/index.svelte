@@ -574,19 +574,19 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   </p>
   <table class="table">
     <thead>
-      <tr><th>Purpose</th><th>Ports</th><th>Protocal</th></tr>
+      <tr><th>Purpose</th><th>Port</th><th>Protocal</th></tr>
     </thead>
     <tbody class="is-family-monospace">
-      <tr><td>Handshake</td><td>16261</td><td>UDP</td></tr>
-      <tr><td>Players</td><td>16262-16294</td><td>TCP</td></tr>
-      <tr><td>Steam</td><td>8766-8767</td><td>UDP</td></tr>
+      <tr><td>Steam</td><td>16261</td><td>UDP</td></tr>
+      <tr><td>Direct</td><td>16262</td><td>UDP</td></tr>
     </tbody>
   </table>
   <p>
     If using manual port forwarding you should also disable UPnP in the
     <span class="is-family-monospace">settings.ini</span> configuration file.
   </p>
-  <pre class="pre"># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules. The server will fall back to default ports if this fails
+  <pre class="pre"># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules.
+# The server will fall back to default ports if this fails.
 UPnP=false</pre>
 </div>
 

@@ -29,7 +29,8 @@
         <div class="field">
           <label for="confirm-entered-name" class="label">Confirm Name</label>
           <div class="control">
-            <input id="confirm-entered-name" class="input" type="text" bind:value={enteredName}>
+            <input id="confirm-entered-name" class="input" type="text"
+                   placeholder={confirmName} bind:value={enteredName}>
           </div>
         </div>
       {/if}
