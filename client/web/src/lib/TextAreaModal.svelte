@@ -6,12 +6,12 @@
   export let contentText;
   export let onApplyChanges;
 
-	function applyChanges() {
+  function applyChanges() {
     closeModal();
     onApplyChanges(contentText);
-	}
+  }
 
-	// TODO make textarea fill vertical space
+  // TODO make textarea fill vertical space
 </script>
 
 

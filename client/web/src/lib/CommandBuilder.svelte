@@ -1,27 +1,27 @@
 <script>
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
-	import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
 
   export let commands;
-	let command = null;
-	let action = null;
-	let args = [null, null, null, null, null, null, null, null, null, null];
+  let command = null;
+  let action = null;
+  let args = [null, null, null, null, null, null, null, null, null, null];
 
   $: resetAction(command);
-	function resetAction(c) {
+  function resetAction(c) {
     action = null;
     resetArgs();
-	}
+  }
 
   $: resetArgs(action);
-	function resetArgs(a) {
+  function resetArgs(a) {
     args = [null, null, null, null, null, null, null, null, null, null];
-	}
+  }
 
-	function send() {
-	  let path = '/' + command;
-	  let body = {};
+  function send() {
+    let path = '/' + command;
+    let body = {};
     commands[command][action].forEach(function(value, index) {
       if (value.type === 'item') {
         path += '/' + urlSafeB64encode(args[index]);
@@ -40,7 +40,7 @@
         notifyInfo(capitalizeKebabCase(command) + ' command sent.');
       })
       .catch(function(error) { notifyError('Failed to send command to server.'); });
-	}
+  }
 </script>
 
 
@@ -74,7 +74,8 @@
           <div class="field">
             <label for="{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
             <div class="control">
-              <input id="{arg.name}" class="input" type="text" bind:value={args[commands[command][action].indexOf(arg)]}>
+              <input id="{arg.name}" class="input" type="text"
+                     bind:value={args[commands[command][action].indexOf(arg)]}>
             </div>
           </div>
         {/if}
@@ -84,7 +85,8 @@
             <div class="control">
               {#each arg.options as option}
                 <label class="radio m-1 p-2">
-                  <input type=radio bind:group={args[commands[command][action].indexOf(arg)]} name="{arg.name}" value="{option}">
+                  <input type=radio name="{arg.name}" value="{option}"
+                         bind:group={args[commands[command][action].indexOf(arg)]}>
                   {capitalizeKebabCase(option)}
                 </label>
               {/each}

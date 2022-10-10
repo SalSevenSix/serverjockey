@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-	import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
   let players = [];
@@ -15,8 +15,8 @@
     lastRunning = running;
   }
 
-	onMount(function() {
-	  fetch($instance.url + '/players', newGetRequest())
+  onMount(function() {
+    fetch($instance.url + '/players', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -24,22 +24,21 @@
       .then(function(json) {
         players = json;
         subs.start($instance.url + '/players/subscribe', function(data) {
+          players = players.filter(function(value) {
+            return value.name != data.player.name;
+          });
           if (data.event === 'login') {
             players = [...players, data.player];
-          } else if (data.event === 'logout') {
-            players = players.filter(function(value) {
-              return value.name != data.player.name;
-            });
           }
           return true;
         });
       })
       .catch(function(error) { notifyError('Failed to load Player List.'); });
-	});
+  });
 
-	onDestroy(function() {
-		subs.stop();
-	});
+  onDestroy(function() {
+    subs.stop();
+  });
 </script>
 
 

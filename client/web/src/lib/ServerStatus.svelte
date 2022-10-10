@@ -1,6 +1,6 @@
 <script>
-	import { capitalize } from '$lib/util';
-	import { serverStatus } from '$lib/serverjockeyapi';
+  import { capitalize } from '$lib/util';
+  import { serverStatus } from '$lib/serverjockeyapi';
 </script>
 
 

@@ -7,8 +7,8 @@
   serverStatus.set({});
   let subs = new SubscriptionHelper();
 
-	onMount(function() {
-	  if (!$instance.identity) return goto('/servers');
+  onMount(function() {
+    if (!$instance.identity) return goto('/servers');
     fetch($instance.url + '/server', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -22,11 +22,11 @@
         });
       })
       .catch(function(error) { notifyError('Failed to load Server Status.'); });
-	});
+  });
 
-	onDestroy(function() {
-		subs.stop();
-	});
+  onDestroy(function() {
+    subs.stop();
+  });
 </script>
 
 

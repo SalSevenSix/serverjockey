@@ -7,10 +7,10 @@
   export let confirmName = '';
   let enteredName = '';
 
-	function confirm() {
+  function confirm() {
     closeModal();
     onConfirm();
-	}
+  }
 </script>
 
 

@@ -119,7 +119,7 @@ exports.players = function($) {
       if (body[i].steamid === false) {
         line = body[i].name;
       } else {
-        line = 'LOGGING IN        ';
+        line = 'LOGGING IN       ';
         if (body[i].steamid != null) { line = body[i].steamid; }
         line += ' ' + body[i].name;
       }

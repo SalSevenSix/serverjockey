@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-	import { sleep } from '$lib/util';
+  import { sleep } from '$lib/util';
 
   export let size = '100%';
   export let dazzle = false;
@@ -40,16 +40,16 @@
     return actions;
   }
 
-	onMount(async function() {
-	  if (!dazzle) return;
-	  let clock = 0;
-	  let actions = generateSchedules();
-	  for (var i = 0; i < actions.length; i++) {
-	    await sleep(actions[i].schedule - clock);
-	    clock = actions[i].schedule;
-	    colours = colours.fill(actions[i].on ? '#ffffff' : '#000000', actions[i].index, actions[i].index + 1);
-	  }
-	});
+  onMount(async function() {
+    if (!dazzle) return;
+    let clock = 0;
+    let actions = generateSchedules();
+    for (var i = 0; i < actions.length; i++) {
+      await sleep(actions[i].schedule - clock);
+      clock = actions[i].schedule;
+      colours = colours.fill(actions[i].on ? '#ffffff' : '#000000', actions[i].index, actions[i].index + 1);
+    }
+  });
 </script>
 
 

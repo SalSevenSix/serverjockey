@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-	import { humanFileSize } from '$lib/util';
-	import { instance, serverStatus, newGetRequest, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { humanFileSize } from '$lib/util';
+  import { instance, serverStatus, newGetRequest, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let allowDelete = false;
 
@@ -29,20 +29,20 @@
     lastState = serverState;
   }
 
-	onMount(rootDirectory);
+  onMount(rootDirectory);
 
-	function rootDirectory() {
-	  update(root);
+  function rootDirectory() {
+    update(root);
   }
 
-	function upDirectory() {
-	  let parts = pwd.split('/');
-	  parts.pop();
-	  update(parts.join('/'));
+  function upDirectory() {
+    let parts = pwd.split('/');
+    parts.pop();
+    update(parts.join('/'));
   }
 
-	function update(url) {
-	  fetch(url, newGetRequest())
+  function update(url) {
+    fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -65,11 +65,11 @@
       });
   }
 
-	function openDirectory() {
-	  update(this.name);
+  function openDirectory() {
+    update(this.name);
   }
 
-	function openFile() {
+  function openFile() {
     openFileInNewTab(this.name, function(error) {
       rootDirectory();
     });

@@ -3,13 +3,13 @@
 
   let menuOpen = false;
 
-	function menuToggle() {
-	  menuOpen = !menuOpen;
-	}
+  function menuToggle() {
+    menuOpen = !menuOpen;
+  }
 
-	function menuClose() {
-	  menuOpen = false;
-	}
+  function menuClose() {
+    menuOpen = false;
+  }
 </script>
 
 

@@ -6,9 +6,9 @@
 
   export let actions = {};
 
-	function doAction() {
-	  let actionName = this.name;
-	  let actionDisplay = capitalizeKebabCase(actionName);
+  function doAction() {
+    let actionName = this.name;
+    let actionDisplay = capitalizeKebabCase(actionName);
     confirmModal('Are you sure you want to ' + actionDisplay + ' ?', function() {
       fetch($instance.url + '/deployment/' + actionName, newPostRequest())
         .then(function(response) {
@@ -17,7 +17,7 @@
         })
         .catch(function(error) { notifyError(actionDisplay + ' failed.'); });
     });
-	}
+  }
 </script>
 
 

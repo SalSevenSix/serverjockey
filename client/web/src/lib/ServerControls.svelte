@@ -1,12 +1,12 @@
 <script>
   import { notifyError } from '$lib/notifications';
-	import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
 
-	function executeCommand() {
+  function executeCommand() {
     fetch($instance.url + '/server/' + this.name, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to send server command.'); });
-	}
+  }
 </script>
 
 

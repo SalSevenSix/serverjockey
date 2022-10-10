@@ -3,8 +3,8 @@
   import { notifyError } from '$lib/notifications';
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
-	import { baseurl, instance, serverStatus, newGetRequest, newPostRequest,
-	         SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { baseurl, instance, serverStatus, newGetRequest, newPostRequest,
+           SubscriptionHelper } from '$lib/serverjockeyapi';
 
   instance.set({});
   serverStatus.set({});
@@ -12,7 +12,7 @@
   let instances = [];
   let subs = new SubscriptionHelper();
 
-	onMount(function() {
+  onMount(function() {
     fetch(baseurl + '/instances', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -37,25 +37,25 @@
       .catch(function(error) { notifyError('Failed to load instances.'); });
   });
 
-	onDestroy(function() {
-		subs.stop();
-	});
+  onDestroy(function() {
+    subs.stop();
+  });
 
-	function viewInstance() {
-	  let selected = instances[this.name];
-		instance.set(selected);
-		goto('/servers/' + selected.module);
-	}
+  function viewInstance() {
+    let selected = instances[this.name];
+    instance.set(selected);
+    goto('/servers/' + selected.module);
+  }
 
-	function deleteInstance() {
-	  let selected = instances[this.name];
-	  let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
-	  confirmDangerModal(message, selected.identity, function() {
+  function deleteInstance() {
+    let selected = instances[this.name];
+    let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
+    confirmDangerModal(message, selected.identity, function() {
       fetch(selected.url + '/server/delete', newPostRequest())
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
         .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
     });
-	}
+  }
 </script>
 
 

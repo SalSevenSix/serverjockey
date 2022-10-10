@@ -13,14 +13,14 @@
   let paths = [];
   let uploadFiles = [];
 
-	onMount(reload);
+  onMount(reload);
 
-	onDestroy(function() {
-		subs.stop();
-	});
+  onDestroy(function() {
+    subs.stop();
+  });
 
-	function reload() {
-	  fetch($instance.url + '/backups', newGetRequest())
+  function reload() {
+    fetch($instance.url + '/backups', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -33,11 +33,11 @@
       })
       .catch(function(error) { notifyError('Failed to load Backup File List.'); })
       .finally(function() { processing = false; });
-	}
+  }
 
-	function createBackup() {
-	  processing = true;
-	  logText = logLines.reset().toText();
+  function createBackup() {
+    processing = true;
+    logText = logLines.reset().toText();
     fetch($instance.url + '/deployment/backup-' + this.name, newPostRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -55,10 +55,10 @@
         notifyError('Failed to create Backup.');
         processing = false;
       });
-	}
+  }
 
-	function restoreBackup() {
-	  let backupName = this.name;
+  function restoreBackup() {
+    let backupName = this.name;
     confirmModal('Restore ' + backupName + ' ?\nExisting files will be overwritten.', function() {
       processing = true;
       logText = logLines.reset().toText();
@@ -82,7 +82,7 @@
           processing = false;
         });
     });
-	}
+  }
 
   function deleteBackup() {
     let backupName = this.name;

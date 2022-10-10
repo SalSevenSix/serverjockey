@@ -6,7 +6,7 @@
   let serverLinkForm = {};
   let applying = false;
 
-	onMount(function() {
+  onMount(function() {
     fetch($instance.url + '/config', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -14,10 +14,10 @@
       })
       .then(function(json) { serverLinkForm = json; })
       .catch(function(error) { notifyError('Failed to load ServerLink Config.'); });
-	});
+  });
 
-	function apply() {
-	  applying = true;
+  function apply() {
+    applying = true;
     let request = newPostRequest('text/plain');
     request.body = JSON.stringify(serverLinkForm);
     fetch($instance.url + '/config', request)
@@ -27,7 +27,7 @@
       })
       .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
       .finally(function() { applying = false; });
-	}
+  }
 </script>
 
 
@@ -64,7 +64,8 @@
   </div>
   <div class="field">
     <div class="control">
-      <button id="apply" disabled={applying} name="apply" class="button is-primary is-fullwidth" on:click={apply}>Apply</button>
+      <button id="apply" disabled={applying} name="apply" class="button is-primary is-fullwidth" on:click={apply}>
+        Apply</button>
     </div>
   </div>
 </div>

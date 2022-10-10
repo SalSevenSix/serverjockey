@@ -7,7 +7,7 @@
   let serverForm = {};
   let creating = false;
 
-	onMount(function() {
+  onMount(function() {
     fetch(baseurl + '/modules', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -19,11 +19,11 @@
       .catch(function(error) { notifyError('Failed to load module list.'); });
   });
 
-	function create() {
-	  if (!serverForm.module) return notifyError('Type not selected.');
-	  if (!serverForm.identity) return notifyError('Instance Name not set.');
-	  creating = true;
-	  serverForm.identity = serverForm.identity.replaceAll(' ', '-').toLowerCase();
+  function create() {
+    if (!serverForm.module) return notifyError('Type not selected.');
+    if (!serverForm.identity) return notifyError('Instance Name not set.');
+    creating = true;
+    serverForm.identity = serverForm.identity.replaceAll(' ', '-').toLowerCase();
     let request = newPostRequest();
     request.body = JSON.stringify(serverForm);
     fetch(baseurl + '/instances', request)
@@ -33,7 +33,7 @@
       })
       .catch(function(error) { notifyError('Failed to create new server.'); })
       .finally(function() { creating = false; });
-	}
+  }
 </script>
 
 

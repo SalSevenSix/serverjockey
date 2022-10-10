@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyError } from '$lib/notifications';
-	import { capitalize, humanFileSize, humanDuration } from '$lib/util';
-	import { baseurl, newGetRequest } from '$lib/serverjockeyapi';
+  import { capitalize, humanFileSize, humanDuration } from '$lib/util';
+  import { baseurl, newGetRequest } from '$lib/serverjockeyapi';
   import RubiksCube from '$lib/RubiksCube.svelte';
 
   let info = {
@@ -26,8 +26,8 @@
     }
   };
 
-	onMount(function() {
-	  fetch(baseurl + '/system/info', newGetRequest())
+  onMount(function() {
+    fetch(baseurl + '/system/info', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { textAreaModal } from '$lib/modals';
-	import { instance, newPostRequest, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { instance, newPostRequest, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let name;
   export let path;
@@ -10,23 +10,23 @@
   let originalText = '';
   let configText = '';
 
-	onMount(reload);
+  onMount(reload);
 
-	function openConfigFile() {
-	  openFileInNewTab($instance.url + path);
-	}
+  function openConfigFile() {
+    openFileInNewTab($instance.url + path);
+  }
 
-	function clear() {
-	  configText = '';
-	}
+  function clear() {
+    configText = '';
+  }
 
-	function openEditor() {
+  function openEditor() {
     textAreaModal(name, configText, function(updatedText) { configText = updatedText; });
-	}
+  }
 
-	function reload() {
-	  updating = true;
-	  fetch($instance.url + path, newGetRequest())
+  function reload() {
+    updating = true;
+    fetch($instance.url + path, newGetRequest())
       .then(function(response) {
         if (response.status === 404) return '';
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -38,10 +38,10 @@
       })
       .catch(function(error) { notifyError('Failed to load ' + name); })
       .finally(function() { updating = false; });
-	}
+  }
 
-	function save() {
-	  updating = true;
+  function save() {
+    updating = true;
     let request = newPostRequest('text/plain');
     request.body = configText;
     fetch($instance.url + path, request)
@@ -52,7 +52,7 @@
       })
       .catch(function(error) { notifyError('Failed to update ' + name); })
       .finally(function() { updating = false; });
-	}
+  }
 </script>
 
 

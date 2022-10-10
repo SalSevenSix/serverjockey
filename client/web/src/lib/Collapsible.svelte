@@ -1,9 +1,10 @@
 <script>
   export let title;
   let visible = false;
-	function toggle() {
+
+  function toggle() {
     visible = !visible;
-	}
+  }
 </script>
 
 <hr />

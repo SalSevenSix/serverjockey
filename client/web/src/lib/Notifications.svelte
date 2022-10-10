@@ -1,9 +1,9 @@
 <script>
   import { notifications, removeNotification } from '$lib/notifications';
 
-	function deleteMessage() {
-	  removeNotification(this.name);
-	}
+  function deleteMessage() {
+    removeNotification(this.name);
+  }
 </script>
 
 
@@ -12,7 +12,8 @@
     <div class="container">
       {#each $notifications as notification, index}
         <div class="notification {notification.level}">
-          <button id="delete-message-{notification.id}" name="{notification.id}" class="delete is-large" on:click={deleteMessage}></button>
+          <button id="delete-message-{notification.id}" name="{notification.id}" class="delete is-large"
+                  on:click={deleteMessage}></button>
           {notification.message}
         </div>
       {/each}

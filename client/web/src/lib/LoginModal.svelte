@@ -7,11 +7,11 @@
   export let isOpen;
   let token = '';
 
-	function keypress(event) {
-	  if (event.key === 'Enter') return login();
-	}
+  function keypress(event) {
+    if (event.key === 'Enter') return login();
+  }
 
-	function login() {
+  function login() {
     if (!token) return notifyError('No token entered');
     fetch(baseurl + '/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
       .then(function(response) {
@@ -23,13 +23,13 @@
         closeModal();
       })
       .catch(function(error) { notifyError('Wrong. Please wait 5 seconds before trying again.'); });
-	}
+  }
 
-	onMount(function() {
-	  if (typeof(Storage) === 'undefined') return;
-	  let storedToken = sessionStorage.getItem('sjgmsSecurityToken');
-	  if (storedToken) { token = storedToken; }
-	});
+  onMount(function() {
+    if (typeof(Storage) === 'undefined') return;
+    let storedToken = sessionStorage.getItem('sjgmsSecurityToken');
+    if (storedToken) { token = storedToken; }
+  });
 </script>
 
 

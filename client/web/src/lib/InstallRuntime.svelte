@@ -16,9 +16,9 @@
   let wiping = false;
   $: processing = installing || wiping;
 
-	onDestroy(function() {
-		subs.stop();
-	});
+  onDestroy(function() {
+    subs.stop();
+  });
 
   function runtimeMeta() {
     openFileInNewTab($instance.url + '/deployment/runtime-meta', function(error) {
@@ -39,15 +39,15 @@
     });
   }
 
-	function installRuntime() {
-	  confirmModal(
-	    'Are you sure you want to Install Runtime ?\nAny existing install will be overwritten.',
-	    doInstallRuntime);
-	}
+  function installRuntime() {
+    confirmModal(
+      'Are you sure you want to Install Runtime ?\nAny existing install will be overwritten.',
+      doInstallRuntime);
+  }
 
-	function doInstallRuntime() {
-	  installing = true;
-	  logText = logLines.reset().toText();
+  function doInstallRuntime() {
+    installing = true;
+    logText = logLines.reset().toText();
     let request = newPostRequest();
     let body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }
@@ -75,7 +75,7 @@
         notifyError('Failed to initiate Install Runtime.');
         installing = false;
       });
-	}
+  }
 </script>
 
 
