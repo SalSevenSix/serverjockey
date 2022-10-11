@@ -3,7 +3,7 @@
   import { notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { humanFileSize } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
   export let allowDelete = false;
 
@@ -69,12 +69,6 @@
     update(this.name);
   }
 
-  function openFile() {
-    openFileInNewTab(this.name, function(error) {
-      rootDirectory();
-    });
-  }
-
   function deletePath() {
     let url = this.name;
     let path = url.substring(root.length);
@@ -121,7 +115,7 @@
           {/if}
           {#if path.type === 'file'}
             <td><i class="fa fa-file-alt fa-2x"></i></td>
-            <td><a href={'#'} name="{path.url}" on:click|preventDefault={openFile}>{path.name}</a></td>
+            <td><a href={path.url} target="_blank">{path.name}</a></td>
           {/if}
           <td>{humanFileSize(path.size)}</td>
           {#if allowDelete}

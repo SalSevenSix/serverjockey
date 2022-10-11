@@ -47,7 +47,7 @@ exports.server = function($) {
     return;
   }
   $.httptool.doGet('/server', function(body) {
-    let result = '```Server is ';
+    let result = '```\nServer ' + $.instance + ' is ';
     if (!body.running) {
       result += 'DOWN```';
       return result;

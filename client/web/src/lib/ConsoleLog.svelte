@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { ReverseRollingLog } from '$lib/util';
-  import { instance, SubscriptionHelper, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   export let hasConsoleLogFile = false;
   let subs = new SubscriptionHelper();
@@ -28,10 +28,6 @@
   onDestroy(function() {
     subs.stop();
   });
-
-  function openConsoleLog() {
-    openFileInNewTab($instance.url + '/log');
-  }
 </script>
 
 
@@ -39,7 +35,7 @@
   <div class="field">
     <label for="console-log" class="label">
       {#if hasConsoleLogFile}
-        <a href={'#'} on:click|preventDefault={openConsoleLog}>Console Log</a>
+        <a href={$instance.url + '/log'} target="_blank">Console Log</a>
       {:else}
         Console Log
       {/if}

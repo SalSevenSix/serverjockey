@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { textAreaModal } from '$lib/modals';
-  import { instance, newPostRequest, newGetRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { instance, newPostRequest, newGetRequest } from '$lib/serverjockeyapi';
 
   export let name;
   export let path;
@@ -11,10 +11,6 @@
   let configText = '';
 
   onMount(reload);
-
-  function openConfigFile() {
-    openFileInNewTab($instance.url + path);
-  }
 
   function clear() {
     configText = '';
@@ -58,7 +54,9 @@
 
 <div class="block">
   <div class="field">
-    <label for="configfile-text" class="label"><a href={'#'} on:click|preventDefault={openConfigFile}>{name}</a></label>
+    <label for="configfile-text" class="label">
+      <a href={$instance.url + path} target="_blank">{name}</a>
+    </label>
     <slot />
     <div class="control pr-6">
       <textarea id="configfile-text" class="textarea" bind:value={configText}></textarea>

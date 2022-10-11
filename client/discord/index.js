@@ -71,23 +71,22 @@ function shutdown() {
 
 // MAIN
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-const context = { running: false };
+const fs = require('fs');
+const fetch = require('node-fetch');
+const { Client, Intents } = require('discord.js');
 const logger = require('./src/logger.js');
 const util = require('./src/util.js');
 const http = require('./src/http.js');
 const system = require('./src/system.js');
 const instances = require('./src/instances.js');
-logger.info('*** START ServerLink Bot ***');
 
+logger.info('*** START ServerLink Bot ***');
+const context = { running: false };
 context.staticData = require('./src/constants.json');
 context.config = { ...require(process.argv[2]), ...require(process.argv[3]) };
 if (!context.config.BOT_TOKEN) throw new Error('BOT_TOKEN not set');
 logger.info('Initialised with config...');
 logger.raw(context.config);
-
-const fs = require('fs');
-const fetch = require('node-fetch');
-const { Client, Intents } = require('discord.js');
 
 context.controller = new AbortController();
 context.signal = context.controller.signal;
