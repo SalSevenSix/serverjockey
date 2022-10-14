@@ -24,6 +24,7 @@ class Deployment:
         self._logs_dir = self._world_dir + '/Logs'
         self._config_dir = self._world_dir + '/Server'
         self._save_dir = self._world_dir + '/Saves'
+        self._lua_dir = self._world_dir + '/Lua'
 
     def new_server_process(self):
         return proch.ServerProcess(self._mailer, self._executable).append_arg('-cachedir=' + self._world_dir)
@@ -84,7 +85,8 @@ class Deployment:
             .append('ini', httpext.MessengerConfigHandler(self._mailer, conf_pre + '.ini', ini_filter)) \
             .append('sandbox', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
             .append('spawnpoints', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
-            .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua'))
+            .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua')) \
+            .append('shop', httpext.MessengerConfigHandler(self._mailer, self._lua_dir + '/ServerPointsListings.ini'))
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)
@@ -92,6 +94,7 @@ class Deployment:
         await io.create_directory(self._playerdb_dir)
         await io.create_directory(self._config_dir)
         await io.create_directory(self._save_dir)
+        await io.create_directory(self._lua_dir)
 
 
 class _DeploymentWiper(msgabc.AbcSubscriber):
