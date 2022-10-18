@@ -3,10 +3,12 @@ from core.http import httpabc, httpsubs, httprsc, httpext
 from core.msg import msgftr, msgtrf, msglog
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
-from core.util import util, io
+from core.util import util, io, aggtrf
 
 
 class Server(svrabc.Server):
+
+    LOG_FILTER = msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE)
 
     def __init__(self, context: contextsvc.Context):
         home = context.config('home')
@@ -22,9 +24,7 @@ class Server(svrabc.Server):
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(msglog.LogfileSubscriber(
-            self._log_file,
-            msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),
-            transformer=msgtrf.GetData()))
+            self._log_file, Server.LOG_FILTER, transformer=msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
         httprsc.ResourceBuilder(resource) \
@@ -33,6 +33,10 @@ class Server(svrabc.Server):
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
             .append('config', httpext.FileSystemHandler(self._config)) \
+            .push('log', httpext.FileSystemHandler(self._log_file)) \
+            .append('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER)) \
+            .append('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
+            .pop() \
             .push(self._httpsubs.resource(resource, 'subscriptions')) \
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 

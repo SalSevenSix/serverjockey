@@ -2,6 +2,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { baseurl, instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import Collapsible from '$lib/Collapsible.svelte';
+  import ConsoleLog from '$lib/ConsoleLog.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
@@ -36,12 +38,19 @@
 
 <div class="columns">
   <div class="column">
-    <h2 class="title is-5">ServerLink Controls</h2>
-    <ServerControls />
-    <ServerStatus />
-  </div>
-  <div class="column">
-    <h2 class="title is-5">ServerLink Configuration</h2>
-    <ServerLinkConfig />
+    <div class="columns">
+      <div class="column">
+        <h2 class="title is-5">ServerLink Controls</h2>
+        <ServerControls />
+        <ServerStatus />
+      </div>
+      <div class="column">
+        <h2 class="title is-5">ServerLink Configuration</h2>
+        <ServerLinkConfig />
+      </div>
+    </div>
+    <Collapsible title="ServerLink Log">
+      <ConsoleLog hasConsoleLogFile />
+    </Collapsible>
   </div>
 </div>
