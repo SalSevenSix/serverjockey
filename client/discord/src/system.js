@@ -1,6 +1,17 @@
 'use strict';
 
 const util = require('./util.js');
+const helpText = {
+  help: [
+    'help {command} {action}    : Show help',
+    'system                     : Show system information',
+    'instances                  : Show server instances list',
+    'use {instance}             : Switch default instance',
+    'create {instance} {module} : Create new instance',
+    'shutdown                   : Shutdown system'
+  ]
+};
+
 
 exports.system = function($) {
   $.httptool.doGet('/system/info', function(info) {
@@ -44,7 +55,7 @@ exports.shutdown = function($) {
 }
 
 exports.help = function($) {
-  let result = '```SYSTEM COMMANDS\n' + $.context.config.CMD_PREFIX;
-  result += $.context.staticData.system.help.join('\n' + $.context.config.CMD_PREFIX);
+  let result = '```\nSYSTEM COMMANDS\n' + $.context.config.CMD_PREFIX;
+  result += helpText.help.join('\n' + $.context.config.CMD_PREFIX);
   $.message.channel.send(result + '```');
 }

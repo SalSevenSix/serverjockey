@@ -36,11 +36,11 @@ exports.commandLineToList = function(line) {
 exports.humanDuration = function(millis) {
     var data = {};
     var units = [
-      {label: 'millis', mod: 1000},
-      {label: 'seconds', mod: 60},
-      {label: 'minutes', mod: 60},
-      {label: 'hours', mod: 24},
-      {label: 'days', mod: 31}
+      { label: 'millis', mod: 1000 },
+      { label: 'seconds', mod: 60 },
+      { label: 'minutes', mod: 60 },
+      { label: 'hours', mod: 24 },
+      { label: 'days', mod: 31 }
     ];
     units.forEach(function(unit) {
       millis = (millis - (data[unit.label] = (millis % unit.mod))) / unit.mod;

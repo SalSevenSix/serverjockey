@@ -3,6 +3,88 @@
 const logger = require('../logger.js');
 const util = require('../util.js');
 const commons = require('../commons.js');
+const helpText = {
+  help1: [
+    'server                    : Server status',
+    'server daemon             : Start server with auto-restart',
+    'server start              : Start server',
+    'server restart            : Save world and restart server',
+    'server stop               : Save world and stop server',
+    'world save                : Save the game world',
+    'world broadcast {message} : Broadcast message to all players',
+    'world chopper             : Trigger chopper event',
+    'world gunshot             : Trigger gunshot event',
+    'world start-storm         : Start a storm',
+    'world stop-weather        : Stop current weather',
+    'world start-rain          : Start rain',
+    'world stop-rain           : Stop rain'
+  ],
+  help2: [
+    'players                   : Show players currently online',
+    'player "{name}" kick      : Kick from server',
+    'player "{name}" set-access-level {level} : Set access level',
+    'player "{name}" tele-to "{toplayer}"     : Teleport to player',
+    'player "{name}" tele-at {x,y,z}          : Teleport to location',
+    'player "{name}" give-xp {skill} {xp}     : Give XP',
+    'player "{name}" give-item {module} {item} {count} : Give item',
+    'player "{name}" spawn-vehicle {module} {item} : Spawn vehicle',
+    'player "{name}" spawn-horde {count}      : Spawn zombies',
+    'player "{name}" lightning           : Trigger lightning',
+    'player "{name}" thunder             : Trigger thunder',
+    'whitelist add-name "{name}" "{pwd}" : Add player by name',
+    'whitelist remove-name "{name}"      : Remove player by name',
+    'whitelist add-id {discordid}        : Add player by discord id',
+    'whitelist remove-id {discordid}     : Remove player by discord id',
+    'banlist add {steamid}     : Add player SteamID to banlist',
+    'banlist remove {steamid}  : Remove player SteamID from banlist'
+  ],
+  help3: [
+    'getconfig ini             : Get INI config as attachment',
+    'getconfig sandbox         : Get Sandbox config as attachment',
+    'getconfig spawnregions    : Get Spawnregions config as attachment',
+    'getconfig spawnpoints     : Get Spawnpoints config as attachment',
+    'getconfig jvm             : Get JVM config as attachment',
+    'setconfig ini             : Update INI using attached file',
+    'setconfig sandbox         : Update Sandbox using attached file',
+    'setconfig spawnregions    : Update Spawnregions using attached file',
+    'setconfig spawnpoints     : Update Spawnpoints using attached file',
+    'setconfig jvm             : Update JVM config using attached file',
+    'deployment backup-world        : Backup game world to zip file',
+    'deployment wipe-world-all      : Delete game world folder',
+    'deployment wipe-world-playerdb : Delete only player DB',
+    'deployment wipe-world-config   : Delete only config files',
+    'deployment wipe-world-save     : Delete only map files',
+    'deployment install-runtime {beta} : Install game server'
+  ],
+  help: [
+    'Show help text. Use {command} and {action} for more detailed information. Both optional.'
+  ],
+  playersetaccesslevel: [
+    'Set access level for online player. Level options:',
+    '`admin, moderator, overseer, gm, observer, none`'
+  ],
+  playergivexp: [
+    'Give XP to online player. Skill options:',
+    '```Fitness, Strength,',
+    'Combat, Axe, Blunt, SmallBlunt, LongBlade, SmallBlade,',
+    'Spear, Maintenance, Firearm, Aiming, Reloading,',
+    'Agility, Sprinting, Lightfoot, Nimble, Sneak,',
+    'Crafting, Woodwork, Cooking, Farming, Doctor,',
+    'Electricity, MetalWelding, Mechanics, Tailoring,',
+    'Survivalist, Fishing, Trapping, PlantScavenging```'
+  ],
+  playergiveitem: [
+    'Give item to player, {count} is optional.'
+  ],
+  playerspawnvehicle: [
+    'Spawn a vehicle next to player. Condition will vary.'
+  ],
+  deploymentinstallruntime: [
+    'Install game server, {beta} optional.',
+    'Only works on Linux. Log output will be attaches as a file.'
+  ]
+};
+
 
 exports.startup = commons.startupSubscribePlayers;
 exports.server = commons.server;
@@ -95,15 +177,15 @@ exports.help = function($) {
   let x = $.context;
   let c = $.message.channel;
   if ($.data.length === 0) {
-    let s = '```PROJECT ZOMBOID COMMANDS\n' + x.config.CMD_PREFIX;
-    c.send(s + x.staticData.projectzomboid.help1.join('\n' + x.config.CMD_PREFIX) + '```');
-    c.send(s + x.staticData.projectzomboid.help2.join('\n' + x.config.CMD_PREFIX) + '```');
-    c.send(s + x.staticData.projectzomboid.help3.join('\n' + x.config.CMD_PREFIX) + '```');
+    let s = '```\nPROJECT ZOMBOID COMMANDS\n' + x.config.CMD_PREFIX;
+    c.send(s + helpText.help1.join('\n' + x.config.CMD_PREFIX) + '```');
+    c.send(s + helpText.help2.join('\n' + x.config.CMD_PREFIX) + '```');
+    c.send(s + helpText.help3.join('\n' + x.config.CMD_PREFIX) + '```');
     return;
   }
   let query = $.data.join('').replaceAll('-', '');
-  if (x.staticData.projectzomboid.hasOwnProperty(query)) {
-    c.send(x.staticData.projectzomboid[query].join('\n'));
+  if (helpText.hasOwnProperty(query)) {
+    c.send(helpText[query].join('\n'));
   } else {
     c.send('No more help available.');
   }
