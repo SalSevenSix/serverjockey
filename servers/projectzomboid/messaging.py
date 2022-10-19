@@ -42,7 +42,7 @@ SERVER_STARTED_FILTER = msgftr.And(
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION = '> buildNumber='
+    VERSION = '> version='
     VERSION_FILTER = msgftr.DataStrContains(VERSION)
     IP = 'Public IP:'
     IP_FILTER = msgftr.DataStrContains(IP)
@@ -71,6 +71,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
+            value = util.right_chop_and_strip(value, 'demo=')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):

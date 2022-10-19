@@ -41,7 +41,7 @@
 
   function installRuntime() {
     confirmModal(
-      'Are you sure you want to Install Runtime ?\nAny existing install will be overwritten.',
+      'Are you sure you want to Install Runtime ?\nAny existing install will be updated.',
       doInstallRuntime);
   }
 

@@ -9,12 +9,11 @@ class Deployment:
         self._mailer = context
         self._home_dir = context.config('home')
         self._runtime_dir = self._home_dir + '/runtime'
-        # self._executable = self._runtime_dir + '/Unturned_Headless.x86_64'
-        self._executable = self._runtime_dir + '/ServerHelper.sh'
+        self._executable = self._runtime_dir + '/Unturned_Headless.x86_64'
         self._world_dir = self._home_dir + '/world'
         self._env = context.config('env').copy()
         self._env['TERM'] = 'xterm'
-        # self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
+        self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
 
     async def initialise(self):
         await self.build_world()
