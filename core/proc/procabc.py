@@ -1,8 +1,15 @@
 import logging
 import typing
 from asyncio import streams
-from core.util import funcutil
+from core.util import funcutil, io, pkg
 from core.msg import msgabc, msgext
+
+
+async def unpack_wrapper(path: str):
+    filename = path + '/wrapper.py'
+    data = await pkg.pkg_load('core.proc', 'wrapper.py')
+    await io.write_file(filename, data)
+    return filename
 
 
 class PipeOutLineProducer(msgabc.Producer):

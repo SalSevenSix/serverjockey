@@ -159,7 +159,7 @@ class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
 class _ModulesHandler(httpabc.GetHandler):
 
     def handle_get(self, resource, data):
-        return ['projectzomboid', 'factorio', 'sevendaystodie']
+        return ['projectzomboid', 'factorio', 'sevendaystodie', 'unturned']
 
 
 class _InstanceHandler(httpabc.GetHandler):

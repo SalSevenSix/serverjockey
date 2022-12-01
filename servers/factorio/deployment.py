@@ -62,7 +62,8 @@ class Deployment:
     async def initialise(self):
         await self.build_world()
         self._mailer.register(jobh.JobProcess(self._mailer))
-        self._mailer.register(msgext.CallableSubscriber(httpext.WipeHandler.FILTER, self.build_world))
+        self._mailer.register(msgext.CallableSubscriber(
+            msgftr.Or(httpext.WipeHandler.FILTER, msgext.Unpacker.FILTER), self.build_world))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(

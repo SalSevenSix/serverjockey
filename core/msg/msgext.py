@@ -289,6 +289,8 @@ class Archiver(msgabc.AbcSubscriber):
 
 class Unpacker(msgabc.AbcSubscriber):
     REQUEST = 'Unpacker.Request'
+    UNPACKED = 'Unpacker.UNPACKED'
+    FILTER = msgftr.NameIs(UNPACKED)
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.NameIs(Unpacker.REQUEST))
@@ -308,6 +310,7 @@ class Unpacker(msgabc.AbcSubscriber):
         unpack_dir = root_dir + '/' + filename.split('.')[0].split('-')[0]
         logger = msglog.LoggingPublisher(self._mailer, message.source())
         await pack.unpack_directory(archive, unpack_dir, logger)
+        self._mailer.post(self, Unpacker.UNPACKED, unpack_dir)
         return None
 
 

@@ -10,8 +10,7 @@ def read(fd):
 def main() -> int:
     status = 1
     try:
-        pty.spawn(sys.argv[1], read)
-        status = 0
+        status = pty.spawn(sys.argv[1:], read)
     except Exception as e:
         print(repr(e), file=sys.stderr, flush=True)
     return status
