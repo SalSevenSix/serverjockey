@@ -84,6 +84,7 @@ class Deployment:
         cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_file))
         return proch.ServerProcess(self._mailer, self._python) \
             .use_env(self._env) \
+            .use_out_decoder(procabc.PtyLineDecoder()) \
             .append_arg(self._wrapper) \
             .append_arg(self._executable) \
             .append_arg('-batchmode') \

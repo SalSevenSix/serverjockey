@@ -6,16 +6,11 @@ from core.proc import proch, prcext
 from core.system import svrsvc
 
 
-class Messaging:
-
-    def __init__(self, context: contextsvc.Context):
-        self._context = context
-
-    def initialise(self):
-        self._context.register(prcext.ServerStateSubscriber(self._context))
-        self._context.register(_ServerDetailsSubscriber(self._context))
-        self._context.register(_ModUpdateRestartSubscriber(self._context))
-        self._context.register(_ProvideAdminPasswordSubscriber(self._context, self._context.config('secret')))
+def initialise(context: contextsvc.Context):
+    context.register(prcext.ServerStateSubscriber(context))
+    context.register(_ServerDetailsSubscriber(context))
+    context.register(_ModUpdateRestartSubscriber(context))
+    context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
 class _ConsoleLogFilter(msgabc.Filter):

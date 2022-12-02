@@ -5,32 +5,27 @@ from core.proc import proch, prcext
 from servers.projectzomboid import playerstore as pls, domain as dom
 
 
-class Console:
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    def resources(self, resource: httpabc.Resource):
-        httprsc.ResourceBuilder(resource) \
-            .push('world') \
-            .append('{command}', _WorldCommandHandler(self._mailer)) \
-            .pop() \
-            .push('config') \
-            .push('options', _OptionsHandler(self._mailer)) \
-            .append('reload', _OptionsReloadHandler(self._mailer)) \
-            .push('x{option}') \
-            .append('{command}', _OptionCommandHandler(self._mailer)) \
-            .pop().pop().pop() \
-            .append('steamids', _SteamidsHandler(self._mailer)) \
-            .push('players', _PlayersHandler(self._mailer)) \
-            .push('x{player}') \
-            .append('{command}', _PlayerCommandHandler(self._mailer)) \
-            .pop().pop() \
-            .push('whitelist') \
-            .append('{command}', _WhitelistCommandHandler(self._mailer)) \
-            .pop() \
-            .push('banlist') \
-            .append('{command}', _BanlistCommandHandler(self._mailer))
+def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+    httprsc.ResourceBuilder(resource) \
+        .push('world') \
+        .append('{command}', _WorldCommandHandler(mailer)) \
+        .pop() \
+        .push('config') \
+        .push('options', _OptionsHandler(mailer)) \
+        .append('reload', _OptionsReloadHandler(mailer)) \
+        .push('x{option}') \
+        .append('{command}', _OptionCommandHandler(mailer)) \
+        .pop().pop().pop() \
+        .append('steamids', _SteamidsHandler(mailer)) \
+        .push('players', _PlayersHandler(mailer)) \
+        .push('x{player}') \
+        .append('{command}', _PlayerCommandHandler(mailer)) \
+        .pop().pop() \
+        .push('whitelist') \
+        .append('{command}', _WhitelistCommandHandler(mailer)) \
+        .pop() \
+        .push('banlist') \
+        .append('{command}', _BanlistCommandHandler(mailer))
 
 
 class _WorldCommandHandler(httpabc.AsyncPostHandler):

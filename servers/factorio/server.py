@@ -13,11 +13,10 @@ class Server(svrabc.Server):
         self._pipeinsvc = proch.PipeInLineService(context)
         self._stopper = prcext.ServerProcessStopper(context, 15.0, '/quit')
         self._deployment = dep.Deployment(context)
-        self._messaging = msg.Messaging(context)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        self._messaging.initialise()
+        msg.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):

@@ -1,3 +1,4 @@
+import abc
 import logging
 import typing
 from asyncio import streams
@@ -12,12 +13,34 @@ async def unpack_wrapper(path: str):
     return filename
 
 
+class LineDecoder(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def decode(self, line: bytes) -> str:
+        pass
+
+
+class DefaultLineDecoder(LineDecoder):
+
+    def decode(self, line: bytes) -> str:
+        return line.decode().strip()
+
+
+class PtyLineDecoder(LineDecoder):
+
+    def decode(self, line: bytes) -> str:
+        result = line.decode().strip()
+        result = result.replace('\x1b[37m', '')  # TODO need a more generic cleanup
+        return result
+
+
 class PipeOutLineProducer(msgabc.Producer):
 
-    def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str, pipe: streams.StreamReader):
+    def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str,
+                 pipe: streams.StreamReader, decoder: LineDecoder = DefaultLineDecoder()):
         self._source = source
         self._name = name
         self._pipe = pipe
+        self._decoder = decoder
         self._publisher = msgext.Publisher(mailer, self)
 
     async def close(self):
@@ -25,13 +48,13 @@ class PipeOutLineProducer(msgabc.Producer):
         await funcutil.silently_cleanup(self._publisher)
 
     async def next_message(self):
-        line = None
         # noinspection PyBroadException
         try:
             line = await self._pipe.readline()
-        except Exception:
-            pass
-        if line is None or line == b'':
-            logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
-            return None
-        return msgabc.Message(self._source, self._name, line.decode().strip())
+            if line is None or line == b'':
+                logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
+                return None
+            return msgabc.Message(self._source, self._name, self._decoder.decode(line))
+        except Exception as e:
+            logging.error('Pipe read line failed: ' + repr(e))
+        return None

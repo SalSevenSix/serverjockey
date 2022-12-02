@@ -15,16 +15,11 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.NameIs(DEPLOYMENT_MSG))
 
 
-class Messaging:
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    def initialise(self):
-        self._mailer.register(prcext.ServerStateSubscriber(self._mailer))
-        self._mailer.register(playerstore.PlayersSubscriber(self._mailer))
-        self._mailer.register(_ServerDetailsSubscriber(self._mailer))
-        self._mailer.register(_PlayerEventSubscriber(self._mailer))
+def initialise(mailer: msgabc.MulticastMailer):
+    mailer.register(prcext.ServerStateSubscriber(mailer))
+    mailer.register(playerstore.PlayersSubscriber(mailer))
+    mailer.register(_ServerDetailsSubscriber(mailer))
+    mailer.register(_PlayerEventSubscriber(mailer))
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):

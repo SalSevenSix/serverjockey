@@ -3,16 +3,26 @@
   import Collapsible from '$lib/Collapsible.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
+  import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
   import FileSystem from '$lib/FileSystem.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = {
     'wipe-world-save': 'Reset the game world map only.',
     'wipe-world-all': 'Reset game world map and configuration.'
+  };
+
+  let consoleCommands = {
+    'console': {
+      'send': [
+        {name: 'line', type: 'string', input: 'text'}
+      ]
+    }
   };
 </script>
 
@@ -26,12 +36,15 @@
           <ServerStatus />
         </div>
         <div class="column">
-          <p>No Players Component yet</p>
+          <Players />
         </div>
       </div>
       <Collapsible title="Logging">
         <ConsoleLog />
         <FileSystem allowDelete />
+      </Collapsible>
+      <Collapsible title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
       </Collapsible>
       <Collapsible title="Configuration">
         <div class="content">

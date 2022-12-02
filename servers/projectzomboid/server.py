@@ -15,18 +15,16 @@ class Server(svrabc.Server):
         self._stopper = prcext.ServerProcessStopper(context, 20.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
         self._deployment = dep.Deployment(context)
-        self._console = con.Console(context)
-        self._messaging = msg.Messaging(context)
         self._playerstore = pls.PlayerStoreService(context)
 
     async def initialise(self):
-        self._messaging.initialise()
+        msg.initialise(self._context)
         self._playerstore.initialise()
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
         self._deployment.resources(resource)
-        self._console.resources(resource)
+        con.resources(self._context, resource)
         httprsc.ResourceBuilder(resource) \
             .push('server', svrext.ServerStatusHandler(self._context)) \
             .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \

@@ -136,17 +136,22 @@ class ServerProcess:
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
+        self._out_decoder = procabc.DefaultLineDecoder()
         self._env = None
         self._process = None
         self._pipeinsvc = None
         self._started_catcher = None
 
+    def append_arg(self, arg: typing.Any) -> ServerProcess:
+        self._command.append(arg)
+        return self
+
     def use_pipeinsvc(self, pipeinsvc: PipeInLineService) -> ServerProcess:
         self._pipeinsvc = pipeinsvc
         return self
 
-    def append_arg(self, arg: typing.Any) -> ServerProcess:
-        self._command.append(arg)
+    def use_out_decoder(self, line_decoder: procabc.LineDecoder) -> ServerProcess:
+        self._out_decoder = line_decoder
         return self
 
     def use_env(self, env: dict[str, str]) -> ServerProcess:
@@ -170,8 +175,10 @@ class ServerProcess:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 env=self._env)
-            stderr = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr)
-            stdout = procabc.PipeOutLineProducer(self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout)
+            stderr = procabc.PipeOutLineProducer(
+                self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
+            stdout = procabc.PipeOutLineProducer(
+                self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout, self._out_decoder)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
             if not self._pipeinsvc:
                 PipeInLineService(self._mailer, self._process.stdin)
