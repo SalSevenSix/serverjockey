@@ -30,6 +30,8 @@ class PtyLineDecoder(LineDecoder):
     def decode(self, line: bytes) -> str:
         result = line.decode().strip()
         result = result.replace('\x1b[37m', '')  # TODO need a more generic cleanup
+        result = result.replace('\x1b[31m', '')
+        result = result.replace('\x1b[6n', '')
         return result
 
 

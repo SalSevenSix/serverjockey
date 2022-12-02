@@ -20,7 +20,8 @@
   let consoleCommands = {
     'console': {
       'send': [
-        {name: 'line', type: 'string', input: 'text'}
+        {name: 'help', input: 'display'},
+        {name: 'line', input: 'text', type: 'string'}
       ]
     }
   };
@@ -39,18 +40,18 @@
           <Players />
         </div>
       </div>
+      <Collapsible title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
       <Collapsible title="Logging">
         <ConsoleLog />
         <FileSystem allowDelete />
       </Collapsible>
-      <Collapsible title="Console Commands">
-        <CommandBuilder commands={consoleCommands} />
-      </Collapsible>
       <Collapsible title="Configuration">
         <div class="content">
           <p>For help with configuration, see the
-             <a href="https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Install-SteamCMD-on-Linux"
-                target="_blank">dedicated server guide</a> on github.</p>
+          <a href="https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Configure-Server"
+             target="_blank">dedicated server guide</a> on github.</p>
         </div>
         <ConfigFile name="Command Line Args" path="/config/cmdargs" />
         <ConfigFile name="Server Commands" path="/config/commands" />

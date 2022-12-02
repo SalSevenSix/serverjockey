@@ -109,6 +109,12 @@ exports.deployment = function($) {
   $.httptool.doPostToFile('/deployment/' + cmd, body);
 }
 
+exports.send = function($) {
+  if ($.data.length < 1) return;
+  let body = { line: $.data.join(' ') };
+  $.httptool.doPost('/console/send', body);
+}
+
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
     let line = 'Players currently online: ' + body.length;

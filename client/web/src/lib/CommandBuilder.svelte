@@ -1,7 +1,7 @@
 <script>
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
-  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
   export let commands;
   let command = null;
@@ -19,11 +19,27 @@
     args = [null, null, null, null, null, null, null, null, null, null];
   }
 
+  function loadDisplay(index) {
+    let name = commands[command][action][index].name;
+    fetch($instance.url + '/' + command + '/' + name, newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.text();
+      })
+      .then(function(text) {
+        args[index] = text;
+      })
+      .catch(function(error) { notifyError('Failed to load display text for ' + name); });
+    return '';
+  }
+
   function send() {
     let path = '/' + command;
     let body = {};
     commands[command][action].forEach(function(value, index) {
-      if (value.type === 'item') {
+      if (!value.type) {
+        // pass
+      } else if (value.type === 'item') {
         path += '/' + urlSafeB64encode(args[index]);
       } else if (value.type === 'number') {
         body[value.name] = parseInt(args[index]);
@@ -70,6 +86,11 @@
     </div>
     {#if action}
       {#each commands[command][action] as arg}
+        {#if arg.input === 'display'}
+          {loadDisplay(commands[command][action].indexOf(arg))}
+          <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
+          <pre class="pre is-size-7">{args[commands[command][action].indexOf(arg)]}</pre>
+        {/if}
         {#if arg.input === 'text'}
           <div class="field">
             <label for="{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
