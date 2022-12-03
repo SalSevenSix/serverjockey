@@ -29,11 +29,12 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
         self._save_dir = self._world_dir + '/save'
+        self._savesvr_dir = self._save_dir + '/Server'
         self._map_dir = self._save_dir + '/Level'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
         self._settings_file = self._save_dir + '/Config.json'
         self._workshop_file = self._save_dir + '/WorkshopDownloadConfig.json'
-        self._commands_file = self._save_dir + '/Server/Commands.dat'
+        self._commands_file = self._savesvr_dir + '/Commands.dat'
         self._env = context.config('env').copy()
         self._env['TERM'] = 'xterm'
         self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
@@ -96,6 +97,7 @@ class Deployment:
         await io.create_directory(self._world_dir)
         await io.create_directory(self._logs_dir)
         await io.create_directory(self._save_dir)
+        await io.create_directory(self._savesvr_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):

@@ -8,12 +8,11 @@ def read(fd):
 
 
 def main() -> int:
-    status = 1
     try:
-        status = pty.spawn(sys.argv[1:], read)
+        return pty.spawn(sys.argv[1:], read)
     except Exception as e:
         print(repr(e), file=sys.stderr, flush=True)
-    return status
+    return 1
 
 
 if __name__ == '__main__':

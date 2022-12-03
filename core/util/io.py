@@ -39,7 +39,7 @@ _rmtree = funcutil.to_async(shutil.rmtree)
 def _auto_chmod(path: str):
     for current_dir_path, subdir_names, file_names in os.walk(path):
         for file_name in file_names:
-            if file_name.endswith('.sh') or file_name.find('.') == -1:
+            if file_name.find('.') == -1 or file_name.endswith('.sh') or file_name.endswith('.x86_64'):
                 file_path = os.path.join(current_dir_path, file_name)
                 os.chmod(file_path, 0o774)
 

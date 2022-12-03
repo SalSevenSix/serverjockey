@@ -13,6 +13,7 @@ class Server(svrabc.Server):
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
+        self._python = context.config('python')
         self._pipeinsvc = proch.PipeInLineService(context)
         self._stopper = prcext.ServerProcessStopper(context, 10.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
@@ -42,7 +43,7 @@ class Server(svrabc.Server):
             .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
-        await proch.ServerProcess(self._context, 'python3') \
+        await proch.ServerProcess(self._context, self._python) \
             .append_arg('../projects/serverjockey/servers/testserver/main.py') \
             .use_pipeinsvc(self._pipeinsvc) \
             .wait_for_started(Server.STARTED_FILTER, 60) \

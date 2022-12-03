@@ -120,7 +120,7 @@ systemctl start serverjockey
 
 %changelog
 * Thu Oct 14 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.5
-- Feature release v0.0.5
+- Added support for Unturned
 * Thu Sep 15 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.4
 - Feature release v0.0.4
 * Thu Sep 15 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.3
