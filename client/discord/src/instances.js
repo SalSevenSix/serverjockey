@@ -82,9 +82,9 @@ exports.Service = class Service {
   getInstancesText() {
     let instances = Object.keys(this.#instances);
     if (instances.length === 0) {
-      return '```No instances found.```';
+      return '```\nNo instances found.\n```';
     }
-    let result = '```';
+    let result = '```\n';
     for (let i = 0; i < instances.length; i++) {
       if (instances[i] === this.#context.instancesService.currentInstance()) {
         result += '=> ';

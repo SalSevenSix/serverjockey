@@ -135,6 +135,9 @@ exports.whitelist = function($) {
   let data = [...$.data];
   if (data.length < 2) return;
   let cmd = data.shift();
+  if (data[0].length > 3 && data[0].startsWith('<@') && data[0].endsWith('>')) {
+    data[0] = data[0].slice(2).slice(0, -1);
+  }
   if (cmd === 'add-name') {
     $.httptool.doPost('/whitelist/add', { player: data[0], password: data[1] });
   } else if (cmd === 'remove-name') {

@@ -20,7 +20,7 @@ function handleMessage(message) {
   if (!message.content.startsWith(context.config.CMD_PREFIX)) return;
   if (!message.member || !message.member.user) return;  // broken message
   logger.info(message.member.user.tag + ' ' + message.content);
-  let data = util.commandLineToList(message.content.slice(1));
+  let data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
   let command = data.shift().toLowerCase();
   let instance = context.instancesService.currentInstance();
   let parts = command.split('.');
@@ -79,6 +79,7 @@ context.client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESS
 context.client.once('ready', startup);
 context.client.on('messageCreate', handleMessage);
 process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 context.shutdown = shutdown;
 
 context.client.login(context.config.BOT_TOKEN);

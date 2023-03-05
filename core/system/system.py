@@ -69,9 +69,9 @@ class SystemService:
     async def shutdown(self):
         await self._clientfile.delete()
         subcontexts = self._context.subcontexts()
-        for subcontext in iter(subcontexts):
+        for subcontext in subcontexts:
             self._instances.remove(subcontext.config('identity'))
-        for subcontext in iter(subcontexts):
+        for subcontext in subcontexts:
             await svrsvc.ServerService.shutdown(subcontext, self)
             await self._context.destroy_subcontext(subcontext)
 

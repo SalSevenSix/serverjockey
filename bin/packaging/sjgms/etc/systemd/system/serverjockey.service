@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 User=sjgms
-ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/sjgms" --logfile "serverjockey.log" --clientfile "serverjockey-client.json"
+ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/sjgms" --logfile "serverjockey.log"
 KillMode=mixed
 TimeoutStopSec=90
 OOMScoreAdjust=-800

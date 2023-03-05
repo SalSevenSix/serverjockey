@@ -45,9 +45,9 @@
     </div>
   </div>
   <div class="field">
-    <label for="command-character" class="label">Command Character</label>
+    <label for="command-prefix" class="label">Command Prefix</label>
     <div class="control">
-      <input id="command-character" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
+      <input id="command-prefix" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
     </div>
   </div>
   <div class="field">
