@@ -9,7 +9,8 @@ from core.system import svrsvc
 def initialise(context: contextsvc.Context):
     context.register(prcext.ServerStateSubscriber(context))
     context.register(_ServerDetailsSubscriber(context))
-    context.register(_ModUpdateRestartSubscriber(context))
+    context.register(_RestartSubscriber(context))
+    context.register(_ModUpdatedSubscriber(context))
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
@@ -34,6 +35,8 @@ NOT_CHAT_MESSAGE = msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{c
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('*** SERVER STARTED ***'))
+SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
+SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
@@ -49,20 +52,25 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
-            NOT_CHAT_MESSAGE,
-            msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
-                      _ServerDetailsSubscriber.VERSION_FILTER,
-                      _ServerDetailsSubscriber.IP_FILTER,
-                      _ServerDetailsSubscriber.PORT_FILTER,
-                      _ServerDetailsSubscriber.STEAMID_FILTER)))
+        super().__init__(msgftr.Or(
+            SERVER_RESTART_REQUIRED_FILTER,
+            msgftr.And(
+                proch.ServerProcess.FILTER_STDOUT_LINE,
+                NOT_CHAT_MESSAGE,
+                msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
+                          _ServerDetailsSubscriber.VERSION_FILTER,
+                          _ServerDetailsSubscriber.IP_FILTER,
+                          _ServerDetailsSubscriber.PORT_FILTER,
+                          _ServerDetailsSubscriber.STEAMID_FILTER))))
         self._mailer = mailer
 
     def handle(self, message):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.INGAMETIME)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
+            return None
+        if SERVER_RESTART_REQUIRED_FILTER.accepts(message):
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': util.now_millis()})
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
@@ -84,18 +92,28 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class _ModUpdateRestartSubscriber(msgabc.AbcSubscriber):
+class _ModUpdatedSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(msgftr.And(
+            proch.ServerProcess.FILTER_STDOUT_LINE,
+            NOT_CHAT_MESSAGE,
+            msgftr.DataStrContains('[ModzCheck] Mod update required')))
+        self._mailer = mailer
+
+    def handle(self, message):
+        self._mailer.post(self, SERVER_RESTART_REQUIRED)
+        return None
+
+
+class _RestartSubscriber(msgabc.AbcSubscriber):
     WAIT = '_ModUpdateRestartSubscriber.Wait'
     WAIT_FILTER = msgftr.NameIs(WAIT)
-    MOD_UPDATE_FILTER = msgftr.DataStrContains('[ModzCheck] Mod update required')
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
-            msgftr.And(
-                proch.ServerProcess.FILTER_STDOUT_LINE,
-                NOT_CHAT_MESSAGE,
-                _ModUpdateRestartSubscriber.MOD_UPDATE_FILTER),
-            _ModUpdateRestartSubscriber.WAIT_FILTER,
+            SERVER_RESTART_REQUIRED_FILTER,
+            _RestartSubscriber.WAIT_FILTER,
             proch.ServerProcess.FILTER_STATE_DOWN,
             msgftr.IsStop()))
         self._mailer = mailer
@@ -109,14 +127,14 @@ class _ModUpdateRestartSubscriber(msgabc.AbcSubscriber):
         if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
             self._initiated, self._second_message = 0, False
             return None
-        if self._initiated == 0 and _ModUpdateRestartSubscriber.MOD_UPDATE_FILTER.accepts(message):
+        if self._initiated == 0 and SERVER_RESTART_REQUIRED_FILTER.accepts(message):
             self._initiated, self._second_message = util.now_millis(), False
             await proch.PipeInLineService.request(
                 self._mailer, self,
                 'servermsg "Mod updated. Server restart in 5 minutes. Please find a safe place and logout."')
-            self._mailer.post(self, _ModUpdateRestartSubscriber.WAIT)
+            self._mailer.post(self, _RestartSubscriber.WAIT)
             return None
-        if self._initiated > 0 and _ModUpdateRestartSubscriber.WAIT_FILTER.accepts(message):
+        if self._initiated > 0 and _RestartSubscriber.WAIT_FILTER.accepts(message):
             waited = util.now_millis() - self._initiated
             if waited > 300000:  # 5 minutes
                 self._initiated, self._second_message = 0, False
@@ -127,10 +145,10 @@ class _ModUpdateRestartSubscriber(msgabc.AbcSubscriber):
                 await proch.PipeInLineService.request(
                     self._mailer, self,
                     'servermsg "Mod updated. Server restart in 1 minute. Please find a safe place and logout."')
-                self._mailer.post(self, _ModUpdateRestartSubscriber.WAIT)
+                self._mailer.post(self, _RestartSubscriber.WAIT)
                 return None
             await asyncio.sleep(1)
-            self._mailer.post(self, _ModUpdateRestartSubscriber.WAIT)
+            self._mailer.post(self, _RestartSubscriber.WAIT)
         return None
 
 

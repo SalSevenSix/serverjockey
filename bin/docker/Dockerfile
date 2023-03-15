@@ -12,12 +12,9 @@ RUN { echo steam steam/license note ''; \
     } | debconf-set-selections && apt -y install steamcmd
 RUN wget -O sjgms.deb https://4sas.short.gy/sjgms-deb-latest
 ARG SJGMS_USER="container"
-RUN apt -y install ./sjgms.deb
-RUN rm ./sjgms.deb
+RUN apt -y install ./sjgms.deb && rm ./sjgms.deb
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
-EXPOSE 6164/tcp
-EXPOSE 16261/udp
-EXPOSE 16262/udp
-ENTRYPOINT ["/usr/local/bin/serverjockey.pyz", "--home", "/home/container", "--logfile", "serverjockey.log"]
+COPY ./entrypoint.sh .
+CMD [ "/bin/bash", "/home/container/entrypoint.sh" ]

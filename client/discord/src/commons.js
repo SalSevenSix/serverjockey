@@ -1,13 +1,31 @@
 'use strict';
 
 const logger = require('./logger.js');
+const util = require('./util.js');
 const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-exports.startupSubscribePlayers = function(context, channel, instance, url) {
+exports.startupEventLogging = function(context, channel, instance, url) {
   if (!channel) return;
-  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
+  let helper = new subs.Helper(context);
+  let lastState = 'COMPLETE';
+  let restartRequired = false;
+  helper.daemon(url + '/server/subscribe', function(json) {
+    if (!json.state) return true; // ignore no state
+    if (json.state === 'INITIALISED' || json.state === 'START') return true; // ignore these states
+    if (!restartRequired && json.details.restart) {
+      channel.send('**Server ' + instance + ' requires a restart.**');
+      restartRequired = true;
+      return true;
+    }
+    if (json.state === lastState) return true; // ignore duplicates
+    if (json.state === 'STARTED') { restartRequired = false; }
+    lastState = json.state;
+    channel.send('Server ' + instance + ' is ' + json.state);
+    return true;
+  });
+  helper.daemon(url + '/players/subscribe', function(json) {
     let result = '';
     if (json.event === 'login') { result += 'LOGIN '; }
     if (json.event === 'logout') { result += 'LOGOUT '; }
@@ -24,7 +42,7 @@ exports.startupSubscribePlayers = function(context, channel, instance, url) {
 exports.server = function($) {
   if ($.data.length === 1) {
     let cmd = $.data[0];
-    if (cmd === 'delete') return;
+    if (cmd === 'delete') return;  // Blocking this. Webapp feature only.
     $.httptool.doPost('/server/' + cmd, null, function(message, json) {
       if (cmd === 'daemon' || cmd === 'start' || cmd === 'restart') {
         message.react('⌛');
@@ -52,17 +70,14 @@ exports.server = function($) {
       result += 'DOWN```';
       return result;
     }
-    result += body.state + '\n';
+    result += body.state;
+    if (body.uptime) { result += ' (' + util.humanDuration(body.uptime) + ')'; }
+    result += '\n';
     let dtl = body.details;
-    if (dtl.hasOwnProperty('version')) {
-      result += 'Version:  ' + dtl.version + '\n';
-    }
-    if (dtl.hasOwnProperty('ip') && dtl.hasOwnProperty('port')) {
-      result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n';
-    }
-    if (dtl.hasOwnProperty('ingametime')) {
-      result += 'Ingame:   ' + dtl.ingametime + '\n';
-    }
+    if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
+    if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
+    if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
+    if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
     return result + '```';
   });
 }

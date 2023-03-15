@@ -171,18 +171,22 @@ class ServerStatus(msgabc.AbcSubscriber):
                                         ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
         self._context = context
         self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'INITIALISED', 'details': {}}
+        self._running_millis = 0
 
     async def handle(self, message):
         action = message.name()
         updated = False
         if action is ServerStatus.REQUEST:
-            self._context.post(self, ServerStatus.RESPONSE, self._status_copy(), message)
+            self._context.post(self, ServerStatus.RESPONSE, self._prep_status(), message)
         elif action is ServerStatus.NOTIFY_RUNNING:
             running = message.data()
             if self._status['running'] != running:
                 self._status['running'] = running
                 if running:
                     self._status['details'] = {}
+                    self._running_millis = util.now_millis()
+                else:
+                    self._running_millis = 0
                 updated = True
         elif action is ServerStatus.NOTIFY_STATE:
             self._status['state'] = message.data()
@@ -192,12 +196,14 @@ class ServerStatus(msgabc.AbcSubscriber):
                 self._status['details'].update(message.data())
                 updated = True
         if updated:
-            self._context.post(self, ServerStatus.UPDATED, self._status_copy())
+            self._context.post(self, ServerStatus.UPDATED, self._prep_status())
         return None
 
-    def _status_copy(self) -> typing.Dict[str, typing.Any]:
+    def _prep_status(self) -> typing.Dict[str, typing.Any]:
         status = self._status.copy()
         status['details'] = self._status['details'].copy()
+        if self._running_millis > 0:
+            status['uptime'] = util.now_millis() - self._running_millis
         return status
 
 

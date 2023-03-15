@@ -31,7 +31,7 @@ const helpText = {
 };
 
 
-exports.startup = commons.startupSubscribePlayers;
+exports.startup = commons.startupEventLogging;
 exports.server = commons.server;
 exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
