@@ -1,5 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { get } from 'svelte/store';
+  import { sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
   import { baseurl, instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
   import Collapsible from '$lib/Collapsible.svelte';
@@ -11,8 +13,24 @@
   // used by ServerControls
   instance.set({ url: baseurl + '/instances/serverlink' });
   serverStatus.set({});
-
   let subs = new SubscriptionHelper();
+
+  async function setServerStatus(data) {
+    let id = Date.now().toString() + Math.random().toString().slice(1);
+    data.id = id;
+    serverStatus.set(data);
+    if (!data.uptime) return;
+    let looping = true;
+    while (looping) {
+      await sleep(20000);
+      if (id === get(serverStatus).id) {
+        data.uptime += 20000;
+        serverStatus.set(data);
+      } else {
+        looping = false;
+      }
+    }
+  }
 
   onMount(function() {
     fetch(baseurl + '/instances/serverlink/server', newGetRequest())
@@ -21,9 +39,9 @@
         return response.json();
       })
       .then(function(json) {
-        serverStatus.set(json);
+        setServerStatus(json);
         subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
-          serverStatus.set(data);
+          setServerStatus(data);
           return true;
         });
       })

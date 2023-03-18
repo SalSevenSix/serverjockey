@@ -24,8 +24,6 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 cp serverjockey.pyz $RPM_BUILD_ROOT/usr/local/bin
 cp serverlink $RPM_BUILD_ROOT/usr/local/bin
-mkdir -p $RPM_BUILD_ROOT/usr/lib/python3.10/site-packages
-cp -r psutil* $RPM_BUILD_ROOT/usr/lib/python3.10/site-packages
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system
 cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
 
@@ -36,45 +34,6 @@ cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
 /usr/local/bin/serverlink
 %defattr(644,root,root)
 /etc/systemd/system/serverjockey.service
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/INSTALLER
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/LICENSE
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/METADATA
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/RECORD
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/REQUESTED
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/WHEEL
-/usr/lib/python3.10/site-packages/psutil-5.9.1.dist-info/top_level.txt
-/usr/lib/python3.10/site-packages/psutil/__init__.py
-/usr/lib/python3.10/site-packages/psutil/_common.py
-/usr/lib/python3.10/site-packages/psutil/_compat.py
-/usr/lib/python3.10/site-packages/psutil/_psaix.py
-/usr/lib/python3.10/site-packages/psutil/_psbsd.py
-/usr/lib/python3.10/site-packages/psutil/_pslinux.py
-/usr/lib/python3.10/site-packages/psutil/_psosx.py
-/usr/lib/python3.10/site-packages/psutil/_psposix.py
-/usr/lib/python3.10/site-packages/psutil/_pssunos.py
-/usr/lib/python3.10/site-packages/psutil/_psutil_linux.cpython-310-x86_64-linux-gnu.so
-/usr/lib/python3.10/site-packages/psutil/_psutil_posix.cpython-310-x86_64-linux-gnu.so
-/usr/lib/python3.10/site-packages/psutil/_pswindows.py
-/usr/lib/python3.10/site-packages/psutil/__pycache__/__init__.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/__init__.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_common.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_common.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_compat.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_compat.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psaix.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psaix.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psbsd.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psbsd.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_pslinux.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_pslinux.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psosx.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psosx.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psposix.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_psposix.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_pssunos.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_pssunos.cpython-310.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_pswindows.cpython-310.opt-1.pyc
-/usr/lib/python3.10/site-packages/psutil/__pycache__/_pswindows.cpython-310.pyc
 
 
 %preun
@@ -110,8 +69,6 @@ if [ $? -ne 0 ]; then
   find $HOME_DIR -type f -exec chmod 600 {} +
   chown -R sjgms $HOME_DIR
   chgrp -R sjgms $HOME_DIR
-  #runuser - sjgms -s /bin/bash -c "steamcmd +quit"
-  #[ -d "$HOME_DIR/.steam" ] || exit 1
 fi
 systemctl daemon-reload
 systemctl enable serverjockey

@@ -8,7 +8,6 @@ verify_ssl = true
 [packages]
 aiohttp = "*"
 aiofiles = "*"
-psutil = "*"
 
 [requires]
 python_version = "3.10"

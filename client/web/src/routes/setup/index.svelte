@@ -398,14 +398,16 @@
     <span class="has-text-weight-bold">myserver</span>. You can give your instance a different name,
     but it must be lower case characters and numbers only, no spaces or special characters.
     The second command value is <span class="has-text-weight-bold">projectzomboid</span>.
-    This is the type of instance. Currently only Project Zomboid is supported so it must be this.
-  </p>
-  <p>
-    Once created the bot will respond with the instances list.
-    The arrow will mark the current selected instance.
+    This is the type of instance.
   </p>
   <pre class="pre">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
+  <p>
+    After creation, you can try the instances command again to see the new instance.
+    The arrow will mark the current selected instance.
+  </p>
+  <pre class="pre">!instances</pre>
+  <figure><img src="/assets/setup/38_list_new_instance.png" alt="View New Instance" /></figure>
 </div>
 
 <div class="content">
@@ -563,14 +565,14 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   <h3 class="title is-4">Port Forwarding</h3>
   <p>
     In order for people to connect to your Project Zomboid server over the internet, your home
-    router (internet gateway / "modem") needs to be configured to forward ports to the server.
+    router (internet gateway / &quot;modem&quot;) needs to be configured to forward ports to the server.
     By default the server will automatically forward ports using UPnP. However, if this is not
     working on your LAN, you can manually add the port forwarding.
   </p>
   <p>
-    To do this, login to your router then forward ports as shown below.
-    Use of the IP address as shown on the ZomBox console. Note that the
-    Players port range is for player connections, one port per player.
+    To do this, login to your router then forward ports as shown below. Use of the IP address as shown
+    on the ZomBox console. More detailed instructions cannot be provided because each router will have
+    a different webapp interface depending on the brand and model.
   </p>
   <table class="table">
     <thead>

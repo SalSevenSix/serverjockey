@@ -77,10 +77,6 @@ echo "Running tests"
 python3.10 -m test > /dev/null
 [ $? -eq 0 ] || exit 1
 
-echo "Move out libraries with natives"
-mv psutil* $TARGET_DIR/usr/local/lib/python3.10/dist-packages
-[ $? -eq 0 ] || exit 1
-
 echo "Removing ServerJockey junk"
 rm -rf .venv venv bin client test *.sh README.md .gitignore > /dev/null 2>&1
 

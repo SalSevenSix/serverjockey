@@ -12,9 +12,7 @@ TAR_DIR="$TARGET_DIR-$VERSION"
 rm -rf $TAR_DIR > /dev/null 2>&1
 
 mkdir $TAR_DIR
-rm -rf $TARGET_DIR/usr/local/lib/python3.10/dist-packages/psutil/tests > /dev/null 2>&1
 mv $TARGET_DIR/usr/local/bin/* $TAR_DIR
-mv $TARGET_DIR/usr/local/lib/python3.10/dist-packages/* $TAR_DIR
 mv $TARGET_DIR/etc/systemd/system/* $TAR_DIR
 rm -rf $TARGET_DIR > /dev/null 2>&1
 

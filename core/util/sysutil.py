@@ -1,16 +1,36 @@
 import shutil
-import psutil
-from core.util import funcutil
+from core.util import funcutil, shellutil
+
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
-_virtual_memory = funcutil.to_async(psutil.virtual_memory)
-_cpu_percent = funcutil.to_async(psutil.cpu_percent)
+# _virtual_memory = funcutil.to_async(psutil.virtual_memory)
+# _cpu_percent = funcutil.to_async(psutil.cpu_percent)
+
+
+async def _virtual_memory() -> tuple:
+    result = await shellutil.run_script('free -b | grep "Mem:"')
+    if not result:
+        return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    result = result.strip().split(' ')
+    result.pop(0)
+    result = [i for i in result if i != '']
+    result = [int(i) for i in result]
+    result = [result[0], result[5], round(float(result[1] / result[0] * 100), 1),
+              result[1], result[2], -1, -1, -1, result[4], -1, -1]
+    return tuple(result)
+
+
+async def _cpu_percent() -> float:
+    result = await shellutil.run_script('top -b -n 2 | grep "%Cpu(s)" | tail -1')
+    result = result.strip().split(' ')
+    result = [i for i in result if i != '']
+    return round(100.0 - float(result[result.index('id,') - 1]), 1)
 
 
 async def system_info() -> dict:
-    disk = await _disk_usage('/')
+    cpu = await _cpu_percent()
     memory = await _virtual_memory()
-    cpu = await _cpu_percent(1)
+    disk = await _disk_usage('/')
     return {
         'cpu': {
             'percent': cpu
