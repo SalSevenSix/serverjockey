@@ -1,35 +1,13 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
-  import { onMount, onDestroy } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { baseurl, instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import { baseurl, instance } from '$lib/serverjockeyapi';
+  import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
 
-  instance.set({ url: baseurl + '/instances/serverlink' });  // used by ServerControls
-  serverStatus.set({});  // used by ServerControls
-  let subs = new SubscriptionHelper();
-
-  onMount(function() {
-    fetch(baseurl + '/instances/serverlink/server', newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) {
-        serverStatus.set(json);
-        subs.start(baseurl + '/instances/serverlink/server/subscribe', function(data) {
-          serverStatus.set(data);
-          return true;
-        });
-      })
-      .catch(function(error) { notifyError('Failed to load ServerLink Status.'); });
-  });
-
-  onDestroy(function() {
-    subs.stop();
-  });
+  // used by ServerStatusStore
+  instance.set({ url: baseurl + '/instances/serverlink' });
 </script>
 
 
@@ -307,8 +285,10 @@
 <hr />
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
-    <ServerStatus />
-    <ServerControls />
+    <ServerStatusStore>
+      <ServerStatus />
+      <ServerControls />
+    </ServerStatusStore>
   </div>
 </div>
 <hr />
