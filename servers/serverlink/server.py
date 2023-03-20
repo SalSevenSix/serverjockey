@@ -1,9 +1,10 @@
+import logging
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
 from core.msg import msgftr, msgtrf, msglog
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
-from core.util import util, io, aggtrf
+from core.util import util, logutil, io, aggtrf
 
 
 class Server(svrabc.Server):
@@ -23,8 +24,13 @@ class Server(svrabc.Server):
     async def initialise(self):
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
-        self._context.register(msglog.LogfileSubscriber(
-            self._log_file, Server.LOG_FILTER, transformer=msgtrf.GetData()))
+        if logutil.is_logging_to_stream(logging.getLogger()):
+            self._context.register(msglog.PrintSubscriber(Server.LOG_FILTER, transformer=msgtrf.GetData()))
+        if logutil.is_logging_to_file(logging.getLogger()):
+            self._context.register(msglog.LogfileSubscriber(
+                self._log_file, Server.LOG_FILTER, transformer=msgtrf.GetData()))
+        else:
+            await io.write_file(self._log_file, 'NO LOG FILE. STDOUT ONLY.')
 
     def resources(self, resource: httpabc.Resource):
         httprsc.ResourceBuilder(resource) \

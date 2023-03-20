@@ -7,7 +7,7 @@ exports.raw = function(value) {
 }
 
 exports.info = function(value) {
-  console.log(new Date().format('yyyy-mm-dd hh:MM:ss.l ') + value);
+  console.log(new Date().format('yyyy-mm-dd HH:MM:ss.l ') + value);
 }
 
 exports.error = function(value) {
@@ -16,6 +16,7 @@ exports.error = function(value) {
     exports.info(value);
     return null;
   }
+  console.error(new Date().format('yyyy-mm-dd HH:MM:ss.l'));
   console.error(value);
   return null;
 }

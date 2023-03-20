@@ -42,7 +42,7 @@ exports.Service = class Service {
       instances[instance].server.startup(context, channel, instance, instances[instance].url);
     }
     logger.info('Instances...');
-    logger.raw(instances);
+    logger.raw(self.getInstancesText());
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
       if (data.event === 'created') {
         data.instance.url = baseurl + '/instances/' + data.instance.identity;
@@ -80,18 +80,17 @@ exports.Service = class Service {
   }
 
   getInstancesText() {
-    let instances = Object.keys(this.#instances);
-    if (instances.length === 0) {
+    if (Object.keys(this.#instances).length === 0) {
       return '```\nNo instances found.\n```';
     }
     let result = '```\n';
-    for (let i = 0; i < instances.length; i++) {
-      if (instances[i] === this.#context.instancesService.currentInstance()) {
+    for (let [identity, data] of Object.entries(this.#instances)) {
+      if (identity === this.#context.instancesService.currentInstance()) {
         result += '=> ';
       } else {
         result += '   ';
       }
-      result += instances[i] + '\n';
+      result += identity + ' (' + data.module + ')\n';
     }
     result += '```';
     return result;

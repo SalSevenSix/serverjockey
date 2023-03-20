@@ -77,7 +77,7 @@ systemctl start serverjockey
 
 %changelog
 * Thu Dec 03 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.6
-- Feature release v0.0.6
+- Small features and added docker distro
 * Thu Oct 14 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.5
 - Added support for Unturned
 * Thu Sep 15 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.4

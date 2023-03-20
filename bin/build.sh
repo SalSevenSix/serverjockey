@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BRANCH="${1-master}"
+BRANCH="${1-local}"
 HOME_DIR="$(pwd)"
 [ -f "start.sh" ] && echo "Not building here!" && exit 1
 SERVERJOCKEY="serverjockey"
@@ -49,7 +49,7 @@ cp -r "$SERVERJOCKEY_DIR/bin/packaging/sjgms" "$HOME_DIR"
 find $TARGET_DIR -type f -name ".deleteme" -delete
 [ $? -eq 0 ] || exit 1
 
-echo "Copying Serverlink into build directory"
+echo "Copying ServerLink into build directory"
 cp -r "$SERVERJOCKEY_DIR/client/discord" "$SERVERLINK_DIR"
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR" ] || exit 1
@@ -78,12 +78,13 @@ python3.10 -m test > /dev/null
 [ $? -eq 0 ] || exit 1
 
 echo "Removing ServerJockey junk"
-rm -rf .venv venv bin client test *.sh README.md .gitignore > /dev/null 2>&1
+rm -rf .venv venv bin client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1
 
 echo "Building ServerJockey zipapp"
 cd $HOME_DIR || exit 1
 python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.bootstrap:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz"
 [ $? -eq 0 ] || exit 1
+[ -f "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz" ] || exit 1
 
 echo "Downloading ServerLink dependencies"
 cd $SERVERLINK_DIR || exit 1
@@ -95,6 +96,7 @@ npm ci
 echo "Building Serverlink nexe"
 nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10)
 [ $? -eq 0 ] || exit 1
+[ -f "$TARGET_DIR/usr/local/bin/$SERVERLINK" ] || exit 1
 
 echo "Cleanup"
 rm -rf $SERVERLINK_DIR $SERVERJOCKEY_DIR > /dev/null 2>&1

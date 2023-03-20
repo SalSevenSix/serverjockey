@@ -18,9 +18,11 @@ def _ssl_config(home: str) -> tuple:
 
 
 def _create_context(args: typing.Collection) -> contextsvc.Context:
-    p = argparse.ArgumentParser(description='Start ServerJockey.')
+    p = argparse.ArgumentParser(description='Start ServerJockey game server management system.')
     p.add_argument('--debug', action='store_true',
                    help='Debug mode')
+    p.add_argument('--showtoken', action='store_true',
+                   help='Print the login token to stdout')
     p.add_argument('--host', type=str,
                    help='Host or IP to bind http service, default is open to all')
     p.add_argument('--port', type=int, default=6164,
@@ -35,15 +37,18 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     args = p.parse_args(args)
     home = os.getcwd() if args.home == '.' else args.home
     scheme, sslcert, sslkey = _ssl_config(home)
+    secret = util.generate_token(10)
+    if args.showtoken:
+        print('ServerJockey Login Token: ' + secret)
     return contextsvc.Context(
-        debug=args.debug, home=home, secret=util.generate_token(10),
+        debug=args.debug, home=home, secret=secret,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
         python=sys.executable, logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 
 
 def _setup_logging(context: contextsvc.Context):
-    logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y%m%d%H%M%S'
+    logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y-%m-%d %H:%M:%S'
     level = logging.DEBUG if context.is_debug() else logging.INFO
     filename = util.overridable_full_path(context.config('home'), context.config('logfile'))
     if filename:

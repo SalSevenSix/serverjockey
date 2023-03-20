@@ -1,5 +1,16 @@
 'use strict';
 
+function loadConfig() {
+  let config = {};
+  for (let i = 2; i < process.argv.length; i++) {
+    config = { ...config, ...require(process.argv[i]) };
+  }
+  if (!config.BOT_TOKEN) throw new Error('BOT_TOKEN not set');
+  logger.info('Initialised with config...');
+  logger.raw(config);
+  return config;
+}
+
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
@@ -47,6 +58,7 @@ function handleMessage(message) {
 }
 
 function shutdown() {
+  logger.info('Shutdown ServerLink');
   if (!context.running) return;
   context.running = false;
   context.controller.abort();
@@ -66,11 +78,7 @@ const instances = require('./src/instances.js');
 
 logger.info('*** START ServerLink Bot ***');
 const context = { running: false };
-context.config = { ...require(process.argv[2]), ...require(process.argv[3]) };
-if (!context.config.BOT_TOKEN) throw new Error('BOT_TOKEN not set');
-logger.info('Initialised with config...');
-logger.raw(context.config);
-
+context.config = loadConfig();
 context.controller = new AbortController();
 context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);
