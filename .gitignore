@@ -5,7 +5,6 @@ scratch.*
 
 # Web deployment root
 /web/
-/client/test-demo/
 
 # PyCharm IDE
 .idea/
@@ -23,7 +22,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
