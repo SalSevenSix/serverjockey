@@ -64,26 +64,27 @@ class _ServerProcessFactory:
         self._config = config
         self._clientfile = clientfile
         self._executable = None
-        self._use_source = False
+        self._script = None
 
     async def initialise(self):
+        env_path = util.get('PATH', self._context.config('env'))
+        self._executable = await io.find_in_env_path(env_path, 'node')
+        script = self._context.config('home') + '/index.js'
+        if self._executable and await io.file_exists(script):
+            self._script = script
+            return
         self._executable = self._context.config('home') + '/serverlink'
         if await io.file_exists(self._executable):
             return
-        env_path = util.get('PATH', self._context.config('env'))
         self._executable = await io.find_in_env_path(env_path, 'serverlink')
         if self._executable:
-            return
-        self._executable = await io.find_in_env_path(env_path, 'node')
-        if self._executable:
-            self._use_source = True
             return
         raise Exception('Unable to find a ServerLink executable.')
 
     def build(self) -> proch.ServerProcess:
         server_process = proch.ServerProcess(self._context, self._executable)
-        if self._use_source:
-            server_process.append_arg(self._context.config('home') + '/index.js')
+        if self._script:
+            server_process.append_arg(self._script)
         server_process.append_arg(self._config)
         server_process.append_arg(self._clientfile)
         return server_process
