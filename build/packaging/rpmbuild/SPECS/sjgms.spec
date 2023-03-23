@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.0.6
+Version:        0.0.7
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -76,9 +76,11 @@ systemctl start serverjockey
 
 
 %changelog
+* Sun Dec 04 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.7
+- Feature release v0.0.7
 * Sat Dec 03 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.6
 - Small features and added docker distro
-* Wed Oct 14 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.5
+* Fri Oct 14 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.5
 - Added support for Unturned
 * Thu Sep 15 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.4
 - Feature release v0.0.4

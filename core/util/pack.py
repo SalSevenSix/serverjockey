@@ -41,6 +41,7 @@ async def unpack_directory(archive: str, unpack_dir: str, logger=None):
         unpack_dir = unpack_dir[:-1]
     await io.delete_directory(unpack_dir)
     await io.create_directory(unpack_dir)
+    # TODO Add filename to logging
     if logger:
         logger.info('START Unpack Directory')
     await _unpack_archive(archive, unpack_dir)

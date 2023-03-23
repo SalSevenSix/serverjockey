@@ -24,7 +24,10 @@ async def _cpu_percent() -> float:
     result = await shellutil.run_script('top -b -n 2 | grep "%Cpu(s)" | tail -1')
     result = result.strip().split(' ')
     result = [i for i in result if i != '']
-    return round(100.0 - float(result[result.index('id,') - 1]), 1)
+    result = result[result.index('id,') - 1]
+    if result == '100.0':
+        return 0.0
+    return round(100.0 - float(result), 1)
 
 
 async def system_info() -> dict:
