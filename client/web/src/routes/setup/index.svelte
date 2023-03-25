@@ -583,7 +583,7 @@ UPnP=false</pre>
   <p>
     Select the <span class="has-text-weight-bold">System</span> section on the left panel,
     then the <span class="has-text-weight-bold">Motherboard</span> tab.
-    By default 9Gb of memory is allocated to ZomBox. This value should not be more
+    By default 10Gb of memory is allocated to ZomBox. This value should not be more
     than how much free memory your real machine has.
   </p>
   <figure><img src="/assets/setup/vb_sysmem.png" alt="ZomBox Memory" /></figure>

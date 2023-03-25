@@ -15,9 +15,9 @@
     if (!data.uptime) return;
     let looping = true;
     while (looping) {
-      await sleep(20000);
+      await sleep(10000);
       if (id === get(serverStatus).id) {
-        data.uptime += 20000;
+        data.uptime += 10000;
         serverStatus.set(data);
       } else {
         looping = false;

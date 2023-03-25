@@ -39,7 +39,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
     scheme, sslcert, sslkey = _ssl_config(home)
     secret = util.generate_token(10)
     if args.showtoken:
-        print('ServerJockey Login Token: ' + secret)
+        print('Webapp Port: ' + str(args.port) + ' Login Token: ' + secret)
     return contextsvc.Context(
         debug=args.debug, home=home, secret=secret,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
