@@ -234,7 +234,7 @@ class _RequestByteStream(httpabc.ByteStream):
 
 
 class _AccessLogFilter(logging.Filter):
-    REGEX = re.compile('.*GET.*/subscriptions/.*HTTP/1.1" (204|200).*')
+    REGEX = re.compile('.*GET.*/(subscriptions|assets|_app)/.*HTTP/1.1" (204|200).*')
 
     def filter(self, record):
         return _AccessLogFilter.REGEX.match(record.getMessage()) is None

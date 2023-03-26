@@ -79,6 +79,7 @@ can be imported into VirtualBox. Use this option on Windows systems.
 
 
 ## Docker Image
-ServerJockey is available as a Docker image.
-This is also an option for Windows systems with Docker installed.
+ServerJockey is available as a Docker image. Webapp login token will be shown in
+the console output. The image is compatible with [Pterodactyl](https://pterodactyl.io/).
+Docker is also a good option for Windows systems.
 [Images on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags)

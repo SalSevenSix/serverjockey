@@ -13,9 +13,9 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = {
-    'wipe-world-save': 'Reset the game world save only.',
-    'wipe-world-playerdb': 'Reset the player database only.',
-    'wipe-world-config': 'Reset the configuration files only.',
+    'wipe-world-save': 'Reset the game world save only. This is the map and player characters.',
+    'wipe-world-playerdb': 'Reset the player database only. This is logins, whitelist, banlist.',
+    'wipe-world-config': 'Reset the configuration files only. INI, Sandbox and Spawn config files.',
     'wipe-world-all': 'Reset all of the above.'
   };
 

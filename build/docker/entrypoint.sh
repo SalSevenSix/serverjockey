@@ -1,5 +1,11 @@
 #!/bin/bash
 
+graceful_shutdown() {
+  PID="$(ps -e -o pid,cmd | awk '/serverjockey\.pyz/{print $1}')"
+  echo "Trapped shutdown signal, terminating $PID"
+  kill $PID
+}
+
 setup_serverlink() {
   mkdir serverlink || exit 1
   echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > serverlink/instance.json
@@ -27,12 +33,11 @@ steamcmd +quit
 
 MODIFIED_STARTUP=$(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
 echo -e ":/home/container$ ${MODIFIED_STARTUP}"
-trap 'kill $PID' TERM INT
+trap 'graceful_shutdown' TERM INT
 eval ${MODIFIED_STARTUP} &
-WPID=$!
-PID=$(ps -e -o pid,cmd | awk '/serverjockey\.pyz/{print $1}')
-wait $WPID
+WAIT_PID=$!
+wait $WAIT_PID
 trap - TERM INT
-wait $WPID
+wait $WAIT_PID
 
 exit 0
