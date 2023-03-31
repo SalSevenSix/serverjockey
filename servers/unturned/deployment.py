@@ -19,12 +19,11 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
+        self._python, self._wrapper = context.config('python'), None
         self._home_dir = context.config('home')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._runtime_metafile = self._runtime_dir + '/steamapps/appmanifest_1110390.acf'
-        self._python = context.config('python')
-        self._wrapper = None
         self._executable = self._runtime_dir + '/Unturned_Headless.x86_64'
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'

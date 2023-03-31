@@ -17,7 +17,7 @@ def to_async(func):
 
 def callable_dict(obj: typing.Any, names: typing.Collection[str]) -> typing.Dict[str, typing.Callable]:
     result = {}
-    for name in iter(names):
+    for name in names:
         if hasattr(obj, name):
             attribute = getattr(obj, name)
             if callable(attribute):

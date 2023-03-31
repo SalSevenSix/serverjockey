@@ -16,6 +16,7 @@
     'wipe-world-save': 'Reset the game world save only. This is the map and player characters.',
     'wipe-world-playerdb': 'Reset the player database only. This is logins, whitelist, banlist.',
     'wipe-world-config': 'Reset the configuration files only. INI, Sandbox and Spawn config files.',
+    'wipe-world-backups': 'Delete all the map backups created by the server upon startup.',
     'wipe-world-all': 'Reset all of the above.'
   };
 

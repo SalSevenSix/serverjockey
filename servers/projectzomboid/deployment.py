@@ -71,6 +71,8 @@ class Deployment:
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._config_dir})) \
             .append('wipe-world-save', httpext.MessengerHandler(
                 self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
+            .append('wipe-world-backups', httpext.MessengerHandler(
+                self._mailer, _DeploymentWiper.REQUEST, {'path': self._world_dir + '/backups'})) \
             .pop() \
             .append('log', httpext.FileSystemHandler(self._console_log)) \
             .push('logs', httpext.FileSystemHandler(self._logs_dir)) \
