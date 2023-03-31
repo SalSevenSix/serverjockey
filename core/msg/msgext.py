@@ -282,8 +282,9 @@ class Archiver(msgabc.AbcSubscriber):
         backups_dir = util.get('backups_dir', message.data())
         if backups_dir is None:
             raise Exception('No backups_dir')
+        prune_hours = int(util.get('prunehours', message.data(), 0))
         logger = msglog.LoggingPublisher(self._mailer, message.source())
-        await pack.archive_directory(source_dir, backups_dir, logger)
+        await pack.archive_directory(source_dir, backups_dir, prune_hours, logger)
         return None
 
 

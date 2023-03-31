@@ -148,8 +148,14 @@ class _CommandProcessor:
         self._connection.post(self._path + '/world/broadcast', json.dumps({'message': str(argument)}))
         return True
 
-    def _backup_world(self) -> bool:
-        result = self._connection.post(self._path + '/deployment/backup-world')
+    def _backup_world(self, argument: str) -> bool:
+        prune_hours = 0
+        if argument:
+            try:
+                prune_hours = int(argument)
+            except (TypeError, ValueError):
+                logging.warning('Invalid argument for prune hours, must be a number, was: ' + str(argument))
+        result = self._connection.post(self._path + '/deployment/backup-world', json.dumps({'prunehours': prune_hours}))
         self._connection.drain(json.loads(result))
         return True
 
@@ -174,6 +180,7 @@ def _initialise(args: typing.Collection) -> dict:
         logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, filename=args.logfile, filemode='w')
     else:
         logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, stream=sys.stdout)
+    # TODO Try searching more locations
     clientfile = args.clientfile if args.clientfile else os.environ['HOME'] + '/serverjockey-client.json'
     commands = args.commands if args.commands else ['server']
     return {'debug': args.debug, 'clientfile': clientfile, 'instance': args.instance, 'commands': commands}

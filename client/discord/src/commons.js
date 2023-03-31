@@ -117,6 +117,9 @@ exports.deployment = function($) {
   if (data.length < 1) return;
   let cmd = data.shift();
   let body = null;
+  if (cmd === 'backup-runtime' || cmd === 'backup-world') {
+    if (data.length > 0) { body = { prunehours: data[0] }; }
+  }
   if (cmd === 'install-runtime') {
     body = { wipe: false, validate: true };
     if (data.length > 0) { body.beta = data[0]; }

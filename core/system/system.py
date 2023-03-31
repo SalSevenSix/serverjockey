@@ -51,8 +51,9 @@ class SystemService:
         return result
 
     async def initialise(self) -> SystemService:
-        autos, ls = [], await io.directory_list_dict(self._home_dir)
-        for directory in iter([o for o in ls if o['type'] == 'directory']):
+        autos, directories = [], await io.directory_list_dict(self._home_dir)
+        directories = [o for o in directories if o['type'] == 'directory']
+        for directory in directories:
             identity = directory['name']
             config_file = self._home_dir + '/' + identity + '/instance.json'
             if await io.file_exists(config_file):
