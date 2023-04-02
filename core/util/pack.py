@@ -31,7 +31,7 @@ async def archive_directory(unpacked_dir: str, archives_dir: str,
     result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)
     logger.info('Created ' + result)
     if prune_hours > 0:
-        logger.info('Pruning archived older than ' + str(prune_hours) + ' hours')
+        logger.info('Pruning archives older than ' + str(prune_hours) + ' hours')
         prune_time = now - float(prune_hours * 60 * 60)
         files = [o for o in await io.directory_list_dict(archives_dir) if o['type'] == 'file']
         files = [o for o in files if o['name'].startswith(archive_kind) and o['mtime'] < prune_time]
@@ -48,8 +48,9 @@ async def unpack_directory(archive: str, unpack_dir: str, logger=logutil.NullLog
         unpack_dir = unpack_dir[:-1]
     await io.delete_directory(unpack_dir)
     await io.create_directory(unpack_dir)
-    # TODO Add filename to logging
     logger.info('START Unpack Directory')
+    logger.info(archive + ' => ' + unpack_dir)
+    logger.info('No progress updates on unpacking, please be patient...')
     await _unpack_archive(archive, unpack_dir)
     logger.info('SET file permissions')
     await io.auto_chmod(unpack_dir)

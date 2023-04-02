@@ -77,6 +77,7 @@ const system = require('./src/system.js');
 const instances = require('./src/instances.js');
 
 logger.info('*** START ServerLink Bot ***');
+logger.info('Version: 0.0.7');
 const context = { running: false };
 context.config = loadConfig();
 context.controller = new AbortController();

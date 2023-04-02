@@ -49,11 +49,11 @@ const helpText = {
     'setconfig spawnregions    : Update Spawnregions using attached file',
     'setconfig spawnpoints     : Update Spawnpoints using attached file',
     'setconfig jvm             : Update JVM config using attached file',
-    'deployment backup-world        : Backup game world to zip file',
-    'deployment wipe-world-all      : Delete game world folder',
-    'deployment wipe-world-playerdb : Delete only player DB',
-    'deployment wipe-world-config   : Delete only config files',
-    'deployment wipe-world-save     : Delete only map files',
+    'deployment backup-world {hours}   : Backup game world to zip file',
+    'deployment wipe-world-all         : Delete game world folder',
+    'deployment wipe-world-playerdb    : Delete only player DB',
+    'deployment wipe-world-config      : Delete only config files',
+    'deployment wipe-world-save        : Delete only map files',
     'deployment install-runtime {beta} : Install game server'
   ],
   help: [
@@ -79,9 +79,14 @@ const helpText = {
   playerspawnvehicle: [
     'Spawn a vehicle next to player. Condition will vary.'
   ],
+  deploymentbackupworld: [
+    'Make a backup of the game world to a zip file.',
+    'Optionally specify {hours} to prune backups older than hours.',
+    'Log output will be attached as a file.'
+  ],
   deploymentinstallruntime: [
     'Install game server, {beta} optional.',
-    'Only works on Linux. Log output will be attaches as a file.'
+    'Log output will be attached as a file.'
   ]
 };
 

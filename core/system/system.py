@@ -7,7 +7,7 @@ from core.util import util, io, pkg, sysutil, signals
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
-from core.system import __version__, svrabc, svrsvc
+from core.system import svrabc, svrsvc
 
 
 class SystemService:
@@ -51,10 +51,8 @@ class SystemService:
         return result
 
     async def initialise(self) -> SystemService:
-        autos, directories = [], await io.directory_list_dict(self._home_dir)
-        directories = [o for o in directories if o['type'] == 'directory']
-        for directory in directories:
-            identity = directory['name']
+        autos, ls = [], await io.directory_list_dict(self._home_dir)
+        for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
             config_file = self._home_dir + '/' + identity + '/instance.json'
             if await io.file_exists(config_file):
                 configuration = await io.read_file(config_file)
@@ -196,7 +194,7 @@ class _SystemInfoHandler(httpabc.AsyncGetHandler):
 
     async def handle_get(self, resource, data):
         info = await sysutil.system_info()
-        info.update({'version': __version__, 'uptime': util.now_millis() - self._start_time})
+        info.update({'uptime': util.now_millis() - self._start_time})
         return info
 
 

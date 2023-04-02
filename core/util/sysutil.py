@@ -1,5 +1,5 @@
 import shutil
-from core.util import funcutil, shellutil
+from core.util import __version__, funcutil, shellutil
 
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
@@ -30,11 +30,16 @@ async def _cpu_percent() -> float:
     return round(100.0 - float(result), 1)
 
 
+def system_version() -> str:
+    return __version__
+
+
 async def system_info() -> dict:
     cpu = await _cpu_percent()
     memory = await _virtual_memory()
     disk = await _disk_usage('/')
     return {
+        'version': system_version(),
         'cpu': {
             'percent': cpu
         },

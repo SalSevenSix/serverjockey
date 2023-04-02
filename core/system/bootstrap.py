@@ -3,7 +3,7 @@ import argparse
 import sys
 import os
 import typing
-from core.util import util, funcutil
+from core.util import util, funcutil, sysutil
 from core.msg import msglog
 from core.context import contextsvc
 from core.http import httpabc, httpsvc
@@ -86,6 +86,7 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
     _setup_logging(context)
     try:
         logging.info('*** START ServerJockey ***')
+        logging.info('Version: ' + sysutil.system_version())
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:
