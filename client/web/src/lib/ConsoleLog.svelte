@@ -1,13 +1,20 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { ReverseRollingLog } from '$lib/util';
+  import { RollingLog } from '$lib/util';
   import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
 
   export let hasConsoleLogFile = false;
   let subs = new SubscriptionHelper();
-  let logLines = new ReverseRollingLog();
+  let logLines = new RollingLog();
   let logText = '';
+  let logBox;
+
+	$: if (logText && logBox) {
+	  tick().then(function() {
+		  logBox.scroll({ top: logBox.scrollHeight });
+		});
+	}
 
   onMount(function() {
     fetch($instance.url + '/log/tail', newGetRequest())
@@ -41,7 +48,8 @@
       {/if}
     </label>
     <div class="control pr-6">
-      <textarea id="console-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
+      <textarea bind:this={logBox} id="console-log"
+                class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
     </div>
   </div>
 </div>

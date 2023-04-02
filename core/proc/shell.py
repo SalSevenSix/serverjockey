@@ -42,7 +42,10 @@ class Script:
         if util.get('validate', kwargs):
             line.append('validate')
         line.append('+quit')
-        return self.include('include_steamcmd_app_update', ' '.join(line).format(**kwargs))
+        return self.include('include_steamcmd_app_update', (
+            'echo "Installing or updating runtime with SteamCMD"',
+            'echo "Log updates are usually delayed"',
+            ' '.join(line).format(**kwargs)))
 
     def include_softlink_steamclient_lib(self, directory: str) -> Script:
         return self.include('include_softlink_steamclient_lib', (

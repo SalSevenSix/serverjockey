@@ -1,5 +1,6 @@
 import { dev } from '$app/env';
 import { writable, get } from 'svelte/store';
+import { sleep } from '$lib/util';
 import { notifyError } from '$lib/notifications';
 
 export const baseurl = (dev ? 'http://localhost:6164' : '');
@@ -60,9 +61,25 @@ export class SubscriptionHelper {
     this.#running = false;
   }
 
-  async start(url, dataHandler) {
-    let pollingUrl = await this.#subscribe(url);
-    return this.poll(pollingUrl, dataHandler);
+  async start(subscribeUrl, dataHandler) {
+    this.#running = true;
+    let url = null;
+    while (this.#running && url == null) {
+      while (this.#running && url == null) {
+        url = await this.#subscribe(subscribeUrl);
+        if (this.#running && url == null) {
+          await sleep(10000);
+        }
+      }
+      if (this.#running && url != null && url != false) {
+        await this.poll(url, dataHandler);
+      }
+      if (url === false) {
+        this.#running = false;
+      } else {
+        url = null;
+      }
+    }
   }
 
   poll(pollingUrl, dataHandler) {
@@ -75,20 +92,20 @@ export class SubscriptionHelper {
     this.#controller.abort();
   }
 
-  running() {
-    return this.#running;
-  }
-
-  async #subscribe(url) {
-    return await fetch(url, newPostRequest())
+  async #subscribe(subscribeUrl) {
+    return await fetch(subscribeUrl, newPostRequest())
       .then(function(response) {
+        if (response.status === 404) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .then(function(json) {
+        if (json === false) return false;
         return json.url;
       })
-      .catch(function(error) { notifyError('Subscription failed.'); });
+      .catch(function(error) {
+        notifyError('Subscription failed. Check connection and server. Refresh page.');
+      });
   }
 
   async #doPoll(url, signal, dataHandler) {
@@ -112,6 +129,5 @@ export class SubscriptionHelper {
           return false;
         });
     }
-    this.#running = false;
   }
 }

@@ -1,20 +1,27 @@
 <script>
-  import { onDestroy } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-  import { ReverseRollingLog } from '$lib/util';
+  import { RollingLog } from '$lib/util';
   import { instance, serverStatus, newPostRequest, SubscriptionHelper, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let qualifierName = null;
   export let showLog = false;
 
   let subs = new SubscriptionHelper();
-  let logLines = new ReverseRollingLog();
+  let logLines = new RollingLog();
   let logText = '';
+  let logBox;
   let qualifier = '';
   let installing = false;
   let wiping = false;
   $: processing = installing || wiping;
+
+	$: if (logText && logBox) {
+	  tick().then(function() {
+		  logBox.scroll({ top: logBox.scrollHeight });
+		});
+	}
 
   onDestroy(function() {
     subs.stop();
@@ -106,7 +113,8 @@
       {/if}
       <label for="install-runtime-log" class="label">Install Log</label>
       <div class="control pr-6">
-        <textarea id="install-runtime-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
+        <textarea bind:this={logBox} id="install-runtime-log"
+                  class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
       </div>
     </div>
   {:else}

@@ -53,7 +53,7 @@ export function urlSafeB64encode(value) {
 }
 
 
-export class ReverseRollingLog {
+export class RollingLog {
   #lines;
 
   constructor() {
@@ -67,7 +67,6 @@ export class ReverseRollingLog {
 
   set(text) {
     this.#lines = text.split('\n');
-    this.#lines.reverse();
     return this;
   }
 
@@ -75,13 +74,11 @@ export class ReverseRollingLog {
     let newLines = text.split('\n');
     if (newLines.length > 200) {
       this.#lines = newLines.slice(-200);
-      this.#lines.reverse();
       return this;
     }
-    newLines.reverse();
-    this.#lines = [...newLines, ...this.#lines];
+    this.#lines = [...this.#lines, ...newLines];
     if (this.#lines > 200) {
-      this.#lines = this.#lines.slice(0, 200);
+      this.#lines = this.#lines.slice(-200);
     }
     return this;
   }

@@ -74,6 +74,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         if name is HttpSubscriptionService.SUBSCRIBE:
             identity = str(uuid.uuid4())
             path = self._subscriptions_path + '/' + identity
+            logging.info('Http subscription created at ' + path)
             selector = message.data()
             subscriber = _Subscriber(self._mailer, identity, selector)
             self._subscriptions.update({identity: subscriber})

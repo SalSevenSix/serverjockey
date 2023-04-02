@@ -1,17 +1,24 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-  import { sleep, humanFileSize, ReverseRollingLog } from '$lib/util';
+  import { sleep, humanFileSize, RollingLog } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest,
            rawPostRequest, SubscriptionHelper } from '$lib/serverjockeyapi';
 
   let subs = new SubscriptionHelper();
-  let logLines = new ReverseRollingLog();
+  let logLines = new RollingLog();
   let logText = '';
+  let logBox;
   let processing = false;
   let paths = [];
   let uploadFiles = [];
+
+	$: if (logText && logBox) {
+	  tick().then(function() {
+		  logBox.scroll({ top: logBox.scrollHeight });
+		});
+	}
 
   onMount(reload);
 
@@ -192,7 +199,8 @@
     {/if}
     <label for="backups-log" class="label">Backups Log</label>
     <div class="control pr-6">
-      <textarea id="backups-log" class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
+      <textarea bind:this={logBox} id="backups-log"
+                class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
     </div>
   </div>
 </div>
