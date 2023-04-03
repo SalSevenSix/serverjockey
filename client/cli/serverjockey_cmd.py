@@ -164,7 +164,7 @@ def _initialise(args: typing.Collection) -> dict:
     epilog = '''
         COMMANDS: exit-if-down sleep:<duration>
         server-daemon server-start server-restart server-stop
-        world-broadcast:"<message>" backup-world
+        world-broadcast:"<message>" backup-world:<prunehours>
     '''
     p = argparse.ArgumentParser(description='ServerJockey CLI.', epilog=epilog)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
@@ -180,8 +180,16 @@ def _initialise(args: typing.Collection) -> dict:
         logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, filename=args.logfile, filemode='w')
     else:
         logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, stream=sys.stdout)
-    # TODO Try searching more locations
-    clientfile = args.clientfile if args.clientfile else os.environ['HOME'] + '/serverjockey-client.json'
+    if args.clientfile:
+        clientfile = args.clientfile
+        if not os.path.isfile(clientfile):
+            raise Exception('Clientfile ' + clientfile + ' not found.')
+    else:
+        clientfile = os.environ['HOME'] + '/serverjockey-client.json'
+        if not os.path.isfile(clientfile):
+            clientfile = os.environ['HOME'] + '/serverjockey/serverjockey-client.json'
+            if not os.path.isfile(clientfile):
+                raise Exception('Unable to find Clientfile. System may be down. Or try using --clientfile option.')
     commands = args.commands if args.commands else ['server']
     return {'debug': args.debug, 'clientfile': clientfile, 'instance': args.instance, 'commands': commands}
 

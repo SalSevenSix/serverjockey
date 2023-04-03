@@ -81,7 +81,8 @@ class SystemService:
         else:
             identity = str(uuid.uuid4())
         home_dir = self._home_dir + '/' + identity
-        # TODO error if directory already exists
+        if await io.directory_exists(home_dir):
+            raise Exception('Unable to create instance. Directory already exists.')
         await io.create_directory(home_dir)
         config_file = home_dir + '/' + 'instance.json'
         await io.write_file(config_file, util.obj_to_json(configuration))

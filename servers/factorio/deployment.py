@@ -149,8 +149,8 @@ class Deployment:
             await io.write_file(
                 self._mods_list, util.obj_to_json(Deployment._default_mods_list(), pretty=True))
 
-    async def install_runtime(self):
-        url = 'https://factorio.com/get-download/stable/headless/linux64'
+    async def install_runtime(self, version: str):
+        url = 'https://factorio.com/get-download/' + version + '/headless/linux64'
         install_package = self._home_dir + '/factorio.tar.xz'
         unpack_dir = self._home_dir + '/factorio'
         chunk_size = 65536
@@ -244,7 +244,8 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
                 msg_filter=msgftr.NameIs(_InstallRuntimeHandler.INSTALL_MESSAGE),
                 completed_filter=msgftr.NameIs(_InstallRuntimeHandler.INSTALL_DONE),
                 aggregator=aggtrf.StrJoin('\n')))
-        tasks.task_fork(self._deployment.install_runtime(), 'factorio.install_runtime()')
+        version = util.get('beta', data, 'stable')
+        tasks.task_fork(self._deployment.install_runtime(version), 'factorio.install_runtime()')
         return {'url': util.get('baseurl', data, '') + subscription_path}
 
 
