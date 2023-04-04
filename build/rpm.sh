@@ -20,7 +20,7 @@ mv $TARGET_DIR/etc/systemd/system/* $TAR_DIR
 echo "Setting directory and file perms"
 find $TAR_DIR -type d -exec chmod 755 {} +
 find $TAR_DIR -type f -exec chmod 644 {} +
-chmod 755 $TAR_DIR/serverjockey.pyz
+chmod 755 $TAR_DIR/*.pyz
 chmod 755 $TAR_DIR/serverlink
 
 echo "Creating TAR file"

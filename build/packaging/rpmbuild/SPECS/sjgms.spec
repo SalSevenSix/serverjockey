@@ -23,6 +23,7 @@ ServerJockey Game Management System
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 cp serverjockey.pyz $RPM_BUILD_ROOT/usr/local/bin
+cp serverjockey_cmd.pyz $RPM_BUILD_ROOT/usr/local/bin
 cp serverlink $RPM_BUILD_ROOT/usr/local/bin
 mkdir -p $RPM_BUILD_ROOT/etc/systemd/system
 cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
@@ -31,6 +32,7 @@ cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
 %files
 %defattr(755,root,root)
 /usr/local/bin/serverjockey.pyz
+/usr/local/bin/serverjockey_cmd.pyz
 /usr/local/bin/serverlink
 %defattr(644,root,root)
 /etc/systemd/system/serverjockey.service

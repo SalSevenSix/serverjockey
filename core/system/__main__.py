@@ -1,5 +1,10 @@
 import sys
 from core.system import bootstrap
 
-if __name__ == '__main__':
+
+def main():
     sys.exit(bootstrap.main())
+
+
+if __name__ == '__main__':
+    main()

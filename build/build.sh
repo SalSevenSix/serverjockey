@@ -6,16 +6,15 @@ BUILD_DIR="$(pwd)"
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
 SERVERJOCKEY="serverjockey"
-TARGET_DIR="$DIST_DIR/sjgms"
 SERVERLINK="serverlink"
 SERVERJOCKEY_DIR="$DIST_DIR/$SERVERJOCKEY"
 SERVERLINK_DIR="$DIST_DIR/discord"
+SERVERJOCKEY_CMD_DIR="$DIST_DIR/cli"
+TARGET_DIR="$DIST_DIR/sjgms"
 LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages"
 LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
-rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
-rm -rf "$SERVERLINK_DIR" > /dev/null 2>&1
-rm -rf "$TARGET_DIR" > /dev/null 2>&1
+rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$TARGET_DIR" > /dev/null 2>&1
 
 cd $DIST_DIR || exit 1
 if [ "$BRANCH" == "local" ]; then
@@ -29,6 +28,9 @@ if [ "$BRANCH" == "local" ]; then
   cd "build" || exit 1
   find . -maxdepth 1 | while read file; do
     [[ $file == "." || $file == "./dist" ]] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
+  done
+  find "$SERVERJOCKEY_DIR" -type d -name "__pycache__" | while read file; do
+    rm -rf $file
   done
 else
   echo "Downloading zip from github"
@@ -64,7 +66,10 @@ cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR"
 find $TARGET_DIR -type f -name ".deleteme" -delete
 [ $? -eq 0 ] || exit 1
 
-echo "Copying ServerLink into build directory"
+echo "Copying CLI and ServerLink into build directory"
+cp -r "$SERVERJOCKEY_DIR/client/cli" "$SERVERJOCKEY_CMD_DIR"
+[ $? -eq 0 ] || exit 1
+[ -d "$SERVERJOCKEY_CMD_DIR" ] || exit 1
 cp -r "$SERVERJOCKEY_DIR/client/discord" "$SERVERLINK_DIR"
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR" ] || exit 1
@@ -82,9 +87,11 @@ pipenv install
 
 echo "Merging ServerJockey dependencies"
 if [ -d "$LIB32_DIR" ]; then
+  rm -rf "$LIB32_DIR/pip"* > /dev/null 2>&1
   cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 if [ -d "$LIB64_DIR" ]; then
+  rm -rf "$LIB64_DIR/pip"* > /dev/null 2>&1
   cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 
@@ -97,9 +104,14 @@ rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/nul
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
-python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.bootstrap:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz"
+python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.__main__:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz"
 [ $? -eq 0 ] || exit 1
 [ -f "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz" ] || exit 1
+
+echo "Building ServerJockey CLI zipapp"
+python3.10 -m zipapp "cli" -p "/usr/bin/env python3.10" -m "serverjockey_cmd:main" -c -o "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz"
+[ $? -eq 0 ] || exit 1
+[ -f "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz" ] || exit 1
 
 echo "Downloading ServerLink dependencies"
 cd $SERVERLINK_DIR || exit 1
@@ -114,7 +126,7 @@ nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=
 [ -f "$TARGET_DIR/usr/local/bin/$SERVERLINK" ] || exit 1
 
 echo "Cleanup"
-rm -rf $SERVERLINK_DIR $SERVERJOCKEY_DIR > /dev/null 2>&1
+rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" > /dev/null 2>&1
 
 echo "Done"
 exit 0
