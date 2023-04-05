@@ -80,6 +80,7 @@ class SystemService:
             configuration.pop('identity')
         else:
             identity = str(uuid.uuid4())
+        logging.info('CREATING instance ' + identity)
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
             raise Exception('Unable to create instance. Directory already exists.')
@@ -90,10 +91,12 @@ class SystemService:
         return await self._initialise_instance(configuration)
 
     async def delete_instance(self, subcontext: contextsvc.Context):
-        self._instances.remove(subcontext.config('identity'))
+        identity = subcontext.config('identity')
+        self._instances.remove(identity)
         await self._context.destroy_subcontext(subcontext)
         await io.delete_directory(subcontext.config('home'))
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
+        logging.info('DELETED instance ' + identity)
 
     async def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)

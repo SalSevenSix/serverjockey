@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import asyncio
 import typing
 from core.util import tasks, util
@@ -66,6 +67,7 @@ class ServerService(msgabc.AbcSubscriber):
             tasks.task_end(self._task)
 
     async def _run(self):
+        identity = self._context.config('identity')
         controller = _RunController(True, False, False)
         while controller.looping():
             if controller.daemon() and self._queue.empty():
@@ -75,6 +77,7 @@ class ServerService(msgabc.AbcSubscriber):
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
+                logging.info('STARTING instance ' + identity)
                 ServerStatus.notify_running(self._context, self, self._running)
                 start = util.now_millis()
                 try:
@@ -82,10 +85,12 @@ class ServerService(msgabc.AbcSubscriber):
                 except Exception as e:
                     ServerStatus.notify_state(self._context, self, 'EXCEPTION')
                     ServerStatus.notify_details(self._context, self, {'error': repr(e)})
+                    logging.warning('EXCEPTION instance ' + identity + ' [' + repr(e) + ']')
                 finally:
                     self._running = False
                     controller.check_uptime(util.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
+                    logging.info('STOPPED instance ' + identity)
 
     async def handle(self, message):
         action = message.name()

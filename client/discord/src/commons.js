@@ -82,6 +82,22 @@ exports.server = function($) {
   });
 }
 
+exports.log = function($) {
+  $.httptool.doGet('/log/tail', function(body) {
+    if (!body) {
+      $.message.channel.send('```No log lines found```');
+      return;
+    }
+    let fname = 'log-' + $.message.id + '.text';
+    let fpath = '/tmp/' + fname;
+    fs.writeFile(fpath, body, function(error) {
+      if (error) return logger.error(error);
+      $.message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+        .finally(function() { fs.unlink(fpath, logger.error); });
+    });
+  });
+}
+
 exports.getconfig = function($) {
   if ($.data.length < 1) return;
   $.httptool.doGet('/config/' + $.data[0], function(body) {

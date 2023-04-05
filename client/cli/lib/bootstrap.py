@@ -7,12 +7,7 @@ from . import cmd, comms
 
 
 def _initialise(args: typing.Collection) -> dict:
-    epilog = '''
-        COMMANDS: exit-if-down sleep:<duration>
-        server-daemon server-start server-restart server-stop
-        world-broadcast:"<message>" backup-world:<prunehours>
-    '''
-    p = argparse.ArgumentParser(description='ServerJockey CLI.', epilog=epilog)
+    p = argparse.ArgumentParser(description='ServerJockey CLI.', epilog=cmd.epilog())
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--logfile', '-l', type=str, help='Log file')
     p.add_argument('--clientfile', '-f', type=str, help='Client file')

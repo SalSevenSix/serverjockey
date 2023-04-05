@@ -8,6 +8,7 @@ const helpText = {
     'server start      : Start server',
     'server restart    : Save world and restart server',
     'server stop       : Save world and stop server',
+    'log               : Get last 100 lines from the log',
     'players           : Show players currently online',
     'getconfig cmdargs : Get cmd args as attachment',
     'getconfig server  : Get server settings as attachment',
@@ -33,6 +34,7 @@ const helpText = {
 
 exports.startup = commons.startupEventLogging;
 exports.server = commons.server;
+exports.log = commons.log;
 exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;

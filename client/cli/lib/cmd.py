@@ -5,6 +5,23 @@ import inspect
 from . import util, comms
 
 
+def epilog() -> str:
+    return '''
+        COMMANDS: exit-if-down exit-if-up sleep:<duration> server server-daemon server-start server-restart server-stop
+        console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours> log-tail
+    '''
+
+
+def _get_prune_hours(argument: str) -> int:
+    prune_hours = 0
+    if argument:
+        prune_hours = util.to_int(argument)
+        if prune_hours is None:
+            prune_hours = 0
+            logging.warning('Invalid argument for prune hours, must be a number, was: ' + str(argument))
+    return prune_hours
+
+
 class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
@@ -37,11 +54,12 @@ class CommandProcessor:
         counter = 0
         for command in self._commands:
             counter += 1
-            logging.info(str(counter) + ' : ' + str(command['method']))
+            method = command['method']
+            logging.info(str(counter) + ' : ' + str(method))
             if 'argument' in command:
-                result = command['method'](self, command['argument'])
+                result = method(self, command['argument'])
             else:
-                result = command['method'](self)
+                result = method(self)
             if not result:
                 return
 
@@ -50,6 +68,13 @@ class CommandProcessor:
         if status['running']:
             return True
         logging.info('exit-if-down command found the server down, no more commands will be processed')
+        return False
+
+    def _exit_if_up(self) -> bool:
+        status = json.loads(self._connection.get(self._path + '/server'))
+        if not status['running']:
+            return True
+        logging.info('exit-if-up command found the server up, no more commands will be processed')
         return False
 
     # noinspection PyMethodMayBeStatic
@@ -63,6 +88,12 @@ class CommandProcessor:
 
     def _server(self) -> bool:
         logging.info(self._connection.get(self._path + '/server'))
+        return True
+
+    def _log_tail(self) -> bool:
+        result = self._connection.get(self._path + '/log/tail')
+        result = [o[2:] if o.startswith('/n') else o for o in result.split('\n')]
+        logging.info('LOG TAIL\n' + '\n'.join(result))
         return True
 
     def _server_daemon(self) -> bool:
@@ -81,17 +112,24 @@ class CommandProcessor:
         self._connection.post(self._path + '/server/stop')
         return True
 
+    def _console_send(self, argument: str) -> bool:
+        self._connection.post(self._path + '/console/send', json.dumps({'line': str(argument)}))
+        return True
+
     def _world_broadcast(self, argument: str) -> bool:
         self._connection.post(self._path + '/world/broadcast', json.dumps({'message': str(argument)}))
         return True
 
     def _backup_world(self, argument: str) -> bool:
-        prune_hours = 0
-        if argument:
-            prune_hours = util.to_int(argument)
-            if prune_hours is None:
-                prune_hours = 0
-                logging.warning('Invalid argument for prune hours, must be a number, was: ' + str(argument))
-        result = self._connection.post(self._path + '/deployment/backup-world', json.dumps({'prunehours': prune_hours}))
+        result = self._connection.post(
+            self._path + '/deployment/backup-world',
+            json.dumps({'prunehours': _get_prune_hours(argument)}))
+        self._connection.drain(json.loads(result))
+        return True
+
+    def _backup_runtime(self, argument: str) -> bool:
+        result = self._connection.post(
+            self._path + '/deployment/backup-runtime',
+            json.dumps({'prunehours': _get_prune_hours(argument)}))
         self._connection.drain(json.loads(result))
         return True
