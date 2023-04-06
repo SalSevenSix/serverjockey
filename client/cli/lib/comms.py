@@ -1,5 +1,4 @@
 import logging
-import json
 from http import client
 
 GET, POST = 'GET', 'POST'
@@ -7,10 +6,8 @@ GET, POST = 'GET', 'POST'
 
 class HttpConnection:
 
-    def __init__(self, clientfile: str):
-        with open(file=clientfile, mode='r') as file:
-            data = json.load(file)
-        url, self._headers = data['SERVER_URL'], {'X-Secret': data['SERVER_TOKEN']}
+    def __init__(self, config: dict):
+        url, self._headers = config['url'], {'X-Secret': config['token']}
         if url.startswith('https'):
             self._connection = client.HTTPSConnection(url[8:])
         else:

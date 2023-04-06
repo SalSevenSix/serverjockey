@@ -3,7 +3,36 @@ import typing
 import argparse
 import sys
 import os
-from . import cmd, comms
+import json
+from . import util, cmd, comms
+
+
+def _find_clientfile(clientfile: str | None) -> str:
+    if clientfile:
+        if not os.path.isfile(clientfile):
+            raise Exception('Clientfile ' + clientfile + ' not found.')
+        return clientfile
+    home, filename = os.environ['HOME'], '/serverjockey-client.json'
+    candidates = (home + filename, home + '/serverjockey' + filename, '/home/sjgms' + filename)
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            return candidate
+    raise Exception('Unable to find Clientfile. ServerJockey may be down. Or try using --clientfile option.')
+
+
+def _load_clientfile(clientfile: str) -> tuple:
+    with open(file=clientfile, mode='r') as file:
+        data = json.load(file)
+        return data['SERVER_URL'], data['SERVER_TOKEN']
+
+
+def _setup_logging(debug: bool, logfile: str | None):
+    logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y-%m-%d %H:%M:%S'
+    level = logging.DEBUG if debug else logging.INFO
+    if logfile:
+        logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, filename=logfile, filemode='w')
+    else:
+        logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, stream=sys.stdout)
 
 
 def _initialise(args: typing.Collection) -> dict:
@@ -11,37 +40,25 @@ def _initialise(args: typing.Collection) -> dict:
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--logfile', '-l', type=str, help='Log file')
     p.add_argument('--clientfile', '-f', type=str, help='Client file')
+    p.add_argument('--showtoken', '-t', action='store_true', help='Show webapp url and login token')
     p.add_argument('--instance', '-s', type=str, help='Instance name')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
-    logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y-%m-%d %H:%M:%S'
-    level = logging.DEBUG if args.debug else logging.INFO
-    if args.logfile:
-        logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, filename=args.logfile, filemode='w')
-    else:
-        logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, stream=sys.stdout)
-    if args.clientfile:
-        clientfile = args.clientfile
-        if not os.path.isfile(clientfile):
-            raise Exception('Clientfile ' + clientfile + ' not found.')
-    else:
-        clientfile = os.environ['HOME'] + '/serverjockey-client.json'
-        if not os.path.isfile(clientfile):
-            clientfile = os.environ['HOME'] + '/serverjockey/serverjockey-client.json'
-            if not os.path.isfile(clientfile):
-                raise Exception(
-                    'Unable to find Clientfile. ServerJockey may be down. Or try using --clientfile option.')
-    commands = args.commands if args.commands else ['server']
-    return {'debug': args.debug, 'clientfile': clientfile, 'instance': args.instance, 'commands': commands}
+    _setup_logging(args.debug, args.logfile)
+    url, token = _load_clientfile(_find_clientfile(args.clientfile))
+    if args.showtoken:
+        logging.info('Webapp URL  : ' + url.replace('localhost', util.get_ip()))
+        logging.info('Login Token : ' + token)
+    commands = args.commands if args.commands else []
+    return {'debug': args.debug, 'url': url, 'token': token, 'instance': args.instance, 'commands': commands}
 
 
 def main() -> int:
     config = _initialise(sys.argv)
     connection = None
     try:
-        logging.info('Processing Commands: ' + repr(config['commands']))
-        connection = comms.HttpConnection(config['clientfile'])
+        connection = comms.HttpConnection(config)
         cmd.CommandProcessor(config, connection).process()
         logging.info('Done')
         return 0

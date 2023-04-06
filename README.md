@@ -32,11 +32,9 @@ sudo apt install ./sjgms.deb
 ```
 
 * The ServerJockey system should automatically be started.
-Find login details for the webapp in the `serverjockey-client.json` file.
-Use the IP of the machine in place of `localhost` in the URL.
-Enter the token to login to the webapp on the home page.
+Find the login details for the webapp by using the CLI client as shown below.
 ```bash
-cat /home/sjgms/serverjockey-client.json
+serverjockey_cmd.pyz -t
 ```
 
 
@@ -59,11 +57,9 @@ curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.g
 ```
 
 * The ServerJockey system should automatically be started.
-Find login details for the webapp in the `serverjockey-client.json` file.
-Use the IP of the machine in place of `localhost` in the URL.
-Enter the token to login to the webapp on the home page.
+Find the login details for the webapp by using the CLI client as shown below.
 ```bash
-cat /home/sjgms/serverjockey-client.json
+serverjockey_cmd.pyz -t
 ```
 
 

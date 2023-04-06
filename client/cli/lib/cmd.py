@@ -41,6 +41,8 @@ class CommandProcessor:
                         self._commands.append({'method': method})
             else:
                 raise Exception('Command {} not found'.format(command))
+        if len(self._commands) == 0:
+            return
         instance, instances = config['instance'], json.loads(self._connection.get('/instances'))
         if instance and instance not in instances.keys():
             raise Exception('Instance {} does not exist'.format(instance))
