@@ -1,14 +1,15 @@
 import logging
 import time
-import json
 import inspect
 from . import util, comms
 
 
 def epilog() -> str:
     return '''
-        COMMANDS: exit-if-down exit-if-up sleep:<duration> server server-daemon server-start server-restart server-stop
-        console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours> log-tail
+        COMMANDS: instances modules use:"<instance>" create:"<instance>,<module>" delete install-runtime:"<version>"
+        exit-if-down exit-if-up sleep:<duration> server server-daemon server-start server-restart server-stop
+        console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours>
+        log-tail
     '''
 
 
@@ -26,6 +27,8 @@ class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
         self._connection = connection
+        self._instances: dict = self._connection.get('/instances')
+        self._instance = None
         self._commands = []
         for command in config['commands']:
             argument, index = None, command.find(':')
@@ -41,16 +44,6 @@ class CommandProcessor:
                         self._commands.append({'method': method})
             else:
                 raise Exception('Command {} not found'.format(command))
-        if len(self._commands) == 0:
-            return
-        instance, instances = config['instance'], json.loads(self._connection.get('/instances'))
-        if instance and instance not in instances.keys():
-            raise Exception('Instance {} does not exist'.format(instance))
-        if not instance and len(instances) == 1:
-            instance = list(instances.keys())[0]
-        if not instance:
-            raise Exception('Unable to identify instance to use. Please use the --instance option.')
-        self._path = '/instances/' + instance
 
     def process(self):
         counter = 0
@@ -65,15 +58,93 @@ class CommandProcessor:
             if not result:
                 return
 
+    def _instance_path(self, command_path: str) -> str:
+        if not self._instance:
+            if not self._use(None):
+                raise Exception('_instance_path() was unable to find instance to use.')
+        return '/instances/' + self._instance + command_path
+
+    def _modules(self) -> bool:
+        logging.info('Modules...')
+        for module in self._connection.get('/modules'):
+            logging.info('   ' + module)
+        return True
+
+    def _instances(self) -> bool:
+        identities = self._instances.keys()
+        if len(identities) == 0:
+            logging.info('No instances found.')
+            return True
+        logging.info('Instances...')
+        for identity in identities:
+            prefix = '=> ' if identity == self._instance else '   '
+            logging.info(prefix + identity + ' (' + self._instances[identity]['module'] + ')')
+        return True
+
+    def _use(self, argument: str | None) -> bool:
+        if argument:
+            if argument in self._instances.keys():
+                self._instance = argument
+                logging.info('Instance set to: ' + self._instance)
+                return True
+            logging.error('Instance ' + argument + ' does not exist. No more commands will be processed.')
+            return False
+        if len(self._instances) > 0:
+            self._instance = list(self._instances.keys())[0]
+            logging.info('Instance defaulted to: ' + self._instance)
+            return True
+        logging.error('No instances found. No more commands will be processed.')
+        return False
+
+    def _create(self, argument: str) -> bool:
+        if not argument:
+            argument = ','
+        parts, instance, module = argument.split(','), None, None
+        if len(parts) >= 2:
+            instance, module = parts[0], parts[1]
+        if not instance or not module:
+            logging.error('Instance name and module required. No more commands will be processed.')
+            return False
+        if instance in self._instances.keys():
+            logging.error('Instance already exists. No more commands will be processed.')
+            return False
+        if module not in self._connection.get('/modules'):
+            logging.error('Module not found. No more commands will be processed.')
+            return False
+        logging.info('Creating instance: ' + instance + ' (' + module + ')')
+        self._connection.post('/instances', {'module': module, 'identity': instance})
+        self._instances.update({instance: {'module': module}})
+        self._use(instance)
+        return True
+
+    def _install_runtime(self, argument: str) -> bool:
+        body = {'wipe': False, 'validate': True}
+        if argument:
+            body.update({'beta': argument})
+        result = self._connection.post(self._instance_path('/deployment/install-runtime'), body)
+        if result:
+            self._connection.drain(result)
+        return True
+
+    def _delete(self) -> bool:
+        if not self._instance:
+            logging.error('Instance must be explicitly set to delete. No more commands will be processed.')
+            return False
+        self._connection.post(self._instance_path('/server/delete'))
+        logging.info('Deleted instance: ' + self._instance)
+        del self._instances[self._instance]
+        self._instance = None
+        return True
+
     def _exit_if_down(self) -> bool:
-        status = json.loads(self._connection.get(self._path + '/server'))
+        status = self._connection.get(self._instance_path('/server'))
         if status['running']:
             return True
         logging.info('exit-if-down command found the server down, no more commands will be processed')
         return False
 
     def _exit_if_up(self) -> bool:
-        status = json.loads(self._connection.get(self._path + '/server'))
+        status = self._connection.get(self._instance_path('/server'))
         if not status['running']:
             return True
         logging.info('exit-if-up command found the server up, no more commands will be processed')
@@ -89,49 +160,48 @@ class CommandProcessor:
         return True
 
     def _server(self) -> bool:
-        logging.info(self._connection.get(self._path + '/server'))
+        logging.info(self._connection.get(self._instance_path('/server')))
         return True
 
     def _log_tail(self) -> bool:
-        result = self._connection.get(self._path + '/log/tail')
-        result = [o[2:] if o.startswith('/n') else o for o in result.split('\n')]
-        logging.info('LOG TAIL\n' + '\n'.join(result))
+        result = self._connection.get(self._instance_path('/log/tail'))
+        logging.info('LOG TAIL\n' + result)
         return True
 
     def _server_daemon(self) -> bool:
-        self._connection.post(self._path + '/server/daemon')
+        self._connection.post(self._instance_path('/server/daemon'))
         return True
 
     def _server_start(self) -> bool:
-        self._connection.post(self._path + '/server/start')
+        self._connection.post(self._instance_path('/server/start'))
         return True
 
     def _server_restart(self) -> bool:
-        self._connection.post(self._path + '/server/restart')
+        self._connection.post(self._instance_path('/server/restart'))
         return True
 
     def _server_stop(self) -> bool:
-        self._connection.post(self._path + '/server/stop')
+        self._connection.post(self._instance_path('/server/stop'))
         return True
 
     def _console_send(self, argument: str) -> bool:
-        self._connection.post(self._path + '/console/send', json.dumps({'line': str(argument)}))
+        self._connection.post(self._instance_path('/console/send'), {'line': str(argument)})
         return True
 
     def _world_broadcast(self, argument: str) -> bool:
-        self._connection.post(self._path + '/world/broadcast', json.dumps({'message': str(argument)}))
+        self._connection.post(self._instance_path('/world/broadcast'), {'message': str(argument)})
         return True
 
     def _backup_world(self, argument: str) -> bool:
         result = self._connection.post(
-            self._path + '/deployment/backup-world',
-            json.dumps({'prunehours': _get_prune_hours(argument)}))
-        self._connection.drain(json.loads(result))
+            self._instance_path('/deployment/backup-world'),
+            {'prunehours': _get_prune_hours(argument)})
+        self._connection.drain(result)
         return True
 
     def _backup_runtime(self, argument: str) -> bool:
         result = self._connection.post(
-            self._path + '/deployment/backup-runtime',
-            json.dumps({'prunehours': _get_prune_hours(argument)}))
-        self._connection.drain(json.loads(result))
+            self._instance_path('/deployment/backup-runtime'),
+            {'prunehours': _get_prune_hours(argument)})
+        self._connection.drain(result)
         return True

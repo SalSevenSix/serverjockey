@@ -41,7 +41,6 @@ def _initialise(args: typing.Collection) -> dict:
     p.add_argument('--logfile', '-l', type=str, help='Log file')
     p.add_argument('--clientfile', '-f', type=str, help='Client file')
     p.add_argument('--showtoken', '-t', action='store_true', help='Show webapp url and login token')
-    p.add_argument('--instance', '-s', type=str, help='Instance name')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
@@ -50,20 +49,20 @@ def _initialise(args: typing.Collection) -> dict:
     if args.showtoken:
         logging.info('Webapp URL  : ' + url.replace('localhost', util.get_ip()))
         logging.info('Login Token : ' + token)
-    commands = args.commands if args.commands else []
-    return {'debug': args.debug, 'url': url, 'token': token, 'instance': args.instance, 'commands': commands}
+    return {'debug': args.debug, 'url': url, 'token': token, 'commands': args.commands}
 
 
 def main() -> int:
-    config = _initialise(sys.argv)
-    connection = None
+    config, connection = None, None
     try:
-        connection = comms.HttpConnection(config)
-        cmd.CommandProcessor(config, connection).process()
-        logging.info('Done')
+        config = _initialise(sys.argv)
+        if config['commands']:
+            connection = comms.HttpConnection(config)
+            cmd.CommandProcessor(config, connection).process()
+        logging.info('OK')
         return 0
     except Exception as e:
-        if config['debug']:
+        if config and config['debug']:
             raise e
         logging.error(repr(e))
         return 1
