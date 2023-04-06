@@ -3,13 +3,15 @@ import time
 import inspect
 from . import util, comms
 
+_OUT = '    '
+
 
 def epilog() -> str:
     return '''
         COMMANDS: instances modules use:"<instance>" create:"<instance>,<module>" delete install-runtime:"<version>"
         exit-if-down exit-if-up sleep:<duration> server server-daemon server-start server-restart server-stop
         console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours>
-        log-tail
+        log-tail:<lines> log-tail-f
     '''
 
 
@@ -67,7 +69,7 @@ class CommandProcessor:
     def _modules(self) -> bool:
         logging.info('Modules...')
         for module in self._connection.get('/modules'):
-            logging.info('   ' + module)
+            logging.info(_OUT + module)
         return True
 
     def _instances(self) -> bool:
@@ -77,7 +79,7 @@ class CommandProcessor:
             return True
         logging.info('Instances...')
         for identity in identities:
-            prefix = '=> ' if identity == self._instance else '   '
+            prefix = ' => ' if identity == self._instance else _OUT
             logging.info(prefix + identity + ' (' + self._instances[identity]['module'] + ')')
         return True
 
@@ -160,12 +162,27 @@ class CommandProcessor:
         return True
 
     def _server(self) -> bool:
-        logging.info(self._connection.get(self._instance_path('/server')))
+        result = self._connection.get(self._instance_path('/server'))
+        logging.info(_OUT + str(result))
         return True
 
-    def _log_tail(self) -> bool:
+    def _log_tail(self, argument: str) -> bool:
+        lines = util.to_int(argument) if argument else 100
+        if not lines:
+            lines = 100
+            logging.warning('Invalid argument for log-tail command, must be a number > 0')
         result = self._connection.get(self._instance_path('/log/tail'))
-        logging.info('LOG TAIL\n' + result)
+        result = result.strip().split('\n')
+        if len(result) > 0 and lines < 100:
+            result = result[-lines:]
+        for line in result:
+            logging.info(_OUT + line)
+        return True
+
+    def _log_tail_f(self) -> bool:
+        self._log_tail('10')
+        result = self._connection.post(self._instance_path('/log/subscribe'))
+        self._connection.drain(result)
         return True
 
     def _server_daemon(self) -> bool:

@@ -2,7 +2,7 @@ import logging
 import json
 from http import client
 
-GET, POST = 'GET', 'POST'
+_GET, _POST = 'GET', 'POST'
 
 
 class HttpConnection:
@@ -15,7 +15,7 @@ class HttpConnection:
             self._connection = client.HTTPConnection(url[7:])
 
     def get(self, path: str) -> str | dict | None:
-        self._connection.request(GET, path, headers=self._headers)
+        self._connection.request(_GET, path, headers=self._headers)
         response = self._connection.getresponse()
         try:
             if response.status == 204:
@@ -33,7 +33,7 @@ class HttpConnection:
         headers = self._headers.copy()
         headers.update({'Content-Type': 'application/json'})
         payload = json.dumps(body) if body else None
-        self._connection.request(POST, path, headers=headers, body=payload)
+        self._connection.request(_POST, path, headers=headers, body=payload)
         response = self._connection.getresponse()
         try:
             if response.status == 204:
@@ -50,12 +50,12 @@ class HttpConnection:
     def drain(self, url_dict: dict):
         path = '/' + '/'.join(url_dict['url'].split('/')[3:])
         while True:
-            self._connection.request(GET, path, headers=self._headers)
+            self._connection.request(_GET, path, headers=self._headers)
             response = self._connection.getresponse()
             try:
                 if response.status == 200:
                     for line in response.readlines():
-                        logging.info(line.decode().strip())
+                        logging.info('    ' + line.decode().strip())
                 elif response.status == 404:
                     return
                 elif response.status != 204:

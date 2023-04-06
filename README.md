@@ -34,7 +34,7 @@ sudo apt install ./sjgms.deb
 * The ServerJockey system should automatically be started.
 Find the login details for the webapp by using the CLI client as shown below.
 ```bash
-serverjockey_cmd.pyz -t
+serverjockey_cmd.pyz -nt
 ```
 
 
@@ -59,7 +59,7 @@ curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.g
 * The ServerJockey system should automatically be started.
 Find the login details for the webapp by using the CLI client as shown below.
 ```bash
-serverjockey_cmd.pyz -t
+serverjockey_cmd.pyz -nt
 ```
 
 
