@@ -69,6 +69,8 @@ function shutdown() {
 
 // MAIN
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 const { Client, Intents } = require('discord.js');
 const logger = require('./src/logger.js');
 const util = require('./src/util.js');

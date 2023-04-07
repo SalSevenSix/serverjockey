@@ -7,6 +7,7 @@ const helpText = {
     'system                     : Show system information',
     'instances                  : Show server instances list',
     'use {instance}             : Switch default instance',
+    'modules                    : Supported games list',
     'create {instance} {module} : Create new instance',
     'shutdown                   : Shutdown system'
   ]
@@ -26,6 +27,16 @@ exports.system = function($) {
     result += ' ('        + info.disk.percent + '%)\n';
     result += '```';
     return result;
+  });
+}
+
+exports.modules = function($) {
+  $.httptool.doGet('/modules', function(body) {
+    let result = '```\n';
+    for (let module in body) {
+      result += body[module] + '\n';
+    }
+    return result + '```';
   });
 }
 

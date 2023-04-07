@@ -8,8 +8,10 @@ _OUT = '    '
 
 def epilog() -> str:
     return '''
-        COMMANDS: instances modules use:"<instance>" create:"<instance>,<module>" delete install-runtime:"<version>"
-        exit-if-down exit-if-up sleep:<duration> server server-daemon server-start server-restart server-stop
+        COMMANDS:
+        report instances modules create:"<instance>,<module>" delete
+        use:"<instance>" install-runtime:"<version>" exit-if-down exit-if-up sleep:<duration>
+        server server-daemon server-start server-restart server-stop
         console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours>
         log-tail:<lines> log-tail-f
     '''
@@ -85,7 +87,9 @@ class CommandProcessor:
 
     def _use(self, argument: str | None) -> bool:
         if argument:
-            if argument in self._instances.keys():
+            if argument == self._instance:
+                return True
+            if argument == 'serverlink' or argument in self._instances.keys():
                 self._instance = argument
                 logging.info('Instance set to: ' + self._instance)
                 return True
@@ -163,7 +167,25 @@ class CommandProcessor:
 
     def _server(self) -> bool:
         result = self._connection.get(self._instance_path('/server'))
-        logging.info(_OUT + str(result))
+        result = 'instance: ' + self._instance + '\n' + util.repr_dict(result)
+        for line in result.strip().split('\n'):
+            logging.info(_OUT + line)
+        return True
+
+    def _report(self) -> bool:
+        result = self._connection.get('/system/info')
+        for line in util.repr_dict(result).strip().split('\n'):
+            logging.info(_OUT + line)
+        identities = self._instances.keys()
+        if len(identities) == 0:
+            return True
+        original = self._instance
+        for identity in identities:
+            self._instance = identity
+            result = self._connection.get(self._instance_path('/server'))
+            for line in util.repr_dict(result, identity).strip().split('\n'):
+                logging.info(_OUT + line)
+        self._instance = original
         return True
 
     def _log_tail(self, argument: str) -> bool:

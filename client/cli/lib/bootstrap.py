@@ -58,7 +58,7 @@ def _initialise(args: typing.Collection) -> dict:
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
     p.add_argument('--clientfile', '-f', type=str, help='Client file')
     p.add_argument('--showtoken', '-t', action='store_true', help='Show webapp url and login token')
-    p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands')
+    p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     _setup_logging(args.debug, args.nolog)
