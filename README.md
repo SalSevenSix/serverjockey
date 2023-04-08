@@ -83,3 +83,9 @@ Docker is also a good option for Windows systems.
 
 ## Running from source
 TODO
+```bash
+BRANCH="master"
+wget https://github.com/SalSevenSix/serverjockey/archive/refs/heads/$BRANCH.zip
+unzip -q $BRANCH.zip && mv serverjockey-$BRANCH serverjockey
+./serverjockey/serverjockey.sh --showtoken
+```

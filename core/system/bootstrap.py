@@ -17,8 +17,10 @@ def _ssl_config(home: str) -> tuple:
     return 'http', None, None
 
 
-def _create_context(args: typing.Collection) -> contextsvc.Context:
+def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     p = argparse.ArgumentParser(description='Start ServerJockey game server management system.')
+    p.add_argument('--version', action='store_true',
+                   help='Show version then exit')
     p.add_argument('--debug', action='store_true',
                    help='Debug mode')
     p.add_argument('--showtoken', action='store_true',
@@ -35,6 +37,9 @@ def _create_context(args: typing.Collection) -> contextsvc.Context:
                    help='Log file to use, relative to "home" unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
+    if args.version:
+        print(sysutil.system_version())
+        return None
     home = os.getcwd() if args.home == '.' else args.home
     scheme, sslcert, sslkey = _ssl_config(home)
     secret = util.generate_token(10)
@@ -83,6 +88,8 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
 
 def main(args: typing.Optional[typing.Collection] = None) -> int:
     context = _create_context(args if args else sys.argv)
+    if not context:
+        return 0
     _setup_logging(context)
     try:
         logging.info('*** START ServerJockey ***')

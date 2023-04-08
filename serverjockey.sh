@@ -125,12 +125,22 @@ check_discord() {
   fi
 }
 
+check_webapp() {
+  echo
+  echo "  checking for webapp."
+  if [ ! -d "$JOCKEY_DIR/web" ]; then
+    echo "  webapp not found, building it now."
+    $JOCKEY_DIR/client/web/build.sh
+  fi
+}
+
 check_dependencies() {
   echo
   echo "CHECKING dependencies."
   cd $JOCKEY_DIR || exit 1
   check_jockey
   check_discord
+  check_webapp
   check_steamcmd
   echo
   echo "  all dependencies installed, creating a file to skip these checks;"
