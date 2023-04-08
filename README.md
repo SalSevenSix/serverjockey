@@ -13,13 +13,13 @@ If your like using this system, please consider supporting me on Ko-fi.
 [ServerJockey](https://github.com/SalSevenSix/serverjockey) project on GitHub
 
 
-## Ubuntu/Debian Install
-Arch x86_64 only. Requires Python 3.10 installed. Tested and works on Ubuntu 22.04
+## DEB Package Install
+Arch x86_64 only. Requires Python 3.10 installed. Tested and works on **Ubuntu 22.04**
 
 * Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed
 ```bash
-sudo add-apt-repository multiverse
 sudo apt install software-properties-common
+sudo add-apt-repository multiverse
 sudo dpkg --add-architecture i386
 sudo apt update
 sudo apt install lib32gcc-s1 steamcmd
@@ -38,8 +38,8 @@ serverjockey_cmd.pyz -nt
 ```
 
 
-## Fedora/CentOS Install
-Arch x86_64 only. Requires Python 3.10 installed. Tested and works on Fedora 36
+## RPM Package Install
+Arch x86_64 only. Requires Python 3.10 installed. Tested and works on **Fedora 36**
 
 * Download and install the rpm package
 ```bash
@@ -79,3 +79,7 @@ ServerJockey is available as a Docker image. Webapp login token will be shown in
 the console output. The image is compatible with [Pterodactyl](https://pterodactyl.io/).
 Docker is also a good option for Windows systems.
 [Images on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags)
+
+
+## Running from source
+TODO

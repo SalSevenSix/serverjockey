@@ -7,6 +7,16 @@ from core.system import svrabc, svrsvc, svrext
 from core.util import util, logutil, io, aggtrf
 
 
+def _default_config():
+    return {
+        'CMD_PREFIX': '!',
+        'ADMIN_ROLE': 'pzadmin',
+        'BOT_TOKEN': None,
+        'EVENTS_CHANNEL_ID': None,
+        'WHITELIST_DM': 'Welcome to our server.\nYour login is ${user} and password is ${pass}'
+    }
+
+
 class Server(svrabc.Server):
 
     LOG_FILTER = msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE)
@@ -22,6 +32,8 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
+        if not await io.file_exists(self._config):
+            await io.write_file(self._config, util.obj_to_json(_default_config()))
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream(logging.getLogger()):

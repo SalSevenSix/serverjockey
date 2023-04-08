@@ -8,16 +8,7 @@ graceful_shutdown() {
 
 setup_serverlink() {
   mkdir serverlink || exit 1
-  echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > serverlink/instance.json
-  {
-    echo "{"
-    echo "  \"CMD_PREFIX\": \"!\","
-    echo "  \"ADMIN_ROLE\": \"pzadmin\","
-    echo "  \"BOT_TOKEN\": null,"
-    echo "  \"EVENTS_CHANNEL_ID\": null,"
-    echo "  \"WHITELIST_DM\": \"Welcome to our server.\nYour login is \${user} and password is \${pass}\""
-    echo "}"
-  } > serverlink/serverlink.json
+  echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > serverlink/instance.json
 }
 
 sleep 1

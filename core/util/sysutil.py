@@ -1,4 +1,5 @@
 import shutil
+import asyncio
 from core.util import __version__, funcutil, shellutil
 
 
@@ -25,7 +26,7 @@ async def _cpu_percent() -> float:
     result = result.strip().split(' ')
     result = [i for i in result if i != '']
     result = result[result.index('id,') - 1]
-    if result == '100.0':
+    if result == 'ni,100.0':
         return 0.0
     return round(100.0 - float(result), 1)
 
@@ -35,9 +36,7 @@ def system_version() -> str:
 
 
 async def system_info() -> dict:
-    cpu = await _cpu_percent()
-    memory = await _virtual_memory()
-    disk = await _disk_usage('/')
+    cpu, memory, disk = await asyncio.gather(_cpu_percent(), _virtual_memory(), _disk_usage('/'))
     return {
         'version': system_version(),
         'cpu': {

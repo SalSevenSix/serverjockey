@@ -57,16 +57,7 @@ if [ $? -ne 0 ]; then
   adduser --system sjgms
   [ $? -eq 0 ] || exit 1
   mkdir -p $SERVERLINK_DIR
-  echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > $SERVERLINK_DIR/instance.json
-  {
-    echo "{"
-    echo "  \"CMD_PREFIX\": \"!\","
-    echo "  \"ADMIN_ROLE\": \"pzadmin\","
-    echo "  \"BOT_TOKEN\": null,"
-    echo "  \"EVENTS_CHANNEL_ID\": null,"
-    echo "  \"WHITELIST_DM\": \"Welcome to our server.\nYour login is \${user} and password is \${pass}\""
-    echo "}"
-  } > $SERVERLINK_DIR/serverlink.json
+  echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > $SERVERLINK_DIR/instance.json
   find $HOME_DIR -type d -exec chmod 755 {} +
   find $HOME_DIR -type f -exec chmod 600 {} +
   chown -R sjgms $HOME_DIR

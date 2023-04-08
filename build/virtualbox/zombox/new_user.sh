@@ -50,28 +50,17 @@ adduser --system $SJGMS_USER
 
 echo "3. Setup home directory"
 mkdir -p $SERVERLINK_DIR
-echo "{ \"module\": \"serverlink\", \"auto\": \"daemon\", \"hidden\": true }" > $SERVERLINK_DIR/instance.json
-{
-  echo "{"
-  echo "  \"CMD_PREFIX\": \"!\","
-  echo "  \"ADMIN_ROLE\": \"pzadmin\","
-  echo "  \"BOT_TOKEN\": null,"
-  echo "  \"EVENTS_CHANNEL_ID\": null,"
-  echo "  \"WHITELIST_DM\": \"Welcome to our server.\nYour login is \${user} and password is \${pass}\""
-  echo "}"
-} > $SERVERLINK_DIR/serverlink.json
-
-echo "4. Applying file attributes"
+echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > $SERVERLINK_DIR/instance.json
 find $HOME_DIR -type d -exec chmod 755 {} +
 find $HOME_DIR -type f -exec chmod 600 {} +
 chown -R $SJGMS_USER $HOME_DIR
 chgrp -R nogroup $HOME_DIR
 
-echo "5. Installing SteamCMD for user"
+echo "4. Installing SteamCMD for user"
 runuser - $SJGMS_USER -s /bin/bash -c "steamcmd +quit"
 [ -d "$HOME_DIR/.steam" ] || exit 1
 
-echo "6. Starting $SJGMS_USER service"
+echo "5. Starting $SJGMS_USER service"
 systemctl daemon-reload
 systemctl enable $SJGMS_USER
 systemctl start $SJGMS_USER
