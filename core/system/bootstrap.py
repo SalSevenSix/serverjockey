@@ -5,7 +5,7 @@ import os
 import typing
 from core.util import util, funcutil, sysutil
 from core.msg import msglog
-from core.context import contextsvc
+from core.context import contextsvc, contextext
 from core.http import httpabc, httpsvc
 from core.system import system
 
@@ -42,11 +42,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
         return None
     home = os.getcwd() if args.home == '.' else args.home
     scheme, sslcert, sslkey = _ssl_config(home)
-    secret = util.generate_token(10)
-    if args.showtoken:
-        print('Webapp Port: ' + str(args.port) + ' Login Token: ' + secret)
     return contextsvc.Context(
-        debug=args.debug, home=home, secret=secret,
+        debug=args.debug, home=home, secret=util.generate_token(10), showtoken=args.showtoken,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
         python=sys.executable, logfile=args.logfile, clientfile=args.clientfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
@@ -74,6 +71,10 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
 
     async def initialise(self) -> httpabc.Resource:
         self._context.start()
+        if self._context.config('showtoken'):
+            local_ip = await sysutil.get_local_ip()
+            print('URL   : ' + contextext.RootUrl(self._context).build(local_ip))
+            print('TOKEN : ' + self._context.config('secret'))
         if self._context.is_debug():
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         self._context.post(self, 'Logging.File', self._context.config('logfile'))

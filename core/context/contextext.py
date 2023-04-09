@@ -2,6 +2,20 @@ from core.util import util, io
 from core.context import contextsvc
 
 
+class RootUrl:
+
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
+
+    def build(self, fallback_host: str = 'localhost') -> str:
+        scheme = self._context.config('scheme')
+        host = self._context.config('host')
+        if not host:
+            host = fallback_host
+        port = self._context.config('port')
+        return util.build_url(scheme, host, port)
+
+
 class ClientFile:
     WRITTEN = 'ClientFile.Written'
 
@@ -13,12 +27,8 @@ class ClientFile:
         return self._clientfile
 
     async def write(self):
-        scheme = self._context.config('scheme')
-        host = self._context.config('host')
-        host = host if host else 'localhost'
-        port = self._context.config('port')
         data = util.obj_to_json({
-            'SERVER_URL': util.build_url(scheme, host, port),
+            'SERVER_URL': RootUrl(self._context).build(),
             'SERVER_TOKEN': self._context.config('secret')
         })
         await io.write_file(self._clientfile, data)

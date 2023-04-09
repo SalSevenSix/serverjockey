@@ -3,7 +3,9 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { instance, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
+  export let noHints = false;
   let serverLinkForm = {};
+  let botToken = null;
   let applying = false;
 
   onMount(function() {
@@ -12,7 +14,10 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .then(function(json) { serverLinkForm = json; })
+      .then(function(json) {
+        serverLinkForm = json;
+        botToken = json.BOT_TOKEN;
+      })
       .catch(function(error) { notifyError('Failed to load ServerLink Config.'); });
   });
 
@@ -23,6 +28,7 @@
     fetch($instance.url + '/config', request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
+        botToken = serverLinkForm.BOT_TOKEN;
         notifyInfo('ServerLink Config saved.');
       })
       .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
@@ -32,6 +38,11 @@
 
 
 <div class="block">
+  {#if !noHints && !botToken}
+    <div class="content">
+      <p>For help setting up the ServerLink discord bot, please see <a href="/guides/discord">the guide.</a></p>
+    </div>
+  {/if}
   <div class="field">
     <label for="bot-token" class="label">Discord Bot Token</label>
     <div class="control">

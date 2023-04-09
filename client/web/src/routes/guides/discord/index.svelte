@@ -270,7 +270,7 @@
 <hr />
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
-    <ServerLinkConfig />
+    <ServerLinkConfig noHints />
   </div>
 </div>
 <hr />

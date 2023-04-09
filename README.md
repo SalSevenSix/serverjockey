@@ -77,7 +77,7 @@ can be imported into VirtualBox. Use this option on Windows systems.
 ## Docker Image
 ServerJockey is available as a Docker image. Webapp login token will be shown in
 the console output. The image is compatible with [Pterodactyl](https://pterodactyl.io/).
-Docker is also a good option for Windows systems.
+Docker is also a good option on Windows systems.
 
 **[Images on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags)**
 
@@ -86,8 +86,8 @@ Docker is also a good option for Windows systems.
 ServerJockey can be run from the source code. This option should work on
 a wider range of linux distros. Note that the `serverjocket.sh` script
 will check for required dependencies. Follow the instructions provided by
-the script to install dependencies that need root privileges. Once all
-the dependencies are satisfied, the system will start.
+the script to install dependencies that need root privileges. Retry running
+the script until the dependencies are satisfied, then the system will start.
 ```bash
 BRANCH="master"
 wget https://github.com/SalSevenSix/serverjockey/archive/refs/heads/$BRANCH.zip
