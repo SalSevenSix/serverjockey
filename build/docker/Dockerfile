@@ -10,7 +10,7 @@ RUN apt update
 RUN { echo steam steam/license note ''; \
       echo steam steam/question select "I AGREE"; \
     } | debconf-set-selections && apt -y install steamcmd
-RUN wget -O sjgms.deb https://4sas.short.gy/sjgms-deb-latest
+COPY ./sjgms.deb ./sjgms.deb
 ARG SJGMS_USER="container"
 RUN apt -y install ./sjgms.deb && rm ./sjgms.deb
 USER container

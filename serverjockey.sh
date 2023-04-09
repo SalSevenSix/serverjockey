@@ -131,6 +131,10 @@ check_webapp() {
   if [ ! -d "$JOCKEY_DIR/web" ]; then
     echo "  webapp not found, building it now."
     $JOCKEY_DIR/client/web/build.sh
+    if [ $? -ne 0 ]; then
+      echo "ERROR Failed building webapp. Sorry."
+      exit 1
+    fi
   fi
 }
 
@@ -143,7 +147,7 @@ check_dependencies() {
   check_webapp
   check_steamcmd
   echo
-  echo "  all dependencies installed, creating a file to skip these checks;"
+  echo "  all dependencies satisfied, creating a file to skip these checks;"
   date > "$DEPENDENCIES_FILE"
   echo "  $DEPENDENCIES_FILE"
   echo

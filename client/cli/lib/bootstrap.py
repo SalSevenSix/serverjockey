@@ -5,7 +5,7 @@ import argparse
 import sys
 import os
 import json
-from . import util, cmd, comms
+from . import cmd, comms
 
 
 class _NoLogFilter(logging.Filter):
@@ -56,16 +56,12 @@ def _initialise(args: typing.Collection) -> dict:
     p = argparse.ArgumentParser(description='ServerJockey CLI.', epilog=cmd.epilog())
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
-    p.add_argument('--clientfile', '-f', type=str, help='Client file')
-    p.add_argument('--showtoken', '-t', action='store_true', help='Show webapp url and login token')
+    p.add_argument('--clientfile', '-f', type=str, help='Specify client file')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     _setup_logging(args.debug, args.nolog)
     url, token = _load_clientfile(_find_clientfile(args.clientfile))
-    if args.showtoken:
-        logging.info('    URL: ' + url.replace('localhost', util.get_ip()))
-        logging.info('    Token: ' + token)
     return {'debug': args.debug, 'url': url, 'token': token, 'commands': args.commands}
 
 

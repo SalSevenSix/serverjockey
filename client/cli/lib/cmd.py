@@ -9,11 +9,11 @@ _OUT = '    '
 def epilog() -> str:
     return '''
         COMMANDS:
-        report instances modules create:"<instance>,<module>" delete
+        showtoken report instances modules create:"<instance>,<module>" delete
         use:"<instance>" install-runtime:"<version>" exit-if-down exit-if-up sleep:<duration>
         server server-daemon server-start server-restart server-stop
         console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours>
-        log-tail:<lines> log-tail-f
+        log-tail:<lines> log-tail-f shutdown
     '''
 
 
@@ -30,6 +30,7 @@ def _get_prune_hours(argument: str) -> int:
 class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
+        self._url, self._token = config['url'], config['token']
         self._connection = connection
         self._instances: dict = self._connection.get('/instances')
         self._instance = None
@@ -42,10 +43,10 @@ class CommandProcessor:
             if hasattr(CommandProcessor, method_name):
                 method = getattr(CommandProcessor, method_name)
                 if callable(method):
+                    entry = {'name': command, 'method': method}
                     if len(inspect.signature(method).parameters.keys()) > 1:
-                        self._commands.append({'method': method, 'argument': argument})
-                    else:
-                        self._commands.append({'method': method})
+                        entry.update({'argument': argument})
+                    self._commands.append(entry)
             else:
                 raise Exception('Command {} not found'.format(command))
 
@@ -53,11 +54,14 @@ class CommandProcessor:
         counter = 0
         for command in self._commands:
             counter += 1
-            method = command['method']
-            logging.info(str(counter) + ' : ' + str(method))
+            name, method = command['name'], command['method']
+            prefix = '{:02d}> '.format(counter) if counter < 100 else '--> '
             if 'argument' in command:
-                result = method(self, command['argument'])
+                argument: str = command['argument']
+                logging.info(prefix + name + (':' + argument if argument else ''))
+                result = method(self, argument)
             else:
+                logging.info(prefix + name)
                 result = method(self)
             if not result:
                 return
@@ -165,6 +169,25 @@ class CommandProcessor:
             logging.warning('Invalid argument for sleep command, must be a number > 0, was: ' + str(argument))
         return True
 
+    def _welcome(self) -> bool:
+        logging.info(_OUT)
+        logging.info(_OUT)
+        logging.info(_OUT + ' ===========================================================')
+        logging.info(_OUT + ' =                    WELCOME TO ZOMBOX                    =')
+        logging.info(_OUT + ' ===========================================================')
+        logging.info(_OUT)
+        logging.info(_OUT + ' Open the webapp then login with the token.')
+        logging.info(_OUT)
+        logging.info(_OUT + ' Address   ' + self._url.replace('localhost', util.get_ip()))
+        logging.info(_OUT + ' Token     ' + self._token)
+        logging.info(_OUT)
+        return True
+
+    def _showtoken(self) -> bool:
+        logging.info(_OUT + 'URL: ' + self._url.replace('localhost', util.get_ip()))
+        logging.info(_OUT + 'Token: ' + self._token)
+        return True
+
     def _server(self) -> bool:
         result = self._connection.get(self._instance_path('/server'))
         result = 'instance: ' + self._instance + '\n' + util.repr_dict(result)
@@ -244,3 +267,7 @@ class CommandProcessor:
             {'prunehours': _get_prune_hours(argument)})
         self._connection.drain(result)
         return True
+
+    def _shutdown(self) -> bool:
+        self._connection.post('/system/shutdown')
+        return False

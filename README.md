@@ -34,7 +34,7 @@ sudo apt install ./sjgms.deb
 * The ServerJockey system should automatically be started.
 Find the login details for the webapp by using the CLI client as shown below.
 ```bash
-serverjockey_cmd.pyz -nt
+serverjockey_cmd.pyz -nc showtoken
 ```
 
 
@@ -59,7 +59,7 @@ curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.g
 * The ServerJockey system should automatically be started.
 Find the login details for the webapp by using the CLI client as shown below.
 ```bash
-serverjockey_cmd.pyz -nt
+serverjockey_cmd.pyz -nc showtoken
 ```
 
 
@@ -78,11 +78,16 @@ can be imported into VirtualBox. Use this option on Windows systems.
 ServerJockey is available as a Docker image. Webapp login token will be shown in
 the console output. The image is compatible with [Pterodactyl](https://pterodactyl.io/).
 Docker is also a good option for Windows systems.
-[Images on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags)
+
+**[Images on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags)**
 
 
 ## Running from source
-TODO
+ServerJockey can be run from the source code. This option should work on
+a wider range of linux distros. Note that the `serverjocket.sh` script
+will check for required dependencies. Follow the instructions provided by
+the script to install dependencies that need root privileges. Once all
+the dependencies are satisfied, the system will start.
 ```bash
 BRANCH="master"
 wget https://github.com/SalSevenSix/serverjockey/archive/refs/heads/$BRANCH.zip
