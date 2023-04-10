@@ -17,7 +17,7 @@
   <div class="navbar-brand">
     <div class="navbar-item">
       <RubiksCube size="30" />
-      <span class="ml-1 is-size-5 has-text-weight-bold">ZomBox</span>
+      <span class="ml-1 is-size-5 has-text-weight-bold">ServerJockey</span>
     </div>
     <a href={'#'} role="button" on:click={menuToggle} class:is-active={menuOpen}
        class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">

@@ -134,7 +134,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
             msgftr.NameIs(httpcnt.RESOURCES_READY)
         ))
         self._mailer = mailer
-        self._autos = None
+        self._autos = []
 
     async def handle(self, message):
         if message.name() is _AutoStartsSubscriber.AUTOS:

@@ -10,10 +10,11 @@
   <div class="column content is-two-thirds">
     <h2 class="title is-3 mt-2">About</h2>
     <p>
-      <span class="has-text-weight-bold">ZomBox</span> is a self contained game server management system
-      for <span class="has-text-weight-bold">Project Zomboid</span>. It is designed to be an easy to use
-      self-hosting option for multiplayer servers. Allowing you to create and remotely manage your servers.
-      Both this webapp and the Discord platform with the help of a discord bot is used to manage the servers.
+      <span class="has-text-weight-bold">ServerJockey</span> is a game server management system for
+      <span class="has-text-weight-bold">Project Zomboid</span> and other supported games. It is designed
+      to be an easy to use self-hosting option for multiplayer servers. Allowing you to create and remotely
+      manage your servers. Both this webapp and Discord can be used to manage the servers. However to
+      use Discord you will need to <a href="/guides/discord">setup a discord bot</a> first.
     </p>
     <p>
       If your like using this system, please consider supporting me on Ko-fi.
@@ -29,13 +30,14 @@
       </div>
     </div>
     <p>
-      ZomBox is a packaged system using the ServerJockey game management system. You can find it on GitHub.
+      ServerJockey can be found on GitHub.
     </p>
     <div class="columns is-centered">
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
           <figure>
-            <img class="github-img" src="/assets/icons/GitHub_Logo.png" alt="ServerJockey on GitHub" />
+            <img class="github-img" src="/assets/icons/GitHub_Logo.png"
+                 alt="ServerJockey on GitHub" />
           </figure>
         </a>
       </div>
