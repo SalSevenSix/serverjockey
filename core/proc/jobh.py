@@ -10,13 +10,14 @@ class JobProcess(msgabc.AbcSubscriber):
     STDERR_LINE = 'JobProcess.StdErrLine'
     STDOUT_LINE = 'JobProcess.StdOutLine'
     START = 'JobProcess.Start'
+
     STATE_STARTED = 'JobProcess.StateStarted'
-    STATE_EXCEPTION = 'JobProcess.StateException'
     STATE_COMPLETE = 'JobProcess.StateComplete'
-    JOB_DONE = (STATE_EXCEPTION, STATE_COMPLETE)
+    STATE_EXCEPTION = 'JobProcess.StateException'
+
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
-    FILTER_JOB_DONE = msgftr.NameIn(JOB_DONE)
+    FILTER_JOB_DONE = msgftr.NameIn((STATE_EXCEPTION, STATE_COMPLETE))
 
     @staticmethod
     async def start_job(

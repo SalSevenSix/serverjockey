@@ -9,11 +9,11 @@ const fetch = require('node-fetch');
 exports.startupEventLogging = function(context, channel, instance, url) {
   if (!channel) return;
   let helper = new subs.Helper(context);
-  let lastState = 'COMPLETE';
+  let lastState = 'READY';
   let restartRequired = false;
   helper.daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true; // ignore no state
-    if (json.state === 'INITIALISED' || json.state === 'START') return true; // ignore these states
+    if (json.state === 'START') return true; // ignore this transient state
     if (!restartRequired && json.details.restart) {
       channel.send('**Server ' + instance + ' requires a restart.**');
       restartRequired = true;

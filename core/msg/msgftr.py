@@ -109,11 +109,15 @@ class DataEquals(msgabc.Filter):
 
 class DataStrContains(msgabc.Filter):
 
-    def __init__(self, value):
-        self._value = value
+    def __init__(self, value, ignore_case: bool = False):
+        self._value = str(value)
+        self._ignore_case = ignore_case
 
     def accepts(self, message):
-        return str(message.data()).find(self._value) != -1
+        data = str(message.data())
+        if self._ignore_case:
+            return data.lower().find(self._value.lower()) != -1
+        return data.find(self._value) != -1
 
 
 class DataMatches(msgabc.Filter):

@@ -175,7 +175,7 @@ class ServerStatus(msgabc.AbcSubscriber):
         super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,
                                         ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
         self._context = context
-        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'INITIALISED', 'details': {}}
+        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'READY', 'details': {}}
         self._running_millis = 0
 
     async def handle(self, message):

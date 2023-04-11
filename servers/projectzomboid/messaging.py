@@ -14,23 +14,14 @@ def initialise(context: contextsvc.Context):
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
-class _ConsoleLogFilter(msgabc.Filter):
-
-    def accepts(self, message):
-        if not (proch.ServerProcess.FILTER_STDOUT_LINE.accepts(message)
-                or proch.ServerProcess.FILTER_STDERR_LINE.accepts(message)):
-            return False
-        value = message.data().lower()
-        if value.find('password') != -1:
-            return False
-        if value.find('token') != -1:
-            return False
-        if value.find('command entered via server console') != -1:
-            return False
-        return True
-
-
-CONSOLE_LOG_FILTER = _ConsoleLogFilter()
+CONSOLE_LOG_FILTER = msgftr.And(
+    msgftr.Or(
+        proch.ServerProcess.FILTER_STDOUT_LINE,
+        proch.ServerProcess.FILTER_STDERR_LINE),
+    msgftr.Not(msgftr.Or(
+        msgftr.DataStrContains('password', True),
+        msgftr.DataStrContains('token', True),
+        msgftr.DataStrContains('command entered via server console', True))))
 NOT_CHAT_MESSAGE = msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General"))
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -107,14 +98,14 @@ class _ModUpdatedSubscriber(msgabc.AbcSubscriber):
 
 
 class _RestartSubscriber(msgabc.AbcSubscriber):
-    WAIT = '_ModUpdateRestartSubscriber.Wait'
+    WAIT = '_RestartSubscriber.Wait'
     WAIT_FILTER = msgftr.NameIs(WAIT)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
             SERVER_RESTART_REQUIRED_FILTER,
             _RestartSubscriber.WAIT_FILTER,
-            proch.ServerProcess.FILTER_STATE_DOWN,
+            proch.ServerProcess.FILTER_STATES_DOWN,
             msgftr.IsStop()))
         self._mailer = mailer
         self._second_message = False
@@ -124,7 +115,7 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
         if message is msgabc.STOP:
             self._initiated, self._second_message = 0, False
             return True
-        if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
+        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._initiated, self._second_message = 0, False
             return None
         if self._initiated == 0 and SERVER_RESTART_REQUIRED_FILTER.accepts(message):

@@ -17,7 +17,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
         proch.ServerProcess.STATE_TIMEOUT: 'TIMEOUT',
         proch.ServerProcess.STATE_TERMINATED: 'TERMINATED',
         proch.ServerProcess.STATE_EXCEPTION: 'EXCEPTION',
-        proch.ServerProcess.STATE_COMPLETE: 'COMPLETE'
+        proch.ServerProcess.STATE_STOPPED: 'STOPPED'
     }
 
     def __init__(self, mailer: msgabc.MulticastMailer):
@@ -26,8 +26,8 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         name = message.name()
-        state = util.get(name, ServerStateSubscriber._STATE_MAP)
-        svrsvc.ServerStatus.notify_state(self._mailer, self, state if state else 'UNKNOWN')
+        state = util.get(name, ServerStateSubscriber._STATE_MAP, 'UNKNOWN')
+        svrsvc.ServerStatus.notify_state(self._mailer, self, state)
         if name is proch.ServerProcess.STATE_EXCEPTION:
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'error': repr(message.data())})
         return None
@@ -67,7 +67,7 @@ class ServerProcessStopper:
         if not process:
             return
         self._mailer.post(self, proch.ServerProcess.STATE_STOPPING, process)
-        catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATE_DOWN, self._timeout)
+        catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATES_DOWN, self._timeout)
         self._mailer.register(catcher)
         if self._quit_command:
             await proch.PipeInLineService.request(self._mailer, self, self._quit_command)
@@ -91,10 +91,10 @@ class _ServerProcessSubscriber(msgabc.AbcSubscriber):
         return self._process
 
     def handle(self, message):
-        if proch.ServerProcess.FILTER_STATE_UP.accepts(message) and isinstance(message.data(), subprocess.Process):
+        if proch.ServerProcess.FILTER_STATES_UP.accepts(message) and isinstance(message.data(), subprocess.Process):
             self._process = message.data()
             return None
-        if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
+        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._process = None
             return None
         return None

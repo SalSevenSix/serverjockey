@@ -74,7 +74,7 @@ class PipeInLineService(msgabc.Subscriber):
         self._msg_filter = msgftr.Or(
             PipeInLineService.FILTER_REQUEST,
             ServerProcess.FILTER_STATE_STARTED,
-            ServerProcess.FILTER_STATE_DOWN)
+            ServerProcess.FILTER_STATES_DOWN)
         if pipe is None:
             self._msg_filter = msgftr.Or(self._msg_filter, PipeInLineService.FILTER_PIPE_NEW)
             self._persistent = True
@@ -96,7 +96,7 @@ class PipeInLineService(msgabc.Subscriber):
             assert self._handler is None
             self._handler = _PipeInLineHandler(self._mailer, message.data())
             return None
-        if ServerProcess.FILTER_STATE_DOWN.accepts(message):
+        if ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._enabled = False
             if self._handler is not None:
                 await self._handler.close()
@@ -114,23 +114,24 @@ class PipeInLineService(msgabc.Subscriber):
 class ServerProcess:
     STDERR_LINE = 'ServerProcess.StdErrLine'
     STDOUT_LINE = 'ServerProcess.StdOutLine'
+
     STATE_START = 'ServerProcess.StateStart'
     STATE_STARTING = 'ServerProcess.StateStarting'
     STATE_STARTED = 'ServerProcess.StateStarted'
     STATE_STOPPING = 'ServerProcess.StateStopping'
-    STATE_TIMEOUT = 'ServerProcess.StateTimeout'
-    STATE_TERMINATED = 'ServerProcess.StateTerminate'
+    STATE_STOPPED = 'ServerProcess.StateStopped'
     STATE_EXCEPTION = 'ServerProcess.StateException'
-    STATE_COMPLETE = 'ServerProcess.StateComplete'
+    STATE_TIMEOUT = 'ServerProcess.StateTimeout'   # TODO consider removing this
+    STATE_TERMINATED = 'ServerProcess.StateTerminate'
     STATES_UP = (STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING, STATE_TIMEOUT)
-    STATES_DOWN = (STATE_TERMINATED, STATE_EXCEPTION, STATE_COMPLETE)
+    STATES_DOWN = (STATE_STOPPED, STATE_EXCEPTION, STATE_TERMINATED)
 
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
-    FILTER_STATE_UP = msgftr.NameIn(STATES_UP)
-    FILTER_STATE_DOWN = msgftr.NameIn(STATES_DOWN)
+    FILTER_STATES_UP = msgftr.NameIn(STATES_UP)
+    FILTER_STATES_DOWN = msgftr.NameIn(STATES_DOWN)
     FILTER_STATE_ALL = msgftr.NameIn(STATES_UP + STATES_DOWN)
 
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
@@ -183,6 +184,7 @@ class ServerProcess:
             if not self._pipeinsvc:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
+            # TODO Should trigger catcher upon process exit too. Prevent waiting on dead process.
             started_msg = await self._started_catcher.get() if self._started_catcher else None
             rc = self._process.returncode
             if rc is not None:
@@ -192,7 +194,7 @@ class ServerProcess:
             rc = await self._process.wait()
             if rc != 0:
                 raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self._process, rc))
-            self._mailer.post(self, ServerProcess.STATE_COMPLETE, self._process)
+            self._mailer.post(self, ServerProcess.STATE_STOPPED, self._process)
         except asyncio.TimeoutError:
             rc = self._process.returncode
             if rc is None:  # Zombie process

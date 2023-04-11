@@ -17,7 +17,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             PLAYER_EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
-            proch.ServerProcess.FILTER_STATE_DOWN))
+            proch.ServerProcess.FILTER_STATES_DOWN))
         self._mailer = mailer
         self._players = []
 
@@ -28,7 +28,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         return response.data()
 
     def handle(self, message):
-        if proch.ServerProcess.FILTER_STATE_DOWN.accepts(message):
+        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._players = []
             return None
         if PLAYER_EVENT_FILTER.accepts(message):
