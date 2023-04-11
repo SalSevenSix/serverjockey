@@ -19,16 +19,39 @@
 <div class="content">
   <hr />
   <h3 class="title is-4">General Guides</h3>
-  <h6><a href="/guides/discord">Discord Bot Setup</a></h6>
-  <p>Oh hiya</p>
-  <h6><a href="/guides/virtualbox">VirtualBox</a></h6>
-  <p>Oh hiya 2</p>
+</div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href="/guides/discord">Discord Bot Setup</a>
+  </div>
+  <div class="column content">
+    <p>
+      This guide will show you how to setup a Discord bot. You can use the bot on Discord
+      to manage your servers as an alternative to the webapp. Most features are supported,
+      with a few extra unique features as well.
+    </p>
+    <p>
+      The instructions are detailed. If you are unfamiliar with Discord, the guide also includes
+      instructions on where to register a Discord account and how to start a new server (if needed).
+    </p>
+  </div>
+</div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href="/guides/virtualbox">VirtualBox</a>
+  </div>
+  <div class="column content">
+    <p>
+      ServerJockey is available pre-installed as a VirtualBox Appliance. If you are using this option,
+      this guide provides information on how to configure important VirtualBox settings.
+    </p>
+  </div>
 </div>
 
 <div class="content">
   <hr />
   <h3 class="title is-4">Game Server Guides</h3>
-  <ul>
+  <ul class="has-text-weight-bold">
     <li><a href="/guides/servers/projectzomboid">Project Zomboid</a></li>
   <ul>
 </div>

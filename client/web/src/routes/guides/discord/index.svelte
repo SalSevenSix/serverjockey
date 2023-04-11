@@ -12,35 +12,36 @@
 
 
 <div class="content">
-  <h2 class="title is-3 mt-2">Discord Bot Setup Guide</h2>
+  <h2 class="title is-3 mt-2">Discord Bot Setup</h2>
   <p>
-    If you are reading this, you have already successfully installed and started ServerJockey on VirtualBox.
-    Congratulations!
-    This page will guide you through the rest of the setup process and how to create, configure and start a server.
+    The Discord bot, also called <span class="has-text-weight-bold">ServerLink</span>,
+    allows you to manage your servers as an alternative to the webapp.
+    Most features are supported, with a few extra unique features as well.
+    In order to use the bot you will need to register it on Discord. No coding is required,
+    that is all in ServerJockey. Just like a user account, the bot needs to be registered.
   </p>
   <p>
-    Although this guide will walk you through process carefully, some prerequisite game server knowledge is
-    still required. You will need to be familiar with editing Project Zomboid server configuration files.
-    Also you may have to know how to forward ports on your router.
-    However <a href="#additionalinformation" use:scrollto={'#additionalinformation'}>additional information</a>
-    is included at the end of the guide to help with these.
+    If you are new to Discord
+    <a href="#new-discord-account" use:scrollto={'#new-discord-account'}>start at step 1</a>
+    to create an account for yourself.
+    If you already have an account but need a Discord server,
+    <a href="#new-discord-server" use:scrollto={'#new-discord-server'}>jump to step 2</a>.
+    If you have a Discord server and just need the bot then
+    <a href="#create-bot" use:scrollto={'#create-bot'}>jump to the create bot step</a>.
   </p>
 </div>
 
-<div class="content">
+<div class="content" id="new-discord-account">
   <hr />
   <p><span class="step-title">01.</span>
     First step is to <a href="https://discord.com/login" target="_blank">login to Discord</a> in your browser.
     If you don&#39;t have an account then <a href="https://discord.com/register" target="_blank">register</a> a new one.
-    Below is screenshot of a fresh account for the guide. You now need your own Discord server.
-    If you already have one, <a href="#createbot" use:scrollto={'#createbot'}>skip to the bot step</a>.
-    If not, create a new Discord server in the
-    <a href="#newdiscordserver" use:scrollto={'#newdiscordserver'}>next step</a>.
+    Below is screenshot of a fresh account for the guide.
   </p>
   <figure><img src="/assets/setup/01_new_account.png" alt="New Discord Account" /></figure>
 </div>
 
-<div class="content" id="newdiscordserver">
+<div class="content" id="new-discord-server">
   <p><span class="step-title">02.</span>
     Add a new Discord server by clicking the <span class="is-family-monospace is-size-5">+</span> button
     on the left panel.
@@ -72,12 +73,12 @@
 <div class="content">
   <p><span class="step-title">06.</span>
     You should now have a new Discord server. It should look like the screenshot below.
-    For the guide, I called the server ZomBoxGuide. Not very original, I know.
+    For the guide, I called the server ZomBoxGuide.
   </p>
   <figure><img src="/assets/setup/06_fresh_server.png" alt="Fresh Discord Server" /></figure>
 </div>
 
-<div class="content" id="createbot">
+<div class="content" id="create-bot">
   <p><span class="step-title">07.</span>
     Now that a new or existing Discord server is ready. It is time to create a Discord bot.
     Don&#39;t worry! No coding is required, that is all in ServerJockey. This is the bot setup on Discord.
@@ -165,14 +166,14 @@
 
 <div class="content">
   <p><span class="step-title">16.</span>
-    Open a new tab in your browser. Paste the URL into the address bar and hit enter.
+    Open a new tab in your browser. Paste the URL into the address bar then hit enter.
   </p>
   <figure><img src="/assets/setup/16_bot_invite_url.png" alt="Invite Bot" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">17.</span>
-    Choose your Discord server from the dropdown list.
+    Choose your Discord server from the <span class="has-text-weight-bold">ADD TO SERVER</span> dropdown list.
     Then click the <span class="has-text-weight-bold">Continue</span> button.
   </p>
   <figure><img src="/assets/setup/17_bot_invite_choose_server.png" alt="Choose Server for Bot" /></figure>
@@ -195,16 +196,17 @@
 <div class="content">
   <p><span class="step-title">20.</span>
     Now go to the Discord server browser tab. You should now see the bot as a member on the right panel.
-    It will be offline, that is expected.
+    It will be offline, that is expected. If you do not see the member panel on the right,
+    hit the people button. It&#39;s just to the left of Search.
   </p>
   <figure><img src="/assets/setup/20_bot_invite_fresh.png" alt="Bot Invited" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">21.</span>
-    Before starting up the bot, it is recommended that you enable the developer features on Discord.
+    Before starting up the bot, it is recommended that you enable the developer features in Discord.
     This will allow you to see the channel IDs. If already enabled or you don&#39;t want to do this then
-    skip to the <a href="#getbottoken" use:scrollto={'#getbottoken'}>get bot login token</a> step.
+    skip to the <a href="#get-bot-token" use:scrollto={'#get-bot-token'}>bot login token</a> step.
   </p>
   <p>
     To enable, open <span class="has-text-weight-bold">User Settings</span> with the cog button.
@@ -223,13 +225,13 @@
 
 <div class="content">
   <p><span class="step-title">23.</span>
-    With Developer Mode enabled. If you right-click on a Channel, there is now a menu option to Copy ID.
-    This will be useful later on.
+    With Developer Mode enabled. If you right-click on a Channel, there is now a menu option to
+    <span class="has-text-weight-bold">Copy ID</span>. This will be useful later on.
   </p>
   <figure><img src="/assets/setup/23_copy_channel_id.png" alt="Copy Channel ID" /></figure>
 </div>
 
-<div class="content" id="getbottoken">
+<div class="content" id="get-bot-token">
   <p><span class="step-title">24.</span>
     Time to startup the bot. First a login token is needed. Go to the Developer Portal browser tab again.
     In the <span class="has-text-weight-bold">Bot</span> section click
@@ -249,7 +251,6 @@
 <div class="content">
   <p><span class="step-title">26.</span>
     Now click the <span class="has-text-weight-bold">Copy</span> button to copy the new token.
-    Do not share this token with anyone.
   </p>
   <figure><img src="/assets/setup/26_copy_bot_token.png" alt="Copy Bot Token" /></figure>
 </div>
@@ -290,16 +291,16 @@
 <div class="content">
   <p><span class="step-title">29.</span>
     Go to the Discord server browser tab again. You should now see the bot online on the right panel.
-    Congratulations making it this far!
+    Congratulations making it this far! Note that the Discord bot config and controls can be found on the
+    home page of this webapp. No need to come back here to make config changes or stop &amp; start the bot.
   </p>
   <figure><img src="/assets/setup/29_bot_logged_in.png" alt="Bot Logged In" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title">30.</span>
-    Now it&#39;s time to try out the bot and learn how to create and manage a Project Zomboid server.
-    The bot will work from any channel it has access to. First try the help command as shown below.
-    The bot should reply with available commands.
+    Now it&#39;s time to try out the bot. The bot will work from any channel it has access to.
+    First try the help command as shown below. The bot should reply with available commands.
   </p>
   <pre class="pre">!help</pre>
   <figure><img src="/assets/setup/30_help_system.png" alt="System Help" /></figure>
@@ -307,7 +308,7 @@
 
 <div class="content">
   <p><span class="step-title">31.</span>
-    Now try the instances command. An instance is a server container. This command will list them all.
+    Now try the instances command. An instance is a game server container. This command will list them all.
     The response shows none are found because no instance has been created yet.
   </p>
   <pre class="pre">!instances</pre>
@@ -316,8 +317,8 @@
 
 <div class="content">
   <p><span class="step-title">32.</span>
-    Try creating an instance now as shown below. The bot reacts with a lock emoji which means it didn&#39;t work!
-    This is expected, you aren&#39;t authorised to create a server yet. Next steps will remedy this.
+    Now try creating an instance as shown below. The bot reacts with a lock emoji which means it didn&#39;t work!
+    This is expected, you aren&#39;t authorised to create an instance yet. Next steps will remedy this.
   </p>
   <pre class="pre">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/32_create_instance_locked.png" alt="Create Instances Locked" /></figure>
@@ -341,7 +342,8 @@
 
 <div class="content">
   <p><span class="step-title">35.</span>
-    Enter a role name of <span class="is-family-monospace">pzadmin</span>. It must be named this.
+    Enter a role name of <span class="is-family-monospace">pzadmin</span> as specified
+    in the <span class="has-text-weight-bold">Admin Role</span> in the bot config.
     Now <span class="has-text-weight-bold">Save Changes</span>
     then select the <span class="has-text-weight-bold">Manage Members</span> tab.
   </p>
@@ -358,7 +360,7 @@
 <div class="content">
   <p><span class="step-title">37.</span>
     Add yourself and any other members on your Discord server that you want access to manage
-    your Project Zomboid server. Then click <span class="has-text-weight-bold">Add</span> button.
+    your game servers. Then click <span class="has-text-weight-bold">Add</span> button.
     Optionally you can select the <span class="has-text-weight-bold">Permissions</span> tab
     and make changes as you want. When done click the <span class="has-text-weight-bold">ESC</span>
     button at the top right to close Settings.
@@ -370,9 +372,10 @@
   <p><span class="step-title">38.</span>
     Now try creating an instance again. For this guide I called the instance
     <span class="has-text-weight-bold">myserver</span>. You can give your instance a different name,
-    but it must be lower case characters and numbers only, no spaces or special characters.
+    but it must be lower case characters, numbers, dashes, underscores, no other special characters.
     The second command value is <span class="has-text-weight-bold">projectzomboid</span>.
-    This is the type of instance.
+    This is the module name, which is a supported game server. In this case, Project Zomboid.
+    So this instance will be for a Project Zomboid server.
   </p>
   <pre class="pre">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
@@ -382,4 +385,14 @@
   </p>
   <pre class="pre">!instances</pre>
   <figure><img src="/assets/setup/38_list_new_instance.png" alt="View New Instance" /></figure>
+</div>
+
+<div class="content">
+  <hr />
+  <p><span class="step-title">So what next?</span></p>
+  <p>
+    The Discord bot is setup and working! So this is the end of this guide. However if you wish to continue
+    setting up and starting a Project Zomboid server using the bot, go to the
+    <a href="/guides/servers/projectzomboid">Project Zomboid guide</a>.
+  </p>
 </div>

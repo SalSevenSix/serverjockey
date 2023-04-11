@@ -8,10 +8,10 @@ find_steamcmd() {
 
 check_steamcmd() {
   echo
-  echo "  checking for steamcmd."
+  echo "  checking for SteamCMD."
   find_steamcmd
   if [ $? -ne 0 ]; then
-    echo "ERROR Steamcmd not found."
+    echo "ERROR SteamCMD not found."
     echo "If you have any installation issues, please consult the website;"
     echo "  https://developer.valvesoftware.com/wiki/SteamCMD"
     echo "For Ubuntu/Debian;"
@@ -66,11 +66,11 @@ check_jockey() {
   fi
 
   echo
-  echo "  installing serverjockey module dependencies."
+  echo "  installing ServerJockey module dependencies."
   cd "$JOCKEY_DIR" || exit 1
   python3 -m pipenv install
   if [ $? -ne 0 ]; then
-    echo "ERROR Failed installing serverjockey dependencies. Sorry."
+    echo "ERROR Failed installing ServerJockey dependencies. Sorry."
     exit 1
   fi
 }
@@ -101,20 +101,20 @@ check_discord() {
   fi
 
   echo
-  echo "  checking for serverlink module dependencies."
+  echo "  checking for ServerLink module dependencies."
   local discord_dir="$JOCKEY_DIR/client/discord"
   if [ ! -d "$discord_dir/node_modules" ]; then
     echo "  dependencies not found, installing now."
     cd $discord_dir || exit 1
     npm ci
     if [ $? -ne 0 ]; then
-      echo "ERROR Failed installing serverlink dependencies. Sorry."
+      echo "ERROR Failed installing ServerLink dependencies. Sorry."
       exit 1
     fi
   fi
 
   echo
-  echo "  checking for serverlink instance."
+  echo "  checking for ServerLink instance."
   local serverlink_dir="$HOME_DIR/serverlink"
   if [ ! -d "$serverlink_dir" ]; then
     echo "  instance not found, creating it now."
