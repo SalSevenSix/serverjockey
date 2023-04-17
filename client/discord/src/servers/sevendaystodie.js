@@ -14,6 +14,7 @@ const helpText = {
     'getconfig admin    : Get admin settings as attachment',
     'setconfig settings : Update settings using attached file',
     'setconfig admin    : Update admin settings using attached file',
+    'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',

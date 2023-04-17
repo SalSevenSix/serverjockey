@@ -24,6 +24,7 @@ const helpText = {
     'setconfig adminlist : Update adminlist using attached file',
     'setconfig whitelist : Update whitelist using attached file',
     'setconfig banlist   : Update banlist using attached file',
+    'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',

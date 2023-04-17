@@ -19,6 +19,7 @@ const helpText = {
     'setconfig commands : Update server commands using attached file',
     'setconfig settings : Update general settings using attached file',
     'setconfig workshop : Update workshop mods using attached file',
+    'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game map and config',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime   : Install game server'
