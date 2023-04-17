@@ -1,25 +1,39 @@
 
 <div class="content">
-  <p>VirtualBox guide!</p>
+  <h2 class="title is-3 mt-2">VirtualBox</h2>
+  <p>
+    <a href="https://www.virtualbox.org" target="_blank">VirtualBox</a> is a free virtualization system for
+    enterprise and personal use. It allows you to run a virtual machine on a real machine. ServerJockey is
+    available as a VirtualBox Appliance (virtual machine). The appliance is running Ubuntu Server with
+    ServerJockey pre-installed and ready to use.
+  </p>
+  <p>
+    This guide provides some basic information on setting memory and processor allocations.
+    For comprehensive information about VirtualBox, consult the
+    <a href="https://www.virtualbox.org/manual/UserManual.html" target="_blank">online manual</a>.
+  </p>
 </div>
 
 <div class="content">
-  <h3 class="title is-4">Memory Allocations</h3>
+  <h3 class="title is-4">Settings</h3>
   <p>
-    ServerJockey is a <a href="https://www.virtualbox.org" target="_blank">VirtualBox</a> virtual machine application.
-    You can configure how much of your real machine memory and CPU the virtual machine is allowed to use.
+    You can configure how much of your real machine Memory and Processor the virtual machine is allowed to use.
     To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
   </p>
-  <figure><img src="/assets/setup/vb_main.png" alt="VirtualBox Main" /></figure>
+  <figure><img src="/assets/setup/vb_main.png" alt="VirtualBox Settings" /></figure>
+  <h3 class="title is-4">Memory Allocation</h3>
   <p>
     Select the <span class="has-text-weight-bold">System</span> section on the left panel,
     then the <span class="has-text-weight-bold">Motherboard</span> tab.
-    By default 10Gb of memory is allocated to ServerJockey. This value should not be more
-    than how much free memory your real machine has.
+    The ServerJockey appliance has 10Gb of memory allocated. You can change this value as needed.
+    It should less than how much free memory your real machine has, but enough to support the game server
+    you are running with 2Gb spare.
   </p>
   <figure><img src="/assets/setup/vb_sysmem.png" alt="VirtualBox Memory" /></figure>
+  <h3 class="title is-4">Processor Allocation</h3>
   <p>
-    On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much CPU is allowed.
+    On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much processor is allocated.
+    You can specify a number of cores as well as an execution cap.
   </p>
-  <figure><img src="/assets/setup/vb_syscpu.png" alt="VirtualBox CPU" /></figure>
+  <figure><img src="/assets/setup/vb_syscpu.png" alt="VirtualBox Processor" /></figure>
 </div>

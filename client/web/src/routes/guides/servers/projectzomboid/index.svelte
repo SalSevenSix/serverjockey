@@ -6,34 +6,53 @@
 <div class="content">
   <h2 class="title is-3 mt-2">Project Zomboid</h2>
   <p>
-    This guide has 2 sections<br />
-    <a href="#setup-with-bot" use:scrollto={'#setup-with-bot'}>Setup with Bot</a><br />
-    <a href="#additional-information" use:scrollto={'#additional-information'}>Additional Information</a>
+    <a href="https://projectzomboid.com" target="_blank">Project Zomboid</a> is a zombie apocalypse survival
+    horror game with crafting &amp; RPG elements and a focus on realism. ServerJockey provides full support
+    for multiplayer servers on both the webapp and discord.
   </p>
+  <p>
+    This guide covers installing, configuring and starting a Project Zomboid server using Discord.
+    You will need to <a href="/guides/discord">setup the discord bot</a> first if you have not already.
+    When ready, <a href="#setup-with-bot" use:scrollto={'#setup-with-bot'}>jump to the first step</a> to begin.
+  </p>
+  <p>
+    Go to the <a href="#additional-information" use:scrollto={'#additional-information'}>additional information</a>
+    section at the end for help on;
+  </p>
+  <ul>
+    <li><a href="#configuration-files" use:scrollto={'#configuration-files'}>Configuration Files</a></li>
+    <li><a href="#port-forwarding" use:scrollto={'#port-forwarding'}>Port Fowarding</a></li>
+    <li><a href="#memory-allocation" use:scrollto={'#memory-allocation'}>Memory Allocation</a></li>
+  </ul>
 </div>
 
 
 <div class="content" id="setup-with-bot">
   <hr />
-  <h3 class="title is-4">Setup Guide using the Discord bot</h3>
+  <h3 class="title is-4">Server setup using the Discord bot</h3>
 </div>
 
 <div class="content">
   <p><span class="step-title">01.</span>
-    Now try creating an instance again. For this guide I called the instance
-    <span class="has-text-weight-bold">myserver</span>. You can give your instance a different name,
-    but it must be lower case characters and numbers only, no spaces or special characters.
-    The second command value is <span class="has-text-weight-bold">projectzomboid</span>.
-    This is the type of instance.
+    First step is to create an instance for the Project Zomboid server. If you are following this guide after the
+    <a href="/guides/discord">discord bot setup guide</a>, then the instance already exists, so you can
+    <a href="#setup-with-bot-02" use:scrollto={'#setup-with-bot-02'}>jump to the next step</a>.
+  </p>
+  <p>
+    For this guide the instance is called <span class="has-text-weight-bold">myserver</span>. You can give your
+    instance a different name, but it must be lower case characters and numbers only, no spaces or special characters.
+    The second command value is <span class="has-text-weight-bold">projectzomboid</span>. This is the type of instance.
+  </p>
+  <p>
+    Enter the command in discord as shown below to create the instance.
   </p>
   <pre class="pre">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
 </div>
 
-<div class="content">
+<div class="content" id="setup-with-bot-02">
   <p><span class="step-title">02.</span>
-    Now enter the help command again. Now that there is an instance,
-    you will see all the commands for that type of server.
+    Now enter the help command. Now that there is an instance, you will see all the commands for that type of instance.
   </p>
   <pre class="pre">!help</pre>
   <figure><img src="/assets/setup/39_help_pz.png" alt="Help PZ" /></figure>
@@ -42,11 +61,10 @@
 <div class="content">
   <p><span class="step-title">03.</span>
     Although the instance has been created, the Project Zomboid server itself is not installed yet.
-    The stable version can now be downloaded and installed with the command shown below.
-    The bot reacts with an hourglass emoji initially as the process happens.
-    Once complete, the hourglass will be replaced with a green tick.
-    Also the log output from SteamCMD will be attached. You can check this to ensure the
-    server was installed without issue.
+    The stable version can now be downloaded and installed with the command shown below. The bot reacts
+    with an hourglass emoji initially as the process happens. Once complete, the hourglass will be replaced
+    with a green tick. Also the log output from SteamCMD will be attached. You can check this to ensure
+    the server was installed without issue.
   </p>
   <pre class="pre">!deployment install-runtime</pre>
   <figure><img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" /></figure>
@@ -86,6 +104,7 @@
   <p><span class="step-title">07.</span>
     The server INI file can be downloaded as an attachment with the following command.
     See the server command list for other configuration files that can be downloaded.
+    Save this file to disk somewhere to edit it.
   </p>
   <pre class="pre">!getconfig ini</pre>
   <figure><img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" /></figure>
@@ -114,7 +133,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 
 <div class="content">
   <p><span class="step-title">10.</span>
-    The server configuration has now been updated. However the server created a game world save (map)
+    The server configuration has now been updated. However the server created a game world (map files)
     using the default configuration. You can delete the world with the following command.
   </p>
   <pre class="pre">!deployment wipe-world-save</pre>
@@ -124,13 +143,13 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 <div class="content">
   <p><span class="step-title">11.</span>
     Now start the server again. For this guide I used the local network IP to login to the Project Zomboid server.
-    In order for other people to connect over the internet to your server, you need to redirect ports on your router.
-    More information on that can be found in
+    In order for other people to connect over the internet to your server, you may need to redirect ports
+    on your router. More information on that can be found in
     <a href="#additional-information" use:scrollto={'#additional-information'}>additional information</a>.
   </p>
   <p>
-    After logging in I am greeted with the new Welcome Message I configured earlier.
-    Also, if you set a Log Channel ID in the bot setup you should see a login event in that channel.
+    After logging in I am greeted with the new Welcome Message I configured earlier. Also, if you have a
+    Log Channel ID set in the discord bot configuration, you should see a login event message in that channel.
   </p>
   <pre class="pre">!server start</pre>
   <figure><img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" /></figure>
@@ -158,7 +177,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   <h3 class="title is-4">Additional Information</h3>
 </div>
 
-<div class="content">
+<div class="content" id="configuration-files">
   <h4 class="title is-5">Configuration Files</h4>
   <p>
     For help understanding Project Zomboid server configuration files. Please see the
@@ -181,13 +200,13 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   </table>
 </div>
 
-<div class="content">
+<div class="content" id="port-forwarding">
   <h4 class="title is-5">Port Forwarding</h4>
   <p>
     In order for people to connect to your Project Zomboid server over the internet, your home
     router (internet gateway / &quot;modem&quot;) needs to be configured to forward ports to the server.
-    By default the server will automatically forward ports using UPnP. However, if this is not
-    working on your LAN, you can manually add the port forwarding.
+    <span class="is-italic">By default the server will automatically forward ports using UPnP.</span>
+    However, if this is not working on your LAN, you can manually add the port forwarding.
   </p>
   <p>
     To do this, login to your router then forward ports as shown below. Use of the IP address as shown
@@ -212,16 +231,15 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 UPnP=false</pre>
 </div>
 
-<div class="content">
+<div class="content" id="memory-allocation">
   <h4 class="title is-5">Memory Allocation</h4>
   <p>
-    The Project Zomboid server that runs inside ServerJockey also has a memory allocation.
-    This is defined in the <span class="is-family-monospace">ProjectZomboid64.json</span> file.
-    Find the <span class="has-text-weight-bold">-Xmx</span>
-    argument under <span class="has-text-weight-bold">vmArgs</span>.
-    By default 8Gb is allocated. You can adjust as needed.
-    As a general rule, the memory required is 2Gb + 500Mb per player.
-    Whatever value is set, the ZomBox memory allocation should be 1Gb more.
+    The Project Zomboid server has a memory allocation. This is defined in
+    the <span class="is-family-monospace">ProjectZomboid64.json</span> file.
+    Find the <span class="has-text-weight-bold">-Xmx</span> argument under
+    <span class="has-text-weight-bold">vmArgs</span>. By default 8Gb is allocated. You can adjust as needed.
+    As a general rule, the memory required is 2Gb + 500Mb per player. Whatever value is set,
+    the machine that the server is running on needs at least 1Gb more of free memory.
   </p>
   <pre class="pre">"vmArgs": [
     "-Djava.awt.headless=true",

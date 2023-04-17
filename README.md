@@ -67,7 +67,7 @@ serverjockey_cmd.pyz -nc showtoken
 ServerJockey is available pre-installed on a virtual machine (VM) image that
 can be imported into VirtualBox. Use this option on Windows systems.
 
-* Download the VM image: https://4sas.short.gy/zombox-latest
+* [Download the VM image](https://4sas.short.gy/zombox-latest)
 * Install [VirtualBox](https://www.virtualbox.org/) if not installed.
 * Import the VM image file into VirtualBox.
 * Adjust the CPU and memory settings for the VM as desired.
@@ -75,19 +75,19 @@ can be imported into VirtualBox. Use this option on Windows systems.
 
 
 ## Docker Image
-ServerJockey is available as a Docker image. Webapp login token will be shown in
-the console output. The image is compatible with [Pterodactyl](https://pterodactyl.io/).
+ServerJockey is available as a
+[Docker image on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags).
+Webapp login token will be shown in the console output.
+The image is compatible with [Pterodactyl](https://pterodactyl.io/).
 Docker is also a good option on Windows systems.
-
-**[Images on Docker Hub](https://hub.docker.com/r/salsevensix/serverjockey/tags)**
 
 
 ## Running from source
 ServerJockey can be run from the source code. This option should work on
-a wider range of linux distros. Note that the `serverjocket.sh` script
+a wider range of linux distros. Note that the `serverjockey.sh` script
 will check for required dependencies. Follow the instructions provided by
 the script to install dependencies that need root privileges. Retry running
-the script until the dependencies are satisfied, then the system will start.
+the script until all dependencies are satisfied, then the system will start.
 ```bash
 BRANCH="master"
 wget https://github.com/SalSevenSix/serverjockey/archive/refs/heads/$BRANCH.zip
