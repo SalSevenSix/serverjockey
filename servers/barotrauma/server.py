@@ -5,7 +5,9 @@ from core.proc import proch, prcext
 from core.system import svrabc, svrext, svrsvc
 from servers.barotrauma import deployment as dep
 
-SERVER_STARTED_FILTER = msgftr.DataStrContains('Server started')
+SERVER_STARTED_FILTER = msgftr.And(
+    proch.ServerProcess.FILTER_STDOUT_LINE,
+    msgftr.DataStrContains('Server started'))
 
 
 class Server(svrabc.Server):

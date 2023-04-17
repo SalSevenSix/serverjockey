@@ -19,6 +19,7 @@ class LoggingPublisher:
         logging.INFO: INFO,
         logging.DEBUG: DEBUG
     }
+    FILTER_ALL_LEVELS = msgftr.NameIn((DEBUG, INFO, WARNING, ERROR, CRITICAL))
 
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
         self._mailer = mailer

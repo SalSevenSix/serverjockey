@@ -1,10 +1,15 @@
 from core.util import util
-from core.msg import msgabc, msgftr
-from core.proc import proch, prcext
+from core.msg import msgabc, msgftr, msglog
+from core.proc import proch, jobh, prcext
 from core.system import svrsvc, playerstore
 
-SERVER_STARTED_FILTER = msgftr.DataEquals('Loading level: 100%')
-CONSOLE_LOG_FILTER = msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE)
+SERVER_STARTED_FILTER = msgftr.And(
+    proch.ServerProcess.FILTER_STDOUT_LINE,
+    msgftr.DataEquals('Loading level: 100%'))
+CONSOLE_LOG_FILTER = msgftr.Or(
+    proch.ServerProcess.FILTER_ALL_LINES,
+    jobh.JobProcess.FILTER_ALL_LINES,
+    msglog.LoggingPublisher.FILTER_ALL_LEVELS)
 
 
 def initialise(mailer: msgabc.MulticastMailer):

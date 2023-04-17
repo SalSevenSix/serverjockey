@@ -1,8 +1,8 @@
 import asyncio
 from core.context import contextsvc
 from core.util import util
-from core.msg import msgabc, msgftr
-from core.proc import proch, prcext
+from core.msg import msgabc, msglog, msgftr
+from core.proc import proch, jobh, prcext
 from core.system import svrsvc
 
 
@@ -14,18 +14,21 @@ def initialise(context: contextsvc.Context):
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
-CONSOLE_LOG_FILTER = msgftr.And(
-    msgftr.Or(
-        proch.ServerProcess.FILTER_STDOUT_LINE,
-        proch.ServerProcess.FILTER_STDERR_LINE),
-    msgftr.Not(msgftr.Or(
-        msgftr.DataStrContains('password', True),
-        msgftr.DataStrContains('token', True),
-        msgftr.DataStrContains('command entered via server console', True))))
-NOT_CHAT_MESSAGE = msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General"))
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('*** SERVER STARTED ***'))
+CONSOLE_LOG_FILTER = msgftr.Or(
+    msgftr.And(
+        proch.ServerProcess.FILTER_ALL_LINES,
+        msgftr.Not(msgftr.Or(
+            msgftr.DataStrContains('password', True),
+            msgftr.DataStrContains('token', True),
+            msgftr.DataStrContains('command entered via server console', True)))),
+    jobh.JobProcess.FILTER_ALL_LINES,
+    msglog.LoggingPublisher.FILTER_ALL_LEVELS)
+CONSOLE_OUTPUT_FILTER = msgftr.And(
+    proch.ServerProcess.FILTER_STDOUT_LINE,
+    msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General")))
 SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 
@@ -46,8 +49,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             SERVER_RESTART_REQUIRED_FILTER,
             msgftr.And(
-                proch.ServerProcess.FILTER_STDOUT_LINE,
-                NOT_CHAT_MESSAGE,
+                CONSOLE_OUTPUT_FILTER,
                 msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
                           _ServerDetailsSubscriber.VERSION_FILTER,
                           _ServerDetailsSubscriber.IP_FILTER,
@@ -87,8 +89,7 @@ class _ModUpdatedSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
-            NOT_CHAT_MESSAGE,
+            CONSOLE_OUTPUT_FILTER,
             msgftr.DataStrContains('[ModzCheck] Mod update required')))
         self._mailer = mailer
 
@@ -147,8 +148,7 @@ class _ProvideAdminPasswordSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer, pwd: str):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
-            NOT_CHAT_MESSAGE,
+            CONSOLE_OUTPUT_FILTER,
             msgftr.Or(msgftr.DataStrContains('Enter new administrator password'),
                       msgftr.DataStrContains('Confirm the password'))))
         self._mailer = mailer

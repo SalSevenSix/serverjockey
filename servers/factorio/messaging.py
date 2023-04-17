@@ -1,5 +1,5 @@
 from core.util import util
-from core.msg import msgabc, msgftr
+from core.msg import msgabc, msgftr, msglog
 from core.proc import proch, jobh, prcext
 from core.system import svrsvc, playerstore
 
@@ -9,9 +9,9 @@ SERVER_STARTED_FILTER = msgftr.And(
         '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
 DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
-    proch.ServerProcess.FILTER_STDERR_LINE,
-    jobh.JobProcess.FILTER_STDOUT_LINE,
+    proch.ServerProcess.FILTER_ALL_LINES,
+    jobh.JobProcess.FILTER_ALL_LINES,
+    msglog.LoggingPublisher.FILTER_ALL_LEVELS,
     msgftr.NameIs(DEPLOYMENT_MSG))
 
 

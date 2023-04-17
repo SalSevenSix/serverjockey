@@ -1,7 +1,6 @@
 import typing
 from core.util import util
 from core.msg import msgabc, msgext, msgftr
-from core.proc import proch
 from servers.projectzomboid import domain as dom, messaging as msg
 
 
@@ -70,8 +69,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
-            msg.NOT_CHAT_MESSAGE,
+            msg.CONSOLE_OUTPUT_FILTER,
             msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER, _PlayerEventSubscriber.LOGOUT_KEY_FILTER)))
         self._mailer = mailer
 

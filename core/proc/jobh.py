@@ -17,6 +17,7 @@ class JobProcess(msgabc.AbcSubscriber):
 
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
+    FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
     FILTER_JOB_DONE = msgftr.NameIn((STATE_EXCEPTION, STATE_COMPLETE))
 
     @staticmethod

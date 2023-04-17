@@ -1,7 +1,7 @@
 import logging
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
-from core.msg import msgftr, msgtrf, msglog
+from core.msg import msgtrf, msglog
 from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
 from core.util import util, logutil, io, aggtrf
@@ -19,7 +19,7 @@ def _default_config():
 
 class Server(svrabc.Server):
 
-    LOG_FILTER = msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE)
+    LOG_FILTER = proch.ServerProcess.FILTER_ALL_LINES
 
     def __init__(self, context: contextsvc.Context):
         home = context.config('home')

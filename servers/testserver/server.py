@@ -10,6 +10,7 @@ class Server(svrabc.Server):
     STARTED_FILTER = msgftr.And(
         proch.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.DataStrContains('SERVER STARTED'))
+    LOG_FILTER = proch.ServerProcess.FILTER_ALL_LINES
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -29,11 +30,8 @@ class Server(svrabc.Server):
             .append('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
             .push('log') \
-            .append('tail', httpext.RollingLogHandler(
-                self._context,
-                msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE, proch.ServerProcess.FILTER_STDERR_LINE),
-                size=200)) \
-            .append('subscribe', self._httpsubs.handler(proch.ServerProcess.FILTER_STDOUT_LINE, aggtrf.StrJoin('\n'))) \
+            .append('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER, size=200)) \
+            .append('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
             .append('players', _PlayersHandler(self._context)) \
             .push('console') \
