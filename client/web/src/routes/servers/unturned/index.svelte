@@ -40,11 +40,11 @@
           <Players />
         </div>
       </div>
+      <ConsoleLog />
       <Collapsible title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
       <Collapsible title="Logging">
-        <ConsoleLog />
         <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Configuration">

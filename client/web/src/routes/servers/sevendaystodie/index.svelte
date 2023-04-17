@@ -32,8 +32,8 @@
           <Players />
         </div>
       </div>
+      <ConsoleLog />
       <Collapsible title="Logging">
-        <ConsoleLog />
         <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Console Commands">

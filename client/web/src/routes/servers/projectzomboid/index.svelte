@@ -109,8 +109,8 @@
           <Players />
         </div>
       </div>
+      <ConsoleLog hasConsoleLogFile />
       <Collapsible title="Logging">
-        <ConsoleLog hasConsoleLogFile />
         <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Console Commands">

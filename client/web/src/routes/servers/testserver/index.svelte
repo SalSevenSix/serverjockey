@@ -16,9 +16,7 @@
   </div>
   <div class="columns">
     <div class="column">
-      <Collapsible title="Logging">
-        <ConsoleLog />
-      </Collapsible>
+      <ConsoleLog />
     </div>
   </div>
 </Instance>

@@ -30,9 +30,7 @@
           <Players />
         </div>
       </div>
-      <Collapsible title="Logging">
-        <ConsoleLog hasConsoleLogFile />
-      </Collapsible>
+      <ConsoleLog hasConsoleLogFile />
       <Collapsible title="Configuration">
         <ConfigFile name="Command Line Args" path="/config/cmdargs">
           <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
