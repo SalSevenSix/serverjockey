@@ -9,16 +9,6 @@ from core.system import svrsvc
 
 
 class ServerStateSubscriber(msgabc.AbcSubscriber):
-    _STATE_MAP = {
-        proch.ServerProcess.STATE_START: 'START',
-        proch.ServerProcess.STATE_STARTING: 'STARTING',
-        proch.ServerProcess.STATE_STARTED: 'STARTED',
-        proch.ServerProcess.STATE_STOPPING: 'STOPPING',
-        proch.ServerProcess.STATE_TIMEOUT: 'TIMEOUT',
-        proch.ServerProcess.STATE_TERMINATED: 'TERMINATED',
-        proch.ServerProcess.STATE_EXCEPTION: 'EXCEPTION',
-        proch.ServerProcess.STATE_STOPPED: 'STOPPED'
-    }
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(proch.ServerProcess.FILTER_STATE_ALL)
@@ -26,7 +16,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         name = message.name()
-        state = util.get(name, ServerStateSubscriber._STATE_MAP, 'UNKNOWN')
+        state = util.left_chop_and_strip(name, '.').upper()
         svrsvc.ServerStatus.notify_state(self._mailer, self, state)
         if name is proch.ServerProcess.STATE_EXCEPTION:
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'error': repr(message.data())})

@@ -65,7 +65,7 @@
         </ConfigFile>
       </Collapsible>
       <Collapsible title="Deployment">
-        <InstallRuntime qualifierName="Version (optional)" showLog />
+        <InstallRuntime qualifierName="Version (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
       <Collapsible title="Backups">

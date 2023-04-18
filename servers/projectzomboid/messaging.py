@@ -1,18 +1,9 @@
 import asyncio
 from core.context import contextsvc
 from core.util import util
-from core.msg import msgabc, msglog, msgftr
+from core.msg import msgabc, msglog, msgftr, msgext
 from core.proc import proch, jobh, prcext
-from core.system import svrsvc
-
-
-def initialise(context: contextsvc.Context):
-    context.register(prcext.ServerStateSubscriber(context))
-    context.register(_ServerDetailsSubscriber(context))
-    context.register(_RestartSubscriber(context))
-    context.register(_ModUpdatedSubscriber(context))
-    context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
-
+from core.system import svrsvc, svrext
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -29,8 +20,21 @@ CONSOLE_LOG_FILTER = msgftr.Or(
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General")))
+MAINTENANCE_STATE_FILTER = msgftr.Or(
+    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+READY_STATE_FILTER = msgftr.Or(
+    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
+
+
+def initialise(context: contextsvc.Context):
+    context.register(prcext.ServerStateSubscriber(context))
+    context.register(svrext.MaintenanceStateSubscriber(context, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
+    context.register(_ServerDetailsSubscriber(context))
+    context.register(_RestartSubscriber(context))
+    context.register(_ModUpdatedSubscriber(context))
+    context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):

@@ -270,12 +270,23 @@ class ReadWriteFileSubscriber(msgabc.AbcSubscriber):
 
 class Archiver(msgabc.AbcSubscriber):
     REQUEST = 'Archiver.Request'
+    START, COMPLETE, EXCEPTION = 'Archiver.Start', 'Archiver.Complete', 'Archiver.Exception'
+    FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn((COMPLETE, EXCEPTION))
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.NameIs(Archiver.REQUEST))
         self._mailer = mailer
 
     async def handle(self, message):
+        try:
+            self._mailer.post(message.source(), Archiver.START)
+            archive_file = await self._archive(message)
+            self._mailer.post(message.source(), Archiver.COMPLETE, archive_file, message)
+        except Exception as e:
+            self._mailer.post(message.source(), Archiver.EXCEPTION, e, message)
+        return None
+
+    async def _archive(self, message):
         source_dir = util.get('source_dir', message.data())
         if source_dir is None:
             raise Exception('No source_dir')
@@ -284,20 +295,28 @@ class Archiver(msgabc.AbcSubscriber):
             raise Exception('No backups_dir')
         prune_hours = int(util.get('prunehours', message.data(), 0))
         logger = msglog.LoggingPublisher(self._mailer, message.source())
-        await pack.archive_directory(source_dir, backups_dir, prune_hours, logger)
-        return None
+        return await pack.archive_directory(source_dir, backups_dir, prune_hours, logger)
 
 
 class Unpacker(msgabc.AbcSubscriber):
     REQUEST = 'Unpacker.Request'
-    UNPACKED = 'Unpacker.UNPACKED'
-    FILTER = msgftr.NameIs(UNPACKED)
+    START, COMPLETE, EXCEPTION = 'Unpacker.Start', 'Unpacker.Complete', 'Unpacker.Exception'
+    FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn((COMPLETE, EXCEPTION))
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.NameIs(Unpacker.REQUEST))
         self._mailer = mailer
 
     async def handle(self, message):
+        try:
+            self._mailer.post(message.source(), Unpacker.START)
+            unpack_dir = await self._unpack(message)
+            self._mailer.post(message.source(), Unpacker.COMPLETE, unpack_dir, message)
+        except Exception as e:
+            self._mailer.post(message.source(), Unpacker.EXCEPTION, e, message)
+        return None
+
+    async def _unpack(self, message):
         root_dir = util.get('root_dir', message.data())
         if root_dir is None or not await io.directory_exists(root_dir):
             raise Exception('No root_dir')
@@ -311,8 +330,7 @@ class Unpacker(msgabc.AbcSubscriber):
         unpack_dir = root_dir + '/' + filename.split('.')[0].split('-')[0]
         logger = msglog.LoggingPublisher(self._mailer, message.source())
         await pack.unpack_directory(archive, unpack_dir, logger)
-        self._mailer.post(self, Unpacker.UNPACKED, unpack_dir)
-        return None
+        return unpack_dir
 
 
 class RelaySubscriber(msgabc.AbcSubscriber):

@@ -63,7 +63,7 @@ class Deployment:
         await self.build_world()
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER, msgext.Unpacker.FILTER), self.build_world))
+            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE), self.build_world))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(
@@ -155,11 +155,12 @@ class Deployment:
         unpack_dir = self._home_dir + '/factorio'
         chunk_size = 65536
         try:
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'START Install')
+            self._mailer.post(self, msg.INSTALL_START)
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'START Install')
             await io.delete_file(install_package)
             await io.delete_directory(unpack_dir)
             await io.delete_directory(self._runtime_dir)
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'DOWNLOADING ' + url)
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + url)
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, read_bufsize=chunk_size) as response:
                     assert response.status == 200
@@ -167,40 +168,38 @@ class Deployment:
                     content_length = response.headers.get('Content-Length')
                     if content_length:
                         tracker = _DownloadTracker(
-                            self._mailer, _InstallRuntimeHandler.INSTALL_MESSAGE, int(content_length), 10)
+                            self._mailer, msg.DEPLOYMENT_MSG, int(content_length), 10)
                     await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'UNPACKING ' + install_package)
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'INSTALLING Factorio server')
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INSTALLING Factorio server')
             await io.rename_path(unpack_dir, self._runtime_dir)
             await io.delete_file(install_package)
             await self.build_world()
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, 'END Install')
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'END Install')
         except Exception as e:
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_MESSAGE, repr(e))
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, repr(e))
         finally:
-            self._mailer.post(self, _InstallRuntimeHandler.INSTALL_DONE)
+            self._mailer.post(self, msg.INSTALL_DONE)
 
     async def ensure_map(self):
         if not await io.file_exists(self._map_file):
-            await self._create_map()
+            await io.delete_directory(self._save_dir)
+            await io.create_directory(self._save_dir)
+            await jobh.JobProcess.run_job(self._mailer, self, (
+                self._executable,
+                '--create', self._map_file,
+                '--map-gen-settings', self._map_gen_settings,
+                '--map-settings', self._map_settings))
         if not await io.symlink_exists(self._autosave_dir):
             await io.create_symlink(self._autosave_dir, self._save_dir)
 
-    async def _create_map(self):
-        await io.delete_directory(self._save_dir)
-        await io.create_directory(self._save_dir)
-        await jobh.JobProcess.run_job(self._mailer, self, (
-            self._executable,
-            '--create', self._map_file,
-            '--map-gen-settings', self._map_gen_settings,
-            '--map-settings', self._map_settings))
-
     async def sync_mods(self):
-        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods')
         mods = util.json_to_dict(await io.read_file(self._mods_list))
         if not mods.get('service-username') or not mods.get('service-token'):
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials not available')
             return
+        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods')
         mod_files, mod_list, chunk_size = [], [], 65536
         baseurl = 'https://mods.factorio.com'
         credentials = '?username=' + mods['service-username'] + '&token=' + mods['service-token']
@@ -231,8 +230,6 @@ class Deployment:
 
 
 class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
-    INSTALL_MESSAGE = '_InstallRuntimeHandler.Message'
-    INSTALL_DONE = '_InstallRuntimeHandler.Done'
 
     def __init__(self, deployment: Deployment, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -241,8 +238,8 @@ class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
     async def handle_post(self, resource, data):
         subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
             self._mailer, self, httpsubs.Selector(
-                msg_filter=msgftr.NameIs(_InstallRuntimeHandler.INSTALL_MESSAGE),
-                completed_filter=msgftr.NameIs(_InstallRuntimeHandler.INSTALL_DONE),
+                msg_filter=msg.FILTER_DEPLOYMENT_MSG,
+                completed_filter=msg.FILTER_INSTALL_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
         version = util.get('beta', data, 'stable')
         tasks.task_fork(self._deployment.install_runtime(version), 'factorio.install_runtime()')

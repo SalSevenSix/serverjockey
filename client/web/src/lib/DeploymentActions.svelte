@@ -6,7 +6,10 @@
 
   export let actions = {};
 
+  $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+
   function doAction() {
+    cannotProcess = true;
     let actionName = this.name;
     let actionDisplay = capitalizeKebabCase(actionName);
     confirmModal('Are you sure you want to ' + actionDisplay + ' ?', function() {
@@ -15,7 +18,8 @@
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo(actionDisplay + ' completed.');
         })
-        .catch(function(error) { notifyError(actionDisplay + ' failed.'); });
+        .catch(function(error) { notifyError(actionDisplay + ' failed.'); })
+        .finally(function() { cannotProcess = false; });
     });
   }
 </script>
@@ -28,7 +32,7 @@
         <tr>
           <td>
             <button id="{name}-button" name="{name}" class="button is-danger is-fullwidth"
-                    disabled={$serverStatus.running} on:click={doAction}>{capitalizeKebabCase(name)}</button>
+                    disabled={cannotProcess} on:click={doAction}>{capitalizeKebabCase(name)}</button>
           </td>
           <td>{actions[name]}</td>
         </tr>

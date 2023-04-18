@@ -193,8 +193,8 @@ class RollingLogHandler(httpabc.AsyncGetHandler):
 
 
 class WipeHandler(httpabc.AsyncPostHandler):
-    WIPED = 'WipeHandler.WIPED'
-    FILTER = msgftr.NameIs(WIPED)
+    WIPED = 'WipeHandler.Wiped'
+    FILTER_DONE = msgftr.NameIs(WIPED)
 
     def __init__(self, mailer: msgabc.MulticastMailer, path: str):
         self._mailer = mailer

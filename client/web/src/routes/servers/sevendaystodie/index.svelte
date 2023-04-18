@@ -51,7 +51,7 @@
         <ConfigFile name="Admin" path="/config/admin" />
       </Collapsible>
       <Collapsible title="Deployment">
-        <InstallRuntime qualifierName="Beta" showLog />
+        <InstallRuntime qualifierName="Beta (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
       <Collapsible title="Backups">

@@ -16,7 +16,7 @@
   <button id="servercontrols-restart" name="restart" class="button is-warning" on:click={executeCommand}
           disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'}>Restart</button>
   <button id="servercontrols-start" name="start" class="button is-primary" on:click={executeCommand}
-          disabled={$serverStatus.running}>Start</button>
+          disabled={$serverStatus.running || $serverStatus.state === 'MAINTENANCE'}>Start</button>
   <button id="servercontrols-daemon" name="daemon" class="button is-success" on:click={executeCommand}
-          disabled={$serverStatus.running}>Daemon</button>
+          disabled={$serverStatus.running || $serverStatus.state === 'MAINTENANCE'}>Daemon</button>
 </div>

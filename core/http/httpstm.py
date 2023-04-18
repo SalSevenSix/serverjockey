@@ -11,9 +11,9 @@ class SteamCmdInstallHandler(httpabc.AsyncPostHandler):
         self._mailer = mailer
         self._path = path
         self._app_id = app_id
-        self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.START, selector=httpsubs.Selector(
+        self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
-            completed_filter=jobh.JobProcess.FILTER_JOB_DONE,
+            completed_filter=jobh.JobProcess.FILTER_DONE,
             aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):

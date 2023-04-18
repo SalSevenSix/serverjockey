@@ -7,18 +7,18 @@ from core.msg import msgabc, msgext, msgftr
 
 
 class JobProcess(msgabc.AbcSubscriber):
+    REQUEST = 'JobProcess.Request'
+    STATE_STARTED = 'JobProcess.Started'
+    STATE_COMPLETE = 'JobProcess.Complete'
+    STATE_EXCEPTION = 'JobProcess.Exception'
+    FILTER_STARTED = msgftr.NameIs(STATE_STARTED)
+    FILTER_DONE = msgftr.NameIn((STATE_EXCEPTION, STATE_COMPLETE))
+
     STDERR_LINE = 'JobProcess.StdErrLine'
     STDOUT_LINE = 'JobProcess.StdOutLine'
-    START = 'JobProcess.Start'
-
-    STATE_STARTED = 'JobProcess.StateStarted'
-    STATE_COMPLETE = 'JobProcess.StateComplete'
-    STATE_EXCEPTION = 'JobProcess.StateException'
-
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
-    FILTER_JOB_DONE = msgftr.NameIn((STATE_EXCEPTION, STATE_COMPLETE))
 
     @staticmethod
     async def start_job(
@@ -26,7 +26,7 @@ class JobProcess(msgabc.AbcSubscriber):
             source: typing.Any,
             command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, JobProcess.START, command)
+        response = await messenger.request(source, JobProcess.REQUEST, command)
         return response.data()
 
     @staticmethod
@@ -34,12 +34,12 @@ class JobProcess(msgabc.AbcSubscriber):
             mailer: msgabc.MulticastMailer,
             source: typing.Any,
             command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        messenger = msgext.SynchronousMessenger(mailer, catcher=msgext.SingleCatcher(JobProcess.FILTER_JOB_DONE))
-        response = await messenger.request(source, JobProcess.START, command)
+        messenger = msgext.SynchronousMessenger(mailer, catcher=msgext.SingleCatcher(JobProcess.FILTER_DONE))
+        response = await messenger.request(source, JobProcess.REQUEST, command)
         return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.NameIs(JobProcess.START))
+        super().__init__(msgftr.NameIs(JobProcess.REQUEST))
         self._mailer = mailer
 
     async def handle(self, message):

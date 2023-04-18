@@ -1,7 +1,7 @@
 from core.util import util
-from core.msg import msgabc, msgftr, msglog
+from core.msg import msgabc, msgftr, msglog, msgext
 from core.proc import proch, jobh, prcext
-from core.system import svrsvc, playerstore
+from core.system import svrsvc, svrext, playerstore
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -10,10 +10,15 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.LoggingPublisher.FILTER_ALL_LEVELS)
+MAINTENANCE_STATE_FILTER = msgftr.Or(
+    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+READY_STATE_FILTER = msgftr.Or(
+    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
 def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
+    mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
     mailer.register(playerstore.PlayersSubscriber(mailer))
     mailer.register(_ServerDetailsSubscriber(mailer))
     mailer.register(_PlayerEventSubscriber(mailer))

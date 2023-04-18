@@ -1,31 +1,17 @@
 <script>
-  import { onDestroy, tick } from 'svelte';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-  import { RollingLog } from '$lib/util';
-  import { instance, serverStatus, newPostRequest, SubscriptionHelper, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let qualifierName = null;
-  export let showLog = false;
-
-  let subs = new SubscriptionHelper();
-  let logLines = new RollingLog();
-  let logText = '';
-  let logBox;
   let qualifier = '';
-  let installing = false;
-  let wiping = false;
-  $: processing = installing || wiping;
+  let notifyText = null;
 
-	$: if (logText && logBox) {
-	  tick().then(function() {
-		  logBox.scroll({ top: logBox.scrollHeight });
-		});
-	}
-
-  onDestroy(function() {
-    subs.stop();
-  });
+  $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+  $: if (!cannotProcess && notifyText) {
+    notifyInfo(notifyText);
+    notifyText = null;
+  }
 
   function runtimeMeta() {
     openFileInNewTab($instance.url + '/deployment/runtime-meta', function(error) {
@@ -35,14 +21,14 @@
 
   function wipeRuntime() {
     confirmModal('Are you sure you want to delete runtime ?', function() {
-      wiping = true;
+      cannotProcess = true;
       fetch($instance.url + '/deployment/wipe-runtime', newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo('Delete runtime completed.');
         })
         .catch(function(error) { notifyError('Delete runtime failed.'); })
-        .finally(function() { wiping = false; });
+        .finally(function() { cannotProcess = false; });
     });
   }
 
@@ -53,38 +39,38 @@
   }
 
   function doInstallRuntime() {
-    installing = true;
-    logText = logLines.reset().toText();
+    cannotProcess = true;
     let request = newPostRequest();
     let body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }
     request.body = JSON.stringify(body);
     fetch($instance.url + '/deployment/install-runtime', request)
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
         if (response.status === 204) return null;
+        if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .then(function(json) {
-        if (!json) {
-          notifyInfo('Install Runtime completed.');
-          installing = false;
-        } else if (showLog && json.url) {
-          subs.poll(json.url, function(data) {
-            logText = logLines.append(data).toText();
-            return true;
-          })
-          .then(function() { notifyInfo('Install Runtime completed. Please check log output for details.'); })
-          .finally(function() { installing = false; });
+        if (json && json.url) {
+          notifyText = 'Install Runtime completed. Please check console log output for details.';
+        } else {
+          notifyText = 'Install Runtime completed.';
+          cannotProcess = false;
         }
       })
       .catch(function(error) {
         notifyError('Failed to initiate Install Runtime.');
-        installing = false;
+        cannotProcess = false;
       });
   }
 </script>
 
+
+<div class="content">
+  <p>
+    Please be patient with the Install Runtime process, it may take a while. Check the console log to confirm success.
+  </p>
+</div>
 
 <div class="block">
   {#if qualifierName}
@@ -98,26 +84,11 @@
   <div class="field">
     <div class="control buttons">
       <button id="wipe-runtime" name="wipe-runtime" class="button is-danger"
-              disabled={$serverStatus.running || processing} on:click={wipeRuntime}>Delete Runtime</button>
+              disabled={cannotProcess} on:click={wipeRuntime}>Delete Runtime</button>
       <button id="install-runtime" name="install-runtime" class="button is-warning"
-              disabled={$serverStatus.running || processing} on:click={installRuntime}>Install Runtime</button>
+              disabled={cannotProcess} on:click={installRuntime}>Install Runtime</button>
       <button id="runtime-meta" name="runtime-meta" class="button is-primary"
-              disabled={$serverStatus.running || processing} on:click={runtimeMeta}>Runtime Meta</button>
+              disabled={cannotProcess} on:click={runtimeMeta}>Runtime Meta</button>
     </div>
   </div>
-  {#if showLog}
-    <div class="field">
-      {#if installing}
-        <p>Please be patient, Install process may take a while. Wait for Install process to complete before
-           closing this section or leaving page. Check log output below to confirm success.</p>
-      {/if}
-      <label for="install-runtime-log" class="label">Install Log</label>
-      <div class="control pr-6">
-        <textarea bind:this={logBox} id="install-runtime-log"
-                  class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
-      </div>
-    </div>
-  {:else}
-    <p>Please be patient during install. Buttons will be enabled again when complete.</p>
-  {/if}
 </div>

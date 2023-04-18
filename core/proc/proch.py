@@ -115,25 +115,24 @@ class ServerProcess:
     STDERR_LINE = 'ServerProcess.StdErrLine'
     STDOUT_LINE = 'ServerProcess.StdOutLine'
 
-    STATE_START = 'ServerProcess.StateStart'
-    STATE_STARTING = 'ServerProcess.StateStarting'
-    STATE_STARTED = 'ServerProcess.StateStarted'
-    STATE_STOPPING = 'ServerProcess.StateStopping'
-    STATE_STOPPED = 'ServerProcess.StateStopped'
-    STATE_EXCEPTION = 'ServerProcess.StateException'
-    STATE_TIMEOUT = 'ServerProcess.StateTimeout'   # TODO consider removing this
-    STATE_TERMINATED = 'ServerProcess.StateTerminate'
-    STATES_UP = (STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING, STATE_TIMEOUT)
-    STATES_DOWN = (STATE_STOPPED, STATE_EXCEPTION, STATE_TERMINATED)
-
     FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
+
+    STATE_START = 'ServerProcess.Start'
+    STATE_STARTING = 'ServerProcess.Starting'
+    STATE_STARTED = 'ServerProcess.Started'
+    STATE_STOPPING = 'ServerProcess.Stopping'
+    STATE_STOPPED = 'ServerProcess.Stopped'
+    STATE_EXCEPTION = 'ServerProcess.Exception'
+    STATE_TIMEOUT = 'ServerProcess.Timeout'   # TODO consider removing this
+    STATE_TERMINATED = 'ServerProcess.Terminated'
+
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
-    FILTER_STATES_UP = msgftr.NameIn(STATES_UP)
-    FILTER_STATES_DOWN = msgftr.NameIn(STATES_DOWN)
-    FILTER_STATE_ALL = msgftr.NameIn(STATES_UP + STATES_DOWN)
+    FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING, STATE_TIMEOUT))
+    FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION, STATE_TERMINATED))
+    FILTER_STATE_ALL = msgftr.Or(FILTER_STATES_UP, FILTER_STATES_DOWN)
 
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer

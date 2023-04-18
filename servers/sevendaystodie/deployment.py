@@ -33,7 +33,7 @@ class Deployment:
         await self.build_world()
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER, msgext.Unpacker.FILTER, jobh.JobProcess.FILTER_JOB_DONE),
+            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
             self.build_world))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))

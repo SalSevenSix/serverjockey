@@ -1,5 +1,5 @@
 from core.util import util, funcutil
-from core.msg import msgabc
+from core.msg import msgabc, msgftr
 from core.http import httpabc
 from core.system import svrsvc
 
@@ -27,6 +27,24 @@ class ServerCommandHandler(httpabc.PostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         ServerCommandHandler.COMMANDS[command](self._mailer, self)
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):
+        super().__init__(msgftr.Or(maintenance_filter, ready_filter))
+        self._mailer = mailer
+        self._maintenance_filter = maintenance_filter
+        self._ready_filter = ready_filter
+
+    def handle(self, message):
+        if self._maintenance_filter.accepts(message):
+            svrsvc.ServerStatus.notify_state(self._mailer, self, 'MAINTENANCE')
+            return None
+        if self._ready_filter.accepts(message):
+            svrsvc.ServerStatus.notify_state(self._mailer, self, 'READY')
+            return None
+        return None
 
 
 class ServerRunningLock(msgabc.AbcSubscriber):

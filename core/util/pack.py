@@ -16,8 +16,7 @@ async def archive_directory(unpacked_dir: str, archives_dir: str,
     if unpacked_dir[-1] == '/':
         unpacked_dir = unpacked_dir[:-1]
     if not await io.directory_exists(unpacked_dir):
-        logger.info('WARNING No directory to archive')
-        logger.info('END Archive Directory')
+        logger.warning('WARNING No directory to archive')
         return None
     if archives_dir[-1] == '/':
         archives_dir = archives_dir[:-1]

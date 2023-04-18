@@ -9,8 +9,13 @@ _disk_usage = funcutil.to_async(shutil.disk_usage)
 
 
 async def get_local_ip() -> str:
-    result = await shellutil.run_script('hostname -I')
-    return result.strip().split()[0]
+    # noinspection PyBroadException
+    try:
+        result = await shellutil.run_script('hostname -I')
+        return result.strip().split()[0]
+    except Exception:
+        pass
+    return 'localhost'
 
 
 async def _virtual_memory() -> tuple:
