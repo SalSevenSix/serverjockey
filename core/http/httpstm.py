@@ -5,7 +5,7 @@ from core.http import httpabc, httpext, httpsubs
 from core.proc import jobh, shell   # TODO Should not import proc package in http package
 
 
-class SteamCmdInstallHandler(httpabc.AsyncPostHandler):
+class SteamCmdInstallHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, path: str, app_id: int):
         self._mailer = mailer

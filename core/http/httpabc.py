@@ -7,6 +7,15 @@ from yarl import URL
 from core.util import io
 
 
+class HttpServiceCallbacks(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    async def initialise(self) -> Resource:
+        pass
+
+    async def shutdown(self):
+        pass
+
+
 class Method(enum.Enum):
     OPTIONS = 'OPTIONS'
     GET = 'GET'
@@ -138,31 +147,10 @@ class GetHandler(metaclass=abc.ABCMeta):
         pass
 
 
-class AsyncGetHandler(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    async def handle_get(self, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
-        pass
-
-
 class PostHandler(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def handle_post(self, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
         pass
 
 
-class AsyncPostHandler(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    async def handle_post(self, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
-        pass
-
-
-class HttpServiceCallbacks(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    async def initialise(self) -> Resource:
-        pass
-
-    async def shutdown(self):
-        pass
-
-
-ABC_HANDLER = typing.Union[GetHandler, AsyncGetHandler, PostHandler, AsyncPostHandler]
+ABC_HANDLER = typing.Union[GetHandler, PostHandler]

@@ -11,7 +11,7 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
         .append('{command}', _ConsoleCommandHandler(mailer))
 
 
-class _ConsoleCommandHandler(httpabc.AsyncPostHandler):
+class _ConsoleCommandHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({'send': '{line}'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):

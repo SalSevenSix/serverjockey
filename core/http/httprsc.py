@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
 import typing
+import inspect
 from yarl import URL
 from core.util import util
 from core.http import httpabc, httpcnt
@@ -121,18 +122,19 @@ class WebResource(httpabc.Resource):
         if self._handler is None:
             return False
         if method is httpabc.Method.GET:
-            return isinstance(self._handler, (httpabc.GetHandler, httpabc.AsyncGetHandler))
+            return isinstance(self._handler, httpabc.GetHandler)
         if method is httpabc.Method.POST:
-            return isinstance(self._handler, (httpabc.PostHandler, httpabc.AsyncPostHandler))
+            return isinstance(self._handler, httpabc.PostHandler)
         return False
 
     async def handle_get(self, url: URL, secure: bool) -> httpabc.ABC_RESPONSE:
         data = PathProcessor(self).extract_args_url(url)
         if secure:
             httpcnt.make_secure(data)
-        if isinstance(self._handler, httpabc.GetHandler):
-            return self._handler.handle_get(self, data)
-        return await self._handler.handle_get(self, data)
+        if inspect.iscoroutinefunction(self._handler.handle_get):
+            # noinspection PyUnresolvedReferences
+            return await self._handler.handle_get(self, data)
+        return self._handler.handle_get(self, data)
 
     async def handle_post(
             self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]) -> httpabc.ABC_RESPONSE:
@@ -141,9 +143,10 @@ class WebResource(httpabc.Resource):
             data.update(body)
         else:
             data.update({'body': body})
-        if isinstance(self._handler, httpabc.PostHandler):
-            return self._handler.handle_post(self, data)
-        return await self._handler.handle_post(self, data)
+        if inspect.iscoroutinefunction(self._handler.handle_post):
+            # noinspection PyUnresolvedReferences
+            return await self._handler.handle_post(self, data)
+        return self._handler.handle_post(self, data)
 
 
 class PathProcessor:

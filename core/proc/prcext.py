@@ -23,7 +23,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class PipeInLineNoContentPostHandler(httpabc.AsyncPostHandler):
+class PipeInLineNoContentPostHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any, commands: cmdutil.CommandLines):
         self._mailer = mailer

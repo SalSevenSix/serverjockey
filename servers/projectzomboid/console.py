@@ -28,7 +28,7 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
         .append('{command}', _BanlistCommandHandler(mailer))
 
 
-class _WorldCommandHandler(httpabc.AsyncPostHandler):
+class _WorldCommandHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({
         'broadcast': 'servermsg "{message}"',
         'save': 'save',
@@ -46,7 +46,7 @@ class _WorldCommandHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, data)
 
 
-class _OptionsHandler(httpabc.AsyncGetHandler):
+class _OptionsHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -56,7 +56,7 @@ class _OptionsHandler(httpabc.AsyncGetHandler):
         return [o.asdict() for o in options]
 
 
-class _OptionsReloadHandler(httpabc.AsyncPostHandler):
+class _OptionsReloadHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({'reload': 'reloadoptions'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
@@ -66,7 +66,7 @@ class _OptionsReloadHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, {'command': resource.name()})
 
 
-class _OptionCommandHandler(httpabc.AsyncPostHandler):
+class _OptionCommandHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({'set': 'changeoption {option} "{value}"'})
 
     def __init__(self, mailer: msgabc.MulticastMailer):
@@ -82,7 +82,7 @@ class _OptionCommandHandler(httpabc.AsyncPostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class _SteamidsHandler(httpabc.AsyncGetHandler):
+class _SteamidsHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -94,7 +94,7 @@ class _SteamidsHandler(httpabc.AsyncGetHandler):
         return playerstore.asdict()
 
 
-class _PlayersHandler(httpabc.AsyncGetHandler):
+class _PlayersHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -104,7 +104,7 @@ class _PlayersHandler(httpabc.AsyncGetHandler):
         return [o.asdict() for o in players]
 
 
-class _PlayerCommandHandler(httpabc.AsyncPostHandler):
+class _PlayerCommandHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({
         'set-access-level': 'setaccesslevel "{player}" "{level}"',
         'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],
@@ -128,7 +128,7 @@ class _PlayerCommandHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, data)
 
 
-class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
+class _WhitelistCommandHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({
         'add': 'adduser "{player}" "{password}"',
         'remove': 'removeuserfromwhitelist "{player}"'})
@@ -140,7 +140,7 @@ class _WhitelistCommandHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, data)
 
 
-class _BanlistCommandHandler(httpabc.AsyncPostHandler):
+class _BanlistCommandHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({
         'add-player': ['banuser "{player}"', {'ip': '-ip', 'reason': '-r "{}"'}],
         'remove-player': 'unbanuser "{player}"',

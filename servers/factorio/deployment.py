@@ -219,7 +219,7 @@ class Deployment:
         await io.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
 
 
-class _InstallRuntimeHandler(httpabc.AsyncPostHandler):
+class _InstallRuntimeHandler(httpabc.PostHandler):
 
     def __init__(self, deployment: Deployment, mailer: msgabc.MulticastMailer):
         self._mailer = mailer

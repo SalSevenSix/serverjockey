@@ -44,7 +44,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class PlayersHandler(httpabc.AsyncGetHandler):
+class PlayersHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer

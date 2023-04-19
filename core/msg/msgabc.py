@@ -35,20 +35,14 @@ class Message:
     def name(self):
         return self._name
 
-    def has_data(self):
-        return self._data is not None
-
     def data(self):
         return self._data
-
-    def has_reply_to(self):
-        return self._reply_to is not None
 
     def reply_to(self):
         return self._reply_to
 
 
-STOP = Message(Message, 'msgabc.STOP', '<internal messaging system stop signal>')
+STOP = Message(Message, 'msgabc.STOP')
 
 
 class Transformer(metaclass=abc.ABCMeta):

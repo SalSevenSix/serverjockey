@@ -51,7 +51,7 @@ class Server(svrabc.Server):
         await self._stopper.stop()
 
 
-class _ConsoleHandler(httpabc.AsyncPostHandler):
+class _ConsoleHandler(httpabc.PostHandler):
     COMMANDS = cmdutil.CommandLines({
         'kick': 'kick {player}'
     })
@@ -63,7 +63,7 @@ class _ConsoleHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, data)
 
 
-class _PlayersHandler(httpabc.AsyncGetHandler):
+class _PlayersHandler(httpabc.GetHandler):
 
     def __init__(self, context: contextsvc.Context):
         self._context = context

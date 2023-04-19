@@ -202,7 +202,7 @@ class _Subscriber(msgabc.AbcSubscriber):
             return None
 
 
-class _SubscriptionsHandler(httpabc.AsyncGetHandler):
+class _SubscriptionsHandler(httpabc.GetHandler):
 
     def __init__(self, service: HttpSubscriptionService, name: str):
         self._service = service
@@ -221,7 +221,7 @@ class _SubscriptionsHandler(httpabc.AsyncGetHandler):
         return result
 
 
-class _SubscribeHandler(httpabc.AsyncPostHandler):
+class _SubscribeHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, selector: Selector):
         self._mailer = mailer

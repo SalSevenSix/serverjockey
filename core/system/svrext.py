@@ -4,7 +4,7 @@ from core.http import httpabc
 from core.system import svrsvc
 
 
-class ServerStatusHandler(httpabc.AsyncGetHandler):
+class ServerStatusHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer

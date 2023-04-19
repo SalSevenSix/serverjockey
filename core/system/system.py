@@ -175,7 +175,7 @@ class _InstanceHandler(httpabc.GetHandler):
         return self._configuration
 
 
-class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
+class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     def __init__(self, system: SystemService):
         self._system = system
@@ -191,7 +191,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.AsyncPostHandler):
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
 
 
-class _SystemInfoHandler(httpabc.AsyncGetHandler):
+class _SystemInfoHandler(httpabc.GetHandler):
 
     def __init__(self):
         self._start_time = util.now_millis()

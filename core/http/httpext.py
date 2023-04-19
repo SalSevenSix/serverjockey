@@ -15,7 +15,7 @@ class LoginHandler(httpabc.PostHandler):
         return self._secret
 
 
-class MessengerHandler(httpabc.AsyncPostHandler):
+class MessengerHandler(httpabc.PostHandler):
 
     def __init__(self,
                  mailer: msgabc.MulticastMailer,
@@ -56,7 +56,7 @@ class MessengerHandler(httpabc.AsyncPostHandler):
         return result
 
 
-class ArchiveHandler(httpabc.AsyncPostHandler):
+class ArchiveHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, source_dir: str):
         self._handler = MessengerHandler(
@@ -71,7 +71,7 @@ class ArchiveHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, data)
 
 
-class UnpackerHandler(httpabc.AsyncPostHandler):
+class UnpackerHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, root_dir: str):
         self._handler = MessengerHandler(
@@ -86,7 +86,7 @@ class UnpackerHandler(httpabc.AsyncPostHandler):
         return await self._handler.handle_post(resource, data)
 
 
-class RollingLogHandler(httpabc.AsyncGetHandler):
+class RollingLogHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, msg_filter: msgabc.Filter, size: int = 100):
         self._mailer = mailer
@@ -101,7 +101,7 @@ class RollingLogHandler(httpabc.AsyncGetHandler):
         return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())
 
 
-class WipeHandler(httpabc.AsyncPostHandler):
+class WipeHandler(httpabc.PostHandler):
     WIPED = 'WipeHandler.Wiped'
     FILTER_DONE = msgftr.NameIs(WIPED)
 
@@ -115,7 +115,7 @@ class WipeHandler(httpabc.AsyncPostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class FileSystemHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True):
         self._path = path
