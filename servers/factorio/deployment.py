@@ -27,11 +27,7 @@ class Deployment:
 
     @staticmethod
     def _default_mods_list():
-        return {
-            'service-username': None,
-            'service-token': None,
-            'mods': [{'name': 'base', 'enabled': True}]
-        }
+        return {'mods': [{'name': 'base', 'enabled': True}]}
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
@@ -196,17 +192,17 @@ class Deployment:
 
     async def sync_mods(self):
         mods = util.json_to_dict(await io.read_file(self._mods_list))
-        if not mods.get('service-username') or not mods.get('service-token'):
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials not available')
+        settings = util.json_to_dict(await io.read_file(self._server_settings))
+        if not settings.get('username') or not settings.get('token'):
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods')
-        mod_files, mod_list, chunk_size = [], [], 65536
-        baseurl = 'https://mods.factorio.com'
-        credentials = '?username=' + mods['service-username'] + '&token=' + mods['service-token']
+        baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], 65536
+        credentials = '?username=' + settings['username'] + '&token=' + settings['token']
         async with aiohttp.ClientSession() as session:
             for mod in mods['mods']:
+                mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
                 if mod['name'] != 'base':
-                    mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
                     async with session.get(baseurl + '/api/mods/' + mod['name']) as meta_response:
                         assert meta_response.status == 200
                         meta = await meta_response.json()
