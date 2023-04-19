@@ -2,7 +2,7 @@ from xml.dom import minidom
 from core.util import io
 from core.msg import msgftr, msgtrf, msglog, msgext
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpstm, httpext, httpsel
+from core.http import httpabc, httprsc, httpstm, httpext
 from core.proc import proch, jobh
 from core.system import svrsvc
 from servers.sevendaystodie import messaging as msg
@@ -40,8 +40,7 @@ class Deployment:
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(msglog.LogfileSubscriber(
-            self._log_file,
-            msg.CONSOLE_LOG_FILTER,
+            self._log_file, msg.CONSOLE_LOG_FILTER,
             msgftr.And(msgftr.NameIs(svrsvc.ServerStatus.NOTIFY_RUNNING), msgftr.DataEquals(False)),
             msgtrf.GetData()))
 
@@ -61,15 +60,9 @@ class Deployment:
             .append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir)) \
             .append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir)) \
             .append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir)) \
-            .append('backup-runtime', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, httpsel.archive_selector())) \
-            .append('backup-world', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, httpsel.archive_selector())) \
-            .append('restore-backup', httpext.MessengerHandler(
-                self._mailer, msgext.Unpacker.REQUEST,
-                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, httpsel.unpacker_selector())) \
+            .append('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir)) \
+            .append('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir)) \
+            .append('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir)) \
             .pop() \
             .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))

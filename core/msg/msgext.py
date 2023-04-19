@@ -1,7 +1,6 @@
 import asyncio
 import enum
 import logging
-import time
 import uuid
 import collections
 import typing
@@ -140,29 +139,6 @@ class Publisher:
         tasks.task_end(self._task)
 
 
-class SetSubscriber(msgabc.Subscriber):
-
-    def __init__(self, *delegates: msgabc.Subscriber):
-        self._delegates = list(delegates)
-
-    def accepts(self, message):
-        for delegate in iter(self._delegates):
-            if delegate.accepts(message):
-                return True
-        return False
-
-    async def handle(self, message):
-        expired = []
-        for delegate in iter(self._delegates):
-            if delegate.accepts(message):
-                result = await msgabc.try_handle('SetSubscriber', delegate, message)
-                if result is not None:
-                    expired.append(delegate)
-        for delegate in iter(expired):
-            self._delegates.remove(delegate)
-        return None if len(self._delegates) > 0 else True
-
-
 class SyncReply(enum.Enum):
     AT_START = enum.auto(),
     AT_END = enum.auto(),
@@ -190,82 +166,6 @@ class SyncWrapper(msgabc.AbcSubscriber):
         self._mailer.post(source, SyncWrapper.END, True if result is None else result,
                           message if self._reply is SyncReply.AT_END else None)
         return result
-
-
-class TimeoutSubscriber(msgabc.AbcSubscriber):
-    EXCEPTION = 'TimeoutSubscriber.Exception'
-
-    def __init__(self, mailer: msgabc.Mailer, delegate: msgabc.Subscriber, timeout: float = 1.0):
-        super().__init__(msgftr.Or(delegate, msgftr.IsStop()))
-        self._mailer = mailer
-        self._delegate = delegate
-        self._timeout = timeout
-        self._queue = asyncio.Queue(maxsize=2)
-        self._task = tasks.task_start(self._run(), name=util.obj_to_str(self))
-        self._running = True
-
-    async def handle(self, message):
-        if message is msgabc.STOP:
-            self._running = False
-            self._queue.put_nowait(msgabc.STOP)
-            return True
-        source = message.source()
-        timeout = self._timeout - (time.time() - message.created())
-        if timeout < 0.0:
-            self._mailer.post(source, TimeoutSubscriber.EXCEPTION, Exception('Timeout in mailer queue'), message)
-            return None if self._running else True
-        try:
-            await asyncio.wait_for(self._queue.join(), timeout)
-            if self._running:
-                self._queue.put_nowait(message)
-            else:
-                self._mailer.post(source, TimeoutSubscriber.EXCEPTION, Exception('Job task has ended'), message)
-        except asyncio.TimeoutError:
-            self._mailer.post(source, TimeoutSubscriber.EXCEPTION, Exception('Timeout in job queue'), message)
-        return None if self._running else True
-
-    async def _run(self):
-        while self._running:
-            message = await self._queue.get()
-            if self._running:
-                result = await msgabc.try_handle('TimeoutSubscriber', self._delegate, message)
-                self._running = self._running and result is None
-                self._queue.task_done()
-        tasks.task_end(self._task)
-
-
-class ReadWriteFileSubscriber(msgabc.AbcSubscriber):
-    READ = 'ReadWriteFileSubscriber.Read'
-    WRITE = 'ReadWriteFileSubscriber.Write'
-    RESPONSE = 'ReadWriteFileSubscriber.Response'
-
-    @staticmethod
-    async def read(mailer: msgabc.MulticastMailer, filename: str) -> str:
-        messenger = SynchronousMessenger(mailer)
-        response = await messenger.request(
-            util.obj_to_str(messenger), ReadWriteFileSubscriber.READ, {'filename': filename})
-        return response.data()
-
-    @staticmethod
-    async def write(mailer: msgabc.MulticastMailer, filename: str, data: str) -> bool:
-        messenger = SynchronousMessenger(mailer)
-        response = await messenger.request(
-            util.obj_to_str(messenger), ReadWriteFileSubscriber.WRITE, {'filename': filename, 'data': data})
-        return response.data()
-
-    def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.NameIn((ReadWriteFileSubscriber.READ, ReadWriteFileSubscriber.WRITE)))
-        self._mailer = mailer
-
-    async def handle(self, message):
-        source, name, data = message.source(), message.name(), message.data()
-        if name is ReadWriteFileSubscriber.READ:
-            file = await io.read_file(data['filename'])
-            self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, file, message)
-        if name is ReadWriteFileSubscriber.WRITE:
-            await io.write_file(data['filename'], data['data'])
-            self._mailer.post(source, ReadWriteFileSubscriber.RESPONSE, True, message)
-        return None
 
 
 class Archiver(msgabc.AbcSubscriber):

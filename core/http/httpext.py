@@ -1,9 +1,8 @@
 import asyncio
 import typing
-import re
 import aiofiles
 from core.util import util, io, tasks, aggtrf
-from core.msg import msgabc, msgext, msgftr, msgtrf
+from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
 from core.http import httpabc, httpcnt, httpsubs
 
 
@@ -57,42 +56,62 @@ class MessengerHandler(httpabc.AsyncPostHandler):
         return result
 
 
-class MessengerConfigHandler(httpabc.AsyncGetHandler, httpabc.AsyncPostHandler):
+class ArchiveHandler(httpabc.AsyncPostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, filename: str,
-                 protection: typing.Union[bool, typing.Collection[str]] = False):
-        self._mailer = mailer
-        self._filename = filename
-        self._protected = protection if isinstance(protection, bool) else False
-        self._patterns = [] if isinstance(protection, bool) else [re.compile(r) for r in protection]
-
-    async def handle_get(self, resource, data):
-        if self._protected and not httpcnt.is_secure(data):
-            return httpabc.ResponseBody.UNAUTHORISED
-        if not await io.file_exists(self._filename):
-            return httpabc.ResponseBody.NOT_FOUND
-        content = await msgext.ReadWriteFileSubscriber.read(self._mailer, self._filename)
-        if isinstance(content, Exception):
-            return {'error': str(content)}
-        if len(self._patterns) == 0 or httpcnt.is_secure(data):
-            return content
-        result = []
-        for line in iter(content.split('\n')):
-            exclude = False
-            for pattern in iter(self._patterns):
-                if pattern.match(line) is not None:
-                    exclude = True
-            if not exclude:
-                result.append(line)
-        return '\n'.join(result)
+    def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, source_dir: str):
+        self._handler = MessengerHandler(
+            mailer, msgext.Archiver.REQUEST,
+            {'backups_dir': backups_dir, 'source_dir': source_dir},
+            httpsubs.Selector(
+                msg_filter=msglog.LoggingPublisher.FILTER_ALL_LEVELS,
+                completed_filter=msgext.Archiver.FILTER_DONE,
+                aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
-        body = util.get('body', data)
-        if not isinstance(body, str):
-            return httpabc.ResponseBody.BAD_REQUEST
-        result = await msgext.ReadWriteFileSubscriber.write(self._mailer, self._filename, body)
-        if isinstance(result, Exception):
-            return {'error': str(result)}
+        return await self._handler.handle_post(resource, data)
+
+
+class UnpackerHandler(httpabc.AsyncPostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, root_dir: str):
+        self._handler = MessengerHandler(
+            mailer, msgext.Unpacker.REQUEST,
+            {'backups_dir': backups_dir, 'root_dir': root_dir},
+            httpsubs.Selector(
+                msg_filter=msglog.LoggingPublisher.FILTER_ALL_LEVELS,
+                completed_filter=msgext.Unpacker.FILTER_DONE,
+                aggregator=aggtrf.StrJoin('\n')))
+
+    async def handle_post(self, resource, data):
+        return await self._handler.handle_post(resource, data)
+
+
+class RollingLogHandler(httpabc.AsyncGetHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, msg_filter: msgabc.Filter, size: int = 100):
+        self._mailer = mailer
+        self._subscriber = msgext.RollingLogSubscriber(
+            mailer, size=size,
+            msg_filter=msg_filter,
+            transformer=msgtrf.GetData(),
+            aggregator=aggtrf.StrJoin('\n'))
+        mailer.register(self._subscriber)
+
+    async def handle_get(self, resource, data):
+        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())
+
+
+class WipeHandler(httpabc.AsyncPostHandler):
+    WIPED = 'WipeHandler.Wiped'
+    FILTER_DONE = msgftr.NameIs(WIPED)
+
+    def __init__(self, mailer: msgabc.MulticastMailer, path: str):
+        self._mailer = mailer
+        self._path = path
+
+    async def handle_post(self, resource, data):
+        await io.delete_directory(self._path)
+        self._mailer.post(self, WipeHandler.WIPED, self._path)
         return httpabc.ResponseBody.NO_CONTENT
 
 
@@ -175,32 +194,3 @@ class _FileByteStream(httpabc.ByteStream):
                 pumping = chunk is not None and chunk != b''
         tasks.task_end(self._task)
         self._task = None
-
-
-class RollingLogHandler(httpabc.AsyncGetHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer, msg_filter: msgabc.Filter, size: int = 100):
-        self._mailer = mailer
-        self._subscriber = msgext.RollingLogSubscriber(
-            mailer, size=size,
-            msg_filter=msg_filter,
-            transformer=msgtrf.GetData(),
-            aggregator=aggtrf.StrJoin('\n'))
-        mailer.register(self._subscriber)
-
-    async def handle_get(self, resource, data):
-        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())
-
-
-class WipeHandler(httpabc.AsyncPostHandler):
-    WIPED = 'WipeHandler.Wiped'
-    FILTER_DONE = msgftr.NameIs(WIPED)
-
-    def __init__(self, mailer: msgabc.MulticastMailer, path: str):
-        self._mailer = mailer
-        self._path = path
-
-    async def handle_post(self, resource, data):
-        await io.delete_directory(self._path)
-        self._mailer.post(self, WipeHandler.WIPED, self._path)
-        return httpabc.ResponseBody.NO_CONTENT

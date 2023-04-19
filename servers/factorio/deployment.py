@@ -2,7 +2,7 @@ import aiohttp
 from core.util import util, tasks, io, pack, aggtrf
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpsubs, httpsel
+from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
 from servers.factorio import messaging as msg
 
@@ -85,15 +85,9 @@ class Deployment:
             .append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir)) \
             .append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir)) \
             .append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir)) \
-            .append('backup-runtime', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, httpsel.archive_selector())) \
-            .append('backup-world', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, httpsel.archive_selector())) \
-            .append('restore-backup', httpext.MessengerHandler(
-                self._mailer, msgext.Unpacker.REQUEST,
-                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, httpsel.unpacker_selector())) \
+            .append('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir)) \
+            .append('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir)) \
+            .append('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir)) \
             .pop() \
             .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
             .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))

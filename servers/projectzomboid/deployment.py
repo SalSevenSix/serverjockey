@@ -1,113 +1,77 @@
-from core.util import util, io
-from core.msg import msgabc, msgext, msgftr
+from core.util import io
+from core.msg import msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpstm, httpsel
+from core.http import httpabc, httprsc, httpext, httpstm
 from core.proc import proch, jobh
-from core.system import svrext
+
+_WORLD = 'servertest'
 
 
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._world_name = 'servertest'
         self._home_dir = context.config('home')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
-        self._runtime_metafile = self._runtime_dir + '/steamapps/appmanifest_380870.acf'
-        self._executable = self._runtime_dir + '/start-server.sh'
-        self._jvm_config_file = self._runtime_dir + '/ProjectZomboid64.json'
         self._world_dir = self._home_dir + '/world'
-        self._playerdb_dir = self._world_dir + '/db'
-        self._playerdb_file = self._playerdb_dir + '/' + self._world_name + '.db'
-        self._console_log = self._world_dir + '/server-console.txt'
+        self._player_dir = self._world_dir + '/db'
         self._logs_dir = self._world_dir + '/Logs'
         self._config_dir = self._world_dir + '/Server'
         self._save_dir = self._world_dir + '/Saves'
         self._lua_dir = self._world_dir + '/Lua'
 
     def new_server_process(self):
-        return proch.ServerProcess(self._mailer, self._executable).append_arg('-cachedir=' + self._world_dir)
+        return proch.ServerProcess(self._mailer, self._runtime_dir + '/start-server.sh') \
+            .append_arg('-cachedir=' + self._world_dir)
 
     async def initialise(self):
         await self.build_world()
-        self._mailer.register(msgext.TimeoutSubscriber(self._mailer, msgext.SetSubscriber(
-            svrext.ServerRunningLock(self._mailer, jobh.JobProcess(self._mailer)),
-            msgext.SyncWrapper(self._mailer, msgext.ReadWriteFileSubscriber(self._mailer), msgext.SyncReply.AT_END),
-            svrext.ServerRunningLock(
-                self._mailer,
-                msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START)),
-            svrext.ServerRunningLock(
-                self._mailer,
-                msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START)),
-            svrext.ServerRunningLock(
-                self._mailer,
-                msgext.SyncWrapper(self._mailer, _DeploymentWiper(self), msgext.SyncReply.AT_END))
-        )))
+        self._mailer.register(msgext.CallableSubscriber(
+            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
+            self.build_world))
+        self._mailer.register(jobh.JobProcess(self._mailer))
+        self._mailer.register(
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
+        self._mailer.register(
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
-        ini_filter = ('.*Password.*', '.*Token.*')
-        conf_pre = self._config_dir + '/' + self._world_name
-        httprsc.ResourceBuilder(resource) \
-            .push('deployment') \
-            .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
-            .append('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870)) \
-            .append('wipe-runtime', httpext.MessengerHandler(
-                self._mailer, _DeploymentWiper.REQUEST, {'path': self._runtime_dir})) \
-            .append('backup-runtime', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._runtime_dir}, httpsel.archive_selector())) \
-            .append('backup-world', httpext.MessengerHandler(
-                self._mailer, msgext.Archiver.REQUEST,
-                {'backups_dir': self._backups_dir, 'source_dir': self._world_dir}, httpsel.archive_selector())) \
-            .append('restore-backup', httpext.MessengerHandler(
-                self._mailer, msgext.Unpacker.REQUEST,
-                {'backups_dir': self._backups_dir, 'root_dir': self._home_dir}, httpsel.unpacker_selector())) \
-            .append('wipe-world-all', httpext.MessengerHandler(
-                self._mailer, _DeploymentWiper.REQUEST, {'path': self._world_dir})) \
-            .append('wipe-world-playerdb', httpext.MessengerHandler(
-                self._mailer, _DeploymentWiper.REQUEST, {'path': self._playerdb_dir})) \
-            .append('wipe-world-config', httpext.MessengerHandler(
-                self._mailer, _DeploymentWiper.REQUEST, {'path': self._config_dir})) \
-            .append('wipe-world-save', httpext.MessengerHandler(
-                self._mailer, _DeploymentWiper.REQUEST, {'path': self._save_dir})) \
-            .append('wipe-world-backups', httpext.MessengerHandler(
-                self._mailer, _DeploymentWiper.REQUEST, {'path': self._world_dir + '/backups'})) \
-            .pop() \
-            .append('log', httpext.FileSystemHandler(self._console_log)) \
-            .push('logs', httpext.FileSystemHandler(self._logs_dir)) \
-            .append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path')) \
-            .pop() \
-            .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
-            .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path')) \
-            .pop() \
-            .push('config') \
-            .append('db', httpext.FileSystemHandler(self._playerdb_file)) \
-            .append('jvm', httpext.MessengerConfigHandler(self._mailer, self._jvm_config_file)) \
-            .append('ini', httpext.MessengerConfigHandler(self._mailer, conf_pre + '.ini', ini_filter)) \
-            .append('sandbox', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_SandboxVars.lua')) \
-            .append('spawnpoints', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnpoints.lua')) \
-            .append('spawnregions', httpext.MessengerConfigHandler(self._mailer, conf_pre + '_spawnregions.lua')) \
-            .append('shop', httpext.MessengerConfigHandler(self._mailer, self._lua_dir + '/ServerPointsListings.ini'))
+        r = httprsc.ResourceBuilder(resource)
+        r.push('deployment')
+        r.append('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_380870.acf'))
+        r.append('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870))
+        r.append('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir))
+        r.append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir))
+        r.append('wipe-world-playerdb', httpext.WipeHandler(self._mailer, self._player_dir))
+        r.append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir))
+        r.append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir))
+        r.append('wipe-world-backups', httpext.WipeHandler(self._mailer, self._world_dir + '/backups'))
+        r.append('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir))
+        r.append('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir))
+        r.append('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir))
+        r.pop()
+        r.append('log', httpext.FileSystemHandler(self._world_dir + '/server-console.txt'))
+        r.push('logs', httpext.FileSystemHandler(self._logs_dir))
+        r.append('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'))
+        r.pop()
+        r.push('backups', httpext.FileSystemHandler(self._backups_dir))
+        r.append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
+        r.pop()
+        r.push('config')
+        r.append('db', httpext.FileSystemHandler(self._player_dir + '/' + _WORLD + '.db'))
+        r.append('jvm', httpext.FileSystemHandler(self._runtime_dir + '/ProjectZomboid64.json'))
+        config_pre = self._config_dir + '/' + _WORLD
+        r.append('ini', httpext.FileSystemHandler(config_pre + '.ini'))
+        r.append('sandbox', httpext.FileSystemHandler(config_pre + '_SandboxVars.lua'))
+        r.append('spawnpoints', httpext.FileSystemHandler(config_pre + '_spawnpoints.lua'))
+        r.append('spawnregions', httpext.FileSystemHandler(config_pre + '_spawnregions.lua'))
+        r.append('shop', httpext.FileSystemHandler(self._lua_dir + '/ServerPointsListings.ini'))
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)
         await io.create_directory(self._world_dir)
-        await io.create_directory(self._playerdb_dir)
+        await io.create_directory(self._player_dir)
         await io.create_directory(self._config_dir)
         await io.create_directory(self._save_dir)
         await io.create_directory(self._lua_dir)
-
-
-class _DeploymentWiper(msgabc.AbcSubscriber):
-    REQUEST = 'DeploymentWiper.Request'
-
-    def __init__(self, deployment: Deployment):
-        super().__init__(msgftr.NameIs(_DeploymentWiper.REQUEST))
-        self._deployment = deployment
-
-    async def handle(self, message):
-        path = util.get('path', message.data())
-        await io.delete_directory(path)
-        await self._deployment.build_world()
-        return None

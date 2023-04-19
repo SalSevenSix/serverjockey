@@ -149,11 +149,6 @@ class ServerStatus(msgabc.AbcSubscriber):
     NOTIFY_DETAILS = 'ServerStatus.NotifyDetails'
 
     @staticmethod
-    async def is_running(mailer: msgabc.MulticastMailer, source: typing.Any):
-        status = await ServerStatus.get_status(mailer, source)
-        return status['running']
-
-    @staticmethod
     async def get_status(mailer: msgabc.MulticastMailer, source: typing.Any):
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, ServerStatus.REQUEST)
