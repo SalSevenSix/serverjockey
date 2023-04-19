@@ -5,6 +5,7 @@ from core.http import httpabc
 
 class Server(metaclass=abc.ABCMeta):
 
+    # noinspection PyUnusedLocal
     @abc.abstractmethod
     def __init__(self, context: contextsvc.Context):
         pass

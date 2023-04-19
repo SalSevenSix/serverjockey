@@ -2,6 +2,7 @@ from __future__ import annotations
 import abc
 import enum
 import typing
+import inspect
 from aiohttp import web_exceptions as we
 from yarl import URL
 from core.util import io
@@ -46,10 +47,11 @@ class ResourceKind(enum.Enum):
 class ResponseBody:
     NO_CONTENT = we.HTTPNoContent
     NOT_FOUND = we.HTTPNotFound
+    CONFLICT = we.HTTPConflict
     BAD_REQUEST = we.HTTPBadRequest
     UNAVAILABLE = we.HTTPServiceUnavailable
     UNAUTHORISED = we.HTTPUnauthorized
-    ERRORS = (NOT_FOUND, BAD_REQUEST, UNAVAILABLE, UNAUTHORISED)
+    ERRORS = (NOT_FOUND, CONFLICT, BAD_REQUEST, UNAVAILABLE, UNAUTHORISED)
 
 
 class ContentType(metaclass=abc.ABCMeta):
@@ -90,7 +92,25 @@ ABC_DATA_POST = typing.Dict[str, typing.Union[ABC_DATA_GET, str, int, float, boo
 ABC_RESPONSE = typing.Union[dict, tuple, list, str, ByteStream, we.HTTPException]
 
 
-class Resource:
+class AllowMethod(metaclass=abc.ABCMeta):
+    @staticmethod
+    def call(method: Method, handler: typing.Optional[ABC_HANDLER]) -> bool:
+        if handler is None:
+            return False
+        if isinstance(handler, AllowMethod):
+            return handler.allows(method)
+        if method is Method.GET:
+            return isinstance(handler, GetHandler)
+        if method is Method.POST:
+            return isinstance(handler, PostHandler)
+        return False
+
+    @abc.abstractmethod
+    def allows(self, method: Method) -> bool:
+        pass
+
+
+class Resource(AllowMethod, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def append(self, resource: Resource) -> Resource:
@@ -129,10 +149,6 @@ class Resource:
         pass
 
     @abc.abstractmethod
-    def allows(self, method: Method) -> bool:
-        pass
-
-    @abc.abstractmethod
     async def handle_get(self, url: URL, secure: bool) -> ABC_RESPONSE:
         pass
 
@@ -142,12 +158,26 @@ class Resource:
 
 
 class GetHandler(metaclass=abc.ABCMeta):
+    @staticmethod
+    async def call(handler: GetHandler, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
+        if inspect.iscoroutinefunction(handler.handle_get):
+            # noinspection PyUnresolvedReferences
+            return await handler.handle_get(resource, data)
+        return handler.handle_get(resource, data)
+
     @abc.abstractmethod
     def handle_get(self, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
         pass
 
 
 class PostHandler(metaclass=abc.ABCMeta):
+    @staticmethod
+    async def call(handler: PostHandler, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
+        if inspect.iscoroutinefunction(handler.handle_post):
+            # noinspection PyUnresolvedReferences
+            return await handler.handle_post(resource, data)
+        return handler.handle_post(resource, data)
+
     @abc.abstractmethod
     def handle_post(self, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
         pass

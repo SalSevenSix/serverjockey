@@ -10,9 +10,11 @@ def epilog() -> str:
     return '''
         COMMANDS:
         showtoken report instances modules create:"<instance>,<module>" delete
-        use:"<instance>" install-runtime:"<version>" exit-if-down exit-if-up sleep:<duration>
+        use:"<instance>" install-runtime:"<version>" runtime-meta
+        exit-if-down exit-if-up sleep:<duration>
         server server-daemon server-start server-restart server-stop
-        console-send:"<cmd>" world-broadcast:"<message>" backup-world:<prunehours> backup-runtime:<prunehours>
+        console-send:"<cmd>" world-broadcast:"<message>"
+        backup-world:<prunehours> backup-runtime:<prunehours>
         log-tail:<lines> log-tail-f shutdown
     '''
 
@@ -125,6 +127,12 @@ class CommandProcessor:
         self._connection.post('/instances', {'module': module, 'identity': instance})
         self._instances.update({instance: {'module': module}})
         self._use(instance)
+        return True
+
+    def _runtime_meta(self) -> bool:
+        result = self._connection.get(self._instance_path('/deployment/runtime-meta'))
+        for line in result.split('\n'):
+            logging.info(_OUT + line)
         return True
 
     def _install_runtime(self, argument: str) -> bool:

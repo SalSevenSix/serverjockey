@@ -72,32 +72,29 @@ class _RequestHandler:
         self._context = context
         self._security = security
         self._statics = statics
-        self._resources = resources
         self._request = request
-        self._method = httpabc.Method.resolve(self._request.method)
+        self._method = httpabc.Method.resolve(request.method)
+        self._resource = resources.lookup(request.path)
 
     async def handle(self) -> web.Response:
-        resource = self._resources.lookup(self._request.path)
-        if resource is None:
+        # Static response
+        if self._resource is None:
             if self._method is httpabc.Method.GET:
                 return await self._statics.handle(self._request)
             raise err.HTTPNotFound
-        if self._method is not httpabc.Method.OPTIONS and not resource.allows(self._method):
-            allowed = [str(httpabc.Method.OPTIONS.value)]
-            if resource.allows(httpabc.Method.GET):
-                allowed.append(str(httpabc.Method.GET.value))
-            if resource.allows(httpabc.Method.POST):
-                allowed.append(str(httpabc.Method.POST.value))
-            raise err.HTTPMethodNotAllowed(str(self._method), allowed)
+
+        # Check method allowed
+        if self._method is not httpabc.Method.OPTIONS and not self._resource.allows(self._method):
+            raise self._build_error_method_not_allowed()
 
         # OPTIONS
         if self._method is httpabc.Method.OPTIONS:
-            return self._build_options_response(resource)
+            return self._build_response_options()
 
         # GET
         secure = self._context.is_debug() or self._security.check(self._request)
         if self._method is httpabc.Method.GET:
-            response_body = await resource.handle_get(self._request.url, secure)
+            response_body = await self._resource.handle_get(self._request.url, secure)
             if response_body is None:
                 raise err.HTTPNotFound
             return await self._build_response(response_body)
@@ -124,7 +121,7 @@ class _RequestHandler:
                 request_body = util.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
-        response_body = await resource.handle_post(self._request.url, request_body)
+        response_body = await self._resource.handle_post(self._request.url, request_body)
         return await self._build_response(response_body)
 
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
@@ -172,10 +169,10 @@ class _RequestHandler:
         response.body = body
         return response
 
-    def _build_options_response(self, resource: httpabc.Resource) -> web.Response:
+    def _build_response_options(self) -> web.Response:
         response = web.Response()
-        methods = httpabc.Method.GET.value + ',' if resource.allows(httpabc.Method.GET) else ''
-        methods += httpabc.Method.POST.value + ',' if resource.allows(httpabc.Method.POST) else ''
+        methods = httpabc.Method.GET.value + ',' if self._resource.allows(httpabc.Method.GET) else ''
+        methods += httpabc.Method.POST.value + ',' if self._resource.allows(httpabc.Method.POST) else ''
         methods += httpabc.Method.OPTIONS.value
         response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
         response.headers.add(httpcnt.ALLOW, methods)
@@ -186,6 +183,14 @@ class _RequestHandler:
         response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_METHODS, methods)
         response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS, httpcnt.CONTENT_TYPE + ',' + httpcnt.X_SECRET)
         return response
+
+    def _build_error_method_not_allowed(self) -> err.HTTPMethodNotAllowed:
+        allowed = [str(httpabc.Method.OPTIONS.value)]
+        if self._resource.allows(httpabc.Method.GET):
+            allowed.append(str(httpabc.Method.GET.value))
+        if self._resource.allows(httpabc.Method.POST):
+            allowed.append(str(httpabc.Method.POST.value))
+        return err.HTTPMethodNotAllowed(str(self._method), allowed)
 
 
 class _MultipartFormByteStream(httpabc.ByteStream):

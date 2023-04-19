@@ -29,6 +29,25 @@ class ServerCommandHandler(httpabc.PostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
+class CheckServerNotRunningHandler(httpabc.AllowMethod, httpabc.GetHandler, httpabc.PostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, delegate: httpabc.ABC_HANDLER):
+        self._mailer = mailer
+        self._delegate = delegate
+
+    def allows(self, method: httpabc.Method) -> bool:
+        return httpabc.AllowMethod.call(method, self._delegate)
+
+    async def handle_get(self, resource, data):
+        return await httpabc.GetHandler.call(self._delegate, resource, data)
+
+    async def handle_post(self, resource, data):
+        status = await svrsvc.ServerStatus.get_status(self._mailer, self)
+        if status['running']:
+            return httpabc.ResponseBody.CONFLICT
+        return await httpabc.PostHandler.call(self._delegate, resource, data)
+
+
 class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):

@@ -1,8 +1,8 @@
 from __future__ import annotations
+import typing
 from aiohttp import abc as webabc
 from core.util import util
 from core.http import httpabc
-import typing
 
 SECURE = '_SECURE'
 X_SECRET = 'X-Secret'
