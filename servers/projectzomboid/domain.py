@@ -1,15 +1,14 @@
 import typing
 from core.util import util
 from core.msg import msgabc, msgext, msgftr
-from core.http import httpabc
 from core.proc import proch
 from servers.projectzomboid import playerstore as pls
 
 
 class Option:
 
-    def __init__(self, option: str, value: str, url: typing.Optional[str] = None):
-        self._data = {'url': url, 'option': option, 'value': value}
+    def __init__(self, option: str, value: str):
+        self._data = {'option': option, 'value': value}
 
     def option(self) -> str:
         return self._data['option']
@@ -20,13 +19,9 @@ class Option:
 
 class OptionLoader:
 
-    def __init__(self,
-                 mailer: msgabc.MulticastMailer,
-                 source: typing.Any,
-                 resource: typing.Optional[httpabc.Resource] = None):
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any):
         self._mailer = mailer
         self._source = source
-        self._resource = resource
 
     async def all(self) -> typing.Collection[Option]:
         response = await proch.PipeInLineService.request(
@@ -40,8 +35,7 @@ class OptionLoader:
         for line in iter([m.data() for m in response]):
             if line.startswith('* '):
                 option, value = line[2:].split('=')
-                url = self._resource.path({'option': option}) if self._resource else None
-                options.append(Option(option, value, url))
+                options.append(Option(option, value))
         return options
 
     async def get(self, option: str) -> typing.Optional[Option]:
@@ -53,8 +47,8 @@ class OptionLoader:
 
 class Player:
 
-    def __init__(self, steamid: str, name: str, url: typing.Optional[str] = None):
-        self._data = {'url': url, 'steamid': steamid, 'name': name}
+    def __init__(self, steamid: str, name: str):
+        self._data = {'steamid': steamid, 'name': name}
 
     def steamid(self) -> str:
         return self._data['steamid']
@@ -68,13 +62,9 @@ class Player:
 
 class PlayerLoader:
 
-    def __init__(self,
-                 mailer: msgabc.MulticastMailer,
-                 source: typing.Any,
-                 resource: typing.Optional[httpabc.Resource] = None):
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any):
         self._mailer = mailer
         self._source = source
-        self._resource = resource
 
     async def all(self) -> typing.Collection[Player]:
         response = await proch.PipeInLineService.request(
@@ -90,8 +80,7 @@ class PlayerLoader:
             if line.startswith('-'):
                 name = line[1:]
                 steamid = playerstore.find_steamid(name)
-                url = self._resource.path({'player': name}) if self._resource else None
-                players.append(Player(steamid, name, url))
+                players.append(Player(steamid, name))
         return players
 
     async def get(self, name: str) -> typing.Optional[Player]:

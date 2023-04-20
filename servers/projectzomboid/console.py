@@ -54,7 +54,7 @@ class _OptionsHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        options = await dom.OptionLoader(self._mailer, self, resource.child('option')).all()
+        options = await dom.OptionLoader(self._mailer, self).all()
         return [o.asdict() for o in options]
 
 
@@ -102,7 +102,7 @@ class _PlayersHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        players = await dom.PlayerLoader(self._mailer, self, resource.child('player')).all()
+        players = await dom.PlayerLoader(self._mailer, self).all()
         return [o.asdict() for o in players]
 
 
@@ -126,6 +126,7 @@ class _PlayerCommandHandler(httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         if not await dom.PlayerLoader(self._mailer, self).get(util.get('player', data)):
+            # TODO set-access-level doesn't need the player in-game i think
             return httpabc.ResponseBody.NOT_FOUND
         return await self._handler.handle_post(resource, data)
 

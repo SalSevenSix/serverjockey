@@ -10,10 +10,10 @@ def epilog() -> str:
     return '''
         COMMANDS:
         showtoken report instances modules create:"<instance>,<module>" delete
-        use:"<instance>" install-runtime:"<version>" runtime-meta
-        exit-if-down exit-if-up sleep:<duration>
+        use:"<instance>" install-runtime:"<version>" runtime-meta sleep:<duration>
+        exit-if-down exit-if-up exit-if-players exit-if-noplayers
         server server-daemon server-start server-restart server-stop
-        console-send:"<cmd>" world-broadcast:"<message>"
+        players console-send:"<cmd>" world-broadcast:"<message>"
         backup-world:<prunehours> backup-runtime:<prunehours>
         log-tail:<lines> log-tail-f shutdown
     '''
@@ -168,6 +168,20 @@ class CommandProcessor:
         logging.info('exit-if-up command found the server up, no more commands will be processed')
         return False
 
+    def _exit_if_players(self) -> bool:
+        count = len(self._connection.get(self._instance_path('/players')))
+        if count == 0:
+            return True
+        logging.info('exit-if-players command found players in-game, no more commands will be processed')
+        return False
+
+    def _exit_if_noplayers(self) -> bool:
+        count = len(self._connection.get(self._instance_path('/players')))
+        if count > 0:
+            return True
+        logging.info('exit-if-noplayers command found no players in-game, no more commands will be processed')
+        return False
+
     # noinspection PyMethodMayBeStatic
     def _sleep(self, argument: str) -> bool:
         seconds = util.to_int(argument)
@@ -201,6 +215,16 @@ class CommandProcessor:
         result = 'instance: ' + self._instance + '\n' + util.repr_dict(result)
         for line in result.strip().split('\n'):
             logging.info(_OUT + line)
+        return True
+
+    def _players(self) -> bool:
+        result: list = self._connection.get(self._instance_path('/players'))
+        logging.info(_OUT + 'Players online: ' + str(len(result)))
+        for player in result:
+            line = _OUT + player['name']
+            if 'steamid' in player and player['steamid']:
+                line += ' [' + player['steamid'] + ']'
+            logging.info(line)
         return True
 
     def _report(self) -> bool:

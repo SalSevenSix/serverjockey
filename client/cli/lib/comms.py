@@ -14,7 +14,7 @@ class HttpConnection:
         else:
             self._connection = client.HTTPConnection(url[7:])
 
-    def get(self, path: str) -> str | dict | None:
+    def get(self, path: str) -> str | list | dict | None:
         self._connection.request(_GET, path, headers=self._headers)
         response = self._connection.getresponse()
         try:
