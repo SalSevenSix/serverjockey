@@ -29,11 +29,14 @@ class ServerCommandHandler(httpabc.PostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class CheckServerNotRunningHandler(httpabc.AllowMethod, httpabc.GetHandler, httpabc.PostHandler):
+class CheckServerStateInterceptor(httpabc.InterceptorHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, delegate: httpabc.ABC_HANDLER):
+    def __init__(self, mailer: msgabc.MulticastMailer, delegate: httpabc.ABC_HANDLER,
+                 running: bool = None, states: tuple = None):
         self._mailer = mailer
         self._delegate = delegate
+        self._running = running
+        self._states = states if states else ()
 
     def allows(self, method: httpabc.Method) -> bool:
         return httpabc.AllowMethod.call(method, self._delegate)
@@ -43,12 +46,16 @@ class CheckServerNotRunningHandler(httpabc.AllowMethod, httpabc.GetHandler, http
 
     async def handle_post(self, resource, data):
         status = await svrsvc.ServerStatus.get_status(self._mailer, self)
-        if status['running']:
+        if self._running is not None and self._running == status['running']:
             return httpabc.ResponseBody.CONFLICT
+        for state in self._states:
+            if state == status['state']:
+                return httpabc.ResponseBody.CONFLICT
         return await httpabc.PostHandler.call(self._delegate, resource, data)
 
 
 class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
+    READY, MAINTENANCE = 'READY', 'MAINTENANCE'
 
     def __init__(self, mailer: msgabc.MulticastMailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):
         super().__init__(msgftr.Or(maintenance_filter, ready_filter))
@@ -58,9 +65,9 @@ class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if self._maintenance_filter.accepts(message):
-            svrsvc.ServerStatus.notify_state(self._mailer, self, 'MAINTENANCE')
+            svrsvc.ServerStatus.notify_state(self._mailer, self, MaintenanceStateSubscriber.MAINTENANCE)
             return None
         if self._ready_filter.accepts(message):
-            svrsvc.ServerStatus.notify_state(self._mailer, self, 'READY')
+            svrsvc.ServerStatus.notify_state(self._mailer, self, MaintenanceStateSubscriber.READY)
             return None
         return None

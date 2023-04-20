@@ -11,18 +11,25 @@ ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc
 class ResourceBuilder:
 
     def __init__(self, resource: httpabc.Resource):
+        self._interceptors = {}
         self._current = resource
+
+    def reg(self, key: str, builder: httpabc.InterceptorBuilder) -> ResourceBuilder:
+        assert key and len(key) == 1
+        self._interceptors[key] = builder
+        return self
 
     def push(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
         return self.psh(signature, handler)
 
-    def psh(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
+    def psh(self, signature: str,
+            handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
         if kind is httpabc.ResourceKind.ARG_TAIL:
             raise Exception('ARG_TAIL resource cannot have children')
         resource = self._current.child(name)
         if resource is None:
-            resource = WebResource(name, kind, handler)
+            resource = WebResource(name, kind, self._wrap(ikeys, handler))
         self._current.append(resource)
         self._current = resource
         ResourceBuilder._log_binding(resource, handler)
@@ -36,14 +43,26 @@ class ResourceBuilder:
         return self
 
     def append(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
-        return self.add(signature, handler)
+        return self.put(signature, handler)
 
-    def add(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
+    def put(self, signature: str,
+            handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
-        resource = WebResource(name, kind, handler)
+        resource = WebResource(name, kind, self._wrap(ikeys, handler))
         self._current.append(resource)
         ResourceBuilder._log_binding(resource, handler)
         return self
+
+    def _wrap(self, ikeys: str, handler: typing.Optional[httpabc.ABC_HANDLER]) -> typing.Optional[httpabc.ABC_HANDLER]:
+        if not handler or not ikeys:
+            return handler
+        for key in ikeys[::-1]:
+            builder = util.get(key, self._interceptors)
+            if builder:
+                handler = builder.wrap(handler)
+            else:
+                raise Exception('ERROR HTTP Interceptor with key "' + key + '" not registered.')
+        return handler
 
     @staticmethod
     def _unpack(signature: str) -> typing.Tuple[str, httpabc.ResourceKind]:

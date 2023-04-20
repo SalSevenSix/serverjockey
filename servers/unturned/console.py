@@ -2,13 +2,15 @@ from core.util import cmdutil
 from core.msg import msgabc
 from core.http import httpabc, httprsc
 from core.proc import prcext
+from core.system import interceptors
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
-    httprsc.ResourceBuilder(resource) \
-        .push('console') \
-        .append('help', _ConsoleHelpHandler()) \
-        .append('{command}', _ConsoleCommandHandler(mailer))
+    r = httprsc.ResourceBuilder(resource)
+    r.reg('s', interceptors.block_not_started(mailer))
+    r.psh('console')
+    r.put('help', _ConsoleHelpHandler())
+    r.put('{command}', _ConsoleCommandHandler(mailer), 's')
 
 
 class _ConsoleCommandHandler(httpabc.PostHandler):

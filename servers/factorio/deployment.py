@@ -4,6 +4,7 @@ from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
+from core.system import interceptors
 from servers.factorio import messaging as msg
 
 
@@ -66,31 +67,33 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
-        httprsc.ResourceBuilder(resource) \
-            .append('log', httpext.FileSystemHandler(self._current_log)) \
-            .push('config') \
-            .append('cmdargs', httpext.FileSystemHandler(self._cmdargs_settings)) \
-            .append('server', httpext.FileSystemHandler(self._server_settings)) \
-            .append('map', httpext.FileSystemHandler(self._map_settings)) \
-            .append('mapgen', httpext.FileSystemHandler(self._map_gen_settings)) \
-            .append('modslist', httpext.FileSystemHandler(self._mods_list)) \
-            .append('adminlist', httpext.FileSystemHandler(self._server_adminlist)) \
-            .append('whitelist', httpext.FileSystemHandler(self._server_whitelist)) \
-            .append('banlist', httpext.FileSystemHandler(self._server_banlist)) \
-            .pop() \
-            .push('deployment') \
-            .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
-            .append('install-runtime', _InstallRuntimeHandler(self, self._mailer)) \
-            .append('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir)) \
-            .append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir)) \
-            .append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir)) \
-            .append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir)) \
-            .append('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir)) \
-            .append('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir)) \
-            .append('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir)) \
-            .pop() \
-            .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
-            .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
+        r = httprsc.ResourceBuilder(resource)
+        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
+        r.reg('m', interceptors.block_maintenance_only(self._mailer))
+        r.put('log', httpext.FileSystemHandler(self._current_log))
+        r.psh('config')
+        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_settings))
+        r.put('server', httpext.FileSystemHandler(self._server_settings))
+        r.put('map', httpext.FileSystemHandler(self._map_settings))
+        r.put('mapgen', httpext.FileSystemHandler(self._map_gen_settings))
+        r.put('modslist', httpext.FileSystemHandler(self._mods_list))
+        r.put('adminlist', httpext.FileSystemHandler(self._server_adminlist))
+        r.put('whitelist', httpext.FileSystemHandler(self._server_whitelist))
+        r.put('banlist', httpext.FileSystemHandler(self._server_banlist))
+        r.pop()
+        r.psh('deployment')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
+        r.put('install-runtime', _InstallRuntimeHandler(self, self._mailer), 'r')
+        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
+        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
+        r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
+        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
+        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
+        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
+        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
+        r.pop()
+        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
+        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_settings))

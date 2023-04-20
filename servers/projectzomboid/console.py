@@ -2,30 +2,32 @@ from core.util import cmdutil, util
 from core.msg import msgabc
 from core.http import httpabc, httpcnt, httprsc
 from core.proc import proch, prcext
+from core.system import interceptors
 from servers.projectzomboid import playerstore as pls, domain as dom
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
-    httprsc.ResourceBuilder(resource) \
-        .push('world') \
-        .append('{command}', _WorldCommandHandler(mailer)) \
-        .pop() \
-        .push('config') \
-        .push('options', _OptionsHandler(mailer)) \
-        .append('reload', _OptionsReloadHandler(mailer)) \
-        .push('x{option}') \
-        .append('{command}', _OptionCommandHandler(mailer)) \
-        .pop().pop().pop() \
-        .append('steamids', _SteamidsHandler(mailer)) \
-        .push('players', _PlayersHandler(mailer)) \
-        .push('x{player}') \
-        .append('{command}', _PlayerCommandHandler(mailer)) \
-        .pop().pop() \
-        .push('whitelist') \
-        .append('{command}', _WhitelistCommandHandler(mailer)) \
-        .pop() \
-        .push('banlist') \
-        .append('{command}', _BanlistCommandHandler(mailer))
+    r = httprsc.ResourceBuilder(resource)
+    r.reg('s', interceptors.block_not_started(mailer))
+    r.psh('world')
+    r.put('{command}', _WorldCommandHandler(mailer), 's')
+    r.pop()
+    r.psh('config')
+    r.psh('options', _OptionsHandler(mailer), 's')
+    r.put('reload', _OptionsReloadHandler(mailer), 's')
+    r.psh('x{option}')
+    r.put('{command}', _OptionCommandHandler(mailer), 's')
+    r.pop().pop().pop()
+    r.put('steamids', _SteamidsHandler(mailer))
+    r.psh('players', _PlayersHandler(mailer))
+    r.psh('x{player}')
+    r.put('{command}', _PlayerCommandHandler(mailer), 's')
+    r.pop().pop()
+    r.psh('whitelist')
+    r.put('{command}', _WhitelistCommandHandler(mailer), 's')
+    r.pop()
+    r.psh('banlist')
+    r.put('{command}', _BanlistCommandHandler(mailer), 's')
 
 
 class _WorldCommandHandler(httpabc.PostHandler):

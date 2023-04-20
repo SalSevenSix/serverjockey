@@ -184,3 +184,14 @@ class PostHandler(metaclass=abc.ABCMeta):
 
 
 ABC_HANDLER = typing.Union[GetHandler, PostHandler]
+
+
+class InterceptorHandler(AllowMethod, GetHandler, PostHandler, metaclass=abc.ABCMeta):
+    pass
+
+
+class InterceptorBuilder(metaclass=abc.ABCMeta):
+
+    @abc.abstractmethod
+    def wrap(self, handler: ABC_HANDLER) -> ABC_HANDLER:
+        pass

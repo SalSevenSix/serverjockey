@@ -3,7 +3,7 @@ from core.msg import msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpstm
 from core.proc import proch, jobh
-from core.system import interceptors as x
+from core.system import interceptors  # TODO should servers call system package?
 
 _WORLD = 'servertest'
 
@@ -38,38 +38,38 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
-        # TODO consider r.push_interceptor() to decorate somehow
-        m = self._mailer
         r = httprsc.ResourceBuilder(resource)
+        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
+        r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('deployment')
-        r.add('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_380870.acf'))
-        r.add('install-runtime', x.snr(m, httpstm.SteamCmdInstallHandler(m, self._runtime_dir, 380870)))
-        r.add('wipe-runtime', x.snr(m, httpext.WipeHandler(m, self._runtime_dir)))
-        r.add('wipe-world-all', x.snr(m, httpext.WipeHandler(m, self._world_dir)))
-        r.add('wipe-world-playerdb', x.snr(m, httpext.WipeHandler(m, self._player_dir)))
-        r.add('wipe-world-config', x.snr(m, httpext.WipeHandler(m, self._config_dir)))
-        r.add('wipe-world-save', x.snr(m, httpext.WipeHandler(m, self._save_dir)))
-        r.add('wipe-world-backups', x.snr(m, httpext.WipeHandler(m, self._world_dir + '/backups')))
-        r.add('backup-runtime', x.snr(m, httpext.ArchiveHandler(m, self._backups_dir, self._runtime_dir)))
-        r.add('backup-world', x.snr(m, httpext.ArchiveHandler(m, self._backups_dir, self._world_dir)))
-        r.add('restore-backup', x.snr(m, httpext.UnpackerHandler(m, self._backups_dir, self._home_dir)))
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_380870.acf'))
+        r.put('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870), 'r')
+        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
+        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
+        r.put('wipe-world-playerdb', httpext.WipeHandler(self._mailer, self._player_dir), 'r')
+        r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
+        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
+        r.put('wipe-world-backups', httpext.WipeHandler(self._mailer, self._world_dir + '/backups'), 'r')
+        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
+        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
+        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
         r.pop()
-        r.add('log', httpext.FileSystemHandler(self._world_dir + '/server-console.txt'))
+        r.put('log', httpext.FileSystemHandler(self._world_dir + '/server-console.txt'))
         r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
-        r.add('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'))
+        r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'))
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.add('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
+        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
         r.pop()
         r.psh('config')
-        r.add('db', x.snr(m, httpext.FileSystemHandler(self._player_dir + '/' + _WORLD + '.db')))
-        r.add('jvm', httpext.FileSystemHandler(self._runtime_dir + '/ProjectZomboid64.json'))
+        r.put('db', httpext.FileSystemHandler(self._player_dir + '/' + _WORLD + '.db'), 'r')
+        r.put('jvm', httpext.FileSystemHandler(self._runtime_dir + '/ProjectZomboid64.json'))
         config_pre = self._config_dir + '/' + _WORLD
-        r.add('ini', httpext.FileSystemHandler(config_pre + '.ini'))
-        r.add('sandbox', httpext.FileSystemHandler(config_pre + '_SandboxVars.lua'))
-        r.add('spawnpoints', httpext.FileSystemHandler(config_pre + '_spawnpoints.lua'))
-        r.add('spawnregions', httpext.FileSystemHandler(config_pre + '_spawnregions.lua'))
-        r.add('shop', httpext.FileSystemHandler(self._lua_dir + '/ServerPointsListings.ini'))
+        r.put('ini', httpext.FileSystemHandler(config_pre + '.ini'))
+        r.put('sandbox', httpext.FileSystemHandler(config_pre + '_SandboxVars.lua'))
+        r.put('spawnpoints', httpext.FileSystemHandler(config_pre + '_spawnpoints.lua'))
+        r.put('spawnregions', httpext.FileSystemHandler(config_pre + '_spawnregions.lua'))
+        r.put('shop', httpext.FileSystemHandler(self._lua_dir + '/ServerPointsListings.ini'))
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)

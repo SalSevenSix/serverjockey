@@ -4,7 +4,7 @@ from core.msg import msgftr, msgtrf, msglog, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpstm, httpext
 from core.proc import proch, jobh
-from core.system import svrsvc
+from core.system import svrsvc, interceptors
 from servers.sevendaystodie import messaging as msg
 
 
@@ -45,27 +45,29 @@ class Deployment:
             msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
-        httprsc.ResourceBuilder(resource) \
-            .push('logs', httpext.FileSystemHandler(self._log_dir)) \
-            .append('*{path}', httpext.FileSystemHandler(self._log_dir, 'path')) \
-            .pop() \
-            .push('config') \
-            .append('settings', httpext.FileSystemHandler(self._settings_file)) \
-            .append('admin', httpext.FileSystemHandler(self._admin_file)) \
-            .pop() \
-            .push('deployment') \
-            .append('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile)) \
-            .append('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420)) \
-            .append('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir)) \
-            .append('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir)) \
-            .append('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir)) \
-            .append('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir)) \
-            .append('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir)) \
-            .append('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir)) \
-            .append('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir)) \
-            .pop() \
-            .push('backups', httpext.FileSystemHandler(self._backups_dir)) \
-            .append('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'))
+        r = httprsc.ResourceBuilder(resource)
+        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
+        r.reg('m', interceptors.block_maintenance_only(self._mailer))
+        r.psh('logs', httpext.FileSystemHandler(self._log_dir))
+        r.put('*{path}', httpext.FileSystemHandler(self._log_dir, 'path'))
+        r.pop()
+        r.psh('config')
+        r.put('settings', httpext.FileSystemHandler(self._settings_file))
+        r.put('admin', httpext.FileSystemHandler(self._admin_file))
+        r.pop()
+        r.psh('deployment')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
+        r.put('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420), 'r')
+        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
+        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
+        r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
+        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
+        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
+        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
+        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
+        r.pop()
+        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
+        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
 
     def new_server_process(self) -> proch.ServerProcess:
         return proch.ServerProcess(self._mailer, self._executable) \
