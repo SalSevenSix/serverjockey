@@ -6,19 +6,6 @@ from . import util, comms
 _OUT = '    '
 
 
-def epilog() -> str:
-    return '''
-        COMMANDS:
-        showtoken report instances modules create:"<instance>,<module>" delete
-        use:"<instance>" install-runtime:"<version>" runtime-meta sleep:<duration>
-        exit-if-down exit-if-up exit-if-players exit-if-noplayers
-        server server-daemon server-start server-restart server-stop
-        players console-send:"<cmd>" world-broadcast:"<message>"
-        backup-world:<prunehours> backup-runtime:<prunehours>
-        log-tail:<lines> log-tail-f shutdown
-    '''
-
-
 def _get_prune_hours(argument: str) -> int:
     prune_hours = 0
     if argument:
@@ -142,6 +129,18 @@ class CommandProcessor:
         result = self._connection.post(self._instance_path('/deployment/install-runtime'), body)
         if result:
             self._connection.drain(result)
+        return True
+
+    def _wipe_runtime(self) -> bool:
+        self._connection.post(self._instance_path('/deployment/wipe-runtime'))
+        return True
+
+    def _wipe_world_all(self) -> bool:
+        self._connection.post(self._instance_path('/deployment/wipe-world-all'))
+        return True
+
+    def _wipe_world_save(self) -> bool:
+        self._connection.post(self._instance_path('/deployment/wipe-world-save'))
         return True
 
     def _delete(self) -> bool:

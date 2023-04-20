@@ -5,7 +5,7 @@ import argparse
 import sys
 import os
 import json
-from . import cmd, comms
+from . import cmd, comms, helptext
 
 
 class _NoLogFilter(logging.Filter):
@@ -53,7 +53,10 @@ def _load_clientfile(clientfile: str) -> tuple:
 
 
 def _initialise(args: typing.Collection) -> dict:
-    p = argparse.ArgumentParser(description='ServerJockey CLI.', epilog=cmd.epilog())
+    p = argparse.ArgumentParser(
+        description='ServerJockey CLI.',
+        epilog=helptext.epilog(),
+        formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
     p.add_argument('--clientfile', '-f', type=str, help='Specify client file')
@@ -65,6 +68,7 @@ def _initialise(args: typing.Collection) -> dict:
     return {'debug': args.debug, 'url': url, 'token': token, 'commands': args.commands}
 
 
+# noinspection PyUnusedLocal
 def _terminate(sig, frame):
     logging.info('OK (Ctrl-C)')
     sys.exit(0)
