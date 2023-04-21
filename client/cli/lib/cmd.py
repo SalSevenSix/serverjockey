@@ -6,16 +6,6 @@ from . import util, comms
 _OUT = '    '
 
 
-def _get_prune_hours(argument: str) -> int:
-    prune_hours = 0
-    if argument:
-        prune_hours = util.to_int(argument)
-        if prune_hours is None:
-            prune_hours = 0
-            logging.warning('Invalid argument for prune hours, must be a number, was: ' + str(argument))
-    return prune_hours
-
-
 class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
@@ -288,14 +278,14 @@ class CommandProcessor:
     def _backup_world(self, argument: str) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-world'),
-            {'prunehours': _get_prune_hours(argument)})
+            {'prunehours': util.to_int_optional(argument)})
         self._connection.drain(result)
         return True
 
     def _backup_runtime(self, argument: str) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-runtime'),
-            {'prunehours': _get_prune_hours(argument)})
+            {'prunehours': util.to_int_optional(argument)})
         self._connection.drain(result)
         return True
 

@@ -77,25 +77,32 @@ check_jockey() {
 
 check_discord() {
   echo
-  echo "  checking for npm."
-  npm --version
-  if [ $? -ne 0 ]; then
-    echo "ERROR Npm not found."
-    echo "For Ubuntu/Debian;"
-    echo "  $ sudo apt install npm"
-    echo "For RedHat/CentOS;"
-    echo "  $ sudo yum install npm"
-    exit 1
-  fi
-
-  echo
   echo "  checking for nodejs."
   node --version
   if [ $? -ne 0 ]; then
     echo "ERROR Nodejs not found."
     echo "For Ubuntu/Debian;"
+    echo "  $ curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -"
     echo "  $ sudo apt install nodejs"
     echo "For RedHat/CentOS;"
+    echo "  $ curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -"
+    echo "  $ sudo yum install nodejs"
+    exit 1
+  fi
+
+  echo
+  echo "  checking nodejs version, v16 or higher needed."
+  local node_version=$(node --version | awk -F"." '{print$1}' | cut -c2-)
+  if [ $node_version -lt 16 ]; then
+    echo "ERROR Nodejs version too low, version 16 or higher needed."
+    echo "For Ubuntu/Debian;"
+    echo "  $ sudo apt-get purge nodejs"
+    echo "  $ sudo apt autoremove"
+    echo "  $ curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -"
+    echo "  $ sudo apt install nodejs"
+    echo "For RedHat/CentOS;"
+    echo "  $ sudo yum autoremove nodejs"
+    echo "  $ curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -"
     echo "  $ sudo yum install nodejs"
     exit 1
   fi

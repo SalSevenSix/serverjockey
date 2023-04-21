@@ -1,3 +1,4 @@
+import logging
 import subprocess
 
 
@@ -19,6 +20,16 @@ def to_int(value: str) -> int | None:
     except (TypeError, ValueError):
         pass
     return None
+
+
+def to_int_optional(value: str) -> int:
+    result = 0
+    if value:
+        result = to_int(value)
+        if result is None:
+            result = 0
+            logging.warning('Invalid argument, must be a number, was: ' + str(value))
+    return result
 
 
 def get_ip() -> str:
