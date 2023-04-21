@@ -6,3 +6,17 @@ body {
 a[target="_blank"] {
   font-weight: bold;
 }
+
+.step-title {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+pre.is-thinner {
+  margin: 0em 2.3em;
+}
+
+table.is-thinner {
+  margin: 0em 1.5em;
+  width: 90%;
+}

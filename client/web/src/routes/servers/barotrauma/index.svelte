@@ -17,7 +17,6 @@
           <p>No Players Component yet</p>
         </div>
       </div>
-      <hr />
     </div>
   </div>
 </Instance>

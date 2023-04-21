@@ -31,7 +31,7 @@ check_jockey() {
   local python_check=$(which python3 | wc -l)
   [ $python_check -ne 0 ] && python_check=$(python3 --version | grep "Python 3\.10" | wc -l)
   if [ $python_check -eq 0 ]; then
-    echo "ERROR Python3.10 not found."
+    echo "ERROR Python 3.10 not found."
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt install software-properties-common"
     echo "  $ sudo add-apt-repository ppa:deadsnakes/ppa"

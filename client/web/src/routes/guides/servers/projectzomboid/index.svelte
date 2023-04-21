@@ -46,7 +46,7 @@
   <p>
     Enter the command in discord as shown below to create the instance.
   </p>
-  <pre class="pre">!create myserver projectzomboid</pre>
+  <pre class="pre is-thinner">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
 </div>
 
@@ -54,7 +54,7 @@
   <p><span class="step-title">02.</span>
     Now enter the help command. Now that there is an instance, you will see all the commands for that type of instance.
   </p>
-  <pre class="pre">!help</pre>
+  <pre class="pre is-thinner">!help</pre>
   <figure><img src="/assets/setup/39_help_pz.png" alt="Help PZ" /></figure>
 </div>
 
@@ -66,7 +66,7 @@
     with a green tick. Also the log output from SteamCMD will be attached. You can check this to ensure
     the server was installed without issue.
   </p>
-  <pre class="pre">!deployment install-runtime</pre>
+  <pre class="pre is-thinner">!deployment install-runtime</pre>
   <figure><img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" /></figure>
   <figure><img src="/assets/setup/40_deploy_runtime_success.png" alt="Deploy Runtime Success" /></figure>
 </div>
@@ -76,7 +76,7 @@
     With the server installed, it can now be started with the following command. Same as the server install,
     an hourglass emoji is shown then replaced with a green tick when the server has fully started.
   </p>
-  <pre class="pre">!server start</pre>
+  <pre class="pre is-thinner">!server start</pre>
   <figure><img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" /></figure>
   <figure><img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" /></figure>
 </div>
@@ -86,7 +86,7 @@
     You can check the status of the server at any time with the following command.
     Now that the server is up, the server version and connection details are shown.
   </p>
-  <pre class="pre">!server</pre>
+  <pre class="pre is-thinner">!server</pre>
   <figure><img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" /></figure>
 </div>
 
@@ -96,7 +96,7 @@
     Project Zomboid server for the first time, the configuration files are created with default values.
     So stop the server with the following command.
   </p>
-  <pre class="pre">!server stop</pre>
+  <pre class="pre is-thinner">!server stop</pre>
   <figure><img src="/assets/setup/43_server_stop.png" alt="Server Stop" /></figure>
 </div>
 
@@ -106,7 +106,7 @@
     See the server command list for other configuration files that can be downloaded.
     Save this file to disk somewhere to edit it.
   </p>
-  <pre class="pre">!getconfig ini</pre>
+  <pre class="pre is-thinner">!getconfig ini</pre>
   <figure><img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" /></figure>
 </div>
 
@@ -117,7 +117,7 @@
     <a href="#additional-information" use:scrollto={'#additional-information'}>additional information</a>
     at the end of this guide for more help on Project Zomboid server configuration.
   </p>
-  <pre class="pre">PublicName=ZomBox demo server
+  <pre class="pre is-thinner">PublicName=ZomBox demo server
 ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 </div>
 
@@ -127,7 +127,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Attach the INI file in Discord to upload it with the following command.
     Once again, the bot will react with a green tick emoji to show that the command was successful.
   </p>
-  <pre class="pre">!setconfig ini</pre>
+  <pre class="pre is-thinner">!setconfig ini</pre>
   <figure><img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" /></figure>
 </div>
 
@@ -136,7 +136,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     The server configuration has now been updated. However the server created a game world (map files)
     using the default configuration. You can delete the world with the following command.
   </p>
-  <pre class="pre">!deployment wipe-world-save</pre>
+  <pre class="pre is-thinner">!deployment wipe-world-save</pre>
   <figure><img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" /></figure>
 </div>
 
@@ -151,7 +151,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     After logging in I am greeted with the new Welcome Message I configured earlier. Also, if you have a
     Log Channel ID set in the discord bot configuration, you should see a login event message in that channel.
   </p>
-  <pre class="pre">!server start</pre>
+  <pre class="pre is-thinner">!server start</pre>
   <figure><img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" /></figure>
   <figure><img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" /></figure>
   <figure><img src="/assets/setup/48_login_event.png" alt="Login Event" /></figure>
@@ -164,8 +164,8 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Items can also be spawned in a players inventory.
     See the help command for the full list of server console commands.
   </p>
-  <pre class="pre">!world broadcast Hello Everyone</pre>
-  <pre class="pre">!player Demo give-item Base Axe 2</pre>
+  <pre class="pre is-thinner">!world broadcast Hello Everyone</pre>
+  <pre class="pre is-thinner">!player Demo give-item Base Axe 2</pre>
   <figure><img src="/assets/setup/49_console_commands.png" alt="Console Commands" /></figure>
   <figure><img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" /></figure>
   <figure><img src="/assets/setup/49_give_item.png" alt="Give Item" /></figure>
@@ -186,7 +186,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     All of the configuration files can be downloaded using Discord using the commands shown below.
     Use the corresponding <span class="is-family-monospace">!setconfig</span> command to upload files.
   </p>
-  <table class="table">
+  <table class="table is-thinner">
     <thead>
       <tr><th>Download Command</th><th>Config File</th></tr>
     </thead>
@@ -213,7 +213,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     on the ServerJockey console. More detailed instructions cannot be provided because each router will have
     a different webapp interface depending on the brand and model.
   </p>
-  <table class="table">
+  <table class="table is-thinner">
     <thead>
       <tr><th>Purpose</th><th>Port</th><th>Protocal</th></tr>
     </thead>
@@ -226,7 +226,8 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     If using manual port forwarding you should also disable UPnP in the
     <span class="is-family-monospace">settings.ini</span> configuration file.
   </p>
-  <pre class="pre"># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules.
+  <pre class="pre is-thinner"
+># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules.
 # The server will fall back to default ports if this fails.
 UPnP=false</pre>
 </div>
@@ -241,7 +242,7 @@ UPnP=false</pre>
     As a general rule, the memory required is 2Gb + 500Mb per player. Whatever value is set,
     the machine that the server is running on needs at least 1Gb more of free memory.
   </p>
-  <pre class="pre">"vmArgs": [
+  <pre class="pre is-thinner">"vmArgs": [
     "-Djava.awt.headless=true",
     "-Xmx8g",
     "-Dzomboid.steam=1",

@@ -302,7 +302,7 @@
     Now it&#39;s time to try out the bot. The bot will work from any channel it has access to.
     First try the help command as shown below. The bot should reply with available commands.
   </p>
-  <pre class="pre">!help</pre>
+  <pre class="pre is-thinner">!help</pre>
   <figure><img src="/assets/setup/30_help_system.png" alt="System Help" /></figure>
 </div>
 
@@ -311,7 +311,7 @@
     Now try the instances command. An instance is a game server container. This command will list them all.
     The response shows none are found because no instance has been created yet.
   </p>
-  <pre class="pre">!instances</pre>
+  <pre class="pre is-thinner">!instances</pre>
   <figure><img src="/assets/setup/31_instances_empty.png" alt="Instances Empty" /></figure>
 </div>
 
@@ -320,7 +320,7 @@
     Now try creating an instance as shown below. The bot reacts with a lock emoji which means it didn&#39;t work!
     This is expected, you aren&#39;t authorised to create an instance yet. Next steps will remedy this.
   </p>
-  <pre class="pre">!create myserver projectzomboid</pre>
+  <pre class="pre is-thinner">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/32_create_instance_locked.png" alt="Create Instances Locked" /></figure>
 </div>
 
@@ -377,13 +377,13 @@
     This is the module name, which is a supported game server. In this case, Project Zomboid.
     So this instance will be for a Project Zomboid server.
   </p>
-  <pre class="pre">!create myserver projectzomboid</pre>
+  <pre class="pre is-thinner">!create myserver projectzomboid</pre>
   <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
   <p>
     After creation, you can try the instances command again to see the new instance.
     The arrow will mark the current selected instance.
   </p>
-  <pre class="pre">!instances</pre>
+  <pre class="pre is-thinner">!instances</pre>
   <figure><img src="/assets/setup/38_list_new_instance.png" alt="View New Instance" /></figure>
 </div>
 

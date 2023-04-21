@@ -45,8 +45,6 @@
   </div>
 </div>
 
-<hr />
-
 
 <style>
   .ko-fi-img {

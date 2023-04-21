@@ -22,6 +22,7 @@
     {#if $securityToken}
       <Navbar />
       <slot />
+      <hr />
     {/if}
   </div>
 </section>

@@ -12,4 +12,3 @@
     <InstanceList />
   </div>
 </div>
-<hr />

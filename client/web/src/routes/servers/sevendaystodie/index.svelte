@@ -57,7 +57,6 @@
       <Collapsible title="Backups">
         <BackupRestoreActions />
       </Collapsible>
-      <hr />
     </div>
   </div>
 </Instance>

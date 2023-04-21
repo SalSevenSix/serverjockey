@@ -7,4 +7,3 @@
 <SystemInfo />
 <hr />
 <ServerLink />
-<hr />
