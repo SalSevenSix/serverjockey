@@ -1,3 +1,4 @@
+# ALLOW util.* msg.* context.* http.* system.* EXCEPT system.bootstrap
 from core.util import util, funcutil
 from core.msg import msgabc, msgftr
 from core.http import httpabc

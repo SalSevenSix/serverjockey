@@ -1,5 +1,6 @@
 import logging
 import subprocess
+# ALLOW NONE
 
 
 def repr_dict(obj: dict, prefix: str = '') -> str:

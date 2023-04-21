@@ -1,3 +1,4 @@
+# ALLOW util.* msg.* contextsvc.*
 from core.util import util, io
 from core.context import contextsvc
 

@@ -1,8 +1,9 @@
 import logging
+# ALLOW util.* msg.* context.* http.* system.* proc.*
 from core.util import aggtrf, util
 from core.msg import msgabc
 from core.http import httpabc, httpext, httpsubs
-from core.proc import jobh, shell   # TODO Should not import proc package in http package
+from core.proc import jobh, shell
 
 
 class SteamCmdInstallHandler(httpabc.PostHandler):

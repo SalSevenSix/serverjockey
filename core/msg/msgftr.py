@@ -1,4 +1,5 @@
 import re
+# ALLOW util.* msg.msgabc
 from core.msg import msgabc
 
 

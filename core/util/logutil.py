@@ -1,4 +1,5 @@
 import logging
+# ALLOW util.util
 
 
 def is_logging_to_file(logger: logging.Logger) -> bool:

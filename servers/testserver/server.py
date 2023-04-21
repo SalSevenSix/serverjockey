@@ -1,9 +1,10 @@
+# ALLOW core.*
+from core.util import util, cmdutil, aggtrf
+from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
-from core.msg import msgabc, msgext, msgftr
-from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
-from core.util import util, cmdutil, aggtrf
+from core.proc import proch, prcext
 
 
 class Server(svrabc.Server):

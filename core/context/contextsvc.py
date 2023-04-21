@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import typing
+# ALLOW util.* msg.*
 from core.util import util, funcutil
 from core.msg import msgabc, msgsvc
 

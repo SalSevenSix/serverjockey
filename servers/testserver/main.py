@@ -2,6 +2,7 @@ import sys
 import threading
 import time
 from random import randint
+# ALLOW NONE
 
 
 def p(line):

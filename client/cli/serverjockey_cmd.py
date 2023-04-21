@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+# ALLOW lib.*
 from lib import bootstrap
 
 

@@ -1,6 +1,7 @@
 import logging
 import time
 import inspect
+# ALLOW lib.util, lib.comms
 from . import util, comms
 
 _OUT = '    '

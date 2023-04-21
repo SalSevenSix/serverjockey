@@ -3,9 +3,10 @@ import logging
 import typing
 import asyncio
 from asyncio import streams
-from core.proc import procabc
+# ALLOW util.* msg.* context.* proc.procabc
 from core.util import signals, cmdutil, funcutil
 from core.msg import msgabc, msgext, msgftr
+from core.proc import procabc
 
 
 class _PipeInLineCommand:

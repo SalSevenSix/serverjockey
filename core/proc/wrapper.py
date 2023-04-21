@@ -1,6 +1,7 @@
 import sys
 import os
 import pty  # https://docs.python.org/3/library/pty.html
+# ALLOW NONE
 
 
 def read(fd):

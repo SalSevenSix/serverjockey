@@ -1,8 +1,9 @@
 from __future__ import annotations
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
-from core.context import contextsvc
+# ALLOW util.* msg.* context.* http.httpabc http.httpcnt
 from core.util import util, pack, pkg
+from core.context import contextsvc
 from core.http import httpabc, httpcnt
 
 

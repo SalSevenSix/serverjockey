@@ -1,9 +1,10 @@
+# ALLOW core.* projectzomboid.*
 from core.util import aggtrf
 from core.msg import msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
-from core.proc import proch, prcext
 from core.system import svrabc, svrsvc, svrext
+from core.proc import proch, prcext
 from servers.projectzomboid import deployment as dep, playerstore as pls, console as con, messaging as msg
 
 

@@ -1,10 +1,12 @@
 from xml.dom import minidom
+# ALLOW core.* sevendaystodie.messaging
 from core.util import io
 from core.msg import msgftr, msgtrf, msglog, msgext
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpstm, httpext
+from core.http import httpabc, httprsc, httpext
+from core.system import svrsvc
 from core.proc import proch, jobh
-from core.system import svrsvc, interceptors
+from core.common import steam, interceptors
 from servers.sevendaystodie import messaging as msg
 
 
@@ -57,7 +59,7 @@ class Deployment:
         r.pop()
         r.psh('deployment')
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
-        r.put('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420), 'r')
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')

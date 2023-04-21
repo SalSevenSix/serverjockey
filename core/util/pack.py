@@ -3,6 +3,7 @@ import lzma
 import tarfile
 import gzip
 import time
+# ALLOW util.*
 from core.util import funcutil, io, logutil
 
 _make_archive = funcutil.to_async(shutil.make_archive)

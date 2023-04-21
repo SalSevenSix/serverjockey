@@ -1,7 +1,108 @@
 import typing
+# ALLOW core.* projectzomboid.messaging
 from core.util import util
 from core.msg import msgabc, msgext, msgftr
-from servers.projectzomboid import domain as dom, messaging as msg
+from core.proc import proch
+from servers.projectzomboid import messaging as msg
+
+
+class Option:
+
+    def __init__(self, option: str, value: str):
+        self._data = {'option': option, 'value': value}
+
+    def option(self) -> str:
+        return self._data['option']
+
+    def asdict(self) -> dict:
+        return self._data.copy()
+
+
+class Player:
+
+    def __init__(self, steamid: str, name: str):
+        self._data = {'steamid': steamid, 'name': name}
+
+    def steamid(self) -> str:
+        return self._data['steamid']
+
+    def name(self) -> str:
+        return self._data['name']
+
+    def asdict(self) -> dict:
+        return self._data.copy()
+
+
+class PlayerEvent:
+
+    def __init__(self, event: str, player: Player):
+        self._created = util.now_millis()
+        self._event = event
+        self._player = player
+
+    def player(self) -> Player:
+        return self._player
+
+    def asdict(self) -> dict:
+        return {'created': self._created, 'event': self._event, 'player': self._player.asdict()}
+
+
+class OptionLoader:
+
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any):
+        self._mailer = mailer
+        self._source = source
+
+    async def all(self) -> typing.Collection[Option]:
+        response = await proch.PipeInLineService.request(
+            self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                start_filter=msgftr.DataStrContains('List of Server Options:'), include_start=False,
+                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True, timeout=10.0))
+        options = []
+        if not util.iterable(response):
+            return options
+        for line in iter([m.data() for m in response]):
+            if line.startswith('* '):
+                option, value = line[2:].split('=')
+                options.append(Option(option, value))
+        return options
+
+    async def get(self, option: str) -> typing.Optional[Option]:
+        if option is None:
+            return None
+        options = [o for o in await self.all() if o.option() == option]
+        return util.single(options)
+
+
+class PlayerLoader:
+
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any):
+        self._mailer = mailer
+        self._source = source
+
+    async def all(self) -> typing.Collection[Player]:
+        response = await proch.PipeInLineService.request(
+            self._mailer, self._source, 'players', msgext.MultiCatcher(
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
+                stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=10.0))
+        players = []
+        if not util.iterable(response):
+            return players
+        playerstore = await PlayerStoreService.get(self._mailer, self._source)
+        for line in iter([m.data() for m in response]):
+            if line.startswith('-'):
+                name = line[1:]
+                steamid = playerstore.find_steamid(name)
+                players.append(Player(steamid, name))
+        return players
+
+    async def get(self, name: str) -> typing.Optional[Player]:
+        if name is None:
+            return None
+        players = [o for o in await self.all() if o.name() == name]
+        return util.single(players)
 
 
 class PlayerStore:
@@ -9,7 +110,7 @@ class PlayerStore:
     def __init__(self):
         self._data: typing.Dict[str, typing.List[str]] = {}
 
-    def add_player(self, player: dom.Player):
+    def add_player(self, player: Player):
         names = util.get(player.steamid(), self._data)
         if names:
             if player.name() not in names:
@@ -43,20 +144,6 @@ class PlayerStoreService:
         return response.data()
 
 
-class PlayerEvent:
-
-    def __init__(self, event: str, player: dom.Player):
-        self._created = util.now_millis()
-        self._event = event
-        self._player = player
-
-    def player(self) -> dom.Player:
-        return self._player
-
-    def asdict(self) -> dict:
-        return {'created': self._created, 'event': self._event, 'player': self._player.asdict()}
-
-
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
@@ -81,13 +168,13 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = str(message.data())
             name = util.left_chop_and_strip(name, 'username="')
             name = util.right_chop_and_strip(name, '" connection-type=')
-            event = PlayerEvent('login', dom.Player(steamid, name))
+            event = PlayerEvent('login', Player(steamid, name))
             self._mailer.post(self, _PlayerEventSubscriber.LOGIN, event)
         if _PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
             line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT_KEY)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
-            event = PlayerEvent('logout', dom.Player(steamid, name[1:-1]))
+            event = PlayerEvent('logout', Player(steamid, name[1:-1]))
             self._mailer.post(self, _PlayerEventSubscriber.LOGOUT, event)
         return None
 

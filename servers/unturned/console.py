@@ -1,8 +1,9 @@
+# ALLOW core.* unturned.messaging
 from core.util import cmdutil
 from core.msg import msgabc
 from core.http import httpabc, httprsc
 from core.proc import prcext
-from core.system import interceptors
+from core.common import interceptors
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):

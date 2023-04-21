@@ -1,8 +1,8 @@
 import typing
+# ALLOW util.* msg.* context.* http.* system.* proc.*
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
 from core.proc import proch
-# TODO Should move out of system into new package
 
 PLAYER_EVENT = 'playerstore.Event'
 PLAYER_EVENT_FILTER = msgftr.NameIs(PLAYER_EVENT)
@@ -21,6 +21,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         self._mailer = mailer
         self._players = []
 
+    # TODO Should have static helper methods to send player event messages
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any):
         messenger = msgext.SynchronousMessenger(mailer)

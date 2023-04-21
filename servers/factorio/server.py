@@ -1,8 +1,10 @@
+# ALLOW core.* factorio.*
 from core.util import aggtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
+from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
-from core.system import svrabc, svrsvc, svrext, playerstore
+from core.common import playerstore
 from servers.factorio import deployment as dep, messaging as msg
 
 

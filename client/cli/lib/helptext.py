@@ -1,3 +1,5 @@
+# ALLOW lib.util
+
 
 def epilog() -> str:
     return '''

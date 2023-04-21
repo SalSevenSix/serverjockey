@@ -1,3 +1,4 @@
+# ALLOW core.*
 from core.util import io
 from core.context import contextsvc
 from core.proc import procabc, proch

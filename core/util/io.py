@@ -5,6 +5,7 @@ import time
 import typing
 import aiofiles
 from aiofiles import os as aioos
+# ALLOW util.*
 from core.util import funcutil
 
 DEFAULT_CHUNK_SIZE = 10240

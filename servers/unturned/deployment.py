@@ -1,9 +1,10 @@
+# ALLOW core.* unturned.messaging
 from core.util import util, io
-from core.context import contextsvc
 from core.msg import msgftr, msgext
-from core.http import httpabc, httprsc, httpstm, httpext
+from core.context import contextsvc
+from core.http import httpabc, httprsc, httpext
 from core.proc import procabc, proch, jobh
-from core.system import interceptors
+from core.common import steam, interceptors
 
 # https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Launch-Server-on-Linux
 # https://unturned.info/Server-Hosting/ServerHosting/
@@ -66,7 +67,7 @@ class Deployment:
         r.pop()
         r.psh('deployment')
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
-        r.put('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 1110390), 'r')
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 1110390), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._map_dir), 'r')

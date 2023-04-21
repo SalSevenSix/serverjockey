@@ -1,9 +1,10 @@
 import typing
 import asyncio
 from asyncio import subprocess
-from core.proc import procabc
+# ALLOW util.* msg.* context.* proc.procabc
 from core.util import util, funcutil
 from core.msg import msgabc, msgext, msgftr
+from core.proc import procabc
 
 
 class JobProcess(msgabc.AbcSubscriber):

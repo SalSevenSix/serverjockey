@@ -3,6 +3,7 @@ import typing
 import inspect
 import logging
 import uuid
+# ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, io, pkg, sysutil, signals
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext

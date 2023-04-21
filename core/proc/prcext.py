@@ -1,11 +1,12 @@
 import typing
 import asyncio
 from asyncio import subprocess
+# ALLOW util.* msg.* context.* http.* system.* proc.* EXCEPT proc.wrapper
 from core.util import cmdutil, util, signals
 from core.msg import msgabc, msgext
 from core.http import httpabc
-from core.proc import proch
 from core.system import svrsvc
+from core.proc import proch
 
 
 class ServerStateSubscriber(msgabc.AbcSubscriber):

@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging
 import typing
 from yarl import URL
+# ALLOW util.* msg.* context.* http.httpabc http.httpcnt
 from core.util import util
 from core.http import httpabc, httpcnt
 

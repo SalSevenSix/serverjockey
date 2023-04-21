@@ -1,9 +1,10 @@
+# ALLOW core.* projectzomboid.messaging projectzomboid.playerstore
 from core.util import cmdutil, util
 from core.msg import msgabc
 from core.http import httpabc, httpcnt, httprsc
 from core.proc import proch, prcext
-from core.system import interceptors
-from servers.projectzomboid import playerstore as pls, domain as dom
+from core.common import interceptors
+from servers.projectzomboid import playerstore as pls
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
@@ -54,7 +55,7 @@ class _OptionsHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        options = await dom.OptionLoader(self._mailer, self).all()
+        options = await pls.OptionLoader(self._mailer, self).all()
         return [o.asdict() for o in options]
 
 
@@ -75,7 +76,7 @@ class _OptionCommandHandler(httpabc.PostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        if not await dom.OptionLoader(self._mailer, self).get(util.get('option', data)):
+        if not await pls.OptionLoader(self._mailer, self).get(util.get('option', data)):
             return httpabc.ResponseBody.NOT_FOUND
         cmdline = _OptionCommandHandler.COMMANDS.get(data)
         if not cmdline or util.get('value', data) is None:
@@ -102,7 +103,7 @@ class _PlayersHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        players = await dom.PlayerLoader(self._mailer, self).all()
+        players = await pls.PlayerLoader(self._mailer, self).all()
         return [o.asdict() for o in players]
 
 
@@ -125,7 +126,7 @@ class _PlayerCommandHandler(httpabc.PostHandler):
         self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _PlayerCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
-        if not await dom.PlayerLoader(self._mailer, self).get(util.get('player', data)):
+        if not await pls.PlayerLoader(self._mailer, self).get(util.get('player', data)):
             # TODO set-access-level doesn't need the player in-game i think
             return httpabc.ResponseBody.NOT_FOUND
         return await self._handler.handle_post(resource, data)

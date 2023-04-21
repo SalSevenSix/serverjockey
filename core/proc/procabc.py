@@ -2,6 +2,7 @@ import abc
 import logging
 import typing
 from asyncio import streams
+# ALLOW util.* msg.* context.*
 from core.util import funcutil, io, pkg
 from core.msg import msgabc, msgext
 

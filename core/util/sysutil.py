@@ -1,5 +1,6 @@
 import shutil
 import asyncio
+# ALLOW util.*
 from core.util import __version__, funcutil, shellutil
 
 

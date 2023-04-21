@@ -1,9 +1,10 @@
 import asyncio
-from core.context import contextsvc
+# ALLOW core.*
 from core.util import util
 from core.msg import msgabc, msglog, msgftr, msgext
-from core.proc import proch, jobh, prcext
+from core.context import contextsvc
 from core.system import svrsvc, svrext
+from core.proc import proch, jobh, prcext
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,

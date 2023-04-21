@@ -1,8 +1,9 @@
-from core.context import contextsvc
+# ALLOW core.* barotrauma.*
 from core.msg import msgftr
+from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs
-from core.proc import proch, prcext
 from core.system import svrabc, svrext, svrsvc
+from core.proc import proch, prcext
 from servers.barotrauma import deployment as dep
 
 SERVER_STARTED_FILTER = msgftr.And(

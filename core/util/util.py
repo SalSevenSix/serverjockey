@@ -6,6 +6,7 @@ import json
 import time
 import typing
 from collections.abc import Iterable
+# ALLOW NONE
 
 _BASE62_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 _SCRIPT_SPECIALS = str.maketrans({

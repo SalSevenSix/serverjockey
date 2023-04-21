@@ -1,10 +1,11 @@
 import aiohttp
+# ALLOW core.* factorio.messaging
 from core.util import util, tasks, io, pack, aggtrf
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
-from core.system import interceptors
+from core.common import interceptors
 from servers.factorio import messaging as msg
 
 

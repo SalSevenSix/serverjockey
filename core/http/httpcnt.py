@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing
 from aiohttp import abc as webabc
+# ALLOW util.* msg.* context.* http.httpabc
 from core.util import util
 from core.http import httpabc
 

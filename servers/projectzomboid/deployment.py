@@ -1,9 +1,10 @@
+# ALLOW core.* projectzomboid.messaging
 from core.util import io
 from core.msg import msgext, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpstm
+from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
-from core.system import interceptors  # TODO should servers call system package?
+from core.common import steam, interceptors
 
 _WORLD = 'servertest'
 
@@ -43,7 +44,7 @@ class Deployment:
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('deployment')
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_380870.acf'))
-        r.put('install-runtime', httpstm.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870), 'r')
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-playerdb', httpext.WipeHandler(self._mailer, self._player_dir), 'r')

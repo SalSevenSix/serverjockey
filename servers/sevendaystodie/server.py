@@ -1,8 +1,10 @@
+# ALLOW core.* sevendaystodie.*
 from core.util import aggtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
+from core.system import svrabc, svrsvc, svrext
 from core.proc import prcext
-from core.system import svrabc, svrsvc, svrext, playerstore
+from core.common import playerstore
 from servers.sevendaystodie import deployment as dep, messaging as msg
 
 

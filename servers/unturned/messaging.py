@@ -1,7 +1,9 @@
+# ALLOW core.*
 from core.util import util
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
-from core.system import svrsvc, svrext, playerstore
+from core.common import playerstore
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,

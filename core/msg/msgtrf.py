@@ -1,3 +1,4 @@
+# ALLOW util.* msg.msgabc
 from core.util import util
 from core.msg import msgabc
 

@@ -3,6 +3,7 @@ import re
 import ssl
 import aiohttp
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
+# ALLOW util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
 from core.util import util, pack, io
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics

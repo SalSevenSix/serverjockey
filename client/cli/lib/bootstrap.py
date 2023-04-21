@@ -5,6 +5,7 @@ import argparse
 import sys
 import os
 import json
+# ALLOW lib.*
 from . import cmd, comms, helptext
 
 
