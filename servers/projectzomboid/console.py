@@ -126,8 +126,8 @@ class _PlayerCommandHandler(httpabc.PostHandler):
         self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _PlayerCommandHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
-        if not await pls.PlayerLoader(self._mailer, self).get(util.get('player', data)):
-            # TODO set-access-level doesn't need the player in-game i think
+        command, player = util.get('command', data), util.get('player', data)
+        if command != 'set-access-level' and not await pls.PlayerLoader(self._mailer, self).get(player):
             return httpabc.ResponseBody.NOT_FOUND
         return await self._handler.handle_post(resource, data)
 

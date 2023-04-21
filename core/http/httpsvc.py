@@ -210,12 +210,11 @@ class _MultipartFormByteStream(httpabc.ByteStream):
         return -1
 
     async def read(self, length: int = -1) -> bytes:
-        # TODO to be safe this should iterate through to find first file part
         if not self._part:
             self._part = await self._reader.next()
         chunk = await self._part.read_chunk(length)
         if chunk is None or chunk == b'':
-            while self._part is not None:
+            while self._part is not None:  # Drain remaining parts if any
                 self._part = await self._reader.next()
         return chunk
 

@@ -47,17 +47,17 @@ class Server(svrabc.Server):
 
     def resources(self, resource: httpabc.Resource):
         httprsc.ResourceBuilder(resource) \
-            .push('server', svrext.ServerStatusHandler(self._context)) \
-            .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .append('{command}', svrext.ServerCommandHandler(self._context)) \
+            .psh('server', svrext.ServerStatusHandler(self._context)) \
+            .put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
+            .put('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
-            .append('config', httpext.FileSystemHandler(self._config)) \
-            .push('log', httpext.FileSystemHandler(self._log_file)) \
-            .append('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER)) \
-            .append('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
+            .put('config', httpext.FileSystemHandler(self._config)) \
+            .psh('log', httpext.FileSystemHandler(self._log_file)) \
+            .put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER)) \
+            .put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
-            .push(self._httpsubs.resource(resource, 'subscriptions')) \
-            .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
+            .psh(self._httpsubs.resource(resource, 'subscriptions')) \
+            .put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._clientfile.write()

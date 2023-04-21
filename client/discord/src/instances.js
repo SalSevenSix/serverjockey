@@ -92,8 +92,7 @@ exports.Service = class Service {
       }
       result += identity + ' (' + data.module + ')\n';
     }
-    result += '```';
-    return result;
+    return result + '```';
   }
 
 }

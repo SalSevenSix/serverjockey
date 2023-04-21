@@ -217,10 +217,13 @@ class CommandProcessor:
             logging.info(line)
         return True
 
-    def _report(self) -> bool:
+    def _system(self) -> bool:
         result = self._connection.get('/system/info')
         for line in util.repr_dict(result).strip().split('\n'):
             logging.info(_OUT + line)
+        return True
+
+    def _report(self) -> bool:
         identities = self._instances.keys()
         if len(identities) == 0:
             return True

@@ -20,9 +20,6 @@ class ResourceBuilder:
         self._interceptors[key] = builder
         return self
 
-    def push(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
-        return self.psh(signature, handler)
-
     def psh(self, signature: str,
             handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
@@ -42,9 +39,6 @@ class ResourceBuilder:
             raise Exception('Cannot pop() root')
         self._current = parent
         return self
-
-    def append(self, signature: str, handler: typing.Optional[httpabc.ABC_HANDLER] = None) -> ResourceBuilder:
-        return self.put(signature, handler)
 
     def put(self, signature: str,
             handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:

@@ -35,8 +35,8 @@ class JobProcess(msgabc.AbcSubscriber):
             mailer: msgabc.MulticastMailer,
             source: typing.Any,
             command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        # TODO The catcher should include the source so it doesn't pickup any done Job
-        messenger = msgext.SynchronousMessenger(mailer, catcher=msgext.SingleCatcher(JobProcess.FILTER_DONE))
+        catcher = msgext.SingleCatcher(msgftr.And(msgftr.SourceIs(source), JobProcess.FILTER_DONE))
+        messenger = msgext.SynchronousMessenger(mailer, catcher=catcher)
         response = await messenger.request(source, JobProcess.REQUEST, command)
         return response.data()
 

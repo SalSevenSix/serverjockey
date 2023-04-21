@@ -23,19 +23,19 @@ class Server(svrabc.Server):
     def resources(self, resource: httpabc.Resource):
         self._deployment.resources(resource)
         httprsc.ResourceBuilder(resource) \
-            .push('server', svrext.ServerStatusHandler(self._context)) \
-            .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .append('{command}', svrext.ServerCommandHandler(self._context)) \
+            .psh('server', svrext.ServerStatusHandler(self._context)) \
+            .put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
+            .put('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
-            .push('log') \
-            .append('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER)) \
-            .append('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
+            .psh('log') \
+            .put('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER)) \
+            .put('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
-            .push('players', playerstore.PlayersHandler(self._context)) \
-            .append('subscribe', self._httpsubs.handler(playerstore.PLAYER_EVENT_FILTER)) \
+            .psh('players', playerstore.PlayersHandler(self._context)) \
+            .put('subscribe', self._httpsubs.handler(playerstore.PlayersSubscriber.EVENT_FILTER)) \
             .pop() \
-            .push(self._httpsubs.resource(resource, 'subscriptions')) \
-            .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
+            .psh(self._httpsubs.resource(resource, 'subscriptions')) \
+            .put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._deployment.build_live_config()

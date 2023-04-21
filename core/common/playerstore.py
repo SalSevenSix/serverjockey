@@ -4,24 +4,34 @@ from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
 from core.proc import proch
 
-PLAYER_EVENT = 'playerstore.Event'
-PLAYER_EVENT_FILTER = msgftr.NameIs(PLAYER_EVENT)
-
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
+    EVENT = 'PlayersSubscriber.Event'
+    EVENT_FILTER = msgftr.NameIs(EVENT)
     GET = 'PlayersSubscriber.Get'
     GET_FILTER = msgftr.NameIs(GET)
     GET_RESPONSE = 'PlayersSubscriber.GetResponse'
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
-            PLAYER_EVENT_FILTER,
+            PlayersSubscriber.EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
             proch.ServerProcess.FILTER_STATES_DOWN))
         self._mailer = mailer
         self._players = []
 
-    # TODO Should have static helper methods to send player event messages
+    @staticmethod
+    def event_login(mailer: msgabc.MulticastMailer, source: typing.Any, name: str, steamid: str = None):
+        mailer.post(
+            source, PlayersSubscriber.EVENT,
+            {'event': 'login', 'player': {'steamid': steamid if steamid else False, 'name': name}})
+
+    @staticmethod
+    def event_logout(mailer: msgabc.MulticastMailer, source: typing.Any, name: str, steamid: str = None):
+        mailer.post(
+            source, PlayersSubscriber.EVENT,
+            {'event': 'logout', 'player': {'steamid': steamid if steamid else False, 'name': name}})
+
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any):
         messenger = msgext.SynchronousMessenger(mailer)
@@ -32,7 +42,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._players = []
             return None
-        if PLAYER_EVENT_FILTER.accepts(message):
+        if PlayersSubscriber.EVENT_FILTER.accepts(message):
             event = message.data()
             if event['event'] == 'login':
                 self._players.append(event['player'])

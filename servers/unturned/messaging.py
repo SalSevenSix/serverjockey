@@ -64,10 +64,10 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         self._mailer = mailer
 
     def handle(self, message):
-        event = 'login' if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message) else 'logout'
         value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.NAME)
         value = util.right_chop_and_strip(value, _PlayerEventSubscriber.CHARACTER)
-        self._mailer.post(
-            self, playerstore.PLAYER_EVENT,
-            {'event': event, 'player': {'steamid': False, 'name': value}})
+        if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
+            playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
+        else:
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
         return None

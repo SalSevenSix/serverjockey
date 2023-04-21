@@ -26,20 +26,20 @@ class Server(svrabc.Server):
 
     def resources(self, resource: httpabc.Resource):
         httprsc.ResourceBuilder(resource) \
-            .push('server', svrext.ServerStatusHandler(self._context)) \
-            .append('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .append('{command}', svrext.ServerCommandHandler(self._context)) \
+            .psh('server', svrext.ServerStatusHandler(self._context)) \
+            .put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
+            .put('{command}', svrext.ServerCommandHandler(self._context)) \
             .pop() \
-            .push('log') \
-            .append('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER, size=200)) \
-            .append('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
+            .psh('log') \
+            .put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER, size=200)) \
+            .put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
             .pop() \
-            .append('players', _PlayersHandler(self._context)) \
-            .push('console') \
-            .append('{command}', _ConsoleHandler(self._context)) \
+            .put('players', _PlayersHandler(self._context)) \
+            .psh('console') \
+            .put('{command}', _ConsoleHandler(self._context)) \
             .pop() \
-            .push(self._httpsubs.resource(resource, 'subscriptions')) \
-            .append('{identity}', self._httpsubs.subscriptions_handler('identity'))
+            .psh(self._httpsubs.resource(resource, 'subscriptions')) \
+            .put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await proch.ServerProcess(self._context, self._python) \

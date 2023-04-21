@@ -25,17 +25,17 @@ class SystemService:
         subs = httpsubs.HttpSubscriptionService(context)
         self._resource = httprsc.WebResource()
         httprsc.ResourceBuilder(self._resource) \
-            .append('login', httpext.LoginHandler(context.config('secret'))) \
-            .append('modules', _ModulesHandler()) \
-            .push('system') \
-            .append('info', _SystemInfoHandler()) \
-            .append('shutdown', _ShutdownHandler(self)) \
+            .put('login', httpext.LoginHandler(context.config('secret'))) \
+            .put('modules', _ModulesHandler()) \
+            .psh('system') \
+            .put('info', _SystemInfoHandler()) \
+            .put('shutdown', _ShutdownHandler(self)) \
             .pop() \
-            .push('instances', _InstancesHandler(self)) \
-            .append('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer())) \
+            .psh('instances', _InstancesHandler(self)) \
+            .put('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer())) \
             .pop() \
-            .push(subs.resource(self._resource, 'subscriptions')) \
-            .append('{identity}', subs.subscriptions_handler('identity'))
+            .psh(subs.resource(self._resource, 'subscriptions')) \
+            .put('{identity}', subs.subscriptions_handler('identity'))
         self._instances = self._resource.child('instances')
         context.register(_DeleteInstanceSubscriber(self))
         context.register(_AutoStartsSubscriber(self._context))

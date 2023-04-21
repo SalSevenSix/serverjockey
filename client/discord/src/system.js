@@ -25,8 +25,7 @@ exports.system = function($) {
     result += 'Disk   : ' + util.humanFileSize(info.disk.used);
     result += ' / '       + util.humanFileSize(info.disk.total);
     result += ' ('        + info.disk.percent + '%)\n';
-    result += '```';
-    return result;
+    return result + '```';
   });
 }
 
@@ -46,10 +45,9 @@ exports.instances = function($) {
 
 exports.use = function($) {
   if (!util.checkAdmin($.message, $.context.config.ADMIN_ROLE)) return;
-  if ($.data.length > 0) {
-    $.context.instancesService.useInstance($.data[0]);
-    $.message.channel.send($.context.instancesService.getInstancesText());
-  }
+  if ($.data.length === 0) return;
+  $.context.instancesService.useInstance($.data[0]);
+  $.message.channel.send($.context.instancesService.getInstancesText());
 }
 
 exports.create = function($) {
@@ -68,5 +66,5 @@ exports.shutdown = function($) {
 exports.help = function($) {
   let result = '```\nSYSTEM COMMANDS\n' + $.context.config.CMD_PREFIX;
   result += helpText.help.join('\n' + $.context.config.CMD_PREFIX);
-  $.message.channel.send(result + '```');
+  $.message.channel.send(result + '\n```');
 }

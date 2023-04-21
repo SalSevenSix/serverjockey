@@ -126,12 +126,11 @@ class ServerProcess:
     STATE_STOPPING = 'ServerProcess.Stopping'
     STATE_STOPPED = 'ServerProcess.Stopped'
     STATE_EXCEPTION = 'ServerProcess.Exception'
-    STATE_TIMEOUT = 'ServerProcess.Timeout'   # TODO consider removing this
     STATE_TERMINATED = 'ServerProcess.Terminated'
 
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
-    FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING, STATE_TIMEOUT))
+    FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING))
     FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION, STATE_TERMINATED))
     FILTER_STATE_ALL = msgftr.Or(FILTER_STATES_UP, FILTER_STATES_DOWN)
 
@@ -200,7 +199,6 @@ class ServerProcess:
             rc = self._process.returncode
             if rc is None:  # Zombie process
                 logging.error('Timeout waiting for STARTED but process is still running, killing now')
-                self._mailer.post(self, ServerProcess.STATE_TIMEOUT, self._process)
                 await signals.kill_tree(self._process.pid)
                 self._mailer.post(self, ServerProcess.STATE_TERMINATED, self._process)
             else:  # It's dead Jim
