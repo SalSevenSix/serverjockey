@@ -161,8 +161,7 @@ class Deployment:
                     tracker = None
                     content_length = response.headers.get('Content-Length')
                     if content_length:
-                        tracker = _DownloadTracker(
-                            self._mailer, msg.DEPLOYMENT_MSG, int(content_length), 10)
+                        tracker = _DownloadTracker(self._mailer, msg.DEPLOYMENT_MSG, int(content_length), 10)
                     await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)

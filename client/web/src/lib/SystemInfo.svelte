@@ -7,24 +7,10 @@
 
   let looping = true;
   let info = {
-    version: '0.0.0',
-    uptime: 0,
-    cpu: {
-      percent: 0
-    },
-    memory: {
-      total: 0,
-      used: 0,
-      available: 0,
-      free: 0,
-      percent: 0.0
-    },
-    disk: {
-      total: 0,
-      used: 0,
-      free: 0,
-      percent: 0.0
-    }
+    version: '', uptime: 0, cpu: { percent: 0 },
+    memory: { total: 0, used: 0, available: 0, free: 0, percent: 0.0 },
+    disk: { total: 0, used: 0, free: 0, percent: 0.0 },
+    net: { local: '', public: '' }
   };
 
   async function updateSystemInfo() {
@@ -58,6 +44,8 @@
     <table class="table">
       <tbody>
         <tr><td class="has-text-weight-bold">Version</td><td>{info.version}</td></tr>
+        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
+        <tr><td class="has-text-weight-bold">CPU</td><td>{info.cpu.percent}%</td></tr>
         <tr><td class="has-text-weight-bold">Memory</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.memory.total)}</td></tr>
         <tr><td>Used</td><td>{humanFileSize(info.memory.used)}</td></tr>
@@ -70,13 +58,14 @@
   <div class="column is-one-third">
     <table class="table">
       <tbody>
-        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
-        <tr><td class="has-text-weight-bold">CPU</td><td>{info.cpu.percent}%</td></tr>
         <tr><td class="has-text-weight-bold">Disk</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
         <tr><td>Used</td><td>{humanFileSize(info.disk.used)}</td></tr>
         <tr><td>Available</td><td>{humanFileSize(info.disk.free)}</td></tr>
         <tr><td>Usage</td><td>{info.disk.percent}%</td></tr>
+        <tr><td class="has-text-weight-bold">IPv4</td><td></td></tr>
+        <tr><td>Local</td><td>{info.net.local}</td></tr>
+        <tr><td>Public</td><td>{info.net.public}</td></tr>
       </tbody>
     </table>
   </div>

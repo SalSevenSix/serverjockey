@@ -25,7 +25,8 @@ exports.system = function($) {
     result += 'Disk   : ' + util.humanFileSize(info.disk.used);
     result += ' / '       + util.humanFileSize(info.disk.total);
     result += ' ('        + info.disk.percent + '%)\n';
-    return result + '```';
+    result += 'IPv4   : ' + info.net.local + ' ' + info.net.public;
+    return result + '\n```';
   });
 }
 

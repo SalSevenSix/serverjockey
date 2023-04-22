@@ -23,8 +23,6 @@ class ResourceBuilder:
     def psh(self, signature: str,
             handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
-        if kind is httpabc.ResourceKind.ARG_TAIL:
-            raise Exception('ARG_TAIL resource cannot have children')
         resource = self._current.child(name)
         if resource is None:
             resource = WebResource(name, kind, self._wrap(ikeys, handler))
@@ -96,6 +94,8 @@ class WebResource(httpabc.Resource):
         self._handler = handler
 
     def append(self, resource: httpabc.Resource) -> httpabc.Resource:
+        if self.kind() is httpabc.ResourceKind.ARG_TAIL:
+            raise Exception('ARG_TAIL resource cannot have children')
         if resource.kind().is_arg() and len(self.children(*ARG_KINDS)) > 0:
             raise Exception('Only one ARG kind allowed')
         resource._parent = self

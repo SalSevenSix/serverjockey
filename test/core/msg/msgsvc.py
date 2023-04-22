@@ -47,3 +47,7 @@ async def test_catching():
     await test_messages
     assert message.name() == 'bon'
     await mailer.stop()
+
+
+if __name__ == '__main__':
+    test()
