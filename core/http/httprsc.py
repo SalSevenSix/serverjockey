@@ -133,7 +133,7 @@ class WebResource(httpabc.Resource):
         if len(kinds) == 0:
             return self._children.copy()
         results = []
-        for kind in iter(kinds):
+        for kind in kinds:
             results.extend([c for c in self._children if c.kind() is kind])
         return results
 
@@ -163,9 +163,9 @@ class PathProcessor:
 
     def lookup_resource(self, path: str) -> typing.Optional[httpabc.Resource]:
         found, tail, current = False, False, self._resource
-        for element in iter(PathProcessor._split(path)):
+        for element in PathProcessor._split(path):
             found_path, found_arg = False, False
-            for path_resource in iter(current.children(httpabc.ResourceKind.PATH)):
+            for path_resource in current.children(httpabc.ResourceKind.PATH):
                 if not found_path and element == path_resource.name():
                     found, found_path, current = True, True, path_resource
             if not found_path:
@@ -212,7 +212,7 @@ class PathProcessor:
             data.update({self._resource.name(): '/'.join(path[depth:])})
             path, current = path[:depth], self._resource.parent()
         path.reverse()
-        for element in iter(path):
+        for element in path:
             if current.kind() is httpabc.ResourceKind.ARG_ENCODED:
                 data.update({current.name(): util.urlsafe_b64decode(element)})
             elif current.kind() is httpabc.ResourceKind.ARG:

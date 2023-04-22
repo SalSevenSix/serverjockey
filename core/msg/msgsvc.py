@@ -65,7 +65,7 @@ class TaskMailer(msgabc.Mailer):
 class TaskMulticastMailer(msgabc.MulticastMailer):
 
     def __init__(self, msg_filter: msgabc.Filter = msgftr.AcceptAll()):
-        self._subscriber = _TaskMulticastSubscriber(self, msg_filter)
+        self._subscriber = _TaskMulticastSubscriber(msg_filter)
         self._mailer = TaskMailer(self._subscriber)
 
     def start(self) -> asyncio.Task:
@@ -78,29 +78,31 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
         return self._mailer.post(*vargs)
 
     async def stop(self):
-        expired = self._subscriber.mailers.copy()
+        expired = self._subscriber.mailers()
         await self._mailer.stop()
-        for mailer in iter(expired):
+        for mailer in expired:
             await mailer.stop()  # This may post STOP again, but they will just be ignored
 
 
 class _TaskMulticastSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self, mailer: msgabc.Mailer, msg_filter: msgabc.Filter):
+    def __init__(self, msg_filter: msgabc.Filter):
         super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
-        self.mailer = mailer
-        self.mailers = []
+        self._mailers = []
+
+    def mailers(self) -> tuple:
+        return tuple(self._mailers)
 
     def add_mailer(self, subscriber: msgabc.Subscriber) -> TaskMailer:
         mailer = TaskMailer(subscriber)
-        self.mailers.append(mailer)
+        self._mailers.append(mailer)
         return mailer
 
     def handle(self, message):
         expired = []
-        for mailer in iter(self.mailers):
+        for mailer in self._mailers:
             if not mailer.post(message):
                 expired.append(mailer)
-        for mailer in iter(expired):
-            self.mailers.remove(mailer)
+        for mailer in expired:
+            self._mailers.remove(mailer)
         return None

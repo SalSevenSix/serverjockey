@@ -141,7 +141,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
         if message.name() is _AutoStartsSubscriber.AUTOS:
             self._autos = message.data()
             return None
-        for subcontext in iter(self._autos):
+        for subcontext in self._autos:
             if subcontext.config('auto') == 'daemon':
                 svrsvc.ServerService.signal_daemon(subcontext, self)
             if subcontext.config('auto') == 'start':

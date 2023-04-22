@@ -5,7 +5,6 @@ import base64
 import json
 import time
 import typing
-from collections.abc import Iterable
 # ALLOW NONE
 
 _BASE62_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -49,12 +48,8 @@ def now_millis() -> int:
 def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
     if collection is None or len(collection) == 0:
         return None
-    for item in iter(collection):
+    for item in collection:
         return item
-
-
-def iterable(value: typing.Any) -> bool:
-    return value is not None and isinstance(value, Iterable)
 
 
 def obj_to_str(obj: typing.Any) -> str:

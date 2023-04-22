@@ -111,7 +111,7 @@ async def directory_list_dict(
     if not path.endswith('/'):
         path += '/'
     result = []
-    for name in iter(await _listdir(path)):
+    for name in await _listdir(path):
         file, ftype, size, entry = path + name, 'unknown', -1, {}
         if await _is_symlink(file):
             ftype = 'link'

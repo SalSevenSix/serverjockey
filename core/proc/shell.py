@@ -11,7 +11,7 @@ class Script:
 
     def build(self) -> str:
         text = []
-        for name, lines in iter(self._script.items()):
+        for name, lines in self._script.items():
             text.append('# ' + name)
             if isinstance(lines, (tuple, list)):
                 text.extend(lines)

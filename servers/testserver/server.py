@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 # ALLOW core.*
 from core.util import util, cmdutil, aggtrf
 from core.msg import msgabc, msgext, msgftr
@@ -76,9 +77,9 @@ class _PlayersHandler(httpabc.GetHandler):
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
                 stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=5.0))
         result = []
-        if not util.iterable(response):
+        if response is None or not isinstance(response, Iterable):
             return result
-        for line in iter([m.data() for m in response]):
+        for line in [m.data() for m in response]:
             result.append({'steamid': str(util.now_millis()), 'name': line[1:]})
         return result
 

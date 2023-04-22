@@ -46,7 +46,7 @@ class Context(msgabc.MulticastMailer):
         return self._mailer.post(*vargs)
 
     async def shutdown(self):
-        for subcontext in iter(self.subcontexts()):
+        for subcontext in self.subcontexts():
             await self.destroy_subcontext(subcontext)
         await funcutil.silently_cleanup(self._mailer)
 

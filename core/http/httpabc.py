@@ -26,7 +26,7 @@ class Method(enum.Enum):
     @staticmethod
     def resolve(value: str) -> typing.Optional[Method]:
         value = value.upper()
-        for method in iter(tuple(Method)):
+        for method in tuple(Method):
             if value == method.value:
                 return method
         return None

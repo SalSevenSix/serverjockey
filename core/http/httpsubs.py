@@ -15,7 +15,7 @@ class Selector:
     @staticmethod
     def from_argv(*argv):
         msg_filter, transformer, aggregator, completed_filter = None, None, None, None
-        for arg in iter(argv):
+        for arg in argv:
             if isinstance(arg, Selector):
                 return arg
             if isinstance(arg, msgabc.Filter):

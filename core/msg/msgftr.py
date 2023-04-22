@@ -36,7 +36,7 @@ class And(msgabc.Filter):
         self._msg_filters = tuple(msg_filters)
 
     def accepts(self, message):
-        for msg_filter in iter(self._msg_filters):
+        for msg_filter in self._msg_filters:
             if not msg_filter.accepts(message):
                 return False
         return True
@@ -48,7 +48,7 @@ class Or(msgabc.Filter):
         self._msg_filters = tuple(msg_filters)
 
     def accepts(self, message):
-        for msg_filter in iter(self._msg_filters):
+        for msg_filter in self._msg_filters:
             if msg_filter.accepts(message):
                 return True
         return False

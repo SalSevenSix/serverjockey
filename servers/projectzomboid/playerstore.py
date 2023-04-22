@@ -1,4 +1,5 @@
 import typing
+from collections.abc import Iterable
 # ALLOW core.* projectzomboid.messaging
 from core.util import util
 from core.msg import msgabc, msgext, msgftr
@@ -60,9 +61,9 @@ class OptionLoader:
                 start_filter=msgftr.DataStrContains('List of Server Options:'), include_start=False,
                 stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True, timeout=10.0))
         options = []
-        if not util.iterable(response):
+        if response is None or not isinstance(response, Iterable):
             return options
-        for line in iter([m.data() for m in response]):
+        for line in [m.data() for m in response]:
             if line.startswith('* '):
                 option, value = line[2:].split('=')
                 options.append(Option(option, value))
@@ -88,10 +89,10 @@ class PlayerLoader:
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
                 stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=10.0))
         players = []
-        if not util.iterable(response):
+        if response is None or not isinstance(response, Iterable):
             return players
         playerstore = await PlayerStoreService.get(self._mailer, self._source)
-        for line in iter([m.data() for m in response]):
+        for line in [m.data() for m in response]:
             if line.startswith('-'):
                 name = line[1:]
                 steamid = playerstore.find_steamid(name)
@@ -119,7 +120,7 @@ class PlayerStore:
             self._data.update({player.steamid(): [player.name()]})
 
     def find_steamid(self, name: str) -> typing.Optional[str]:
-        for steamid, names in iter(self._data.items()):
+        for steamid, names in self._data.items():
             if name in names:
                 return steamid
         return None

@@ -23,7 +23,7 @@ class CommandLine:
     def build_list(self, args: typing.Optional[dict] = None) -> list:
         args = {**self._args, **args} if args else self._args
         cmdline = []
-        for part in iter(self._command):
+        for part in self._command:
             if isinstance(part, (str, int, float)):
                 part_str = str(part)
                 if util.is_format(part_str):
@@ -31,7 +31,7 @@ class CommandLine:
                 else:
                     cmdline.append(part_str)
             elif isinstance(part, dict):
-                for arg_key, arg_format in iter(part.items()):
+                for arg_key, arg_format in part.items():
                     arg_format = str(arg_format).replace('%s', '{}')
                     if util.is_format(arg_format):
                         value = util.get(arg_key, args)
