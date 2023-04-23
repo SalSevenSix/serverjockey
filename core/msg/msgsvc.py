@@ -51,7 +51,7 @@ class TaskMailer(msgabc.Mailer):
             result = None
             message = await self._queue.get()
             if (message is not msgabc.STOP) or (message is msgabc.STOP and self._subscriber.accepts(msgabc.STOP)):
-                result = await msgabc.try_handle('TaskMailer', self._subscriber, message)
+                result = await msgabc.try_handle(self._subscriber, message)
             if result is not None or message is msgabc.STOP:
                 running = False
                 if result is None:

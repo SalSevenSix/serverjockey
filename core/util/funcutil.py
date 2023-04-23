@@ -48,4 +48,4 @@ async def silently_call(invokable: typing.Callable):
         else:
             invokable()
     except Exception as e:
-        logging.debug('silently_call failed: ' + repr(e))
+        logging.debug('silently_call() ' + repr(e))

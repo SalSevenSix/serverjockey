@@ -1,7 +1,7 @@
 # ALLOW core.*
 from core.util import io
 from core.context import contextsvc
-from core.proc import procabc, proch
+from core.proc import proch, prcenc, prcext
 
 
 class Deployment:
@@ -16,12 +16,12 @@ class Deployment:
         self._logs_dir = self._world_dir + '/ServerLogs'
 
     async def initialise(self):
-        self._wrapper = await procabc.unpack_wrapper(self._home_dir)
+        self._wrapper = await prcext.unpack_wrapper(self._home_dir)
         await self.build_world()
 
     def new_server_process(self) -> proch.ServerProcess:
         return proch.ServerProcess(self._mailer, self._python) \
-            .use_out_decoder(procabc.PtyLineDecoder()) \
+            .use_out_decoder(prcenc.PtyLineDecoder()) \
             .append_arg(self._wrapper) \
             .append_arg(self._executable)
 

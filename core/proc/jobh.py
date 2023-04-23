@@ -1,10 +1,10 @@
 import typing
 import asyncio
 from asyncio import subprocess
-# ALLOW util.* msg.* context.* proc.procabc
+# ALLOW util.* msg.* context.* proc.prcenc proc.prcprd
 from core.util import util, funcutil
 from core.msg import msgabc, msgext, msgftr
-from core.proc import procabc
+from core.proc import prcprd
 
 
 class JobProcess(msgabc.AbcSubscriber):
@@ -48,7 +48,7 @@ class JobProcess(msgabc.AbcSubscriber):
         source, command = message.source(), message.data()
         if isinstance(command, dict):
             command = util.get('command', command, util.get('script', command))
-        if not (isinstance(command, str) or util.iterable(command)):
+        if not isinstance(command, (str, tuple, list)):
             self._mailer.post(source, JobProcess.STATE_EXCEPTION, Exception('Invalid job request'), message)
             return None
         stderr, stdout, replied = None, None, False
@@ -61,8 +61,8 @@ class JobProcess(msgabc.AbcSubscriber):
                 process = await asyncio.create_subprocess_exec(
                     command[0], *command[1:],
                     stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = procabc.PipeOutLineProducer(self._mailer, source, JobProcess.STDERR_LINE, process.stderr)
-            stdout = procabc.PipeOutLineProducer(self._mailer, source, JobProcess.STDOUT_LINE, process.stdout)
+            stderr = prcprd.PipeOutLineProducer(self._mailer, source, JobProcess.STDERR_LINE, process.stderr)
+            stdout = prcprd.PipeOutLineProducer(self._mailer, source, JobProcess.STDOUT_LINE, process.stdout)
             replied = self._mailer.post(source, JobProcess.STATE_STARTED, process, message)
             rc = await process.wait()
             if rc != 0:

@@ -1,45 +1,16 @@
-import abc
 import logging
 import typing
 from asyncio import streams
-# ALLOW util.* msg.* context.*
-from core.util import funcutil, io, pkg
+# ALLOW util.* msg.* context.* proc.prcenc
+from core.util import funcutil
 from core.msg import msgabc, msgext
-
-
-async def unpack_wrapper(path: str):
-    filename = path + '/wrapper.py'
-    data = await pkg.pkg_load('core.proc', 'wrapper.py')
-    await io.write_file(filename, data)
-    return filename
-
-
-class LineDecoder(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def decode(self, line: bytes) -> str:
-        pass
-
-
-class DefaultLineDecoder(LineDecoder):
-
-    def decode(self, line: bytes) -> str:
-        return line.decode().strip()
-
-
-class PtyLineDecoder(LineDecoder):
-
-    def decode(self, line: bytes) -> str:
-        result = line.decode().strip()
-        result = result.replace('\x1b[37m', '')  # TODO need a more generic cleanup
-        result = result.replace('\x1b[31m', '')
-        result = result.replace('\x1b[6n', '')
-        return result
+from core.proc import prcenc
 
 
 class PipeOutLineProducer(msgabc.Producer):
 
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str,
-                 pipe: streams.StreamReader, decoder: LineDecoder = DefaultLineDecoder()):
+                 pipe: streams.StreamReader, decoder: prcenc.LineDecoder = prcenc.DefaultLineDecoder()):
         self._source = source
         self._name = name
         self._pipe = pipe

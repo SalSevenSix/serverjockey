@@ -3,10 +3,10 @@ import logging
 import typing
 import asyncio
 from asyncio import streams
-# ALLOW util.* msg.* context.* proc.procabc
+# ALLOW util.* msg.* context.* proc.prcenc proc.prcprd
 from core.util import signals, cmdutil, funcutil
 from core.msg import msgabc, msgext, msgftr
-from core.proc import procabc
+from core.proc import prcenc, prcprd
 
 
 class _PipeInLineCommand:
@@ -137,7 +137,7 @@ class ServerProcess:
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
-        self._out_decoder = procabc.DefaultLineDecoder()
+        self._out_decoder = prcenc.DefaultLineDecoder()
         self._env = None
         self._process = None
         self._pipeinsvc = None
@@ -151,7 +151,7 @@ class ServerProcess:
         self._pipeinsvc = pipeinsvc
         return self
 
-    def use_out_decoder(self, line_decoder: procabc.LineDecoder) -> ServerProcess:
+    def use_out_decoder(self, line_decoder: prcenc.LineDecoder) -> ServerProcess:
         self._out_decoder = line_decoder
         return self
 
@@ -176,9 +176,9 @@ class ServerProcess:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 env=self._env)
-            stderr = procabc.PipeOutLineProducer(
+            stderr = prcprd.PipeOutLineProducer(
                 self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
-            stdout = procabc.PipeOutLineProducer(
+            stdout = prcprd.PipeOutLineProducer(
                 self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout, self._out_decoder)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
             if not self._pipeinsvc:

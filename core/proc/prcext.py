@@ -2,11 +2,18 @@ import typing
 import asyncio
 from asyncio import subprocess
 # ALLOW util.* msg.* context.* http.* system.* proc.* EXCEPT proc.wrapper
-from core.util import cmdutil, util, signals
+from core.util import cmdutil, util, signals, io, pkg
 from core.msg import msgabc, msgext
 from core.http import httpabc
 from core.system import svrsvc
 from core.proc import proch
+
+
+async def unpack_wrapper(path: str):
+    filename = path + '/wrapper.py'
+    data = await pkg.pkg_load('core.proc', 'wrapper.py')
+    await io.write_file(filename, data)
+    return filename
 
 
 class ServerStateSubscriber(msgabc.AbcSubscriber):

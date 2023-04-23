@@ -104,13 +104,13 @@ class AbcSubscriber(Subscriber):
         raise NotImplemented()
 
 
-async def try_handle(source: str, handler: Handler, message: Message) -> typing.Any:
+async def try_handle(handler: Handler, message: Message) -> typing.Any:
     try:
         if inspect.iscoroutinefunction(handler.handle):
             result = await handler.handle(message)
         else:
             result = handler.handle(message)
     except Exception as e:
-        logging.error('%s handling exception. raised: %s', source, e)
+        logging.error('try_handle() ' + repr(e))
         result = e
     return result

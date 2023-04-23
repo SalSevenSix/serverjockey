@@ -163,7 +163,7 @@ class SyncWrapper(msgabc.AbcSubscriber):
         source = message.source()
         self._mailer.post(source, SyncWrapper.START, True,
                           message if self._reply is SyncReply.AT_START else None)
-        result = await msgabc.try_handle('MonitorSubscriber', self._delegate, message)
+        result = await msgabc.try_handle(self._delegate, message)
         self._mailer.post(source, SyncWrapper.END, True if result is None else result,
                           message if self._reply is SyncReply.AT_END else None)
         return result

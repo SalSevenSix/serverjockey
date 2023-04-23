@@ -2,6 +2,7 @@ from __future__ import annotations
 import typing
 # ALLOW util.*
 from core.util import util
+# TODO is there a better way to do this?
 
 
 class CommandLine:

@@ -30,8 +30,7 @@ def generate_token(length: int) -> str:
 
 
 def is_format(text: str) -> bool:
-    open_index = text.count('{')
-    close_index = text.count('}')
+    open_index, close_index = text.count('{'), text.count('}')
     if open_index == 0 and close_index == 0:
         return False
     return open_index == close_index
@@ -83,7 +82,7 @@ def obj_to_json(obj: typing.Any, pretty: bool = False) -> typing.Optional[str]:
             return json.dumps(obj, cls=encoder, indent=2, separators=(',', ': '))
         return json.dumps(obj, cls=encoder)
     except Exception as e:
-        logging.warning('Not serializable to JSON. raised: %s', e)
+        logging.warning('Not serializable to JSON. raised: %s', repr(e))
         return None
 
 
@@ -91,7 +90,7 @@ def json_to_dict(text: str) -> typing.Optional[dict]:
     try:
         return json.loads(text)
     except Exception as e:
-        logging.warning('Text is not valid JSON. raised: %s', e)
+        logging.warning('Text is not valid JSON. raised: %s', repr(e))
         return None
 
 
@@ -106,11 +105,7 @@ def urlsafe_b64decode(value: str) -> str:
     return str(value, 'utf-8')
 
 
-def build_url(
-        scheme: str = 'http',
-        host: str = 'localhost',
-        port: int = 80,
-        path: typing.Optional[str] = None) -> str:
+def build_url(scheme: str = 'http', host: str = 'localhost', port: int = 80, path: str = '') -> str:
     parts = [scheme, '://', host]
     if port != 80:
         parts.append(':')
@@ -123,23 +118,23 @@ def build_url(
 
 
 def get(key: typing.Any, dictionary: dict, default: typing.Any = None):
-    if key and dictionary and isinstance(dictionary, dict) and key in dictionary:
+    if key and dictionary and key in dictionary:
         return dictionary[key]
     return default
 
 
-def left_chop_and_strip(line: str, keyword: str) -> str:
-    index = line.find(keyword)
+def left_chop_and_strip(value: str, keyword: str) -> str:
+    index = value.find(keyword)
     if index == -1:
-        return line
-    return line[index + len(keyword):].strip()
+        return value
+    return value[index + len(keyword):].strip()
 
 
-def right_chop_and_strip(line: str, keyword: str) -> str:
-    index = line.find(keyword)
+def right_chop_and_strip(value: str, keyword: str) -> str:
+    index = value.find(keyword)
     if index == -1:
-        return line
-    return line[:index].strip()
+        return value
+    return value[:index].strip()
 
 
 def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
