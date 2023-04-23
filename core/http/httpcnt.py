@@ -37,6 +37,7 @@ def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
 
 
 class ContentTypeImpl(httpabc.ContentType):
+
     def __init__(self, content_type: str):
         self._content_type = content_type
         self._mime_type, self._encoding = ContentTypeImpl._parse(content_type)

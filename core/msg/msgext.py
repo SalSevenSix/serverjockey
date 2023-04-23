@@ -14,12 +14,12 @@ class SynchronousMessenger:
     def __init__(self, mailer: msgabc.MulticastMailer,
                  timeout: typing.Optional[float] = None,
                  catcher: typing.Optional[msgabc.Catcher] = None):
+        assert not (timeout and catcher)
         self._mailer = mailer
         self._timeout = timeout
         self._catcher = catcher
 
     async def request(self, *vargs) -> typing.Union[None, msgabc.Message, typing.Collection[msgabc.Message]]:
-        assert not (self._catcher and self._timeout)
         message = msgabc.Message.from_vargs(*vargs)
         catcher = self._catcher if self._catcher else SingleCatcher(msgftr.ReplyToIs(message), self._timeout)
         self._mailer.register(catcher)
@@ -115,8 +115,7 @@ class SingleCatcher(msgabc.Catcher):
 
 
 class Publisher:
-    START = 'Publisher.Start'
-    END = 'Publisher.End'
+    START, END = 'Publisher.Start', 'Publisher.End'
 
     def __init__(self, mailer: msgabc.Mailer, producer: msgabc.Producer):
         self._mailer = mailer
@@ -147,8 +146,7 @@ class SyncReply(enum.Enum):
 
 
 class SyncWrapper(msgabc.AbcSubscriber):
-    START = 'SyncWrapper.Start'
-    END = 'SyncWrapper.End'
+    START, END = 'SyncWrapper.Start', 'SyncWrapper.End'
 
     def __init__(self,
                  mailer: msgabc.Mailer,

@@ -36,8 +36,8 @@ def is_format(text: str) -> bool:
     return open_index == close_index
 
 
-def to_millis(value: float) -> int:
-    return int(value * 1000.0) + 1
+def to_millis(seconds: float) -> int:
+    return int(seconds * 1000.0) + 1
 
 
 def now_millis() -> int:

@@ -69,8 +69,8 @@ systemctl start serverjockey
 
 
 %changelog
-* Sun Dec 04 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.7
-- Feature release v0.0.7
+* Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.7
+- Added CLI client
 * Sat Dec 03 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.6
 - Small features and added docker distro
 * Fri Oct 14 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.5

@@ -132,8 +132,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
             msgftr.NameIs(_AutoStartsSubscriber.AUTOS),
-            msgftr.NameIs(httpcnt.RESOURCES_READY)
-        ))
+            msgftr.NameIs(httpcnt.RESOURCES_READY)))
         self._mailer = mailer
         self._autos = []
 
@@ -164,7 +163,7 @@ class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
 class _ModulesHandler(httpabc.GetHandler):
 
     def handle_get(self, resource, data):
-        return ['projectzomboid', 'factorio', 'sevendaystodie', 'unturned']
+        return 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned'
 
 
 class _InstanceHandler(httpabc.GetHandler):

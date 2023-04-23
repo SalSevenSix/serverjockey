@@ -47,18 +47,21 @@ STOP = Message(Message, 'msgabc.STOP')
 
 
 class Transformer(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def transform(self, message: Message) -> typing.Any:
         pass
 
 
 class Filter(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def accepts(self, message: Message) -> bool:
         pass
 
 
 class Handler(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     async def handle(self, message: Message) -> typing.Any:
         pass
@@ -69,24 +72,28 @@ class Subscriber(Filter, Handler, metaclass=abc.ABCMeta):
 
 
 class Mailer(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def post(self, *vargs) -> bool:
         pass
 
 
 class MulticastMailer(Mailer, metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def register(self, subscriber: Subscriber) -> asyncio.Task:
         pass
 
 
 class Catcher(Subscriber, metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     async def get(self) -> typing.Union[None, Message, typing.Collection[Message]]:
         pass
 
 
 class Producer(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     async def next_message(self) -> typing.Optional[Message]:
         pass

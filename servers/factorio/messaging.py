@@ -68,9 +68,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    JOIN = '[JOIN]'
+    JOIN, LEAVE = '[JOIN]', '[LEAVE]'
     JOIN_FILTER = msgftr.DataStrContains(JOIN)
-    LEAVE = '[LEAVE]'
     LEAVE_FILTER = msgftr.DataStrContains(LEAVE)
 
     def __init__(self, mailer: msgabc.MulticastMailer):

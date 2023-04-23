@@ -29,8 +29,7 @@ def initialise(mailer: msgabc.MulticastMailer):
 # \x1b[?1h\x1b=\x1b[6n\x1b[H\x1b[2J\x1b]0;Unturned\x07\x1b[37mGame version: 3.22.19.4 Engine version: 2020.3.38f1
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_PREFIX = 'Game version:'
-    VERSION_SUFFIX = 'Engine version:'
+    VERSION_PREFIX, VERSION_SUFFIX = 'Game version:', 'Engine version:'
     VERSION_FILTER = msgftr.DataMatches('.*' + VERSION_PREFIX + '.*' + VERSION_SUFFIX + '.*')
 
     def __init__(self, mailer: msgabc.MulticastMailer):
@@ -52,8 +51,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # \x1b[37mDisconnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    NAME = 'Name:'
-    CHARACTER = 'Character:'
+    NAME, CHARACTER = 'Name:', 'Character:'
     LOGIN_FILTER = msgftr.DataMatches('.*Connecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
     LOGOUT_FILTER = msgftr.DataMatches('.*Disconnecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
 

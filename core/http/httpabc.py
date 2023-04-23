@@ -10,6 +10,7 @@ from core.util import io
 
 
 class HttpServiceCallbacks(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     async def initialise(self) -> Resource:
         pass
@@ -19,9 +20,7 @@ class HttpServiceCallbacks(metaclass=abc.ABCMeta):
 
 
 class Method(enum.Enum):
-    OPTIONS = 'OPTIONS'
-    GET = 'GET'
-    POST = 'POST'
+    OPTIONS, GET, POST = 'OPTIONS', 'GET', 'POST'
 
     @staticmethod
     def resolve(value: str) -> typing.Optional[Method]:
@@ -75,6 +74,7 @@ class ContentType(metaclass=abc.ABCMeta):
 
 
 class ByteStream(io.Readable, metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def name(self) -> str:
         pass
@@ -94,6 +94,7 @@ ABC_RESPONSE = typing.Union[dict, tuple, list, str, ByteStream, we.HTTPException
 
 
 class AllowMethod(metaclass=abc.ABCMeta):
+
     @staticmethod
     def call(method: Method, handler: typing.Optional[ABC_HANDLER]) -> bool:
         if handler is None:
@@ -159,6 +160,7 @@ class Resource(AllowMethod, metaclass=abc.ABCMeta):
 
 
 class GetHandler(metaclass=abc.ABCMeta):
+
     @staticmethod
     async def call(handler: GetHandler, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
         if inspect.iscoroutinefunction(handler.handle_get):
@@ -172,6 +174,7 @@ class GetHandler(metaclass=abc.ABCMeta):
 
 
 class PostHandler(metaclass=abc.ABCMeta):
+
     @staticmethod
     async def call(handler: PostHandler, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
         if inspect.iscoroutinefunction(handler.handle_post):

@@ -3,6 +3,7 @@ import abc
 
 
 class LineDecoder(metaclass=abc.ABCMeta):
+
     @abc.abstractmethod
     def decode(self, line: bytes) -> str:
         pass
