@@ -1,6 +1,6 @@
 'use strict';
 
-function loadConfig() {
+function initialise() {
   let config = {};
   for (let i = 2; i < process.argv.length; i++) {
     config = { ...config, ...require(process.argv[i]) };
@@ -9,6 +9,8 @@ function loadConfig() {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.')
     process.exit(1)
   }
+  logger.info('*** START ServerLink Bot ***');
+  logger.info('Version: 0.0.7');
   logger.info('Initialised with config...');
   logger.raw(config);
   return config;
@@ -82,9 +84,7 @@ const system = require('./src/system.js');
 const instances = require('./src/instances.js');
 
 const context = { running: false };
-context.config = loadConfig();
-logger.info('*** START ServerLink Bot ***');
-logger.info('Version: 0.0.7');
+context.config = initialise();
 context.controller = new AbortController();
 context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);

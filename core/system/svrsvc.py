@@ -141,10 +141,10 @@ class ServerService(msgabc.AbcSubscriber):
 
 
 class ServerStatus(msgabc.AbcSubscriber):
+    _READY = 'READY'
     UPDATED = 'ServerStatus.Updated'
     UPDATED_FILTER = msgftr.NameIs(UPDATED)
-    REQUEST = 'ServerStatus.Request'
-    RESPONSE = 'ServerStatus.Response'
+    REQUEST, RESPONSE = 'ServerStatus.Request', 'ServerStatus.Response'
     NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'
     NOTIFY_STATE = 'ServerStatus.NotifyState'
     NOTIFY_DETAILS = 'ServerStatus.NotifyDetails'
@@ -171,12 +171,11 @@ class ServerStatus(msgabc.AbcSubscriber):
         super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,
                                         ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
         self._context = context
-        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': 'READY', 'details': {}}
+        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': ServerStatus._READY, 'details': {}}
         self._running_millis = 0
 
     async def handle(self, message):
-        action = message.name()
-        updated = False
+        action, updated = message.name(), False
         if action is ServerStatus.REQUEST:
             self._context.post(self, ServerStatus.RESPONSE, self._prep_status(), message)
         elif action is ServerStatus.NOTIFY_RUNNING:
@@ -190,7 +189,10 @@ class ServerStatus(msgabc.AbcSubscriber):
                     self._running_millis = 0
                 updated = True
         elif action is ServerStatus.NOTIFY_STATE:
-            self._status['state'] = message.data()
+            state = message.data()
+            self._status['state'] = state
+            if state == ServerStatus._READY:
+                self._status['details'] = {}
             updated = True
         elif action is ServerStatus.NOTIFY_DETAILS:
             if isinstance(message.data(), dict):
