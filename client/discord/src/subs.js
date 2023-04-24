@@ -14,13 +14,16 @@ exports.Helper = class Helper {
   async daemon(subscribeUrl, dataHandler) {
     let context = this.#context;
     let url = null;
+    let counter = 0;
     while (context.running && url == null) {
       while (context.running && url == null) {
         url = await this.subscribe(subscribeUrl, function(pollUrl) {
           logger.info(subscribeUrl + ' => ' + pollUrl);
         });
-        if (context.running && url == null) {
-          await util.sleep(12000);
+        counter = 60;
+        while (context.running && url == null) {
+          await util.sleep(200);
+          counter -= 1;
         }
       }
       if (context.running && url != null && url != false) {
