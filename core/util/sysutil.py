@@ -3,36 +3,59 @@ import shutil
 import asyncio
 import aiohttp
 # ALLOW util.*
-from core.util import __version__, funcutil, shellutil
+from core.util import __version__, util, io, funcutil, shellutil
 
+# TODO utils probably should not cache or hold statefulness
+CACHE = {}
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
 # _virtual_memory = funcutil.to_async(psutil.virtual_memory)
 # _cpu_percent = funcutil.to_async(psutil.cpu_percent)
 
 
+async def get_os_name() -> str:
+    result = util.get('os_name', CACHE)
+    if result:
+        return result
+    file = '/etc/os-release'
+    # noinspection PyBroadException
+    try:
+        if await io.file_exists(file):
+            data = await io.read_file(file)
+            for line in data.split('\n'):
+                if line.startswith('PRETTY_NAME="'):
+                    CACHE['os_name'] = line[13:-1]
+                    return CACHE['os_name']
+    except Exception as e:
+        logging.error('get_os_name() failed %s', repr(e))
+    CACHE['os_name'] = 'UNKNOWN'
+    return CACHE['os_name']
+
+
 async def get_local_ip() -> str:
-    if NET.local_ip:
-        return NET.local_ip
+    result = util.get('local_ip', CACHE)
+    if result:
+        return result
     # noinspection PyBroadException
     try:
         result = await shellutil.run_script('hostname -I')
-        NET.local_ip = result.strip().split()[0]
-        return NET.local_ip
+        CACHE['local_ip'] = result.strip().split()[0]
+        return CACHE['local_ip']
     except Exception as e:
         logging.error('get_local_ip() failed %s', repr(e))
     return 'localhost'
 
 
 async def get_public_ip() -> str:
-    if NET.public_ip:
-        return NET.public_ip
+    result = util.get('public_ip', CACHE)
+    if result:
+        return result
     for url in ('https://api.ipify.org', 'https://ip4.seeip.org'):
-        NET.public_ip = await _fetch_text(url)
-        if NET.public_ip:
-            return NET.public_ip
-    NET.public_ip = 'UNAVAILABLE'
-    return NET.public_ip
+        CACHE['public_ip'] = await _fetch_text(url)
+        if CACHE['public_ip']:
+            return CACHE['public_ip']
+    CACHE['public_ip'] = 'UNAVAILABLE'
+    return CACHE['public_ip']
 
 
 async def _fetch_text(url: str) -> str | None:
@@ -76,10 +99,11 @@ def system_version() -> str:
 
 
 async def system_info() -> dict:
-    cpu, memory, disk, local_ip, public_ip = await asyncio.gather(
-        _cpu_percent(), _virtual_memory(), _disk_usage('/'), get_local_ip(), get_public_ip())
+    os_name, cpu, memory, disk, local_ip, public_ip = await asyncio.gather(
+        get_os_name(), _cpu_percent(), _virtual_memory(), _disk_usage('/'), get_local_ip(), get_public_ip())
     return {
         'version': system_version(),
+        'os': os_name,
         'cpu': {
             'percent': cpu
         },
@@ -101,12 +125,3 @@ async def system_info() -> dict:
             'public': public_ip
         }
     }
-
-
-# TODO utils probably should not cache or hold statefulness
-class NetCache:
-    def __init__(self):
-        self.local_ip, self.public_ip = '', ''
-
-
-NET = NetCache()

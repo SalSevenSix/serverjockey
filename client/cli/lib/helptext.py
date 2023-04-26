@@ -9,7 +9,7 @@ example:
 commands:
   showtoken         | Show webapp url and login token
   system            | Show system information
-  report            | Generate report on all instances
+  report            | Show report on all instances
   modules           | List the modules (supported game servers)
   instances         | List the instances (game servers)
   use:<instance>    | Set the current <instance> to use

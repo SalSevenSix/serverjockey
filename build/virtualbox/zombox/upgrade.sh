@@ -8,10 +8,10 @@ fi
 
 echo "Upgrading ServerJockey"
 rm sjgms.deb > /dev/null 2>&1
-wget -O sjgms.deb https://4sas.short.gy/sjgms-deb-latest
+wget --version > /dev/null 2>&1 || apt -y install wget
+wget -q -O sjgms.deb https://4sas.short.gy/sjgms-deb-latest
 [ $? -eq 0 ] || exit 1
-[ -f sjgms.deb ] || exit 1
-apt install ./sjgms.deb
+apt -y install ./sjgms.deb
 [ $? -eq 0 ] || exit 1
 rm sjgms.deb > /dev/null 2>&1
 echo "Upgrade complete"

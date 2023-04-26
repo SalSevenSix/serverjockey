@@ -7,7 +7,7 @@
 
   let looping = true;
   let info = {
-    version: '', uptime: 0, cpu: { percent: 0 },
+    version: '', os: '', uptime: 0, cpu: { percent: 0 },
     memory: { total: 0, used: 0, available: 0, free: 0, percent: 0.0 },
     disk: { total: 0, used: 0, free: 0, percent: 0.0 },
     net: { local: '', public: '' }
@@ -44,7 +44,7 @@
     <table class="table">
       <tbody>
         <tr><td class="has-text-weight-bold">Version</td><td>{info.version}</td></tr>
-        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
+        <tr><td class="has-text-weight-bold">OS</td><td>{info.os}</td></tr>
         <tr><td class="has-text-weight-bold">CPU</td><td>{info.cpu.percent}%</td></tr>
         <tr><td class="has-text-weight-bold">Memory</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.memory.total)}</td></tr>
@@ -58,6 +58,7 @@
   <div class="column is-one-third">
     <table class="table">
       <tbody>
+        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
         <tr><td class="has-text-weight-bold">Disk</td><td></td></tr>
         <tr><td>Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
         <tr><td>Used</td><td>{humanFileSize(info.disk.used)}</td></tr>
