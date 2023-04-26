@@ -5,29 +5,21 @@ from core.http import httpabc, httprsc
 from core.proc import prcext
 from core.common import interceptors
 
+_COMMANDS = cmdutil.CommandLines({'send': '{line}'})
+
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r = httprsc.ResourceBuilder(resource)
     r.reg('s', interceptors.block_not_started(mailer))
     r.psh('console')
     r.put('help', _ConsoleHelpHandler())
-    r.put('{command}', _ConsoleCommandHandler(mailer), 's')
-
-
-class _ConsoleCommandHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({'send': '{line}'})
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _ConsoleCommandHandler.COMMANDS)
-
-    async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, data)
+    r.put('{command}', prcext.ConsoleCommandHandler(mailer, _COMMANDS), 's')
 
 
 class _ConsoleHelpHandler(httpabc.GetHandler):
 
     def handle_get(self, resource, data):
-        return """UNTURNED CONSOLE COMMANDS
+        return '''UNTURNED CONSOLE COMMANDS
 Admin [SteamID | Player]
 Admins
 Airdrop
@@ -89,4 +81,4 @@ Votify [Vote Allowed Y/N]/[Pass Cooldown]/[Fail Cooldown]/[Vote Duration]/[Vote 
 Weather [None | Disable | Storm | Blizzard | GUID]
 Welcome [Text]/[R]/[G]/[B]
 Whitelisted
-"""
+'''

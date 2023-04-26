@@ -31,18 +31,17 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class PipeInLineNoContentPostHandler(httpabc.PostHandler):
+class ConsoleCommandHandler(httpabc.PostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any, commands: cmdutil.CommandLines):
+    def __init__(self, mailer: msgabc.MulticastMailer, commands: cmdutil.CommandLines):
         self._mailer = mailer
-        self._source = source
         self._commands = commands
 
     async def handle_post(self, resource, data):
         cmdline = self._commands.get(data)
         if not cmdline:
             return httpabc.ResponseBody.BAD_REQUEST
-        await proch.PipeInLineService.request(self._mailer, self._source, cmdline.build())
+        await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
         return httpabc.ResponseBody.NO_CONTENT
 
 

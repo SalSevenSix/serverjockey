@@ -6,47 +6,82 @@ from core.proc import proch, prcext
 from core.common import interceptors
 from servers.projectzomboid import playerstore as pls
 
+_OPTIONS_RELOAD = cmdutil.CommandLines({'reload': 'reloadoptions'})
+_WORLD = cmdutil.CommandLines({
+    'broadcast': 'servermsg "{message}"',
+    'save': 'save',
+    'chopper': 'chopper',
+    'gunshot': 'gunshot',
+    'start-storm': 'startstorm',
+    'stop-weather': 'stopweather',
+    'start-rain': 'startrain',
+    'stop-rain': 'stoprain'})
+_PLAYER = cmdutil.CommandLines({
+    'set-access-level': 'setaccesslevel "{player}" "{level}"',
+    'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],
+    'give-xp': 'addxp "{player}" {skill}={xp}',
+    'spawn-vehicle': 'addvehicle "{module}.{item}" "{player}"',
+    'spawn-horde': 'createhorde {count} "{player}"',
+    'tele-to': 'teleport "{player}" "{toplayer}"',
+    'tele-at': 'teleportto "{player}" {location}',
+    # 'gunshot': 'gunshot "{player}"',   Doesn't seem to work yet
+    'lightning': 'lightning "{player}"',
+    'thunder': 'thunder "{player}"',
+    'kick': ['kickuser "{player}"', {'reason': '-r "{}"'}]})
+_WHITELIST = cmdutil.CommandLines({
+    'add': 'adduser "{player}" "{password}"',
+    'remove': 'removeuserfromwhitelist "{player}"'})
+_BANLIST = cmdutil.CommandLines({
+    'add-player': ['banuser "{player}"', {'ip': '-ip', 'reason': '-r "{}"'}],
+    'remove-player': 'unbanuser "{player}"',
+    'add-id': 'banid {steamid}',
+    'remove-id': 'unbanid {steamid}'})
+
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r = httprsc.ResourceBuilder(resource)
     r.reg('s', interceptors.block_not_started(mailer))
     r.psh('world')
-    r.put('{command}', _WorldCommandHandler(mailer), 's')
+    r.put('{command}', prcext.ConsoleCommandHandler(mailer, _WORLD), 's')
     r.pop()
     r.psh('config')
     r.psh('options', _OptionsHandler(mailer), 's')
-    r.put('reload', _OptionsReloadHandler(mailer), 's')
+    r.put('reload', prcext.ConsoleCommandHandler(mailer, _OPTIONS_RELOAD), 's')
     r.psh('x{option}')
     r.put('{command}', _OptionCommandHandler(mailer), 's')
     r.pop().pop().pop()
-    r.put('steamids', _SteamidsHandler(mailer))
+    r.put('steamids', _SteamIdsHandler(mailer))
     r.psh('players', _PlayersHandler(mailer))
     r.psh('x{player}')
-    r.put('{command}', _PlayerCommandHandler(mailer), 's')
+    r.put('{command}', prcext.ConsoleCommandHandler(mailer, _PLAYER), 's')
     r.pop().pop()
     r.psh('whitelist')
-    r.put('{command}', _WhitelistCommandHandler(mailer), 's')
+    r.put('{command}', prcext.ConsoleCommandHandler(mailer, _WHITELIST), 's')
     r.pop()
     r.psh('banlist')
-    r.put('{command}', _BanlistCommandHandler(mailer), 's')
+    r.put('{command}', prcext.ConsoleCommandHandler(mailer, _BANLIST), 's')
 
 
-class _WorldCommandHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({
-        'broadcast': 'servermsg "{message}"',
-        'save': 'save',
-        'chopper': 'chopper',
-        'gunshot': 'gunshot',
-        'start-storm': 'startstorm',
-        'stop-weather': 'stopweather',
-        'start-rain': 'startrain',
-        'stop-rain': 'stoprain'})
+class _SteamIdsHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _WorldCommandHandler.COMMANDS)
+        self._mailer = mailer
 
-    async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, data)
+    async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        result = await pls.PlayerStoreService.get(self._mailer, self)
+        return result.asdict()
+
+
+class _PlayersHandler(httpabc.GetHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+
+    async def handle_get(self, resource, data):
+        players = await pls.PlayerLoader(self._mailer, self).all()
+        return [o.asdict() for o in players]
 
 
 class _OptionsHandler(httpabc.GetHandler):
@@ -57,16 +92,6 @@ class _OptionsHandler(httpabc.GetHandler):
     async def handle_get(self, resource, data):
         options = await pls.OptionLoader(self._mailer, self).all()
         return [o.asdict() for o in options]
-
-
-class _OptionsReloadHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({'reload': 'reloadoptions'})
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _OptionsReloadHandler.COMMANDS)
-
-    async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, {'command': resource.name()})
 
 
 class _OptionCommandHandler(httpabc.PostHandler):
@@ -83,76 +108,3 @@ class _OptionCommandHandler(httpabc.PostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
         return httpabc.ResponseBody.NO_CONTENT
-
-
-class _SteamidsHandler(httpabc.GetHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
-            return httpabc.ResponseBody.UNAUTHORISED
-        playerstore = await pls.PlayerStoreService.get(self._mailer, self)
-        return playerstore.asdict()
-
-
-class _PlayersHandler(httpabc.GetHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    async def handle_get(self, resource, data):
-        players = await pls.PlayerLoader(self._mailer, self).all()
-        return [o.asdict() for o in players]
-
-
-class _PlayerCommandHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({
-        'set-access-level': 'setaccesslevel "{player}" "{level}"',
-        'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],
-        'give-xp': 'addxp "{player}" {skill}={xp}',
-        'spawn-vehicle': 'addvehicle "{module}.{item}" "{player}"',
-        'spawn-horde': 'createhorde {count} "{player}"',
-        'tele-to': 'teleport "{player}" "{toplayer}"',
-        'tele-at': 'teleportto "{player}" {location}',
-        # 'gunshot': 'gunshot "{player}"',   Doesn't seem to work yet
-        'lightning': 'lightning "{player}"',
-        'thunder': 'thunder "{player}"',
-        'kick': ['kickuser "{player}"', {'reason': '-r "{}"'}]})
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _PlayerCommandHandler.COMMANDS)
-
-    async def handle_post(self, resource, data):
-        command, player = util.get('command', data), util.get('player', data)
-        if command != 'set-access-level' and not await pls.PlayerLoader(self._mailer, self).get(player):
-            return httpabc.ResponseBody.NOT_FOUND
-        return await self._handler.handle_post(resource, data)
-
-
-class _WhitelistCommandHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({
-        'add': 'adduser "{player}" "{password}"',
-        'remove': 'removeuserfromwhitelist "{player}"'})
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _WhitelistCommandHandler.COMMANDS)
-
-    async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, data)
-
-
-class _BanlistCommandHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({
-        'add-player': ['banuser "{player}"', {'ip': '-ip', 'reason': '-r "{}"'}],
-        'remove-player': 'unbanuser "{player}"',
-        'add-id': 'banid {steamid}',
-        'remove-id': 'unbanid {steamid}'})
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._handler = prcext.PipeInLineNoContentPostHandler(mailer, self, _BanlistCommandHandler.COMMANDS)
-
-    async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, data)
