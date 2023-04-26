@@ -3,7 +3,7 @@ import logging
 from core.util import aggtrf, util
 from core.msg import msgabc
 from core.http import httpabc, httpext, httpsubs
-from core.proc import jobh, shell
+from core.proc import jobh
 
 
 class SteamCmdInstallHandler(httpabc.PostHandler):
@@ -18,16 +18,28 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
             aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
-        script = shell.Script()
+        script = _script_head()
         if util.get('wipe', data):
-            script.include_delete_path(self._path)
-        script.include_steamcmd_app_update(
-            app_id=self._app_id,
-            install_dir=self._path,
-            beta=util.script_escape(util.get('beta', data)),
-            validate=util.get('validate', data))
-        script.include_softlink_steamclient_lib(self._path)
-        script = script.build()
+            script += 'rm -rf ' + self._path + '\n'
+        script += '$(find_steamcmd) +force_install_dir ' + self._path
+        script += ' +login anonymous +app_update ' + str(self._app_id)
+        beta = util.get('beta', data)
+        if beta:
+            script += ' -beta ' + util.script_escape(beta)
+        if util.get('validate', data):
+            script += ' validate'
+        script += ' +quit'
         logging.debug('SCRIPT\n' + script)
         data['script'] = script
         return await self._handler.handle_post(resource, data)
+
+
+def _script_head() -> str:
+    return '''find_steamcmd() {
+  /usr/games/steamcmd +quit >/dev/null 2>&1 && echo /usr/games/steamcmd && return 0
+  ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0
+  echo steamcmd && return 1
+}
+echo "Installing or updating runtime with SteamCMD"
+echo "Log updates are usually delayed"
+'''
