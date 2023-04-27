@@ -6,7 +6,7 @@ import sys
 import os
 import json
 # ALLOW lib.*
-from . import cmd, comms, helptext
+from . import scr, cmd, comms, helptext
 
 
 class _NoLogFilter(logging.Filter):
@@ -61,12 +61,15 @@ def _initialise(args: typing.Collection) -> dict:
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
     p.add_argument('--clientfile', '-f', type=str, help='Specify client file')
+    p.add_argument('--scripts', '-s', type=str, nargs='+', help='List of scripts to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     _setup_logging(args.debug, args.nolog)
-    url, token = _load_clientfile(_find_clientfile(args.clientfile))
-    return {'debug': args.debug, 'url': url, 'token': token, 'commands': args.commands}
+    url, token = None, None
+    if args.commands or not args.scripts:
+        url, token = _load_clientfile(_find_clientfile(args.clientfile))
+    return {'debug': args.debug, 'url': url, 'token': token, 'scripts': args.scripts, 'commands': args.commands}
 
 
 # noinspection PyUnusedLocal
@@ -79,8 +82,12 @@ def main() -> int:
     config, connection = None, None
     try:
         config = _initialise(sys.argv)
-        if config['commands']:
+        scripts, commands = config['scripts'], config['commands']
+        if scripts or commands:
             signal.signal(signal.SIGINT, _terminate)
+        if scripts:
+            scr.ScriptProcessor(config).process()
+        if commands:
             connection = comms.HttpConnection(config)
             cmd.CommandProcessor(config, connection).process()
         logging.info('OK')

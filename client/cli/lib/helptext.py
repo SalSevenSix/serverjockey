@@ -3,8 +3,12 @@
 
 def epilog() -> str:
     return '''
-example:
-  serverjockey_cmd.py -c use:myserver server-start
+examples:
+  serverjockey_cmd.pyz -c use:myserver server-start
+  sudo serverjockey_cmd.pyz -s upgrade
+
+scripts:
+  upgrade           | Upgrade ServerJockey to latest version
 
 commands:
   showtoken         | Show webapp url and login token
@@ -15,7 +19,7 @@ commands:
   use:<instance>    | Set the current <instance> to use
   create:<instance>,<module>  | Create a new instance called <instance>
                               | of type <module>
-  install-runtime:"<version>" | Install game server on current instance,
+  install-runtime:<version>   | Install game server on current instance,
                               | <version> is optional
   runtime-meta      | Show meta information about the installed runtime
                     | Error will be shown if no runtime is installed

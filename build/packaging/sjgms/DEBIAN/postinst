@@ -16,9 +16,6 @@ setup_user() {
   find $HOME_DIR -type f -exec chmod 600 {} +
   chown -R $SJGMS_USER $HOME_DIR
   chgrp -R nogroup $HOME_DIR
-
-  runuser - $SJGMS_USER -s /bin/bash -c "steamcmd +quit"
-  [ -d "$HOME_DIR/.steam" ] || exit 1
 }
 
 id -u $SJGMS_USER > /dev/null 2>&1
