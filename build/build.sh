@@ -63,8 +63,10 @@ echo "Copying target directory into build directory"
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR"
 [ $? -eq 0 ] || exit 1
 [ -d "$TARGET_DIR" ] || exit 1
-find $TARGET_DIR -type f -name ".deleteme" -delete
-[ $? -eq 0 ] || exit 1
+mkdir -p $TARGET_DIR/usr/local/bin
+[ -d "$TARGET_DIR/usr/local/bin" ] || exit 1
+mkdir -p $TARGET_DIR/etc/systemd/system
+[ -d "$TARGET_DIR/etc/systemd/system" ] || exit 1
 
 echo "Copying CLI and ServerLink into build directory"
 cp -r "$SERVERJOCKEY_DIR/client/cli" "$SERVERJOCKEY_CMD_DIR"
@@ -112,6 +114,11 @@ echo "Building ServerJockey CLI zipapp"
 python3.10 -m zipapp "cli" -p "/usr/bin/env python3.10" -m "serverjockey_cmd:main" -c -o "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz"
 [ $? -eq 0 ] || exit 1
 [ -f "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz" ] || exit 1
+
+echo "Generating Control-D service file"
+$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz -nt ctrld > $TARGET_DIR/etc/systemd/system/serverjockey.service
+[ $? -eq 0 ] || exit 1
+[ -f "$TARGET_DIR/etc/systemd/system/serverjockey.service" ] || exit 1
 
 echo "Downloading ServerLink dependencies"
 cd $SERVERLINK_DIR || exit 1

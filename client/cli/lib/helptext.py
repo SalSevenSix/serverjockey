@@ -5,9 +5,9 @@ def epilog() -> str:
     return '''
 examples:
   serverjockey_cmd.pyz -c use:myserver server-start
-  sudo serverjockey_cmd.pyz -s upgrade
+  sudo serverjockey_cmd.pyz -t upgrade
 
-scripts:
+tasks:
   upgrade           | Upgrade ServerJockey to latest version
 
 commands:

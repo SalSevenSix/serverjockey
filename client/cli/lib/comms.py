@@ -9,7 +9,7 @@ _GET, _POST = 'GET', 'POST'
 class HttpConnection:
 
     def __init__(self, config: dict):
-        url, self._headers = config['url'], {'X-Secret': config['token']}
+        url, self._out, self._headers = config['url'], config['out'], {'X-Secret': config['token']}
         if url.startswith('https'):
             self._connection = client.HTTPSConnection(url[8:])
         else:
@@ -56,7 +56,7 @@ class HttpConnection:
             try:
                 if response.status == 200:
                     for line in response.readlines():
-                        logging.info('    ' + line.decode().strip())
+                        logging.info(self._out + line.decode().strip())
                 elif response.status == 404:
                     return
                 elif response.status != 204:

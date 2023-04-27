@@ -6,18 +6,20 @@ import sys
 import os
 import json
 # ALLOW lib.*
-from . import scr, cmd, comms, helptext
+from . import tsk, cmd, comms, helptext
+
+_OUT = '    '
 
 
 class _NoLogFilter(logging.Filter):
     def filter(self, record):
-        return record.getMessage().startswith(' ')
+        return record.getMessage().startswith(_OUT)
 
 
 class _NoLogFormatter(logging.Formatter):
     def format(self, record):
-        if record.msg and len(record.msg) > 4 and record.msg.startswith(' '):
-            record.msg = record.msg[4:]
+        if record.msg and record.msg.startswith(_OUT):
+            record.msg = record.msg[len(_OUT):]
         return super(_NoLogFormatter, self).format(record)
 
 
@@ -61,15 +63,16 @@ def _initialise(args: typing.Collection) -> dict:
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
     p.add_argument('--clientfile', '-f', type=str, help='Specify client file')
-    p.add_argument('--scripts', '-s', type=str, nargs='+', help='List of scripts to run')
+    p.add_argument('--tasks', '-t', type=str, nargs='+', help='List of tasks to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     _setup_logging(args.debug, args.nolog)
     url, token = None, None
-    if args.commands or not args.scripts:
+    if args.commands or not args.tasks:
         url, token = _load_clientfile(_find_clientfile(args.clientfile))
-    return {'debug': args.debug, 'url': url, 'token': token, 'scripts': args.scripts, 'commands': args.commands}
+    return {'out': _OUT, 'debug': args.debug, 'url': url, 'token': token,
+            'tasks': args.tasks, 'commands': args.commands}
 
 
 # noinspection PyUnusedLocal
@@ -82,11 +85,11 @@ def main() -> int:
     config, connection = None, None
     try:
         config = _initialise(sys.argv)
-        scripts, commands = config['scripts'], config['commands']
-        if scripts or commands:
+        tasks, commands = config['tasks'], config['commands']
+        if tasks or commands:
             signal.signal(signal.SIGINT, _terminate)
-        if scripts:
-            scr.ScriptProcessor(config).process()
+        if tasks:
+            tsk.TaskProcessor(config).process()
         if commands:
             connection = comms.HttpConnection(config)
             cmd.CommandProcessor(config, connection).process()

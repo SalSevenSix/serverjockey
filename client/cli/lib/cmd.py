@@ -4,13 +4,11 @@ import inspect
 # ALLOW lib.util, lib.comms
 from . import util, comms
 
-_OUT = '    '
-
 
 class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
-        self._url, self._token = config['url'], config['token']
+        self._out, self._url, self._token = config['out'], config['url'], config['token']
         self._connection = connection
         self._instances: dict = self._connection.get('/instances')
         self._instance = None
@@ -53,9 +51,8 @@ class CommandProcessor:
         return '/instances/' + self._instance + command_path
 
     def _modules(self) -> bool:
-        logging.info('Modules...')
         for module in self._connection.get('/modules'):
-            logging.info(_OUT + module)
+            logging.info(self._out + module)
         return True
 
     def _instances(self) -> bool:
@@ -63,10 +60,8 @@ class CommandProcessor:
         if len(identities) == 0:
             logging.info('No instances found.')
             return True
-        logging.info('Instances...')
         for identity in identities:
-            prefix = ' => ' if identity == self._instance else _OUT
-            logging.info(prefix + identity + ' (' + self._instances[identity]['module'] + ')')
+            logging.info(self._out + identity + ' ' + self._instances[identity]['module'])
         return True
 
     def _use(self, argument: str | None) -> bool:
@@ -110,7 +105,7 @@ class CommandProcessor:
     def _runtime_meta(self) -> bool:
         result = self._connection.get(self._instance_path('/deployment/runtime-meta'))
         for line in result.split('\n'):
-            logging.info(_OUT + line)
+            logging.info(self._out + line)
         return True
 
     def _install_runtime(self, argument: str) -> bool:
@@ -182,36 +177,36 @@ class CommandProcessor:
         return True
 
     def _welcome(self) -> bool:
-        logging.info(_OUT)
-        logging.info(_OUT)
-        logging.info(_OUT + ' ===========================================================')
-        logging.info(_OUT + ' =                    WELCOME TO ZOMBOX                    =')
-        logging.info(_OUT + ' ===========================================================')
-        logging.info(_OUT)
-        logging.info(_OUT + ' Open the webapp then login with the token.')
-        logging.info(_OUT)
-        logging.info(_OUT + ' Address   ' + self._url.replace('localhost', util.get_ip()))
-        logging.info(_OUT + ' Token     ' + self._token)
-        logging.info(_OUT)
+        logging.info(self._out)
+        logging.info(self._out)
+        logging.info(self._out + ' ===========================================================')
+        logging.info(self._out + ' =                    WELCOME TO ZOMBOX                    =')
+        logging.info(self._out + ' ===========================================================')
+        logging.info(self._out)
+        logging.info(self._out + ' Open the webapp then login with the token.')
+        logging.info(self._out)
+        logging.info(self._out + ' Address   ' + self._url.replace('localhost', util.get_ip()))
+        logging.info(self._out + ' Token     ' + self._token)
+        logging.info(self._out)
         return True
 
     def _showtoken(self) -> bool:
-        logging.info(_OUT + 'URL: ' + self._url.replace('localhost', util.get_ip()))
-        logging.info(_OUT + 'Token: ' + self._token)
+        logging.info(self._out + 'URL: ' + self._url.replace('localhost', util.get_ip()))
+        logging.info(self._out + 'Token: ' + self._token)
         return True
 
     def _server(self) -> bool:
         result = self._connection.get(self._instance_path('/server'))
         result = 'instance: ' + self._instance + '\n' + util.repr_dict(result)
         for line in result.strip().split('\n'):
-            logging.info(_OUT + line)
+            logging.info(self._out + line)
         return True
 
     def _players(self) -> bool:
         result: list = self._connection.get(self._instance_path('/players'))
-        logging.info(_OUT + 'Players online: ' + str(len(result)))
+        logging.info(self._out + 'Players online: ' + str(len(result)))
         for player in result:
-            line = _OUT + player['name']
+            line = self._out + player['name']
             if 'steamid' in player and player['steamid']:
                 line += ' [' + player['steamid'] + ']'
             logging.info(line)
@@ -220,7 +215,7 @@ class CommandProcessor:
     def _system(self) -> bool:
         result = self._connection.get('/system/info')
         for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(_OUT + line)
+            logging.info(self._out + line)
         return True
 
     def _report(self) -> bool:
@@ -232,7 +227,7 @@ class CommandProcessor:
             self._instance = identity
             result = self._connection.get(self._instance_path('/server'))
             for line in util.repr_dict(result, identity).strip().split('\n'):
-                logging.info(_OUT + line)
+                logging.info(self._out + line)
         self._instance = original
         return True
 
@@ -246,7 +241,7 @@ class CommandProcessor:
         if len(result) > 0 and lines < 100:
             result = result[-lines:]
         for line in result:
-            logging.info(_OUT + line)
+            logging.info(self._out + line)
         return True
 
     def _log_tail_f(self) -> bool:
