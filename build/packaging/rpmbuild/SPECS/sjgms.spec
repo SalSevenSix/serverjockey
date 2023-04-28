@@ -39,36 +39,22 @@ cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
 
 
 %preun
-systemctl stop serverjockey
+systemctl stop serverjockey > /dev/null 2>&1
 exit 0
 
 
 %pre
-systemctl stop serverjockey
+systemctl stop serverjockey > /dev/null 2>&1
 exit 0
 
 
 %post
-HOME_DIR="/home/sjgms"
-SERVERLINK_DIR="$HOME_DIR/serverlink"
-id -u sjgms > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  rm -rf $HOME_DIR > /dev/null 2>&1
-  adduser --system sjgms
-  [ $? -eq 0 ] || exit 1
-  mkdir -p $SERVERLINK_DIR
-  echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > $SERVERLINK_DIR/instance.json
-  find $HOME_DIR -type d -exec chmod 755 {} +
-  find $HOME_DIR -type f -exec chmod 600 {} +
-  chown -R sjgms $HOME_DIR
-  chgrp -R sjgms $HOME_DIR
-fi
-systemctl daemon-reload
-systemctl enable serverjockey
-systemctl start serverjockey
+/usr/local/bin/serverjockey_cmd.pyz -nt adduser
 
 
 %changelog
+* Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.8
+- Feature release v0.0.8
 * Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.7
 - Added CLI client
 * Sat Dec 03 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.6

@@ -1,6 +1,10 @@
 import logging
 import inspect
 import subprocess
+# ALLOW lib.util
+
+_DEFAULT_USER = 'sjgms'
+_DEFAULT_PORT = 6164
 
 
 class TaskProcessor:
@@ -35,23 +39,86 @@ class TaskProcessor:
             if not result:
                 return
 
-    def _ctrld(self, argument: str):
-        user, port = 'sjgms', None
+    @staticmethod
+    def _extract_user_and_port(argument: str):
+        user, port = _DEFAULT_USER, _DEFAULT_PORT
         if argument:
             parts = argument.split(',')
-            user, port = parts[0], int(parts[1]) if len(parts) > 1 else None
-        args = ' --port ' + str(port) if port else ''
+            user, port = parts[0], int(parts[1]) if len(parts) > 1 else port
+        return user, port
+
+    def _dump_to_log(self, *data: str | bytes):
+        if not data:
+            return
+        for item in data:
+            text = item.decode() if isinstance(item, bytes) else item
+            if text:
+                for line in text.strip().split('\n'):
+                    logging.info(self._out + line)
+
+    def _ctrld(self, argument: str):
+        user, port = TaskProcessor._extract_user_and_port(argument)
+        args = ' --port ' + str(port) if port != _DEFAULT_PORT else ''
         result = _serverjockey_service().format(user=user, args=args)
-        for line in result.strip().split('\n'):
-            logging.info(self._out + line)
+        self._dump_to_log(result)
+
+    def _do_service_task(self, action: str, argument: str):
+        user = TaskProcessor._extract_user_and_port(argument)[0]
+        args = action + ' ' + ('serverjockey' if user == _DEFAULT_USER else user)
+        script = _systemctl_script().strip().format(args=args)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Service ' + action + ' task failed')
+
+    def _service_status(self, argument: str):
+        self._do_service_task('status', argument)
+
+    def _service_start(self, argument: str):
+        self._do_service_task('start', argument)
+
+    def _service_stop(self, argument: str):
+        self._do_service_task('stop', argument)
+
+    def _service_enable(self, argument: str):
+        self._do_service_task('enable', argument)
+
+    def _service_disable(self, argument: str):
+        self._do_service_task('disable', argument)
 
     def _upgrade(self):
         result = subprocess.run(_upgrade_script().strip(), shell=True, capture_output=True)
-        if result.stdout:
-            for line in result.stdout.decode().strip().split('\n'):
-                logging.info(self._out + line)
-        if result.returncode != 0 or not result.stdout:
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
             raise Exception('Upgrade task failed')
+
+    def _adduser(self, argument: str):
+        user, port = TaskProcessor._extract_user_and_port(argument)
+        if user == 'serverjockey':
+            raise Exception('User name not allowed')
+        script = _adduser_script().strip()
+        script = script.replace('{userdef}', _DEFAULT_USER).replace('{user}', user).replace('{port}', str(port))
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('New user task failed')
+
+    def _userdel(self, argument: str):
+        user = TaskProcessor._extract_user_and_port(argument)[0]
+        if user == _DEFAULT_USER:
+            raise Exception('Unable to delete default user')
+        script = _userdel_script().strip().replace('{user}', user)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Delete user task failed')
+
+    def _uninstall(self):
+        script = _uninstall_script().strip().replace('{userdef}', _DEFAULT_USER)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Uninstall task failed')
 
 
 def _serverjockey_service() -> str:
@@ -74,6 +141,16 @@ WantedBy=multi-user.target
 '''
 
 
+def _systemctl_script() -> str:
+    return '''
+if [ "$(whoami)" != "root" ]; then
+  echo "Not root user. Please run using sudo."
+  exit 1
+fi
+systemctl {args}
+'''
+
+
 def _upgrade_script() -> str:
     return '''
 if [ "$(whoami)" != "root" ]; then
@@ -81,28 +158,114 @@ if [ "$(whoami)" != "root" ]; then
   echo "  sudo serverjockey_cmd.pyz -t upgrade"
   exit 1
 fi
+
+INSTALLER="apt"
+PKGTYPE="deb"
 if which yum > /dev/null; then
   INSTALLER="yum"
   PKGTYPE="rpm"
 fi
-if which apt > /dev/null; then
-  INSTALLER="apt"
-  PKGTYPE="deb"
-fi
-if [ -z "${INSTALLER}" ]; then
-  echo "Unable to identify package installer. Only apt and yum supported."
-  exit 1
-fi
-echo "Upgrading ServerJockey..."
+
 rm sjgms.${PKGTYPE} > /dev/null 2>&1
 wget --version > /dev/null 2>&1 || apt -y install wget
-echo "Downloading"
+echo "downloading..."
 wget -q -O sjgms.${PKGTYPE} https://4sas.short.gy/sjgms-${PKGTYPE}-latest
 [ $? -eq 0 ] || exit 1
-echo "Installing"
-${INSTALLER} -y install ./sjgms.${PKGTYPE} 2>&1
+${INSTALLER} -y install ./sjgms.${PKGTYPE}
 [ $? -eq 0 ] || exit 1
 rm sjgms.${PKGTYPE} > /dev/null 2>&1
-echo "Upgrade complete"
+
+echo "upgrade done"
+exit 0
+'''
+
+
+def _adduser_script() -> str:
+    return '''
+if [ "$(whoami)" != "root" ]; then
+  echo "Not root user. Please run using sudo as follows..."
+  echo "  sudo serverjockey_cmd.pyz -t adduser:<name>,<port>"
+  exit 1
+fi
+
+SJGMS_USER_DEF="{userdef}"
+SJGMS_USER="{user}"
+SJGMS_PORT="{port}"
+HOME_DIR="/home/$SJGMS_USER"
+SERVERLINK_DIR="$HOME_DIR/serverlink"
+SERVICE_NAME="$SJGMS_USER"
+[ "$SJGMS_USER" = "$SJGMS_USER_DEF" ] && SERVICE_NAME="serverjockey"
+id -u $SJGMS_USER_DEF > /dev/null 2>&1 || SERVICE_NAME="serverjockey"
+SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
+
+id -u $SJGMS_USER > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  rm -rf $HOME_DIR > /dev/null 2>&1
+  adduser --system $SJGMS_USER || exit 1
+  mkdir -p $SERVERLINK_DIR
+  echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > $SERVERLINK_DIR/instance.json
+  find $HOME_DIR -type d -exec chmod 755 {} +
+  find $HOME_DIR -type f -exec chmod 600 {} +
+  chown -R $SJGMS_USER $HOME_DIR
+  chgrp -R $(ls -ld $HOME_DIR | awk '{print $4}') $HOME_DIR
+fi
+
+[ -f $SERVICE_FILE ] || /usr/local/bin/serverjockey_cmd.pyz -nt ctrld:$SJGMS_USER,$SJGMS_PORT > $SERVICE_FILE
+systemctl daemon-reload
+systemctl enable $SERVICE_NAME
+systemctl start $SERVICE_NAME
+
+echo "adduser done"
+exit 0
+'''
+
+
+def _userdel_script() -> str:
+    return '''
+if [ "$(whoami)" != "root" ]; then
+  echo "Not root user. Please run using sudo as follows..."
+  echo "  sudo serverjockey_cmd.pyz -t userdel:<name>"
+  exit 1
+fi
+
+SJGMS_USER="{user}"
+SERVICE_FILE="/etc/systemd/system/$SJGMS_USER.service"
+
+if [ -f $SERVICE_FILE ]; then
+  echo "removing service"
+  systemctl stop $SJGMS_USER > /dev/null 2>&1
+  rm $SERVICE_FILE > /dev/null 2>&1
+  systemctl daemon-reload
+fi
+
+if id -u $SJGMS_USER > /dev/null 2>&1; then
+  echo "removing user"
+  userdel $SJGMS_USER
+  rm -rf /home/$SJGMS_USER > /dev/null 2>&1
+fi
+
+echo "userdel done"
+exit 0
+'''
+
+
+def _uninstall_script() -> str:
+    return '''
+if [ "$(whoami)" != "root" ]; then
+  echo "Not root user. Please run using sudo as follows..."
+  echo "  sudo serverjockey_cmd.pyz -t uninstall"
+  exit 1
+fi
+
+systemctl stop serverjockey
+which apt > /dev/null && apt -y remove {userdef}
+which yum > /dev/null && yum -y remove {userdef}
+systemctl daemon-reload
+if id -u {userdef} > /dev/null 2>&1; then
+  userdel {userdef}
+  rm -rf /home/{userdef} > /dev/null 2>&1
+fi
+
+echo "uninstall done"
 exit 0
 '''

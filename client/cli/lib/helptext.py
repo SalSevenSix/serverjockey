@@ -8,7 +8,16 @@ examples:
   sudo serverjockey_cmd.pyz -t upgrade
 
 tasks:
-  upgrade           | Upgrade ServerJockey to latest version
+  upgrade                | Upgrade ServerJockey to latest version
+  adduser:<name>,<port>  | Add a new ServerJockey service user
+                         | called <name> with webapp using <port>
+  userdel:<name>         | Delete ServerJockey user and home folder
+  service-status:<name>  | Show service status, user <name> optional
+  service-start:<name>   | Start service, user <name> optional
+  service-stop:<name>    | Stop service, user <name> optional
+  service-enable:<name>  | Enable service, user <name> optional
+  service-disable:<name> | Disable service, user <name> optional
+  uninstall              | Uninstall ServerJockey and delete default user
 
 commands:
   showtoken         | Show webapp url and login token

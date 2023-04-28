@@ -1,28 +1,5 @@
 #!/bin/bash
 
 SJGMS_USER=${SJGMS_USER:-sjgms}
-HOME_DIR="/home/$SJGMS_USER"
-SERVERLINK_DIR="$HOME_DIR/serverlink"
-
-setup_user() {
-  rm -rf $HOME_DIR > /dev/null 2>&1
-  adduser --system $SJGMS_USER
-  [ $? -eq 0 ] || exit 1
-
-  mkdir -p $SERVERLINK_DIR
-  echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > $SERVERLINK_DIR/instance.json
-
-  find $HOME_DIR -type d -exec chmod 755 {} +
-  find $HOME_DIR -type f -exec chmod 600 {} +
-  chown -R $SJGMS_USER $HOME_DIR
-  chgrp -R nogroup $HOME_DIR
-}
-
-id -u $SJGMS_USER > /dev/null 2>&1
-[ $? -eq 0 ] || setup_user
-
-systemctl daemon-reload
-systemctl enable serverjockey
-systemctl start serverjockey
-
-exit 0
+/usr/local/bin/serverjockey_cmd.pyz -nt adduser:$SJGMS_USER
+exit $?

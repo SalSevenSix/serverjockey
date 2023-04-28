@@ -1,5 +1,4 @@
 #!/bin/bash
 
-systemctl stop serverjockey
-
+systemctl stop serverjockey > /dev/null 2>&1
 exit 0

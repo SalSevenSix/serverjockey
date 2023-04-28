@@ -9,10 +9,8 @@ class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
         self._out, self._url, self._token = config['out'], config['url'], config['token']
-        self._connection = connection
-        self._instances: dict = self._connection.get('/instances')
-        self._instance = None
-        self._commands = []
+        self._connection, self._commands, self._instance = connection, [], None
+        self._instances: dict = connection.get('/instances')
         for command in config['commands']:
             argument, index = None, command.find(':')
             if index > 0:
@@ -81,7 +79,7 @@ class CommandProcessor:
         logging.error('No instances found. No more commands will be processed.')
         return False
 
-    def _create(self, argument: str) -> bool:
+    def _create(self, argument: str | None) -> bool:
         if not argument:
             argument = ','
         parts, instance, module = argument.split(','), None, None
@@ -108,7 +106,7 @@ class CommandProcessor:
             logging.info(self._out + line)
         return True
 
-    def _install_runtime(self, argument: str) -> bool:
+    def _install_runtime(self, argument: str | None) -> bool:
         body = {'wipe': False, 'validate': True}
         if argument:
             body.update({'beta': argument})
@@ -231,7 +229,7 @@ class CommandProcessor:
         self._instance = original
         return True
 
-    def _log_tail(self, argument: str) -> bool:
+    def _log_tail(self, argument: str | None) -> bool:
         lines = util.to_int(argument) if argument else 100
         if not lines:
             lines = 100
@@ -274,14 +272,14 @@ class CommandProcessor:
         self._connection.post(self._instance_path('/world/broadcast'), {'message': str(argument)})
         return True
 
-    def _backup_world(self, argument: str) -> bool:
+    def _backup_world(self, argument: str | None) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-world'),
             {'prunehours': util.to_int_optional(argument)})
         self._connection.drain(result)
         return True
 
-    def _backup_runtime(self, argument: str) -> bool:
+    def _backup_runtime(self, argument: str | None) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-runtime'),
             {'prunehours': util.to_int_optional(argument)})
