@@ -45,18 +45,18 @@ else
   [ $? -eq 0 ] || exit 1
   rm "$BRANCH.zip" > /dev/null 2>&1
 fi
-
 cd $DIST_DIR || exit 1
-if [ -d "$HOME/rpmbuild" ]; then
+
+if which yum > /dev/null; then
   echo "Updating Fedora scripts and spec file"
   if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
     cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
-    rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
     echo "Build script updated. Please run again."
     exit 1
   fi
-  cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
+  [ -d "$HOME/rpmbuild/SPECS" ] || mkdir -p $HOME/rpmbuild/SPECS
   cp "$SERVERJOCKEY_DIR/build/packaging/rpmbuild/SPECS/sjgms.spec" "$HOME/rpmbuild/SPECS/sjgms.spec"
+  cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
 fi
 
 echo "Copying target directory into build directory"

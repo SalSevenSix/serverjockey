@@ -3,7 +3,7 @@
 cd "$(dirname $0)/dist" || exit 1
 DIST_DIR="$(pwd)"
 RPMBUILD_DIR="$HOME/rpmbuild"
-[ -d "$RPMBUILD_DIR" ] || exit 1
+[ -f "$RPMBUILD_DIR/SPECS/sjgms.spec" ] || exit 1
 TARGET_DIR="$DIST_DIR/sjgms"
 [ -d "$TARGET_DIR" ] || exit 1
 VERSION=$(awk '/^Version:/{print $2}' "$RPMBUILD_DIR/SPECS/sjgms.spec")
@@ -11,6 +11,13 @@ OSVER="fc$(cat /etc/fedora-release | awk {'print$3'})"
 RPM_FILE="$RPMBUILD_DIR/RPMS/x86_64/sjgms-${VERSION}-1.${OSVER}.x86_64.rpm"
 TAR_DIR="${TARGET_DIR}-${VERSION}"
 rm -rf $TAR_DIR > /dev/null 2>&1
+
+echo "Building rpmbuild directory as needed"
+[ -d "$RPMBUILD_DIR/BUILD" ] || mkdir -p $RPMBUILD_DIR/BUILD
+[ -d "$RPMBUILD_DIR/BUILDROOT" ] || mkdir -p $RPMBUILD_DIR/BUILDROOT
+[ -d "$RPMBUILD_DIR/RPMS" ] || mkdir -p $RPMBUILD_DIR/RPMS
+[ -d "$RPMBUILD_DIR/SOURCES" ] || mkdir -p $RPMBUILD_DIR/SOURCES
+[ -d "$RPMBUILD_DIR/SRPMS" ] || mkdir -p $RPMBUILD_DIR/SRPMS
 
 echo "Building directory for TAR file"
 mkdir $TAR_DIR
