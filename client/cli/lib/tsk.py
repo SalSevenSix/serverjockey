@@ -257,7 +257,7 @@ if [ "$(whoami)" != "root" ]; then
   exit 1
 fi
 
-systemctl stop serverjockey
+systemctl stop serverjockey > /dev/null 2>&1
 which apt > /dev/null && apt -y remove {userdef}
 which yum > /dev/null && yum -y remove {userdef}
 systemctl daemon-reload

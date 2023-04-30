@@ -57,6 +57,7 @@ if which yum > /dev/null; then
   [ -d "$HOME/rpmbuild/SPECS" ] || mkdir -p $HOME/rpmbuild/SPECS
   cp "$SERVERJOCKEY_DIR/build/packaging/rpmbuild/SPECS/sjgms.spec" "$HOME/rpmbuild/SPECS/sjgms.spec"
   cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
+  chmod 755 $BUILD_DIR/rpm.sh
 fi
 
 echo "Copying target directory into build directory"
