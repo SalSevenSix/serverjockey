@@ -48,14 +48,12 @@ fi
 cd $DIST_DIR || exit 1
 
 if which yum > /dev/null; then
-  echo "Updating Fedora scripts and spec file"
+  echo "Updating RPM scripts"
   if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
     cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
     echo "Build script updated. Please run again."
     exit 1
   fi
-  [ -d "$HOME/rpmbuild/SPECS" ] || mkdir -p $HOME/rpmbuild/SPECS
-  cp "$SERVERJOCKEY_DIR/build/packaging/rpmbuild/SPECS/sjgms.spec" "$HOME/rpmbuild/SPECS/sjgms.spec"
   cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
   chmod 755 $BUILD_DIR/rpm.sh
 fi

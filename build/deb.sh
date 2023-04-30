@@ -8,7 +8,8 @@ VERSION=$(awk '/^Version:/{print $2}' "$TARGET_DIR/DEBIAN/control")
 DEB_FILE="sjgms.deb"
 rm $DEB_FILE > /dev/null 2>&1
 
-echo "Setting directory and file perms"
+echo "Preparing built directory"
+rm -rf $TARGET_DIR/SPECS > /dev/null 2>&1
 find $TARGET_DIR -type d -exec chmod 755 {} +
 find $TARGET_DIR -type f -exec chmod 644 {} +
 find $TARGET_DIR/usr/local/bin -type f -exec chmod 755 {} +

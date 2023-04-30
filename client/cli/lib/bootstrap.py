@@ -53,7 +53,7 @@ def _find_clientfile(user: str | None) -> str:
     for candidate in candidates:
         if os.path.isfile(candidate):
             return candidate
-    raise Exception('Unable to find Clientfile. ServerJockey may be down. Or try using --clientfile option.')
+    raise Exception('Unable to find Clientfile. ServerJockey may be down. Or try using --user option.')
 
 
 def _load_clientfile(clientfile: str) -> tuple:

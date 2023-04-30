@@ -59,7 +59,7 @@ class _ConsoleHandler(httpabc.PostHandler):
     })
 
     def __init__(self, context: contextsvc.Context):
-        self._handler = prcext.PipeInLineNoContentPostHandler(context, self, _ConsoleHandler.COMMANDS)
+        self._handler = prcext.ConsoleCommandHandler(context, _ConsoleHandler.COMMANDS)
 
     async def handle_post(self, resource, data):
         return await self._handler.handle_post(resource, data)
