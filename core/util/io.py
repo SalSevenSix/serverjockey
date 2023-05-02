@@ -71,6 +71,14 @@ async def create_directory(path: str):
         await aioos.mkdir(path)
 
 
+async def create_directories(path: str):
+    current = ''
+    for part in path.split('/'):
+        if part:
+            current += '/' + part
+            await create_directory(current)
+
+
 async def create_symlink(symlink_path: str, target_path: str):
     await delete_directory(symlink_path)
     await delete_file(symlink_path)
