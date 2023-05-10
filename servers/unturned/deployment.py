@@ -83,10 +83,8 @@ class Deployment:
         return proch.ServerProcess(self._mailer, self._python) \
             .use_env(self._env) \
             .use_out_decoder(prcenc.PtyLineDecoder()) \
-            .append_arg(self._wrapper) \
-            .append_arg(self._executable) \
-            .append_arg('-batchmode') \
-            .append_arg('-nographics') \
+            .append_arg(self._wrapper).append_arg(self._executable) \
+            .append_arg('-batchmode').append_arg('-nographics') \
             .append_arg('+' + cmdargs['scope'] + '/Save')
 
     async def build_world(self):

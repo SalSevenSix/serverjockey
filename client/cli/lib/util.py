@@ -3,6 +3,21 @@ import subprocess
 # ALLOW NONE
 
 
+def split_argument(argument: str | None, expected: int) -> tuple:
+    assert expected > 0
+    result = []
+    index = expected
+    while index > 0:
+        result.append(None)
+        index -= 1
+    if argument is not None:
+        for part in argument.split(','):
+            if index < expected:
+                result[index] = part
+                index += 1
+    return tuple(result)
+
+
 def repr_dict(obj: dict, prefix: str = '') -> str:
     result = ''
     if prefix:

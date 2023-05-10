@@ -138,10 +138,9 @@ class ServerProcess:
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
         self._out_decoder = prcenc.DefaultLineDecoder()
-        self._env = None
+        self._pipeinsvc, self._started_catcher = None, None
+        self._env, self._cwd = None, None
         self._process = None
-        self._pipeinsvc = None
-        self._started_catcher = None
 
     def append_arg(self, arg: typing.Any) -> ServerProcess:
         self._command.append(arg)
@@ -157,6 +156,10 @@ class ServerProcess:
 
     def use_env(self, env: dict[str, str]) -> ServerProcess:
         self._env = env
+        return self
+
+    def use_cwd(self, cwd: str) -> ServerProcess:
+        self._cwd = cwd
         return self
 
     def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
@@ -175,7 +178,7 @@ class ServerProcess:
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                env=self._env)
+                env=self._env, cwd=self._cwd)
             stderr = prcprd.PipeOutLineProducer(
                 self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
             stdout = prcprd.PipeOutLineProducer(

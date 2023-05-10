@@ -2,6 +2,8 @@ import logging
 import inspect
 import subprocess
 # ALLOW lib.util
+from . import util
+
 
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
@@ -41,11 +43,8 @@ class TaskProcessor:
 
     @staticmethod
     def _extract_user_and_port(argument: str):
-        user, port = _DEFAULT_USER, _DEFAULT_PORT
-        if argument:
-            parts = argument.split(',')
-            user, port = parts[0], int(parts[1]) if len(parts) > 1 else port
-        return user, port
+        user, port = util.split_argument(argument, 2)
+        return user if user else _DEFAULT_USER, int(port) if port else _DEFAULT_PORT
 
     def _dump_to_log(self, *data: str | bytes):
         if not data:

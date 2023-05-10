@@ -1,10 +1,45 @@
 import typing
 import asyncio
-from asyncio import subprocess
+from asyncio import subprocess, streams
 # ALLOW util.* msg.* context.* proc.prcenc proc.prcprd
-from core.util import util, funcutil
+from core.util import util, funcutil, io, pkg
 from core.msg import msgabc, msgext, msgftr
+from core.context import contextsvc
 from core.proc import prcprd
+
+
+class JobPipeInLineService(msgabc.AbcSubscriber):
+    REQUEST = 'JobPipeInLineService.Request'
+    RESPONSE = 'JobPipeInLineService.Response'
+    EXCEPTION = 'JobPipeInLineService.Exception'
+    CLOSE = 'JobPipeInLineService.Close'
+
+    @staticmethod
+    async def request(mailer: msgabc.MulticastMailer, source: typing.Any, cmdline: str) -> typing.Any:
+        messenger = msgext.SynchronousMessenger(mailer)
+        response = await messenger.request(source, JobPipeInLineService.REQUEST, cmdline)
+        return response.data()
+
+    def __init__(self, mailer: msgabc.MulticastMailer, pipe: streams.StreamWriter):
+        super().__init__(msgftr.NameIn((JobPipeInLineService.REQUEST, JobPipeInLineService.CLOSE)))
+        self._mailer = mailer
+        self._pipe = pipe
+        mailer.register(self)
+
+    async def close(self):
+        self._mailer.post(self, JobPipeInLineService.CLOSE)
+        await funcutil.silently_cleanup(self._pipe)
+
+    def handle(self, message):
+        if message.name() is JobPipeInLineService.CLOSE:
+            return True
+        try:
+            self._pipe.write(message.data().encode())
+            self._pipe.write(b'\n')
+            self._mailer.post(self, JobPipeInLineService.RESPONSE, None, message)
+        except Exception as e:
+            self._mailer.post(self, JobPipeInLineService.EXCEPTION, e, message)
+        return None
 
 
 class JobProcess(msgabc.AbcSubscriber):
@@ -22,55 +57,83 @@ class JobProcess(msgabc.AbcSubscriber):
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
 
     @staticmethod
-    async def start_job(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
-            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, JobProcess.REQUEST, command)
-        return response.data()
-
-    @staticmethod
     async def run_job(
             mailer: msgabc.MulticastMailer,
             source: typing.Any,
-            command: typing.Union[str, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
+            command: typing.Union[str, dict, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
         catcher = msgext.SingleCatcher(msgftr.And(msgftr.SourceIs(source), JobProcess.FILTER_DONE))
         messenger = msgext.SynchronousMessenger(mailer, catcher=catcher)
         response = await messenger.request(source, JobProcess.REQUEST, command)
         return response.data()
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.NameIs(JobProcess.REQUEST))
-        self._mailer = mailer
+        self._mailer = context
 
     async def handle(self, message):
-        source, command = message.source(), message.data()
-        if isinstance(command, dict):
-            command = util.get('command', command, util.get('script', command))
-        if not isinstance(command, (str, tuple, list)):
-            self._mailer.post(source, JobProcess.STATE_EXCEPTION, Exception('Invalid job request'), message)
-            return None
-        stderr, stdout, replied = None, None, False
+        stdin, stderr, stdout, replied = None, None, None, False
+        command = _CommandHelper(self._mailer, message)
         try:
-            if isinstance(command, str):
+            await command.prepare()
+            if command.is_script():
                 process = await asyncio.create_subprocess_shell(
-                    command,
-                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                    command.command(),
+                    stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             else:
                 process = await asyncio.create_subprocess_exec(
-                    command[0], *command[1:],
-                    stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = prcprd.PipeOutLineProducer(self._mailer, source, JobProcess.STDERR_LINE, process.stderr)
-            stdout = prcprd.PipeOutLineProducer(self._mailer, source, JobProcess.STDOUT_LINE, process.stdout)
-            replied = self._mailer.post(source, JobProcess.STATE_STARTED, process, message)
+                    command.command()[0], *command.command()[1:],
+                    stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            stderr = prcprd.PipeOutLineProducer(self._mailer, command.source(), JobProcess.STDERR_LINE, process.stderr)
+            stdout = prcprd.PipeOutLineProducer(self._mailer, command.source(), JobProcess.STDOUT_LINE, process.stdout)
+            stdin = JobPipeInLineService(self._mailer, process.stdin)
+            replied = self._mailer.post(command.source(), JobProcess.STATE_STARTED, process, message)
             rc = await process.wait()
             if rc != 0:
                 raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(process, rc))
-            self._mailer.post(source, JobProcess.STATE_COMPLETE, process)
+            self._mailer.post(command.source(), JobProcess.STATE_COMPLETE, process)
         except Exception as e:
-            self._mailer.post(source, JobProcess.STATE_EXCEPTION, e, None if replied else message)
+            self._mailer.post(command.source(), JobProcess.STATE_EXCEPTION, e, None if replied else message)
         finally:
+            await funcutil.silently_cleanup(stdin)
             await funcutil.silently_cleanup(stdout)
             await funcutil.silently_cleanup(stderr)
+            await funcutil.silently_cleanup(command)
         return None
+
+
+class _CommandHelper:
+
+    def __init__(self, context: contextsvc.Context, message: msgabc.Message):
+        self._python, self._work_dir, self._pty = context.config('python'), None, False
+        self._source, self._command = message.source(), message.data()
+        if isinstance(self._command, dict):
+            self._pty = util.get('pty', self._command, False)
+            self._command = util.get('command', self._command)
+
+    async def prepare(self):
+        if not self._command or not isinstance(self._command, (str, list, tuple)):
+            raise Exception('Invalid job request')
+        if not self._pty:
+            return
+        self._work_dir = '/tmp/' + util.generate_token(6) + str(util.now_millis())
+        await io.create_directory(self._work_dir)
+        command = [self._python, self._work_dir + '/wrapper.py']
+        await io.write_file(command[1], await pkg.pkg_load('core.proc', 'wrapper.py'))  # TODO duplicated in prcext
+        if isinstance(self._command, str):
+            command.extend(['/bin/bash', self._work_dir + '/job.sh'])
+            await io.write_file(command[3], self._command)
+        else:  # TODO test this part
+            command.extend(self._command)
+        self._command = tuple(command)
+
+    def source(self) -> typing.Any:
+        return self._source
+
+    def is_script(self) -> bool:
+        return isinstance(self._command, str)
+
+    def command(self) -> typing.Union[str, typing.Collection[str]]:
+        return self._command
+
+    async def cleanup(self):
+        await io.delete_directory(self._work_dir)

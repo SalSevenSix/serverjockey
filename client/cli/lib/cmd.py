@@ -79,12 +79,9 @@ class CommandProcessor:
         logging.error('No instances found. No more commands will be processed.')
         return False
 
+    # TODO retest this
     def _create(self, argument: str | None) -> bool:
-        if not argument:
-            argument = ','
-        parts, instance, module = argument.split(','), None, None
-        if len(parts) >= 2:
-            instance, module = parts[0], parts[1]
+        instance, module = util.split_argument(argument, 2)
         if not instance or not module:
             logging.error('Instance name and module required. No more commands will be processed.')
             return False
