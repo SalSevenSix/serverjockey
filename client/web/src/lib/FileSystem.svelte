@@ -6,6 +6,11 @@
   import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
 
   export let allowDelete = false;
+  export let sortFunction = function(a, b) {
+      let typeCompare = b.type.localeCompare(a.type);
+      if (typeCompare != 0) return typeCompare;
+      return b.name.localeCompare(a.name);
+    };
 
   let root = $instance.url + '/logs';
   let pwd = root;
@@ -47,11 +52,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       }).then(function(json) {
-        json.sort(function(a, b) {
-          let typeCompare = b.type.localeCompare(a.type);
-          if (typeCompare != 0) return typeCompare;
-          return b.name.localeCompare(a.name);
-        });
+        json.sort(sortFunction);
         paths = json;
         pwd = url;
       })

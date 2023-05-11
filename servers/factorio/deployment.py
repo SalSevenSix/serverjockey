@@ -216,7 +216,7 @@ class Deployment:
                                     assert modfile_response.status == 200
                                     await io.stream_write_file(
                                         filename, io.WrapReader(modfile_response.content), chunk_size)
-        for file in await io.directory_list_dict(self._mods_dir):
+        for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
                 await io.delete_file(self._mods_dir + '/' + file['name'])
         await io.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))

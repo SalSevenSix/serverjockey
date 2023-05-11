@@ -31,7 +31,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
     async def handle_post(self, resource, data):
         login = 'anonymous'
         if not self._anon:
-            pass  # TODO Get user from _SteamConfig
+            login = 'bsalis'  # TODO Get user from _SteamConfig
         script = _script_head()
         if util.get('wipe', data):
             script += 'rm -rf ' + self._path + '\n'
@@ -70,7 +70,7 @@ class _SteamConfig:
 # Waiting for user info...OK
 
 
-class _PasswordProvider(msgabc.AbcSubscriber):
+class _KillSteamCmdIfSolicitHanged(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer, password: str):
         super().__init__(msgftr.Or(jobh.JobProcess.FILTER_STDOUT_LINE, jobh.JobProcess.FILTER_DONE))

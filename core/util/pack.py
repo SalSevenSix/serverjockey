@@ -33,7 +33,7 @@ async def archive_directory(unpacked_dir: str, archives_dir: str,
     if prune_hours > 0:
         logger.info('Pruning archives older than ' + str(prune_hours) + ' hours')
         prune_time = now - float(prune_hours * 60 * 60)
-        files = [o for o in await io.directory_list_dict(archives_dir) if o['type'] == 'file']
+        files = [o for o in await io.directory_list(archives_dir) if o['type'] == 'file']
         files = [o for o in files if o['name'].startswith(archive_kind) and o['mtime'] < prune_time]
         for file in [o['name'] for o in files]:
             logger.info('Deleting ' + file)

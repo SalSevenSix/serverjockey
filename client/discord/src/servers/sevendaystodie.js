@@ -18,7 +18,7 @@ const helpText = {
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',
-    'deployment install-runtime   : Install game server'
+    'deployment install-runtime {beta} : Install game server'
   ]
 };
 

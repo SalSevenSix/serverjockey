@@ -52,7 +52,7 @@ class SystemService:
         return result
 
     async def initialise(self) -> SystemService:
-        autos, ls = [], await io.directory_list_dict(self._home_dir)
+        autos, ls = [], await io.directory_list(self._home_dir)
         for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
             config_file = self._home_dir + '/' + identity + '/instance.json'
             if await io.file_exists(config_file):
@@ -163,7 +163,7 @@ class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
 class _ModulesHandler(httpabc.GetHandler):
 
     def handle_get(self, resource, data):
-        return 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned'
+        return 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound'
 
 
 class _InstanceHandler(httpabc.GetHandler):

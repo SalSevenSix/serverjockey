@@ -118,10 +118,12 @@ class WipeHandler(httpabc.PostHandler):
 
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
-    def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True):
+    def __init__(self, path: str, tail: typing.Optional[str] = None,
+                 protected: bool = True, ls_filter: typing.Callable = None):
         self._path = path
         self._tail = tail
         self._protected = protected
+        self._ls_filter = ls_filter
 
     async def handle_get(self, resource, data):
         if self._protected and not httpcnt.is_secure(data):
@@ -134,7 +136,8 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
                 return await io.read_file(path)
             return _FileByteStream(path)
         if await io.directory_exists(path):
-            return await io.directory_list_dict(path, data['baseurl'] + resource.path(data))
+            result = await io.directory_list(path, data['baseurl'] + resource.path(data))
+            return [e for e in result if self._ls_filter(e)] if self._ls_filter else result
         return httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):

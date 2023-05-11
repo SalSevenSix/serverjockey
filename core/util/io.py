@@ -114,7 +114,7 @@ async def file_size(file: str) -> int:
     return stats.st_size
 
 
-async def directory_list_dict(
+async def directory_list(
         path: str, baseurl: str = None) -> typing.List[typing.Dict[str, typing.Union[str, float]]]:
     if not path.endswith('/'):
         path += '/'

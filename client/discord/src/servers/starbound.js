@@ -10,18 +10,11 @@ const helpText = {
     'server stop        : Save world and stop server',
     'log                : Get last 100 lines from the log',
     'players            : Show players currently online',
-    'send {line}        : Send command to server console',
-    'getconfig cmdargs  : Get command line args as attachment',
-    'getconfig commands : Get server commands as attachment',
-    'getconfig settings : Get general settings as attachment',
-    'getconfig workshop : Get workshop mods as attachment',
-    'setconfig cmdargs  : Update command line args using attached file',
-    'setconfig commands : Update server commands using attached file',
-    'setconfig settings : Update general settings using attached file',
-    'setconfig workshop : Update workshop mods using attached file',
+    'getconfig settings : Get settings as attachment',
+    'setconfig settings : Update settings using attached file',
     'deployment backup-world      : Backup game world to zip file',
-    'deployment wipe-world-all    : Delete game map and config',
-    'deployment wipe-world-save   : Delete only map file',
+    'deployment wipe-world-all    : Delete game world folder',
+    'deployment wipe-world-save   : Delete only map files',
     'deployment install-runtime {beta} : Install game server'
   ]
 };
@@ -34,22 +27,15 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
-exports.send = commons.send;
 
 exports.help = function($) {
   let c = $.message.channel;
   if ($.data.length > 0) {
-    if ($.data[0] === 'send') {
-      $.httptool.doGet('/console/help', function(body) {
-        return '```\n' + body + '\n```';
-      });
-      return;
-    }
     c.send('No more help available.');
     return;
   }
   let x = $.context;
-  let s = '```\nUNTURNED COMMANDS\n' + x.config.CMD_PREFIX;
+  let s = '```\nSTARBOUND COMMANDS\n' + x.config.CMD_PREFIX;
   c.send(s + helpText.help.join('\n' + x.config.CMD_PREFIX) + '```');
   return;
 }

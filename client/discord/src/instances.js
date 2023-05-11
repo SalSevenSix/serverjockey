@@ -8,7 +8,8 @@ const servers = {
   projectzomboid: require('./servers/projectzomboid.js'),
   factorio: require('./servers/factorio.js'),
   sevendaystodie: require('./servers/sevendaystodie.js'),
-  unturned: require('./servers/unturned.js')
+  unturned: require('./servers/unturned.js'),
+  starbound: require('./servers/starbound.js')
 };
 
 exports.Service = class Service {
