@@ -50,6 +50,10 @@ class Deployment:
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
         r.pop()
+        r.psh('steamcmd')
+        r.put('login', steam.SteamCmdLoginHandler(self._mailer))
+        r.put('input', steam.SteamCmdInputHandler(self._mailer))
+        r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
 

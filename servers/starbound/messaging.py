@@ -33,8 +33,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_PREFIX, VERSION_SUFFIX = '[Info] Server Version', 'Source ID:'
     VERSION_FILTER = msgftr.DataMatches(
         '.*' + VERSION_PREFIX.replace('[', '\[').replace(']', '\]') + '.*' + VERSION_SUFFIX + '.*')
-    PORT_PREFIX = '[Info] UniverseServer: listening for incoming TCP connections on'
-    PORT_FILTER = msgftr.DataStrContains(PORT_PREFIX)
+    PORT_FILTER = msgftr.DataStrContains('[Info] UniverseServer: listening for incoming TCP connections on')
 
     def __init__(self, mailer: msgabc.MulticastMailer, public_ip: str):
         super().__init__(msgftr.And(

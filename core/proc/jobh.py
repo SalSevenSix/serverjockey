@@ -16,7 +16,7 @@ class JobPipeInLineService(msgabc.AbcSubscriber):
 
     @staticmethod
     async def request(mailer: msgabc.MulticastMailer, source: typing.Any, cmdline: str) -> typing.Any:
-        messenger = msgext.SynchronousMessenger(mailer)
+        messenger = msgext.SynchronousMessenger(mailer, timeout=2.0)
         response = await messenger.request(source, JobPipeInLineService.REQUEST, cmdline)
         return response.data()
 

@@ -1,8 +1,10 @@
 import logging
 import asyncio
+import vdf
 # ALLOW util.* msg.* context.* http.* system.* proc.*
-from core.util import aggtrf, util
+from core.util import aggtrf, util, io
 from core.msg import msgabc, msgftr
+from core.context import contextsvc
 from core.http import httpabc, httpext, httpsubs
 from core.proc import jobh
 
@@ -13,25 +15,24 @@ def _script_head() -> str:
   ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0
   echo steamcmd && return 1
 }
-echo "Installing or updating runtime with SteamCMD"
-echo "Log updates are usually delayed"
 '''
 
 
 class SteamCmdInstallHandler(httpabc.PostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, path: str, app_id: int, anon: bool = True):
-        self._mailer = mailer
+    def __init__(self, context: contextsvc.Context, path: str, app_id: int, anon: bool = True):
+        self._mailer = context
         self._path, self._app_id, self._anon = path, app_id, anon
+        self._steam_config = _SteamConfig(context.config('env'))
         self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
             completed_filter=jobh.JobProcess.FILTER_DONE,
             aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
-        login = 'anonymous'
-        if not self._anon:
-            login = 'bsalis'  # TODO Get user from _SteamConfig
+        login = 'anonymous' if self._anon else await self._steam_config.get_login()
+        if not login:
+            raise httpabc.ResponseBody.CONFLICT
         script = _script_head()
         if util.get('wipe', data):
             script += 'rm -rf ' + self._path + '\n'
@@ -50,8 +51,78 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         return await self._handler.handle_post(resource, data)
 
 
+class SteamCmdLoginHandler(httpabc.PostHandler):
+
+    def __init__(self, context: contextsvc.Context):
+        self._mailer = context
+        self._steam_config = _SteamConfig(context.config('env'))
+        self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
+            msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
+            completed_filter=jobh.JobProcess.FILTER_DONE,
+            aggregator=aggtrf.StrJoin('\n')))
+
+    async def handle_post(self, resource, data):
+        login = util.get('login', data)
+        if not login:
+            raise httpabc.ResponseBody.BAD_REQUEST
+        await self._steam_config.clear_cache()
+        script = _script_head()
+        script += '$(find_steamcmd)'
+        script += ' +login ' + util.script_escape(login)
+        script += ' +quit'
+        logging.debug('SCRIPT\n' + script)
+        data['command'], data['pty'] = script, True
+        return await self._handler.handle_post(resource, data)
+
+
+class SteamCmdInputHandler(httpabc.PostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+
+    async def handle_post(self, resource, data):
+        value = util.get('value', data)
+        if not value:
+            return httpabc.ResponseBody.BAD_REQUEST
+        result = await jobh.JobPipeInLineService.request(self._mailer, self, util.script_escape(value))
+        if isinstance(result, Exception):
+            raise result
+        return httpabc.ResponseBody.NO_CONTENT
+
+
 class _SteamConfig:
-    pass
+
+    def __init__(self, env: dict):
+        self._path = env['HOME'] + '/Steam/config/config.vdf'  # TODO check manual SteamCMD install location
+
+    async def _load(self) -> tuple:
+        try:
+            result = await io.read_file(self._path)
+            root = vdf.loads(result)
+            steamer = root['InstallConfigStore']['Software']['Valve']['steam']
+            return root, steamer
+        except Exception as e:
+            logging.debug('Problem loading or parsing ' + self._path + ' ' + repr(e))
+        return None, None
+
+    async def get_login(self) -> str | None:
+        root, steamer = await self._load()
+        if not steamer:
+            return None
+        if 'Accounts' in steamer:
+            for login in steamer['Accounts'].keys():
+                return login
+        return None
+
+    async def clear_cache(self):
+        root, steamer = await self._load()
+        if not steamer:
+            return
+        if 'Accounts' in steamer:
+            del steamer['Accounts']
+        if 'ConnectCache' in steamer:
+            del steamer['ConnectCache']
+        await io.write_file(self._path, vdf.dumps(root))
 
 
 # ~/Steam/config/config.vdf ...
