@@ -10,11 +10,11 @@
   let logText = '';
   let logBox;
 
-	$: if (logText && logBox) {
-	  tick().then(function() {
-		  logBox.scroll({ top: logBox.scrollHeight });
-		});
-	}
+  $: if (logText && logBox) {
+    tick().then(function() {
+      logBox.scroll({ top: logBox.scrollHeight });
+    });
+  }
 
   onMount(function() {
     fetch($instance.url + '/log/tail', newGetRequest())

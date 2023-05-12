@@ -1,11 +1,16 @@
 import { openModal } from 'svelte-modals';
 import LoginModal from '$lib/LoginModal.svelte';
+import SteamLoginModal from '$lib/SteamLoginModal.svelte';
 import ConfirmModal from '$lib/ConfirmModal.svelte';
 import TextAreaModal from '$lib/TextAreaModal.svelte';
 
 
 export function loginModal() {
   openModal(LoginModal);
+}
+
+export function steamLoginModal(successCallback) {
+  openModal(SteamLoginModal, { onSuccess: successCallback });
 }
 
 export function confirmModal(messageText, confirmCallback) {

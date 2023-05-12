@@ -1,6 +1,6 @@
 <script>
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
-  import { confirmModal } from '$lib/modals';
+  import { confirmModal, steamLoginModal } from '$lib/modals';
   import { instance, serverStatus, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let qualifierName = null;
@@ -46,20 +46,24 @@
     request.body = JSON.stringify(body);
     fetch($instance.url + '/deployment/install-runtime', request)
       .then(function(response) {
-        if (response.status === 204) return null;
+        if (response.status === 204) return true;
+        if (response.status === 409) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .then(function(json) {
         if (json && json.url) {
-          notifyText = 'Install Runtime completed. Please check console log output for details.';
-        } else {
+          // TODO drain log to check password prompt for changed password
+          notifyText = 'Install Runtime started. Please check console log output for details.';
+        } else if (json) {
           notifyText = 'Install Runtime completed.';
           cannotProcess = false;
+        } else {
+          steamLoginModal(doInstallRuntime);
         }
       })
       .catch(function(error) {
-        notifyError('Failed to initiate Install Runtime.');
+        notifyError('Failed to Install Runtime.');
         cannotProcess = false;
       });
   }

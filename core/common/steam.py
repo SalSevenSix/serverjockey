@@ -15,15 +15,15 @@ def _script_head() -> str:
   ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0
   echo steamcmd && return 1
 }
+echo "Running SteamCMD, log output may be delayed..."
 '''
 
 
 class SteamCmdInstallHandler(httpabc.PostHandler):
 
     def __init__(self, context: contextsvc.Context, path: str, app_id: int, anon: bool = True):
-        self._mailer = context
+        self._mailer, self._steam_config = context, _SteamConfig(context.config('env'))
         self._path, self._app_id, self._anon = path, app_id, anon
-        self._steam_config = _SteamConfig(context.config('env'))
         self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
             completed_filter=jobh.JobProcess.FILTER_DONE,
@@ -33,6 +33,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         login = 'anonymous' if self._anon else await self._steam_config.get_login()
         if not login:
             raise httpabc.ResponseBody.CONFLICT
+        # TODO Subscriber to kill if hangs on solicit password
         script = _script_head()
         if util.get('wipe', data):
             script += 'rm -rf ' + self._path + '\n'
@@ -54,8 +55,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
 class SteamCmdLoginHandler(httpabc.PostHandler):
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
-        self._steam_config = _SteamConfig(context.config('env'))
+        self._mailer, self._steam_config = context, _SteamConfig(context.config('env'))
         self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
             completed_filter=jobh.JobProcess.FILTER_DONE,
@@ -81,12 +81,11 @@ class SteamCmdInputHandler(httpabc.PostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        value = util.get('value', data)
-        if not value:
-            return httpabc.ResponseBody.BAD_REQUEST
-        result = await jobh.JobPipeInLineService.request(self._mailer, self, util.script_escape(value))
-        if isinstance(result, Exception):
-            raise result
+        value, heartbeat = util.get('value', data), util.get('heartbeat', data)
+        if value:
+            result = await jobh.JobPipeInLineService.request(self._mailer, self, util.script_escape(value))
+            if isinstance(result, Exception):
+                raise result
         return httpabc.ResponseBody.NO_CONTENT
 
 
