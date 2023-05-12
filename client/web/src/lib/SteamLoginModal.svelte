@@ -2,7 +2,7 @@
   import { notifyError } from '$lib/notifications';
   import { onDestroy, tick } from 'svelte';
   import { closeModal } from 'svelte-modals';
-  import { RollingLog } from '$lib/util';
+  import { sleep, RollingLog } from '$lib/util';
   import { instance, SubscriptionHelper, newPostRequest } from '$lib/serverjockeyapi';
 
   export let isOpen;
@@ -23,13 +23,20 @@
     });
   }
 
+  async function heartbeat() {
+    while (stage > 0) {
+      await sleep(1000);
+      await fetch($instance.url + '/steamcmd/input', newPostRequest());
+    }
+  }
+
   function startLogin() {
     if (!steamLogin) {
       notifyError('Login not provided');
       return;
     }
     stage = 1;
-    // TODO Start heartbeat to keep SteamCMD process alive
+    heartbeat();
     let request = newPostRequest();
     request.body = JSON.stringify({ login: steamLogin });
     fetch($instance.url + '/steamcmd/login', request)
@@ -81,6 +88,7 @@
   }
 
   onDestroy(function() {
+    stage = 0;
     subs.stop();
   });
 </script>

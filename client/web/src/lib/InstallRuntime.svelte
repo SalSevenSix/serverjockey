@@ -1,17 +1,16 @@
 <script>
+  import { onDestroy } from 'svelte';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal, steamLoginModal } from '$lib/modals';
-  import { instance, serverStatus, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { RollingLog } from '$lib/util';
+  import { instance, serverStatus, SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let qualifierName = null;
+  let subs = new SubscriptionHelper();
+  let logLines = new RollingLog();
   let qualifier = '';
-  let notifyText = null;
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
-  $: if (!cannotProcess && notifyText) {
-    notifyInfo(notifyText);
-    notifyText = null;
-  }
 
   function runtimeMeta() {
     openFileInNewTab($instance.url + '/deployment/runtime-meta', function(error) {
@@ -53,10 +52,20 @@
       })
       .then(function(json) {
         if (json && json.url) {
-          // TODO drain log to check password prompt for changed password
-          notifyText = 'Install Runtime started. Please check console log output for details.';
+          subs.poll(json.url, function(data) {
+            logLines.append(data);
+            return true;
+          })
+          .finally(function() {
+            if (logLines.toText().includes('password:')) {
+              logLines.reset();
+              steamLoginModal(doInstallRuntime);
+            } else {
+              notifyInfo('Install Runtime completed. Please check console log output for details.');
+            }
+          });
         } else if (json) {
-          notifyText = 'Install Runtime completed.';
+          notifyInfo('Install Runtime completed.');
           cannotProcess = false;
         } else {
           steamLoginModal(doInstallRuntime);
@@ -67,6 +76,10 @@
         cannotProcess = false;
       });
   }
+
+  onDestroy(function() {
+    subs.stop();
+  });
 </script>
 
 

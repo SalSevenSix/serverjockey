@@ -1,6 +1,7 @@
 import logging
-import asyncio
 import vdf
+import re
+from asyncio import subprocess   # TODO Probably should not import this
 # ALLOW util.* msg.* context.* http.* system.* proc.*
 from core.util import aggtrf, util, io
 from core.msg import msgabc, msgftr
@@ -33,7 +34,8 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         login = 'anonymous' if self._anon else await self._steam_config.get_login()
         if not login:
             raise httpabc.ResponseBody.CONFLICT
-        # TODO Subscriber to kill if hangs on solicit password
+        if not self._anon:
+            self._mailer.register(_KillSteam(self._mailer))
         script = _script_head()
         if util.get('wipe', data):
             script += 'rm -rf ' + self._path + '\n'
@@ -81,12 +83,48 @@ class SteamCmdInputHandler(httpabc.PostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        value, heartbeat = util.get('value', data), util.get('heartbeat', data)
+        value = util.get('value', data)
         if value:
             result = await jobh.JobPipeInLineService.request(self._mailer, self, util.script_escape(value))
             if isinstance(result, Exception):
                 raise result
+        print('DING')
         return httpabc.ResponseBody.NO_CONTENT
+
+
+# Loading Steam API...OK
+# Logging in user 'bsalis' to Steam Public...
+# password:
+# Enter the current code from your Steam Guard Mobile Authenticator app
+# Two-factor code:
+# OK
+# Waiting for client config...OK
+# Waiting for user info...OK
+
+
+class _KillSteam(msgabc.AbcSubscriber):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(msgftr.Or(
+            jobh.JobProcess.FILTER_STDOUT_LINE,
+            jobh.JobProcess.FILTER_STARTED,
+            jobh.JobProcess.FILTER_DONE))
+        self._mailer = mailer
+        self._process: subprocess.Process | None = None
+        self._solicit_password = re.compile('^Logging in user \'.*\' to Steam Public\.\.\.$')
+
+    async def handle(self, message):
+        if jobh.JobProcess.FILTER_DONE.accepts(message):
+            return True
+        if jobh.JobProcess.FILTER_STARTED.accepts(message):
+            self._process = message.data()
+            return None
+        if jobh.JobProcess.FILTER_STDOUT_LINE.accepts(message):
+            if self._solicit_password.match(message.data()) is not None:
+                if self._process and self._process.returncode is None:
+                    self._process.terminate()
+                return True
+        return None
 
 
 class _SteamConfig:
@@ -122,38 +160,3 @@ class _SteamConfig:
         if 'ConnectCache' in steamer:
             del steamer['ConnectCache']
         await io.write_file(self._path, vdf.dumps(root))
-
-
-# ~/Steam/config/config.vdf ...
-#  "ConnectCache"
-#  {
-#   "f5e8c7a71" "....."
-#  }
-
-# Loading Steam API...OK
-# Logging in user 'bsalis' to Steam Public...
-# password:
-# Enter the current code from your Steam Guard Mobile Authenticator app
-# Two-factor code:
-# OK
-# Waiting for client config...OK
-# Waiting for user info...OK
-
-
-class _KillSteamCmdIfSolicitHanged(msgabc.AbcSubscriber):
-
-    def __init__(self, mailer: msgabc.MulticastMailer, password: str):
-        super().__init__(msgftr.Or(jobh.JobProcess.FILTER_STDOUT_LINE, jobh.JobProcess.FILTER_DONE))
-        self._mailer = mailer
-        assert password  # TODO test this is ok
-        self._password = password
-        print('|' + password + '|')
-
-    async def handle(self, message):
-        if jobh.JobProcess.FILTER_DONE.accepts(message):
-            return True
-        print('|' + message.data() + '|')
-        if message.data().find("Logging in user 'bsalis' to Steam Public...") > -1:
-            await asyncio.sleep(1)
-            await jobh.JobPipeInLineService.request(self._mailer, self, self._password)
-        return None
