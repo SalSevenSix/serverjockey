@@ -242,4 +242,6 @@ class _AccessLogFilter(logging.Filter):
     REGEX = re.compile('.*GET.*/(subscriptions|assets|_app)/.*HTTP/1.1" (204|200).*')
 
     def filter(self, record):
-        return _AccessLogFilter.REGEX.match(record.getMessage()) is None
+        line = record.getMessage()
+        result = _AccessLogFilter.REGEX.match(line) is not None or line.find('steamcmd/input') > -1
+        return not result

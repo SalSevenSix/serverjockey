@@ -69,6 +69,7 @@
           cannotProcess = false;
         } else {
           steamLoginModal(doInstallRuntime);
+          cannotProcess = false;
         }
       })
       .catch(function(error) {

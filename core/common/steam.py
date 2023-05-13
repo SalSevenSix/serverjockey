@@ -1,9 +1,10 @@
 import logging
 import vdf
 import re
-from asyncio import subprocess   # TODO Probably should not import this
+import asyncio
+from asyncio import subprocess   # TODO Probably should not import, keep within proc package
 # ALLOW util.* msg.* context.* http.* system.* proc.*
-from core.util import aggtrf, util, io
+from core.util import aggtrf, util, io, tasks
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpext, httpsubs
@@ -34,8 +35,6 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         login = 'anonymous' if self._anon else await self._steam_config.get_login()
         if not login:
             raise httpabc.ResponseBody.CONFLICT
-        if not self._anon:
-            self._mailer.register(_KillSteam(self._mailer))
         script = _script_head()
         if util.get('wipe', data):
             script += 'rm -rf ' + self._path + '\n'
@@ -51,6 +50,8 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         script += ' +quit'
         logging.debug('SCRIPT\n' + script)
         data['command'], data['pty'] = script, True
+        if not self._anon:
+            self._mailer.register(_KillSteamOnSolicitPassword(self._mailer))
         return await self._handler.handle_post(resource, data)
 
 
@@ -74,6 +75,7 @@ class SteamCmdLoginHandler(httpabc.PostHandler):
         script += ' +quit'
         logging.debug('SCRIPT\n' + script)
         data['command'], data['pty'] = script, True
+        self._mailer.register(_KillSteamOnNoHeartbeat(self._mailer))
         return await self._handler.handle_post(resource, data)
 
 
@@ -88,21 +90,12 @@ class SteamCmdInputHandler(httpabc.PostHandler):
             result = await jobh.JobPipeInLineService.request(self._mailer, self, util.script_escape(value))
             if isinstance(result, Exception):
                 raise result
-        print('DING')
+            return httpabc.ResponseBody.NO_CONTENT
+        self._mailer.post(self, _KillSteamOnNoHeartbeat.HEARTBEAT)
         return httpabc.ResponseBody.NO_CONTENT
 
 
-# Loading Steam API...OK
-# Logging in user 'bsalis' to Steam Public...
-# password:
-# Enter the current code from your Steam Guard Mobile Authenticator app
-# Two-factor code:
-# OK
-# Waiting for client config...OK
-# Waiting for user info...OK
-
-
-class _KillSteam(msgabc.AbcSubscriber):
+class _KillSteamOnSolicitPassword(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
@@ -114,17 +107,57 @@ class _KillSteam(msgabc.AbcSubscriber):
         self._solicit_password = re.compile('^Logging in user \'.*\' to Steam Public\.\.\.$')
 
     async def handle(self, message):
-        if jobh.JobProcess.FILTER_DONE.accepts(message):
-            return True
+        if jobh.JobProcess.FILTER_STDOUT_LINE.accepts(message):
+            if self._solicit_password.match(message.data()) is not None:
+                _terminate_process(self._process)
+                return True
         if jobh.JobProcess.FILTER_STARTED.accepts(message):
             self._process = message.data()
             return None
-        if jobh.JobProcess.FILTER_STDOUT_LINE.accepts(message):
-            if self._solicit_password.match(message.data()) is not None:
-                if self._process and self._process.returncode is None:
-                    self._process.terminate()
-                return True
+        if jobh.JobProcess.FILTER_DONE.accepts(message):
+            return True
         return None
+
+
+class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
+    HEARTBEAT = '_KillSteamOnNoHeartbeat.Hearbeat'
+    FILTER_HEARTBEAT = msgftr.NameIs(HEARTBEAT)
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(msgftr.Or(
+            _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT,
+            jobh.JobProcess.FILTER_STARTED,
+            jobh.JobProcess.FILTER_DONE))
+        self._mailer = mailer
+        self._queue = asyncio.Queue()
+        self._process: subprocess.Process | None = None
+        self._task = None
+
+    async def handle(self, message):
+        if _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT.accepts(message):
+            if self._task:
+                self._queue.put_nowait(True)
+            return None
+        if jobh.JobProcess.FILTER_STARTED.accepts(message):
+            self._process = message.data()
+            self._task = tasks.task_start(self._monitor(), util.obj_to_str(self))
+            return None
+        if jobh.JobProcess.FILTER_DONE.accepts(message):
+            self._queue.put_nowait(False)
+            return True
+        return None
+
+    async def _monitor(self):
+        try:
+            looping = True
+            while looping:
+                looping = await asyncio.wait_for(self._queue.get(), 3.0)
+                self._queue.task_done()
+        except asyncio.TimeoutError:
+            _terminate_process(self._process)
+        finally:
+            util.clear_queue(self._queue)
+            tasks.task_end(self._task)
 
 
 class _SteamConfig:
@@ -160,3 +193,8 @@ class _SteamConfig:
         if 'ConnectCache' in steamer:
             del steamer['ConnectCache']
         await io.write_file(self._path, vdf.dumps(root))
+
+
+def _terminate_process(process: subprocess.Process | None):
+    if process and process.returncode is None:
+        process.terminate()
