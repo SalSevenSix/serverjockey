@@ -262,7 +262,11 @@ class CommandProcessor:
         return True
 
     def _console_send(self, argument: str) -> bool:
-        self._connection.post(self._instance_path('/console/send'), {'line': str(argument)})
+        result = self._connection.post(self._instance_path('/console/send'), {'line': str(argument)})
+        if result:
+            result = util.repr_dict(result) if isinstance(result, dict) else str(result)
+            for line in result.strip().split('\n'):
+                logging.info(self._out + line)
         return True
 
     def _world_broadcast(self, argument: str) -> bool:

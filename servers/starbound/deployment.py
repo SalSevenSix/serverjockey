@@ -1,10 +1,10 @@
 # ALLOW core.* starbound.messaging
-from core.util import io
+from core.util import util, io
 from core.msg import msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
-from core.common import steam, interceptors
+from core.common import steam, rconsvc, interceptors
 from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
@@ -18,6 +18,7 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
+        self._config_file = self._world_dir + '/starbound_server.config'
 
     async def initialise(self):
         await self.build_world()
@@ -39,7 +40,7 @@ class Deployment:
         r.put('*{path}', httpext.FileSystemHandler(self._world_dir, 'path'))
         r.pop()
         r.psh('config')
-        r.put('settings', httpext.FileSystemHandler(self._world_dir + '/starbound_server.config'))
+        r.put('settings', httpext.FileSystemHandler(self._config_file))
         r.pop()
         r.psh('deployment')
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_211820.acf'))
@@ -59,6 +60,7 @@ class Deployment:
         r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
 
     async def new_server_process(self):
+        await self._rcon_config()
         await self._link_mods()
         bin_dir = self._runtime_dir + '/linux'
         return proch.ServerProcess(self._mailer, bin_dir + '/starbound_server').use_cwd(bin_dir)
@@ -71,6 +73,13 @@ class Deployment:
         storage_dir = self._runtime_dir + '/storage'
         if not await io.symlink_exists(storage_dir):
             await io.create_symlink(storage_dir, self._world_dir)
+
+    async def _rcon_config(self):
+        if not await io.file_exists(self._config_file):
+            return
+        config = util.json_to_dict(await io.read_file(self._config_file))
+        port, password = util.get('rconServerPort', config), util.get('rconServerPassword', config)
+        rconsvc.RconService.set_config(self._mailer, self, port, password)
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')

@@ -5,7 +5,7 @@ from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import prcext
 from core.common import playerstore
-from servers.starbound import deployment as dep, messaging as msg
+from servers.starbound import deployment as dep, messaging as msg, console as con
 
 
 class Server(svrabc.Server):
@@ -18,9 +18,11 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         await msg.initialise(self._mailer)
+        await con.initialise(self._mailer)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
+        con.resources(self._mailer, resource)
         self._deployment.resources(resource)
         r = httprsc.ResourceBuilder(resource)
         r.psh('server', svrext.ServerStatusHandler(self._mailer))

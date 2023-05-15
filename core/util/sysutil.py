@@ -60,13 +60,13 @@ async def get_public_ip() -> str:
 async def _fetch_text(url: str) -> str | None:
     # noinspection PyBroadException
     try:
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=3.0)) as session:
             async with session.get(url) as response:
                 assert response.status == 200
                 result = await response.text()
                 return result.strip()
     except Exception as e:
-        logging.error('Failed to get public ip from %s because %s', url, repr(e))
+        logging.warning('Failed to get public ip from %s because %s', url, repr(e))
     return None
 
 

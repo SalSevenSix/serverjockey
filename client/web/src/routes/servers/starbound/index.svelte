@@ -10,10 +10,20 @@
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = {
     'wipe-world-save': 'Reset the game world map only.',
     'wipe-world-all': 'Reset game world map and configuration.'
+  };
+
+  let consoleCommands = {
+    'console': {
+      'send': [
+        {name: 'help', input: 'display'},
+        {name: 'line', input: 'text', type: 'string'}
+      ]
+    }
   };
 </script>
 
@@ -31,6 +41,9 @@
         </div>
       </div>
       <ConsoleLog hasConsoleLogFile />
+      <Collapsible title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
       <Collapsible title="Logging">
         <FileSystem allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
       </Collapsible>

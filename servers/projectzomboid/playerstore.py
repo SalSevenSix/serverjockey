@@ -59,7 +59,8 @@ class OptionLoader:
             self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('List of Server Options:'), include_start=False,
-                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True, timeout=10.0))
+                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True,
+                timeout=10.0))
         options = []
         if response is None or not isinstance(response, Iterable):
             return options
@@ -87,7 +88,8 @@ class PlayerLoader:
             self._mailer, self._source, 'players', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
-                stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=10.0))
+                stop_filter=msgftr.DataEquals(''), include_stop=False,
+                timeout=10.0))
         players = []
         if response is None or not isinstance(response, Iterable):
             return players

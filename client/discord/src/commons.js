@@ -145,7 +145,11 @@ exports.deployment = function($) {
 
 exports.send = function($) {
   if ($.data.length < 1) return;
-  let body = { line: $.data.join(' ') };
+  let data = $.data.map(function(value) {
+    if (value.includes(' ')) return '"' + value + '"';
+    return value;
+  });
+  let body = { line: data.join(' ') };
   $.httptool.doPost('/console/send', body);
 }
 

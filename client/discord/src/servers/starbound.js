@@ -10,6 +10,7 @@ const helpText = {
     'server stop        : Save world and stop server',
     'log                : Get last 100 lines from the log',
     'players            : Show players currently online',
+    'send {line}        : Send command to server console',
     'getconfig settings : Get settings as attachment',
     'setconfig settings : Update settings using attached file',
     'deployment backup-world      : Backup game world to zip file',
@@ -27,6 +28,7 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
+exports.send = commons.send;
 
 exports.help = function($) {
   let c = $.message.channel;

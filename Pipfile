@@ -9,6 +9,7 @@ verify_ssl = true
 aiohttp = "*"
 aiofiles = "*"
 vdf = "*"
+rcon = "*"
 
 [requires]
 python_version = "3.10"
