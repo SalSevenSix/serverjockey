@@ -22,16 +22,16 @@
   </p>
   <p>
     If you are new to Discord
-    <a href="#new-discord-account" use:scrollto={'#new-discord-account'}>start at step 1</a>
+    <a href="#newDiscordAccount" use:scrollto={'#newDiscordAccount'}>start at step 1</a>
     to create an account for yourself.
     If you already have an account but need a Discord server,
-    <a href="#new-discord-server" use:scrollto={'#new-discord-server'}>jump to step 2</a>.
+    <a href="#newDiscordServer" use:scrollto={'#newDiscordServer'}>jump to step 2</a>.
     If you have a Discord server and just need the bot then
-    <a href="#create-bot" use:scrollto={'#create-bot'}>jump to the create bot step</a>.
+    <a href="#createBot" use:scrollto={'#createBot'}>jump to the create bot step</a>.
   </p>
 </div>
 
-<div class="content" id="new-discord-account">
+<div class="content" id="newDiscordAccount">
   <hr />
   <p><span class="step-title">01.</span>
     First step is to <a href="https://discord.com/login" target="_blank">login to Discord</a> in your browser.
@@ -41,7 +41,7 @@
   <figure><img src="/assets/setup/01_new_account.png" alt="New Discord Account" /></figure>
 </div>
 
-<div class="content" id="new-discord-server">
+<div class="content" id="newDiscordServer">
   <p><span class="step-title">02.</span>
     Add a new Discord server by clicking the <span class="is-family-monospace is-size-5">+</span> button
     on the left panel.
@@ -78,7 +78,7 @@
   <figure><img src="/assets/setup/06_fresh_server.png" alt="Fresh Discord Server" /></figure>
 </div>
 
-<div class="content" id="create-bot">
+<div class="content" id="createBot">
   <p><span class="step-title">07.</span>
     Now that a new or existing Discord server is ready. It is time to create a Discord bot.
     Don&#39;t worry! No coding is required, that is all in ServerJockey. This is the bot setup on Discord.
@@ -206,7 +206,7 @@
   <p><span class="step-title">21.</span>
     Before starting up the bot, it is recommended that you enable the developer features in Discord.
     This will allow you to see the channel IDs. If already enabled or you don&#39;t want to do this then
-    skip to the <a href="#get-bot-token" use:scrollto={'#get-bot-token'}>bot login token</a> step.
+    skip to the <a href="#getBotToken" use:scrollto={'#getBotToken'}>bot login token</a> step.
   </p>
   <p>
     To enable, open <span class="has-text-weight-bold">User Settings</span> with the cog button.
@@ -231,7 +231,7 @@
   <figure><img src="/assets/setup/23_copy_channel_id.png" alt="Copy Channel ID" /></figure>
 </div>
 
-<div class="content" id="get-bot-token">
+<div class="content" id="getBotToken">
   <p><span class="step-title">24.</span>
     Time to startup the bot. First a login token is needed. Go to the Developer Portal browser tab again.
     In the <span class="has-text-weight-bold">Bot</span> section click

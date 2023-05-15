@@ -40,7 +40,7 @@
 
 <div class="block">
   <div class="field">
-    <label for="console-log" class="label">
+    <label for="consoleLogText" class="label">
       {#if hasConsoleLogFile}
         <a href={$instance.url + '/log'} target="_blank">Console Log</a>
       {:else}
@@ -48,8 +48,8 @@
       {/if}
     </label>
     <div class="control pr-6">
-      <textarea bind:this={logBox} id="console-log"
-                class="textarea is-family-monospace is-size-7" readonly>{logText}</textarea>
+      <textarea id="consoleLogText" class="textarea is-family-monospace is-size-7"
+                bind:this={logBox} readonly>{logText}</textarea>
     </div>
   </div>
 </div>

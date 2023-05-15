@@ -54,12 +54,12 @@
 
 <div class="block">
   <div class="field">
-    <label for="configfile-text" class="label">
+    <label for={'configFileText' + name.replaceAll(' ', '')} class="label">
       <a href={$instance.url + path} target="_blank">{name}</a>
     </label>
     <slot />
     <div class="control pr-6">
-      <textarea id="configfile-text" class="textarea" bind:value={configText}></textarea>
+      <textarea id={'configFileText' + name.replaceAll(' ', '')} class="textarea" bind:value={configText}></textarea>
     </div>
   </div>
   <div class="field">

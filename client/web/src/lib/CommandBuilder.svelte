@@ -93,9 +93,9 @@
         {/if}
         {#if arg.input === 'text'}
           <div class="field">
-            <label for="{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
+            <label for="commandBuilderI{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
             <div class="control">
-              <input id="{arg.name}" class="input" type="text"
+              <input id="commandBuilderI{arg.name}" class="input" type="text"
                      bind:value={args[commands[command][action].indexOf(arg)]}>
             </div>
           </div>
@@ -117,7 +117,7 @@
       {/each}
       <div class="field">
         <div class="control">
-          <button id="send" name="send" class="button is-primary"
+          <button name="send" class="button is-primary"
                   disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'}
                   on:click={send}>Send</button>
         </div>

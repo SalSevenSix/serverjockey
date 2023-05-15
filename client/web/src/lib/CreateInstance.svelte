@@ -40,10 +40,10 @@
 <div class="block">
   <h2 class="title is-5">New Instance</h2>
   <div class="field">
-    <label for="createinstance-module" class="label">Type</label>
+    <label for="createInstanceModule" class="label">Type</label>
     <div class="control">
       <div class="select">
-        <select id="createinstance-module" bind:value={serverForm.module}>
+        <select id="createInstanceModule" bind:value={serverForm.module}>
           {#each modules as module}
             <option>{module}</option>
           {/each}
@@ -52,14 +52,14 @@
     </div>
   </div>
   <div class="field">
-    <label for="createinstance-instance" class="label">Name</label>
+    <label for="createInstanceIdentity" class="label">Name</label>
     <div class="control">
-      <input id="createinstance-instance" class="input" type="text" bind:value={serverForm.identity}>
+      <input id="createInstanceIdentity" class="input" type="text" bind:value={serverForm.identity}>
     </div>
   </div>
   <div class="field">
     <div class="control">
-      <button id="createinstance-create" name="create" class="button is-primary is-fullwidth"
+      <button name="create" class="button is-primary is-fullwidth"
               disabled={creating} on:click={create}>Create</button>
     </div>
   </div>

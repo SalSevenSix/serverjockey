@@ -3,9 +3,9 @@
   import 'font-awesome5/css/fontawesome-all.css';
   import '../app.css';
 
-  import { securityToken } from '$lib/serverjockeyapi';
   import { onMount } from 'svelte';
   import { Modals } from 'svelte-modals';
+  import { securityToken } from '$lib/serverjockeyapi';
   import { loginModal } from '$lib/modals';
   import Navbar from '$lib/Navbar.svelte';
   import Notifications from '$lib/Notifications.svelte';

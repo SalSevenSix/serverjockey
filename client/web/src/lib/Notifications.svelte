@@ -12,8 +12,7 @@
     <div class="container">
       {#each $notifications as notification, index}
         <div class="notification {notification.level}">
-          <button id="delete-message-{notification.id}" name="{notification.id}" class="delete is-large"
-                  on:click={deleteMessage}></button>
+          <button name="{notification.id}" class="delete is-large" on:click={deleteMessage}></button>
           {notification.message}
         </div>
       {/each}

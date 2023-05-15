@@ -95,58 +95,54 @@
 
 
 <div class="modal" class:is-active={isOpen}>
-  <div class="modal-background" on:click={closeModal}></div>
+  <div class="modal-background" on:click={closeModal} on:keypress={function() {}}></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Login to Steam</p>
       <button class="delete is-large" aria-label="close" on:click={closeModal}></button>
     </header>
     <section class="modal-card-body">
-      <div id="confirmModalMessageContent" class="content">
+      <div class="content">
         <p>This game server requires a Steam account with game licence to install.
            Please provide Steam credentials to continue.</p>
       </div>
       {#if stage < 2}
         <div class="field">
-          <label for="steamloginname" class="label">Steam Login Name</label>
+          <label for="steamLoginModalLogin" class="label">Steam Login Name</label>
           <div class="control">
-            <input id="steamloginname" class="input" type="text" bind:value={steamLogin} />
+            <input id="steamLoginModalLogin" class="input" type="text" bind:value={steamLogin} />
           </div>
         </div>
         <div class="field buttons is-right">
-          <button id="steamloginstart" name="steam-login-start" class="button is-primary"
+          <button name="steam-login-start" class="button is-primary"
                   disabled={stage > 0} on:click={startLogin}>Login</button>
         </div>
       {/if}
       {#if stage == 2}
         <div class="field">
-          <label for="steampassword" class="label">Enter Password</label>
+          <label for="steamLoginModalPassword" class="label">Enter Password</label>
           <div class="control">
-            <input id="steampassword" class="input" type="password" bind:value={steamPassword} />
+            <input id="steamLoginModalPassword" class="input" type="password" bind:value={steamPassword} />
           </div>
         </div>
         <div class="field buttons is-right">
-          <button id="steampasswordenter" name="steam-password-enter" class="button is-primary"
-                  on:click={enterPassword}>Enter</button>
+          <button name="steam-password-enter" class="button is-primary" on:click={enterPassword}>Enter</button>
         </div>
       {/if}
       {#if stage == 3}
         <div class="field">
-          <label for="steamcode" class="label">Enter Steam Guard Code</label>
+          <label for="steamLoginModalCode" class="label">Enter Steam Guard Code</label>
           <div class="control">
-            <input id="steamcode" class="input" type="text" bind:value={steamCode} />
+            <input id="steamLoginModalCode" class="input" type="text" bind:value={steamCode} />
           </div>
         </div>
         <div class="field buttons is-right">
-          <button id="steamcodeenter" name="steam-code-enter" class="button is-primary"
-                  on:click={enterCode}>Enter</button>
+          <button name="steam-code-enter" class="button is-primary" on:click={enterCode}>Enter</button>
         </div>
       {/if}
       <div class="field">
         <div class="control">
-          <textarea bind:this={logBox} id="steam-login-log"
-                    class="textarea has-fixed-size" rows="4"
-                    readonly>{logText}</textarea>
+          <textarea class="textarea has-fixed-size" rows="4" bind:this={logBox} readonly>{logText}</textarea>
         </div>
       </div>
     </section>

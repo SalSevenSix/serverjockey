@@ -13,21 +13,21 @@
   <p>
     This guide covers installing, configuring and starting a Project Zomboid server using Discord.
     You will need to <a href="/guides/discord">setup the discord bot</a> first if you have not already.
-    When ready, <a href="#setup-with-bot" use:scrollto={'#setup-with-bot'}>jump to the first step</a> to begin.
+    When ready, <a href="#setupWithBotOne" use:scrollto={'#setupWithBotOne'}>jump to the first step</a> to begin.
   </p>
   <p>
-    Go to the <a href="#additional-information" use:scrollto={'#additional-information'}>additional information</a>
+    Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
     section at the end for help on;
   </p>
   <ul>
-    <li><a href="#configuration-files" use:scrollto={'#configuration-files'}>Configuration Files</a></li>
-    <li><a href="#port-forwarding" use:scrollto={'#port-forwarding'}>Port Fowarding</a></li>
-    <li><a href="#memory-allocation" use:scrollto={'#memory-allocation'}>Memory Allocation</a></li>
+    <li><a href="#configurationFiles" use:scrollto={'#configurationFiles'}>Configuration Files</a></li>
+    <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
+    <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
   </ul>
 </div>
 
 
-<div class="content" id="setup-with-bot">
+<div class="content" id="setupWithBotOne">
   <hr />
   <h3 class="title is-4">Server setup using the Discord bot</h3>
 </div>
@@ -36,7 +36,7 @@
   <p><span class="step-title">01.</span>
     First step is to create an instance for the Project Zomboid server. If you are following this guide after the
     <a href="/guides/discord">discord bot setup guide</a>, then the instance already exists, so you can
-    <a href="#setup-with-bot-02" use:scrollto={'#setup-with-bot-02'}>jump to the next step</a>.
+    <a href="#setupWithBotTwo" use:scrollto={'#setupWithBotTwo'}>jump to the next step</a>.
   </p>
   <p>
     For this guide the instance is called <span class="has-text-weight-bold">myserver</span>. You can give your
@@ -50,7 +50,7 @@
   <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
 </div>
 
-<div class="content" id="setup-with-bot-02">
+<div class="content" id="setupWithBotTwo">
   <p><span class="step-title">02.</span>
     Now enter the help command. Now that there is an instance, you will see all the commands for that type of instance.
   </p>
@@ -114,7 +114,7 @@
   <p><span class="step-title">08.</span>
     For the purpose of this guide. I have only updated a the public server name and welcome message
     in the downloaded INI file. Typically you will make more changes. You can look at the
-    <a href="#additional-information" use:scrollto={'#additional-information'}>additional information</a>
+    <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
     at the end of this guide for more help on Project Zomboid server configuration.
   </p>
   <pre class="pre is-thinner">PublicName=ZomBox demo server
@@ -145,7 +145,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Now start the server again. For this guide I used the local network IP to login to the Project Zomboid server.
     In order for other people to connect over the internet to your server, you may need to redirect ports
     on your router. More information on that can be found in
-    <a href="#additional-information" use:scrollto={'#additional-information'}>additional information</a>.
+    <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>.
   </p>
   <p>
     After logging in I am greeted with the new Welcome Message I configured earlier. Also, if you have a
@@ -172,12 +172,12 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 </div>
 
 
-<div class="content" id="additional-information">
+<div class="content" id="additionalInformation">
   <hr />
   <h3 class="title is-4">Additional Information</h3>
 </div>
 
-<div class="content" id="configuration-files">
+<div class="content" id="configurationFiles">
   <h4 class="title is-5">Configuration Files</h4>
   <p>
     For help understanding Project Zomboid server configuration files. Please see the
@@ -200,7 +200,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   </table>
 </div>
 
-<div class="content" id="port-forwarding">
+<div class="content" id="portForwarding">
   <h4 class="title is-5">Port Forwarding</h4>
   <p>
     In order for people to connect to your Project Zomboid server over the internet, your home
@@ -232,7 +232,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 UPnP=false</pre>
 </div>
 
-<div class="content" id="memory-allocation">
+<div class="content" id="memoryAllocation">
   <h4 class="title is-5">Memory Allocation</h4>
   <p>
     The Project Zomboid server has a memory allocation. This is defined in

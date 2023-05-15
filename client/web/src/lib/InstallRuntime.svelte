@@ -93,19 +93,19 @@
 <div class="block">
   {#if qualifierName}
     <div class="field">
-      <label for="install-runtime-qualifier" class="label">{qualifierName}</label>
+      <label for="installRuntimeQualifier" class="label">{qualifierName}</label>
       <div class="control">
-        <input id="install-runtime-qualifier" class="input" type="text" bind:value={qualifier}>
+        <input id="installRuntimeQualifier" class="input" type="text" bind:value={qualifier}>
       </div>
     </div>
   {/if}
   <div class="field">
     <div class="control buttons">
-      <button id="wipe-runtime" name="wipe-runtime" class="button is-danger"
+      <button name="wipe-runtime" class="button is-danger"
               disabled={cannotProcess} on:click={wipeRuntime}>Delete Runtime</button>
-      <button id="install-runtime" name="install-runtime" class="button is-warning"
+      <button name="install-runtime" class="button is-warning"
               disabled={cannotProcess} on:click={installRuntime}>Install Runtime</button>
-      <button id="runtime-meta" name="runtime-meta" class="button is-primary"
+      <button name="runtime-meta" class="button is-primary"
               disabled={cannotProcess} on:click={runtimeMeta}>Runtime Meta</button>
     </div>
   </div>

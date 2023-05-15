@@ -44,39 +44,39 @@
     </div>
   {/if}
   <div class="field">
-    <label for="bot-token" class="label">Discord Bot Token</label>
+    <label for="serverLinkConfigBotToken" class="label">Discord Bot Token</label>
     <div class="control">
-      <input id="bot-token" class="input" type="text" bind:value={serverLinkForm.BOT_TOKEN}>
+      <input id="serverLinkConfigBotToken" class="input" type="text" bind:value={serverLinkForm.BOT_TOKEN}>
     </div>
   </div>
   <div class="field">
-    <label for="log-channel" class="label">Log Channel ID</label>
+    <label for="serverLinkConfigLogChannel" class="label">Log Channel ID</label>
     <div class="control">
-      <input id="log-channel" class="input" type="text" bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
+      <input id="serverLinkConfigLogChannel" class="input" type="text" bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
     </div>
   </div>
   <div class="field">
-    <label for="command-prefix" class="label">Command Prefix</label>
+    <label for="serverLinkConfigCommandPrefix" class="label">Command Prefix</label>
     <div class="control">
-      <input id="command-prefix" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
+      <input id="serverLinkConfigCommandPrefix" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
     </div>
   </div>
   <div class="field">
-    <label for="admin-role" class="label">Admin Role</label>
+    <label for="serverLinkConfigAdminRole" class="label">Admin Role</label>
     <div class="control">
-      <input id="admin-role" class="input" type="text" bind:value={serverLinkForm.ADMIN_ROLE}>
+      <input id="serverLinkConfigAdminRole" class="input" type="text" bind:value={serverLinkForm.ADMIN_ROLE}>
     </div>
   </div>
   <div class="field">
-    <label for="whitelist-dm" class="label">Whitelist DM</label>
+    <label for="serverLinkConfigWhitelistDm" class="label">Whitelist DM</label>
     <div class="control">
-      <textarea id="whitelist-dm" class="textarea" bind:value={serverLinkForm.WHITELIST_DM}></textarea>
+      <textarea id="serverLinkConfigWhitelistDm" class="textarea" bind:value={serverLinkForm.WHITELIST_DM}></textarea>
     </div>
   </div>
   <div class="field">
     <div class="control">
-      <button id="apply" disabled={applying} name="apply" class="button is-primary is-fullwidth" on:click={apply}>
-        Apply</button>
+      <button name="apply" class="button is-primary is-fullwidth"
+              disabled={applying} on:click={apply}>Apply</button>
     </div>
   </div>
 </div>

@@ -31,7 +31,7 @@
       {#each Object.keys(actions) as name}
         <tr>
           <td>
-            <button id="{name}-button" name="{name}" class="button is-danger is-fullwidth"
+            <button name="{name}" class="button is-danger is-fullwidth"
                     disabled={cannotProcess} on:click={doAction}>{capitalizeKebabCase(name)}</button>
           </td>
           <td>{actions[name]}</td>

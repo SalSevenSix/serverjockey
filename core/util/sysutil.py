@@ -5,8 +5,7 @@ import aiohttp
 # ALLOW util.*
 from core.util import __version__, util, io, funcutil, shellutil
 
-# TODO utils probably should not cache or hold statefulness
-CACHE = {}
+_CACHE = {}  # TODO utils probably should not cache or hold statefulness
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
 # _virtual_memory = funcutil.to_async(psutil.virtual_memory)
@@ -14,7 +13,7 @@ _disk_usage = funcutil.to_async(shutil.disk_usage)
 
 
 async def get_os_name() -> str:
-    result = util.get('os_name', CACHE)
+    result = util.get('os_name', _CACHE)
     if result:
         return result
     file = '/etc/os-release'
@@ -24,38 +23,38 @@ async def get_os_name() -> str:
             data = await io.read_file(file)
             for line in data.split('\n'):
                 if line.startswith('PRETTY_NAME="'):
-                    CACHE['os_name'] = line[13:-1]
-                    return CACHE['os_name']
+                    _CACHE['os_name'] = line[13:-1]
+                    return _CACHE['os_name']
     except Exception as e:
         logging.error('get_os_name() failed %s', repr(e))
-    CACHE['os_name'] = 'UNKNOWN'
-    return CACHE['os_name']
+    _CACHE['os_name'] = 'UNKNOWN'
+    return _CACHE['os_name']
 
 
 async def get_local_ip() -> str:
-    result = util.get('local_ip', CACHE)
+    result = util.get('local_ip', _CACHE)
     if result:
         return result
     # noinspection PyBroadException
     try:
         result = await shellutil.run_script('hostname -I')
-        CACHE['local_ip'] = result.strip().split()[0]
-        return CACHE['local_ip']
+        _CACHE['local_ip'] = result.strip().split()[0]
+        return _CACHE['local_ip']
     except Exception as e:
         logging.error('get_local_ip() failed %s', repr(e))
     return 'localhost'
 
 
 async def get_public_ip() -> str:
-    result = util.get('public_ip', CACHE)
+    result = util.get('public_ip', _CACHE)
     if result:
         return result
     for url in ('https://api.ipify.org', 'https://ip4.seeip.org'):
-        CACHE['public_ip'] = await _fetch_text(url)
-        if CACHE['public_ip']:
-            return CACHE['public_ip']
-    CACHE['public_ip'] = 'UNAVAILABLE'
-    return CACHE['public_ip']
+        _CACHE['public_ip'] = await _fetch_text(url)
+        if _CACHE['public_ip']:
+            return _CACHE['public_ip']
+    _CACHE['public_ip'] = 'UNAVAILABLE'
+    return _CACHE['public_ip']
 
 
 async def _fetch_text(url: str) -> str | None:

@@ -38,14 +38,14 @@
   <div class="modal-content">
     <div class="box">
       <div class="field">
-        <label for="login-token" class="label">Enter Login Token</label>
+        <label for="loginModalToken" class="label">Enter Login Token</label>
         <div class="control">
-          <input id="login-token" class="input" type="text" on:keypress={keypress} bind:value={token} />
+          <input id="loginModalToken" class="input" type="text" on:keypress={keypress} bind:value={token} />
         </div>
       </div>
       <div class="field">
         <div class="control">
-          <button id="login-button" name="login" class="button is-primary is-fullwidth" on:click={login}>Login</button>
+          <button name="login" class="button is-primary is-fullwidth" on:click={login}>Login</button>
         </div>
       </div>
     </div>

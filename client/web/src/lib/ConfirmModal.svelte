@@ -15,7 +15,7 @@
 
 
 <div class="modal" class:is-active={isOpen}>
-  <div class="modal-background" on:click={closeModal}></div>
+  <div class="modal-background" on:click={closeModal} on:keypress={function() {}}></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Confirm action</p>
@@ -27,9 +27,9 @@
       </div>
       {#if confirmName}
         <div class="field">
-          <label for="confirm-entered-name" class="label">Confirm Name</label>
+          <label for="confirmModalName" class="label">Confirm Name</label>
           <div class="control">
-            <input id="confirm-entered-name" class="input" type="text"
+            <input id="confirmModalName" class="input" type="text"
                    placeholder={confirmName} bind:value={enteredName}>
           </div>
         </div>

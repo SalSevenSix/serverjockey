@@ -172,8 +172,8 @@
 <div class="block">
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
-      <button id="upload-file" name="upload" disabled={cannotMaintenance}
-              class="button is-success" on:click={uploadFile}>Upload File</button>
+      <button name="upload" class="button is-success"
+              disabled={cannotMaintenance} on:click={uploadFile}>Upload File</button>
     </div>
     <label class="file-label">
       <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
@@ -186,10 +186,10 @@
   </div>
   <div class="field">
     <div class="control buttons">
-      <button id="backup-runtime" name="runtime" disabled={cannotProcess}
-              class="button is-primary" on:click={createBackup}>Backup Runtime</button>
-      <button id="backup-world" name="world" disabled={cannotProcess}
-              class="button is-primary" on:click={createBackup}>Backup World</button>
+      <button name="runtime" class="button is-primary"
+              disabled={cannotProcess} on:click={createBackup}>Backup Runtime</button>
+      <button name="world" class="button is-primary"
+              disabled={cannotProcess} on:click={createBackup}>Backup World</button>
     </div>
   </div>
 </div>
