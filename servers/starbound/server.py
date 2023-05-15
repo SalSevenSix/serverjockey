@@ -38,9 +38,9 @@ class Server(svrabc.Server):
         r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
-        await self._deployment.new_server_process() \
-            .wait_for_started(msg.SERVER_STARTED_FILTER, 60) \
-            .run()
+        server_process = await self._deployment.new_server_process()
+        server_process.wait_for_started(msg.SERVER_STARTED_FILTER, 60)
+        await server_process.run()
 
     async def stop(self):
         await self._stopper.stop()

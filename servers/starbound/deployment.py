@@ -5,6 +5,7 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
 from core.common import steam, interceptors
+from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
 
@@ -57,7 +58,8 @@ class Deployment:
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
 
-    def new_server_process(self):
+    async def new_server_process(self):
+        await self._link_mods()
         bin_dir = self._runtime_dir + '/linux'
         return proch.ServerProcess(self._mailer, bin_dir + '/starbound_server').use_cwd(bin_dir)
 
@@ -69,6 +71,27 @@ class Deployment:
         storage_dir = self._runtime_dir + '/storage'
         if not await io.symlink_exists(storage_dir):
             await io.create_symlink(storage_dir, self._world_dir)
+
+    async def _link_mods(self):
+        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')
+        workshop_dir, mods_dir = self._runtime_dir + '/steamapps/workshop/content/211820', self._runtime_dir + '/mods'
+        workshop_items, workshop_files = [], await io.directory_list(workshop_dir)
+        for workshop_item in [o['name'] for o in workshop_files if o['type'] == 'directory']:
+            pack_file = workshop_dir + '/' + workshop_item + '/contents.pak'
+            if await io.file_exists(pack_file):
+                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Adding   ' + workshop_item)
+                workshop_items.append(workshop_item + '.pak')
+                link_file = mods_dir + '/' + workshop_item + '.pak'
+                if not await io.symlink_exists(link_file):
+                    await io.create_symlink(link_file, pack_file)
+            else:
+                self._mailer.post(self, msg.DEPLOYMENT_MSG,
+                                  'ERROR Adding   ' + workshop_item + ' because contents.pak not found')
+        mod_files = await io.directory_list(mods_dir)
+        for mod_file in [o['name'] for o in mod_files if o['type'] == 'link']:
+            if mod_file not in workshop_items:
+                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Removing ' + mod_file[:-4])
+                await io.delete_file(mods_dir + '/' + mod_file)
 
 
 def _logfiles(entry) -> bool:

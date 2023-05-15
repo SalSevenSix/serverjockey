@@ -95,7 +95,7 @@ async def delete_directory(path: str):
 
 
 async def delete_file(file: str):
-    if await file_exists(file):
+    if await file_exists(file) or await symlink_exists(file):
         await aioos.remove(file)
 
 
@@ -120,16 +120,21 @@ async def directory_list(
         path += '/'
     result = []
     for name in await _listdir(path):
-        file, ftype, size, entry = path + name, 'unknown', -1, {}
+        entry, file, ftype = {}, path + name, 'unknown'
+        exists, size, updated, mtime = False, -1, -1, ''
         if await _is_symlink(file):
             ftype = 'link'
+            if await aioos.path.isfile(file):
+                exists, size = True, await file_size(file)
+            elif await aioos.path.isdir(file):
+                exists = True
         elif await aioos.path.isfile(file):
-            ftype = 'file'
-            size = await file_size(file)
+            exists, ftype, size = True, 'file', await file_size(file)
         elif await aioos.path.isdir(file):
-            ftype = 'directory'
-        mtime = await aioos.path.getmtime(file)
-        updated = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
+            exists, ftype = True, 'directory'
+        if exists:
+            mtime = await aioos.path.getmtime(file)
+            updated = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
         entry.update({'type': ftype, 'name': name, 'updated': updated, 'mtime': mtime})
         if size > -1:
             entry.update({'size': size})

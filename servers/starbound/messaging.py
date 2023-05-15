@@ -8,8 +8,10 @@ from core.common import playerstore
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('[Info] Root: Writing runtime configuration to'))
+DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
+    msgftr.NameIs(DEPLOYMENT_MSG),
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.LoggingPublisher.FILTER_ALL_LEVELS)
 MAINTENANCE_STATE_FILTER = msgftr.Or(
