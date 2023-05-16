@@ -2,10 +2,10 @@ import typing
 import asyncio
 from asyncio import subprocess, streams
 # ALLOW util.* msg.* context.* proc.prcenc proc.prcprd
-from core.util import util, funcutil, io, pkg
+from core.util import util, funcutil, io
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
-from core.proc import prcprd
+from core.proc import prcprd, wrapper
 
 
 class JobPipeInLineService(msgabc.AbcSubscriber):
@@ -117,12 +117,11 @@ class _CommandHelper:
             return
         self._work_dir = '/tmp/' + util.generate_token(6) + str(util.now_millis())
         await io.create_directory(self._work_dir)
-        command = [self._python, self._work_dir + '/wrapper.py']
-        await io.write_file(command[1], await pkg.pkg_load('core.proc', 'wrapper.py'))  # TODO duplicated in prcext
+        command = [self._python, await wrapper.write_wrapper(self._work_dir)]
         if isinstance(self._command, str):
             command.extend(['/bin/bash', self._work_dir + '/job.sh'])
             await io.write_file(command[3], self._command)
-        else:  # TODO test this part
+        else:
             command.extend(self._command)
         self._command = tuple(command)
 

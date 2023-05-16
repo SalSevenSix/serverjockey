@@ -3,7 +3,7 @@ from core.util import util, io
 from core.msg import msgftr, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
-from core.proc import proch, jobh, prcenc, prcext
+from core.proc import proch, jobh, prcenc, wrapper
 from core.common import steam, interceptors
 
 # https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Launch-Server-on-Linux
@@ -41,7 +41,7 @@ class Deployment:
         self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
 
     async def initialise(self):
-        self._wrapper = await prcext.unpack_wrapper(self._home_dir)
+        self._wrapper = await wrapper.write_wrapper(self._home_dir)
         await self.build_world()
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),

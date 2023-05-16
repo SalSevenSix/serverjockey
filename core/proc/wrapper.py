@@ -1,7 +1,18 @@
-import sys
+# ALLOW util.* msg.* context.*
+from core.util import io
+
+
+async def write_wrapper(path: str):
+    filename = path + '/wrapper.py'
+    await io.write_file(filename, wrapper_code())
+    return filename
+
+
+def wrapper_code() -> str:
+    # https://docs.python.org/3/library/pty.html
+    return '''import sys
 import os
-import pty  # https://docs.python.org/3/library/pty.html
-# ALLOW NONE
+import pty
 
 
 def read(fd):
@@ -18,3 +29,4 @@ def main() -> int:
 
 if __name__ == '__main__':
     sys.exit(main())
+'''

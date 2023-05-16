@@ -1,7 +1,7 @@
 # ALLOW core.*
 from core.util import io
 from core.context import contextsvc
-from core.proc import proch, prcenc, prcext
+from core.proc import proch, prcenc, wrapper
 
 # BAROTRAUMA https://barotraumagame.com/wiki/Hosting_a_Dedicated_Server
 # TODO Try using gnome-terminal.wrapper or whatever is on ubuntu server
@@ -31,7 +31,7 @@ class Deployment:
 
     async def initialise(self):
         await io.create_directories(self._env['HOME'] + '/.local/share/Daedalic Entertainment GmbH/Barotrauma')
-        self._wrapper = await prcext.unpack_wrapper(self._home_dir)
+        self._wrapper = await wrapper.write_wrapper(self._home_dir)
         await self.build_world()
 
     def new_server_process(self) -> proch.ServerProcess:

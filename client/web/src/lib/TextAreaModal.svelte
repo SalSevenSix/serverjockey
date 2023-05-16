@@ -4,15 +4,14 @@
   export let isOpen;
   export let contentName;
   export let contentText;
-  export let onApplyChanges;
+  export let onSaveChanges;
 
-  function applyChanges() {
+  function saveChanges() {
     closeModal();
-    onApplyChanges(contentText);
+    onSaveChanges(contentText);
   }
 
   // TODO make textarea fill vertical space
-  // TODO Change Apply to be Save
 </script>
 
 
@@ -30,7 +29,7 @@
       </div>
       <div class="field">
         <div class="control buttons">
-          <button name="apply" class="button is-primary" on:click={applyChanges}>Apply</button>
+          <button name="save" class="button is-primary" on:click={saveChanges}>Save</button>
           <button name="close" class="button" on:click={closeModal}>Close</button>
         </div>
       </div>

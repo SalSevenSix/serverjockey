@@ -21,6 +21,6 @@ export function confirmDangerModal(messageText, name, confirmCallback) {
   openModal(ConfirmModal, { message: messageText, confirmName: name, onConfirm: confirmCallback });
 }
 
-export function textAreaModal(name, text, applyChangesCallback) {
-  openModal(TextAreaModal, { contentName: name, contentText: text, onApplyChanges: applyChangesCallback });
+export function textAreaModal(name, text, saveChangesCallback) {
+  openModal(TextAreaModal, { contentName: name, contentText: text, onSaveChanges: saveChangesCallback });
 }

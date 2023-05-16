@@ -31,7 +31,6 @@ def make_secure(data: httpabc.ABC_DATA_GET):
     data.update({SECURE: True})
 
 
-# TODO Move all use of this up to core. GET handlers should be flagged as secure at binding
 def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
     return util.get(SECURE, data) is True
 

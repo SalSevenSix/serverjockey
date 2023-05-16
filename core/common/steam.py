@@ -2,7 +2,7 @@ import logging
 import vdf
 import re
 import asyncio
-from asyncio import subprocess   # TODO Probably should not import, keep within proc package
+from asyncio import subprocess
 # ALLOW util.* msg.* context.* http.* system.* proc.*
 from core.util import aggtrf, util, io, tasks
 from core.msg import msgabc, msgftr

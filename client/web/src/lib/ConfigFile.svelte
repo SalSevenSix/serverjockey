@@ -17,7 +17,10 @@
   }
 
   function openEditor() {
-    textAreaModal(name, configText, function(updatedText) { configText = updatedText; });
+    textAreaModal(name, configText, function(updatedText) {
+      configText = updatedText;
+      save();
+    });
   }
 
   function reload() {
