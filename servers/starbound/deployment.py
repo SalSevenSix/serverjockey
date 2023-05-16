@@ -79,7 +79,14 @@ class Deployment:
             return
         config = util.json_to_dict(await io.read_file(self._config_file))
         port, password = util.get('rconServerPort', config), util.get('rconServerPassword', config)
+        if not port:
+            port = 21026
+        if not password:
+            password = util.generate_token(8)
         rconsvc.RconService.set_config(self._mailer, self, port, password)
+        config['rconServerPort'], config['rconServerPassword'] = port, password
+        config['runRconServer'] = True
+        await io.write_file(self._config_file, util.obj_to_json(config, pretty=True))
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')

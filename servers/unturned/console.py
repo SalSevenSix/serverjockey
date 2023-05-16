@@ -81,4 +81,7 @@ Votify [Vote Allowed Y/N]/[Pass Cooldown]/[Fail Cooldown]/[Vote Duration]/[Vote 
 Weather [None | Disable | Storm | Blizzard | GUID]
 Welcome [Text]/[R]/[G]/[B]
 Whitelisted
+
+Use Help {command} to get detailed documentation.
+Command output will be shown in the console log.
 '''

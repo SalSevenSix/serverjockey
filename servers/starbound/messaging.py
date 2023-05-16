@@ -35,7 +35,7 @@ async def initialise(mailer: msgabc.MulticastMailer):
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_PREFIX, VERSION_SUFFIX = '[Info] Server Version', 'Source ID:'
     VERSION_FILTER = msgftr.DataMatches(
-        '.*' + VERSION_PREFIX.replace('[', '\[').replace(']', '\]') + '.*' + VERSION_SUFFIX + '.*')
+        '.*' + VERSION_PREFIX.replace('[', r'\[').replace(']', r'\]') + '.*' + VERSION_SUFFIX + '.*')
     PORT_FILTER = msgftr.DataStrContains('[Info] UniverseServer: listening for incoming TCP connections on')
 
     def __init__(self, mailer: msgabc.MulticastMailer, public_ip: str):
@@ -66,9 +66,9 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     PREFIX = '[Info] UniverseServer: Client'
-    REG_PREFIX = '.*' + PREFIX.replace('[', '\[').replace(']', '\]')
-    CONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + '.*\) connected.*')
-    DISCONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + '.*\) disconnected for reason.*')
+    REG_PREFIX = '.*' + PREFIX.replace('[', r'\[').replace(']', r'\]')
+    CONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) connected.*')
+    DISCONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) disconnected for reason.*')
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(

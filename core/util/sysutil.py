@@ -52,6 +52,7 @@ async def get_public_ip() -> str:
     for url in ('https://api.ipify.org', 'https://ip4.seeip.org'):
         _CACHE['public_ip'] = await _fetch_text(url)
         if _CACHE['public_ip']:
+            logging.debug('Public IP sourced from ' + url)
             return _CACHE['public_ip']
     _CACHE['public_ip'] = 'UNAVAILABLE'
     return _CACHE['public_ip']
@@ -60,7 +61,7 @@ async def get_public_ip() -> str:
 async def _fetch_text(url: str) -> str | None:
     # noinspection PyBroadException
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=3.0)) as session:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=4.0)) as session:
             async with session.get(url) as response:
                 assert response.status == 200
                 result = await response.text()

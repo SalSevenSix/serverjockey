@@ -3,9 +3,9 @@ import asyncio
 import shlex
 from rcon.source import rcon
 # ALLOW util.* msg.* context.* http.* system.* proc.*
-from core.util import aggtrf, util, io, tasks
+from core.util import util
 from core.msg import msgabc, msgftr, msgext
-from core.http import httpabc, httpext, httpsubs
+from core.http import httpabc
 
 
 class RconHandler(httpabc.PostHandler):
@@ -55,7 +55,7 @@ class RconService(msgabc.AbcSubscriber):
             cmdline = message.data()
             if not cmdline:
                 raise Exception('No rcon cmdline provided.')
-            cmd = shlex.split(cmdline)
+            cmd = shlex.split(cmdline, posix=False)
             coro = rcon(cmd[0], *cmd[1:], host='localhost', port=self._port, passwd=self._password)
             result = await asyncio.wait_for(coro, 6.0)
             if result:

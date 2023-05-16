@@ -104,7 +104,7 @@ class _KillSteamOnSolicitPassword(msgabc.AbcSubscriber):
             jobh.JobProcess.FILTER_DONE))
         self._mailer = mailer
         self._process: subprocess.Process | None = None
-        self._solicit_password = re.compile('^Logging in user \'.*\' to Steam Public\.\.\.$')
+        self._solicit_password = re.compile(r'^Logging in user \'.*\' to Steam Public\.\.\.$')
 
     async def handle(self, message):
         if jobh.JobProcess.FILTER_STDOUT_LINE.accepts(message):

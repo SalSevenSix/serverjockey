@@ -43,12 +43,11 @@ exports.players = commons.players;
 
 exports.help = function($) {
   let c = $.message.channel;
-  if ($.data.length > 0) {
-    c.send('No more help available.');
+  if ($.data.length === 0) {
+    let x = $.context;
+    let s = '```\nFACTORIO COMMANDS\n' + x.config.CMD_PREFIX;
+    c.send(s + helpText.help.join('\n' + x.config.CMD_PREFIX) + '```');
     return;
   }
-  let x = $.context;
-  let s = '```\nFACTORIO COMMANDS\n' + x.config.CMD_PREFIX;
-  c.send(s + helpText.help.join('\n' + x.config.CMD_PREFIX) + '```');
-  return;
+  c.send('No more help available.');
 }

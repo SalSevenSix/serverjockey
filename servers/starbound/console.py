@@ -26,6 +26,6 @@ setspawnpoint, settileprotection, setuniverseflag, spawnitem,
 spawnliquid, spawnmonster, spawnnpc, spawnstagehand, spawntreasure,
 spawnvehicle, timewarp, unbanip, unbanuuiud, warp, whereis
 
-Use help [command] to get detailed documentation.
-Command output will be shown on the console log.
+Use help {command} to get detailed documentation.
+Command output will be shown in the console log.
 '''

@@ -65,14 +65,16 @@ exports.MessageHttpTool = class MessageHttpTool {
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         if (response.status === 204) return null;
+        let ct = response.headers.get('Content-Type');
+        if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
-      .then(function(json) {
-        if (json != null && json.hasOwnProperty('error')) throw new Error(json.error);
+      .then(function(data) {
+        if (data != null && data.hasOwnProperty('error')) throw new Error(data.error);
         if (dataHandler == null) {
           message.react('✅');
         } else {
-          dataHandler(message, json);
+          dataHandler(message, data);
         }
       })
       .catch(function(error) {

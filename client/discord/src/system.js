@@ -47,8 +47,11 @@ exports.instances = function($) {
 exports.use = function($) {
   if (!util.checkAdmin($.message, $.context.config.ADMIN_ROLE)) return;
   if ($.data.length === 0) return;
-  $.context.instancesService.useInstance($.data[0]);
-  $.message.channel.send($.context.instancesService.getInstancesText());
+  if ($.context.instancesService.useInstance($.data[0])) {
+    $.message.channel.send($.context.instancesService.getInstancesText());
+  } else {
+    $.message.react('⛔');
+  }
 }
 
 exports.create = function($) {

@@ -20,7 +20,7 @@ def test_base64_coding():
 def test_script_escape():
     assert 'iwbums build14' == util.script_escape('iwbums build14')
     assert '1.8.3' == util.script_escape('1.8.3')
-    assert '\#\$\*\&' == util.script_escape('#$*&')
+    assert r'\#\$\*\&' == util.script_escape('#$*&')
 
 
 def test_build_url():

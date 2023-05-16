@@ -145,12 +145,16 @@ exports.deployment = function($) {
 
 exports.send = function($) {
   if ($.data.length < 1) return;
-  let data = $.data.map(function(value) {
-    if (value.includes(' ')) return '"' + value + '"';
-    return value;
+  let data = $.message.content;
+  data = data.slice(data.indexOf(' '));
+  let body = { line: data.trim() };
+  $.httptool.doPost('/console/send', body, function(message, text) {
+    if (text) {
+      message.channel.send('```\n' + text + '\n```');
+    } else {
+      message.react('✅');
+    }
   });
-  let body = { line: data.join(' ') };
-  $.httptool.doPost('/console/send', body);
 }
 
 exports.players = function($) {
