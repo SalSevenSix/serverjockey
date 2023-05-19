@@ -40,45 +40,60 @@ exports.startupEventLogging = function(context, channel, instance, url) {
 }
 
 exports.server = function($) {
-  if ($.data.length === 1) {
-    let cmd = $.data[0];
-    if (cmd === 'delete') return;  // Blocking this. Webapp feature only.
-    $.httptool.doPost('/server/' + cmd, null, function(message, json) {
-      if (cmd === 'daemon' || cmd === 'start' || cmd === 'restart') {
-        message.react('⌛');
-        let helper = new subs.Helper($.context);
-        helper.subscribe($.httptool.baseurl + '/server/subscribe', function(pollUrl) {
-          helper.poll(pollUrl, function(data) {
-            if (data != null && data.running && data.state === 'STARTED') {
-              message.reactions.removeAll()
-                .then(function() { message.react('✅'); })
-                .catch(logger.error);
-              return false;
-            }
-            return true;
-          });
-        });
-      } else {
-        message.react('✅');
+  if ($.data.length === 0) {
+    $.httptool.doGet('/server', function(body) {
+      let result = '```\nServer ' + $.instance + ' is ';
+      if (!body.running) {
+        result += 'DOWN```';
+        return result;
       }
+      result += body.state;
+      if (body.uptime) { result += ' (' + util.humanDuration(body.uptime) + ')'; }
+      result += '\n';
+      let dtl = body.details;
+      if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
+      if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
+      if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
+      if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
+      return result + '```';
     });
     return;
   }
-  $.httptool.doGet('/server', function(body) {
-    let result = '```\nServer ' + $.instance + ' is ';
-    if (!body.running) {
-      result += 'DOWN```';
-      return result;
+  let cmd = $.data[0];
+  if (cmd === 'delete') {  // Blocking this. Webapp and CLI only.
+    message.react('⛔');
+    return;
+  }
+  $.httptool.doPost('/server/' + cmd, { respond: true }, function(message, json) {
+    let currentState = json.current.state;
+    let targetUp = (cmd === 'start' || cmd === 'daemon');
+    if (targetUp && ['START', 'STARTING', 'STARTED', 'STOPPING'].includes(currentState)) {
+      message.react('⛔');
+      return;
     }
-    result += body.state;
-    if (body.uptime) { result += ' (' + util.humanDuration(body.uptime) + ')'; }
-    result += '\n';
-    let dtl = body.details;
-    if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
-    if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
-    if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
-    if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
-    return result + '```';
+    if (!targetUp && ['READY', 'STOPPED', 'EXCEPTION', 'TERMINATED'].includes(currentState)) {
+      message.react('⛔');
+      return;
+    }
+    message.react('⌛');
+    targetUp = targetUp || cmd === 'restart';
+    new subs.Helper($.context).poll(json.url, function(data) {
+      if (data.state === currentState) return true;
+      currentState = data.state;
+      if (currentState === 'EXCEPTION' || currentState === 'TERMINATED') {
+        message.reactions.removeAll().then(function() { message.react('⛔'); }).catch(logger.error);
+        return false;
+      }
+      if (targetUp && currentState === 'STARTED') {
+        message.reactions.removeAll().then(function() { message.react('✅'); }).catch(logger.error);
+        return false;
+      }
+      if (!targetUp && currentState === 'STOPPED') {
+        message.reactions.removeAll().then(function() { message.react('✅'); }).catch(logger.error);
+        return false;
+      }
+      return true;
+    });
   });
 }
 

@@ -4,7 +4,7 @@ from core.context import contextsvc
 from core.proc import proch, prcenc, wrapper
 
 # BAROTRAUMA https://barotraumagame.com/wiki/Hosting_a_Dedicated_Server
-# TODO Try using gnome-terminal.wrapper or whatever is on ubuntu server
+# Try using gnome-terminal.wrapper or whatever is on ubuntu server
 
 # REQUIRED /home/bsalis/.local/share/Daedalic Entertainment GmbH/Barotrauma
 # export LD_LIBRARY_PATH=./linux64:$LD_LIBRARY_PATH

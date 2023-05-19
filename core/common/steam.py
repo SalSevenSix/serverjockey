@@ -86,12 +86,12 @@ class SteamCmdInputHandler(httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         value = util.get('value', data)
-        if value:
-            result = await jobh.JobPipeInLineService.request(self._mailer, self, util.script_escape(value))
-            if isinstance(result, Exception):
-                raise result
+        if not value:
+            self._mailer.post(self, _KillSteamOnNoHeartbeat.HEARTBEAT)
             return httpabc.ResponseBody.NO_CONTENT
-        self._mailer.post(self, _KillSteamOnNoHeartbeat.HEARTBEAT)
+        result = await jobh.JobPipeInLineService.request(self._mailer, self, value)
+        if isinstance(result, Exception):
+            raise result
         return httpabc.ResponseBody.NO_CONTENT
 
 
@@ -163,7 +163,7 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
 class _SteamConfig:
 
     def __init__(self, env: dict):
-        self._path = env['HOME'] + '/Steam/config/config.vdf'  # TODO check manual SteamCMD install location
+        self._path = env['HOME'] + '/Steam/config/config.vdf'
 
     async def _load(self) -> tuple:
         try:
@@ -172,7 +172,7 @@ class _SteamConfig:
             steamer = root['InstallConfigStore']['Software']['Valve']['steam']
             return root, steamer
         except Exception as e:
-            logging.debug('Problem loading or parsing ' + self._path + ' ' + repr(e))
+            logging.warning('Problem loading or parsing ' + self._path + ' ' + repr(e))
         return None, None
 
     async def get_login(self) -> str | None:
