@@ -11,6 +11,7 @@ tasks:
   upgrade                | Upgrade ServerJockey to latest version
   adduser:<name>,<port>  | Add a new ServerJockey service user
                          | called <name> with webapp using <port>
+  serverlink-edit:<name> | Edit the ServerLink config
   userdel:<name>         | Delete ServerJockey user and home folder
   service-status:<name>  | Show service status, user <name> optional
   service-start:<name>   | Start service, user <name> optional

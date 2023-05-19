@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.8
-- Feature release v0.0.8
+* Sat May 20 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.8
+- Added support for Starbound
 * Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.7
 - Added CLI client
 * Sat Dec 03 2022 Bowden Salis <bsalis76@gmail.com> - 0.0.6

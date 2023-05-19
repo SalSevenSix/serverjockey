@@ -102,6 +102,15 @@ class TaskProcessor:
         if result.returncode != 0:
             raise Exception('New user task failed')
 
+    # TODO Figue out proper way to launch editor
+    def _serverlink_edit(self, argument: str):
+        user = TaskProcessor._extract_user_and_port(argument)[0]
+        script = _serverlink_edit_script().strip().replace('{user}', user)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('ServerLink Edit task failed')
+
     def _userdel(self, argument: str):
         user = TaskProcessor._extract_user_and_port(argument)[0]
         if user == _DEFAULT_USER:
@@ -215,6 +224,25 @@ systemctl enable $SERVICE_NAME
 systemctl start $SERVICE_NAME
 
 echo "adduser done"
+exit 0
+'''
+
+
+def _serverlink_edit_script() -> str:
+    return '''
+CURRENT_USER="$(whoami)"
+SJGMS_USER="{user}"
+CONFIG_FILE="/home/$SJGMS_USER/serverlink/serverlink.json"
+[ -f $CONFIG_FILE ] || CONFIG_FILE="/home/$SUDO_USER/serverlink/serverlink.json"
+[ -f $CONFIG_FILE ] || CONFIG_FILE="/home/$SUDO_USER/serverjockey/serverlink/serverlink.json"
+[ -f $CONFIG_FILE ] || CONFIG_FILE="/home/$CURRENT_USER/serverlink/serverlink.json"
+[ -f $CONFIG_FILE ] || CONFIG_FILE="/home/$CURRENT_USER/serverjockey/serverlink/serverlink.json"
+if [ ! -f $CONFIG_FILE ]; then
+  echo "ServerLink config file not found."
+  exit 1
+fi
+
+echo "sudo nano $CONFIG_FILE"
 exit 0
 '''
 
