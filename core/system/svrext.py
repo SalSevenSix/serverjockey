@@ -1,7 +1,7 @@
 # ALLOW util.* msg.* context.* http.* system.* EXCEPT system.bootstrap
 from core.util import util, funcutil
 from core.msg import msgabc, msgftr
-from core.http import httpabc
+from core.http import httpabc, httpsubs
 from core.system import svrsvc
 
 
@@ -22,12 +22,18 @@ class ServerCommandHandler(httpabc.PostHandler):
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
 
-    def handle_post(self, resource, data):
+    async def handle_post(self, resource, data):
         command = 'signal_' + str(util.get('command', data))
         if command not in ServerCommandHandler.COMMANDS:
             return httpabc.ResponseBody.BAD_REQUEST
+        respond, response = util.get('respond', data, False), {}
+        if respond:
+            subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
+                self._mailer, self, httpsubs.Selector(svrsvc.ServerStatus.UPDATED_FILTER))
+            response['url'] = util.get('baseurl', data, '') + subscription_path
+            response['current'] = await svrsvc.ServerStatus.get_status(self._mailer, self)
         ServerCommandHandler.COMMANDS[command](self._mailer, self)
-        return httpabc.ResponseBody.NO_CONTENT
+        return response if respond else httpabc.ResponseBody.NO_CONTENT
 
 
 class CheckServerStateInterceptor(httpabc.InterceptorHandler):

@@ -5,6 +5,7 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrext, svrsvc
 from core.proc import proch, prcext, jobh
+from core.common import interceptors
 from servers.barotrauma import deployment as dep
 
 SERVER_STARTED_FILTER = msgftr.And(
@@ -30,17 +31,18 @@ class Server(svrabc.Server):
         self._context.register(prcext.ServerStateSubscriber(self._context))
 
     def resources(self, resource: httpabc.Resource):
-        httprsc.ResourceBuilder(resource) \
-            .psh('server', svrext.ServerStatusHandler(self._context)) \
-            .put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .put('{command}', svrext.ServerCommandHandler(self._context)) \
-            .pop() \
-            .psh('log') \
-            .put('tail', httpext.RollingLogHandler(self._context, CONSOLE_LOG_FILTER)) \
-            .put('subscribe', self._httpsubs.handler(CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n'))) \
-            .pop() \
-            .psh(self._httpsubs.resource(resource, 'subscriptions')) \
-            .put('{identity}', self._httpsubs.subscriptions_handler('identity'))
+        r = httprsc.ResourceBuilder(resource)
+        r.reg('m', interceptors.block_maintenance_only(self._context))
+        r.psh('server', svrext.ServerStatusHandler(self._context))
+        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
+        r.pop()
+        r.psh('log')
+        r.put('tail', httpext.RollingLogHandler(self._context, CONSOLE_LOG_FILTER))
+        r.put('subscribe', self._httpsubs.handler(CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n')))
+        r.pop()
+        r.psh(self._httpsubs.resource(resource, 'subscriptions'))
+        r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._deployment.new_server_process() \

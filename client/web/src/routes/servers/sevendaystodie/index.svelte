@@ -41,9 +41,12 @@
       </Collapsible>
       <Collapsible title="Configuration">
         <div class="content">
-          <p>For help with configuration, see the
-             <a href="https://developer.valvesoftware.com/wiki/7_Days_to_Die_Dedicated_Server#Serverconfig.xml"
-                target="_blank">dedicated server guide</a> on the wiki.</p>
+          <p>
+            For help with configuration, see the
+            <a href="https://developer.valvesoftware.com/wiki/7_Days_to_Die_Dedicated_Server#Serverconfig.xml"
+               target="_blank">dedicated server guide</a> on the wiki.<br />
+            Default Admin config file is not generated until after first server start.
+          </p>
         </div>
         <ConfigFile name="Settings" path="/config/settings">
           <p>Note that &quot;Folder and file locations&quot; settings will be ignored.</p>

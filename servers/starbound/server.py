@@ -4,7 +4,7 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import prcext
-from core.common import playerstore
+from core.common import playerstore, interceptors
 from servers.starbound import deployment as dep, messaging as msg, console as con
 
 
@@ -25,9 +25,10 @@ class Server(svrabc.Server):
         con.resources(self._mailer, resource)
         self._deployment.resources(resource)
         r = httprsc.ResourceBuilder(resource)
+        r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('server', svrext.ServerStatusHandler(self._mailer))
         r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
-        r.put('{command}', svrext.ServerCommandHandler(self._mailer))
+        r.put('{command}', svrext.ServerCommandHandler(self._mailer), 'm')
         r.pop()
         r.psh('log')
         r.put('tail', httpext.RollingLogHandler(self._mailer, msg.CONSOLE_LOG_FILTER))

@@ -49,9 +49,12 @@
       </Collapsible>
       <Collapsible title="Configuration">
         <div class="content">
-          <p>For help with configuration, see the
-             <a href="https://starbounder.org/Guide:LinuxServerSetup#Configuration"
-                target="_blank">dedicated server guide</a> on the Starbound wiki.</p>
+          <p>
+            For help with configuration, see the
+            <a href="https://starbounder.org/Guide:LinuxServerSetup#Configuration"
+               target="_blank">dedicated server guide</a> on the Starbound wiki.<br />
+            Default Settings file is not generated until after first server start.
+          </p>
         </div>
         <ConfigFile name="Settings" path="/config/settings" />
       </Collapsible>

@@ -51,7 +51,8 @@
         <div class="content">
           <p>For help with configuration, see the
           <a href="https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Configure-Server"
-             target="_blank">dedicated server guide</a> on github.</p>
+             target="_blank">dedicated server guide</a> on github.<br />
+          Default configuration files are not generated until after first server start.</p>
         </div>
         <ConfigFile name="Command Line Args" path="/config/cmdargs" />
         <ConfigFile name="Server Commands" path="/config/commands" />
