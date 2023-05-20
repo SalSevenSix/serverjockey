@@ -102,7 +102,7 @@ class TaskProcessor:
         if result.returncode != 0:
             raise Exception('New user task failed')
 
-    # TODO Figue out proper way to launch editor
+    # TODO Figure out proper way to launch editor
     def _serverlink_edit(self, argument: str):
         user = TaskProcessor._extract_user_and_port(argument)[0]
         script = _serverlink_edit_script().strip().replace('{user}', user)
@@ -175,7 +175,7 @@ if which yum > /dev/null; then
 fi
 
 rm sjgms.${PKGTYPE} > /dev/null 2>&1
-wget --version > /dev/null 2>&1 || apt -y install wget
+wget --version > /dev/null 2>&1 || ${INSTALLER} -y install wget
 echo "downloading..."
 wget -q -O sjgms.${PKGTYPE} https://4sas.short.gy/sjgms-${PKGTYPE}-latest
 [ $? -eq 0 ] || exit 1

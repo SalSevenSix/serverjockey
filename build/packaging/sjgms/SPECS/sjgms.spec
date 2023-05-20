@@ -53,7 +53,7 @@ exit 0
 
 
 %changelog
-* Sat May 20 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.8
+* Sun May 21 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.8
 - Added support for Starbound
 * Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.7
 - Added CLI client

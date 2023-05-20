@@ -4,7 +4,7 @@ import sys
 import os
 import typing
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
-from core.util import util, funcutil, sysutil
+from core.util import util, funcutil, sysutil, steamutil
 from core.msg import msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsvc
@@ -81,6 +81,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         self._context.post(self, 'Logging.File', self._context.config('logfile'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
+        await steamutil.check_steam(self._context.config('env')['HOME'])
         return self._syssvc.resources()
 
     async def shutdown(self):
