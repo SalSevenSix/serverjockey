@@ -142,7 +142,8 @@
       {/if}
       <div class="field">
         <div class="control">
-          <textarea class="textarea has-fixed-size" rows="4" bind:this={logBox} readonly>{logText}</textarea>
+          <textarea class="textarea has-fixed-size is-family-monospace is-size-7" rows="4"
+                    bind:this={logBox} readonly>{logText}</textarea>
         </div>
       </div>
     </section>

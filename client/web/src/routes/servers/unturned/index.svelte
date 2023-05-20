@@ -44,9 +44,6 @@
       <Collapsible title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
-      <Collapsible title="Logging">
-        <FileSystem allowDelete />
-      </Collapsible>
       <Collapsible title="Configuration">
         <div class="content">
           <p>For help with configuration, see the
@@ -58,6 +55,9 @@
         <ConfigFile name="Server Commands" path="/config/commands" />
         <ConfigFile name="General Settings" path="/config/settings" />
         <ConfigFile name="Workshop Mods" path="/config/workshop" />
+      </Collapsible>
+      <Collapsible title="Logging">
+        <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

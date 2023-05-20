@@ -44,9 +44,6 @@
       <Collapsible title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
-      <Collapsible title="Logging">
-        <FileSystem allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
-      </Collapsible>
       <Collapsible title="Configuration">
         <div class="content">
           <p>
@@ -57,6 +54,9 @@
           </p>
         </div>
         <ConfigFile name="Settings" path="/config/settings" />
+      </Collapsible>
+      <Collapsible title="Logging">
+        <FileSystem allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
       </Collapsible>
       <Collapsible title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

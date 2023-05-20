@@ -62,7 +62,8 @@
     </label>
     <slot />
     <div class="control pr-6">
-      <textarea id={'configFileText' + name.replaceAll(' ', '')} class="textarea" bind:value={configText}></textarea>
+      <textarea id={'configFileText' + name.replaceAll(' ', '')} class="textarea is-family-monospace is-size-7"
+                bind:value={configText}></textarea>
     </div>
   </div>
   <div class="field">

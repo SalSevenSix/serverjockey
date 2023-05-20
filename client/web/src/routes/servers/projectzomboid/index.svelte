@@ -110,9 +110,6 @@
         </div>
       </div>
       <ConsoleLog hasConsoleLogFile />
-      <Collapsible title="Logging">
-        <FileSystem allowDelete />
-      </Collapsible>
       <Collapsible title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
@@ -136,6 +133,9 @@
             Do not change other fields unless you know what you are doing!
           </p>
         </ConfigFile>
+      </Collapsible>
+      <Collapsible title="Logging">
+        <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

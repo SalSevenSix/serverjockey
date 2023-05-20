@@ -33,9 +33,6 @@
         </div>
       </div>
       <ConsoleLog />
-      <Collapsible title="Logging">
-        <FileSystem allowDelete />
-      </Collapsible>
       <Collapsible title="Console Commands">
          <Iframe />
       </Collapsible>
@@ -52,6 +49,9 @@
           <p>Note that &quot;Folder and file locations&quot; settings will be ignored.</p>
         </ConfigFile>
         <ConfigFile name="Admin" path="/config/admin" />
+      </Collapsible>
+      <Collapsible title="Logging">
+        <FileSystem allowDelete />
       </Collapsible>
       <Collapsible title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

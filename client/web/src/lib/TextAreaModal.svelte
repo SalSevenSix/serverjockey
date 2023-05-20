@@ -23,7 +23,7 @@
       <div class="field">
         <label for="textAreaModalEditor" class="label">{contentName}</label>
         <div class="control">
-          <textarea id="textAreaModalEditor" class="textarea has-fixed-size" rows="18"
+          <textarea id="textAreaModalEditor" class="textarea has-fixed-size is-family-monospace is-size-8" rows="18"
                     bind:value={contentText}></textarea>
         </div>
       </div>

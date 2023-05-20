@@ -167,9 +167,9 @@ class _SteamConfig:
 
     async def _load(self) -> tuple:
         try:
-            result = await io.read_file(self._path)
-            root = vdf.loads(result)
-            steamer = root['InstallConfigStore']['Software']['Valve']['steam']
+            root = vdf.loads(await io.read_file(self._path))
+            valve = root['InstallConfigStore']['Software']['Valve']
+            steamer = util.get('Steam', valve, util.get('steam', valve))
             return root, steamer
         except Exception as e:
             logging.warning('Problem loading or parsing ' + self._path + ' ' + repr(e))
