@@ -78,7 +78,7 @@
             <button name={index} class="button is-primary" title="View"
                     on:click={viewInstance}>&nbsp;<i class="fa fa-folder-open"></i>&nbsp;</button>
             <button name={index} class="button is-danger" title="Delete"
-                    on:click={deleteInstance}><i class="fa fa-trash"></i></button>
+                    on:click={deleteInstance}><i class="fa fa-trash-can"></i></button>
           </td>
         </tr>
       {/each}

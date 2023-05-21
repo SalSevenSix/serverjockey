@@ -7,7 +7,13 @@
 <div class="block">
   <table class="table">
     <tbody>
-      <tr><td class="has-text-weight-bold">Running</td><td>{$serverStatus.running}</td></tr>
+      <tr><td class="has-text-weight-bold">Running</td><td>
+        {#if $serverStatus.running}
+          <i class="fa fa-thumbs-up fa-lg"></i>
+        {:else}
+          <i class="fa fa-thumbs-down fa-lg"></i>
+        {/if}
+      </td></tr>
       {#if $serverStatus.state}
         <tr><td class="has-text-weight-bold">State</td><td>{$serverStatus.state}</td></tr>
       {/if}

@@ -122,7 +122,7 @@
           {#if allowDelete}
             <td class="buttons">
               <button name="{path.url}" class="button is-danger" title="Delete"
-                      disabled={$serverStatus.running} on:click={deletePath}><i class="fa fa-trash"></i></button>
+                      disabled={$serverStatus.running} on:click={deletePath}><i class="fa fa-trash-can"></i></button>
             </td>
           {/if}
         </tr>

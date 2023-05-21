@@ -15,9 +15,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@fortawesome/fontawesome-free": "^6.4.0",
 		"@sveltejs/adapter-static": "^1.0.0-next.34",
 		"bulma": "^0.9.4",
-		"font-awesome5": "^1.0.5",
 		"svelte-modals": "^1.2.0",
 		"svelte-scrollto-element": "^0.7.0"
 	}

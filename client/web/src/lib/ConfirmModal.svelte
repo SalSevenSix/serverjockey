@@ -36,8 +36,10 @@
       {/if}
     </section>
     <footer class="modal-card-foot">
-      <button class="button is-success" disabled={confirmName != enteredName} on:click={confirm}>Confirm</button>
-      <button class="button" on:click={closeModal}>Cancel</button>
+      <button class="button" on:click={closeModal}>
+        <i class="fa fa-rectangle-xmark fa-lg"></i>&nbsp;&nbsp;Cancel</button>
+      <button class="button is-success" disabled={confirmName != enteredName} on:click={confirm}>
+        <i class="fa fa-square-check fa-lg"></i>&nbsp;&nbsp;Confirm</button>
     </footer>
   </div>
 </div>

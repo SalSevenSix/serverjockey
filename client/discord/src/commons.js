@@ -175,7 +175,7 @@ exports.send = function($) {
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
-    let line = 'Players currently online: ' + body.length;
+    let line = 'Players on ' + $.instance + ' : ' + body.length;
     let chars = line.length;
     let chunk = [line];
     let result = [];

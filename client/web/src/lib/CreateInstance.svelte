@@ -20,8 +20,8 @@
   });
 
   function create() {
-    if (!serverForm.module) return notifyError('Type not selected.');
-    if (!serverForm.identity) return notifyError('Instance Name not set.');
+    if (!serverForm.module) return notifyError('Module not selected.');
+    if (!serverForm.identity) return notifyError('Name not set.');
     creating = true;
     serverForm.identity = serverForm.identity.replaceAll(' ', '-').toLowerCase();
     let request = newPostRequest();
@@ -40,7 +40,7 @@
 <div class="block">
   <h2 class="title is-5">New Instance</h2>
   <div class="field">
-    <label for="createInstanceModule" class="label">Type</label>
+    <label for="createInstanceModule" class="label">Module</label>
     <div class="control">
       <div class="select">
         <select id="createInstanceModule" bind:value={serverForm.module}>
@@ -57,10 +57,8 @@
       <input id="createInstanceIdentity" class="input" type="text" bind:value={serverForm.identity}>
     </div>
   </div>
-  <div class="field">
-    <div class="control">
-      <button name="create" class="button is-primary is-fullwidth"
-              disabled={creating} on:click={create}>Create</button>
-    </div>
+  <div class="block buttons">
+    <button name="create" class="button is-primary is-fullwidth" disabled={creating} on:click={create}>
+      <i class="fa-solid fa-folder-plus fa-lg"></i>&nbsp;&nbsp;Create</button>
   </div>
 </div>

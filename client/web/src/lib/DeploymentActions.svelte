@@ -9,10 +9,10 @@
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   function doAction() {
-    cannotProcess = true;
     let actionName = this.name;
     let actionDisplay = capitalizeKebabCase(actionName);
     confirmModal('Are you sure you want to ' + actionDisplay + ' ?', function() {
+      cannotProcess = true;
       fetch($instance.url + '/deployment/' + actionName, newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);

@@ -75,7 +75,7 @@
       <button disabled={updating} on:click={reload}
               name="reload" class="button is-warning">Reload</button>
       <button disabled={updating || originalText === configText} on:click={save}
-              name="save" class="button is-primary">Save</button>
+              name="save" class="button is-primary"><i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
     </div>
   </div>
 </div>

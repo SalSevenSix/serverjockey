@@ -115,12 +115,10 @@
           </div>
         {/if}
       {/each}
-      <div class="field">
-        <div class="control">
-          <button name="send" class="button is-primary"
-                  disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'}
-                  on:click={send}>Send</button>
-        </div>
+      <div class="block buttons">
+        <button name="send" class="button is-primary"
+                disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'} on:click={send}>
+                <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
       </div>
     {/if}
   {/if}

@@ -149,7 +149,7 @@
                     <i class="fa fa-undo"></button>
             <button name="{path.name}" class="button is-danger" title="Delete"
                     disabled={cannotMaintenance} on:click={deleteBackup}>
-                    <i class="fa fa-trash"></i></button>
+                    <i class="fa fa-trash-can"></i></button>
           </td>
         </tr>
       {/each}
@@ -172,24 +172,22 @@
 <div class="block">
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
-      <button name="upload" class="button is-success"
-              disabled={cannotMaintenance} on:click={uploadFile}>Upload File</button>
+      <button name="upload" class="button is-success" disabled={cannotMaintenance} on:click={uploadFile}>
+        <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload File</button>
     </div>
     <label class="file-label">
       <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
       <span class="file-cta">
-        <span class="file-icon"><i class="fa fa-upload"></i></span>
-        <span class="file-label">Choose a file…</span>
+        <span class="file-icon"><i class="fa fa-file-circle-plus"></i></span>
+        <span class="file-label">Choose file…</span>
       </span>
       <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected.'}</span>
     </label>
   </div>
-  <div class="field">
-    <div class="control buttons">
-      <button name="runtime" class="button is-primary"
-              disabled={cannotProcess} on:click={createBackup}>Backup Runtime</button>
-      <button name="world" class="button is-primary"
-              disabled={cannotProcess} on:click={createBackup}>Backup World</button>
-    </div>
+  <div class="block buttons">
+    <button name="runtime" class="button is-primary" disabled={cannotProcess} on:click={createBackup}>
+      <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
+    <button name="world" class="button is-primary" disabled={cannotProcess} on:click={createBackup}>
+      <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
   </div>
 </div>

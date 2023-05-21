@@ -6,7 +6,7 @@
   export let noHints = false;
   let serverLinkForm = {};
   let botToken = null;
-  let applying = false;
+  let saving = false;
 
   onMount(function() {
     fetch($instance.url + '/config', newGetRequest())
@@ -21,8 +21,8 @@
       .catch(function(error) { notifyError('Failed to load ServerLink Config.'); });
   });
 
-  function apply() {
-    applying = true;
+  function save() {
+    saving = true;
     let request = newPostRequest('text/plain');
     request.body = JSON.stringify(serverLinkForm);
     fetch($instance.url + '/config', request)
@@ -32,7 +32,7 @@
         notifyInfo('ServerLink Config saved.');
       })
       .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
-      .finally(function() { applying = false; });
+      .finally(function() { saving = false; });
   }
 </script>
 
@@ -73,10 +73,8 @@
       <textarea id="serverLinkConfigWhitelistDm" class="textarea" bind:value={serverLinkForm.WHITELIST_DM}></textarea>
     </div>
   </div>
-  <div class="field">
-    <div class="control">
-      <button name="apply" class="button is-primary is-fullwidth"
-              disabled={applying} on:click={apply}>Apply</button>
-    </div>
+  <div class="block buttons">
+    <button name="save" class="button is-primary is-fullwidth" disabled={saving} on:click={save}>
+      <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
   </div>
 </div>
