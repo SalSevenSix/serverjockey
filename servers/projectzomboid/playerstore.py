@@ -148,6 +148,8 @@ class PlayerStoreService:
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
+    CLEAR = 'PlayerActivitySubscriber.Clear'
+    CLEAR_FILTER = msgftr.NameIs(CLEAR)
     LOGIN = 'PlayerActivitySubscriber.Login'
     LOGIN_FILTER = msgftr.NameIs(LOGIN)
     LOGIN_KEY = '> ConnectionManager: [fully-connected]'
@@ -158,12 +160,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
 
     def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.And(
-            msg.CONSOLE_OUTPUT_FILTER,
-            msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER, _PlayerEventSubscriber.LOGOUT_KEY_FILTER)))
+        super().__init__(msgftr.Or(
+            proch.ServerProcess.FILTER_STATES_DOWN,
+            msgftr.And(
+                msg.CONSOLE_OUTPUT_FILTER,
+                msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER,
+                          _PlayerEventSubscriber.LOGOUT_KEY_FILTER))))
         self._mailer = mailer
 
     def handle(self, message):
+        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
+            self._mailer.post(self, _PlayerEventSubscriber.CLEAR, {'event': 'clear'})
+            return None
         if _PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
             steamid = str(message.data())
             steamid = util.left_chop_and_strip(steamid, 'steam-id=')
@@ -173,12 +181,14 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.right_chop_and_strip(name, '" connection-type=')
             event = PlayerEvent('login', Player(steamid, name))
             self._mailer.post(self, _PlayerEventSubscriber.LOGIN, event)
+            return None
         if _PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
             line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT_KEY)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             event = PlayerEvent('logout', Player(steamid, name[1:-1]))
             self._mailer.post(self, _PlayerEventSubscriber.LOGOUT, event)
+            return None
         return None
 
 
@@ -200,4 +210,7 @@ class _CaptureSteamidSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-PLAYER_EVENT_FILTER = msgftr.Or(_PlayerEventSubscriber.LOGIN_FILTER, _PlayerEventSubscriber.LOGOUT_FILTER)
+PLAYER_EVENT_FILTER = msgftr.Or(
+    _PlayerEventSubscriber.CLEAR_FILTER,
+    _PlayerEventSubscriber.LOGIN_FILTER,
+    _PlayerEventSubscriber.LOGOUT_FILTER)

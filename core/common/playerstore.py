@@ -3,6 +3,7 @@ import typing
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
 from core.proc import proch
+from core.util import util
 
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
@@ -40,14 +41,20 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
-            self._players = []
+            self._mailer.post(self, PlayersSubscriber.EVENT, {'event': 'clear'})
             return None
         if PlayersSubscriber.EVENT_FILTER.accepts(message):
-            event = message.data()
-            if event['event'] == 'login':
-                self._players.append(event['player'])
-            if event['event'] == 'logout':
-                self._players.remove(event['player'])
+            event_type = util.get('event', message.data())
+            if event_type == 'clear':
+                self._players = []
+                return None
+            players, player = [], util.get('player', message.data())
+            for current in self._players:
+                if player['name'] != current['name']:
+                    players.append(current)
+            if event_type == 'login':
+                players.append(player)
+            self._players = players
             return None
         if PlayersSubscriber.GET_FILTER.accepts(message):
             self._mailer.post(self, PlayersSubscriber.GET_RESPONSE, tuple(self._players), message)

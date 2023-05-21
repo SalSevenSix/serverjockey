@@ -29,6 +29,7 @@ exports.startupEventLogging = function(context, channel, instance, url) {
     let result = '';
     if (json.event === 'login') { result += 'LOGIN '; }
     if (json.event === 'logout') { result += 'LOGOUT '; }
+    if (!result) return true;
     result += json.player.name;
     if (json.player.steamid) {
       result += ' [' + json.player.steamid + ']';

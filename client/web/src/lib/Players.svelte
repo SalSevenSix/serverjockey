@@ -1,19 +1,11 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  // TODO probably should HTML escape names
 
   let subs = new SubscriptionHelper();
   let players = [];
-
-  let lastRunning = $serverStatus.running;
-  $: serverRunningChange($serverStatus.running);
-  function serverRunningChange(running) {
-    if (lastRunning === true && running === false) {
-      players = [];
-    }
-    lastRunning = running;
-  }
 
   onMount(function() {
     fetch($instance.url + '/players', newGetRequest())
@@ -24,6 +16,10 @@
       .then(function(json) {
         players = json;
         subs.start($instance.url + '/players/subscribe', function(data) {
+          if (data.event === 'clear') {
+            players = [];
+            return true;
+          }
           players = players.filter(function(value) {
             return value.name != data.player.name;
           });
