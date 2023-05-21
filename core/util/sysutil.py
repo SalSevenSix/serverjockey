@@ -2,6 +2,7 @@ import logging
 import shutil
 import asyncio
 import aiohttp
+import socket
 # ALLOW util.*
 from core.util import __version__, util, io, funcutil, shellutil
 
@@ -49,7 +50,7 @@ async def get_public_ip() -> str:
     result = util.get('public_ip', _CACHE)
     if result:
         return result
-    for url in ('https://api.ipify.org', 'https://ip4.seeip.org'):
+    for url in ('https://api.seeip.org', 'https://api.ipify.org'):
         _CACHE['public_ip'] = await _fetch_text(url)
         if _CACHE['public_ip']:
             logging.debug('Public IP sourced from ' + url)
@@ -59,9 +60,11 @@ async def get_public_ip() -> str:
 
 
 async def _fetch_text(url: str) -> str | None:
+    connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
+    timout = aiohttp.ClientTimeout(total=4.0)
     # noinspection PyBroadException
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=4.0)) as session:
+        async with aiohttp.ClientSession(connector=connector, timeout=timout) as session:
             async with session.get(url) as response:
                 assert response.status == 200
                 result = await response.text()

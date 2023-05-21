@@ -81,7 +81,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         self._context.post(self, 'Logging.File', self._context.config('logfile'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
-        await steamutil.check_steam(self._context.config('env')['HOME'])
+        await steamutil.check_steam(util.get('HOME', self._context.config('env')))
         return self._syssvc.resources()
 
     async def shutdown(self):

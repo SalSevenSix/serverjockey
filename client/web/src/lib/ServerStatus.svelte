@@ -7,16 +7,16 @@
 <div class="block">
   <table class="table">
     <tbody>
-      <tr><td><strong>Running</strong></td><td>{$serverStatus.running}</td></tr>
+      <tr><td class="has-text-weight-bold">Running</td><td>{$serverStatus.running}</td></tr>
       {#if $serverStatus.state}
-        <tr><td><strong>State</strong></td><td>{$serverStatus.state}</td></tr>
+        <tr><td class="has-text-weight-bold">State</td><td>{$serverStatus.state}</td></tr>
       {/if}
       {#if $serverStatus.uptime}
-        <tr><td><strong>Uptime</strong></td><td>{humanDuration($serverStatus.uptime)}</td></tr>
+        <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration($serverStatus.uptime)}</td></tr>
       {/if}
       {#if $serverStatus.details}
         {#each Object.keys($serverStatus.details) as key}
-          <tr><td><strong>{capitalize(key)}</strong></td><td>{$serverStatus.details[key]}</td></tr>
+          <tr><td class="has-text-weight-bold">{capitalize(key)}</td><td>{$serverStatus.details[key]}</td></tr>
         {/each}
       {/if}
     </tbody>

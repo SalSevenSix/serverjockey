@@ -6,6 +6,8 @@ from core.util import shellutil, io, tasks
 
 
 async def check_steam(home_dir: str):
+    if not home_dir:
+        return
     if await io.directory_exists(home_dir + '/Steam'):
         return
     tasks.task_fork(_install_steam(), 'Steam Installer')

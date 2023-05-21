@@ -1,8 +1,3 @@
-
-body {
-  background-color: #FFFDF8;
-}
-
 a[target="_blank"] {
   font-weight: bold;
 }
@@ -16,7 +11,20 @@ pre.is-thinner {
   margin: 0em 2.3em;
 }
 
+.table {
+  background-color: transparent;
+  line-height: 1;
+}
+
 table.is-thinner {
   margin: 0em 1.5em;
   width: 90%;
+}
+
+.navbar {
+  border: 1px solid #DBDBDB;
+}
+
+body {
+  background-color: #FFFDF8;
 }

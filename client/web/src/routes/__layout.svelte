@@ -5,8 +5,8 @@
 
   import { onMount } from 'svelte';
   import { Modals } from 'svelte-modals';
-  import { securityToken } from '$lib/serverjockeyapi';
   import { loginModal } from '$lib/modals';
+  import { securityToken } from '$lib/serverjockeyapi';
   import Navbar from '$lib/Navbar.svelte';
   import Notifications from '$lib/Notifications.svelte';
 
