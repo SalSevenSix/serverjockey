@@ -6,6 +6,7 @@
 
   let subs = new SubscriptionHelper();
   let players = [];
+  let loading = true;
 
   onMount(function() {
     fetch($instance.url + '/players', newGetRequest())
@@ -29,7 +30,12 @@
           return true;
         });
       })
-      .catch(function(error) { notifyError('Failed to load Player List.'); });
+      .catch(function(error) {
+        notifyError('Failed to load Player list.');
+      })
+      .finally(function() {
+        loading = false;
+      });
   });
 
   onDestroy(function() {
@@ -39,21 +45,26 @@
 
 
 <div class="block">
-  <h2 class="title is-5">{players.length} Players Online</h2>
   <table class="table">
     <thead>
       <tr>
-        <th>Name</th>
+        <th>Player</th>
         <th>Steam ID</th>
       </tr>
     </thead>
     <tbody>
-      {#each players as player}
-        <tr>
-          <td>{player.name}</td>
-          <td>{(player.steamid == false) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
-        </tr>
-      {/each}
+      {#if players.length === 0}
+        <tr><td colspan="2">
+          {loading ? 'Loading...' : '0 players online.'}
+        </td></tr>
+      {:else}
+        {#each players as player}
+          <tr>
+            <td>{player.name}</td>
+            <td>{(player.steamid === false) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
+          </tr>
+        {/each}
+      {/if}
     </tbody>
   </table>
 </div>

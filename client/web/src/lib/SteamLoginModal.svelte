@@ -114,8 +114,9 @@
           </div>
         </div>
         <div class="field buttons is-right">
-          <button name="steam-login-start" class="button is-primary" disabled={stage > 0} on:click={startLogin}>
-                  <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
+          <button name="steam-login-start" title="Login Steam" class="button is-primary"
+                  disabled={stage > 0} on:click={startLogin}>
+            <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
         </div>
       {/if}
       {#if stage == 2}
@@ -126,8 +127,8 @@
           </div>
         </div>
         <div class="field buttons is-right">
-          <button name="steam-password-enter" class="button is-primary" on:click={enterPassword}>
-                  <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
+          <button name="steam-password-enter" title="Enter Password" class="button is-primary" on:click={enterPassword}>
+            <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
         </div>
       {/if}
       {#if stage == 3}
@@ -138,8 +139,8 @@
           </div>
         </div>
         <div class="field buttons is-right">
-          <button name="steam-code-enter" class="button is-primary" on:click={enterCode}>
-                  <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
+          <button name="steam-code-enter" title="Enter Code" class="button is-primary" on:click={enterCode}>
+            <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
         </div>
       {/if}
       <div class="field">

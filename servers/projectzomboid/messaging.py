@@ -45,8 +45,6 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     IP_FILTER = msgftr.DataStrContains(IP)
     PORT = '> Clients should use'
     PORT_FILTER = msgftr.DataStrContains(PORT)
-    STEAMID = 'Server Steam ID'
-    STEAMID_FILTER = msgftr.DataStrContains(STEAMID)
     INGAMETIME = '> IngameTime'
     INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
 
@@ -58,8 +56,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
                 msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
                           _ServerDetailsSubscriber.VERSION_FILTER,
                           _ServerDetailsSubscriber.IP_FILTER,
-                          _ServerDetailsSubscriber.PORT_FILTER,
-                          _ServerDetailsSubscriber.STEAMID_FILTER))))
+                          _ServerDetailsSubscriber.PORT_FILTER))))
         self._mailer = mailer
 
     def handle(self, message):
@@ -84,9 +81,6 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.right_chop_and_strip(value, 'port for connections')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': int(value)})
             return None
-        if _ServerDetailsSubscriber.STEAMID_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.STEAMID)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'steamid': int(value)})
         return None
 
 

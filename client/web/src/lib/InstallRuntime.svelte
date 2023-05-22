@@ -6,9 +6,9 @@
   import { instance, serverStatus, SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
 
   export let qualifierName = null;
+  let qualifier = '';
   let subs = new SubscriptionHelper();
   let logLines = new RollingLog();
-  let qualifier = '';
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
@@ -101,11 +101,11 @@
   {/if}
   <div class="field">
     <div class="control buttons">
-      <button name="wipe-runtime" class="button is-danger"
+      <button name="wipe-runtime" title="Delete Runtime" class="button is-danger"
               disabled={cannotProcess} on:click={wipeRuntime}>Delete Runtime</button>
-      <button name="install-runtime" class="button is-warning"
+      <button name="install-runtime" title="Install Runtime" class="button is-warning"
               disabled={cannotProcess} on:click={installRuntime}>Install Runtime</button>
-      <button name="runtime-meta" class="button is-primary"
+      <button name="runtime-meta" title="Runtime Runtime" class="button is-primary"
               disabled={cannotProcess} on:click={runtimeMeta}>Runtime Meta</button>
     </div>
   </div>

@@ -45,7 +45,7 @@
       </div>
       <div class="field">
         <div class="control">
-          <button name="login" class="button is-primary is-fullwidth" on:click={login}>
+          <button name="login" title="Login" class="button is-primary is-fullwidth" on:click={login}>
             <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
         </div>
       </div>

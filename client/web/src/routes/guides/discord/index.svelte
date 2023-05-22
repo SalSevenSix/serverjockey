@@ -281,7 +281,7 @@
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
     <ServerStatusStore>
-      <ServerStatus />
+      <ServerStatus stateOnly />
       <ServerControls />
     </ServerStatusStore>
   </div>

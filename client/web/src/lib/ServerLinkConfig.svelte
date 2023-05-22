@@ -74,7 +74,7 @@
     </div>
   </div>
   <div class="block buttons">
-    <button name="save" class="button is-primary is-fullwidth" disabled={saving} on:click={save}>
+    <button name="save" title="Save" class="button is-primary is-fullwidth" disabled={saving} on:click={save}>
       <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
   </div>
 </div>

@@ -26,9 +26,9 @@
       </div>
       <div class="field">
         <div class="control buttons">
-          <button name="close" class="button" on:click={closeModal}>
+          <button name="close" title="Close" class="button" on:click={closeModal}>
             <i class="fa fa-xmark fa-lg"></i>&nbsp;&nbsp;Close</button>
-          <button name="save" class="button is-primary" on:click={saveChanges}>
+          <button name="save" title="Save" class="button is-primary" on:click={saveChanges}>
             <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
         </div>
       </div>

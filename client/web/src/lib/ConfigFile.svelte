@@ -6,7 +6,8 @@
 
   export let name;
   export let path;
-  let updating = false;
+  let configFileTextId = 'configFileText' + name.replaceAll(' ', '');
+  let updating = true;
   let originalText = '';
   let configText = '';
 
@@ -57,25 +58,26 @@
 
 <div class="block">
   <div class="field">
-    <label for={'configFileText' + name.replaceAll(' ', '')} class="label">
+    <label for={configFileTextId} class="label">
       <a href={$instance.url + path} target="_blank">{name}</a>
     </label>
     <slot />
     <div class="control pr-6">
-      <textarea id={'configFileText' + name.replaceAll(' ', '')} class="textarea is-family-monospace is-size-7"
-                bind:value={configText}></textarea>
+      <textarea id={configFileTextId} class="textarea is-family-monospace is-size-7"
+                disabled={updating} bind:value={configText}></textarea>
     </div>
   </div>
   <div class="field">
     <div class="control buttons">
-      <button disabled={updating} on:click={openEditor}
-              name="editor" class="button">&nbsp;<i class="fa fa-expand-arrows-alt"></i>&nbsp;</button>
-      <button disabled={updating || !configText} on:click={clear}
-              name="clear" class="button is-danger">Clear</button>
-      <button disabled={updating} on:click={reload}
-              name="reload" class="button is-warning">Reload</button>
+      <button disabled={updating} on:click={openEditor} name="editor" title="Editor" class="button">
+        <i class="fa fa-expand-arrows-alt"></i>&nbsp;&nbsp;Editor</button>
+      <button disabled={updating || !configText} on:click={clear} name="clear" title="Clear" class="button is-danger">
+        <i class="fa fa-eraser"></i>&nbsp;&nbsp;Clear</button>
+      <button disabled={updating} on:click={reload} name="reload" title="Reload" class="button is-warning">
+        <i class="fa fa-rotate-right"></i>&nbsp;&nbsp;Reload</button>
       <button disabled={updating || originalText === configText} on:click={save}
-              name="save" class="button is-primary"><i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
+              name="save" title="Save" class="button is-primary">
+        <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
     </div>
   </div>
 </div>

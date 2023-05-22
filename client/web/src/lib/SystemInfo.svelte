@@ -41,7 +41,7 @@
     <div class="pl-5 pr-6"><RubiksCube /></div>
   </div>
   <div class="column is-one-third">
-    <table class="table">
+    <table class="table is-thinner">
       <tbody>
         <tr><td class="has-text-weight-bold">Version</td><td>{info.version}</td></tr>
         <tr><td class="has-text-weight-bold">OS</td><td>{info.os}</td></tr>
@@ -56,7 +56,7 @@
     </table>
   </div>
   <div class="column is-one-third">
-    <table class="table">
+    <table class="table is-thinner">
       <tbody>
         <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
         <tr><td class="has-text-weight-bold">Disk</td><td></td></tr>
@@ -71,10 +71,3 @@
     </table>
   </div>
 </div>
-
-
-<style>
-  .table {
-    width: 90%;
-  }
-</style>

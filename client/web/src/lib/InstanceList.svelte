@@ -59,7 +59,7 @@
 </script>
 
 
-<div class="block">
+<div class="content">
   <h2 class="title is-5">Instances</h2>
   <table class="table">
     <thead>
@@ -74,10 +74,10 @@
         <tr>
           <td>{instance.identity}</td>
           <td>{instance.module}</td>
-          <td class="buttons">
-            <button name={index} class="button is-primary" title="View"
+          <td>
+            <button name={index} class="button is-primary mb-1" title="View"
                     on:click={viewInstance}>&nbsp;<i class="fa fa-folder-open"></i>&nbsp;</button>
-            <button name={index} class="button is-danger" title="Delete"
+            <button name={index} class="button is-danger ml-1" title="Delete"
                     on:click={deleteInstance}><i class="fa fa-trash-can"></i></button>
           </td>
         </tr>

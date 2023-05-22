@@ -21,6 +21,10 @@ table.is-thinner {
   width: 90%;
 }
 
+.word-break-all {
+  word-break: break-all;
+}
+
 .navbar {
   border: 1px solid #DBDBDB;
 }

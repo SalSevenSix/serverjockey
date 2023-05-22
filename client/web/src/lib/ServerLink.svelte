@@ -19,7 +19,7 @@
         <div class="column">
           <h2 class="title is-5">ServerLink Controls</h2>
           <ServerControls />
-          <ServerStatus />
+          <ServerStatus stateOnly />
         </div>
         <div class="column">
           <h2 class="title is-5">ServerLink Configuration</h2>

@@ -1,5 +1,5 @@
 # ALLOW core.*
-from core.util import util
+from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
@@ -22,11 +22,11 @@ MAINTENANCE_STATE_FILTER = msgftr.Or(FILTER_INSTALL_START, msgext.Archiver.FILTE
 READY_STATE_FILTER = msgftr.Or(FILTER_INSTALL_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
-def initialise(mailer: msgabc.MulticastMailer):
+async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
     mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer))
+    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.get_local_ip()))
     mailer.register(_PlayerEventSubscriber(mailer))
 
 
@@ -37,7 +37,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         msgftr.DataMatches('.*Info.*Own address is IP ADDR.*confirmed by pingpong.*'),
         msgftr.DataMatches('.*Warning.*Determining own address has failed. Best guess: IP ADDR.*'))
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.MulticastMailer, local_ip: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
@@ -45,6 +45,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
                 _ServerDetailsSubscriber.PORT_FILTER,
                 _ServerDetailsSubscriber.IP_FILTER)))
         self._mailer = mailer
+        self._local_ip = local_ip
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
@@ -56,12 +57,16 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.left_chop_and_strip(message.data(), '({')
             value = util.right_chop_and_strip(value, '})')
             value = value.split(':')
+            if value[0] == '0.0.0.0':
+                value[0] = self._local_ip
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value[0], 'port': value[1]})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), '({')
             value = util.right_chop_and_strip(value, '})')
             value = value.split(':')
+            if value[0] == '0.0.0.0':
+                value[0] = self._local_ip
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value[0]})
             return None
         return None

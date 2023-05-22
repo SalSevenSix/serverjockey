@@ -116,7 +116,7 @@
         {/if}
       {/each}
       <div class="block buttons">
-        <button name="send" class="button is-primary"
+        <button name="send" title="Send" class="button is-primary"
                 disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'} on:click={send}>
                 <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
       </div>

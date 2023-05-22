@@ -11,16 +11,16 @@
 
 
 <div class="block buttons">
-  <button name="stop" class="button is-danger" on:click={executeCommand}
+  <button name="stop" title="Stop" class="button is-danger" on:click={executeCommand}
           disabled={!$serverStatus.running || $serverStatus.state === 'STOPPING'}>
           Stop</button>
-  <button name="restart" class="button is-warning" on:click={executeCommand}
+  <button name="restart" title="Restart" class="button is-warning" on:click={executeCommand}
           disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'}>
           Restart</button>
-  <button name="start" class="button is-primary" on:click={executeCommand}
+  <button name="start" title="Start" class="button is-primary" on:click={executeCommand}
           disabled={$serverStatus.running || $serverStatus.state === 'MAINTENANCE'}>
           Start</button>
-  <button name="daemon" class="button is-success" on:click={executeCommand}
+  <button name="daemon" title="Daemon (auto restart)" class="button is-success" on:click={executeCommand}
           disabled={$serverStatus.running || $serverStatus.state === 'MAINTENANCE'}>
           Daemon</button>
 </div>

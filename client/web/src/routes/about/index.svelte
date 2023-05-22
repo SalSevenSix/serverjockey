@@ -20,11 +20,10 @@
       If your like using this system, please consider supporting me on Ko-fi.
     </p>
     <div class="columns is-centered">
-      <div class="column is-half">
+      <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
           <figure>
-            <img class="ko-fi-img" src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
-                 alt="Help support me at at ko-fi.com" />
+            <img alt="Help support me at at ko-fi.com" src="/assets/icons/KoFi_button_black.png" />
           </figure>
         </a>
       </div>
@@ -36,23 +35,10 @@
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
           <figure>
-            <img class="github-img" src="/assets/icons/GitHub_Logo.png"
-                 alt="ServerJockey on GitHub" />
+            <img alt="ServerJockey on GitHub" src="/assets/icons/GitHub_Logo.png" />
           </figure>
         </a>
       </div>
     </div>
   </div>
 </div>
-
-
-<style>
-  .ko-fi-img {
-    border: 0px;
-    height: 36px;
-  }
-
-  .github-img {
-    width: 128px;
-  }
-</style>

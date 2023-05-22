@@ -5,6 +5,7 @@
   import { sleep, humanFileSize } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest } from '$lib/serverjockeyapi';
 
+  let reloading = true;
   let uploading = false;
   let rotatorText = '';
   let reloadRequired = false;
@@ -26,6 +27,7 @@
   onMount(reload);
 
   function reload() {
+    reloading = true;
     fetch($instance.url + '/backups', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -38,7 +40,10 @@
         paths = json;
       })
       .catch(function(error) {
-        notifyError('Failed to load Backup File List.');
+        notifyError('Failed to load Backup files.');
+      })
+      .finally(function() {
+        reloading = false;
       });
   }
 
@@ -138,21 +143,27 @@
       </tr>
     </thead>
     <tbody>
-      {#each paths as path}
-        <tr>
-          <td>{path.updated}</td>
-          <td>{humanFileSize(path.size)}</td>
-          <td><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
-          <td class="buttons">
-            <button name="{path.name}" class="button is-warning" title="Restore"
-                    disabled={cannotProcess} on:click={restoreBackup}>
-                    <i class="fa fa-undo"></button>
-            <button name="{path.name}" class="button is-danger" title="Delete"
-                    disabled={cannotMaintenance} on:click={deleteBackup}>
-                    <i class="fa fa-trash-can"></i></button>
-          </td>
-        </tr>
-      {/each}
+      {#if paths.length === 0}
+        <tr><td colspan="4">
+          {reloading ? 'Loading...' : 'No Backups found.'}
+        </td></tr>
+      {:else}
+        {#each paths as path}
+          <tr>
+            <td>{path.updated}</td>
+            <td>{humanFileSize(path.size)}</td>
+            <td class="word-break-all"><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
+            <td>
+              <button name="{path.name}" title="Restore" class="button is-warning mb-1"
+                      disabled={cannotProcess} on:click={restoreBackup}>
+                      <i class="fa fa-undo"></button>
+              <button name="{path.name}" title="Delete" class="button is-danger"
+                      disabled={cannotMaintenance} on:click={deleteBackup}>
+                      <i class="fa fa-trash-can"></i></button>
+            </td>
+          </tr>
+        {/each}
+      {/if}
     </tbody>
   </table>
 </div>
@@ -172,7 +183,8 @@
 <div class="block">
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
-      <button name="upload" class="button is-success" disabled={cannotMaintenance} on:click={uploadFile}>
+      <button name="upload" title="Upload File" class="button is-success"
+              disabled={cannotMaintenance} on:click={uploadFile}>
         <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload File</button>
     </div>
     <label class="file-label">
@@ -185,9 +197,11 @@
     </label>
   </div>
   <div class="block buttons">
-    <button name="runtime" class="button is-primary" disabled={cannotProcess} on:click={createBackup}>
+    <button name="runtime" title="Backup Runtime" class="button is-primary"
+            disabled={cannotProcess} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
-    <button name="world" class="button is-primary" disabled={cannotProcess} on:click={createBackup}>
+    <button name="world" title="Backup World" class="button is-primary"
+            disabled={cannotProcess} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
   </div>
 </div>

@@ -58,7 +58,7 @@
     </div>
   </div>
   <div class="block buttons">
-    <button name="create" class="button is-primary is-fullwidth" disabled={creating} on:click={create}>
+    <button name="create" title="Create" class="button is-primary is-fullwidth" disabled={creating} on:click={create}>
       <i class="fa-solid fa-folder-plus fa-lg"></i>&nbsp;&nbsp;Create</button>
   </div>
 </div>
