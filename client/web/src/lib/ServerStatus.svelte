@@ -1,21 +1,17 @@
 <script>
   import { capitalize, humanDuration } from '$lib/util';
   import { serverStatus } from '$lib/serverjockeyapi';
+  import ServerStatusToggle from '$lib/ServerStatusToggle.svelte';
 </script>
 
 
 <div class="block">
   <table class="table">
     <tbody>
-      <tr><td class="has-text-weight-bold">Running</td><td>
-        {#if $serverStatus.running}
-          <i class="fa fa-thumbs-up fa-lg"></i>
-        {:else}
-          <i class="fa fa-thumbs-down fa-lg"></i>
-        {/if}
-      </td></tr>
       {#if $serverStatus.state}
-        <tr><td class="has-text-weight-bold">State</td><td>{$serverStatus.state}</td></tr>
+        <tr><td class="has-text-weight-bold">State</td><td>
+          <ServerStatusToggle />&nbsp;{$serverStatus.state}
+        </td></tr>
       {/if}
       {#if $serverStatus.uptime}
         <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration($serverStatus.uptime)}</td></tr>

@@ -13,7 +13,10 @@
       {#each $notifications as notification, index}
         <div class="notification {notification.level}">
           <button name="{notification.id}" class="delete is-large" on:click={deleteMessage}></button>
-          {notification.message}
+          {#if notification.level === 'is-success'}<i class="fa fa-circle-check fa-lg"></i>{/if}
+          {#if notification.level === 'is-warning'}<i class="fa fa-triangle-exclamation fa-lg"></i>{/if}
+          {#if notification.level === 'is-danger'}<i class="fa fa-circle-minus fa-lg"></i>{/if}
+          &nbsp;&nbsp;{notification.message}
         </div>
       {/each}
     </div>

@@ -1,5 +1,5 @@
 <script>
-  import 'bulma/css/bulma.css';
+  import 'bulma/css/bulma.min.css';
   import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
   import '@fortawesome/fontawesome-free/css/solid.min.css';
   import '../app.css';
