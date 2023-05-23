@@ -12,13 +12,17 @@
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
 
-  let deploymentActions = {
-    'wipe-world-save': 'Reset the game world save only. This is the map and player characters.',
-    'wipe-world-playerdb': 'Reset the player database only. This is logins, whitelist, banlist.',
-    'wipe-world-config': 'Reset the configuration files only. INI, Sandbox and Spawn config files.',
-    'wipe-world-backups': 'Delete all the map backups created by the Project Zomboid server.',
-    'wipe-world-all': 'Reset all of the above.'
-  };
+  let deploymentActions = [
+    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+      'desc': 'Reset the game world save only. This is the map and player characters.' },
+    { 'key': 'wipe-world-playerdb', 'icon': 'explosion', 'name': 'World Player DB',
+      'desc': 'Reset the player database only. This is logins, whitelist, banlist.' },
+    { 'key': 'wipe-world-config', 'icon': 'explosion', 'name': 'World Config',
+      'desc': 'Reset the configuration files only. INI, Sandbox and Spawn config files.' },
+    { 'key': 'wipe-world-backups', 'icon': 'explosion', 'name': 'World Backups',
+      'desc': 'Delete all the map backups created by the Project Zomboid server.' },
+    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+      'desc': 'Reset Save, Player DB and Config.' }];
 
   let consoleCommands = {
     'world': {

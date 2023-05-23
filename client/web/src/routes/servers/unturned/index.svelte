@@ -12,10 +12,11 @@
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
 
-  let deploymentActions = {
-    'wipe-world-save': 'Reset the game world map only.',
-    'wipe-world-all': 'Reset game world map and configuration.'
-  };
+  let deploymentActions = [
+    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+      'desc': 'Reset the game world map only.' },
+    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+      'desc': 'Reset game world map and configuration.' }];
 
   let consoleCommands = {
     'console': {

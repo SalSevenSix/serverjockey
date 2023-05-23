@@ -10,11 +10,13 @@
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
 
-  let deploymentActions = {
-    'wipe-world-save': 'Reset the game world save only.',
-    'wipe-world-config': 'Reset the configuration files only.',
-    'wipe-world-all': 'Reset all of the above.'
-  };
+  let deploymentActions = [
+    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+      'desc': 'Reset the game world save only.' },
+    { 'key': 'wipe-world-config', 'icon': 'explosion', 'name': 'World Config',
+      'desc': 'Reset the configuration files only.' },
+    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+      'desc': 'Reset all of the above.' }];
 </script>
 
 

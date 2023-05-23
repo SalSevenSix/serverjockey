@@ -159,5 +159,6 @@ _CONTENT_TYPES = {
     'webp': ContentTypeImpl('image/webp'),
     'woff': ContentTypeImpl('font/woff'),
     'woff2': ContentTypeImpl('font/woff2'),
+    'ttf': ContentTypeImpl('font/ttf'),
     'zip': ContentTypeImpl('application/zip')
 }

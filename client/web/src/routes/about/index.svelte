@@ -23,7 +23,7 @@
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
           <figure>
-            <img alt="Help support me at at ko-fi.com" src="/assets/icons/KoFi_button_black.png" />
+            <img alt="Help support me at ko-fi.com" src="/assets/icons/KoFi_button_black.png" />
           </figure>
         </a>
       </div>

@@ -4,21 +4,21 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
 
-  export let actions = {};
+  export let actions = [];
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   function doAction() {
-    let actionName = this.name;
-    let actionDisplay = capitalizeKebabCase(actionName);
-    confirmModal('Are you sure you want to ' + actionDisplay + ' ?', function() {
+    let actionKey = this.name;
+    let actionTitle = this.title;
+    confirmModal('Are you sure you want to ' + actionTitle + ' ?', function() {
       cannotProcess = true;
-      fetch($instance.url + '/deployment/' + actionName, newPostRequest())
+      fetch($instance.url + '/deployment/' + actionKey, newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
-          notifyInfo(actionDisplay + ' completed.');
+          notifyInfo(actionTitle + ' completed.');
         })
-        .catch(function(error) { notifyError(actionDisplay + ' failed.'); })
+        .catch(function(error) { notifyError(actionTitle + ' failed.'); })
         .finally(function() { cannotProcess = false; });
     });
   }
@@ -28,13 +28,14 @@
 <div class="block">
   <table class="table">
     <tbody>
-      {#each Object.keys(actions) as name}
+      {#each actions as action}
         <tr>
           <td>
-            <button name="{name}" title={capitalizeKebabCase(name)} class="button is-danger is-fullwidth"
-                    disabled={cannotProcess} on:click={doAction}>{capitalizeKebabCase(name)}</button>
+            <button name={action.key} title={capitalizeKebabCase(action.key)} class="button is-danger is-fullwidth"
+                    disabled={cannotProcess} on:click={doAction}>
+              <i class={'fa fa-' + action.icon + ' fa-lg'}></i>&nbsp;&nbsp;{action.name}</button>
           </td>
-          <td>{actions[name]}</td>
+          <td>{action.desc}</td>
         </tr>
       {/each}
     </tbody>

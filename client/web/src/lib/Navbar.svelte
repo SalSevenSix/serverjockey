@@ -12,6 +12,7 @@
   }
 </script>
 
+
 <div class="block">
   <nav class="navbar is-spaced" aria-label="main navigation">
     <div class="navbar-brand">

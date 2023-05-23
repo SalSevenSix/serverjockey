@@ -156,10 +156,10 @@
             <td>
               <button name="{path.name}" title="Restore" class="button is-warning mb-1"
                       disabled={cannotProcess} on:click={restoreBackup}>
-                      <i class="fa fa-undo"></button>
+                      <i class="fa fa-undo fa-lg"></button>
               <button name="{path.name}" title="Delete" class="button is-danger"
                       disabled={cannotMaintenance} on:click={deleteBackup}>
-                      <i class="fa fa-trash-can"></i></button>
+                      <i class="fa fa-trash-can fa-lg"></i></button>
             </td>
           </tr>
         {/each}

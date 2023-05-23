@@ -102,11 +102,14 @@
   <div class="field">
     <div class="control buttons">
       <button name="wipe-runtime" title="Delete Runtime" class="button is-danger"
-              disabled={cannotProcess} on:click={wipeRuntime}>Delete Runtime</button>
+              disabled={cannotProcess} on:click={wipeRuntime}>
+        <i class="fa fa-trash-can fa-lg"></i>&nbsp;&nbsp;Delete Runtime</button>
       <button name="install-runtime" title="Install Runtime" class="button is-warning"
-              disabled={cannotProcess} on:click={installRuntime}>Install Runtime</button>
+              disabled={cannotProcess} on:click={installRuntime}>
+        <i class="fa fa-gear fa-lg"></i>&nbsp;&nbsp;Install Runtime</button>
       <button name="runtime-meta" title="Runtime Runtime" class="button is-primary"
-              disabled={cannotProcess} on:click={runtimeMeta}>Runtime Meta</button>
+              disabled={cannotProcess} on:click={runtimeMeta}>
+        <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;Runtime Meta</button>
     </div>
   </div>
 </div>

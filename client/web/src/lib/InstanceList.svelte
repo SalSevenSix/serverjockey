@@ -76,9 +76,9 @@
           <td>{instance.module}</td>
           <td>
             <button name={index} class="button is-primary mb-1" title="View"
-                    on:click={viewInstance}>&nbsp;<i class="fa fa-folder-open"></i>&nbsp;</button>
+                    on:click={viewInstance}>&nbsp;<i class="fa fa-folder-open fa-lg"></i>&nbsp;</button>
             <button name={index} class="button is-danger ml-1" title="Delete"
-                    on:click={deleteInstance}><i class="fa fa-trash-can"></i></button>
+                    on:click={deleteInstance}><i class="fa fa-trash-can fa-lg"></i></button>
           </td>
         </tr>
       {/each}

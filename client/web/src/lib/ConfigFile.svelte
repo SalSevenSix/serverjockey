@@ -70,11 +70,11 @@
   <div class="field">
     <div class="control buttons">
       <button disabled={updating} on:click={openEditor} name="editor" title="Editor" class="button">
-        <i class="fa fa-expand-arrows-alt"></i>&nbsp;&nbsp;Editor</button>
+        <i class="fa fa-expand-arrows-alt fa-lg"></i>&nbsp;&nbsp;Editor</button>
       <button disabled={updating || !configText} on:click={clear} name="clear" title="Clear" class="button is-danger">
-        <i class="fa fa-eraser"></i>&nbsp;&nbsp;Clear</button>
+        <i class="fa fa-eraser fa-lg"></i>&nbsp;&nbsp;Clear</button>
       <button disabled={updating} on:click={reload} name="reload" title="Reload" class="button is-warning">
-        <i class="fa fa-rotate-right"></i>&nbsp;&nbsp;Reload</button>
+        <i class="fa fa-rotate-right fa-lg"></i>&nbsp;&nbsp;Reload</button>
       <button disabled={updating || originalText === configText} on:click={save}
               name="save" title="Save" class="button is-primary">
         <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
