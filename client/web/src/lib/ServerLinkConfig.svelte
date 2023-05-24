@@ -44,31 +44,41 @@
     </div>
   {/if}
   <div class="field">
-    <label for="serverLinkConfigBotToken" class="label">Discord Bot Token</label>
+    <label for="serverLinkConfigBotToken" class="label"
+           title="Login token for the discord bot">
+      Discord Bot Token</label>
     <div class="control">
       <input id="serverLinkConfigBotToken" class="input" type="text" bind:value={serverLinkForm.BOT_TOKEN}>
     </div>
   </div>
   <div class="field">
-    <label for="serverLinkConfigLogChannel" class="label">Log Channel ID</label>
+    <label for="serverLinkConfigLogChannel" class="label"
+           title="Discord channel ID for event logging">
+      Log Channel ID</label>
     <div class="control">
       <input id="serverLinkConfigLogChannel" class="input" type="text" bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
     </div>
   </div>
   <div class="field">
-    <label for="serverLinkConfigCommandPrefix" class="label">Command Prefix</label>
+    <label for="serverLinkConfigCommandPrefix" class="label"
+           title="Prefix the bot will recognise as commands">
+      Command Prefix</label>
     <div class="control">
       <input id="serverLinkConfigCommandPrefix" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
     </div>
   </div>
   <div class="field">
-    <label for="serverLinkConfigAdminRole" class="label">Admin Role</label>
+    <label for="serverLinkConfigAdminRole" class="label"
+           title="Discord role required for user to run admin commands">
+      Admin Role</label>
     <div class="control">
       <input id="serverLinkConfigAdminRole" class="input" type="text" bind:value={serverLinkForm.ADMIN_ROLE}>
     </div>
   </div>
   <div class="field">
-    <label for="serverLinkConfigWhitelistDm" class="label">Whitelist DM</label>
+    <label for="serverLinkConfigWhitelistDm" class="label"
+           title="DM message that will be sent to the user when whitelisted by Discord tag">
+      Whitelist DM</label>
     <div class="control">
       <textarea id="serverLinkConfigWhitelistDm" class="textarea" bind:value={serverLinkForm.WHITELIST_DM}></textarea>
     </div>

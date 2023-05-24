@@ -93,7 +93,9 @@
 <div class="block">
   {#if qualifierName}
     <div class="field">
-      <label for="installRuntimeQualifier" class="label">{qualifierName}</label>
+      <label for="installRuntimeQualifier" class="label"
+             title="Set to appropriate version/beta/tag to install desired non-stable version">
+        {qualifierName}</label>
       <div class="control">
         <input id="installRuntimeQualifier" class="input" type="text" bind:value={qualifier}>
       </div>

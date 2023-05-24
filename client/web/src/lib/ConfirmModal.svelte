@@ -27,7 +27,7 @@
       </div>
       {#if confirmName}
         <div class="field">
-          <label for="confirmModalName" class="label">Confirm Name</label>
+          <label for="confirmModalName" class="label" title="Enter name to confirm action">Confirm Name</label>
           <div class="control">
             <input id="confirmModalName" class="input" type="text"
                    placeholder={confirmName} bind:value={enteredName}>
