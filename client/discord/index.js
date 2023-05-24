@@ -10,7 +10,7 @@ function initialise() {
     process.exit(1)
   }
   logger.info('*** START ServerLink Bot ***');
-  logger.info('Version: 0.0.8');
+  logger.info('Version: 0.1.0');
   logger.info('Initialised with config...');
   logger.raw(config);
   return config;
