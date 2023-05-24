@@ -1,7 +1,7 @@
 # ALLOW core.* unturned.messaging
 from core.util import cmdutil
 from core.msg import msgabc
-from core.http import httpabc, httprsc
+from core.http import httpabc, httprsc, httpext
 from core.proc import prcext
 from core.common import interceptors
 
@@ -12,14 +12,11 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r = httprsc.ResourceBuilder(resource)
     r.reg('s', interceptors.block_not_started(mailer))
     r.psh('console')
-    r.put('help', _ConsoleHelpHandler())
+    r.put('help', httpext.StaticHandler(HELP_TEXT))
     r.put('{command}', prcext.ConsoleCommandHandler(mailer, _COMMANDS), 's')
 
 
-class _ConsoleHelpHandler(httpabc.GetHandler):
-
-    def handle_get(self, resource, data):
-        return '''UNTURNED CONSOLE COMMANDS
+HELP_TEXT = '''UNTURNED CONSOLE COMMANDS
 Admin [SteamID | Player]
 Admins
 Airdrop

@@ -57,6 +57,15 @@ class MessengerHandler(httpabc.PostHandler):
         return result
 
 
+class StaticHandler(httpabc.GetHandler):
+
+    def __init__(self, response: httpabc.ABC_RESPONSE):
+        self._response = response
+
+    def handle_get(self, resource, data):
+        return self._response
+
+
 class ArchiveHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, source_dir: str):

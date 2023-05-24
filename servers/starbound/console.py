@@ -1,6 +1,6 @@
 # ALLOW core.* starbound.messaging
 from core.msg import msgabc
-from core.http import httpabc, httprsc
+from core.http import httpabc, httprsc, httpext
 from core.common import rconsvc, interceptors
 
 
@@ -12,14 +12,11 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r = httprsc.ResourceBuilder(resource)
     r.reg('s', interceptors.block_not_started(mailer))
     r.psh('console')
-    r.put('help', _ConsoleHelpHandler())
+    r.put('help', httpext.StaticHandler(HELP_TEXT))
     r.put('send', rconsvc.RconHandler(mailer), 's')
 
 
-class _ConsoleHelpHandler(httpabc.GetHandler):
-
-    def handle_get(self, resource, data):
-        return '''STARBOUND CONSOLE COMMANDS
+HELP_TEXT = '''STARBOUND CONSOLE COMMANDS
 help, ban, clearstagehand, disablespawning, enablespawning,
 kick, listplacedungeon, resetuniverseflags, serverreload,
 setspawnpoint, settileprotection, setuniverseflag, spawnitem,

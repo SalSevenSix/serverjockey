@@ -19,14 +19,14 @@
   }
 
   function wipeRuntime() {
-    confirmModal('Are you sure you want to delete runtime ?', function() {
+    confirmModal('Are you sure you want to Delete Runtime ?', function() {
       cannotProcess = true;
       fetch($instance.url + '/deployment/wipe-runtime', newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo('Delete runtime completed.');
         })
-        .catch(function(error) { notifyError('Delete runtime failed.'); })
+        .catch(function(error) { notifyError('Delete Runtime failed.'); })
         .finally(function() { cannotProcess = false; });
     });
   }

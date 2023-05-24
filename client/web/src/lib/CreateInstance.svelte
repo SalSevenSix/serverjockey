@@ -23,7 +23,6 @@
     if (!serverForm.module) return notifyError('Module not selected.');
     if (!serverForm.identity) return notifyError('Name not set.');
     creating = true;
-    serverForm.identity = serverForm.identity.replaceAll(' ', '-').toLowerCase();
     let request = newPostRequest();
     request.body = JSON.stringify(serverForm);
     fetch(baseurl + '/instances', request)
@@ -31,7 +30,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         serverForm.identity = null;
       })
-      .catch(function(error) { notifyError('Failed to create new server.'); })
+      .catch(function(error) { notifyError('Failed to create new instance.'); })
       .finally(function() { creating = false; });
   }
 </script>
@@ -43,7 +42,7 @@
     <label for="createInstanceModule" class="label">Module</label>
     <div class="control">
       <div class="select">
-        <select id="createInstanceModule" bind:value={serverForm.module}>
+        <select id="createInstanceModule" title="Select a module (game server)" bind:value={serverForm.module}>
           {#each modules as module}
             <option>{module}</option>
           {/each}
@@ -54,7 +53,9 @@
   <div class="field">
     <label for="createInstanceIdentity" class="label">Name</label>
     <div class="control">
-      <input id="createInstanceIdentity" class="input" type="text" bind:value={serverForm.identity}>
+      <input id="createInstanceIdentity" class="input" type="text"
+             title="Name must be lower case letters and numbers, no spaces or special characters except dashes and underscores"
+             bind:value={serverForm.identity}>
     </div>
   </div>
   <div class="block buttons">

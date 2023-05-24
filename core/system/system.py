@@ -2,13 +2,15 @@ from __future__ import annotations
 import typing
 import inspect
 import logging
-import uuid
+import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, io, pkg, sysutil, signals
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
 from core.system import svrabc, svrsvc
+
+MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
 
 
 class SystemService:
@@ -26,7 +28,7 @@ class SystemService:
         self._resource = httprsc.WebResource()
         httprsc.ResourceBuilder(self._resource) \
             .put('login', httpext.LoginHandler(context.config('secret'))) \
-            .put('modules', _ModulesHandler()) \
+            .put('modules', httpext.StaticHandler(MODULES)) \
             .psh('system') \
             .put('info', _SystemInfoHandler()) \
             .put('shutdown', _ShutdownHandler(self)) \
@@ -76,15 +78,11 @@ class SystemService:
             await self._context.destroy_subcontext(subcontext)
 
     async def create_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
-        identity = util.get('identity', configuration)
-        if identity:
-            configuration.pop('identity')
-        else:
-            identity = str(uuid.uuid4())
-        logging.info('CREATING instance ' + identity)
+        identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
             raise Exception('Unable to create instance. Directory already exists.')
+        logging.info('CREATING instance ' + identity)
         await io.create_directory(home_dir)
         config_file = home_dir + '/' + 'instance.json'
         await io.write_file(config_file, util.obj_to_json(configuration))
@@ -107,7 +105,7 @@ class SystemService:
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         server = await self._create_server(subcontext)
         await server.initialise()
-        resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(configuration))
+        resource = httprsc.WebResource(subcontext.config('identity'), handler=httpext.StaticHandler(configuration))
         self._instances.append(resource)
         server.resources(resource)
         svrsvc.ServerService(subcontext, server).start()
@@ -160,22 +158,8 @@ class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class _ModulesHandler(httpabc.GetHandler):
-
-    def handle_get(self, resource, data):
-        return 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound'
-
-
-class _InstanceHandler(httpabc.GetHandler):
-
-    def __init__(self, configuration: typing.Dict[str, str]):
-        self._configuration = configuration.copy()
-
-    def handle_get(self, resource, data):
-        return self._configuration
-
-
 class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
+    VALIDATOR = re.compile(r'[^a-z0-9_\-]')
 
     def __init__(self, system: SystemService):
         self._system = system
@@ -185,7 +169,10 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
-        if not module:
+        if not identity or module not in MODULES:
+            return httpabc.ResponseBody.BAD_REQUEST
+        identity = identity.replace(' ', '_').lower()
+        if _InstancesHandler.VALIDATOR.search(identity):
             return httpabc.ResponseBody.BAD_REQUEST
         subcontext = await self._system.create_instance({'module': module, 'identity': identity})
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
