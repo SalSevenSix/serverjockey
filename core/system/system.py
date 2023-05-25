@@ -1,5 +1,4 @@
 from __future__ import annotations
-import typing
 import inspect
 import logging
 import re
@@ -45,13 +44,31 @@ class SystemService:
     def resources(self):
         return self._resource
 
-    def instances_dict(self, baseurl: str) -> typing.Dict:
+    def instances_info(self, baseurl: str) -> dict:
         result = {}
         for child in self._instances.children():
-            for subcontext in self._context.subcontexts():
-                if child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
-                    result[child.name()] = {'module': subcontext.config('module'), 'url': baseurl + child.path()}
+            subcontext = self._get_subcontext(child.name(), False)
+            if subcontext and child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
+                result[child.name()] = {'module': subcontext.config('module'), 'url': baseurl + child.path()}
         return result
+
+    def instance_info(self, identity: str) -> dict | None:
+        subcontext = self._get_subcontext(identity, True)
+        return subcontext.config() if subcontext else None
+
+    async def instance_update(self, identity: str, updates: dict) -> dict | None:
+        subcontext = self._get_subcontext(identity, True)
+        if not subcontext:
+            return None
+        auto = util.get('auto', updates)  # Only thing that can be updated
+        current = subcontext.config()
+        persist = {key: current[key] for key in ('module', 'auto', 'hidden')}
+        if auto is None:
+            return persist
+        persist['auto'] = auto
+        await io.write_file(current['home'] + '/instance.json', util.obj_to_json(persist))
+        subcontext.set_config('auto', auto)
+        return persist
 
     async def initialise(self) -> SystemService:
         autos, ls = [], await io.directory_list(self._home_dir)
@@ -60,6 +77,7 @@ class SystemService:
             if await io.file_exists(config_file):
                 configuration = await io.read_file(config_file)
                 configuration = util.json_to_dict(configuration)
+                await _AutoStartsSubscriber.migrate(config_file, configuration)
                 configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
                 subcontext = await self._initialise_instance(configuration)
                 if subcontext.config('auto'):
@@ -77,15 +95,16 @@ class SystemService:
             await svrsvc.ServerService.shutdown(subcontext, self)
             await self._context.destroy_subcontext(subcontext)
 
-    async def create_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
+    async def create_instance(self, configuration: dict) -> contextsvc.Context:
+        assert configuration['module']
+        assert configuration['identity']
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
             raise Exception('Unable to create instance. Directory already exists.')
         logging.info('CREATING instance ' + identity)
         await io.create_directory(home_dir)
-        config_file = home_dir + '/' + 'instance.json'
-        await io.write_file(config_file, util.obj_to_json(configuration))
+        await io.write_file(home_dir + '/instance.json', util.obj_to_json(configuration))
         configuration.update({'identity': identity, 'home': home_dir})
         return await self._initialise_instance(configuration)
 
@@ -97,7 +116,7 @@ class SystemService:
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
         logging.info('DELETED instance ' + identity)
 
-    async def _initialise_instance(self, configuration: typing.Dict[str, str]) -> contextsvc.Context:
+    async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
         subcontext.start()
         subcontext.register(msgext.RelaySubscriber(self._context, _DeleteInstanceSubscriber.FILTER))
@@ -105,7 +124,7 @@ class SystemService:
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         server = await self._create_server(subcontext)
         await server.initialise()
-        resource = httprsc.WebResource(subcontext.config('identity'), handler=httpext.StaticHandler(configuration))
+        resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(self))
         self._instances.append(resource)
         server.resources(resource)
         svrsvc.ServerService(subcontext, server).start()
@@ -123,9 +142,29 @@ class SystemService:
                 return member(subcontext)
         raise Exception('Server class implementation not found in module: ' + repr(module))
 
+    def _get_subcontext(self, identity: str, include_hidden: bool) -> contextsvc.Context | None:
+        for subcontext in self._context.subcontexts():
+            if identity == subcontext.config('identity'):
+                if include_hidden or not subcontext.config('hidden'):
+                    return subcontext
+                return None
+        return None
+
 
 class _AutoStartsSubscriber(msgabc.AbcSubscriber):
     AUTOS = 'AutoStartsSubscriber.Autos'
+
+    @staticmethod
+    async def migrate(config_file: str, configuration: dict):
+        auto = util.get('auto', configuration)
+        if not auto or not isinstance(auto, str):
+            return
+        configuration['auto'] = 0
+        if auto == 'daemon':
+            configuration['auto'] = 3
+        if auto == 'start':
+            configuration['auto'] = 1
+        await io.write_file(config_file, util.obj_to_json(configuration))
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
@@ -139,9 +178,9 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
             self._autos = message.data()
             return None
         for subcontext in self._autos:
-            if subcontext.config('auto') == 'daemon':
+            if subcontext.config('auto') == 3:
                 svrsvc.ServerService.signal_daemon(subcontext, self)
-            if subcontext.config('auto') == 'start':
+            if subcontext.config('auto') == 1:
                 svrsvc.ServerService.signal_start(subcontext, self)
         return True
 
@@ -165,7 +204,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._system = system
 
     def handle_get(self, resource, data):
-        return self._system.instances_dict(util.get('baseurl', data, ''))
+        return self._system.instances_info(util.get('baseurl', data, ''))
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
@@ -176,6 +215,20 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         subcontext = await self._system.create_instance({'module': module, 'identity': identity})
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
+
+
+class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
+
+    def __init__(self, system: SystemService):
+        self._system = system
+
+    def handle_get(self, resource, data):
+        result = self._system.instance_info(resource.name())
+        return result if result else httpabc.ResponseBody.NOT_FOUND
+
+    async def handle_post(self, resource, data):
+        result = await self._system.instance_update(resource.name(), data)
+        return result if httpabc.ResponseBody.NO_CONTENT else httpabc.ResponseBody.NOT_FOUND
 
 
 class _SystemInfoHandler(httpabc.GetHandler):

@@ -195,7 +195,7 @@ if [ $? -ne 0 ]; then
   rm -rf $HOME_DIR > /dev/null 2>&1
   adduser --system $SJGMS_USER || exit 1
   mkdir -p $SERVERLINK_DIR
-  echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > $SERVERLINK_DIR/instance.json
+  echo '{ "module": "serverlink", "auto": 3, "hidden": true }' > $SERVERLINK_DIR/instance.json
   find $HOME_DIR -type d -exec chmod 755 {} +
   find $HOME_DIR -type f -exec chmod 600 {} +
   chown -R $SJGMS_USER $HOME_DIR

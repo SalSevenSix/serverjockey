@@ -100,11 +100,13 @@ class ServerService(msgabc.AbcSubscriber):
             await self._queue_join()
             return None
         if not self._running and action is ServerService.START:
-            self._queue.put_nowait(_RunController(True, True, False))
+            auto = self._context.config('auto')
+            self._queue.put_nowait(_RunController(True, True, auto and auto > 1))
             await self._queue_join()
             return None
         if self._running and action is ServerService.RESTART:
-            self._queue.put_nowait(_RunController(True, True, None))
+            auto = self._context.config('auto')
+            self._queue.put_nowait(_RunController(True, True, auto and auto > 1))
             await self._server_stop()
             await self._queue_join()
             return None

@@ -30,11 +30,16 @@ class Context(msgabc.MulticastMailer):
     def subcontexts(self) -> typing.Collection[Context]:
         return tuple(self._children)
 
-    def config(self, key: str) -> typing.Any:
+    def config(self, key: str = None) -> typing.Any:
+        if key is None:
+            return self._configuration.copy()
         value = util.get(key, self._configuration)
         if value is not None or self._parent is None:
             return value
         return self._parent.config(key)
+
+    def set_config(self, key: str, value: typing.Any):
+        self._configuration[key] = value
 
     def is_debug(self) -> bool:
         return self.config('debug')
