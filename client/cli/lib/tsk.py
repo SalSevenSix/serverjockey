@@ -62,19 +62,18 @@ class TaskProcessor:
         result = _serverjockey_service().format(user=user, args=args)
         self._dump_to_log(result)
 
-    def _service(self, argument: str):
-        args = argument + ' ' + ('serverjockey' if self._user == _DEFAULT_USER else self._user)
-        script = _systemctl_script().strip().format(args=args)
-        result = subprocess.run(script, shell=True, capture_output=True)
-        self._dump_to_log(result.stdout, result.stderr)
-        if result.returncode != 0:
-            raise Exception('Service ' + argument + ' task failed')
-
     def _upgrade(self):
         result = subprocess.run(_upgrade_script().strip(), shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('Upgrade task failed')
+
+    def _uninstall(self):
+        script = _uninstall_script().strip().replace('{userdef}', _DEFAULT_USER)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Uninstall task failed')
 
     def _adduser(self, argument: str):
         user, port = TaskProcessor._extract_user_and_port(argument)
@@ -87,6 +86,16 @@ class TaskProcessor:
         if result.returncode != 0:
             raise Exception('New user task failed')
 
+    def _userdel(self, argument: str):
+        user = TaskProcessor._extract_user_and_port(argument)[0]
+        if user == _DEFAULT_USER:
+            raise Exception('Unable to delete default user.')
+        script = _userdel_script().strip().replace('{user}', user)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Delete user task failed')
+
     # TODO Figure out proper way to launch editor
     def _serverlink_edit(self):
         script = _serverlink_edit_script().strip().replace('{user}', self._user)
@@ -95,21 +104,13 @@ class TaskProcessor:
         if result.returncode != 0:
             raise Exception('ServerLink Edit task failed')
 
-    def _userdel(self):
-        if self._user == _DEFAULT_USER:
-            raise Exception('Unable to delete default user. Use the --user option.')
-        script = _userdel_script().strip().replace('{user}', self._user)
+    def _service(self, argument: str):
+        args = argument + ' ' + ('serverjockey' if self._user == _DEFAULT_USER else self._user)
+        script = _systemctl_script().strip().format(args=args)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
-            raise Exception('Delete user task failed')
-
-    def _uninstall(self):
-        script = _uninstall_script().strip().replace('{userdef}', _DEFAULT_USER)
-        result = subprocess.run(script, shell=True, capture_output=True)
-        self._dump_to_log(result.stdout, result.stderr)
-        if result.returncode != 0:
-            raise Exception('Uninstall task failed')
+            raise Exception('Service ' + argument + ' task failed')
 
 
 def _serverjockey_service() -> str:

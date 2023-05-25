@@ -12,8 +12,8 @@ tasks:
   uninstall              | Uninstall ServerJockey and delete default user
   adduser:<name>,<port>  | Add a new ServerJockey service user
                          | called <name> with webapp using <port>
+  userdel:<name>         | Delete alternate service user and home folder
   For tasks below, use --user option to set alternate user if needed
-  userdel                | Delete ServerJockey user and home folder
   serverlink-edit        | Edit the ServerLink config
   service:status         | Show ServerJockey service status
   service:start          | Start ServerJockey service
