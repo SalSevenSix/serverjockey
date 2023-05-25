@@ -13,6 +13,7 @@ class TaskProcessor:
 
     def __init__(self, config: dict):
         self._out, self._tasks = config['out'], []
+        self._user = config['user'] if config['user'] else _DEFAULT_USER
         for task in config['tasks']:
             argument, index = None, task.find(':')
             if index > 0:
@@ -61,29 +62,13 @@ class TaskProcessor:
         result = _serverjockey_service().format(user=user, args=args)
         self._dump_to_log(result)
 
-    def _do_service_task(self, action: str, argument: str):
-        user = TaskProcessor._extract_user_and_port(argument)[0]
-        args = action + ' ' + ('serverjockey' if user == _DEFAULT_USER else user)
+    def _service(self, argument: str):
+        args = argument + ' ' + ('serverjockey' if self._user == _DEFAULT_USER else self._user)
         script = _systemctl_script().strip().format(args=args)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
-            raise Exception('Service ' + action + ' task failed')
-
-    def _service_status(self, argument: str):
-        self._do_service_task('status', argument)
-
-    def _service_start(self, argument: str):
-        self._do_service_task('start', argument)
-
-    def _service_stop(self, argument: str):
-        self._do_service_task('stop', argument)
-
-    def _service_enable(self, argument: str):
-        self._do_service_task('enable', argument)
-
-    def _service_disable(self, argument: str):
-        self._do_service_task('disable', argument)
+            raise Exception('Service ' + argument + ' task failed')
 
     def _upgrade(self):
         result = subprocess.run(_upgrade_script().strip(), shell=True, capture_output=True)
@@ -103,19 +88,17 @@ class TaskProcessor:
             raise Exception('New user task failed')
 
     # TODO Figure out proper way to launch editor
-    def _serverlink_edit(self, argument: str):
-        user = TaskProcessor._extract_user_and_port(argument)[0]
-        script = _serverlink_edit_script().strip().replace('{user}', user)
+    def _serverlink_edit(self):
+        script = _serverlink_edit_script().strip().replace('{user}', self._user)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('ServerLink Edit task failed')
 
-    def _userdel(self, argument: str):
-        user = TaskProcessor._extract_user_and_port(argument)[0]
-        if user == _DEFAULT_USER:
-            raise Exception('Unable to delete default user')
-        script = _userdel_script().strip().replace('{user}', user)
+    def _userdel(self):
+        if self._user == _DEFAULT_USER:
+            raise Exception('Unable to delete default user. Use the --user option.')
+        script = _userdel_script().strip().replace('{user}', self._user)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
@@ -169,7 +152,7 @@ fi
 
 INSTALLER="apt"
 PKGTYPE="deb"
-if which yum > /dev/null; then
+if which yum > /dev/null 2>&1; then
   INSTALLER="yum"
   PKGTYPE="rpm"
 fi
@@ -285,8 +268,8 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 systemctl stop serverjockey > /dev/null 2>&1
-which apt > /dev/null && apt -y remove {userdef}
-which yum > /dev/null && yum -y remove {userdef}
+which apt > /dev/null 2>&1 && apt -y remove {userdef}
+which yum > /dev/null 2>&1 && yum -y remove {userdef}
 systemctl daemon-reload
 if id -u {userdef} > /dev/null 2>&1; then
   userdel {userdef}

@@ -189,7 +189,10 @@ class CommandProcessor:
         logging.info(self._out + 'Token: ' + self._token)
         return True
 
-    def _server(self) -> bool:
+    def _server(self, argument: str | None) -> bool:
+        if argument:
+            self._connection.post(self._instance_path('/server/' + argument))
+            return True
         result = self._connection.get(self._instance_path('/server'))
         result = 'instance: ' + self._instance + '\n' + util.repr_dict(result)
         for line in result.strip().split('\n'):
@@ -242,22 +245,6 @@ class CommandProcessor:
         self._log_tail('10')
         result = self._connection.post(self._instance_path('/log/subscribe'))
         self._connection.drain(result)
-        return True
-
-    def _server_daemon(self) -> bool:
-        self._connection.post(self._instance_path('/server/daemon'))
-        return True
-
-    def _server_start(self) -> bool:
-        self._connection.post(self._instance_path('/server/start'))
-        return True
-
-    def _server_restart(self) -> bool:
-        self._connection.post(self._instance_path('/server/restart'))
-        return True
-
-    def _server_stop(self) -> bool:
-        self._connection.post(self._instance_path('/server/stop'))
         return True
 
     def _console_send(self, argument: str) -> bool:

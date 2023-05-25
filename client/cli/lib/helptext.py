@@ -9,16 +9,17 @@ examples:
 
 tasks:
   upgrade                | Upgrade ServerJockey to latest version
+  uninstall              | Uninstall ServerJockey and delete default user
   adduser:<name>,<port>  | Add a new ServerJockey service user
                          | called <name> with webapp using <port>
-  serverlink-edit:<name> | Edit the ServerLink config
-  userdel:<name>         | Delete ServerJockey user and home folder
-  service-status:<name>  | Show service status, user <name> optional
-  service-start:<name>   | Start service, user <name> optional
-  service-stop:<name>    | Stop service, user <name> optional
-  service-enable:<name>  | Enable service, user <name> optional
-  service-disable:<name> | Disable service, user <name> optional
-  uninstall              | Uninstall ServerJockey and delete default user
+  For tasks below, use --user option to set alternate user if needed
+  userdel                | Delete ServerJockey user and home folder
+  serverlink-edit        | Edit the ServerLink config
+  service:status         | Show ServerJockey service status
+  service:start          | Start ServerJockey service
+  service:stop           | Stop ServerJockey service
+  service:enable         | Enable ServerJockey service
+  service:disable        | Disable ServerJockey service
 
 commands:
   showtoken         | Show webapp url and login token
@@ -34,11 +35,10 @@ commands:
   runtime-meta      | Show meta information about the installed runtime
                     | Error will be shown if no runtime is installed
   server            | Show the server status
-  server-daemon     | Start the server with automatic restart
-                    | if it stops or crashes
-  server-start      | Start the server
-  server-restart    | Stop then immediately start the server
-  server-stop       | Stop the server
+  server:daemon     | Start the server with automatic restart if it crashes
+  server:start      | Start the server
+  server:restart    | Stop then immediately start the server
+  server:stop       | Stop the server
   players           | List the players currently in-game
   world-broadcast:"<message>" | Broadcast <message> to all players in-game
                               | Not all modules support this command

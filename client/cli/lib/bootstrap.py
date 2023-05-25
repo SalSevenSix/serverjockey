@@ -38,16 +38,16 @@ def _setup_logging(debug: bool, nolog: bool):
 
 def _find_clientfile(user: str | None) -> str:
     candidate = user
-    if candidate and candidate.find('.') > 0:  # user is a file name
-        if not os.path.isfile(candidate):
-            raise Exception('Clientfile ' + candidate + ' not found. ServerJockey may be down.')
-        return candidate
+    if candidate and candidate.find('.') > -1:  # "user" is a file name
+        if os.path.isfile(candidate):
+            return candidate
+        raise Exception('Clientfile ' + candidate + ' not found. ServerJockey may be down.')
     filename = '/serverjockey-client.json'
     if candidate:  # user is a username
         candidate = '/home/' + user + filename
-        if not os.path.isfile(candidate):
-            raise Exception('Clientfile for user ' + user + ' not found. ServerJockey may be down.')
-        return candidate
+        if os.path.isfile(candidate):
+            return candidate
+        raise Exception('Clientfile for user ' + user + ' not found. ServerJockey may be down.')
     home = os.environ['HOME']
     candidates = (home + filename, home + '/serverjockey' + filename, '/home/sjgms' + filename)
     for candidate in candidates:
@@ -69,7 +69,7 @@ def _initialise(args: typing.Collection) -> dict:
         formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
-    p.add_argument('--user', '-u', type=str, help='Specify user or client file')
+    p.add_argument('--user', '-u', type=str, help='Specify alternate user')
     p.add_argument('--tasks', '-t', type=str, nargs='+', help='List of tasks to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = [] if args is None or len(args) < 2 else args[1:]
@@ -79,7 +79,7 @@ def _initialise(args: typing.Collection) -> dict:
     if args.commands or not args.tasks:
         url, token = _load_clientfile(_find_clientfile(args.user))
     return {'out': _OUT, 'debug': args.debug, 'url': url, 'token': token,
-            'tasks': args.tasks, 'commands': args.commands}
+            'user': args.user, 'tasks': args.tasks, 'commands': args.commands}
 
 
 # noinspection PyUnusedLocal
