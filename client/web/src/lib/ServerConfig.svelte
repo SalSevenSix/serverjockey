@@ -1,0 +1,63 @@
+<script>
+  import { notifyError } from '$lib/notifications';
+  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+
+  let autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
+  let lastRunning = $serverStatus.running;
+  let currentOption = null;
+  let selectedOption = null;
+
+  $: if ($serverStatus.auto > -1) {
+    if (selectedOption === null) {
+      currentOption = autoOptions[$serverStatus.auto];
+      selectedOption = currentOption;
+    }
+  }
+
+  $: serverRunningChange($serverStatus.running);
+  function serverRunningChange(running) {
+    if (lastRunning === true && running === false) {
+      currentOption = autoOptions[$serverStatus.auto];
+      selectedOption = currentOption;
+    }
+    lastRunning = running;
+  }
+
+  $: if (selectedOption) {
+    if (currentOption != selectedOption) {
+      let originalOption = currentOption;
+      currentOption = selectedOption;  // lock it in now to block another trigger
+      let request = newPostRequest();
+      request.body = JSON.stringify({ auto: autoOptions.indexOf(selectedOption) });
+      fetch($instance.url, request)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Status: ' + response.status);
+        })
+        .catch(function(error) {
+          currentOption = originalOption;  // safe rollback
+          selectedOption = originalOption;
+          notifyError('Failed to update Auto mode.');
+        });
+    }
+  }
+</script>
+
+
+<div class="block field is-horizontal">
+  <div class="field-label is-normal">
+    <label for="serverConfigAuto" class="label" title="Auto mode">Auto</label>
+  </div>
+  <div class="field-body">
+    <div class="field is-narrow">
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select id="serverConfigAuto" disabled={$serverStatus.running} bind:value={selectedOption}>
+            {#each autoOptions as option}
+              <option>{option}</option>
+            {/each}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

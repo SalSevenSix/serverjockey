@@ -4,10 +4,10 @@ const commons = require('../commons.js');
 const helpText = {
   help: [
     'server             : Server status',
-    'server daemon      : Start server with auto-restart',
     'server start       : Start server',
     'server restart     : Save world and restart server',
     'server stop        : Save world and stop server',
+    'auto {mode}        : Set auto mode, valid values 0,1,2,3',
     'log                : Get last 100 lines from the log',
     'players            : Show players currently online',
     'getconfig settings : Get settings as attachment',
@@ -25,6 +25,7 @@ const helpText = {
 
 exports.startup = commons.startupEventLogging;
 exports.server = commons.server;
+exports.auto = commons.auto;
 exports.log = commons.log;
 exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;

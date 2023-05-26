@@ -35,10 +35,10 @@ commands:
   runtime-meta      | Show meta information about the installed runtime
                     | Error will be shown if no runtime is installed
   server            | Show the server status
-  server:daemon     | Start the server with automatic restart if it crashes
   server:start      | Start the server
   server:restart    | Stop then immediately start the server
   server:stop       | Stop the server
+  auto:<mode>       | Set auto mode 0=Off, 1=Auto Start, 2=Auto Restart, 4=Both
   players           | List the players currently in-game
   world-broadcast:"<message>" | Broadcast <message> to all players in-game
                               | Not all modules support this command

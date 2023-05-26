@@ -62,7 +62,7 @@ class SystemService:
             return None
         auto = util.get('auto', updates)  # Only thing that can be updated
         current = subcontext.config()
-        persist = {key: current[key] for key in ('module', 'auto', 'hidden')}
+        persist = util.filter_dict(current, ('module', 'auto', 'hidden'))
         if auto is None:
             return persist
         persist['auto'] = auto
@@ -160,10 +160,10 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
         if not auto or not isinstance(auto, str):
             return
         configuration['auto'] = 0
-        if auto == 'daemon':
-            configuration['auto'] = 3
         if auto == 'start':
             configuration['auto'] = 1
+        if auto == 'daemon':
+            configuration['auto'] = 3
         await io.write_file(config_file, util.obj_to_json(configuration))
 
     def __init__(self, mailer: msgabc.Mailer):
@@ -178,9 +178,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
             self._autos = message.data()
             return None
         for subcontext in self._autos:
-            if subcontext.config('auto') == 3:
-                svrsvc.ServerService.signal_daemon(subcontext, self)
-            if subcontext.config('auto') == 1:
+            if subcontext.config('auto') in (1, 3):
                 svrsvc.ServerService.signal_start(subcontext, self)
         return True
 
@@ -227,6 +225,15 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
         return result if result else httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):
+        auto = util.get('auto', data)
+        if auto is not None:
+            try:
+                auto = int(auto)
+            except (TypeError, ValueError):
+                return httpabc.ResponseBody.BAD_REQUEST
+            if auto not in (0, 1, 2, 3):
+                return httpabc.ResponseBody.BAD_REQUEST
+            data['auto'] = auto
         result = await self._system.instance_update(resource.name(), data)
         return result if httpabc.ResponseBody.NO_CONTENT else httpabc.ResponseBody.NOT_FOUND
 

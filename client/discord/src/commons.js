@@ -98,6 +98,19 @@ exports.server = function($) {
   });
 }
 
+exports.auto = function($) {
+  if ($.data.length > 0) {
+    $.httptool.doPost('', { auto: $.data[0] });
+    return;
+  }
+  let desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
+  $.httptool.doGet('/server', function(body) {
+    let result = '```\nAuto mode: ' + body.auto;
+    result += ' (' + desc[body.auto] + ')\n'
+    return result + '```';
+  });
+}
+
 exports.log = function($) {
   $.httptool.doGet('/log/tail', function(body) {
     if (!body) {

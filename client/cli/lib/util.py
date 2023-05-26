@@ -1,4 +1,3 @@
-import logging
 import subprocess
 # ALLOW NONE
 
@@ -30,22 +29,11 @@ def repr_dict(obj: dict, prefix: str = '') -> str:
     return result
 
 
-def to_int(value: str) -> int | None:
+def to_int(value: str | None, fallback: int = None) -> int | None:
     try:
         return int(value)
     except (TypeError, ValueError):
-        pass
-    return None
-
-
-def to_int_optional(value: str) -> int:
-    result = 0
-    if value:
-        result = to_int(value)
-        if result is None:
-            result = 0
-            logging.warning('Invalid argument, must be a number, was: ' + str(value))
-    return result
+        return fallback
 
 
 def get_ip() -> str:

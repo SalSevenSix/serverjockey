@@ -13,14 +13,11 @@
 <div class="block buttons">
   <button name="stop" title="Stop" class="button is-danger" on:click={executeCommand}
           disabled={!$serverStatus.running || $serverStatus.state === 'STOPPING'}>
-          Stop</button>
+          <i class="fa fa-stop fa-lg"></i>&nbsp;&nbsp;Stop</button>
   <button name="restart" title="Restart" class="button is-warning" on:click={executeCommand}
           disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'}>
-          Restart</button>
+          <i class="fa fa-arrows-rotate fa-lg"></i>&nbsp;&nbsp;Restart</button>
   <button name="start" title="Start" class="button is-primary" on:click={executeCommand}
           disabled={$serverStatus.running || $serverStatus.state === 'MAINTENANCE'}>
-          Start</button>
-  <button name="daemon" title="Daemon (auto restart)" class="button is-success" on:click={executeCommand}
-          disabled={$serverStatus.running || $serverStatus.state === 'MAINTENANCE'}>
-          Daemon</button>
+          <i class="fa fa-play fa-lg"></i>&nbsp;&nbsp;Start</button>
 </div>

@@ -2,6 +2,7 @@
   import { baseurl, instance } from '$lib/serverjockeyapi';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
+  import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
   import Collapsible from '$lib/Collapsible.svelte';
@@ -19,6 +20,7 @@
         <div class="column">
           <h2 class="title is-5">ServerLink Controls</h2>
           <ServerControls />
+          <ServerConfig />
           <ServerStatus stateOnly />
         </div>
         <div class="column">

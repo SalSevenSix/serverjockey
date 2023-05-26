@@ -123,6 +123,14 @@ def get(key: typing.Any, dictionary: dict, default: typing.Any = None):
     return default
 
 
+def filter_dict(dictionary: dict, keys: typing.Collection):
+    result = {}
+    for key in keys:
+        if key in dictionary:
+            result[key] = dictionary[key]
+    return result
+
+
 def left_chop_and_strip(value: str, keyword: str) -> str:
     index = value.find(keyword)
     if index == -1:

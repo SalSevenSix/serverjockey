@@ -42,7 +42,7 @@ class CommandProcessor:
             if not result:
                 return
 
-    def _instance_path(self, command_path: str) -> str:
+    def _instance_path(self, command_path: str = '') -> str:
         if not self._instance:
             if not self._use(None):
                 raise Exception('_instance_path() was unable to find instance to use.')
@@ -163,8 +163,8 @@ class CommandProcessor:
 
     # noinspection PyMethodMayBeStatic
     def _sleep(self, argument: str) -> bool:
-        seconds = util.to_int(argument)
-        if seconds:
+        seconds = util.to_int(argument, 0)
+        if seconds > 0:
             time.sleep(seconds)
         else:
             logging.warning('Invalid argument for sleep command, must be a number > 0, was: ' + str(argument))
@@ -199,6 +199,10 @@ class CommandProcessor:
             logging.info(self._out + line)
         return True
 
+    def _auto(self, argument: str | None) -> bool:
+        self._connection.post(self._instance_path(), {'auto': util.to_int(argument, -1)})
+        return True
+
     def _players(self) -> bool:
         result: list = self._connection.get(self._instance_path('/players'))
         logging.info(self._out + 'Players online: ' + str(len(result)))
@@ -229,8 +233,8 @@ class CommandProcessor:
         return True
 
     def _log_tail(self, argument: str | None) -> bool:
-        lines = util.to_int(argument) if argument else 100
-        if not lines:
+        lines = util.to_int(argument, 100)
+        if lines <= 0:
             lines = 100
             logging.warning('Invalid argument for log-tail command, must be a number > 0')
         result = self._connection.get(self._instance_path('/log/tail'))
@@ -262,14 +266,14 @@ class CommandProcessor:
     def _backup_world(self, argument: str | None) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-world'),
-            {'prunehours': util.to_int_optional(argument)})
+            {'prunehours': util.to_int(argument, 0)})
         self._connection.drain(result)
         return True
 
     def _backup_runtime(self, argument: str | None) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-runtime'),
-            {'prunehours': util.to_int_optional(argument)})
+            {'prunehours': util.to_int(argument, 0)})
         self._connection.drain(result)
         return True
 

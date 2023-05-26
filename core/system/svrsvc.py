@@ -207,6 +207,8 @@ class ServerStatus(msgabc.AbcSubscriber):
     def _prep_status(self) -> typing.Dict[str, typing.Any]:
         status = self._status.copy()
         status['details'] = self._status['details'].copy()
+        auto = self._context.config('auto')
+        status['auto'] = auto if auto else 0
         if self._running_millis > 0:
             status['uptime'] = util.now_millis() - self._running_millis
         return status
