@@ -19,6 +19,10 @@
       .catch(function(error) { notifyError('Failed to load module list.'); });
   });
 
+  function kpCreate(event) {
+    if (event.key === 'Enter') { create(); }
+  }
+
   function create() {
     if (!serverForm.module) return notifyError('Module not selected.');
     if (!serverForm.identity) return notifyError('Name not set.');
@@ -42,7 +46,7 @@
     <label for="createInstanceModule" class="label" title="Module (game server)">Module</label>
     <div class="control">
       <div class="select">
-        <select id="createInstanceModule" bind:value={serverForm.module}>
+        <select id="createInstanceModule" disabled={creating} bind:value={serverForm.module}>
           {#each modules as module}
             <option>{module}</option>
           {/each}
@@ -55,7 +59,8 @@
            title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores">
       Name</label>
     <div class="control">
-      <input id="createInstanceIdentity" class="input" type="text" bind:value={serverForm.identity}>
+      <input id="createInstanceIdentity" class="input" type="text"
+             disabled={creating} on:keypress={kpCreate} bind:value={serverForm.identity}>
     </div>
   </div>
   <div class="block buttons">

@@ -30,6 +30,10 @@
     }
   }
 
+  function kpStartLogin(event) {
+    if (event.key === 'Enter') { startLogin(); }
+  }
+
   function startLogin() {
     if (!steamLogin) {
       notifyError('Login not provided');
@@ -63,6 +67,10 @@
       });
   }
 
+  function kpEnterPassword(event) {
+    if (event.key === 'Enter') { enterPassword(); }
+  }
+
   function enterPassword() {
     if (!steamPassword) {
       notifyError('Password not provided');
@@ -73,6 +81,10 @@
     fetch($instance.url + '/steamcmd/input', request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to send password.'); });
+  }
+
+  function kpEnterCode(event) {
+    if (event.key === 'Enter') { enterCode(); }
   }
 
   function enterCode() {
@@ -110,7 +122,8 @@
         <div class="field">
           <label for="steamLoginModalLogin" class="label">Steam Login</label>
           <div class="control">
-            <input id="steamLoginModalLogin" class="input" type="text" bind:value={steamLogin} />
+            <input id="steamLoginModalLogin" class="input" type="text"
+                   on:keypress={kpStartLogin} bind:value={steamLogin}>
           </div>
         </div>
         <div class="field buttons is-right">
@@ -123,11 +136,13 @@
         <div class="field">
           <label for="steamLoginModalPassword" class="label">Enter Password</label>
           <div class="control">
-            <input id="steamLoginModalPassword" class="input" type="password" bind:value={steamPassword} />
+            <input id="steamLoginModalPassword" class="input" type="password"
+                   on:keypress={kpEnterPassword} bind:value={steamPassword}>
           </div>
         </div>
         <div class="field buttons is-right">
-          <button name="steam-password-enter" title="Enter Password" class="button is-primary" on:click={enterPassword}>
+          <button name="steam-password-enter" title="Enter Password" class="button is-primary"
+                  on:click={enterPassword}>
             <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
         </div>
       {/if}
@@ -135,11 +150,13 @@
         <div class="field">
           <label for="steamLoginModalCode" class="label">Enter Steam Guard Code</label>
           <div class="control">
-            <input id="steamLoginModalCode" class="input" type="text" bind:value={steamCode} />
+            <input id="steamLoginModalCode" class="input" type="text"
+                   on:keypress={kpEnterCode} bind:value={steamCode}>
           </div>
         </div>
         <div class="field buttons is-right">
-          <button name="steam-code-enter" title="Enter Code" class="button is-primary" on:click={enterCode}>
+          <button name="steam-code-enter" title="Enter Code" class="button is-primary"
+                  on:click={enterCode}>
             <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
         </div>
       {/if}

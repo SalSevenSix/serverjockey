@@ -48,7 +48,8 @@
            title="Login token for the discord bot">
       Discord Bot Token</label>
     <div class="control">
-      <input id="serverLinkConfigBotToken" class="input" type="text" bind:value={serverLinkForm.BOT_TOKEN}>
+      <input id="serverLinkConfigBotToken" class="input" type="text"
+             disabled={saving} bind:value={serverLinkForm.BOT_TOKEN}>
     </div>
   </div>
   <div class="field">
@@ -56,7 +57,8 @@
            title="Discord channel ID for event logging">
       Log Channel ID</label>
     <div class="control">
-      <input id="serverLinkConfigLogChannel" class="input" type="text" bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
+      <input id="serverLinkConfigLogChannel" class="input" type="text"
+             disabled={saving} bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
     </div>
   </div>
   <div class="field">
@@ -64,7 +66,8 @@
            title="Prefix the bot will recognise as commands">
       Command Prefix</label>
     <div class="control">
-      <input id="serverLinkConfigCommandPrefix" class="input" type="text" bind:value={serverLinkForm.CMD_PREFIX}>
+      <input id="serverLinkConfigCommandPrefix" class="input" type="text"
+             disabled={saving} bind:value={serverLinkForm.CMD_PREFIX}>
     </div>
   </div>
   <div class="field">
@@ -72,7 +75,8 @@
            title="Discord role required for user to run admin commands">
       Admin Role</label>
     <div class="control">
-      <input id="serverLinkConfigAdminRole" class="input" type="text" bind:value={serverLinkForm.ADMIN_ROLE}>
+      <input id="serverLinkConfigAdminRole" class="input" type="text"
+             disabled={saving} bind:value={serverLinkForm.ADMIN_ROLE}>
     </div>
   </div>
   <div class="field">
@@ -80,7 +84,8 @@
            title="DM message that will be sent to the user when whitelisted by Discord tag">
       Whitelist DM</label>
     <div class="control">
-      <textarea id="serverLinkConfigWhitelistDm" class="textarea" bind:value={serverLinkForm.WHITELIST_DM}></textarea>
+      <textarea id="serverLinkConfigWhitelistDm" class="textarea"
+                disabled={saving} bind:value={serverLinkForm.WHITELIST_DM}></textarea>
     </div>
   </div>
   <div class="block buttons">

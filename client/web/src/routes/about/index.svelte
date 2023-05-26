@@ -23,7 +23,7 @@
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
           <figure>
-            <img alt="Help support me at ko-fi.com" src="/assets/icons/KoFi_button_black.png" />
+            <img src="/assets/icons/KoFi_button_black.png" alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
           </figure>
         </a>
       </div>
@@ -35,7 +35,7 @@
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
           <figure>
-            <img alt="ServerJockey on GitHub" src="/assets/icons/GitHub_Logo.png" />
+            <img src="/assets/icons/GitHub_Logo.png" alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>
         </a>
       </div>

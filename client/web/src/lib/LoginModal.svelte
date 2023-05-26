@@ -7,8 +7,8 @@
   export let isOpen;
   let token = '';
 
-  function keypress(event) {
-    if (event.key === 'Enter') return login();
+  function kpLogin(event) {
+    if (event.key === 'Enter') { login(); }
   }
 
   function login() {
@@ -40,7 +40,7 @@
       <div class="field">
         <label for="loginModalToken" class="label">Enter Login Token</label>
         <div class="control">
-          <input id="loginModalToken" class="input" type="text" on:keypress={keypress} bind:value={token} />
+          <input id="loginModalToken" class="input" type="text" on:keypress={kpLogin} bind:value={token}>
         </div>
       </div>
       <div class="field">

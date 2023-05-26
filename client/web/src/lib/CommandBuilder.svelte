@@ -19,6 +19,8 @@
     args = [null, null, null, null, null, null, null, null, null, null];
   }
 
+  $: cannotSend = !($serverStatus.state === 'STARTED');
+
   function loadDisplay(index) {
     let name = commands[command][action][index].name;
     fetch($instance.url + '/' + command + '/' + name, newGetRequest())
@@ -33,7 +35,12 @@
     return '';
   }
 
+  function kpSend(event) {
+    if (event.key === 'Enter') { send(); }
+  }
+
   function send() {
+    if (cannotSend) return;
     let path = '/' + command;
     let body = {};
     commands[command][action].forEach(function(value, index) {
@@ -91,12 +98,17 @@
           <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
           <pre class="pre is-size-7">{args[commands[command][action].indexOf(arg)]}</pre>
         {/if}
-        {#if arg.input === 'text'}
+        {#if arg.input === 'text' || arg.input === 'text>'}
           <div class="field">
             <label for="commandBuilderI{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
             <div class="control">
-              <input id="commandBuilderI{arg.name}" class="input" type="text"
-                     bind:value={args[commands[command][action].indexOf(arg)]}>
+              {#if arg.input === 'text'}
+                <input id="commandBuilderI{arg.name}" class="input" type="text"
+                       bind:value={args[commands[command][action].indexOf(arg)]}>
+              {:else}
+                <input id="commandBuilderI{arg.name}" class="input" type="text" on:keypress={kpSend}
+                       bind:value={args[commands[command][action].indexOf(arg)]}>
+              {/if}
             </div>
           </div>
         {/if}
@@ -116,9 +128,8 @@
         {/if}
       {/each}
       <div class="block buttons">
-        <button name="send" title="Send" class="button is-primary"
-                disabled={!$serverStatus.running || $serverStatus.state != 'STARTED'} on:click={send}>
-                <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
+        <button name="send" title="Send" class="button is-primary" disabled={cannotSend} on:click={send}>
+          <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
       </div>
     {/if}
   {/if}
