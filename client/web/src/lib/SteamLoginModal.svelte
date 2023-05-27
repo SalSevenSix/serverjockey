@@ -123,7 +123,7 @@
           <label for="steamLoginModalLogin" class="label">Steam Login</label>
           <div class="control">
             <input id="steamLoginModalLogin" class="input" type="text"
-                   on:keypress={kpStartLogin} bind:value={steamLogin}>
+                   disabled={stage > 0} on:keypress={kpStartLogin} bind:value={steamLogin}>
           </div>
         </div>
         <div class="field buttons is-right">

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt
@@ -18,13 +19,16 @@ class Statics:
             raise err.HTTPNotFound
         response = web.Response()
         response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
-        response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=3600')  # One hour
+        response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=86400')  # 24 hours
         if httpcnt.HeadersTool(request).accepts_encoding(httpcnt.GZIP) and await resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()
         else:
             body = await resource.uncompressed()
-        response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))
+        length = len(body)
+        if length > 524288:  # Half a Megabyte
+            logging.warning('Large static file ' + request.path + ' (' + str(length) + ' bytes)')
+        response.headers.add(httpcnt.CONTENT_LENGTH, str(length))
         response.body = body
         return response
 

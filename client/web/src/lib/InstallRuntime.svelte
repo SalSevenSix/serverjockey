@@ -97,7 +97,8 @@
              title="Set to appropriate version/beta/tag to install desired non-stable version">
         {qualifierName}</label>
       <div class="control">
-        <input id="installRuntimeQualifier" class="input" type="text" bind:value={qualifier}>
+        <input id="installRuntimeQualifier" class="input" type="text"
+               disabled={cannotProcess} bind:value={qualifier}>
       </div>
     </div>
   {/if}

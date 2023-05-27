@@ -123,18 +123,28 @@ class HeadersTool:
         return accepts and accepts.find(encoding) != -1
 
 
-MIME_TEXT_PLAIN = 'text/plain'
-MIME_APPLICATION_JSON = 'application/json'
-MIME_MULTIPART_FORM_DATA = 'multipart/form-data'
 MIME_APPLICATION_BIN = 'application/octet-stream'
-_TEXT_TYPES = (MIME_TEXT_PLAIN, MIME_APPLICATION_JSON, 'text/html', 'application/xml',
-               'text/css', 'application/javascript', 'application/typescript',
-               'image/svg+xml')
+MIME_MULTIPART_FORM_DATA = 'multipart/form-data'
+MIME_TEXT_PLAIN = 'text/plain'
+MIME_TEXT_HTML = 'text/html'
+MIME_TEXT_CSS = 'text/css'
+MIME_APPLICATION_JSON = 'application/json'
+MIME_APPLICATION_XML = 'application/xml'
+MIME_APPLICATION_JAVASCRIPT = 'application/javascript'
+MIME_APPLICATION_TYPESCRIPT = 'application/typescript'
+MIME_IMAGE_SVGXML = 'image/svg+xml'
+
+_TEXT_TYPES = (
+    MIME_TEXT_PLAIN, MIME_TEXT_HTML, MIME_TEXT_CSS, MIME_APPLICATION_JSON, MIME_APPLICATION_XML,
+    MIME_APPLICATION_JAVASCRIPT, MIME_APPLICATION_TYPESCRIPT, MIME_IMAGE_SVGXML
+)
+
 _CHARSET = 'charset='
-CONTENT_TYPE_TEXT_PLAIN = ContentTypeImpl(MIME_TEXT_PLAIN)
 CONTENT_TYPE_TEXT_PLAIN_UTF8 = ContentTypeImpl(MIME_TEXT_PLAIN + '; ' + _CHARSET + UTF8)
+CONTENT_TYPE_TEXT_PLAIN = ContentTypeImpl(MIME_TEXT_PLAIN)
 CONTENT_TYPE_APPLICATION_JSON = ContentTypeImpl(MIME_APPLICATION_JSON)
 CONTENT_TYPE_APPLICATION_BIN = ContentTypeImpl(MIME_APPLICATION_BIN)
+
 _CONTENT_TYPES = {
     'txt': CONTENT_TYPE_TEXT_PLAIN,
     'text': CONTENT_TYPE_TEXT_PLAIN,
@@ -145,12 +155,12 @@ _CONTENT_TYPES = {
     'acf': CONTENT_TYPE_TEXT_PLAIN,
     'dat': CONTENT_TYPE_TEXT_PLAIN,
     'json': CONTENT_TYPE_APPLICATION_JSON,
-    'html': ContentTypeImpl('text/html'),
-    'xml': ContentTypeImpl('application/xml'),
-    'css': ContentTypeImpl('text/css'),
-    'js': ContentTypeImpl('application/javascript'),
-    'ts': ContentTypeImpl('application/typescript'),
-    'svg': ContentTypeImpl('image/svg+xml'),
+    'html': ContentTypeImpl(MIME_TEXT_HTML),
+    'xml': ContentTypeImpl(MIME_APPLICATION_XML),
+    'css': ContentTypeImpl(MIME_TEXT_CSS),
+    'js': ContentTypeImpl(MIME_APPLICATION_JAVASCRIPT),
+    'ts': ContentTypeImpl(MIME_APPLICATION_TYPESCRIPT),
+    'svg': ContentTypeImpl(MIME_IMAGE_SVGXML),
     'ico': ContentTypeImpl('image/x-icon'),
     'gif': ContentTypeImpl('image/gif'),
     'jpg': ContentTypeImpl('image/jpeg'),
