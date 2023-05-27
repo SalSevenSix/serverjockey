@@ -59,7 +59,7 @@
 <div class="block">
   <div class="field">
     <label for={configFileTextId} class="label">
-      <a href={$instance.url + path} target="_blank">{name}</a>
+      <a href={$instance.url + path} target="_blank">{name} &nbsp;<i class="fa fa-up-right-from-square"></i></a>
     </label>
     <slot />
     <div class="control pr-6">

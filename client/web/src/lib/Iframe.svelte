@@ -2,21 +2,27 @@
   import { onMount } from 'svelte';
   import { serverStatus } from '$lib/serverjockeyapi';
 
-  let baseurl = 'http://localhost'
-  $: url = baseurl + ':' + $serverStatus.details.cport;
-
+  let baseurl = '';
   onMount(function() {
     baseurl = 'http://' + window.location.hostname;
   });
+
+  $: url = baseurl + ':' + $serverStatus.details.cport;
+  $: showConsole = url.startsWith('http') && $serverStatus.state === 'STARTED';
 </script>
 
 
 <div class="content">
-  {#if $serverStatus.state === 'STARTED'}
-    <p><a href={url} target="_blank">Open in new tab</a></p>
+  {#if showConsole}
+    <p>
+      <a href={url} target="_blank">Open console in new tab &nbsp;<i class="fa fa-up-right-from-square"></i></a>
+    </p>
     <iframe src={url} title="Console Commands"></iframe>
   {:else}
-    <p>Console Unavailable. Server not STARTED.</p>
+    <p>
+      <i class="fa fa-triangle-exclamation fa-lg"></i>
+      Console Unavailable. Server not STARTED.
+    </p>
   {/if}
 </div>
 

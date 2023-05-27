@@ -12,11 +12,11 @@
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
 
   let deploymentActions = [
-    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+    { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only.' },
-    { 'key': 'wipe-world-config', 'icon': 'explosion', 'name': 'World Config',
+    { 'key': 'wipe-world-config', 'name': 'World Config',
       'desc': 'Reset the configuration files only.' },
-    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 </script>
 
@@ -35,7 +35,7 @@
         </div>
       </div>
       <ConsoleLog hasConsoleLogFile />
-      <Collapsible title="Configuration">
+      <Collapsible icon="fa-file-code" title="Configuration">
         <ConfigFile name="Command Line Args" path="/config/cmdargs">
           <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
         </ConfigFile>
@@ -69,11 +69,11 @@
              e.g. [&quot;name1&quot;, &quot;name2&quot;]</p>
         </ConfigFile>
       </Collapsible>
-      <Collapsible title="Deployment">
+      <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Version (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
-      <Collapsible title="Backups">
+      <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
       </Collapsible>
     </div>

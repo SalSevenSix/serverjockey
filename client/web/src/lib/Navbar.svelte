@@ -29,10 +29,14 @@
     </div>
     <div id="navbarMain" class:is-active={menuOpen} class="navbar-menu">
       <div class="navbar-start">
-        <a on:click={menuClose} class="navbar-item" href="/">Home</a>
-        <a on:click={menuClose} class="navbar-item" href="/servers">Instances</a>
-        <a on:click={menuClose} class="navbar-item" href="/guides">Guides</a>
-        <a on:click={menuClose} class="navbar-item" href="/about">About</a>
+        <a on:click={menuClose} class="navbar-item" href="/">
+          <i class="fa fa-house fa-lg"></i>&nbsp;&nbsp;Home</a>
+        <a on:click={menuClose} class="navbar-item" href="/servers">
+          <i class="fa fa-cubes fa-lg"></i>&nbsp;&nbsp;Instances</a>
+        <a on:click={menuClose} class="navbar-item" href="/guides">
+          <i class="fa fa-book fa-lg"></i>&nbsp;&nbsp;Guides</a>
+        <a on:click={menuClose} class="navbar-item" href="/about">
+          <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;About</a>
       </div>
     </div>
   </nav>

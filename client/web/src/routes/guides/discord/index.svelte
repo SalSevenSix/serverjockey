@@ -34,8 +34,10 @@
 <div class="content" id="newDiscordAccount">
   <hr />
   <p><span class="step-title">01.</span>
-    First step is to <a href="https://discord.com/login" target="_blank">login to Discord</a> in your browser.
-    If you don&#39;t have an account then <a href="https://discord.com/register" target="_blank">register</a> a new one.
+    First step is to <a href="https://discord.com/login" target="_blank">
+    login to Discord <i class="fa fa-up-right-from-square"></i></a> in your browser.
+    If you don&#39;t have an account then <a href="https://discord.com/register" target="_blank">
+    register <i class="fa fa-up-right-from-square"></i></a> a new one.
     Below is screenshot of a fresh account for the guide.
   </p>
   <figure><img src="/assets/setup/01_new_account.png" alt="New Discord Account" /></figure>
@@ -85,9 +87,10 @@
     Similar to how users register an account to login, bots also need to be registered to login.
   </p>
   <p>
-    To start the setup process.
-    Open the <a href="https://discord.com/developers" target="_blank">Discord Developer Portal</a>.
-    Then click the <span class="has-text-weight-bold">New Application</span> button.
+    To begin the setup process.
+    Open the <a href="https://discord.com/developers" target="_blank">
+    Discord Developer Portal <i class="fa fa-up-right-from-square"></i></a>
+    then click the <span class="has-text-weight-bold">New Application</span> button.
   </p>
   <figure><img src="/assets/setup/07_developers_home.png" alt="Discord Developer Portal" /></figure>
 </div>

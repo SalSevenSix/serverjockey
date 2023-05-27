@@ -33,7 +33,7 @@
           <td>
             <button name={action.key} title={capitalizeKebabCase(action.key)} class="button is-danger is-fullwidth"
                     disabled={cannotProcess} on:click={doAction}>
-              <i class={'fa fa-' + action.icon + ' fa-lg'}></i>&nbsp;&nbsp;{action.name}</button>
+              <i class="fa {action.icon ? action.icon : 'fa-burst'} fa-lg"></i>&nbsp;&nbsp;{action.name}</button>
           </td>
           <td>{action.desc}</td>
         </tr>

@@ -42,7 +42,8 @@
   <div class="field">
     <label for="consoleLogText" class="label">
       {#if hasConsoleLogFile}
-        <a href={$instance.url + '/log'} target="_blank">Console Log</a>
+        <a href={$instance.url + '/log'} target="_blank">
+          Console Log &nbsp;<i class="fa fa-up-right-from-square"></i></a>
       {:else}
         Console Log
       {/if}

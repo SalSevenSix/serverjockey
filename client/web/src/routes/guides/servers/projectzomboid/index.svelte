@@ -6,9 +6,9 @@
 <div class="content">
   <h2 class="title is-3 mt-2">Project Zomboid</h2>
   <p>
-    <a href="https://projectzomboid.com" target="_blank">Project Zomboid</a> is a zombie apocalypse survival
-    horror game with crafting &amp; RPG elements and a focus on realism. ServerJockey provides full support
-    for multiplayer servers on both the webapp and discord.
+    <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
+    is a zombie apocalypse survival horror game with crafting &amp; RPG elements and a focus on realism.
+    ServerJockey provides full support for multiplayer servers on both the webapp and discord.
   </p>
   <p>
     This guide covers installing, configuring and starting a Project Zomboid server using Discord.
@@ -182,7 +182,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   <p>
     For help understanding Project Zomboid server configuration files. Please see the
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">
-    excellent guide on Steam</a> by Aiteron.
+    excellent guide on Steam <i class="fa fa-up-right-from-square"></i></a> by Aiteron.
     All of the configuration files can be downloaded using Discord using the commands shown below.
     Use the corresponding <span class="is-family-monospace">!setconfig</span> command to upload files.
   </p>

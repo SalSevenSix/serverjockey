@@ -14,15 +14,15 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = [
-    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+    { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only. This is the map and player characters.' },
-    { 'key': 'wipe-world-playerdb', 'icon': 'explosion', 'name': 'World Player DB',
+    { 'key': 'wipe-world-playerdb', 'name': 'World Player DB',
       'desc': 'Reset the player database only. This is logins, whitelist, banlist.' },
-    { 'key': 'wipe-world-config', 'icon': 'explosion', 'name': 'World Config',
+    { 'key': 'wipe-world-config', 'name': 'World Config',
       'desc': 'Reset the configuration files only. INI, Sandbox and Spawn config files.' },
-    { 'key': 'wipe-world-backups', 'icon': 'explosion', 'name': 'World Backups',
+    { 'key': 'wipe-world-backups', 'name': 'World Backups',
       'desc': 'Delete all the map backups created by the Project Zomboid server.' },
-    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset Save, Player DB and Config.' }];
 
   let consoleCommands = {
@@ -116,15 +116,15 @@
         </div>
       </div>
       <ConsoleLog hasConsoleLogFile />
-      <Collapsible title="Console Commands">
+      <Collapsible icon="fa-keyboard" title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
-      <Collapsible title="Configuration">
+      <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>
             For help understanding Project Zomboid configuration files. Please see the
             <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">
-            excellent guide on Steam</a> by Aiteron.<br />
+            excellent guide on Steam <i class="fa fa-up-right-from-square"></i></a> by Aiteron.<br />
             Default configuration files are not generated until after first server start.
           </p>
         </div>
@@ -140,14 +140,14 @@
           </p>
         </ConfigFile>
       </Collapsible>
-      <Collapsible title="Logging">
+      <Collapsible icon="fa-scroll" title="Logging">
         <FileSystem allowDelete />
       </Collapsible>
-      <Collapsible title="Deployment">
+      <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
-      <Collapsible title="Backups">
+      <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
       </Collapsible>
     </div>

@@ -1,4 +1,5 @@
 <script>
+  export let icon;
   export let title;
   let visible = false;
 
@@ -10,7 +11,9 @@
 <hr />
 <div class="columns is-mobile">
   <div class="column">
-    <h2 class="title is-5">{title}</h2>
+    <h2 class="title is-5">
+      {#if icon}<i class="fa {icon} fa-lg"></i>{/if}{title}
+    </h2>
   </div>
   <div class="column">
     <div class="buttons is-right">
@@ -23,3 +26,10 @@
 {#if visible}
   <slot />
 {/if}
+
+
+<style>
+  h2 i {
+    width: 1.4em;
+  }
+</style>

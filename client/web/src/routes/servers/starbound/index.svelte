@@ -14,9 +14,9 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = [
-    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+    { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world map only.' },
-    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset game world map and configuration.' }];
 
   let consoleCommands = {
@@ -44,28 +44,28 @@
         </div>
       </div>
       <ConsoleLog hasConsoleLogFile />
-      <Collapsible title="Console Commands">
+      <Collapsible icon="fa-keyboard" title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>
-      <Collapsible title="Configuration">
+      <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>
             For help with configuration, see the
             <a href="https://starbounder.org/Guide:LinuxServerSetup#Configuration"
-               target="_blank">dedicated server guide</a> on the Starbound wiki.<br />
-            Default Settings file is not generated until after first server start.
+               target="_blank">dedicated server guide <i class="fa fa-up-right-from-square"></i></a>
+            on the Starbound wiki.<br /> Default Settings file is not generated until after first server start.
           </p>
         </div>
         <ConfigFile name="Settings" path="/config/settings" />
       </Collapsible>
-      <Collapsible title="Logging">
+      <Collapsible icon="fa-scroll" title="Logging">
         <FileSystem allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
       </Collapsible>
-      <Collapsible title="Deployment">
+      <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
-      <Collapsible title="Backups">
+      <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
       </Collapsible>
     </div>

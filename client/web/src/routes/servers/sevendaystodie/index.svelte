@@ -14,11 +14,11 @@
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
 
   let deploymentActions = [
-    { 'key': 'wipe-world-save', 'icon': 'explosion', 'name': 'World Save',
+    { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only.' },
-    { 'key': 'wipe-world-config', 'icon': 'explosion', 'name': 'World Config',
+    { 'key': 'wipe-world-config', 'name': 'World Config',
       'desc': 'Reset the configuration files only.' },
-    { 'key': 'wipe-world-all', 'icon': 'explosion', 'name': 'World All',
+    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 </script>
 
@@ -37,16 +37,16 @@
         </div>
       </div>
       <ConsoleLog />
-      <Collapsible title="Console Commands">
+      <Collapsible icon="fa-keyboard" title="Console Commands">
          <Iframe />
       </Collapsible>
-      <Collapsible title="Configuration">
+      <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>
             For help with configuration, see the
             <a href="https://developer.valvesoftware.com/wiki/7_Days_to_Die_Dedicated_Server#Serverconfig.xml"
-               target="_blank">dedicated server guide</a> on the wiki.<br />
-            Default Admin config file is not generated until after first server start.
+               target="_blank">dedicated server guide <i class="fa fa-up-right-from-square"></i></a>
+            on the wiki.<br /> Default Admin config file is not generated until after first server start.
           </p>
         </div>
         <ConfigFile name="Settings" path="/config/settings">
@@ -54,14 +54,14 @@
         </ConfigFile>
         <ConfigFile name="Admin" path="/config/admin" />
       </Collapsible>
-      <Collapsible title="Logging">
+      <Collapsible icon="fa-scroll" title="Logging">
         <FileSystem allowDelete />
       </Collapsible>
-      <Collapsible title="Deployment">
+      <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
-      <Collapsible title="Backups">
+      <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
       </Collapsible>
     </div>
