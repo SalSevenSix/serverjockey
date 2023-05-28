@@ -8,8 +8,7 @@ const helpText = {
     'instances                  : Show server instances list',
     'use {instance}             : Switch default instance',
     'modules                    : Supported games list',
-    'create {instance} {module} : Create new instance',
-    'shutdown                   : Shutdown system'
+    'create {instance} {module} : Create new instance'
   ]
 };
 
@@ -41,21 +40,29 @@ exports.modules = function($) {
 }
 
 exports.instances = function($) {
-  $.message.channel.send($.context.instancesService.getInstancesText());
+  let result = $.context.instancesService.getInstancesText();
+  $.message.channel.send(result);
 }
 
 exports.use = function($) {
   if (!util.checkAdmin($.message, $.context.config.ADMIN_ROLE)) return;
-  if ($.data.length === 0) return;
+  if ($.data.length === 0) {
+    $.message.react('❓');
+    return;
+  }
   if ($.context.instancesService.useInstance($.data[0])) {
-    $.message.channel.send($.context.instancesService.getInstancesText());
+    let result = $.context.instancesService.getInstancesText();
+    $.message.channel.send(result);
   } else {
     $.message.react('⛔');
   }
 }
 
 exports.create = function($) {
-  if ($.data.length < 2) return;
+  if ($.data.length < 2) {
+    $.message.react('❓');
+    return;
+  }
   let body = { identity: $.data[0], module: $.data[1] };
   $.httptool.doPost('/instances', body, function(message, json) {
     $.context.instancesService.setInstance(body.identity);

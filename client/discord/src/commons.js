@@ -128,7 +128,10 @@ exports.log = function($) {
 }
 
 exports.getconfig = function($) {
-  if ($.data.length < 1) return;
+  if ($.data.length === 0) {
+    $.message.react('❓');
+    return;
+  }
   $.httptool.doGet('/config/' + $.data[0], function(body) {
     let fname = $.data[0] + '-' + $.message.id + '.text';
     let fpath = '/tmp/' + fname;
@@ -141,9 +144,12 @@ exports.getconfig = function($) {
 }
 
 exports.setconfig = function($) {
-  if ($.data.length < 1) return;
-  if ($.message.attachments.length < 1) return;
-  fetch($.message.attachments.first().url)
+  let attachment = $.message.attachments.first();
+  if ($.data.length === 0 || !attachment) {
+    $.message.react('❓');
+    return;
+  }
+  fetch(attachment.url)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       return response.text();
@@ -159,7 +165,10 @@ exports.setconfig = function($) {
 
 exports.deployment = function($) {
   let data = [...$.data];
-  if (data.length < 1) return;
+  if (data.length === 0) {
+    $.message.react('❓');
+    return;
+  }
   let cmd = data.shift();
   let body = null;
   if (cmd === 'backup-runtime' || cmd === 'backup-world') {
@@ -173,7 +182,10 @@ exports.deployment = function($) {
 }
 
 exports.send = function($) {
-  if ($.data.length < 1) return;
+  if ($.data.length === 0) {
+    $.message.react('❓');
+    return;
+  }
   let data = $.message.content;
   data = data.slice(data.indexOf(' '));
   let body = { line: data.trim() };

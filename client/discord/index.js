@@ -59,7 +59,7 @@ function handleMessage(message) {
     system[command](args);
     return;
   }
-  message.react('⛔');
+  message.react('❓');
 }
 
 function shutdown() {

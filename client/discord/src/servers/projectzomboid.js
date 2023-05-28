@@ -104,7 +104,10 @@ exports.players = commons.players;
 
 exports.world = function($) {
   let data = [...$.data];
-  if (data.length < 1) return;
+  if (data.length === 0) {
+    $.message.react('❓');
+    return;
+  }
   let cmd = data.shift();
   let body = null;
   if (data.length > 0 && cmd === 'broadcast') {
@@ -115,7 +118,10 @@ exports.world = function($) {
 
 exports.player = function($) {
   let data = [...$.data];
-  if (data.length < 2) return;
+  if (data.length < 2) {
+    $.message.react('❓');
+    return;
+  }
   let name = util.urlSafeB64encode(data.shift());
   let cmd = data.shift();
   let body = null;
@@ -142,12 +148,19 @@ exports.player = function($) {
 
 exports.whitelist = function($) {
   let data = [...$.data];
-  if (data.length < 2) return;
+  if (data.length < 2) {
+    $.message.react('❓');
+    return;
+  }
   let cmd = data.shift();
   if (data[0].length > 3 && data[0].startsWith('<@') && data[0].endsWith('>')) {
     data[0] = data[0].slice(2).slice(0, -1);
   }
   if (cmd === 'add-name') {
+    if (data.length < 2) {
+      $.message.react('❓');
+      return;
+    }
     $.httptool.doPost('/whitelist/add', { player: data[0], password: data[1] });
   } else if (cmd === 'remove-name') {
     $.httptool.doPost('/whitelist/remove', { player: data[0] });
@@ -174,12 +187,17 @@ exports.whitelist = function($) {
       .catch(function(error) {
         $.httptool.error(error, $.message);
       });
+  } else {
+    $.message.react('❓');
   }
 }
 
 exports.banlist = function($) {
   let data = [...$.data];
-  if (data.length < 2) return;
+  if (data.length < 2) {
+    $.message.react('❓');
+    return;
+  }
   let cmd = data.shift() + '-id';
   let body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);
