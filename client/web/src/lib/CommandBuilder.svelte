@@ -106,7 +106,9 @@
                 <input id="commandBuilderI{arg.name}" class="input" type="text"
                        bind:value={args[commands[command][action].indexOf(arg)]}>
               {:else}
-                <input id="commandBuilderI{arg.name}" class="input" type="text" on:keypress={kpSend}
+                <!-- svelte-ignore a11y-autofocus -->
+                <input autofocus on:keypress={kpSend}
+                       id="commandBuilderI{arg.name}" class="input" type="text"
                        bind:value={args[commands[command][action].indexOf(arg)]}>
               {/if}
             </div>

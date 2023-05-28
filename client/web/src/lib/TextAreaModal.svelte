@@ -1,15 +1,23 @@
 <script>
   import { closeModal } from 'svelte-modals';
+  import { onMount } from 'svelte';
 
   export let isOpen;
   export let contentName;
   export let contentText;
   export let onSaveChanges;
 
+  let textEditor;
+
   function saveChanges() {
     closeModal();
     onSaveChanges(contentText);
   }
+
+  onMount(function() {
+    textEditor.focus();
+    textEditor.setSelectionRange(0, 0);
+  });
 </script>
 
 
@@ -21,7 +29,7 @@
         <label for="textAreaModalEditor" class="label">{contentName}</label>
         <div class="control">
           <textarea id="textAreaModalEditor" class="textarea has-fixed-size is-family-monospace is-size-8"
-                    bind:value={contentText}></textarea>
+                    bind:this={textEditor} bind:value={contentText}></textarea>
         </div>
       </div>
       <div class="field">

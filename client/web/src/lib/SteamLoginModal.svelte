@@ -122,7 +122,8 @@
         <div class="field">
           <label for="steamLoginModalLogin" class="label">Steam Login</label>
           <div class="control">
-            <input id="steamLoginModalLogin" class="input" type="text"
+            <!-- svelte-ignore a11y-autofocus -->
+            <input id="steamLoginModalLogin" class="input" type="text" autofocus
                    disabled={stage > 0} on:keypress={kpStartLogin} bind:value={steamLogin}>
           </div>
         </div>
@@ -136,7 +137,8 @@
         <div class="field">
           <label for="steamLoginModalPassword" class="label">Enter Password</label>
           <div class="control">
-            <input id="steamLoginModalPassword" class="input" type="password"
+            <!-- svelte-ignore a11y-autofocus -->
+            <input id="steamLoginModalPassword" class="input" type="password" autofocus
                    on:keypress={kpEnterPassword} bind:value={steamPassword}>
           </div>
         </div>
@@ -150,7 +152,8 @@
         <div class="field">
           <label for="steamLoginModalCode" class="label">Enter Steam Guard Code</label>
           <div class="control">
-            <input id="steamLoginModalCode" class="input" type="text"
+            <!-- svelte-ignore a11y-autofocus -->
+            <input id="steamLoginModalCode" class="input" type="text" autofocus
                    on:keypress={kpEnterCode} bind:value={steamCode}>
           </div>
         </div>
