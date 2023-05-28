@@ -76,7 +76,7 @@ function shutdown() {
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 require('events').EventEmitter.defaultMaxListeners = 20;
 
-const { Client, Intents } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const logger = require('./src/logger.js');
 const util = require('./src/util.js');
 const http = require('./src/http.js');
@@ -88,7 +88,10 @@ context.config = initialise();
 context.controller = new AbortController();
 context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);
-context.client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'], partials: ['CHANNEL'] });
+context.client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
+  partials: [Partials.Channel] });
 
 context.client.once('ready', startup);
 context.client.on('messageCreate', handleMessage);
