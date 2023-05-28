@@ -1,6 +1,6 @@
 <script>
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newPostRequest } from '$lib/sjgmsapi';
 
   function executeCommand() {
     fetch($instance.url + '/server/' + this.name, newPostRequest())

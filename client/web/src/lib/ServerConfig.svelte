@@ -1,6 +1,6 @@
 <script>
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newPostRequest } from '$lib/sjgmsapi';
 
   let autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
   let lastRunning = $serverStatus.running;

@@ -2,7 +2,7 @@
   import { capitalizeKebabCase } from '$lib/util';
   import { confirmModal } from '$lib/modals';
   import { notifyInfo, notifyError } from '$lib/notifications';
-  import { instance, serverStatus, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newPostRequest } from '$lib/sjgmsapi';
 
   export let actions = [];
 

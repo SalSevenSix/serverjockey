@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { instance } from '$lib/serverjockeyapi';
+  import { instance } from '$lib/sjgmsapi';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
 
   onMount(function() {

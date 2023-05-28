@@ -24,7 +24,7 @@ ALLOW = 'Allow'
 ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
 ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
-WEBDEV_ORIGIN = 'http://localhost:3000'
+WEBDEV_ORIGIN = 'http://localhost:5173'
 
 
 def make_secure(data: httpabc.ABC_DATA_GET):

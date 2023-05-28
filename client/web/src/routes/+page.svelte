@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { baseurl, newGetRequest } from '$lib/serverjockeyapi';
+  import { baseurl, newGetRequest } from '$lib/sjgmsapi';
   import SystemInfo from '$lib/SystemInfo.svelte';
   import ServerLink from '$lib/ServerLink.svelte';
 

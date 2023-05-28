@@ -3,7 +3,7 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { sleep, humanFileSize } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
 
   let reloading = true;
   let uploading = false;

@@ -1,6 +1,6 @@
 <script>
   import { capitalize, humanDuration } from '$lib/util';
-  import { serverStatus } from '$lib/serverjockeyapi';
+  import { serverStatus } from '$lib/sjgmsapi';
 
   export let stateOnly = false;
   let commonKeys = ['version', 'ip', 'port'];

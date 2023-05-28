@@ -2,12 +2,12 @@
   import 'bulma/css/bulma.min.css';
   import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
   import '@fortawesome/fontawesome-free/css/solid.min.css';
-  import '../app.css';
+  import './styles.css';
 
   import { onMount } from 'svelte';
   import { Modals } from 'svelte-modals';
   import { loginModal } from '$lib/modals';
-  import { securityToken } from '$lib/serverjockeyapi';
+  import { securityToken } from '$lib/sjgmsapi';
   import Navbar from '$lib/Navbar.svelte';
   import Notifications from '$lib/Notifications.svelte';
 

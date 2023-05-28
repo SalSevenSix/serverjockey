@@ -3,7 +3,7 @@
   import { get } from 'svelte/store';
   import { sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
   serverStatus.set({});
   let subs = new SubscriptionHelper();

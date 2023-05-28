@@ -3,8 +3,7 @@
   import { notifyError } from '$lib/notifications';
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
-  import { baseurl, instance, serverStatus, newGetRequest, newPostRequest,
-           SubscriptionHelper } from '$lib/serverjockeyapi';
+  import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
 
   instance.set({});
   serverStatus.set({});

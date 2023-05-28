@@ -3,7 +3,7 @@
   import { onDestroy, tick } from 'svelte';
   import { closeModal } from 'svelte-modals';
   import { sleep, RollingLog } from '$lib/util';
-  import { instance, SubscriptionHelper, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, SubscriptionHelper, newPostRequest } from '$lib/sjgmsapi';
 
   export let isOpen;
   export let onSuccess;

@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import { instance, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
   // TODO probably should HTML escape names
 
   let subs = new SubscriptionHelper();

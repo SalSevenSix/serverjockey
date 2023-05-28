@@ -1,4 +1,4 @@
-import { dev } from '$app/env';
+import { dev } from '$app/environment';
 import { writable, get } from 'svelte/store';
 import { sleep } from '$lib/util';
 import { notifyError } from '$lib/notifications';

@@ -1,6 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
-  import { baseurl, instance } from '$lib/serverjockeyapi';
+  import { baseurl, instance } from '$lib/sjgmsapi';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';

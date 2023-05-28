@@ -1,5 +1,5 @@
 <script>
-  import { baseurl, instance } from '$lib/serverjockeyapi';
+  import { baseurl, instance } from '$lib/sjgmsapi';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';

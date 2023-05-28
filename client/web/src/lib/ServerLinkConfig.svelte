@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
-  import { instance, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let noHints = false;
   let serverLinkForm = {};

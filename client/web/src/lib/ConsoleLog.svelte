@@ -2,7 +2,7 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { RollingLog } from '$lib/util';
-  import { instance, SubscriptionHelper, newGetRequest } from '$lib/serverjockeyapi';
+  import { instance, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
   export let hasConsoleLogFile = false;
   let subs = new SubscriptionHelper();

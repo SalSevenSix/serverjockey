@@ -3,7 +3,7 @@
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal, steamLoginModal } from '$lib/modals';
   import { RollingLog } from '$lib/util';
-  import { instance, serverStatus, SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/sjgmsapi';
 
   export let qualifierName = null;
   let qualifier = '';

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { closeModal } from 'svelte-modals';
   import { notifyError } from '$lib/notifications';
-  import { baseurl, securityToken } from '$lib/serverjockeyapi';
+  import { baseurl, securityToken } from '$lib/sjgmsapi';
 
   export let isOpen;
   let token = '';

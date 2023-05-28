@@ -3,7 +3,7 @@
   import { notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { humanFileSize } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let allowDelete = false;
   export let sortFunction = function(a, b) {

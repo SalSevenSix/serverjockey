@@ -1,7 +1,7 @@
 <script>
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/serverjockeyapi';
+  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let commands;
   let command = null;
