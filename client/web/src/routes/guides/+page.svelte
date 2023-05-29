@@ -53,5 +53,9 @@
   <h3 class="title is-4">Game Server Guides</h3>
   <ul class="has-text-weight-bold">
     <li><a href="/guides/servers/projectzomboid">Project Zomboid</a></li>
+    <li><a href="/guides/servers/factorio">Factorio</a></li>
+    <li><a href="/guides/servers/sevendaystodie">7 Days to Die</a></li>
+    <li><a href="/guides/servers/starbound">Starbound</a></li>
+    <li><a href="/guides/servers/unturned">Unturned</a></li>
   <ul>
 </div>

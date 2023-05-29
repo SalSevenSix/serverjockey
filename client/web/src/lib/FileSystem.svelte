@@ -1,7 +1,6 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { confirmModal } from '$lib/modals';
   import { humanFileSize } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
@@ -9,7 +8,7 @@
   export let sortFunction = function(a, b) {
       let typeCompare = b.type.localeCompare(a.type);
       if (typeCompare != 0) return typeCompare;
-      return b.name.localeCompare(a.name);
+      return a.mtime - b.mtime;
     };
 
   let reloading = true;
@@ -77,13 +76,10 @@
 
   function deletePath() {
     let url = this.name;
-    let path = url.substring(root.length);
-    confirmModal('Delete this file or folder?\n' + path, function() {
-      fetch(url, newPostRequest())
-        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(function(error) { notifyError('Failed to delete ' + path); })
-        .finally(function() { reload(pwd); });
-    });
+    fetch(url, newPostRequest())
+      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .catch(function(error) { notifyError('Failed to delete ' + url.substring(root.length)); })
+      .finally(function() { reload(pwd); });
   }
 </script>
 
