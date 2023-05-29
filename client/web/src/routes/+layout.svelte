@@ -3,6 +3,7 @@
   import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
   import '@fortawesome/fontawesome-free/css/solid.min.css';
   import './styles.css';
+  // import './dark.css';
 
   import { onMount } from 'svelte';
   import { Modals } from 'svelte-modals';
@@ -23,7 +24,8 @@
     {#if $securityToken}
       <Navbar />
       <slot />
-      <hr />
+      <br /><br /><hr />
+      <div style="margin-bottom: 10%;"></div>
     {/if}
   </div>
 </section>

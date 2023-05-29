@@ -40,7 +40,7 @@
 </script>
 
 
-<div class="block">
+<div class="content">
   <h2 class="title is-5">New Instance</h2>
   <div class="field">
     <label for="createInstanceModule" class="label" title="Module (game server)">Module</label>

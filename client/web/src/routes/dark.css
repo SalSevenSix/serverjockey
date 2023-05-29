@@ -1,0 +1,46 @@
+body {
+  background-color: #091C32;
+  color: #4A6488;
+}
+
+hr {
+  background-color: #293045;
+}
+
+.navbar {
+  background-color: #223C5B;
+}
+
+.navbar-item, .navbar-link {
+  color: #52596E;
+}
+
+.title {
+  color: #4A6488;
+}
+
+.label {
+  color: #4A6488;
+}
+
+.table {
+  color: #4A6488;
+  border: #4A6488;
+}
+
+.table thead td, .table thead th {
+  color: #4A6488;
+}
+
+.table th, .table td {
+  border-color: #293045;
+}
+
+.content table th, .content table td {
+  border-color: #293045;
+}
+
+.input, .textarea, .select select {
+  background-color: #293045;
+  color: #52596E;
+}
