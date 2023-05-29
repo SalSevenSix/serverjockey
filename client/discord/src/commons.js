@@ -72,7 +72,7 @@ exports.server = function($) {
       message.react('⛔');
       return;
     }
-    if (!targetUp && ['READY', 'STOPPED', 'EXCEPTION', 'TERMINATED'].includes(currentState)) {
+    if (!targetUp && ['READY', 'STOPPED', 'EXCEPTION'].includes(currentState)) {
       message.react('⛔');
       return;
     }
@@ -81,7 +81,7 @@ exports.server = function($) {
     new subs.Helper($.context).poll(json.url, function(data) {
       if (data.state === currentState) return true;
       currentState = data.state;
-      if (currentState === 'EXCEPTION' || currentState === 'TERMINATED') {
+      if (currentState === 'EXCEPTION') {
         message.reactions.removeAll().then(function() { message.react('⛔'); }).catch(logger.error);
         return false;
       }

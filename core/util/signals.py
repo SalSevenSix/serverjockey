@@ -1,4 +1,5 @@
 import typing
+import logging
 import os
 import signal
 # ALLOW util.*
@@ -18,3 +19,10 @@ async def kill_tree(pid: int):
          '  kill -9 $pid', 'done',
          'kill -9 ' + pid_str])
     await shellutil.run_script(script)
+
+
+async def silently_kill_tree(pid: int):
+    try:
+        await kill_tree(pid)
+    except Exception as e:
+        logging.debug('silent_kill_tree() ' + repr(e))

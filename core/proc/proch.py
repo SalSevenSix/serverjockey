@@ -4,7 +4,7 @@ import typing
 import asyncio
 from asyncio import streams
 # ALLOW util.* msg.* context.* proc.prcenc proc.prcprd
-from core.util import signals, cmdutil, funcutil
+from core.util import signals, cmdutil, funcutil, tasks
 from core.msg import msgabc, msgext, msgftr
 from core.proc import prcenc, prcprd
 
@@ -126,12 +126,11 @@ class ServerProcess:
     STATE_STOPPING = 'ServerProcess.Stopping'
     STATE_STOPPED = 'ServerProcess.Stopped'
     STATE_EXCEPTION = 'ServerProcess.Exception'
-    STATE_TERMINATED = 'ServerProcess.Terminated'
 
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
     FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING))
-    FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION, STATE_TERMINATED))
+    FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION))
     FILTER_STATE_ALL = msgftr.Or(FILTER_STATES_UP, FILTER_STATES_DOWN)
 
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
@@ -163,8 +162,8 @@ class ServerProcess:
         return self
 
     def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
-        self._started_catcher = msgext.SingleCatcher(
-            msgftr.Or(ServerProcess.FILTER_STATE_STOPPING, msg_filter), timeout)
+        self._started_catcher = msgext.SingleCatcher(msgftr.Or(
+            ServerProcess.FILTER_STATE_STOPPING, ServerProcess.FILTER_STATES_DOWN, msg_filter), timeout)
         self._mailer.register(self._started_catcher)
         return self
 
@@ -179,6 +178,9 @@ class ServerProcess:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 env=self._env, cwd=self._cwd)
+            pid, rc = self._process.pid, self._process.returncode
+            if rc is not None:  # I don't think this can happen but to be sure
+                raise Exception('PID {} exit after START, rc={}'.format(pid, rc))
             stderr = prcprd.PipeOutLineProducer(
                 self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
             stdout = prcprd.PipeOutLineProducer(
@@ -187,32 +189,37 @@ class ServerProcess:
             if not self._pipeinsvc:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
-            # TODO Should trigger catcher upon process exit too. Prevent waiting on dead process.
-            started_msg = await self._started_catcher.get() if self._started_catcher else None
-            rc = self._process.returncode
-            if rc is not None:
-                raise Exception('Process {} exit after STARTING, rc={}'.format(self._process, rc))
-            if started_msg is None or not ServerProcess.FILTER_STATE_STOPPING.accepts(started_msg):
+            if self._started_catcher:
+                tasks.task_fork(self._wait_for_started(), '_wait_for_started PID {}'.format(pid))
+            else:
                 self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
             rc = await self._process.wait()
             if rc != 0:
-                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(self._process, rc))
+                raise Exception('PID {} non-zero exit after STARTED, rc={}'.format(pid, rc))
             self._mailer.post(self, ServerProcess.STATE_STOPPED, self._process)
-        except asyncio.TimeoutError:
-            rc = self._process.returncode
-            if rc is None:  # Zombie process
-                logging.error('Timeout waiting for STARTED but process is still running, killing now')
-                await signals.kill_tree(self._process.pid)
-                self._mailer.post(self, ServerProcess.STATE_TERMINATED, self._process)
-            else:  # It's dead Jim
-                logging.error('Timeout waiting for STARTED because process exit rc=' + str(rc))
-                self._mailer.post(self, ServerProcess.STATE_EXCEPTION,
-                                  Exception('Process {} exit during STARTING, rc={}'.format(self._process, rc)))
         except Exception as e:
-            logging.error('Exception executing "%s" > %s', cmdline, repr(e))
             self._mailer.post(self, ServerProcess.STATE_EXCEPTION, e)
+            logging.error('Exception executing "%s" > %s', cmdline, repr(e))
         finally:
             await funcutil.silently_cleanup(stdout)
             await funcutil.silently_cleanup(stderr)
             # PipeInLineService closes itself via PROCESS_ENDED message
             self._process = None
+
+    async def _wait_for_started(self):
+        try:
+            if self._process.returncode is not None:  # One last check before wait
+                return
+            message = await self._started_catcher.get()
+            if ServerProcess.FILTER_STATES_DOWN.accepts(message):
+                return
+            if ServerProcess.FILTER_STATE_STOPPING.accepts(message):
+                return
+            self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
+        except asyncio.TimeoutError:
+            pid, rc = self._process.pid, self._process.returncode
+            if rc is not None:
+                return
+            # Zombie process
+            logging.error('Timeout on PID {} waiting for STARTED, killing now'.format(pid))
+            await signals.silently_kill_tree(pid)
