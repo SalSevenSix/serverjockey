@@ -5,7 +5,7 @@
 
 
 <div class="columns">
-  <div class="column">
+  <div class="column is-two-thirds">
     <InstanceList />
   </div>
   <div class="column">

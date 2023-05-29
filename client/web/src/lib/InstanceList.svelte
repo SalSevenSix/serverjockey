@@ -82,7 +82,7 @@
       {:else}
         {#each instances as instance, index}
           <tr>
-            <td>{instance.identity}</td>
+            <td class="word-break-all">{instance.identity}</td>
             <td>{instance.module}</td>
             <td>
               <button name={index} class="button is-primary mb-1" title="View"
