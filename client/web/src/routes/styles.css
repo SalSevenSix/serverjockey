@@ -1,3 +1,11 @@
+body {
+  background-color: #FFFDF8;
+}
+
+.navbar {
+  border: 1px solid #DBDBDB;
+}
+
 a[target="_blank"] {
   font-weight: bold;
 }
@@ -25,10 +33,6 @@ table.is-thinner {
   word-break: break-all;
 }
 
-.navbar {
-  border: 1px solid #DBDBDB;
-}
-
-body {
-  background-color: #FFFDF8;
+svg.rubiks {
+  color: #FFFDF8;
 }

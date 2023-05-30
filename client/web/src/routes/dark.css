@@ -29,6 +29,7 @@ body.dark .table {
 }
 
 body.dark .table th, body.dark .table td {
+  color: #4A6488;
   border-color: #293045;
 }
 
@@ -38,5 +39,15 @@ body.dark .content table th, body.dark .content table td {
 
 body.dark .input, body.dark .textarea, body.dark .select select {
   background-color: #293045;
-  color: #52596E;
+  color: #DBDBDB;
+}
+
+body.dark .radio {
+  background-color: #293045;
+  border-color: #223C5B;
+  color: #DBDBDB;
+}
+
+body.dark svg.rubiks {
+  color: #4A6488;
 }
