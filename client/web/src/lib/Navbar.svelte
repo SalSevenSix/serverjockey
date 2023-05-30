@@ -1,7 +1,9 @@
 <script>
+  import { onMount } from 'svelte';
   import RubiksCube from '$lib/RubiksCube.svelte';
 
   let menuOpen = false;
+  let darkMode = true;
 
   function menuToggle() {
     menuOpen = !menuOpen;
@@ -10,6 +12,27 @@
   function menuClose() {
     menuOpen = false;
   }
+
+  function darkModeToggle() {
+    if (darkMode) {
+      document.body.classList.remove('dark');
+      document.body.classList.add('light');
+    } else {
+      document.body.classList.remove('light');
+      document.body.classList.add('dark');
+    }
+    darkMode = !darkMode;
+    if (typeof(Storage) !== 'undefined') {
+      localStorage.setItem('sjgmsDarkMode', darkMode);
+    }
+  }
+
+  onMount(function() {
+    if (typeof(Storage) !== 'undefined') {
+      darkMode = localStorage.getItem('sjgmsDarkMode') ? false : true;
+    }
+    darkModeToggle();
+  });
 </script>
 
 
@@ -37,6 +60,8 @@
           <i class="fa fa-book fa-lg"></i>&nbsp;&nbsp;Guides</a>
         <a on:click={menuClose} class="navbar-item" href="/about">
           <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;About</a>
+        <a on:click|preventDefault={darkModeToggle} class="navbar-item" href={'#'}>
+          &nbsp;<i class="fa fa-{darkMode ? 'moon' : 'sun'} fa-lg"></i>&nbsp;</a>
       </div>
     </div>
   </nav>

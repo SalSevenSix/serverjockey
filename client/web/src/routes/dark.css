@@ -1,46 +1,42 @@
-body {
+body.dark {
   background-color: #091C32;
   color: #4A6488;
 }
 
-hr {
+body.dark hr {
   background-color: #293045;
 }
 
-.navbar {
+body.dark .navbar {
   background-color: #223C5B;
 }
 
-.navbar-item, .navbar-link {
+body.dark .navbar-item, body.dark .navbar-link {
   color: #52596E;
 }
 
-.title {
+body.dark .title {
   color: #4A6488;
 }
 
-.label {
+body.dark .label {
   color: #4A6488;
 }
 
-.table {
+body.dark .table {
   color: #4A6488;
   border: #4A6488;
 }
 
-.table thead td, .table thead th {
-  color: #4A6488;
-}
-
-.table th, .table td {
+body.dark .table th, body.dark .table td {
   border-color: #293045;
 }
 
-.content table th, .content table td {
+body.dark .content table th, body.dark .content table td {
   border-color: #293045;
 }
 
-.input, .textarea, .select select {
+body.dark .input, body.dark .textarea, body.dark .select select {
   background-color: #293045;
   color: #52596E;
 }
