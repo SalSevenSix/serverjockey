@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
+  import BackToTop from '$lib/BackToTop.svelte';
 </script>
 
 
@@ -253,3 +254,5 @@ UPnP=false</pre>
     "-XX:-OmitStackTraceInFastThrow"
 ]</pre>
 </div>
+
+<BackToTop />

@@ -1,6 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import { baseurl, instance } from '$lib/sjgmsapi';
+  import BackToTop from '$lib/BackToTop.svelte';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
@@ -399,3 +400,5 @@
     <a href="/guides/servers/projectzomboid">Project Zomboid guide</a>.
   </p>
 </div>
+
+<BackToTop />
