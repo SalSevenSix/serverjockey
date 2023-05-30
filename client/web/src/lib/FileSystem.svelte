@@ -8,7 +8,7 @@
   export let sortFunction = function(a, b) {
       let typeCompare = b.type.localeCompare(a.type);
       if (typeCompare != 0) return typeCompare;
-      return a.mtime - b.mtime;
+      return b.mtime - a.mtime;
     };
 
   let reloading = true;
@@ -54,6 +54,7 @@
         return response.json();
       }).then(function(json) {
         json.sort(sortFunction);
+        json = json.slice(0, 60);
         paths = json;
         pwd = url;
       })

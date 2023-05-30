@@ -121,7 +121,6 @@ $TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz -nt ctrld > $TARGET_DIR/etc/sy
 
 echo "Downloading ServerLink dependencies"
 cd $SERVERLINK_DIR || exit 1
-rm -rf test* scratch.js > /dev/null 2>&1
 npm ci
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR/node_modules" ] || exit 1

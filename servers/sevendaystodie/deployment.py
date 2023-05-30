@@ -24,7 +24,7 @@ class Deployment:
         self._config_dir = self._world_dir + '/config'
         self._save_dir = self._world_dir + '/save'
         self._log_dir = self._save_dir + '/logs'
-        self._log_file = self._log_dir + '/server-%Y%m%d%H%M%S.log'
+        self._log_file = self._log_dir + '/server-%Y%m%d-%H%M%S.log'
         self._settings_file = self._config_dir + '/serverconfig.xml'
         self._live_file = self._config_dir + '/serverconfig-live.xml'
         self._admin_file = self._config_dir + '/serveradmin.xml'
