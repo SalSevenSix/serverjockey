@@ -1,5 +1,6 @@
 body {
   background-color: #FFFDF8;
+  counter-reset: section;
 }
 
 .navbar {
@@ -13,6 +14,11 @@ a[target="_blank"] {
 .step-title {
   font-weight: bold;
   font-size: 1.2em;
+}
+
+.step-title::before {
+  counter-increment: section;
+  content: counter(section, decimal-leading-zero) ". ";
 }
 
 pre.is-thinner {

@@ -34,7 +34,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">01.</span>
+  <p><span class="step-title"></span>
     First step is to create an instance for the Project Zomboid server. If you are following this guide after the
     <a href="/guides/discord">discord bot setup guide</a>, then the instance already exists, so you can
     <a href="#setupWithBotTwo" use:scrollto={'#setupWithBotTwo'}>jump to the next step</a>.
@@ -52,7 +52,7 @@
 </div>
 
 <div class="content" id="setupWithBotTwo">
-  <p><span class="step-title">02.</span>
+  <p><span class="step-title"></span>
     Now enter the help command. Now that there is an instance, you will see all the commands for that type of instance.
   </p>
   <pre class="pre is-thinner">!help</pre>
@@ -60,7 +60,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">03.</span>
+  <p><span class="step-title"></span>
     Although the instance has been created, the Project Zomboid server itself is not installed yet.
     The stable version can now be downloaded and installed with the command shown below. The bot reacts
     with an hourglass emoji initially as the process happens. Once complete, the hourglass will be replaced
@@ -73,7 +73,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">04.</span>
+  <p><span class="step-title"></span>
     With the server installed, it can now be started with the following command. Same as the server install,
     an hourglass emoji is shown then replaced with a green tick when the server has fully started.
   </p>
@@ -83,7 +83,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">05.</span>
+  <p><span class="step-title"></span>
     You can check the status of the server at any time with the following command.
     Now that the server is up, the server version and connection details are shown.
   </p>
@@ -92,7 +92,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">06.</span>
+  <p><span class="step-title"></span>
     Before we continue to login and play, the server configuration needs attention. After starting the
     Project Zomboid server for the first time, the configuration files are created with default values.
     So stop the server with the following command.
@@ -102,7 +102,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">07.</span>
+  <p><span class="step-title"></span>
     The server INI file can be downloaded as an attachment with the following command.
     See the server command list for other configuration files that can be downloaded.
     Save this file to disk somewhere to edit it.
@@ -112,7 +112,7 @@
 </div>
 
 <div class="content">
-  <p><span class="step-title">08.</span>
+  <p><span class="step-title"></span>
     For the purpose of this guide. I have only updated a the public server name and welcome message
     in the downloaded INI file. Typically you will make more changes. You can look at the
     <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
@@ -123,7 +123,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 </div>
 
 <div class="content">
-  <p><span class="step-title">09.</span>
+  <p><span class="step-title"></span>
     After making changes to the downloaded INI file. You can now upload it back to the server.
     Attach the INI file in Discord to upload it with the following command.
     Once again, the bot will react with a green tick emoji to show that the command was successful.
@@ -133,7 +133,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 </div>
 
 <div class="content">
-  <p><span class="step-title">10.</span>
+  <p><span class="step-title"></span>
     The server configuration has now been updated. However the server created a game world (map files)
     using the default configuration. You can delete the world with the following command.
   </p>
@@ -142,7 +142,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 </div>
 
 <div class="content">
-  <p><span class="step-title">11.</span>
+  <p><span class="step-title"></span>
     Now start the server again. For this guide I used the local network IP to login to the Project Zomboid server.
     In order for other people to connect over the internet to your server, you may need to redirect ports
     on your router. More information on that can be found in
@@ -159,7 +159,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 </div>
 
 <div class="content">
-  <p><span class="step-title">12.</span>
+  <p><span class="step-title"></span>
     Try some server console commands now. Two examples shown below.
     You can broadcast a message to all players on the server.
     Items can also be spawned in a players inventory.

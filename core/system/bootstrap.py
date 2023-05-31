@@ -72,7 +72,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
 
     async def initialise(self) -> httpabc.Resource:
         self._context.start()
-        if self._context.config('showtoken'):
+        if self._context.is_debug() or self._context.config('showtoken'):
             local_ip = await sysutil.get_local_ip()
             print('URL   : ' + contextext.RootUrl(self._context).build(local_ip))
             print('TOKEN : ' + self._context.config('secret'))

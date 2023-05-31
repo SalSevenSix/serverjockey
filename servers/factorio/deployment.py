@@ -74,6 +74,7 @@ class Deployment:
         r.put('log', httpext.FileSystemHandler(self._current_log))
         r.psh('logs', httpext.FileSystemHandler(self._runtime_dir, ls_filter=_logfiles))
         r.put('*{path}', httpext.FileSystemHandler(self._runtime_dir, 'path'))
+        r.pop()
         r.psh('config')
         r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_settings))
         r.put('server', httpext.FileSystemHandler(self._server_settings))

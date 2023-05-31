@@ -7,6 +7,8 @@
   let currentOption = null;
   let selectedOption = null;
 
+  $: cannotChange = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+
   $: if ($serverStatus.auto > -1) {
     if (selectedOption === null) {
       currentOption = autoOptions[$serverStatus.auto];
@@ -51,7 +53,7 @@
     <div class="field is-narrow">
       <div class="control">
         <div class="select is-fullwidth">
-          <select id="serverConfigAuto" disabled={$serverStatus.running} bind:value={selectedOption}>
+          <select id="serverConfigAuto" disabled={cannotChange} bind:value={selectedOption}>
             {#each autoOptions as option}
               <option>{option}</option>
             {/each}
