@@ -60,7 +60,7 @@
         <ConfigFile name="Workshop Mods" path="/config/workshop" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <FileSystem allowDelete />
+        <FileSystem />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

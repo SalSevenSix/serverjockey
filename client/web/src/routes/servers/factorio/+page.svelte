@@ -6,6 +6,7 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
+  import FileSystem from '$lib/FileSystem.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
@@ -68,6 +69,9 @@
           <p>List of user names banned from server.
              e.g. [&quot;name1&quot;, &quot;name2&quot;]</p>
         </ConfigFile>
+      </Collapsible>
+      <Collapsible icon="fa-scroll" title="Logging">
+        <FileSystem />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Version (optional)" />

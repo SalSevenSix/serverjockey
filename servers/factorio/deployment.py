@@ -72,6 +72,8 @@ class Deployment:
         r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.put('log', httpext.FileSystemHandler(self._current_log))
+        r.psh('logs', httpext.FileSystemHandler(self._runtime_dir, ls_filter=_logfiles))
+        r.put('*{path}', httpext.FileSystemHandler(self._runtime_dir, 'path'))
         r.psh('config')
         r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_settings))
         r.put('server', httpext.FileSystemHandler(self._server_settings))
@@ -257,3 +259,7 @@ class _DownloadTracker(io.BytesTracker):
             self._next_target += self._increment
             message = 'downloaded  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
             self._mailer.post(self, self._msg_name, message)
+
+
+def _logfiles(entry) -> bool:
+    return entry['type'] == 'file' and entry['name'].endswith('.log')

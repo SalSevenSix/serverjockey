@@ -24,7 +24,6 @@ class Deployment:
         self._config_dir = self._world_dir + '/config'
         self._save_dir = self._world_dir + '/save'
         self._log_dir = self._save_dir + '/logs'
-        self._log_file = self._log_dir + '/server-%Y%m%d-%H%M%S.log'
         self._settings_file = self._config_dir + '/serverconfig.xml'
         self._live_file = self._config_dir + '/serverconfig-live.xml'
         self._admin_file = self._config_dir + '/serveradmin.xml'
@@ -42,7 +41,7 @@ class Deployment:
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(msglog.LogfileSubscriber(
-            self._log_file, msg.CONSOLE_LOG_FILTER,
+            self._log_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER,
             msgftr.And(msgftr.NameIs(svrsvc.ServerStatus.NOTIFY_RUNNING), msgftr.DataEquals(False)),
             msgtrf.GetData()))
 
