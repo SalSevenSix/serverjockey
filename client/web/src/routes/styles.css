@@ -42,3 +42,7 @@ table.is-thinner {
 svg.rubiks {
   color: #FFFDF8;
 }
+
+figure.box {
+  background-color: #F5F5F5;
+}

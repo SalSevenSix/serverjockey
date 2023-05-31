@@ -241,7 +241,7 @@ UPnP=false</pre>
     Find the <span class="has-text-weight-bold">-Xmx</span> argument under
     <span class="has-text-weight-bold">vmArgs</span>. By default 8Gb is allocated. You can adjust as needed.
     As a general rule, the memory required is 2Gb + 500Mb per player. Whatever value is set,
-    the machine that the server is running on needs at least 1Gb more of free memory.
+    the machine that the server is running on should have 2Gb more of free memory.
   </p>
   <pre class="pre is-thinner">"vmArgs": [
     "-Djava.awt.headless=true",

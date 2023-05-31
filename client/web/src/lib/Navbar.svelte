@@ -25,6 +25,7 @@
     if (typeof(Storage) !== 'undefined') {
       localStorage.setItem('sjgmsDarkMode', darkMode);
     }
+    menuClose();
   }
 
   onMount(function() {

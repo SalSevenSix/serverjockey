@@ -31,8 +31,8 @@
       with a few extra unique features as well.
     </p>
     <p>
-      The instructions are detailed. If you are unfamiliar with Discord, the guide also includes
-      instructions on where to register a Discord account and how to start a new server (if needed).
+      The instructions are detailed. If you are unfamiliar with Discord, the guide also includes instructions
+      on where to register a Discord account and how to start a new Discord server (if needed).
     </p>
   </div>
 </div>

@@ -1,6 +1,8 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import BackToTop from '$lib/BackToTop.svelte';
+  import WebappServerInstall from '../WebappServerInstall.svelte';
+  import WebappConfigRun from '../WebappConfigRun.svelte';
 </script>
 
 
@@ -8,75 +10,20 @@
   <h2 class="title is-3 mt-2">Factorio</h2>
   <p>
     <a href="https://www.factorio.com" target="_blank">Factorio <i class="fa fa-up-right-from-square"></i></a>
-    is a factory building game.
+    is a game where you build, maintain and protect a factory. This involves mining resources, researching technologies,
+    building infrastructure, automating production, and fighting enemies.
   </p>
   <p>
-    Jump to <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
+    This guide will show you how to install, configure and run a Factorio server using this Webapp.
+  </p>
+  <p>
+    Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
+    section at the end for information on ports.
   </p>
 </div>
 
-<div class="content">
-  <hr />
-  <h3 class="title is-4">Server setup using the Webapp</h3>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Go to the <a href="/servers" target="_blank">Instances <i class="fa fa-up-right-from-square"></i></a> page.
-    If opened in a new tab, you will need to enter the login token again.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Go to instances page" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Create new instance.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Create a new instance" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Go to the new instance.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Go to new instance" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Install runtime. View logging.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Install runtime" /></figure>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="View install logging" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Run server once to generate config. Stop server.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Run server to generate default config" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    View and edit config.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="View and edit config" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Wipe game world.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Wipe game world" /></figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Set auto state and startup server again.
-  </p>
-  <figure><img src="/assets/banners/serverjockey.jpg" alt="Set auto and start server again" /></figure>
-</div>
+<WebappServerInstall module="factorio" />
+<WebappConfigRun />
 
 <div class="content" id="additionalInformation">
   <hr />
@@ -86,8 +33,21 @@
 <div class="content" id="portForwarding">
   <h4 class="title is-5">Port Forwarding</h4>
   <p>
-    TODO
+    Factorio only needs a single port opened and redirected for UDP traffic.
+    However if you are using a home network, the server does not automatically
+    redirect ports behind a NAT. Please read the
+    <a href="https://wiki.factorio.com/Multiplayer#Connecting_to_a_Server_Behind_NAT" target="_blank">
+      multiplayer information <i class="fa fa-up-right-from-square"></i></a>
+    on the Factorio wiki for help on how to redirect ports.
   </p>
+  <table class="table is-thinner">
+    <thead>
+      <tr><th>Purpose</th><th>Port</th><th>Protocal</th></tr>
+    </thead>
+    <tbody class="is-family-monospace">
+      <tr><td>Direct</td><td>34197</td><td>UDP</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <BackToTop />
