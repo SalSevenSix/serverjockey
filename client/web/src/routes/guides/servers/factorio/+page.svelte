@@ -34,8 +34,8 @@
   <h4 class="title is-5">Port Forwarding</h4>
   <p>
     Factorio only needs a single port opened and redirected for UDP traffic.
-    However if you are using a home network, the server does not automatically
-    redirect ports behind a NAT. Please read the
+    However if you are using a home network, the server does not automatically redirect ports behind a NAT.
+    Please read the
     <a href="https://wiki.factorio.com/Multiplayer#Connecting_to_a_Server_Behind_NAT" target="_blank">
       multiplayer information <i class="fa fa-up-right-from-square"></i></a>
     on the Factorio wiki for help on how to redirect ports.
@@ -45,7 +45,7 @@
       <tr><th>Purpose</th><th>Port</th><th>Protocal</th></tr>
     </thead>
     <tbody class="is-family-monospace">
-      <tr><td>Direct</td><td>34197</td><td>UDP</td></tr>
+      <tr><td>Server</td><td>34197</td><td>UDP</td></tr>
     </tbody>
   </table>
 </div>

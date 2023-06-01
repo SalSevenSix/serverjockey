@@ -210,7 +210,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     However, if this is not working on your LAN, you can manually add the port forwarding.
   </p>
   <p>
-    To do this, login to your router then forward ports as shown below. Use of the IP address as shown
+    To do this, login to your router then forward ports as shown below. Use of the public IP address as shown
     on the ServerJockey console. More detailed instructions cannot be provided because each router will have
     a different webapp interface depending on the brand and model.
   </p>

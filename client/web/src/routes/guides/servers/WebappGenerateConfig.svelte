@@ -1,8 +1,8 @@
 <div class="content">
   <p><span class="step-title"></span>
     This game server requires you run it once to generate the default configuration files.
-    Find the <span class="has-text-weight-bold">Start</span> button and click it.
-    Once the server is STARTED, click the <span class="has-text-weight-bold">Stop</span> button.
+    Find the <span class="has-text-weight-bold">Start</span> button and click it. Wait for the server State
+    to be STARTED, then click the <span class="has-text-weight-bold">Stop</span> button.
   </p>
   <div class="columns is-gapless">
     <div class="column">

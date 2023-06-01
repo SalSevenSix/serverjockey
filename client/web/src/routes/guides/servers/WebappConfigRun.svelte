@@ -23,7 +23,7 @@
       <tr><td class="has-text-weight-bold">Restart</td>
           <td>Automatically restart the game server if it crashes</td></tr>
       <tr><td class="has-text-weight-bold">Start and Restart</td>
-          <td>Both Start and Restart automatic actions</td></tr>
+          <td>Both automatic Start and Restart actions</td></tr>
     </tbody>
   </table>
   <p>

@@ -30,7 +30,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    On the <span class="has-text-weight-bold">Instances</span> list on the same page you should now find
+    In the <span class="has-text-weight-bold">Instances</span> list on the same page you should find
     the new instance your created. View it now using the open folder button.
   </p>
   <div class="columns is-centered"><div class="column is-two-thirds">
@@ -50,7 +50,7 @@
   </p>
   <figure class="box"><img src="/assets/setup/gg_install_start.png" alt="Start install runtime" /></figure>
   <p>
-    Scrolling back up, find the <span class="has-text-weight-bold">Console Log</span>.
+    Scroll back up to find the <span class="has-text-weight-bold">Console Log</span>.
     You can track the progress of the install process and see the end result in the log.
     Once completed successfully, you will be able to start the game server.
   </p>
