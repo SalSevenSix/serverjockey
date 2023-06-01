@@ -51,11 +51,81 @@
 <div class="content">
   <hr />
   <h3 class="title is-4">Game Server Guides</h3>
-  <ul class="has-text-weight-bold">
-    <li><a href="/guides/servers/projectzomboid">Project Zomboid</a></li>
-    <li><a href="/guides/servers/factorio">Factorio</a></li>
-    <li><a href="/guides/servers/sevendaystodie">7 Days to Die</a></li>
-    <li><a href="/guides/servers/starbound">Starbound</a></li>
-    <li><a href="/guides/servers/unturned">Unturned</a></li>
-  <ul>
 </div>
+
+<div class="columns is-multiline">
+  <div class="column is-one-quarter-desktop is-half-tablet">
+    <a href="/guides/servers/projectzomboid">
+      <div class="card">
+        <header class="card-header card-header-title">Project Zomboid</header>
+        <div class="card-image">
+          <figure class="image is-square">
+            <img src="/assets/icons/pz_icon.jpg" alt="Project Zomboid icon" />
+          </figure>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="column is-one-quarter-desktop is-half-tablet">
+    <a href="/guides/servers/factorio">
+      <div class="card">
+        <header class="card-header card-header-title">Factorio</header>
+        <div class="card-image">
+          <figure class="image is-square">
+            <img src="/assets/icons/ft_icon.jpg" alt="Factorio icon" />
+          </figure>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="column is-one-quarter-desktop is-half-tablet">
+    <a href="/guides/servers/sevendaystodie">
+      <div class="card">
+        <header class="card-header card-header-title">7 Days to Die</header>
+        <div class="card-image">
+          <figure class="image is-square">
+            <img src="/assets/icons/7d2d_icon.png" alt="7d2d icon" />
+          </figure>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="column is-one-quarter-desktop is-half-tablet">
+    <a href="/guides/servers/starbound">
+      <div class="card">
+        <header class="card-header card-header-title">Starbound</header>
+        <div class="card-image">
+          <figure class="image is-square">
+            <img src="/assets/icons/sb_icon.jpg" alt="Starbound icon" />
+          </figure>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="column is-one-quarter-desktop is-half-tablet">
+    <a href="/guides/servers/unturned">
+      <div class="card">
+        <header class="card-header card-header-title">Unturned</header>
+        <div class="card-image">
+          <figure class="image is-square">
+            <img src="/assets/icons/ut_icon.jpg" alt="Unturned icon" />
+          </figure>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+
+<style>
+  .card {
+    background-color: #F5F5F5;
+    color: #485fC7;
+  }
+  .card:hover {
+    color: #363636;
+  }
+  .card-header-title {
+    color: inherit;
+  }
+</style>
