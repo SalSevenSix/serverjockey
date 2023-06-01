@@ -7,20 +7,25 @@
 </script>
 
 
-<div class="content">
-  <h2 class="title is-3 mt-2">Starbound</h2>
-  <p>
-    <a href="https://playstarbound.com" target="_blank">Starbound <i class="fa fa-up-right-from-square"></i></a>
-    is an action-adventure game with fighting, mining and crafting in a procedurally generated 2D world.
-    It has RPG elements and a focus on exploration and player guided storytelling.
-  </p>
-  <p>
-    This guide will show you how to install, configure and run a Starbound server using this Webapp.
-  </p>
-  <p>
-    Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
-    section at the end for information on ports.
-  </p>
+<div class="columns">
+  <div class="column is-one-quarter">
+    <figure class="image pt-3"><img src="/assets/icons/sb_icon.jpg" alt="Starbound icon" /></figure>
+  </div>
+  <div class="column content">
+    <h2 class="title is-3 mt-2">Starbound</h2>
+    <p>
+      <a href="https://playstarbound.com" target="_blank">Starbound <i class="fa fa-up-right-from-square"></i></a>
+      is an action-adventure game with fighting, mining and crafting in a procedurally generated 2D world.
+      It has RPG elements and a focus on exploration and player guided storytelling.
+    </p>
+    <p>
+      This guide will show you how to install, configure and run a Starbound server using this Webapp.
+    </p>
+    <p>
+      Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
+      section at the end for information on ports.
+    </p>
+  </div>
 </div>
 
 <WebappServerInstall module="starbound" />

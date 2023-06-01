@@ -3,30 +3,33 @@
   import BackToTop from '$lib/BackToTop.svelte';
 </script>
 
-
-<div class="content">
-  <h2 class="title is-3 mt-2">Project Zomboid</h2>
-  <p>
-    <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
-    is a zombie apocalypse survival horror game with crafting &amp; RPG elements and a focus on realism.
-    ServerJockey provides full support for multiplayer servers on both the webapp and discord.
-  </p>
-  <p>
-    This guide covers installing, configuring and starting a Project Zomboid server using Discord.
-    You will need to <a href="/guides/discord">setup the discord bot</a> first if you have not already.
-    When ready, <a href="#setupWithBotOne" use:scrollto={'#setupWithBotOne'}>jump to the first step</a> to begin.
-  </p>
-  <p>
-    Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
-    section at the end for help on;
-  </p>
-  <ul>
-    <li><a href="#configurationFiles" use:scrollto={'#configurationFiles'}>Configuration Files</a></li>
-    <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
-    <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
-  </ul>
+<div class="columns">
+  <div class="column is-one-quarter">
+    <figure class="image pt-3"><img src="/assets/icons/pz_icon.jpg" alt="Project Zomboid icon" /></figure>
+  </div>
+  <div class="column content">
+    <h2 class="title is-3 mt-2">Project Zomboid</h2>
+    <p>
+      <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
+      is a zombie apocalypse survival horror game with crafting &amp; RPG elements and a focus on realism.
+      ServerJockey provides full support for multiplayer servers on both the webapp and discord.
+    </p>
+    <p>
+      This guide covers installing, configuring and starting a Project Zomboid server using Discord.
+      You will need to <a href="/guides/discord">setup the discord bot</a> first if you have not already.
+      When ready, <a href="#setupWithBotOne" use:scrollto={'#setupWithBotOne'}>jump to the first step</a> to begin.
+    </p>
+    <p>
+      Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
+      section at the end for help on;
+    </p>
+    <ul>
+      <li><a href="#configurationFiles" use:scrollto={'#configurationFiles'}>Configuration Files</a></li>
+      <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
+      <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
+    </ul>
+  </div>
 </div>
-
 
 <div class="content" id="setupWithBotOne">
   <hr />

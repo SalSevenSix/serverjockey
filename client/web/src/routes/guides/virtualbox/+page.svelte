@@ -1,18 +1,22 @@
-
-<div class="content">
-  <h2 class="title is-3 mt-2">VirtualBox</h2>
-  <p>
-    <a href="https://www.virtualbox.org" target="_blank">VirtualBox <i class="fa fa-up-right-from-square"></i></a>
-    is a free virtualization system for enterprise and personal use. It allows you to run a virtual machine on
-    a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine).
-    The appliance is running Ubuntu Server with ServerJockey pre-installed and ready to use.
-  </p>
-  <p>
-    This guide provides some basic information on setting memory and processor allocations.
-    For comprehensive information about VirtualBox, consult the
-    <a href="https://www.virtualbox.org/manual/UserManual.html" target="_blank">
-      online manual <i class="fa fa-up-right-from-square"></i></a>.
-  </p>
+<div class="columns">
+  <div class="column is-one-quarter">
+    <figure class="image pl-3 pt-2"><img src="/assets/icons/Virtualbox_logo.png" alt="Virtualbox logo" /></figure>
+  </div>
+  <div class="column content">
+    <h2 class="title is-3 mt-2">VirtualBox</h2>
+    <p>
+      <a href="https://www.virtualbox.org" target="_blank">VirtualBox <i class="fa fa-up-right-from-square"></i></a>
+      is a free virtualization system for enterprise and personal use. It allows you to run a virtual machine on
+      a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine).
+      The appliance is running Ubuntu Server with ServerJockey pre-installed and ready to use.
+    </p>
+    <p>
+      This guide provides some basic information on setting memory and processor allocations.
+      For comprehensive information about VirtualBox, consult the
+      <a href="https://www.virtualbox.org/manual/UserManual.html" target="_blank">
+        online manual <i class="fa fa-up-right-from-square"></i></a>.
+    </p>
+  </div>
 </div>
 
 <div class="content">
