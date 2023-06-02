@@ -34,11 +34,11 @@
     It should less than how much free memory your real machine has, but enough to support the game server
     you are running with 2Gb spare.
   </p>
-  <figure><img src="/assets/setup/vb_sysmem.png" alt="VirtualBox Memory" /></figure>
+  <figure><img src="/assets/setup/vb_sysmem.png" alt="VirtualBox Memory" loading="lazy" /></figure>
   <h3 class="title is-4">Processor Allocation</h3>
   <p>
     On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much processor is allocated.
     You can specify a number of cores as well as an execution cap.
   </p>
-  <figure><img src="/assets/setup/vb_syscpu.png" alt="VirtualBox Processor" /></figure>
+  <figure><img src="/assets/setup/vb_syscpu.png" alt="VirtualBox Processor" loading="lazy" /></figure>
 </div>

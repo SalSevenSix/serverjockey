@@ -7,15 +7,18 @@
   <div class="columns is-gapless">
     <div class="column">
       <figure class="box ml-1 mr-1 mb-2">
-        <img src="/assets/setup/gg_server_ready.png" alt="Run server to generate default config" /></figure>
+        <img src="/assets/setup/gg_server_ready.png" alt="Run server to generate default config" loading="lazy" />
+      </figure>
     </div>
     <div class="column">
       <figure class="box ml-1 mr-1 mb-2">
-        <img src="/assets/setup/gg_server_started.png" alt="Stop started server" /></figure>
+        <img src="/assets/setup/gg_server_started.png" alt="Stop started server" loading="lazy" />
+      </figure>
     </div>
     <div class="column">
       <figure class="box ml-1 mr-1 mb-2">
-        <img src="/assets/setup/gg_server_stopped.png" alt="Server stopped" /></figure>
+        <img src="/assets/setup/gg_server_stopped.png" alt="Server stopped" loading="lazy" />
+      </figure>
     </div>
   </div>
 </div>
@@ -27,6 +30,8 @@
     the button to reset the game world save and click it.
   </p>
   <div class="columns is-centered"><div class="column is-two-thirds">
-    <figure class="box"><img src="/assets/setup/gg_wipe_world_save.png" alt="Wipe world save" /></figure>
+    <figure class="box">
+      <img src="/assets/setup/gg_wipe_world_save.png" alt="Wipe world save" loading="lazy" />
+    </figure>
   </div></div>
 </div>

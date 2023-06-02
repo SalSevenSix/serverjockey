@@ -24,7 +24,9 @@
     Click the <span class="has-text-weight-bold">Create</span> button to create the new instance.
   </p>
   <div class="columns is-centered"><div class="column is-half">
-    <figure class="box"><img src="/assets/setup/gg_new_instance.png" alt="Create a new instance" /></figure>
+    <figure class="box">
+      <img src="/assets/setup/gg_new_instance.png" alt="Create a new instance" loading="lazy" />
+    </figure>
   </div></div>
 </div>
 
@@ -34,7 +36,9 @@
     the new instance your created. View it now using the open folder button.
   </p>
   <div class="columns is-centered"><div class="column is-two-thirds">
-    <figure class="box"><img src="/assets/setup/gg_view_instance.png" alt="Go to new instance" /></figure>
+    <figure class="box">
+      <img src="/assets/setup/gg_view_instance.png" alt="Go to new instance" loading="lazy" />
+    </figure>
   </div></div>
 </div>
 
@@ -48,11 +52,15 @@
     Expand it using the black button on the right.
     Now click the <span class="has-text-weight-bold">Install Runtime</span> button.
   </p>
-  <figure class="box"><img src="/assets/setup/gg_install_start.png" alt="Start install runtime" /></figure>
+  <figure class="box">
+    <img src="/assets/setup/gg_install_start.png" alt="Start install runtime" loading="lazy" />
+  </figure>
   <p>
     Scroll back up to find the <span class="has-text-weight-bold">Console Log</span>.
     You can track the progress of the install process and see the end result in the log.
     Once completed successfully, you will be able to start the game server.
   </p>
-  <figure class="box"><img src="/assets/setup/gg_install_log.png" alt="View install logging" /></figure>
+  <figure class="box">
+    <img src="/assets/setup/gg_install_log.png" alt="View install logging" loading="lazy" />
+  </figure>
 </div>

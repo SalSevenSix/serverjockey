@@ -10,7 +10,8 @@
   <div class="column content">
     <h2 class="title is-3 mt-2">Project Zomboid</h2>
     <p>
-      <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
+      <a href="https://projectzomboid.com" target="_blank">
+        Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
       is a zombie apocalypse survival horror game with crafting &amp; RPG elements and a focus on realism.
       ServerJockey provides full support for multiplayer servers on both the webapp and discord.
     </p>
@@ -59,7 +60,7 @@
     Now enter the help command. Now that there is an instance, you will see all the commands for that type of instance.
   </p>
   <pre class="pre is-thinner">!help</pre>
-  <figure><img src="/assets/setup/39_help_pz.png" alt="Help PZ" /></figure>
+  <figure><img src="/assets/setup/39_help_pz.png" alt="Help PZ" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -71,8 +72,12 @@
     the server was installed without issue.
   </p>
   <pre class="pre is-thinner">!deployment install-runtime</pre>
-  <figure><img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" /></figure>
-  <figure><img src="/assets/setup/40_deploy_runtime_success.png" alt="Deploy Runtime Success" /></figure>
+  <figure>
+    <img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" loading="lazy" />
+  </figure>
+  <figure>
+    <img src="/assets/setup/40_deploy_runtime_success.png" alt="Deploy Runtime Success" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -81,8 +86,8 @@
     an hourglass emoji is shown then replaced with a green tick when the server has fully started.
   </p>
   <pre class="pre is-thinner">!server start</pre>
-  <figure><img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" /></figure>
-  <figure><img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" /></figure>
+  <figure><img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" loading="lazy" /></figure>
+  <figure><img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -91,7 +96,7 @@
     Now that the server is up, the server version and connection details are shown.
   </p>
   <pre class="pre is-thinner">!server</pre>
-  <figure><img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" /></figure>
+  <figure><img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -101,7 +106,7 @@
     So stop the server with the following command.
   </p>
   <pre class="pre is-thinner">!server stop</pre>
-  <figure><img src="/assets/setup/43_server_stop.png" alt="Server Stop" /></figure>
+  <figure><img src="/assets/setup/43_server_stop.png" alt="Server Stop" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -111,7 +116,7 @@
     Save this file to disk somewhere to edit it.
   </p>
   <pre class="pre is-thinner">!getconfig ini</pre>
-  <figure><img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" /></figure>
+  <figure><img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -132,7 +137,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Once again, the bot will react with a green tick emoji to show that the command was successful.
   </p>
   <pre class="pre is-thinner">!setconfig ini</pre>
-  <figure><img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" /></figure>
+  <figure><img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -141,7 +146,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     using the default configuration. You can delete the world with the following command.
   </p>
   <pre class="pre is-thinner">!deployment wipe-world-save</pre>
-  <figure><img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" /></figure>
+  <figure><img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -156,9 +161,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Log Channel ID set in the discord bot configuration, you should see a login event message in that channel.
   </p>
   <pre class="pre is-thinner">!server start</pre>
-  <figure><img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" /></figure>
-  <figure><img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" /></figure>
-  <figure><img src="/assets/setup/48_login_event.png" alt="Login Event" /></figure>
+  <figure><img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" loading="lazy" /></figure>
+  <figure><img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" loading="lazy" /></figure>
+  <figure><img src="/assets/setup/48_login_event.png" alt="Login Event" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -170,9 +175,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   </p>
   <pre class="pre is-thinner">!world broadcast Hello Everyone</pre>
   <pre class="pre is-thinner">!player Demo give-item Base Axe 2</pre>
-  <figure><img src="/assets/setup/49_console_commands.png" alt="Console Commands" /></figure>
-  <figure><img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" /></figure>
-  <figure><img src="/assets/setup/49_give_item.png" alt="Give Item" /></figure>
+  <figure><img src="/assets/setup/49_console_commands.png" alt="Console Commands" loading="lazy" /></figure>
+  <figure><img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" loading="lazy" /></figure>
+  <figure><img src="/assets/setup/49_give_item.png" alt="Give Item" loading="lazy" /></figure>
 </div>
 
 

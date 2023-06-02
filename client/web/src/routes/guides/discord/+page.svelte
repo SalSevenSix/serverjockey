@@ -58,28 +58,28 @@
     Add a new Discord server by clicking the <span class="is-family-monospace is-size-5">+</span> button
     on the left panel.
   </p>
-  <figure><img src="/assets/setup/02_add_server_button.png" alt="Add a Server" /></figure>
+  <figure><img src="/assets/setup/02_add_server_button.png" alt="Add a Server" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Select the <span class="has-text-weight-bold">Create My Own</span> option.
   </p>
-  <figure><img src="/assets/setup/03_create_server_options.png" alt="Create Server Options" /></figure>
+  <figure><img src="/assets/setup/03_create_server_options.png" alt="Create Server Options" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Choose the kind of Discord server you want, or skip to choose later.
   </p>
-  <figure><img src="/assets/setup/04_choose_server_type.png" alt="Choose Server Type" /></figure>
+  <figure><img src="/assets/setup/04_choose_server_type.png" alt="Choose Server Type" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Give your new Discord server a name. Can be anything that Discord allows.
   </p>
-  <figure><img src="/assets/setup/05_name_server.png" alt="Name the Server" /></figure>
+  <figure><img src="/assets/setup/05_name_server.png" alt="Name the Server" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -87,7 +87,7 @@
     You should now have a new Discord server. It should look like the screenshot below.
     For the guide, I called the server ZomBoxGuide.
   </p>
-  <figure><img src="/assets/setup/06_fresh_server.png" alt="Fresh Discord Server" /></figure>
+  <figure><img src="/assets/setup/06_fresh_server.png" alt="Fresh Discord Server" loading="lazy" /></figure>
 </div>
 
 <div class="content" id="createBot">
@@ -102,7 +102,7 @@
     Discord Developer Portal <i class="fa fa-up-right-from-square"></i></a>
     then click the <span class="has-text-weight-bold">New Application</span> button.
   </p>
-  <figure><img src="/assets/setup/07_developers_home.png" alt="Discord Developer Portal" /></figure>
+  <figure><img src="/assets/setup/07_developers_home.png" alt="Discord Developer Portal" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -110,14 +110,14 @@
     Give your application a name. It can be anything that Discord allows.
     For the guide, I called it zombox-demo.
   </p>
-  <figure><img src="/assets/setup/08_name_application.png" alt="Name New App" /></figure>
+  <figure><img src="/assets/setup/08_name_application.png" alt="Name New App" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     You should now have a new Discord application. It should look like the screenshot below.
   </p>
-  <figure><img src="/assets/setup/09_fresh_application.png" alt="Fresh App" /></figure>
+  <figure><img src="/assets/setup/09_fresh_application.png" alt="Fresh App" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -126,21 +126,21 @@
     select the <span class="has-text-weight-bold">Bot</span> section.
     Then click the <span class="has-text-weight-bold">Add Bot</span> button.
   </p>
-  <figure><img src="/assets/setup/10_add_bot.png" alt="Add a Bot" /></figure>
+  <figure><img src="/assets/setup/10_add_bot.png" alt="Add a Bot" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Click the <span class="has-text-weight-bold">Yes, do it!</span> button to confirm adding the bot to the application.
   </p>
-  <figure><img src="/assets/setup/11_accept_new_bot.png" alt="Accept New Bot" /></figure>
+  <figure><img src="/assets/setup/11_accept_new_bot.png" alt="Accept New Bot" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
      You should now have a new Discord bot. It should look like the screenshot below.
   </p>
-  <figure><img src="/assets/setup/12_fresh_bot.png" alt="Fresh Bot" /></figure>
+  <figure><img src="/assets/setup/12_fresh_bot.png" alt="Fresh Bot" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -151,8 +151,8 @@
     switch and turn it ON.
     Then click <span class="has-text-weight-bold">Save Changes</span> button.
   </p>
-  <figure><img src="/assets/setup/13_make_bot_private.png" alt="Make Bot Private" /></figure>
-  <figure><img src="/assets/setup/13_allow_receive_messages.png" alt="Allow Receive Messages" /></figure>
+  <figure><img src="/assets/setup/13_make_bot_private.png" alt="Make Bot Private" loading="lazy" /></figure>
+  <figure><img src="/assets/setup/13_allow_receive_messages.png" alt="Allow Receive Messages" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -164,7 +164,7 @@
     Now on the right panel, in <span class="has-text-weight-bold">SCOPES</span>,
     check the <span class="has-text-weight-bold">bot</span> checkbox.
   </p>
-  <figure><img src="/assets/setup/14_bot_invite_scope.png" alt="Set Bot Scope" /></figure>
+  <figure><img src="/assets/setup/14_bot_invite_scope.png" alt="Set Bot Scope" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -174,14 +174,14 @@
     Now click the <span class="has-text-weight-bold">Copy</span> button
     to copy the generated invite URL.
   </p>
-  <figure><img src="/assets/setup/15_bot_invite_perms.png" alt="Set Bot Perms" /></figure>
+  <figure><img src="/assets/setup/15_bot_invite_perms.png" alt="Set Bot Perms" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Open a new tab in your browser. Paste the URL into the address bar then hit enter.
   </p>
-  <figure><img src="/assets/setup/16_bot_invite_url.png" alt="Invite Bot" /></figure>
+  <figure><img src="/assets/setup/16_bot_invite_url.png" alt="Invite Bot" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -189,21 +189,23 @@
     Choose your Discord server from the <span class="has-text-weight-bold">ADD TO SERVER</span> dropdown list.
     Then click the <span class="has-text-weight-bold">Continue</span> button.
   </p>
-  <figure><img src="/assets/setup/17_bot_invite_choose_server.png" alt="Choose Server for Bot" /></figure>
+  <figure>
+    <img src="/assets/setup/17_bot_invite_choose_server.png" alt="Choose Server for Bot" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Click the <span class="has-text-weight-bold">Authorize</span> button to complete the bot invite.
   </p>
-  <figure><img src="/assets/setup/18_bot_invite_authorize.png" alt="Authorise Bot" /></figure>
+  <figure><img src="/assets/setup/18_bot_invite_authorize.png" alt="Authorise Bot" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Your new bot has now joined your Discord server!
   </p>
-  <figure><img src="/assets/setup/19_bot_invite_authorized.png" alt="Bot Authorised" /></figure>
+  <figure><img src="/assets/setup/19_bot_invite_authorized.png" alt="Bot Authorised" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -212,7 +214,7 @@
     It will be offline, that is expected. If you do not see the member panel on the right,
     hit the people button. It&#39;s just to the left of Search.
   </p>
-  <figure><img src="/assets/setup/20_bot_invite_fresh.png" alt="Bot Invited" /></figure>
+  <figure><img src="/assets/setup/20_bot_invite_fresh.png" alt="Bot Invited" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -224,7 +226,7 @@
   <p>
     To enable, open <span class="has-text-weight-bold">User Settings</span> with the cog button.
   </p>
-  <figure><img src="/assets/setup/21_open_settings.png" alt="Open Discord Settings" /></figure>
+  <figure><img src="/assets/setup/21_open_settings.png" alt="Open Discord Settings" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -233,7 +235,7 @@
     Then switch on <span class="has-text-weight-bold">Developer Mode</span>.
     Now click the <span class="has-text-weight-bold">ESC</span> button at the top right to close Settings.
   </p>
-  <figure><img src="/assets/setup/22_enable_developer_mode.png" alt="Enable Developer Mode" /></figure>
+  <figure><img src="/assets/setup/22_enable_developer_mode.png" alt="Enable Developer Mode" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -241,7 +243,7 @@
     With Developer Mode enabled. If you right-click on a Channel, there is now a menu option to
     <span class="has-text-weight-bold">Copy ID</span>. This will be useful later on.
   </p>
-  <figure><img src="/assets/setup/23_copy_channel_id.png" alt="Copy Channel ID" /></figure>
+  <figure><img src="/assets/setup/23_copy_channel_id.png" alt="Copy Channel ID" loading="lazy" /></figure>
 </div>
 
 <div class="content" id="getBotToken">
@@ -251,21 +253,21 @@
     the <span class="has-text-weight-bold">Reset Token</span> button.
     This will reset and generate a new token.
   </p>
-  <figure><img src="/assets/setup/24_reset_bot_token.png" alt="Reset Bot Token" /></figure>
+  <figure><img src="/assets/setup/24_reset_bot_token.png" alt="Reset Bot Token" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Click the <span class="has-text-weight-bold">Yes, do it!</span> button to confirm.
   </p>
-  <figure><img src="/assets/setup/25_accept_reset_bot_token.png" alt="Accept Reset Bot Token" /></figure>
+  <figure><img src="/assets/setup/25_accept_reset_bot_token.png" alt="Accept Reset Bot Token" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Now click the <span class="has-text-weight-bold">Copy</span> button to copy the new token.
   </p>
-  <figure><img src="/assets/setup/26_copy_bot_token.png" alt="Copy Bot Token" /></figure>
+  <figure><img src="/assets/setup/26_copy_bot_token.png" alt="Copy Bot Token" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -307,7 +309,7 @@
     Congratulations making it this far! Note that the Discord bot config and controls can be found on the
     home page of this webapp. No need to come back here to make config changes or stop &amp; start the bot.
   </p>
-  <figure><img src="/assets/setup/29_bot_logged_in.png" alt="Bot Logged In" /></figure>
+  <figure><img src="/assets/setup/29_bot_logged_in.png" alt="Bot Logged In" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -316,7 +318,7 @@
     First try the help command as shown below. The bot should reply with available commands.
   </p>
   <pre class="pre is-thinner">!help</pre>
-  <figure><img src="/assets/setup/30_help_system.png" alt="System Help" /></figure>
+  <figure><img src="/assets/setup/30_help_system.png" alt="System Help" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -325,7 +327,7 @@
     The response shows none are found because no instance has been created yet.
   </p>
   <pre class="pre is-thinner">!instances</pre>
-  <figure><img src="/assets/setup/31_instances_empty.png" alt="Instances Empty" /></figure>
+  <figure><img src="/assets/setup/31_instances_empty.png" alt="Instances Empty" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -334,7 +336,9 @@
     This is expected, you aren&#39;t authorised to create an instance yet. Next steps will remedy this.
   </p>
   <pre class="pre is-thinner">!create myserver projectzomboid</pre>
-  <figure><img src="/assets/setup/32_create_instance_locked.png" alt="Create Instances Locked" /></figure>
+  <figure>
+    <img src="/assets/setup/32_create_instance_locked.png" alt="Create Instances Locked" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -343,14 +347,14 @@
     Find <span class="has-text-weight-bold">Server Settings</span>
     then click on <span class="has-text-weight-bold">Roles</span>.
   </p>
-  <figure><img src="/assets/setup/33_open_roles.png" alt="Open Roles" /></figure>
+  <figure><img src="/assets/setup/33_open_roles.png" alt="Open Roles" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Click the <span class="has-text-weight-bold">Create Role</span> button.
   </p>
-  <figure><img src="/assets/setup/34_create_role_new.png" alt="Create New Role" /></figure>
+  <figure><img src="/assets/setup/34_create_role_new.png" alt="Create New Role" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -360,14 +364,14 @@
     Now <span class="has-text-weight-bold">Save Changes</span>
     then select the <span class="has-text-weight-bold">Manage Members</span> tab.
   </p>
-  <figure><img src="/assets/setup/35_create_pzadmin_role.png" alt="Create PZAdmin Role" /></figure>
+  <figure><img src="/assets/setup/35_create_pzadmin_role.png" alt="Create PZAdmin Role" loading="lazy" /></figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
     Click the <span class="has-text-weight-bold">Add Members</span> button.
   </p>
-  <figure><img src="/assets/setup/36_add_member.png" alt="Add Members to Role" /></figure>
+  <figure><img src="/assets/setup/36_add_member.png" alt="Add Members to Role" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -378,7 +382,7 @@
     and make changes as you want. When done click the <span class="has-text-weight-bold">ESC</span>
     button at the top right to close Settings.
   </p>
-  <figure><img src="/assets/setup/37_choose_member.png" alt="Choose Members for Role" /></figure>
+  <figure><img src="/assets/setup/37_choose_member.png" alt="Choose Members for Role" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -391,13 +395,15 @@
     So this instance will be for a Project Zomboid server.
   </p>
   <pre class="pre is-thinner">!create myserver projectzomboid</pre>
-  <figure><img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
+  <figure>
+    <img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" loading="lazy" />
+  </figure>
   <p>
     After creation, you can try the instances command again to see the new instance.
     The arrow will mark the current selected instance.
   </p>
   <pre class="pre is-thinner">!instances</pre>
-  <figure><img src="/assets/setup/38_list_new_instance.png" alt="View New Instance" /></figure>
+  <figure><img src="/assets/setup/38_list_new_instance.png" alt="View New Instance" loading="lazy" /></figure>
 </div>
 
 <div class="content">
