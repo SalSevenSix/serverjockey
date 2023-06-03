@@ -34,7 +34,7 @@
     <div class="columns is-centered">
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
-          <figure>
+          <figure class="github">
             <img src="/assets/icons/GitHub_Logo.png" alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>
         </a>
@@ -42,3 +42,11 @@
     </div>
   </div>
 </div>
+
+
+<style>
+  .github {
+    background-color: #F5F5F5;
+    border-radius: 1em;
+  }
+</style>

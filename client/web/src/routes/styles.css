@@ -1,15 +1,29 @@
+/* General site changes */
+
 body {
   background-color: #FFFDF8;
   counter-reset: section;
+}
+
+a[target="_blank"] {
+  font-weight: bold;
 }
 
 .navbar {
   border: 1px solid #DBDBDB;
 }
 
-a[target="_blank"] {
-  font-weight: bold;
+.table {
+  background-color: transparent;
+  line-height: 1;
 }
+
+figure.box {
+  background-color: #F5F5F5;
+}
+
+
+/* Utilities */
 
 .step-title {
   font-weight: bold;
@@ -25,11 +39,6 @@ pre.is-thinner {
   margin: 0em 2.3em;
 }
 
-.table {
-  background-color: transparent;
-  line-height: 1;
-}
-
 table.is-thinner {
   margin: 0em 1.5em;
   width: 90%;
@@ -39,12 +48,11 @@ table.is-thinner {
   word-break: break-all;
 }
 
+
+/* Specific cases */
+
 svg.rubiks {
   color: #FFFDF8;
-}
-
-figure.box {
-  background-color: #F5F5F5;
 }
 
 .clyde {
