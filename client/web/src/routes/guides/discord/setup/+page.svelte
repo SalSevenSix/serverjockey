@@ -6,6 +6,7 @@
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
+  import Clyde from '$lib/Clyde.svelte';
 
   // used by ServerStatusStore
   instance.set({ url: baseurl + '/instances/serverlink' });
@@ -14,11 +15,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter">
-    <figure class="pl-5 pr-5 pt-5">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36">
-        <path class="clyde" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-      </svg>
-    </figure>
+    <figure class="pl-5 pr-5 pt-5"><Clyde /></figure>
   </div>
   <div class="column content">
     <h2 class="title is-3 mt-2">Discord Bot Setup</h2>
@@ -26,8 +23,8 @@
       The Discord bot, also called <span class="has-text-weight-bold">ServerLink</span>,
       allows you to manage your servers as an alternative to the webapp.
       Most features are supported, with a few extra unique features as well.
-      In order to use the bot you will need to register it on Discord. No coding is required,
-      that is all in ServerJockey. Just like a user account, the bot needs to be registered.
+      In order to use the bot you will need to register it on Discord. Just like a user account,
+      the bot needs to be registered too. No coding is required, that is all in ServerJockey.
     </p>
     <p>
       If you are new to Discord
@@ -65,7 +62,8 @@
   <p><span class="step-title"></span>
     Select the <span class="has-text-weight-bold">Create My Own</span> option.
   </p>
-  <figure class="image"><img src="/assets/setup/03_create_server_options.png" alt="Create Server Options" loading="lazy" /></figure>
+  <figure class="image">
+    <img src="/assets/setup/03_create_server_options.png" alt="Create Server Options" loading="lazy" /></figure>
 </div>
 
 <div class="content">
@@ -111,7 +109,7 @@
 <div class="content">
   <p><span class="step-title"></span>
     Give your application a name. It can be anything that Discord allows.
-    For the guide, I called it zombox-demo.
+    For the guide, I called it <span class="has-text-weight-bold">zombox-demo</span>.
   </p>
   <figure class="image"><img src="/assets/setup/08_name_application.png" alt="Name New App" loading="lazy" /></figure>
 </div>
@@ -125,7 +123,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    In the <span class="has-text-weight-bold">SETTINGS</span> on the left panel,
+    In <span class="has-text-weight-bold">SETTINGS</span> on the left panel,
     select the <span class="has-text-weight-bold">Bot</span> section.
     Then click the <span class="has-text-weight-bold">Add Bot</span> button.
   </p>
@@ -184,7 +182,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Open a new tab in your browser. Paste the URL into the address bar then hit enter.
+    Open a new tab in your browser. Paste the URL into the address bar then hit Enter.
   </p>
   <figure class="image"><img src="/assets/setup/16_bot_invite_url.png" alt="Invite Bot" loading="lazy" /></figure>
 </div>
@@ -369,7 +367,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Enter a role name of <span class="is-family-monospace">pzadmin</span> as specified
+    Enter a role name of <span class="has-text-weight-bold">pzadmin</span> as specified
     in the <span class="has-text-weight-bold">Admin Role</span> in the bot config.
     Now <span class="has-text-weight-bold">Save Changes</span>
     then select the <span class="has-text-weight-bold">Manage Members</span> tab.
@@ -399,11 +397,11 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now try creating an instance again. For this guide I called the instance
-    <span class="has-text-weight-bold">myserver</span>. You can give your instance a different name,
-    but it must be lower case characters, numbers, dashes, underscores, no other special characters.
-    The second command value is <span class="has-text-weight-bold">projectzomboid</span>.
-    This is the module name, which is a supported game server. In this case, Project Zomboid.
+    Now try creating an instance again.
+    For this guide the instance is called <span class="has-text-weight-bold">myserver</span>.
+    The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
+    The second value is <span class="has-text-weight-bold">projectzomboid</span>.
+    This is the module, which is a supported game server. In this case, Project Zomboid.
     So this instance will be for a Project Zomboid server.
   </p>
   <pre class="pre is-thinner">!create myserver projectzomboid</pre>
@@ -423,9 +421,9 @@
   <hr />
   <h4 class="title is-5">So what next?</h4>
   <p>
-    The Discord bot is setup and working! So this is the end of this guide. However if you wish to continue
-    setting up and starting a Project Zomboid server using the bot, go to the
-    <a href="/guides/servers/projectzomboid">Project Zomboid guide</a>.
+    The Discord bot is setup and working! So that is the end of this guide.
+    However if you want to learn how to use the bot to setup, configure and start a game server.
+    Go to the <a href="/guides/discord/usage">Discord bot usage guide</a>.
   </p>
 </div>
 

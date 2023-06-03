@@ -41,7 +41,7 @@
 <div class="block">
   {#if !noHints && !botToken}
     <div class="content">
-      <p>For help setting up the ServerLink discord bot, please see <a href="/guides/discord">the guide.</a></p>
+      <p>For help setting up the ServerLink discord bot, please see <a href="/guides/discord/setup">the guide</a>.</p>
     </div>
   {/if}
   <div class="field">

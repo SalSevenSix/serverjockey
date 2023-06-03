@@ -1,4 +1,3 @@
-
 <div class="columns">
   <div class="column is-one-third">
     <figure><img src="/assets/icons/box.svg" alt="Setup Box" /></figure>
@@ -10,7 +9,7 @@
       <span class="has-text-weight-bold">ServerJockey</span>. Congratulations!
     </p>
     <p>
-      The guides section will provide information on how to <a href="/guides/discord">setup the Discord bot</a>.
+      The guides section will provide information on how to <a href="/guides/discord/setup">setup the Discord bot</a>.
       As well as help on how to setup, configure and start supported game servers, and more.
     </p>
   </div>
@@ -22,17 +21,29 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord">Discord Bot Setup</a>
+    <a href="/guides/discord/setup">Discord Bot Setup</a>
   </div>
   <div class="column content">
     <p>
       This guide will show you how to setup a Discord bot. You can use the bot on Discord
-      to manage your servers as an alternative to the webapp. Most features are supported,
+      to manage your servers as an alternative to this webapp. Most features are supported,
       with a few extra unique features as well.
     </p>
     <p>
       The instructions are detailed. If you are unfamiliar with Discord, the guide also includes instructions
       on where to register a Discord account and how to start a new Discord server (if needed).
+    </p>
+  </div>
+</div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href="/guides/discord/usage">Discord Bot Usage</a>
+  </div>
+  <div class="column content">
+    <p>
+      This guide will show you how to use the Discord bot to create, configure and start
+      a Project Zomboid server as an example. The same process can be used on other supported
+      game servers too. Please make sure the bot is setup and working first!
     </p>
   </div>
 </div>
@@ -54,7 +65,7 @@
 </div>
 
 <div class="columns is-multiline">
-  <div class="column is-one-quarter-desktop is-half-tablet">
+  <div class="column is-one-quarter-desktop is-one-third-tablet">
     <a href="/guides/servers/projectzomboid">
       <div class="card">
         <header class="card-header card-header-title">Project Zomboid</header>
@@ -66,7 +77,7 @@
       </div>
     </a>
   </div>
-  <div class="column is-one-quarter-desktop is-half-tablet">
+  <div class="column is-one-quarter-desktop is-one-third-tablet">
     <a href="/guides/servers/factorio">
       <div class="card">
         <header class="card-header card-header-title">Factorio</header>
@@ -78,7 +89,7 @@
       </div>
     </a>
   </div>
-  <div class="column is-one-quarter-desktop is-half-tablet">
+  <div class="column is-one-quarter-desktop is-one-third-tablet">
     <a href="/guides/servers/sevendaystodie">
       <div class="card">
         <header class="card-header card-header-title">7 Days to Die</header>
@@ -90,7 +101,7 @@
       </div>
     </a>
   </div>
-  <div class="column is-one-quarter-desktop is-half-tablet">
+  <div class="column is-one-quarter-desktop is-one-third-tablet">
     <a href="/guides/servers/starbound">
       <div class="card">
         <header class="card-header card-header-title">Starbound</header>
@@ -102,7 +113,7 @@
       </div>
     </a>
   </div>
-  <div class="column is-one-quarter-desktop is-half-tablet">
+  <div class="column is-one-quarter-desktop is-one-third-tablet">
     <a href="/guides/servers/unturned">
       <div class="card">
         <header class="card-header card-header-title">Unturned</header>

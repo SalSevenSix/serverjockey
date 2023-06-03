@@ -132,7 +132,7 @@
         <ConfigFile name="Sandbox Settings" path="/config/sandbox" />
         <ConfigFile name="Spawn Regions" path="/config/spawnregions" />
         <ConfigFile name="Spawn Points" path="/config/spawnpoints" />
-        <ConfigFile name="JRE Settings" path="/config/jvm">
+        <ConfigFile name="JVM Settings" path="/config/jvm">
           <p>
             Change -Xmx to set the memory available to the server.
             e.g. &quot;-Xmx8g&quot; for 8Gb memory.

@@ -24,7 +24,7 @@
     {#if $securityToken}
       <Navbar />
       <slot />
-      <br /><br /><hr />
+      <br /><hr /><br />
       <div style="margin-bottom: 10%;"></div>
     {/if}
   </div>

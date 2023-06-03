@@ -14,7 +14,7 @@
       <span class="has-text-weight-bold">Project Zomboid</span> and other supported games. It is designed
       to be an easy to use self-hosting option for multiplayer servers. Allowing you to create and remotely
       manage your servers. Both this webapp and Discord can be used to manage the servers. However to
-      use Discord you will need to <a href="/guides/discord">setup a discord bot</a> first.
+      use Discord you will need to <a href="/guides/discord/setup">setup a discord bot</a> first.
     </p>
     <p>
       If your like using this system, please consider supporting me on Ko-fi.
