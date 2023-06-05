@@ -12,7 +12,9 @@
     Go to the <a href="/servers" target="_blank">Instances <i class="fa fa-up-right-from-square"></i></a> page.
     If opened in a new tab, you will need to enter the login token again.
   </p>
-  <figure class="box"><img src="/assets/setup/gg_goto_instances.png" alt="Go to instances page" /></figure>
+  <figure class="image max-1024 is-bordered">
+    <img src="/assets/setup/gg_goto_instances.png" alt="Go to instances page" />
+  </figure>
 </div>
 
 <div class="content">
@@ -23,11 +25,9 @@
     special characters except dashes and underscores.
     Click the <span class="has-text-weight-bold">Create</span> button to create the new instance.
   </p>
-  <div class="columns is-centered"><div class="column is-half">
-    <figure class="box">
-      <img src="/assets/setup/gg_new_instance.png" alt="Create a new instance" loading="lazy" />
-    </figure>
-  </div></div>
+  <figure class="image max-400 is-bordered">
+    <img src="/assets/setup/gg_new_instance.png" alt="Create a new instance" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -35,11 +35,9 @@
     In the <span class="has-text-weight-bold">Instances</span> list on the same page you should find
     the new instance your created. View it now using the open folder button.
   </p>
-  <div class="columns is-centered"><div class="column is-two-thirds">
-    <figure class="box">
-      <img src="/assets/setup/gg_view_instance.png" alt="Go to new instance" loading="lazy" />
-    </figure>
-  </div></div>
+  <figure class="image max-600 is-bordered">
+    <img src="/assets/setup/gg_view_instance.png" alt="Go to new instance" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -52,7 +50,7 @@
     Expand it using the black button on the right.
     Now click the <span class="has-text-weight-bold">Install Runtime</span> button.
   </p>
-  <figure class="box">
+  <figure class="image max-1024 is-bordered">
     <img src="/assets/setup/gg_install_start.png" alt="Start install runtime" loading="lazy" />
   </figure>
   <p>
@@ -60,7 +58,7 @@
     You can track the progress of the install process and see the end result in the log.
     Once completed successfully, you will be able to start the game server.
   </p>
-  <figure class="box">
+  <figure class="image max-1024 is-bordered">
     <img src="/assets/setup/gg_install_log.png" alt="View install logging" loading="lazy" />
   </figure>
 </div>

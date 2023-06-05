@@ -23,7 +23,7 @@
     { 'key': 'wipe-world-backups', 'name': 'World Backups',
       'desc': 'Delete all the map backups created by the Project Zomboid server.' },
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
-      'desc': 'Reset Save, Player DB and Config.' }];
+      'desc': 'Reset all of the above.' }];
 
   let consoleCommands = {
     'world': {

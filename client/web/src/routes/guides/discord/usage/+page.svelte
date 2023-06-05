@@ -37,8 +37,9 @@
     So this instance will be for a Project Zomboid server.
   </p>
   <pre class="pre is-thinner">!create myserver projectzomboid</pre>
-  <figure class="image">
-    <img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" />
+  </figure>
 </div>
 
 <div class="content" id="setupWithBotTwo">
@@ -47,7 +48,9 @@
     for that type (module) of instance using the help command.
   </p>
   <pre class="pre is-thinner">!help</pre>
-  <figure class="image"><img src="/assets/setup/39_help_pz.png" alt="Help PZ" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/39_help_pz.png" alt="Help PZ" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -59,10 +62,10 @@
     the server was installed without issue.
   </p>
   <pre class="pre is-thinner">!deployment install-runtime</pre>
-  <figure class="image">
+  <figure class="image max-800">
     <img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" loading="lazy" />
   </figure>
-  <figure class="image">
+  <figure class="image max-800">
     <img src="/assets/setup/40_deploy_runtime_success.png" alt="Deploy Runtime Success" loading="lazy" />
   </figure>
 </div>
@@ -73,10 +76,12 @@
     an hourglass emoji is shown then replaced with a green tick when the server has fully started.
   </p>
   <pre class="pre is-thinner">!server start</pre>
-  <figure class="image">
-    <img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" loading="lazy" /></figure>
-  <figure class="image">
-    <img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" loading="lazy" />
+  </figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -85,8 +90,9 @@
     Now that the server is up, the server version and connection details are shown.
   </p>
   <pre class="pre is-thinner">!server</pre>
-  <figure class="image">
-    <img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -96,7 +102,9 @@
     So stop the server with the following command.
   </p>
   <pre class="pre is-thinner">!server stop</pre>
-  <figure class="image"><img src="/assets/setup/43_server_stop.png" alt="Server Stop" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/43_server_stop.png" alt="Server Stop" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -106,7 +114,9 @@
     Save this file to disk somewhere to edit it.
   </p>
   <pre class="pre is-thinner">!getconfig ini</pre>
-  <figure class="image"><img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -125,7 +135,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Once again, the bot will react with a green tick emoji to show that the command was successful.
   </p>
   <pre class="pre is-thinner">!setconfig ini</pre>
-  <figure class="image"><img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -134,7 +146,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     using the default configuration. You can delete the world with the following command.
   </p>
   <pre class="pre is-thinner">!deployment wipe-world-save</pre>
-  <figure class="image"><img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -144,12 +158,15 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Log Channel ID set in the discord bot configuration, you should see a login event message in that channel.
   </p>
   <pre class="pre is-thinner">!server start</pre>
-  <figure class="image">
-    <img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" loading="lazy" /></figure>
-  <figure class="image">
-    <img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" loading="lazy" /></figure>
-  <figure class="image">
-    <img src="/assets/setup/48_login_event.png" alt="Login Event" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" loading="lazy" />
+  </figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" loading="lazy" />
+  </figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/48_login_event.png" alt="Login Event" loading="lazy" />
+  </figure>
 </div>
 
 <div class="content">
@@ -161,19 +178,15 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
   </p>
   <pre class="pre is-thinner">!world broadcast Hello Everyone</pre>
   <pre class="pre is-thinner">!player Demo give-item Base Axe 2</pre>
-  <figure class="image">
-    <img src="/assets/setup/49_console_commands.png" alt="Console Commands" loading="lazy" /></figure>
-  <figure class="image">
-    <img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" loading="lazy" /></figure>
-  <figure class="image">
-    <img src="/assets/setup/49_give_item.png" alt="Give Item" loading="lazy" /></figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/49_console_commands.png" alt="Console Commands" loading="lazy" />
+  </figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" loading="lazy" />
+  </figure>
+  <figure class="image max-800">
+    <img src="/assets/setup/49_give_item.png" alt="Give Item" loading="lazy" />
+  </figure>
 </div>
 
 <BackToTop />
-
-
-<style>
-  img {
-    max-width: 800px;
-  }
-</style>

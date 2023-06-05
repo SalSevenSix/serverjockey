@@ -18,12 +18,29 @@ a[target="_blank"] {
   line-height: 1;
 }
 
-figure.box {
-  background-color: #F5F5F5;
-}
-
 
 /* Utilities */
+
+figure.is-bordered img {
+  border: 8px solid #DBDBDB;
+  border-radius: 8px;
+}
+
+figure.max-1024 img {
+  max-width: 1024px;
+}
+
+figure.max-800 img {
+  max-width: 800px;
+}
+
+figure.max-600 img {
+  max-width: 600px;
+}
+
+figure.max-400 img {
+  max-width: 400px;
+}
 
 .step-title {
   font-weight: bold;

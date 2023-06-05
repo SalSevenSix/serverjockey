@@ -5,7 +5,7 @@
     using the black button on the right. Edit and save the configuration as desired.
     Make sure changes are saved before closing the section, otherwise the changes will be lost!
   </p>
-  <figure class="box">
+  <figure class="image max-1024 is-bordered">
     <img src="/assets/setup/gg_configuration.png" alt="View and edit config" loading="lazy" />
   </figure>
 </div>
@@ -33,10 +33,14 @@
   </p>
   <div class="columns">
     <div class="column">
-      <figure class="box"><img src="/assets/setup/gg_set_auto.png" alt="Set auto setting" loading="lazy" /></figure>
+      <figure class="image max-400 is-bordered">
+        <img src="/assets/setup/gg_set_auto.png" alt="Set auto setting" loading="lazy" />
+      </figure>
     </div>
     <div class="column">
-      <figure class="box"><img src="/assets/setup/gg_server_start.png" alt="Start server" loading="lazy" /></figure>
+      <figure class="image max-400 is-bordered">
+        <img src="/assets/setup/gg_server_start.png" alt="Start server" loading="lazy" />
+      </figure>
     </div>
   </div>
 </div>
