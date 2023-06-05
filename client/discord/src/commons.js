@@ -45,7 +45,7 @@ exports.server = function($) {
     $.httptool.doGet('/server', function(body) {
       let result = '```\nServer ' + $.instance + ' is ';
       if (!body.running) {
-        result += 'DOWN```';
+        result += 'DOWN\n```';
         return result;
       }
       result += body.state;
@@ -62,7 +62,7 @@ exports.server = function($) {
   }
   let cmd = $.data[0];
   if (cmd === 'delete') {  // Blocking this. Webapp and CLI only.
-    message.react('⛔');
+    $.message.react('⛔');
     return;
   }
   $.httptool.doPost('/server/' + cmd, { respond: true }, function(message, json) {
@@ -114,7 +114,7 @@ exports.auto = function($) {
 exports.log = function($) {
   $.httptool.doGet('/log/tail', function(body) {
     if (!body) {
-      $.message.channel.send('```No log lines found```');
+      $.message.channel.send('```\nNo log lines found\n```');
       return;
     }
     let fname = 'log-' + $.message.id + '.text';
