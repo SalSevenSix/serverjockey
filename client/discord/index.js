@@ -12,7 +12,10 @@ function initialise() {
   logger.info('*** START ServerLink Bot ***');
   logger.info('Version: 0.1.0');
   logger.info('Initialised with config...');
-  logger.raw(config);
+  logger.raw(JSON.stringify(config, null, 2).split('\n').slice(1, -1).join('\n'));
+  if (config.SERVER_URL.startsWith('https')) {
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+  }
   return config;
 }
 
@@ -77,9 +80,7 @@ function shutdown() {
 
 
 // MAIN
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 require('events').EventEmitter.defaultMaxListeners = 20;
-
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const logger = require('./src/logger.js');
 const util = require('./src/util.js');

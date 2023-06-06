@@ -54,10 +54,14 @@ exports.sendHelp = function($, helpText) {
     return;
   }
   let query = $.data.join('').replaceAll('-', '');
-  if (helpText.hasOwnProperty(query)) {
-    channel.send(helpText[query].join('\n'));
-  } else {
+  if (!helpText.hasOwnProperty(query)) {
     channel.send('No more help available.');
+    return;
+  }
+  if (util.isString(helpText[query])) {
+    $.httptool.doGet(helpText[query], function(body) { return '```\n' + body + '\n```'; });
+  } else {
+    channel.send(helpText[query].join('\n'));
   }
 }
 

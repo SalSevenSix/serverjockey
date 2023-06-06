@@ -43,7 +43,7 @@ exports.Service = class Service {
       instances[instance].server.startup(context, channel, instance, instances[instance].url);
     }
     logger.info('Instances...');
-    logger.raw(self.getInstancesText());
+    logger.raw(self.getInstancesText().split('\n').slice(1, -1).join('\n'));
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
       if (data.event === 'created') {
         data.instance.url = baseurl + '/instances/' + data.instance.identity;

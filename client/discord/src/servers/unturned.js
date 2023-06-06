@@ -24,7 +24,8 @@ const helpText = {
     'deployment wipe-world-all    : Delete game map and config',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime {beta} : Install game server'
-  ]
+  ],
+  send: '/console/help'
 };
 
 
