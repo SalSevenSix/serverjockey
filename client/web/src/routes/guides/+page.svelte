@@ -1,8 +1,8 @@
 <div class="columns">
   <div class="column is-one-third">
-    <figure><img src="/assets/icons/box.svg" alt="Setup Box" /></figure>
+    <figure class="image"><img src="/assets/icons/box.svg" alt="Setup Box" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">Guides</h2>
     <p>
       If you are reading this, you have successfully installed and started
@@ -23,7 +23,7 @@
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/discord/setup">Discord Bot Setup</a>
   </div>
-  <div class="column content">
+  <div class="column is-four-fifths content">
     <p>
       This guide will show you how to setup a Discord bot. You can use the bot on Discord
       to manage your servers as an alternative to this webapp. Most features are supported,
@@ -39,7 +39,7 @@
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/discord/usage">Discord Bot Usage</a>
   </div>
-  <div class="column content">
+  <div class="column is-four-fifths content">
     <p>
       This guide will show you how to use the Discord bot to create, configure and start
       a Project Zomboid server as an example. The same process can be used on other supported
@@ -51,7 +51,7 @@
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/virtualbox">VirtualBox</a>
   </div>
-  <div class="column content">
+  <div class="column is-four-fifths content">
     <p>
       ServerJockey is available pre-installed as a VirtualBox Appliance. If you are using this option,
       this guide provides information on how to configure important VirtualBox settings.

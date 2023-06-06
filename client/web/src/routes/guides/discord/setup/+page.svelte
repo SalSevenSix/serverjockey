@@ -17,7 +17,7 @@
   <div class="column is-one-quarter">
     <figure class="pl-5 pr-5 pt-5"><Clyde /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Discord Bot Setup</h2>
     <p>
       The Discord bot, also called <span class="has-text-weight-bold">ServerLink</span>,

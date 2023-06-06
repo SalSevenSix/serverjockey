@@ -10,7 +10,7 @@
   <div class="column is-one-quarter">
     <figure class="image pt-3"><img src="/assets/icons/7d2d_icon.png" alt="7d2d icon" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">7 Days to Die</h2>
     <p>
       <a href="https://7daystodie.com" target="_blank">7 Days to Die <i class="fa fa-up-right-from-square"></i></a>

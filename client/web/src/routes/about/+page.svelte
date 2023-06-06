@@ -7,7 +7,7 @@
   <div class="column is-one-third">
     <div class="pl-5 pr-6"><RubiksCube dazzle /></div>
   </div>
-  <div class="column content is-two-thirds">
+  <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">About</h2>
     <p>
       <span class="has-text-weight-bold">ServerJockey</span> is a game server management system for
@@ -22,7 +22,7 @@
     <div class="columns is-centered">
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
-          <figure>
+          <figure class="image">
             <img src="/assets/icons/KoFi_button_black.png" alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
           </figure>
         </a>
@@ -34,7 +34,7 @@
     <div class="columns is-centered">
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
-          <figure class="github">
+          <figure class="image github">
             <img src="/assets/icons/GitHub_Logo.png" alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>
         </a>

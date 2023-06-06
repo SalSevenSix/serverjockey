@@ -10,12 +10,12 @@
   <div class="column is-one-quarter">
     <figure class="image pt-3"><img src="/assets/icons/ft_icon.jpg" alt="Factorio icon" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Factorio</h2>
     <p>
       <a href="https://www.factorio.com" target="_blank">Factorio <i class="fa fa-up-right-from-square"></i></a>
-      is a game where you build, maintain and protect a factory. This involves mining resources, researching technologies,
-      building infrastructure, automating production, and fighting enemies.
+      is a game where you build, maintain and protect a factory. This involves mining resources,
+      researching technologies, building infrastructure, automating production, and fighting enemies.
     </p>
     <p>
       This guide will show you how to install, configure and run a Factorio server using this Webapp.

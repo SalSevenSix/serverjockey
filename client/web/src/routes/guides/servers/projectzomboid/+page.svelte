@@ -10,7 +10,7 @@
   <div class="column is-one-quarter">
     <figure class="image pt-3"><img src="/assets/icons/pz_icon.jpg" alt="Project Zomboid icon" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Project Zomboid</h2>
     <p>
       <a href="https://projectzomboid.com" target="_blank">

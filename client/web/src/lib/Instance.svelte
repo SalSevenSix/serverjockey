@@ -20,7 +20,7 @@
     <slot />
   </ServerStatusStore>
 {:else}
-  <div class="block">
+  <div class="content">
     <p>No instance set</p>
   </div>
 {/if}

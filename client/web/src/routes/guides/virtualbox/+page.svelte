@@ -7,7 +7,7 @@
   <div class="column is-one-quarter">
     <figure class="image pl-3 pt-2"><img src="/assets/icons/Virtualbox_logo.png" alt="Virtualbox logo" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">VirtualBox</h2>
     <p>
       <a href="https://www.virtualbox.org" target="_blank">VirtualBox <i class="fa fa-up-right-from-square"></i></a>

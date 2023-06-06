@@ -11,14 +11,18 @@
   <table class="table">
     <tbody>
       <tr><td class="has-text-weight-bold">State</td><td>
-        {#if $serverStatus.running}
-          <i class="fa fa-toggle-on ss-running fa-lg"></i>
+        {#if $serverStatus.state}
+          {#if $serverStatus.running}
+            <i class="fa fa-toggle-on ss-running fa-lg"></i>
+          {:else}
+            <i class="fa {$serverStatus.state === 'MAINTENANCE' ? 'fa-toggle-on ss-maint' : 'fa-toggle-off'} fa-lg"></i>
+          {/if}
+          &nbsp;{$serverStatus.state}
+          {#if $serverStatus.state === 'STARTED' && $serverStatus.uptime}
+            ({humanDuration($serverStatus.uptime)})
+          {/if}
         {:else}
-          <i class="fa {$serverStatus.state === 'MAINTENANCE' ? 'fa-toggle-on ss-maint' : 'fa-toggle-off'} fa-lg"></i>
-        {/if}
-        &nbsp;{$serverStatus.state}
-        {#if $serverStatus.state === 'STARTED' && $serverStatus.uptime}
-          ({humanDuration($serverStatus.uptime)})
+          <i class="fa fa-toggle-off fa-lg"></i>&nbsp;&nbsp;...
         {/if}
       </td></tr>
       {#if !stateOnly}

@@ -11,7 +11,7 @@
   <div class="column is-one-quarter">
     <figure class="image pt-3"><img src="/assets/icons/ut_icon.jpg" alt="Unturned icon" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Unturned</h2>
     <p>
       <a href="https://smartlydressedgames.com" target="_blank">Unturned <i class="fa fa-up-right-from-square"></i></a>

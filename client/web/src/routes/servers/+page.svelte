@@ -8,7 +8,7 @@
   <div class="column is-two-thirds">
     <InstanceList />
   </div>
-  <div class="column">
+  <div class="column is-one-third">
     <CreateInstance />
   </div>
 </div>

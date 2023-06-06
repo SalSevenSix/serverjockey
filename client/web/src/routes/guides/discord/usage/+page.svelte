@@ -8,7 +8,7 @@
   <div class="column is-one-quarter">
     <figure class="pl-5 pr-5 pt-5"><Clyde /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Discord Bot Usage</h2>
     <p>
       This guide covers installing, configuring and starting a Project Zomboid server using Discord.

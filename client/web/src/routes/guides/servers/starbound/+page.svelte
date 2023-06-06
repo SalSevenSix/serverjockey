@@ -11,7 +11,7 @@
   <div class="column is-one-quarter">
     <figure class="image pt-3"><img src="/assets/icons/sb_icon.jpg" alt="Starbound icon" /></figure>
   </div>
-  <div class="column content">
+  <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Starbound</h2>
     <p>
       <a href="https://playstarbound.com" target="_blank">Starbound <i class="fa fa-up-right-from-square"></i></a>
