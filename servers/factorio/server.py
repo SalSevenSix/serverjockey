@@ -5,7 +5,7 @@ from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
 from core.common import playerstore, interceptors
-from servers.factorio import deployment as dep, messaging as msg
+from servers.factorio import deployment as dep, messaging as msg, console as con
 
 
 class Server(svrabc.Server):
@@ -19,9 +19,11 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         await msg.initialise(self._context)
+        await con.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
+        con.resources(self._context, resource)
         self._deployment.resources(resource)
         r = httprsc.ResourceBuilder(resource)
         r.reg('m', interceptors.block_maintenance_only(self._context))

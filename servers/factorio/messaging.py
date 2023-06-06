@@ -3,7 +3,7 @@ from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
-from core.common import playerstore
+from core.common import playerstore, rconsvc
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -16,6 +16,7 @@ FILTER_INSTALL_DONE = msgftr.NameIs(INSTALL_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
+    rconsvc.RconService.FILTER_OUTPUT,
     msglog.LoggingPublisher.FILTER_ALL_LEVELS,
     FILTER_DEPLOYMENT_MSG)
 MAINTENANCE_STATE_FILTER = msgftr.Or(FILTER_INSTALL_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)

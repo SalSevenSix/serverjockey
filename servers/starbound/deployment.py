@@ -82,7 +82,7 @@ class Deployment:
         if not port:
             port = 21026
         if not password:
-            password = util.generate_token(8)
+            password = util.generate_token(10)
         rconsvc.RconService.set_config(self._mailer, self, port, password)
         config['rconServerPort'], config['rconServerPassword'] = port, password
         config['runRconServer'] = True

@@ -5,7 +5,7 @@ from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
-from core.common import interceptors
+from core.common import interceptors, rconsvc
 from servers.factorio import messaging as msg
 
 
@@ -102,12 +102,17 @@ class Deployment:
     async def new_server_process(self) -> proch.ServerProcess:
         cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_settings))
         server = proch.ServerProcess(self._mailer, self._executable)
-        if cmdargs['port']:
-            server.append_arg('--port').append_arg(cmdargs['port'])
-        if cmdargs['rcon-port']:
-            server.append_arg('--rcon-port').append_arg(cmdargs['rcon-port'])
-        if cmdargs['rcon-password']:
-            server.append_arg('--rcon-password').append_arg(cmdargs['rcon-password'])
+        port = util.get('port', cmdargs)
+        if port:
+            server.append_arg('--port').append_arg(port)
+        port = port if port else 34197
+        rcon_port = util.get('rcon-port', cmdargs)
+        rcon_port = rcon_port if rcon_port else port + 1
+        server.append_arg('--rcon-port').append_arg(rcon_port)
+        rcon_password = util.get('rcon-password', cmdargs)
+        rcon_password = rcon_password if rcon_password else util.generate_token(10)
+        server.append_arg('--rcon-password').append_arg(rcon_password)
+        rconsvc.RconService.set_config(self._mailer, self, rcon_port, rcon_password)
         if cmdargs['use-authserver-bans']:
             server.append_arg('--use-authserver-bans')
         if cmdargs['use-server-whitelist']:

@@ -11,6 +11,7 @@ const helpText = {
     'auto {mode}       : Set auto mode, valid values 0,1,2,3',
     'log               : Get last 100 lines from the log',
     'players           : Show players currently online',
+    'send {line}       : Send command to server console',
     'getconfig cmdargs : Get cmd args as attachment',
     'getconfig server  : Get server settings as attachment',
     'getconfig map     : Get map settings as attachment',
@@ -30,7 +31,8 @@ const helpText = {
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime {version} : Install game server'
-  ]
+  ],
+  send: '/console/help'
 };
 
 
@@ -43,3 +45,4 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
+exports.send = commons.send;

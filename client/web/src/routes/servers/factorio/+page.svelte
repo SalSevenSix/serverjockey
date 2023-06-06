@@ -11,6 +11,7 @@
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import CommandBuilder from '$lib/CommandBuilder.svelte';
 
   let deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
@@ -19,6 +20,15 @@
       'desc': 'Reset the configuration files only.' },
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
+
+  let consoleCommands = {
+    'console': {
+      'send': [
+        {name: 'help', input: 'display'},
+        {name: 'line', input: 'text>', type: 'string'}
+      ]
+    }
+  };
 </script>
 
 
@@ -36,6 +46,9 @@
         </div>
       </div>
       <ConsoleLog hasConsoleLogFile />
+      <Collapsible icon="fa-keyboard" title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
         <ConfigFile name="Command Line Args" path="/config/cmdargs">
           <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
