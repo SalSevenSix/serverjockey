@@ -44,9 +44,13 @@ function handleMessage(message) {
     instance = parts[0];
     command = parts[1];
   }
+  if (command === 'startup') {
+    message.react('❓');
+    return;
+  }
   let args = { context: context, instance: instance, message: message, data: data };
   let instanceData = context.instancesService.getData(instance);
-  if (instanceData && instanceData.server && command != 'startup' && instanceData.server.hasOwnProperty(command)) {
+  if (instanceData && instanceData.server && instanceData.server.hasOwnProperty(command)) {
     if (command === 'help' && data.length === 0) {
       system.help(args);
     }

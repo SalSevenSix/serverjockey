@@ -40,6 +40,27 @@ exports.startupEventLogging = function(context, channel, instance, url) {
   });
 }
 
+exports.sendHelp = function($, helpText) {
+  let channel = $.message.channel;
+  if ($.data.length === 0) {
+    let cmd = $.context.config.CMD_PREFIX;
+    let header = '```\n' + helpText.title + '\n' + cmd;
+    let index = 1;
+    while (helpText.hasOwnProperty('help' + index)) {
+      channel.send(header + helpText['help' + index].join('\n' + cmd) + '\n```');
+      if (index === 1) { header = '```\n' + cmd; }
+      index += 1;
+    }
+    return;
+  }
+  let query = $.data.join('').replaceAll('-', '');
+  if (helpText.hasOwnProperty(query)) {
+    channel.send(helpText[query].join('\n'));
+  } else {
+    channel.send('No more help available.');
+  }
+}
+
 exports.server = function($) {
   if ($.data.length === 0) {
     $.httptool.doGet('/server', function(body) {
@@ -105,9 +126,10 @@ exports.auto = function($) {
   }
   let desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
   $.httptool.doGet('/server', function(body) {
-    let result = '```\nAuto mode: ' + body.auto;
-    result += ' (' + desc[body.auto] + ')\n'
-    return result + '```';
+    let result = '```\n' + $.instance;
+    result += ' auto mode: ' + body.auto;
+    result += ' (' + desc[body.auto] + ')\n```';
+    return result;
   });
 }
 
@@ -200,7 +222,7 @@ exports.send = function($) {
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
-    let line = 'Players on ' + $.instance + ' : ' + body.length;
+    let line = $.instance + ' players online: ' + body.length;
     let chars = line.length;
     let chunk = [line];
     let result = [];

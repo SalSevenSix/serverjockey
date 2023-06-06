@@ -4,6 +4,7 @@ const logger = require('../logger.js');
 const util = require('../util.js');
 const commons = require('../commons.js');
 const helpText = {
+  title: 'PROJECT ZOMBOID COMMANDS',
   help1: [
     'server                    : Server status',
     'server start              : Start server',
@@ -94,6 +95,7 @@ const helpText = {
 
 
 exports.startup = commons.startupEventLogging;
+exports.help = function($) { commons.sendHelp($, helpText); }
 exports.server = commons.server;
 exports.auto = commons.auto;
 exports.log = commons.log;
@@ -201,22 +203,4 @@ exports.banlist = function($) {
   let cmd = data.shift() + '-id';
   let body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);
-}
-
-exports.help = function($) {
-  let x = $.context;
-  let c = $.message.channel;
-  if ($.data.length === 0) {
-    let s = '```\nPROJECT ZOMBOID COMMANDS\n' + x.config.CMD_PREFIX;
-    c.send(s + helpText.help1.join('\n' + x.config.CMD_PREFIX) + '```');
-    c.send(s + helpText.help2.join('\n' + x.config.CMD_PREFIX) + '```');
-    c.send(s + helpText.help3.join('\n' + x.config.CMD_PREFIX) + '```');
-    return;
-  }
-  let query = $.data.join('').replaceAll('-', '');
-  if (helpText.hasOwnProperty(query)) {
-    c.send(helpText[query].join('\n'));
-  } else {
-    c.send('No more help available.');
-  }
 }

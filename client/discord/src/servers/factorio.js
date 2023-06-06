@@ -2,7 +2,8 @@
 
 const commons = require('../commons.js');
 const helpText = {
-  help: [
+  title: 'FACTORIO COMMANDS',
+  help1: [
     'server            : Server status',
     'server start      : Start server',
     'server restart    : Save world and restart server',
@@ -34,6 +35,7 @@ const helpText = {
 
 
 exports.startup = commons.startupEventLogging;
+exports.help = function($) { commons.sendHelp($, helpText); }
 exports.server = commons.server;
 exports.auto = commons.auto;
 exports.log = commons.log;
@@ -41,14 +43,3 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
-
-exports.help = function($) {
-  let c = $.message.channel;
-  if ($.data.length === 0) {
-    let x = $.context;
-    let s = '```\nFACTORIO COMMANDS\n' + x.config.CMD_PREFIX;
-    c.send(s + helpText.help.join('\n' + x.config.CMD_PREFIX) + '```');
-    return;
-  }
-  c.send('No more help available.');
-}
