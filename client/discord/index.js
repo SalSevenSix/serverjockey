@@ -28,7 +28,7 @@ function startup() {
   };
   context.client.channels.fetch(context.config.EVENTS_CHANNEL_ID)
     .then(function(channel) {
-      logger.info('Publishing events to ' + channel.id);
+      logger.info('Publishing events to ' + channel.name + ' (' + channel.id + ')');
       context.instancesService.startup(channel);
     })
     .catch(logger.error);
