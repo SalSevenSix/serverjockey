@@ -9,7 +9,7 @@
 </script>
 
 <hr />
-<div class="columns is-mobile">
+<div class="columns is-mobile mb-0">
   <div class="column">
     <h2 class="title is-5">
       {#if icon}<i class="fa {icon} fa-lg"></i>{/if}{title}

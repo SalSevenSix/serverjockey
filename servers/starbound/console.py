@@ -16,13 +16,13 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.put('send', rconsvc.RconHandler(mailer), 's')
 
 
-HELP_TEXT = '''STARBOUND CONSOLE COMMANDS
+HELP_TEXT = '''STARBOUND CONSOLE HELP
 help, ban, clearstagehand, disablespawning, enablespawning,
-kick, listplacedungeon, resetuniverseflags, serverreload,
+kick, list, placedungeon, resetuniverseflags, serverreload,
 setspawnpoint, settileprotection, setuniverseflag, spawnitem,
 spawnliquid, spawnmonster, spawnnpc, spawnstagehand, spawntreasure,
 spawnvehicle, timewarp, unbanip, unbanuuiud, warp, whereis
 
-Use help {command} to get detailed documentation.
+Use help {command} to get detailed information.
 Command output will be shown in the console log.
 '''

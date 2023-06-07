@@ -16,9 +16,10 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.put('send', rconsvc.RconHandler(mailer), 's')
 
 
-HELP_TEXT = '''FACTORIO CONSOLE
-Console input that does not start with / is shown as a chat message. 
-Help on commands can be found on the Factorio wiki. Note that some
-commands only work on the in-game console.
+HELP_TEXT = '''FACTORIO CONSOLE HELP
+Console input that does not start with / is shown as a chat message.
+Command output will be shown in the console log.
+Note that some commands only work on the in-game console.
+Help on commands can be found on the Factorio wiki.
   https://wiki.factorio.com/Console
 '''

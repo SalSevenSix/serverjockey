@@ -4,18 +4,17 @@
   import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let commands;
-  let command = null;
-  let action = null;
   let args = [null, null, null, null, null, null, null, null, null, null];
+  let action = null;
+  let command = Object.keys(commands).length === 1 ? Object.keys(commands)[0] : null;
 
-  $: resetAction(command);
-  function resetAction(c) {
-    action = null;
-    resetArgs();
+  $: commandUpdated(command);
+  function commandUpdated(cmd) {
+    action = cmd && Object.keys(commands[cmd]).length === 1 ? Object.keys(commands[cmd])[0] : null;
   }
 
-  $: resetArgs(action);
-  function resetArgs(a) {
+  $: actionUpdated(action);
+  function actionUpdated(acn) {
     args = [null, null, null, null, null, null, null, null, null, null];
   }
 
@@ -67,7 +66,7 @@
 </script>
 
 
-<div class="content">
+<div class={Object.keys(commands).length === 1 ? 'is-hidden' : 'content'}>
   <p class="has-text-weight-bold">Command</p>
   <div class="field">
     <div class="control">
@@ -79,7 +78,9 @@
       {/each}
     </div>
   </div>
-  {#if command}
+</div>
+{#if command}
+  <div class={Object.keys(commands[command]).length === 1 ? 'is-hidden' : 'content'}>
     <p class="has-text-weight-bold">Action</p>
     <div class="field">
       <div class="control">
@@ -91,7 +92,9 @@
         {/each}
       </div>
     </div>
-    {#if action}
+  </div>
+  {#if action}
+    <div class="content">
       {#each commands[command][action] as arg}
         {#if arg.input === 'display'}
           {loadDisplay(commands[command][action].indexOf(arg))}
@@ -129,13 +132,13 @@
           </div>
         {/if}
       {/each}
-      <div class="block buttons">
-        <button name="send" title="Send" class="button is-primary" disabled={cannotSend} on:click={send}>
-          <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
-      </div>
-    {/if}
+    </div>
+    <div class="block buttons">
+      <button name="send" title="Send" class="button is-primary" disabled={cannotSend} on:click={send}>
+        <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
+    </div>
   {/if}
-</div>
+{/if}
 
 
 <style>

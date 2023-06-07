@@ -12,14 +12,14 @@
 </script>
 
 
-<div class="content">
+<div class="block">
   {#if showConsole}
-    <p>
+    <p class="pl-2">
       <a href={url} target="_blank">Open console in new tab &nbsp;<i class="fa fa-up-right-from-square"></i></a>
     </p>
     <iframe src={url} title="Console Commands"></iframe>
   {:else}
-    <p>
+    <p class="pl-2">
       <i class="fa fa-triangle-exclamation fa-lg"></i>
       Console Unavailable. Server not STARTED.
     </p>
