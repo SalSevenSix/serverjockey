@@ -17,8 +17,8 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
 
 
 HELP_TEXT = '''FACTORIO CONSOLE
-Console input that does not start with / is shown as a chat message to your team. 
-Help on commands can be found on the Factorio wiki. Note that some commands
-only work on the in-game console.
+Console input that does not start with / is shown as a chat message. 
+Help on commands can be found on the Factorio wiki. Note that some
+commands only work on the in-game console.
   https://wiki.factorio.com/Console
 '''

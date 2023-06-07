@@ -18,7 +18,7 @@
   <div class="column">
     <div class="buttons is-right">
       <button name="toggler" class="button is-dark" on:click={toggle} title={visible ? 'HIDE' : 'SHOW'}>
-        &nbsp;{#if visible}<i class="fa fa-caret-down fa-2x"></i>{:else}<i class="fa fa-caret-left fa-2x"></i>&nbsp;{/if}&nbsp;
+        <i class="fa {visible ? 'fa-caret-down' : 'fa-caret-left'} fa-2x"></i>
       </button>
     </div>
   </div>
@@ -31,5 +31,8 @@
 <style>
   h2 i {
     width: 1.4em;
+  }
+  button i {
+    width: 0.9em;
   }
 </style>

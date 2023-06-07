@@ -185,9 +185,9 @@
     <div class="control buttons mr-2">
       <button name="upload" title="Upload File" class="button is-success"
               disabled={cannotMaintenance} on:click={uploadFile}>
-        <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload File</button>
+        <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload</button>
     </div>
-    <label class="file-label">
+    <label class="file-label pr-6">
       <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
       <span class="file-cta">
         <span class="file-icon"><i class="fa fa-file-circle-plus"></i></span>

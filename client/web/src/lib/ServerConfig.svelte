@@ -51,14 +51,12 @@
   </div>
   <div class="field-body">
     <div class="field is-narrow">
-      <div class="control">
-        <div class="select is-fullwidth">
-          <select id="serverConfigAuto" disabled={cannotChange} bind:value={selectedOption}>
-            {#each autoOptions as option}
-              <option>{option}</option>
-            {/each}
-          </select>
-        </div>
+      <div class="control select">
+        <select id="serverConfigAuto" disabled={cannotChange} bind:value={selectedOption}>
+          {#each autoOptions as option}
+            <option>{option}</option>
+          {/each}
+        </select>
       </div>
     </div>
   </div>
