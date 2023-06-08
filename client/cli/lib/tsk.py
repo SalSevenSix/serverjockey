@@ -123,7 +123,7 @@ After=network.target
 [Service]
 Type=simple
 User={user}
-ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/{user}" --logfile "serverjockey.log"{args}
+ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/{user}" --logfile{args}
 KillMode=mixed
 TimeoutStopSec=90
 OOMScoreAdjust=-800

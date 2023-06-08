@@ -14,18 +14,12 @@ export function capitalize(value) {
 }
 
 export function humanDuration(millis) {
-    var data = {};
-    var units = [
-      {label: 'millis', mod: 1000},
-      {label: 'seconds', mod: 60},
-      {label: 'minutes', mod: 60},
-      {label: 'hours', mod: 24},
-      {label: 'days', mod: 31}
-    ];
-    units.forEach(function(unit) {
-      millis = (millis - (data[unit.label] = (millis % unit.mod))) / unit.mod;
-    });
-    return data.days + 'd ' + data.hours + 'h ' + data.minutes + 'm';
+  let days = Math.floor(millis / 86400000);
+  millis -= days * 86400000;
+  let hours = Math.floor(millis / 3600000);
+  millis -= hours * 3600000;
+  let minutes = Math.floor(millis / 60000);
+  return days + 'd ' + hours + 'h ' + minutes + 'm';
 }
 
 export function humanFileSize(bytes, si=false, dp=1) {

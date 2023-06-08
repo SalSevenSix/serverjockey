@@ -34,8 +34,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Home directory to use for server instances, default is current working directory')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
-    p.add_argument('--logfile', type=str,
-                   help='Log file to use, relative to "home" unless starts with "/" or "."')
+    p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
+                   help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
     args = p.parse_args(args)
     if args.version:
