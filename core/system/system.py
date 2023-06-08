@@ -241,7 +241,7 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
 class _SystemInfoHandler(httpabc.GetHandler):
 
     def __init__(self):
-        self._start_time = util.now_millis() - 2937600000
+        self._start_time = util.now_millis()
 
     async def handle_get(self, resource, data):
         info = await sysutil.system_info()
