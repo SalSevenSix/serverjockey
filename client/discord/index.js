@@ -9,6 +9,16 @@ function initialise() {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.')
     process.exit(1)
   }
+  if (!config.ADMIN_ROLE || !config.ADMIN_ROLE.trim()) {
+    config.ADMIN_ROLE = ['pzadmin'];
+  } else {
+    let roles = config.ADMIN_ROLE.split('@');
+    config.ADMIN_ROLE = [];
+    roles.forEach(function(role) {
+      role = role.trim();
+      if (role) { config.ADMIN_ROLE.push(role); }
+    });
+  }
   logger.info('*** START ServerLink Bot ***');
   logger.info('Version: 0.1.0');
   logger.info('Initialised with config...');

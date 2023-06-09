@@ -2,7 +2,7 @@
   import { notifications, removeNotification } from '$lib/notifications';
 
   function deleteMessage() {
-    removeNotification(this.name);
+    removeNotification(this.id);
   }
 </script>
 
@@ -11,8 +11,9 @@
   <div id="notifications" class="section">
     <div class="container">
       {#each $notifications as notification, index}
-        <div class="notification {notification.level}">
-          <button name="{notification.id}" class="delete is-large" on:click={deleteMessage}></button>
+        <div id={notification.id} on:click={deleteMessage} on:keypress={function() {}}
+             class="notification {notification.level}">
+          <i class="delete is-large mt-1 mr-1"></i>
           {#if notification.level === 'is-success'}<i class="fa fa-circle-check fa-lg"></i>{/if}
           {#if notification.level === 'is-warning'}<i class="fa fa-triangle-exclamation fa-lg"></i>{/if}
           {#if notification.level === 'is-danger'}<i class="fa fa-circle-minus fa-lg"></i>{/if}
@@ -31,8 +32,8 @@
     top: 0;
     z-index: 100;
   }
-
   .notification {
     margin: 0.2rem 1rem 0.2rem 1rem;
+    cursor: pointer;
   }
 </style>

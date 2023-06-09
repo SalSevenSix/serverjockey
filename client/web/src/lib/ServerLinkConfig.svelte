@@ -73,8 +73,8 @@
   </div>
   <div class="field">
     <label for="serverLinkConfigAdminRole" class="label"
-           title="Discord role required for user to run admin commands">
-      Admin Role</label>
+           title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. '@PZ Admin @PZ Moderator'">
+      Admin Roles</label>
     <div class="control">
       <input id="serverLinkConfigAdminRole" class="input" type="text"
              disabled={processing} bind:value={serverLinkForm.ADMIN_ROLE}>

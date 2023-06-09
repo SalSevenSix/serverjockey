@@ -5,7 +5,7 @@ export const notifications = writable([]);
 
 
 function notify(level, message) {
-  let identity = new Date().getTime().toString() + Math.floor(Math.random() * 100).toString();
+  let identity = 'notification' + new Date().getTime().toString() + Math.floor(Math.random() * 100).toString();
   notifications.update(function(current) {
     return [{ 'id': identity, 'level': level, 'message': message }, ...current];
   });

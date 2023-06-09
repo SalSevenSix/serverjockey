@@ -85,13 +85,11 @@ exports.newPostRequest = function(ct, secret) {
   };
 }
 
-exports.checkAdmin = function(message, adminRole) {
+exports.checkAdmin = function(message, adminRoles) {
   let isAdmin = message.member.roles.cache.find(function(role) {
-    return role.name === adminRole;
+    return adminRoles.includes(role.name);
   });
-  if (isAdmin == null) {
-    message.react('🔒');
-    return false;
-  }
-  return true;
+  if (isAdmin) return true;
+  message.react('🔒');
+  return false;
 }
