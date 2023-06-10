@@ -74,7 +74,7 @@ exports.MessageHttpTool = class MessageHttpTool {
         if (dataHandler == null) {
           message.react('✅');
         } else {
-          dataHandler(message, data);
+          dataHandler(data);
         }
       })
       .catch(function(error) {
@@ -90,7 +90,8 @@ exports.MessageHttpTool = class MessageHttpTool {
 
   doPostToFile(path, body = null) {
     let context = this.#context;
-    this.doPost(path, body, function(message, json) {
+    let message = this.#message;
+    this.doPost(path, body, function(json) {
       if (json == null || !json.hasOwnProperty('url')) {
         message.react('✅');
         return;

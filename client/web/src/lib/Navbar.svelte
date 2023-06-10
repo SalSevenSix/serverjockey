@@ -4,6 +4,7 @@
 
   let menuOpen = false;
   let theme = 'light';
+  let themeLink;
 
   $: themeIcon = theme === 'light' ? 'fa-sun' : 'fa-moon';
 
@@ -21,6 +22,7 @@
   }
 
   function toggleTheme() {
+    if (themeLink.blur) { themeLink.blur(); }
     theme = theme === 'light' ? 'dark' : 'light';
     setTheme(theme);
     if (typeof(Storage) !== 'undefined') {
@@ -46,7 +48,7 @@
         <RubiksCube size="30" />
         <span class="ml-1 is-size-5 has-text-weight-bold">ServerJockey</span>
       </div>
-      <a href={'#'} role="button" on:click={toggleMenu} class:is-active={menuOpen}
+      <a href={'#'} role="button" on:click|preventDefault={toggleMenu} class:is-active={menuOpen}
          class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
@@ -63,7 +65,7 @@
           <i class="fa fa-book fa-lg"></i>&nbsp;&nbsp;Guides</a>
         <a on:click={closeMenu} class="navbar-item" href="/about">
           <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;About</a>
-        <a on:click|preventDefault={toggleTheme} class="navbar-item" href={'#'}>
+        <a on:click|preventDefault={toggleTheme} class="navbar-item" href={'#'} bind:this={themeLink}>
           &nbsp;<i class="fa {themeIcon} fa-lg"></i>&nbsp;</a>
       </div>
     </div>

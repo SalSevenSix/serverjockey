@@ -4,7 +4,7 @@
 def epilog() -> str:
     return '''
 examples:
-  serverjockey_cmd.pyz -c use:myserver server-start
+  serverjockey_cmd.pyz -c use:myserver server:start
   sudo serverjockey_cmd.pyz -t upgrade
 
 tasks:

@@ -171,7 +171,7 @@ exports.whitelist = function($) {
       .then(function(user) {
         let pwd = Math.random().toString(16).substr(2, 8);
         let name = user.tag.replaceAll(' ', '_').replaceAll('#', '');
-        logger.info('Add user: ' + data[0] + ' ' + name);
+        logger.info('Whitelist add: ' + data[0] + ' ' + name);
         if ($.httptool.doPost('/whitelist/add', { player: name, password: pwd })) {
           user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd));
         }
@@ -183,7 +183,7 @@ exports.whitelist = function($) {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
         let name = user.tag.replaceAll(' ', '_').replaceAll('#', '');
-        logger.info('Remove user: ' + data[0] + ' ' + name);
+        logger.info('Whitelist remove: ' + data[0] + ' ' + name);
         $.httptool.doPost('/whitelist/remove', { player: name });
       })
       .catch(function(error) {

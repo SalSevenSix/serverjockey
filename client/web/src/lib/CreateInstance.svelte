@@ -56,7 +56,7 @@
   </div>
   <div class="field">
     <label for="createInstanceIdentity" class="label"
-           title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores">
+           title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores.">
       Name</label>
     <div class="control">
       <input id="createInstanceIdentity" class="input" type="text"

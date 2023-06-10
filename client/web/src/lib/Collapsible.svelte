@@ -1,6 +1,7 @@
 <script>
-  export let icon;
+  export let icon = null;
   export let title;
+
   let visible = false;
 
   function toggle() {

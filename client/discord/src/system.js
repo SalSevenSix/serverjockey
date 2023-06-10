@@ -82,9 +82,9 @@ exports.create = function($) {
     return;
   }
   let body = { identity: $.data[0], module: $.data[1] };
-  $.httptool.doPost('/instances', body, function(message, json) {
+  $.httptool.doPost('/instances', body, function(json) {
     $.context.instancesService.setInstance(body.identity);
-    message.react('✅');
+    $.message.react('✅');
   });
 }
 

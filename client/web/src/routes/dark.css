@@ -7,12 +7,16 @@ body.dark hr {
   background-color: #293045;
 }
 
-body.dark .navbar {
+body.dark .navbar, body.dark .navbar-menu.is-active {
   background-color: #223C5B;
 }
 
 body.dark .navbar-item, body.dark .navbar-link {
   color: #52596E;
+}
+
+body.dark .navbar-burger {
+  color: #DBDBDB;
 }
 
 body.dark .title {

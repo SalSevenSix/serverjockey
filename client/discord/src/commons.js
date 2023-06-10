@@ -90,32 +90,32 @@ exports.server = function($) {
     $.message.react('⛔');
     return;
   }
-  $.httptool.doPost('/server/' + cmd, { respond: true }, function(message, json) {
+  $.httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
     let currentState = json.current.state;
     let targetUp = (cmd === 'start' || cmd === 'daemon');
     if (targetUp && ['START', 'STARTING', 'STARTED', 'STOPPING'].includes(currentState)) {
-      message.react('⛔');
+      $.message.react('⛔');
       return;
     }
     if (!targetUp && ['READY', 'STOPPED', 'EXCEPTION'].includes(currentState)) {
-      message.react('⛔');
+      $.message.react('⛔');
       return;
     }
-    message.react('⌛');
+    $.message.react('⌛');
     targetUp = targetUp || cmd === 'restart';
     new subs.Helper($.context).poll(json.url, function(data) {
       if (data.state === currentState) return true;
       currentState = data.state;
       if (currentState === 'EXCEPTION') {
-        message.reactions.removeAll().then(function() { message.react('⛔'); }).catch(logger.error);
+        $.message.reactions.removeAll().then(function() { $.message.react('⛔'); }).catch(logger.error);
         return false;
       }
       if (targetUp && currentState === 'STARTED') {
-        message.reactions.removeAll().then(function() { message.react('✅'); }).catch(logger.error);
+        $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
         return false;
       }
       if (!targetUp && currentState === 'STOPPED') {
-        message.reactions.removeAll().then(function() { message.react('✅'); }).catch(logger.error);
+        $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
         return false;
       }
       return true;
@@ -215,11 +215,11 @@ exports.send = function($) {
   let data = $.message.content;
   data = data.slice(data.indexOf(' '));
   let body = { line: data.trim() };
-  $.httptool.doPost('/console/send', body, function(message, text) {
+  $.httptool.doPost('/console/send', body, function(text) {
     if (text) {
-      message.channel.send('```\n' + text + '\n```');
+      $.message.channel.send('```\n' + text + '\n```');
     } else {
-      message.react('✅');
+      $.message.react('✅');
     }
   });
 }

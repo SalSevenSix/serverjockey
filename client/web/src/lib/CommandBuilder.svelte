@@ -21,6 +21,7 @@
   $: cannotSend = !($serverStatus.state === 'STARTED');
 
   function loadDisplay(index) {
+    args[index] = 'loading...\n\n\n';
     let name = commands[command][action][index].name;
     fetch($instance.url + '/' + command + '/' + name, newGetRequest())
       .then(function(response) {
@@ -30,7 +31,10 @@
       .then(function(text) {
         args[index] = text;
       })
-      .catch(function(error) { notifyError('Failed to load display text for ' + name); });
+      .catch(function(error) {
+        args[index] = ':(';
+        notifyError('Failed to load display text for ' + name);
+      });
     return '';
   }
 
@@ -146,7 +150,7 @@
     background-color: white;
     border: 2px;
     border-style: solid;
-    border-color: #dbdbdb;
+    border-color: #DBDBDB;
     border-radius: 5px;
   }
 </style>
