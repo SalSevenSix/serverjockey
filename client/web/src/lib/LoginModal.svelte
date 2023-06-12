@@ -5,7 +5,10 @@
   import { baseurl, securityToken } from '$lib/sjgmsapi';
 
   export let isOpen;
+
+  const storageKey = 'sjgmsSecurityToken';
   let token = '';
+  let remember = false;
 
   function kpLogin(event) {
     if (event.key === 'Enter') { login(); }
@@ -18,17 +21,32 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);
         if (typeof(Storage) !== 'undefined') {
-          sessionStorage.setItem('sjgmsSecurityToken', token);
+          sessionStorage.setItem(storageKey, token);
+          if (remember) {
+            localStorage.setItem(storageKey, token);
+          } else {
+            localStorage.removeItem(storageKey);
+          }
         }
         closeModal();
       })
-      .catch(function(error) { notifyError('Wrong. Please wait 5 seconds before trying again.'); });
+      .catch(function(error) {
+        notifyError('Wrong. Please wait 5 seconds before trying again.');
+      });
   }
 
   onMount(function() {
     if (typeof(Storage) === 'undefined') return;
-    let storedToken = sessionStorage.getItem('sjgmsSecurityToken');
-    if (storedToken) { token = storedToken; }
+    let storedToken = localStorage.getItem(storageKey);
+    if (storedToken) {
+      token = storedToken;
+      remember = true;
+      return;
+    }
+    storedToken = sessionStorage.getItem(storageKey);
+    if (storedToken) {
+      token = storedToken;
+    }
   });
 </script>
 
@@ -42,6 +60,13 @@
         <div class="control">
           <!-- svelte-ignore a11y-autofocus -->
           <input id="loginModalToken" class="input" type="text" on:keypress={kpLogin} bind:value={token} autofocus>
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <label class="checkbox">
+            <input type="checkbox" bind:checked={remember}>&nbsp; Remember Token
+          </label>
         </div>
       </div>
       <div class="field">

@@ -57,10 +57,13 @@ commands:
   log-tail-f        | Get last 10 lines from log then follow additional lines
                     | Use Ctrl-C to exit
   sleep:<seconds>   | Wait and do nothing for <seconds>
-  exit-if-down      | Stop processing commands and exit if server is down
-  exit-if-up        | Stop processing commands and exit if server is running
-  exit-if-players   | Stop processing commands and exit if players are in-game
-  exit-if-noplayers | Stop processing commands and exit if no players in-game
+  print:"<message>" | Print <message> as output
+  exit-down         | Exit processing if server is not running
+  exit-up           | Exit processing if server is running
+  exit-ut-gt:<seconds> | Exit processing if uptime greater than <seconds>
+  exit-ut-lt:<seconds> | Exit processing if uptime less or equal to <seconds>
+  exit-pl-gt:<#>    | Exit processing if players greater than <#>
+  exit-pl-lt:<#>    | Exit processing if players less or equal to <#>
   delete            | Delete the current instance
   shutdown          | Shutdown the ServerJockey system
 '''

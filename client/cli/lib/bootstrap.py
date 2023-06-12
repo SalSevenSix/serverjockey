@@ -105,7 +105,7 @@ def main() -> int:
     except Exception as e:
         if config and config['debug']:
             raise e
-        logging.error(repr(e))
+        logging.error(str(e))
         return 1
     finally:
         if connection:

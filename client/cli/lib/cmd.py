@@ -133,33 +133,49 @@ class CommandProcessor:
         self._instance = None
         return True
 
-    def _exit_if_down(self) -> bool:
+    def _exit_down(self) -> bool:
         status = self._connection.get(self._instance_path('/server'))
         if status['running']:
             return True
-        logging.info('exit-if-down command found the server down, no more commands will be processed')
+        logging.info('exit-down found the server down, no more commands will be processed')
         return False
 
-    def _exit_if_up(self) -> bool:
+    def _exit_up(self) -> bool:
         status = self._connection.get(self._instance_path('/server'))
         if not status['running']:
             return True
-        logging.info('exit-if-up command found the server up, no more commands will be processed')
+        logging.info('exit-up found the server up, no more commands will be processed')
         return False
 
-    def _exit_if_players(self) -> bool:
-        count = len(self._connection.get(self._instance_path('/players')))
-        if count == 0:
-            return True
-        logging.info('exit-if-players command found players in-game, no more commands will be processed')
-        return False
+    def _exit_ut_gt(self, argument: str) -> bool:
+        status = self._connection.get(self._instance_path('/server'))
+        uptime = status['uptime'] if 'uptime' in status else 0
+        if int(uptime / 1000) > util.to_int(argument, 0):
+            logging.info('exit-ut-gt found uptime over threshold, no more commands will be processed')
+            return False
+        return True
 
-    def _exit_if_noplayers(self) -> bool:
+    def _exit_ut_lt(self, argument: str) -> bool:
+        status = self._connection.get(self._instance_path('/server'))
+        uptime = status['uptime'] if 'uptime' in status else 0
+        if int(uptime / 1000) <= util.to_int(argument, 0):
+            logging.info('exit-ut-lt found uptime under threshold, no more commands will be processed')
+            return False
+        return True
+
+    def _exit_pl_gt(self, argument: str) -> bool:
         count = len(self._connection.get(self._instance_path('/players')))
-        if count > 0:
-            return True
-        logging.info('exit-if-noplayers command found no players in-game, no more commands will be processed')
-        return False
+        if count > util.to_int(argument, 0):
+            logging.info('exit-pl-gt found players over threshold, no more commands will be processed')
+            return False
+        return True
+
+    def _exit_pl_lt(self, argument: str) -> bool:
+        count = len(self._connection.get(self._instance_path('/players')))
+        if count <= util.to_int(argument, 0):
+            logging.info('exit-pl-lt found players under threshold, no more commands will be processed')
+            return False
+        return True
 
     # noinspection PyMethodMayBeStatic
     def _sleep(self, argument: str) -> bool:
@@ -168,6 +184,10 @@ class CommandProcessor:
             time.sleep(seconds)
         else:
             logging.warning('Invalid argument for sleep command, must be a number > 0, was: ' + str(argument))
+        return True
+
+    def _print(self, argument: str) -> bool:
+        logging.info(self._out + argument if argument else '')
         return True
 
     def _welcome(self) -> bool:
