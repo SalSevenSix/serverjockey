@@ -208,13 +208,16 @@ class Deployment:
             for mod in mods['mods']:
                 mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
                 if mod['name'] != 'base':
-                    async with session.get(baseurl + '/api/mods/' + mod['name']) as meta_response:
+                    mod_meta_url = baseurl + '/api/mods/' + mod['name']
+                    async with session.get(mod_meta_url) as meta_response:
                         assert meta_response.status == 200
                         meta = await meta_response.json()
                         if not mod.get('version'):
                             mod['version'] = meta['releases'][-1]['version']
+                    mod_version_found = False
                     for release in meta['releases']:
                         if release['version'] == mod['version']:
+                            mod_version_found = True
                             mod_files.append(release['file_name'])
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await io.file_exists(filename):
@@ -224,6 +227,9 @@ class Deployment:
                                     assert modfile_response.status == 200
                                     await io.stream_write_file(
                                         filename, io.WrapReader(modfile_response.content), chunk_size)
+                    if not mod_version_found:
+                        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR: Mod ' + mod['name'] + ' version '
+                                          + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
                 await io.delete_file(self._mods_dir + '/' + file['name'])

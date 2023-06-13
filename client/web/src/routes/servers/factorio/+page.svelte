@@ -64,10 +64,14 @@
         </ConfigFile>
         <ConfigFile name="Mods List" path="/config/modslist">
           <p>
-            For automatic mod downloading you need to set both username and token in the
-            <span class="has-text-weight-bold">Server</span> configuration.
-            You can find these credentials in your player-data.json file in your Factorio profile.
-            i.e. C:\Users\&lt;YOU&gt;\AppData\Roaming\Factorio\player-data.json
+            For automatic mod downloading both username and token in the
+            <span class="has-text-weight-bold">Server</span> configuration need to be set.
+            You can find these credentials in your Factorio profile i.e.
+            <span class="is-family-monospace is-size-6">
+              C:\Users\&lt;YOU&gt;\AppData\Roaming\Factorio\player-data.json</span><br />
+            Mod version can optionally be specified using
+            <span class="is-family-monospace is-size-6">
+              &quot;version&quot;: &quot;&lt;version&gt;&quot;</span>
           </p>
         </ConfigFile>
         <ConfigFile name="Admin List" path="/config/adminlist">

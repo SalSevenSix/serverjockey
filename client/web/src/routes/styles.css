@@ -65,6 +65,10 @@ table.is-thinner {
   word-break: break-all;
 }
 
+.white-space-nowrap {
+  white-space: nowrap;
+}
+
 
 /* Specific cases */
 

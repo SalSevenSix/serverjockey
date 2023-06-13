@@ -30,6 +30,7 @@
     <ul>
       <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
       <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
+      <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
     </ul>
   </div>
 </div>
@@ -96,6 +97,40 @@ UPnP=false</pre>
     "-XX:+UseZGC",
     "-XX:-OmitStackTraceInFastThrow"
 ]</pre>
+</div>
+
+<div class="content" id="integrationMods">
+  <h4 class="title is-5">Integration Mods</h4>
+  <p>
+    Project Zomboid mods are available to integrate with ServerJockey.
+    They provide additional features. Using these mods is optional.
+  </p>
+  <table class="table is-thinner">
+    <thead>
+      <tr>
+        <th>Workshop ID</th>
+        <th>Mod ID</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="white-space-nowrap">
+          <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2740018049" target="_blank">
+            2740018049 <i class="fa fa-up-right-from-square"></i></a></td>
+        <td>PIT</td>
+        <td>Adds the in-game date &amp; time to the server status in both the webapp and discord.</td>
+      </tr>
+      <tr>
+        <td class="white-space-nowrap">
+          <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2820127528" target="_blank">
+            2820127528 <i class="fa fa-up-right-from-square"></i></a></td>
+        <td>ModzCheck</td>
+        <td>Enables automatic server restart when a Workshop mod has been updated.
+            Players are given restart warning at 5 minutes and 1 minute before restart.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <BackToTop />

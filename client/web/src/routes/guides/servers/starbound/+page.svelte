@@ -22,9 +22,13 @@
       This guide will show you how to install, configure and run a Starbound server using this Webapp.
     </p>
     <p>
-      Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
-      section at the end for information on ports.
+      Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
+      section at the end for help on;
     </p>
+    <ul>
+      <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
+      <li><a href="#mods" use:scrollto={'#mods'}>Mods</a></li>
+    </ul>
   </div>
 </div>
 
@@ -54,6 +58,20 @@
       <tr><td>Server</td><td>21025</td><td>TCP</td></tr>
     </tbody>
   </table>
+</div>
+
+<div class="content" id="mods">
+  <h4 class="title is-5">Mods</h4>
+  <p>
+    Starbound servers require a Steam account with game licence to download and install.
+    Because of this, subscribed Workshop mods are also downloaded.
+    ServerJockey will automatically use these mods on the server when it is started.
+  </p>
+  <p>
+    Any changes to subscribed or unsubscribed mods on the Steam account will require a runtime update to take effect.
+    Go to the <span class="has-text-weight-bold">Deployment</span> section for the instance, then use
+    <span class="has-text-weight-bold">Install Runtime</span> to update the server with mod changes.
+  </p>
 </div>
 
 <BackToTop />
