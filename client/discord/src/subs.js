@@ -17,25 +17,22 @@ exports.Helper = class Helper {
     let counter = 0;
     while (context.running && url == null) {
       while (context.running && url == null) {
-        url = await this.subscribe(subscribeUrl, function(pollUrl) {
-          logger.info(subscribeUrl + ' => ' + pollUrl);
-        });
+        url = await this.subscribe(subscribeUrl);
+        if (url) { logger.info(subscribeUrl + ' => ' + url); }
         counter = 60;
         while (context.running && url == null) {
           await util.sleep(200);
           counter -= 1;
         }
       }
-      if (context.running && url != null && url != false) {
+      if (context.running && url) {
         await this.poll(url, dataHandler);
-      }
-      if (url != false) {
         url = null;
       }
     }
   }
 
-  async subscribe(subscribeUrl, dataHandler) {
+  async subscribe(subscribeUrl) {
     return await fetch(subscribeUrl, util.newPostRequest('application/json', this.#context.config.SERVER_TOKEN))
       .then(function(response) {
         if (response.status === 404) return false;
@@ -44,7 +41,6 @@ exports.Helper = class Helper {
       })
       .then(function(json) {
         if (json === false) return false;
-        dataHandler(json.url);
         return json.url;
       })
       .catch(logger.error);  // return null
@@ -56,16 +52,16 @@ exports.Helper = class Helper {
     while (this.#context.running && polling) {
       polling = await fetch(url, { signal })
         .then(function(response) {
-          if (response.status === 404) return null;
+          if (response.status === 404) return false;
           if (!response.ok) throw new Error('Status: ' + response.status);
-          if (response.status === 204) return {};
+          if (response.status === 204) return null;
           let ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })
         .then(function(data) {
-          if (data == null) return false;
-          if (util.isEmptyObject(data)) return true;
+          if (data === false) return false;
+          if (data == null) return true;
           return dataHandler(data);
         })
         .catch(function(error) {

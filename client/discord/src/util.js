@@ -8,11 +8,6 @@ exports.isString = function(value) {
   return (value != null && typeof value === 'string');
 }
 
-exports.isEmptyObject = function(value) {
-  if (value == null) return false;
-  return (typeof value === 'object' && value.constructor === Object && Object.keys(value).length === 0);
-}
-
 exports.getFirstKey = function(value) {
   if (value == null) return null;
   let keys = Object.keys(value);

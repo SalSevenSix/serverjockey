@@ -64,20 +64,19 @@ export class SubscriptionHelper {
   async start(subscribeUrl, dataHandler) {
     this.#running = true;
     let url = null;
-    while (this.#running && url == null) {
+    while (this.#running) {
+      url = null;
       while (this.#running && url == null) {
         url = await this.#subscribe(subscribeUrl);
         if (this.#running && url == null) {
           await sleep(10000);
         }
       }
-      if (this.#running && url != null && url != false) {
-        await this.poll(url, dataHandler);
-      }
       if (url === false) {
-        this.#running = false;
-      } else {
-        url = null;
+        this.#running = false;  // exit loop
+      }
+      if (this.#running) {
+        await this.#doPoll(url, this.#controller.signal, dataHandler);
       }
     }
   }
@@ -104,7 +103,7 @@ export class SubscriptionHelper {
         return json.url;
       })
       .catch(function(error) {
-        notifyError('Subscription failed. Check connection and server. Refresh page.');
+        return notifyError('Subscription failed. Check connection and server. Refresh page.');
       });
   }
 
@@ -116,7 +115,7 @@ export class SubscriptionHelper {
           if (response.status === 404) return false;
           if (!response.ok) throw new Error('Status: ' + response.status);
           if (response.status === 204) return null;
-          var ct = response.headers.get('Content-Type');
+          let ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })

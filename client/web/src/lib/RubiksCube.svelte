@@ -33,7 +33,7 @@
 
   function generateSchedules() {
     let actions = [];
-    for (var i = 0; i < 27; i++) {
+    for (let i = 0; i < 27; i++) {
        actions.push(...generateSchedule(i));
     }
     actions.sort(function(a, b) { return a.schedule - b.schedule });
@@ -44,7 +44,7 @@
     if (!dazzle) return;
     let clock = 0;
     let actions = generateSchedules();
-    for (var i = 0; i < actions.length; i++) {
+    for (let i = 0; i < actions.length; i++) {
       await sleep(actions[i].schedule - clock);
       clock = actions[i].schedule;
       colours = colours.fill(actions[i].on ? 'currentColor' : '#000000', actions[i].index, actions[i].index + 1);
