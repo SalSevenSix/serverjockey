@@ -66,7 +66,7 @@
 
 <div class="columns is-multiline">
   <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/projectzomboid">
+    <a href="/guides/servers/projectzomboid" title="Project Zomboid guide">
       <div class="card">
         <header class="card-header card-header-title">Project Zomboid</header>
         <div class="card-image">
@@ -78,7 +78,7 @@
     </a>
   </div>
   <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/factorio">
+    <a href="/guides/servers/factorio" title="Factorio guide">
       <div class="card">
         <header class="card-header card-header-title">Factorio</header>
         <div class="card-image">
@@ -90,7 +90,7 @@
     </a>
   </div>
   <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/sevendaystodie">
+    <a href="/guides/servers/sevendaystodie" title="7 Days to Die guide">
       <div class="card">
         <header class="card-header card-header-title">7 Days to Die</header>
         <div class="card-image">
@@ -102,7 +102,7 @@
     </a>
   </div>
   <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/starbound">
+    <a href="/guides/servers/starbound" title="Starbound guide">
       <div class="card">
         <header class="card-header card-header-title">Starbound</header>
         <div class="card-image">
@@ -114,7 +114,7 @@
     </a>
   </div>
   <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/unturned">
+    <a href="/guides/servers/unturned" title="Unturned guide">
       <div class="card">
         <header class="card-header card-header-title">Unturned</header>
         <div class="card-image">

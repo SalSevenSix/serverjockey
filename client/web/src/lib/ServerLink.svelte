@@ -29,7 +29,7 @@
         </div>
       </div>
       <Collapsible title="ServerLink Log">
-        <ConsoleLog hasConsoleLogFile />
+        <ConsoleLog />
       </Collapsible>
     </div>
   </div>

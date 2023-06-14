@@ -64,7 +64,7 @@
   </div>
   <div class="field">
     <label for="serverLinkConfigCommandPrefix" class="label"
-           title="Prefix the bot will recognise as commands">
+           title="Prefix the bot will recognise as commands, more than one character is allowed">
       Command Prefix</label>
     <div class="control">
       <input id="serverLinkConfigCommandPrefix" class="input" type="text"
@@ -73,7 +73,7 @@
   </div>
   <div class="field">
     <label for="serverLinkConfigAdminRole" class="label"
-           title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. '@PZ Admin @PZ Moderator'">
+           title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator">
       Admin Roles</label>
     <div class="control">
       <input id="serverLinkConfigAdminRole" class="input" type="text"
