@@ -9,6 +9,7 @@
   let qualifier = '';
   let subs = new SubscriptionHelper();
   let logLines = new RollingLog();
+  let endInstallMessage = 'Install Runtime completed. Please check console log output for details.'
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
@@ -61,7 +62,7 @@
               logLines.reset();
               steamLoginModal(doInstallRuntime);
             } else {
-              notifyInfo('Install Runtime completed. Please check console log output for details.');
+              notifyInfo(endInstallMessage);
             }
           });
         } else if (json) {
@@ -79,6 +80,7 @@
   }
 
   onDestroy(function() {
+    endInstallMessage = 'Please check console log output for install results.'
     subs.stop();
   });
 </script>

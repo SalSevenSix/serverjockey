@@ -140,6 +140,8 @@ if [ "$(whoami)" != "root" ]; then
   exit 1
 fi
 systemctl {args}
+echo
+exit 0
 '''
 
 
