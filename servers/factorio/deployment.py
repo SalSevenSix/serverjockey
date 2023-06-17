@@ -201,7 +201,7 @@ class Deployment:
         if not settings.get('username') or not settings.get('token'):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             return
-        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods')
+        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods...')
         baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], 65536
         credentials = '?username=' + settings['username'] + '&token=' + settings['token']
         async with aiohttp.ClientSession() as session:
@@ -222,11 +222,14 @@ class Deployment:
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await io.file_exists(filename):
                                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
-                                url = baseurl + release['download_url'] + credentials
-                                async with session.get(url, read_bufsize=chunk_size) as modfile_response:
+                                filename_part = filename + '.part'
+                                await io.delete_file(filename_part)
+                                download_url = baseurl + release['download_url'] + credentials
+                                async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
                                     assert modfile_response.status == 200
                                     await io.stream_write_file(
-                                        filename, io.WrapReader(modfile_response.content), chunk_size)
+                                        filename_part, io.WrapReader(modfile_response.content), chunk_size)
+                                await io.rename_path(filename_part, filename)
                     if not mod_version_found:
                         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR: Mod ' + mod['name'] + ' version '
                                           + mod['version'] + ' not found, see ' + mod_meta_url)

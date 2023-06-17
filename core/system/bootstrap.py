@@ -97,6 +97,7 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
     try:
         logging.info('*** START ServerJockey ***')
         logging.info('Version: ' + sysutil.system_version())
+        logging.info('Python3: ' + sys.version)
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:
