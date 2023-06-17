@@ -20,7 +20,7 @@ function initialise() {
     });
   }
   logger.info('*** START ServerLink Bot ***');
-  logger.info('Version: 0.1.0');
+  logger.info('Version: 0.1.0 ({timestamp})');
   logger.info('Nodejs: ' + process.version);
   logger.info('discord.js: ' + require('discord.js/package.json').version);
   logger.info('Initialised with config...');
@@ -93,8 +93,7 @@ function shutdown() {
 
 // MAIN
 require('events').EventEmitter.defaultMaxListeners = 20;
-const { Client } = require('discord.js');
-//const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const logger = require('./src/logger.js');
 const util = require('./src/util.js');
 const http = require('./src/http.js');
@@ -106,11 +105,10 @@ context.config = initialise();
 context.controller = new AbortController();
 context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);
-context.client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'], partials: ['CHANNEL'] });
-//context.client = new Client({
-//  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
-//            GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
-//  partials: [Partials.Channel] });
+context.client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
+  partials: [Partials.Channel] });
 
 context.client.once('ready', startup);
 context.client.on('messageCreate', handleMessage);

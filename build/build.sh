@@ -2,6 +2,7 @@
 
 BRANCH="${1-local}"
 cd "$(dirname $0)" || exit 1
+TIMESTAMP=$(date '+%Y%m%d%H%M')
 BUILD_DIR="$(pwd)"
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
@@ -57,6 +58,10 @@ if which yum > /dev/null; then
   cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
   chmod 755 $BUILD_DIR/rpm.sh
 fi
+
+echo "Applying build timestamp"
+sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
+sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/index.js || exit 1
 
 echo "Copying target directory into build directory"
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR"
@@ -124,6 +129,7 @@ cd $SERVERLINK_DIR || exit 1
 npm ci
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR/node_modules" ] || exit 1
+cp "$BUILD_DIR/hax/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"  # HAX
 
 echo "Building ServerLink nexe"
 nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10)

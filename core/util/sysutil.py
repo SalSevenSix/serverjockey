@@ -4,7 +4,7 @@ import asyncio
 import aiohttp
 import socket
 # ALLOW util.*
-from core.util import __version__, util, io, funcutil, shellutil
+from core.util import util, io, funcutil, shellutil
 
 _CACHE = {}  # TODO utils probably should not cache or hold statefulness
 
@@ -98,7 +98,7 @@ async def _cpu_percent() -> float:
 
 
 def system_version() -> str:
-    return __version__
+    return '0.1.0 ({timestamp})'
 
 
 async def system_info() -> dict:

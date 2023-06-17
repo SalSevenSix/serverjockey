@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "discord.js": "^13.16.0",
+    "discord.js": "^14.11.0",
     "node-fetch": "^2.6.11"
   }
 }
