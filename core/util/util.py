@@ -7,7 +7,7 @@ import time
 import typing
 # ALLOW NONE
 
-_BASE62_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+_BASE62_CHARS = 'Il1O0ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
     '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
@@ -22,10 +22,12 @@ def script_escape(value: str) -> str:
     return value.translate(_SCRIPT_SPECIALS)
 
 
-def generate_token(length: int) -> str:
+def generate_token(length: int, readable: bool = False) -> str:
+    begin = 5 if readable else 0
+    end = len(_BASE62_CHARS)
     result = []
     for i in range(length):
-        result.append(_BASE62_CHARS[random.randrange(0, 61)])
+        result.append(_BASE62_CHARS[random.randrange(begin, end)])
     return ''.join(result)
 
 

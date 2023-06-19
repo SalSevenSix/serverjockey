@@ -222,7 +222,7 @@ class Deployment:
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await io.file_exists(filename):
                                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
-                                filename_part = filename + '.part'
+                                filename_part = filename + '.part'  # TODO this is now redundant
                                 await io.delete_file(filename_part)
                                 download_url = baseurl + release['download_url'] + credentials
                                 async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:

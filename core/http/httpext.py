@@ -195,15 +195,24 @@ class _FileByteStream(httpabc.ByteStream):
     async def read(self, length: int = -1) -> bytes:
         if self._task is None:
             self._length = length
-            self._task = tasks.task_start(self._run(), name=self._filename)
-        return await self._queue.get()
+            self._task = tasks.task_start(self._run(), name=self._name)
+        try:
+            return await asyncio.wait_for(self._queue.get(), 20.0)
+        except asyncio.TimeoutError:
+            if self._task:
+                self._task.cancel()
+            raise Exception('Timeout waiting for file read ' + self._filename)
 
     async def _run(self):
-        async with aiofiles.open(self._filename, mode='rb') as file:
-            pumping = True
-            while pumping:
-                chunk = await file.read(self._length)
-                await self._queue.put(chunk)
-                pumping = chunk is not None and chunk != b''
-        tasks.task_end(self._task)
-        self._task = None
+        try:
+            async with aiofiles.open(self._filename, mode='rb') as file:
+                pumping = True
+                while pumping:
+                    chunk = await file.read(self._length)
+                    await asyncio.wait_for(self._queue.put(chunk), 60.0)
+                    pumping = chunk is not None and chunk != b''
+        except asyncio.TimeoutError:
+            pass
+        finally:
+            tasks.task_end(self._task)
+            self._task = None

@@ -90,8 +90,10 @@ class Deployment:
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')
-        workshop_dir, mods_dir = self._runtime_dir + '/steamapps/workshop/content/211820', self._runtime_dir + '/mods'
-        workshop_items, workshop_files = [], await io.directory_list(workshop_dir)
+        workshop_files, workshop_dir = [], self._runtime_dir + '/steamapps/workshop/content/211820'
+        if await io.directory_exists(workshop_dir):
+            workshop_files = await io.directory_list(workshop_dir)
+        workshop_items, mods_dir = [], self._runtime_dir + '/mods'
         for workshop_item in [o['name'] for o in workshop_files if o['type'] == 'directory']:
             pack_file = workshop_dir + '/' + workshop_item + '/contents.pak'
             if await io.file_exists(pack_file):

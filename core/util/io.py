@@ -166,8 +166,13 @@ async def stream_write_file(
         filename: str, stream: Readable,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         tracker: BytesTracker = None):
-    async with aiofiles.open(filename, mode='wb') as file:
-        await copy_bytes(stream, file, chunk_size, tracker)
+    # noinspection PyBroadException
+    try:
+        async with aiofiles.open(filename, mode='wb') as file:
+            await copy_bytes(stream, file, chunk_size, tracker)
+    except Exception as e:
+        await delete_file(filename)
+        raise e
 
 
 async def copy_bytes(

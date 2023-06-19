@@ -11,6 +11,7 @@
   import { securityToken } from '$lib/sjgmsapi';
   import Navbar from '$lib/Navbar.svelte';
   import Notifications from '$lib/Notifications.svelte';
+  import Footer from '$lib/Footer.svelte';
 
   onMount(function() {
     if ($securityToken) return;
@@ -24,8 +25,7 @@
     {#if $securityToken}
       <Navbar />
       <slot />
-      <br /><hr /><br />
-      <div style="margin-bottom: 10%;"></div>
+      <Footer />
     {/if}
   </div>
 </section>
