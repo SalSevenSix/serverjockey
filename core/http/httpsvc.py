@@ -57,6 +57,7 @@ class HttpService:
 
     # noinspection PyUnusedLocal
     async def _shutdown(self, app: web.Application):
+        self._resources = None
         await self._callbacks.shutdown()
 
     async def _handle(self, request: webabc.Request) -> web.Response:
@@ -136,7 +137,7 @@ class _RequestHandler:
         elif httpcnt.WEBDEV_ORIGIN == headers.get(httpcnt.ORIGIN):
             response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.WEBDEV_ORIGIN)
         if body == self._context.config('secret'):
-            response.set_cookie('secret', body, max_age=36000, httponly=True)
+            response.set_cookie('secret', body, max_age=36000, httponly=True, samesite='Lax')
             body = httpabc.ResponseBody.NO_CONTENT
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
@@ -239,9 +240,7 @@ class _RequestByteStream(httpabc.ByteStream):
 
 
 class _AccessLogFilter(logging.Filter):
-    REGEX = re.compile(r'.*GET.*/(subscriptions|assets|_app)/.*HTTP/1.1" (204|200).*')
+    REGEX = re.compile(r'.*(GET|POST) /.*HTTP/1.1" (200|204|404|409).*')
 
     def filter(self, record):
-        line = record.getMessage()
-        result = _AccessLogFilter.REGEX.match(line) is not None or line.find('steamcmd/input') > -1
-        return not result
+        return _AccessLogFilter.REGEX.match(record.getMessage()) is None

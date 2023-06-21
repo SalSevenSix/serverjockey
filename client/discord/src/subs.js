@@ -36,6 +36,7 @@ exports.Helper = class Helper {
     return await fetch(subscribeUrl, util.newPostRequest('application/json', this.#context.config.SERVER_TOKEN))
       .then(function(response) {
         if (response.status === 404) return false;
+        if (response.status === 503) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })

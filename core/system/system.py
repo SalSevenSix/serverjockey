@@ -2,6 +2,7 @@ from __future__ import annotations
 import inspect
 import logging
 import re
+import os
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, io, pkg, sysutil, signals
 from core.msg import msgabc, msgext, msgftr, msglog
@@ -96,13 +97,13 @@ class SystemService:
             await self._context.destroy_subcontext(subcontext)
 
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
-        assert configuration['module']
-        assert configuration['identity']
+        assert util.get('identity', configuration)
+        assert util.get('module', configuration) in MODULES
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
             raise Exception('Unable to create instance. Directory already exists.')
-        logging.info('CREATING instance ' + identity)
+        logging.debug('CREATING instance ' + identity)
         await io.create_directory(home_dir)
         await io.write_file(home_dir + '/instance.json', util.obj_to_json(configuration))
         configuration.update({'identity': identity, 'home': home_dir})
@@ -114,7 +115,7 @@ class SystemService:
         await self._context.destroy_subcontext(subcontext)
         await io.delete_directory(subcontext.config('home'))
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
-        logging.info('DELETED instance ' + identity)
+        logging.debug('DELETED instance ' + identity)
 
     async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
@@ -255,7 +256,7 @@ class _ShutdownHandler(httpabc.PostHandler):
         self._system = system
 
     def handle_post(self, resource, data):
-        signals.interrupt()
+        signals.interrupt(os.getpid())
         return httpabc.ResponseBody.NO_CONTENT
 
 

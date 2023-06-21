@@ -19,3 +19,5 @@ async def _install_steam():
         await shellutil.run_script('/usr/games/steamcmd +quit >/dev/null 2>&1')
     except Exception as e:
         logging.warning('Failed installing Steam: ' + repr(e))
+        return
+    logging.info('Steam install complete')

@@ -78,7 +78,7 @@ class ServerService(msgabc.AbcSubscriber):
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
-                logging.info('STARTING instance ' + identity)
+                logging.debug('STARTING instance ' + identity)
                 ServerStatus.notify_running(self._context, self, self._running)
                 start = util.now_millis()
                 try:
@@ -91,7 +91,7 @@ class ServerService(msgabc.AbcSubscriber):
                     self._running = False
                     controller.check_uptime(util.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
-                    logging.info('STOPPED instance ' + identity)
+                    logging.debug('STOPPED instance ' + identity)
 
     async def handle(self, message):
         action = message.name()

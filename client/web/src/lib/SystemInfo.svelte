@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { sleep, capitalize, humanFileSize, humanDuration } from '$lib/util';
+  import { sleep, humanFileSize, humanDuration } from '$lib/util';
   import { baseurl, newGetRequest } from '$lib/sjgmsapi';
   import RubiksCube from '$lib/RubiksCube.svelte';
 

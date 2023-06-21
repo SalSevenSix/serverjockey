@@ -61,10 +61,10 @@ async def get_public_ip() -> str:
 
 async def _fetch_text(url: str) -> str | None:
     connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
-    timout = aiohttp.ClientTimeout(total=4.0)
+    timeout = aiohttp.ClientTimeout(total=4.0)
     # noinspection PyBroadException
     try:
-        async with aiohttp.ClientSession(connector=connector, timeout=timout) as session:
+        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
             async with session.get(url) as response:
                 assert response.status == 200
                 result = await response.text()

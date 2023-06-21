@@ -1,4 +1,3 @@
-import logging
 import asyncio
 import random
 import base64
@@ -79,20 +78,20 @@ def obj_to_json(obj: typing.Any, pretty: bool = False) -> typing.Optional[str]:
     encoder = None if isinstance(obj, dict) else _JsonEncoder
     if hasattr(obj, '__dict__'):
         obj = obj.__dict__
+    # noinspection PyBroadException
     try:
         if pretty:
             return json.dumps(obj, cls=encoder, indent=2, separators=(',', ': '))
         return json.dumps(obj, cls=encoder)
-    except Exception as e:
-        logging.warning('Not serializable to JSON. raised: %s', repr(e))
+    except Exception:
         return None
 
 
 def json_to_dict(text: str) -> typing.Optional[dict]:
+    # noinspection PyBroadException
     try:
         return json.loads(text)
-    except Exception as e:
-        logging.warning('Text is not valid JSON. raised: %s', repr(e))
+    except Exception:
         return None
 
 

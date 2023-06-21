@@ -1,4 +1,3 @@
-import typing
 import logging
 import os
 import signal
@@ -6,10 +5,8 @@ import signal
 from core.util import shellutil
 
 
-def interrupt(pid: typing.Optional[int] = None):
-    if pid is None:
-        pid = os.getpid()
-    os.kill(pid, signal.SIGINT)
+def interrupt(pid: int):
+    os.kill(pid, signal.SIGINT)  # TODO probably blocking io
 
 
 async def kill_tree(pid: int):

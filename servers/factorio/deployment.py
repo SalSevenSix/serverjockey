@@ -155,7 +155,7 @@ class Deployment:
         url = 'https://factorio.com/get-download/' + version + '/headless/linux64'
         install_package = self._home_dir + '/factorio.tar.xz'
         unpack_dir = self._home_dir + '/factorio'
-        chunk_size = 65536
+        chunk_size = io.DEFAULT_CHUNK_SIZE
         try:
             self._mailer.post(self, msg.INSTALL_START)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'START Install')
@@ -202,7 +202,7 @@ class Deployment:
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods...')
-        baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], 65536
+        baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], io.DEFAULT_CHUNK_SIZE
         credentials = '?username=' + settings['username'] + '&token=' + settings['token']
         async with aiohttp.ClientSession() as session:
             for mod in mods['mods']:

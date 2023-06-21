@@ -1,4 +1,8 @@
 
+export function generateId() {
+  return Date.now().toString() + Math.random().toString().slice(2);
+}
+
 export function sleep(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
 }

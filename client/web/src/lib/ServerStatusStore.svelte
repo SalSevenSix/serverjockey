@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { get } from 'svelte/store';
-  import { sleep } from '$lib/util';
+  import { generateId, sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
   import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
@@ -9,7 +9,7 @@
   let subs = new SubscriptionHelper();
 
   async function setServerStatus(data) {
-    let id = Date.now().toString() + Math.random().toString().slice(1);
+    let id = generateId();
     data.id = id;
     serverStatus.set(data);
     if (!data.uptime) return;

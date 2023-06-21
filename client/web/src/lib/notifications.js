@@ -1,11 +1,11 @@
 import { writable } from 'svelte/store';
-import { sleep } from '$lib/util';
+import { generateId, sleep } from '$lib/util';
 
 export const notifications = writable([]);
 
 
 function notify(level, message) {
-  let identity = 'notification' + new Date().getTime().toString() + Math.floor(Math.random() * 100).toString();
+  let identity = generateId();
   notifications.update(function(current) {
     return [{ 'id': identity, 'level': level, 'message': message }, ...current];
   });

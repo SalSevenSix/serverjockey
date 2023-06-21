@@ -8,7 +8,7 @@ from aiofiles import os as aioos
 # ALLOW util.*
 from core.util import funcutil
 
-DEFAULT_CHUNK_SIZE = 10240
+DEFAULT_CHUNK_SIZE = 65536  # 64Kb
 
 
 class BytesTracker(metaclass=abc.ABCMeta):

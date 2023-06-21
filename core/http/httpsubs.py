@@ -75,7 +75,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         if name is HttpSubscriptionService.SUBSCRIBE:
             identity = str(uuid.uuid4())
             path = self._subscriptions_path + '/' + identity
-            logging.info('Http subscription created at ' + path)
+            logging.debug('Http subscription created at ' + path)
             selector = message.data()
             subscriber = _Subscriber(self._mailer, identity, selector)
             self._subscriptions.update({identity: subscriber})
@@ -121,7 +121,7 @@ class _Subscriber(msgabc.AbcSubscriber):
             last = self._time_last_activity
             if last < 0.0 or ((now - last) < self._inactivity_timeout):
                 return None
-            logging.info('Http subscription inactive, unsubscribing ' + self._identity)
+            logging.debug('Http subscription inactive, unsubscribing ' + self._identity)
             HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
             return True
         # noinspection PyBroadException
@@ -132,7 +132,7 @@ class _Subscriber(msgabc.AbcSubscriber):
             self._queue.put_nowait(message)
             return None
         except Exception:
-            logging.info('Http subscription queue is full, unsubscribing ' + self._identity)
+            logging.debug('Http subscription queue is full, unsubscribing ' + self._identity)
             HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
             return True
 
@@ -144,7 +144,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         try:
             result = await self._get()
             if result is msgabc.STOP:
-                logging.info('Http subscription completed, unsubscribing ' + self._identity)
+                logging.debug('Http subscription completed, unsubscribing ' + self._identity)
                 HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
             return result
         finally:

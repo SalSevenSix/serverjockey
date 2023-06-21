@@ -18,7 +18,7 @@ exports.error = function(value) {
     return null;
   }
   if (value.name === 'AbortError') {
-    exports.info(value);
+    // exports.info(value);
     return null;
   }
   console.error(timestamp + ' ERROR');

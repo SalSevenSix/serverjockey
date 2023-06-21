@@ -95,6 +95,7 @@ export class SubscriptionHelper {
     return await fetch(subscribeUrl, newPostRequest())
       .then(function(response) {
         if (response.status === 404) return false;
+        if (response.status === 503) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
