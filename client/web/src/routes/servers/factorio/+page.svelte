@@ -18,6 +18,8 @@
       'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-config', 'name': 'World Config',
       'desc': 'Reset the configuration files only.' },
+    { 'key': 'wipe-world-autosaves', 'name': 'World Autosaves',
+      'desc': 'Delete all the autosave files.' },
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 

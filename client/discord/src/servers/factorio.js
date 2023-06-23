@@ -30,6 +30,7 @@ const helpText = {
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',
+    'deployment wipe-world-autosaves : Delete all autosave files',
     'deployment install-runtime {version} : Install game server'
   ],
   send: '/console/help'

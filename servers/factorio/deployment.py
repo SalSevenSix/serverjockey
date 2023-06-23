@@ -92,6 +92,7 @@ class Deployment:
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
+        r.put('wipe-world-autosaves', _WipeAutosavesHandler(self._save_dir), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
@@ -254,6 +255,19 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
         version = util.get('beta', data, 'stable')
         tasks.task_fork(self._deployment.install_runtime(version), 'factorio.install_runtime()')
         return {'url': util.get('baseurl', data, '') + subscription_path}
+
+
+class _WipeAutosavesHandler(httpabc.PostHandler):
+
+    def __init__(self, path: str):
+        self._path = path
+
+    async def handle_post(self, resource, data):
+        for file in await io.directory_list(self._path):
+            ftype, fname = file['type'], file['name']
+            if ftype == 'file' and fname.startswith('_autosave') and fname.endswith('.zip'):
+                await io.delete_file(self._path + '/' + fname)
+        return httpabc.ResponseBody.NO_CONTENT
 
 
 class _DownloadTracker(io.BytesTracker):
