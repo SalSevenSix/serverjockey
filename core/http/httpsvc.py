@@ -240,7 +240,7 @@ class _RequestByteStream(httpabc.ByteStream):
 
 
 class _AccessLogFilter(logging.Filter):
-    REGEX = re.compile(r'.*(GET|POST) /.*HTTP/1.1" (200|204|404|409).*')
+    REGEX = re.compile(r'.*(GET|POST|OPTIONS) /.*HTTP/1.1" (200|204|404|409).*')
 
     def filter(self, record):
         return _AccessLogFilter.REGEX.match(record.getMessage()) is None

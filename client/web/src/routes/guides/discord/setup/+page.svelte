@@ -139,25 +139,7 @@
   <p><span class="step-title"></span>
     In <span class="has-text-weight-bold">SETTINGS</span> on the left panel,
     select the <span class="has-text-weight-bold">Bot</span> section.
-    Then click the <span class="has-text-weight-bold">Add Bot</span> button.
-  </p>
-  <figure class="image max-1024">
-    <img src="/assets/setup/10_add_bot.png" alt="Add a Bot" loading="lazy" />
-  </figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-    Click the <span class="has-text-weight-bold">Yes, do it!</span> button to confirm adding the bot to the application.
-  </p>
-  <figure class="image max-1024">
-    <img src="/assets/setup/11_accept_new_bot.png" alt="Accept New Bot" loading="lazy" />
-  </figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
-     You should now have a new Discord bot. It should look like the screenshot below.
+    It should look like the screenshot below.
   </p>
   <figure class="image max-1024">
     <img src="/assets/setup/12_fresh_bot.png" alt="Fresh Bot" loading="lazy" />

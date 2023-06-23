@@ -17,6 +17,7 @@ tasks:
   serverlink-edit        | Edit the ServerLink config
   service:status         | Show ServerJockey service status
   service:start          | Start ServerJockey service
+  service:restart        | Restart ServerJockey service
   service:stop           | Stop ServerJockey service
   service:enable         | Enable ServerJockey service
   service:disable        | Disable ServerJockey service
