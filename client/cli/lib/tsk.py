@@ -1,6 +1,7 @@
 import logging
 import inspect
 import subprocess
+from http import client
 # ALLOW lib.util
 from . import util
 
@@ -95,6 +96,36 @@ class TaskProcessor:
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('Delete user task failed')
+
+    def _ddns(self, argument: str):
+        provider, token, domain, ipv4, ipv6 = util.split_argument(argument, 5)
+        if not provider or not token or not domain:
+            raise Exception('DDNS Service Provider, Token and Domain required')
+        if provider != 'duck':
+            raise Exception('Unknown DDNS Service Provider')
+        http_verb, ddns_domain = 'GET', 'www.duckdns.org'
+        path = '/update?domains=' + domain + '&token=' + token
+        if ipv4:
+            path += '&ip=' + ipv4
+        if ipv6:
+            path += '&ipv6=' + ipv6
+        logging.info(http_verb + ' https://' + ddns_domain + path)
+        connection, response = client.HTTPSConnection(ddns_domain), None
+        try:
+            connection.request(http_verb, path)
+            response = connection.getresponse()
+            if response.status == 200:
+                body = response.read()
+                if body:
+                    body = body.decode().strip()
+                if body == 'OK':
+                    return
+                raise Exception('DDNS update failed, response body was ' + str(body))
+            raise Exception('HTTP GET Status: {} Reason: {}'.format(response.status, response.reason))
+        finally:
+            if response:
+                response.close()
+            connection.close()
 
     # TODO Figure out proper way to launch editor
     def _serverlink_edit(self):

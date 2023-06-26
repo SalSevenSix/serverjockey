@@ -8,6 +8,8 @@ examples:
   sudo serverjockey_cmd.pyz -t upgrade
 
 tasks:
+  ddns:duck,<token>,<domain>,<ipv4>,<ipv6> | Update duckdns.org domain,
+                                           | IPs are optional
   upgrade                | Upgrade ServerJockey to latest version
   uninstall              | Uninstall ServerJockey and delete default user
   adduser:<name>,<port>  | Add a new ServerJockey service user
