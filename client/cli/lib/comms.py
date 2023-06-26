@@ -1,5 +1,6 @@
 import logging
 import json
+import ssl
 from http import client
 # ALLOW lib.util
 
@@ -11,7 +12,8 @@ class HttpConnection:
     def __init__(self, config: dict):
         url, self._out, self._headers = config['url'], config['out'], {'X-Secret': config['token']}
         if url.startswith('https'):
-            self._connection = client.HTTPSConnection(url[8:])
+            # noinspection PyProtectedMember
+            self._connection = client.HTTPSConnection(url[8:], context=ssl._create_unverified_context())
         else:
             self._connection = client.HTTPConnection(url[7:])
 
