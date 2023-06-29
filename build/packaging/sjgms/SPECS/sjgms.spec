@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Wed May 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.1.0
-- Feature release v0.1.0
+* Thu Jun 29 2023 Bowden Salis <bsalis76@gmail.com> - 0.1.0
+- Small features and polish release for milestone v0.1.0
 * Wed May 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.8
 - Added support for Starbound
 * Mon Apr 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.0.7

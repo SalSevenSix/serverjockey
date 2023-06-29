@@ -91,10 +91,10 @@ check_discord() {
   fi
 
   echo
-  echo "  checking nodejs version, v16 or higher needed."
+  echo "  checking nodejs version, v18 or higher required."
   local node_version=$(node --version | awk -F"." '{print$1}' | cut -c2-)
-  if [ $node_version -lt 16 ]; then
-    echo "ERROR Nodejs version too low, version 16 or higher needed."
+  if [ $node_version -lt 18 ]; then
+    echo "ERROR Nodejs version too low, version 18 or higher required."
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt-get purge nodejs"
     echo "  $ sudo apt autoremove"
