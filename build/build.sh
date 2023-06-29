@@ -34,9 +34,11 @@ if [ "$BRANCH" == "local" ]; then
     rm -rf $file
   done
 else
-  echo "Downloading zip from github"
-  wget "https://github.com/SalSevenSix/$SERVERJOCKEY/archive/refs/heads/$BRANCH.zip"
-  [ $? -eq 0 ] || exit 1
+  if [ ! -f "$BRANCH.zip" ]; then
+    echo "Downloading zip from github"
+    wget "https://github.com/SalSevenSix/$SERVERJOCKEY/archive/refs/heads/$BRANCH.zip"
+    [ $? -eq 0 ] || exit 1
+  fi
   [ -f "$BRANCH.zip" ] || exit 1
   echo "Unpacking zip"
   unzip "$BRANCH.zip" > /dev/null 2>&1
@@ -44,10 +46,9 @@ else
   [ -d "${SERVERJOCKEY}-${BRANCH}" ] || exit 1
   mv "${SERVERJOCKEY}-${BRANCH}" "$SERVERJOCKEY"
   [ $? -eq 0 ] || exit 1
-  rm "$BRANCH.zip" > /dev/null 2>&1
 fi
-cd $DIST_DIR || exit 1
 
+cd $DIST_DIR || exit 1
 if which yum > /dev/null; then
   echo "Updating RPM scripts"
   if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
@@ -58,6 +59,7 @@ if which yum > /dev/null; then
   cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
   chmod 755 $BUILD_DIR/rpm.sh
 fi
+rm "$BRANCH.zip" > /dev/null 2>&1
 
 echo "Applying build timestamp"
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
@@ -129,7 +131,7 @@ cd $SERVERLINK_DIR || exit 1
 npm ci
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR/node_modules" ] || exit 1
-cp "$BUILD_DIR/hax/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"  # HAX
+cp "$SERVERJOCKEY_DIR/build/hax/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"  # HAX
 
 echo "Building ServerLink nexe"
 nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10)
