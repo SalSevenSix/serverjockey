@@ -11,11 +11,12 @@ SERVERLINK="serverlink"
 SERVERJOCKEY_DIR="$DIST_DIR/$SERVERJOCKEY"
 SERVERLINK_DIR="$DIST_DIR/discord"
 SERVERJOCKEY_CMD_DIR="$DIST_DIR/cli"
+HAX_DIR="$DIST_DIR/hax"
 TARGET_DIR="$DIST_DIR/sjgms"
 LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages"
 LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
-rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$TARGET_DIR" > /dev/null 2>&1
+rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" "$TARGET_DIR" > /dev/null 2>&1
 
 cd $DIST_DIR || exit 1
 if [ "$BRANCH" == "local" ]; then
@@ -81,6 +82,9 @@ cp -r "$SERVERJOCKEY_DIR/client/cli" "$SERVERJOCKEY_CMD_DIR"
 cp -r "$SERVERJOCKEY_DIR/client/discord" "$SERVERLINK_DIR"
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR" ] || exit 1
+cp -r "$SERVERJOCKEY_DIR/build/hax" "$HAX_DIR"
+[ $? -eq 0 ] || exit 1
+[ -d "$HAX_DIR" ] || exit 1
 
 echo "Building web client"
 $SERVERJOCKEY_DIR/client/web/build.sh
@@ -131,7 +135,7 @@ cd $SERVERLINK_DIR || exit 1
 npm ci
 [ $? -eq 0 ] || exit 1
 [ -d "$SERVERLINK_DIR/node_modules" ] || exit 1
-cp "$SERVERJOCKEY_DIR/build/hax/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"  # HAX
+cp "$HAX_DIR/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"
 
 echo "Building ServerLink nexe"
 nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10)
@@ -139,7 +143,7 @@ nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=
 [ -f "$TARGET_DIR/usr/local/bin/$SERVERLINK" ] || exit 1
 
 echo "Cleanup"
-rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" > /dev/null 2>&1
+rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" > /dev/null 2>&1
 
 echo "Done"
 exit 0
