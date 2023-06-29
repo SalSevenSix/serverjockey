@@ -20,7 +20,7 @@ function initialise() {
     });
   }
   logger.info('*** START ServerLink Bot ***');
-  logger.info('Version: 0.1.0 ({timestamp})');
+  logger.info('Version: 0.2.0 ({timestamp})');
   logger.info('Nodejs: ' + process.version);
   logger.info('discord.js: ' + require('discord.js/package.json').version);
   logger.info('Initialised with config...');
