@@ -22,16 +22,12 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         self._players = []
 
     @staticmethod
-    def event_login(mailer: msgabc.MulticastMailer, source: typing.Any, name: str, steamid: str = None):
-        mailer.post(
-            source, PlayersSubscriber.EVENT,
-            {'event': 'login', 'player': {'steamid': steamid if steamid else False, 'name': name}})
+    def event_login(mailer: msgabc.MulticastMailer, source: typing.Any, name: str):
+        mailer.post(source, PlayersSubscriber.EVENT, {'event': 'login', 'player': {'name': name}})
 
     @staticmethod
-    def event_logout(mailer: msgabc.MulticastMailer, source: typing.Any, name: str, steamid: str = None):
-        mailer.post(
-            source, PlayersSubscriber.EVENT,
-            {'event': 'logout', 'player': {'steamid': steamid if steamid else False, 'name': name}})
+    def event_logout(mailer: msgabc.MulticastMailer, source: typing.Any, name: str):
+        mailer.post(source, PlayersSubscriber.EVENT, {'event': 'logout', 'player': {'name': name}})
 
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any):

@@ -37,7 +37,6 @@ class Player:
 class PlayerEvent:
 
     def __init__(self, event: str, player: Player):
-        self._created = util.now_millis()
         self._event = event
         self._player = player
 
@@ -45,7 +44,7 @@ class PlayerEvent:
         return self._player
 
     def asdict(self) -> dict:
-        return {'created': self._created, 'event': self._event, 'player': self._player.asdict()}
+        return {'event': self._event, 'player': self._player.asdict()}
 
 
 class OptionLoader:

@@ -231,12 +231,12 @@ exports.players = function($) {
     let chunk = [line];
     let result = [];
     for (let i = 0; i < body.length; i++) {
-      if (body[i].steamid === false) {
-        line = body[i].name;
-      } else {
+      if (body[i].hasOwnProperty('steamid')) {
         line = 'LOGGING IN       ';
         if (body[i].steamid != null) { line = body[i].steamid; }
         line += ' ' + body[i].name;
+      } else {
+        line = body[i].name;
       }
       chunk.push(line);
       chars += line.length;

@@ -61,7 +61,7 @@
         {#each players as player}
           <tr>
             <td>{player.name}</td>
-            <td>{(player.steamid === false) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
+            <td>{(!player.hasOwnProperty('steamid')) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
           </tr>
         {/each}
       {/if}
