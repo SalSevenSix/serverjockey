@@ -49,11 +49,12 @@ exports.MessageHttpTool = class MessageHttpTool {
       });
   }
 
-  doPost(path, body = null, dataHandler = null) {
+  doPost(path, body = null, dataHandler = null, allowRoles = null) {
     let self = this;
     let context = this.#context;
     let message = this.#message;
-    if (!util.checkAdmin(message, context.config.ADMIN_ROLE)) return;
+    if (allowRoles && !util.checkHasRole(message, allowRoles)) return;
+    if (!allowRoles && !util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
     let request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
     if (util.isString(body)) {
       request = util.newPostRequest('text/plain', context.config.SERVER_TOKEN);

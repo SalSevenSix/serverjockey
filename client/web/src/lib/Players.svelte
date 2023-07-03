@@ -21,9 +21,11 @@
             players = [];
             return true;
           }
-          players = players.filter(function(value) {
-            return value.name != data.player.name;
-          });
+          if (data.event === 'login' || data.event === 'logout') {
+            players = players.filter(function(value) {
+              return value.name != data.player.name;
+            });
+          }
           if (data.event === 'login') {
             players = [...players, data.player];
           }

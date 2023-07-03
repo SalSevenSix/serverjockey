@@ -6,19 +6,11 @@ function initialise() {
     config = { ...config, ...require(process.argv[i]) };
   }
   if (!config.BOT_TOKEN) {
-    logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.')
-    process.exit(1)
+    logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.');
+    process.exit(1);
   }
-  if (!config.ADMIN_ROLE || !config.ADMIN_ROLE.trim()) {
-    config.ADMIN_ROLE = ['pzadmin'];
-  } else {
-    let roles = config.ADMIN_ROLE.split('@');
-    config.ADMIN_ROLE = [];
-    roles.forEach(function(role) {
-      role = role.trim();
-      if (role) { config.ADMIN_ROLE.push(role); }
-    });
-  }
+  config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
+  config.CHAT_ROLE = util.listifyRoles(config.CHAT_ROLE);
   logger.info('*** START ServerLink Bot ***');
   logger.info('Version: 0.2.0 ({timestamp})');
   logger.info('Nodejs: ' + process.version);
@@ -34,16 +26,33 @@ function initialise() {
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  if (!context.config.EVENTS_CHANNEL_ID) {
-    context.instancesService.startup(null);
-    return;
-  };
-  context.client.channels.fetch(context.config.EVENTS_CHANNEL_ID)
-    .then(function(channel) {
-      logger.info('Publishing events to ' + channel.name + ' (' + channel.id + ')');
-      context.instancesService.startup(channel);
-    })
-    .catch(logger.error);
+  // TODO Should probably try to await all the channel fetches, then call startup
+  let channels = { server: null, login: null, chat: null };
+  context.instancesService.startup(channels);
+  if (context.config.EVENT_CHANNELS.server) {
+    context.client.channels.fetch(context.config.EVENT_CHANNELS.server)
+      .then(function(channel) {
+        channels.server = channel;
+        logger.info('Publishing server events to ' + channel.name + ' (' + channel.id + ')');
+      })
+      .catch(logger.error);
+  }
+  if (context.config.EVENT_CHANNELS.login) {
+    context.client.channels.fetch(context.config.EVENT_CHANNELS.login)
+      .then(function(channel) {
+        channels.login = channel;
+        logger.info('Publishing player events to ' + channel.name + ' (' + channel.id + ')');
+      })
+      .catch(logger.error);
+  }
+  if (context.config.EVENT_CHANNELS.chat) {
+    context.client.channels.fetch(context.config.EVENT_CHANNELS.chat)
+      .then(function(channel) {
+        channels.chat = channel;
+        logger.info('Publishing chat to ' + channel.name + ' (' + channel.id + ')');
+      })
+      .catch(logger.error);
+  }
 }
 
 function handleMessage(message) {

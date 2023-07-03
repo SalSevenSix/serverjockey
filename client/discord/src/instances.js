@@ -14,7 +14,6 @@ const servers = {
 
 exports.Service = class Service {
   #context;
-  #channel = null;
   #current = null;
   #instances = {};
 
@@ -22,8 +21,7 @@ exports.Service = class Service {
     this.#context = context;
   }
 
-  async startup(channel) {
-    this.#channel = channel;
+  async startup(channels) {
     let self = this;
     let context = this.#context;
     let baseurl = context.config.SERVER_URL;
@@ -40,7 +38,7 @@ exports.Service = class Service {
     this.setInstance(util.getFirstKey(instances));
     for (let instance in instances) {
       instances[instance].server = servers[instances[instance].module];
-      instances[instance].server.startup(context, channel, instance, instances[instance].url);
+      instances[instance].server.startup(context, channels, instance, instances[instance].url);
     }
     logger.info('Instances...');
     logger.raw(self.getInstancesText().split('\n').slice(1, -1).join('\n'));
@@ -49,7 +47,7 @@ exports.Service = class Service {
         data.instance.url = baseurl + '/instances/' + data.instance.identity;
         data.instance.server = servers[data.instance.module];
         instances[data.instance.identity] = data.instance;
-        data.instance.server.startup(context, channel, data.instance.identity, data.instance.url);
+        data.instance.server.startup(context, channels, data.instance.identity, data.instance.url);
       } else if (data.event === 'deleted') {
         delete instances[data.instance.identity];
         if (data.instance.identity === self.currentInstance()) {

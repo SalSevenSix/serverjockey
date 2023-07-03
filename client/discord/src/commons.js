@@ -6,8 +6,7 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-exports.startupEventLogging = function(context, channel, instance, url) {
-  if (!channel) return;
+exports.startupEventLogging = function(context, channels, instance, url) {
   let helper = new subs.Helper(context);
   let lastState = 'READY';
   let restartRequired = false;
@@ -15,18 +14,26 @@ exports.startupEventLogging = function(context, channel, instance, url) {
     if (!json.state) return true; // ignore no state
     if (json.state === 'START') return true; // ignore this transient state
     if (!restartRequired && json.details.restart) {
-      channel.send('**Server ' + instance + ' requires a restart.**');
+      if (channels.server) { channels.server.send('**Server ' + instance + ' requires a restart.**'); }
       restartRequired = true;
       return true;
     }
     if (json.state === lastState) return true; // ignore duplicates
     if (json.state === 'STARTED') { restartRequired = false; }
     lastState = json.state;
-    channel.send('Server ' + instance + ' is ' + json.state);
+    if (channels.server) { channels.server.send('Server ' + instance + ' is ' + json.state); }
     return true;
   });
   helper.daemon(url + '/players/subscribe', function(json) {
     let result = '';
+    if (json.event === 'chat') {
+      if (json.player.name.startsWith('<') && json.text.startsWith('@')) return;  // Message is from discord user
+      result += '`' + instance + '` '
+      result += json.player.name + ': '
+      result += json.text
+      if (channels.chat) { channels.chat.send(result); }
+      return;
+    }
     if (json.event === 'login') { result += 'LOGIN '; }
     if (json.event === 'logout') { result += 'LOGOUT '; }
     if (!result) return true;
@@ -35,7 +42,7 @@ exports.startupEventLogging = function(context, channel, instance, url) {
       result += ' [' + json.player.steamid + ']';
     }
     result += ' (' + instance + ')';
-    channel.send(result);
+    if (channels.login) { channels.login.send(result); }
     return true;
   });
 }
@@ -213,15 +220,26 @@ exports.send = function($) {
     return;
   }
   let data = $.message.content;
-  data = data.slice(data.indexOf(' '));
-  let body = { line: data.trim() };
-  $.httptool.doPost('/console/send', body, function(text) {
+  data = data.slice(data.indexOf(' ')).trim();
+  $.httptool.doPost('/console/send', { line: data }, function(text) {
     if (text) {
       $.message.channel.send('```\n' + text + '\n```');
     } else {
       $.message.react('✅');
     }
   });
+}
+
+exports.say = function($) {
+  if ($.data.length === 0) {
+    $.message.react('❓');
+    return;
+  }
+  let name = $.message.member.user.tag;
+  name = '@' + name.split('#')[0];
+  let data = $.message.content;
+  data = data.slice(data.indexOf(' ')).trim();
+  $.httptool.doPost('/console/say', { player: name, text: data }, function(noop) {}, $.context.config.CHAT_ROLE);
 }
 
 exports.players = function($) {

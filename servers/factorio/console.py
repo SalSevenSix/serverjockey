@@ -1,4 +1,5 @@
 # ALLOW core.* factorio.messaging
+from core.util import util
 from core.msg import msgabc
 from core.http import httpabc, httprsc, httpext
 from core.common import rconsvc, interceptors
@@ -14,6 +15,29 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.psh('console')
     r.put('help', httpext.StaticHandler(HELP_TEXT))
     r.put('send', rconsvc.RconHandler(mailer), 's')
+    r.put('say', _SayHandler(mailer), 's')
+
+
+class _SayHandler(httpabc.PostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._delegate = rconsvc.RconHandler(mailer)
+
+    async def handle_post(self, resource, data):
+        player = util.get('player', data)
+        text = util.get('text', data)
+        while text and text[0] == '/':
+            text = text[1:]
+        if not text or not player:
+            return httpabc.ResponseBody.BAD_REQUEST
+        lines = util.split_lines(text, 3, 280)
+        for line in lines:
+            if line:
+                data['line'] = player + ': ' + line
+                response = await httpabc.PostHandler.call(self._delegate, resource, data)
+                if response is not httpabc.ResponseBody.NO_CONTENT:
+                    return response
+        return httpabc.ResponseBody.NO_CONTENT
 
 
 HELP_TEXT = '''FACTORIO CONSOLE HELP

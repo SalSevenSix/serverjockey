@@ -64,7 +64,7 @@ exports.instances = function($) {
 }
 
 exports.use = function($) {
-  if (!util.checkAdmin($.message, $.context.config.ADMIN_ROLE)) return;
+  if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
   if ($.data.length === 0) {
     $.message.react('❓');
     return;

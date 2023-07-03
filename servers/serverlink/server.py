@@ -12,8 +12,9 @@ def _default_config():
     return {
         'CMD_PREFIX': '!',
         'ADMIN_ROLE': 'pzadmin',
+        'CHAT_ROLE': None,
         'BOT_TOKEN': None,
-        'EVENTS_CHANNEL_ID': None,
+        'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to our server.\nYour login is ${user} and password is ${pass}'
     }
 
@@ -33,7 +34,9 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        if not await io.file_exists(self._config):
+        if await io.file_exists(self._config):
+            await self._migrate_config()
+        else:
             await io.write_file(self._config, util.obj_to_json(_default_config()))
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
@@ -68,6 +71,23 @@ class Server(svrabc.Server):
 
     async def stop(self):
         await self._stopper.stop()
+
+    async def _migrate_config(self):
+        # Migration from 0.1.0 to 0.2.0
+        update_needed = False
+        config = util.json_to_dict(await io.read_file(self._config))
+        if 'CHAT_ROLE' not in config:
+            update_needed = True
+            config['CHAT_ROLE'] = None
+        if 'EVENT_CHANNELS' not in config:
+            update_needed = True
+            cid = config.pop('EVENTS_CHANNEL_ID') if 'EVENTS_CHANNEL_ID' in config else None
+            if cid:
+                config['EVENT_CHANNELS'] = {'server': cid, 'login': cid, 'chat': cid}
+            else:
+                config['EVENT_CHANNELS'] = {'server': None, 'login': None, 'chat': None}
+        if update_needed:
+            await io.write_file(self._config, util.obj_to_json(config))
 
 
 class _ServerProcessFactory:

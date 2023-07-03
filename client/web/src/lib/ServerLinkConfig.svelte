@@ -4,7 +4,7 @@
   import { instance, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let noHints = false;
-  let serverLinkForm = {};
+  let serverLinkForm = { 'EVENT_CHANNELS': {} };
   let botToken = null;
   let processing = true;
 
@@ -54,15 +54,6 @@
     </div>
   </div>
   <div class="field">
-    <label for="serverLinkConfigLogChannel" class="label"
-           title="Discord channel ID for event logging">
-      Log Channel ID</label>
-    <div class="control">
-      <input id="serverLinkConfigLogChannel" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.EVENTS_CHANNEL_ID}>
-    </div>
-  </div>
-  <div class="field">
     <label for="serverLinkConfigCommandPrefix" class="label"
            title="Prefix the bot will recognise as commands, more than one character is allowed">
       Command Prefix</label>
@@ -78,6 +69,42 @@
     <div class="control">
       <input id="serverLinkConfigAdminRole" class="input" type="text"
              disabled={processing} bind:value={serverLinkForm.ADMIN_ROLE}>
+    </div>
+  </div>
+  <div class="field">
+    <label for="serverLinkConfigChatRole" class="label"
+           title="Discord roles allowed to use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members">
+      Chat Roles</label>
+    <div class="control">
+      <input id="serverLinkConfigChatRole" class="input" type="text"
+             disabled={processing} bind:value={serverLinkForm.CHAT_ROLE}>
+    </div>
+  </div>
+  <div class="field">
+    <label for="serverLinkConfigChannelEventsServer" class="label"
+           title="Discord channel ID for Server event logging">
+      Server Event Channel ID</label>
+    <div class="control">
+      <input id="serverLinkConfigChannelEventsServer" class="input" type="text"
+             disabled={processing} bind:value={serverLinkForm.EVENT_CHANNELS.server}>
+    </div>
+  </div>
+  <div class="field">
+    <label for="serverLinkConfigChannelEventsPlayerLogin" class="label"
+           title="Discord channel ID for Player login/logout event logging">
+      Player Event Channel ID</label>
+    <div class="control">
+      <input id="serverLinkConfigChannelEventsPlayerLogin" class="input" type="text"
+             disabled={processing} bind:value={serverLinkForm.EVENT_CHANNELS.login}>
+    </div>
+  </div>
+  <div class="field">
+    <label for="serverLinkConfigChannelEventsPlayerChat" class="label"
+           title="Discord channel ID for Chat integration">
+      Chat Integration Channel ID</label>
+    <div class="control">
+      <input id="serverLinkConfigChannelEventsPlayerChat" class="input" type="text"
+             disabled={processing} bind:value={serverLinkForm.EVENT_CHANNELS.chat}>
     </div>
   </div>
   <div class="field">

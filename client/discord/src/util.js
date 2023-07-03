@@ -80,11 +80,21 @@ exports.newPostRequest = function(ct, secret) {
   };
 }
 
-exports.checkAdmin = function(message, adminRoles) {
-  let isAdmin = message.member.roles.cache.find(function(role) {
-    return adminRoles.includes(role.name);
+exports.listifyRoles = function(line) {
+  let roles = [];
+  if (!line || !line.trim()) return roles;
+  line.split('@').forEach(function(role) {
+    role = role.trim();
+    if (role) { roles.push(role); }
   });
-  if (isAdmin) return true;
+  return roles;
+}
+
+exports.checkHasRole = function(message, roles) {
+  let hasRole = message.member.roles.cache.find(function(role) {
+    return roles.includes(role.name);
+  });
+  if (hasRole) return true;
   message.react('🔒');
   return false;
 }

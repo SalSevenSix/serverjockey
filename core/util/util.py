@@ -146,6 +146,19 @@ def right_chop_and_strip(value: str, keyword: str) -> str:
     return value[:index].strip()
 
 
+def split_lines(text: str, lines_limit: int = 0, line_char_limit: int = 0) -> tuple | None:
+    if text is None:
+        return None
+    lines = text.split('\n')
+    if 0 < lines_limit < len(lines):
+        return None
+    if line_char_limit > 0:
+        for line in lines:
+            if len(line) > line_char_limit:
+                return None
+    return tuple(lines)
+
+
 def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
     if base is None or path is None or path[0] in ('.', '/'):
         return path
