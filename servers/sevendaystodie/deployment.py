@@ -28,7 +28,7 @@ class Deployment:
         self._live_file = self._config_dir + '/serverconfig-live.xml'
         self._admin_file = self._config_dir + '/serveradmin.xml'
         self._env = context.config('env').copy()
-        self._env['LD_LIBRARY_PATH'] = self._runtime_dir
+        self._env['LD_LIBRARY_PATH'] = '.'
 
     async def initialise(self):
         await self.build_world()
@@ -73,6 +73,7 @@ class Deployment:
     def new_server_process(self) -> proch.ServerProcess:
         return proch.ServerProcess(self._mailer, self._executable) \
             .use_env(self._env) \
+            .use_cwd(self._runtime_dir) \
             .append_arg('-quit') \
             .append_arg('-batchmode') \
             .append_arg('-nographics') \

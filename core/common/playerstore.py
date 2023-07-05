@@ -30,6 +30,10 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         mailer.post(source, PlayersSubscriber.EVENT, {'event': 'logout', 'player': {'name': name}})
 
     @staticmethod
+    def event_chat(mailer: msgabc.MulticastMailer, source: typing.Any, name: str, text: str):
+        mailer.post(source, PlayersSubscriber.EVENT, {'event': 'chat', 'player': {'name': name}, 'text': text})
+
+    @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any):
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, PlayersSubscriber.GET)
@@ -41,6 +45,8 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
             return None
         if PlayersSubscriber.EVENT_FILTER.accepts(message):
             event_type = util.get('event', message.data())
+            if event_type == 'chat':
+                return None
             if event_type == 'clear':
                 self._players = []
                 return None

@@ -63,8 +63,10 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # [Info] UniverseServer: Logged in account '<anonymous>' as player 'Jazmin' from address 00:0000:ffff:c0a8:0065
 # [Info] UniverseServer: Client 'Jazmin' <1> (0000:0000:0000:0000:0000:ffff:c0a8:0065) connected
 # [Info] UniverseServer: Client 'Jazmin' <1> (0000:0000:0000:0000:0000:ffff:c0a8:0065) disconnected for reason:
-
+# [Info] Chat: <Wingshield> Hello Everyone
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
+    CHAT = '[Info] Chat: <'
+    CHAT_FILTER = msgftr.DataStrContains(CHAT)
     PREFIX = '[Info] UniverseServer: Client'
     REG_PREFIX = '.*' + PREFIX.replace('[', r'\[').replace(']', r'\]')
     CONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) connected.*')
@@ -73,10 +75,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.CONNECT_FILTER, _PlayerEventSubscriber.DISCONNECT_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
+                      _PlayerEventSubscriber.CONNECT_FILTER,
+                      _PlayerEventSubscriber.DISCONNECT_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
+        if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.right_chop_and_strip(value, '>')
+            text = util.left_chop_and_strip(value, '>')
+            playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
+            return None
         value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)[1:]
         value = util.right_chop_and_strip(value, "' ")
         if _PlayerEventSubscriber.CONNECT_FILTER.accepts(message):

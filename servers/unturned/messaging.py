@@ -49,19 +49,30 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 # \x1b[37mConnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
 # \x1b[37mDisconnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
-
+# [World] Apollo [Apollo]: "Hello World"
+# Say Hello Everyone   <-- command
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    NAME, CHARACTER = 'Name:', 'Character:'
+    CHAT, NAME, CHARACTER = '[World]', 'Name:', 'Character:'
+    CHAT_FILTER = msgftr.DataStrContains(CHAT)
     LOGIN_FILTER = msgftr.DataMatches('.*Connecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
     LOGOUT_FILTER = msgftr.DataMatches('.*Disconnecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.LOGIN_FILTER, _PlayerEventSubscriber.LOGOUT_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
+                      _PlayerEventSubscriber.LOGIN_FILTER,
+                      _PlayerEventSubscriber.LOGOUT_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
+        if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.left_chop_and_strip(value, '[')
+            name = util.right_chop_and_strip(name, ']')
+            text = util.left_chop_and_strip(value, ']: "')[:-1]
+            playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
+            return None
         value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.NAME)
         value = util.right_chop_and_strip(value, _PlayerEventSubscriber.CHARACTER)
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):

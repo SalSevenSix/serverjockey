@@ -24,10 +24,7 @@ class _SayHandler(httpabc.PostHandler):
         self._delegate = rconsvc.RconHandler(mailer)
 
     async def handle_post(self, resource, data):
-        player = util.get('player', data)
-        text = util.get('text', data)
-        while text and text[0] == '/':
-            text = text[1:]
+        player, text = util.get('player', data), util.get('text', data)
         if not text or not player:
             return httpabc.ResponseBody.BAD_REQUEST
         lines = util.split_lines(text, 3, 280)

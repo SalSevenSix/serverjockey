@@ -68,7 +68,9 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
+# 023-07-05T15:25:55 568.881 INF Chat (from 'Steam_76561197965', entity id '171', to 'Global'): 'Apollo': Hello Everyone
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
+    CHAT_FILTER = msgftr.DataMatches(r".*INF Chat.*to 'Global'\):.*")
     PREFIX = 'INF GMSG: Player \''
     JOIN_SUFFIX = '\' joined the game'
     LEAVE_SUFFIX = '\' left the game'
@@ -78,10 +80,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.JOIN_FILTER, _PlayerEventSubscriber.LEAVE_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
+                      _PlayerEventSubscriber.JOIN_FILTER,
+                      _PlayerEventSubscriber.LEAVE_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
+        if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), "to 'Global'):")
+            name = util.right_chop_and_strip(value, ':')[1:-1]
+            text = util.left_chop_and_strip(value, ':')
+            playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
+            return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
             value = util.right_chop_and_strip(value, _PlayerEventSubscriber.JOIN_SUFFIX)

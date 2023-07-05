@@ -11,6 +11,7 @@ const helpText = {
     'auto {mode}        : Set auto mode, valid values 0,1,2,3',
     'log                : Get last 100 lines from the log',
     'players            : Show players currently online',
+    'say {text}         : Send chat message to players',
     'send {line}        : Send command to server console',
     'getconfig cmdargs  : Get command line args as attachment',
     'getconfig commands : Get server commands as attachment',
@@ -39,3 +40,4 @@ exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
+exports.say = commons.say;

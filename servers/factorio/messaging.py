@@ -29,7 +29,6 @@ async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(playerstore.PlayersSubscriber(mailer))
     mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.get_local_ip()))
     mailer.register(_PlayerEventSubscriber(mailer))
-    mailer.register(_ChatEventSubscriber(mailer))
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
@@ -75,17 +74,26 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    JOIN, LEAVE = '[JOIN]', '[LEAVE]'
+    CHAT, JOIN, LEAVE = '[CHAT]', '[JOIN]', '[LEAVE]'
+    CHAT_FILTER = msgftr.DataStrContains(CHAT)
     JOIN_FILTER = msgftr.DataStrContains(JOIN)
     LEAVE_FILTER = msgftr.DataStrContains(LEAVE)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.JOIN_FILTER, _PlayerEventSubscriber.LEAVE_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
+                      _PlayerEventSubscriber.JOIN_FILTER,
+                      _PlayerEventSubscriber.LEAVE_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
+        if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.right_chop_and_strip(value, ':')
+            text = util.left_chop_and_strip(value, ':')
+            playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
+            return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.JOIN)
             value = util.right_chop_and_strip(value, 'joined the game')
@@ -96,23 +104,4 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             value = util.right_chop_and_strip(value, 'left the game')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
-        return None
-
-
-# 2023-07-03 01:25:21 [CHAT] bsalis: Hello World
-class _ChatEventSubscriber(msgabc.AbcSubscriber):
-    CHAT = '[CHAT]'
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.DataStrContains(_ChatEventSubscriber.CHAT)))
-        self._mailer = mailer
-
-    def handle(self, message):
-        value = util.left_chop_and_strip(message.data(), _ChatEventSubscriber.CHAT)
-        name = util.right_chop_and_strip(value, ':')
-        text = util.left_chop_and_strip(value, ':')
-        self._mailer.post(self, playerstore.PlayersSubscriber.EVENT,
-                          {'event': 'chat', 'player': {'name': name}, 'text': text})
         return None
