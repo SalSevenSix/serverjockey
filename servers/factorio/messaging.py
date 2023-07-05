@@ -92,6 +92,8 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
             name = util.right_chop_and_strip(value, ':')
             text = util.left_chop_and_strip(value, ':')
+            if name == '<server>' and text.startswith('@'):
+                return None  # Ignore chat messages from /console/say command
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):

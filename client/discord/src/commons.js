@@ -11,37 +11,32 @@ exports.startupEventLogging = function(context, channels, instance, url) {
   let lastState = 'READY';
   let restartRequired = false;
   helper.daemon(url + '/server/subscribe', function(json) {
-    if (!json.state) return true; // ignore no state
-    if (json.state === 'START') return true; // ignore this transient state
+    if (!json.state) return true;  // ignore no state
+    if (json.state === 'START') return true;  // ignore transient state
     if (!restartRequired && json.details.restart) {
-      if (channels.server) { channels.server.send('**Server ' + instance + ' requires a restart.**'); }
+      if (channels.server) { channels.server.send('`' + instance + '` 🔄 restart required'); }
       restartRequired = true;
       return true;
     }
-    if (json.state === lastState) return true; // ignore duplicates
+    if (json.state === lastState) return true;  // ignore duplicates
     if (json.state === 'STARTED') { restartRequired = false; }
     lastState = json.state;
-    if (channels.server) { channels.server.send('Server ' + instance + ' is ' + json.state); }
+    if (channels.server) { channels.server.send('`' + instance + '` 📡 ' + json.state); }
     return true;
   });
   helper.daemon(url + '/players/subscribe', function(json) {
-    let result = '';
     if (json.event === 'chat') {
-      if (json.player.name.startsWith('<') && json.text.startsWith('@')) return;  // Message is from discord user
-      result += '`' + instance + '` '
-      result += json.player.name + ': '
-      result += json.text
-      if (channels.chat) { channels.chat.send(result); }
-      return;
+      if (channels.chat) { channels.chat.send('`' + instance + '` 💬 ' + json.player.name + ': ' + json.text); }
+      return true;
     }
-    if (json.event === 'login') { result += 'LOGIN '; }
-    if (json.event === 'logout') { result += 'LOGOUT '; }
-    if (!result) return true;
-    result += json.player.name;
+    let action = null;
+    if (json.event === 'login') { action = ' ➡️ '; }
+    if (json.event === 'logout') { action = ' ⬅️ '; }
+    if (!action) return true;
+    let result = '`' + instance + '`' + action + json.player.name;
     if (json.player.steamid) {
       result += ' [' + json.player.steamid + ']';
     }
-    result += ' (' + instance + ')';
     if (channels.login) { channels.login.send(result); }
     return true;
   });
@@ -239,7 +234,10 @@ exports.say = function($) {
   name = '@' + name.split('#')[0];
   let data = $.message.content;
   data = data.slice(data.indexOf(' ')).trim();
-  $.httptool.doPost('/console/say', { player: name, text: data }, function(noop) {}, $.context.config.CHAT_ROLE);
+  $.httptool.doPost(
+    '/console/say', { player: name, text: data },
+    function(x) { $.message.react('💬'); },
+    $.context.config.CHAT_ROLE);
 }
 
 exports.players = function($) {

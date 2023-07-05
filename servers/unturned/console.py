@@ -26,11 +26,12 @@ class _SayHandler(httpabc.PostHandler):
         player, text = util.get('player', data), util.get('text', data)
         if not text or not player:
             return httpabc.ResponseBody.BAD_REQUEST
-        lines = util.split_lines(text, 3, 280)
+        lines = util.split_lines(text, lines_limit=5, total_char_limit=280)
+        if not lines:
+            return httpabc.ResponseBody.BAD_REQUEST
         for line in lines:
             if line:
                 await proch.PipeInLineService.request(self._mailer, self, 'Say ' + player + ': ' + line)
-                # TODO check error response
         return httpabc.ResponseBody.NO_CONTENT
 
 

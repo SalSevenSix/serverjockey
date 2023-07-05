@@ -197,6 +197,7 @@ class Deployment:
             await io.create_symlink(self._autosave_dir, self._save_dir)
 
     async def sync_mods(self):
+        # TODO put timeouts on HTTP calls
         mods = util.json_to_dict(await io.read_file(self._mods_list))
         settings = util.json_to_dict(await io.read_file(self._server_settings))
         if not settings.get('username') or not settings.get('token'):
