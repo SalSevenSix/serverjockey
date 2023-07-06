@@ -1,4 +1,5 @@
 import aiohttp
+import socket
 # ALLOW core.* factorio.messaging
 from core.util import util, tasks, io, pack, aggtrf
 from core.msg import msgabc, msgext, msgftr
@@ -164,7 +165,8 @@ class Deployment:
             await io.delete_directory(unpack_dir)
             await io.delete_directory(self._runtime_dir)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + url)
-            async with aiohttp.ClientSession() as session:
+            connector = aiohttp.TCPConnector(family=socket.AF_INET)  # Force IPv4
+            async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, read_bufsize=chunk_size) as response:
                     assert response.status == 200
                     tracker = None
@@ -207,9 +209,10 @@ class Deployment:
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods...')
         baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], io.DEFAULT_CHUNK_SIZE
+        connector = aiohttp.TCPConnector(family=socket.AF_INET)  # Force IPv4
         timeout = aiohttp.ClientTimeout(total=8.0)
         credentials = '?username=' + settings['username'] + '&token=' + settings['token']
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=connector) as session:
             for mod in mods['mods']:
                 mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
                 if mod['name'] != 'base':

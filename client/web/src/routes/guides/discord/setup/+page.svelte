@@ -401,7 +401,7 @@
 <div class="content">
   <p><span class="step-title"></span>
     Enter a role name of <span class="has-text-weight-bold">pzadmin</span> as specified
-    in the <span class="has-text-weight-bold">Admin Role</span> in the bot config.
+    in the <span class="has-text-weight-bold">Admin Roles</span> in the bot config.
     Now <span class="has-text-weight-bold">Save Changes</span>
     then select the <span class="has-text-weight-bold">Manage Members</span> tab.
   </p>
