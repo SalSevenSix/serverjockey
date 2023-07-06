@@ -237,7 +237,7 @@ exports.say = function($) {
   $.httptool.doPost(
     '/console/say', { player: name, text: data },
     function(x) { $.message.react('💬'); },
-    $.context.config.CHAT_ROLE);
+    $.context.config.PLAYER_ROLE);
 }
 
 exports.players = function($) {

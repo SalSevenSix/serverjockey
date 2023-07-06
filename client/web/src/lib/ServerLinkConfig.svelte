@@ -72,12 +72,12 @@
     </div>
   </div>
   <div class="field">
-    <label for="serverLinkConfigChatRole" class="label"
-           title="Discord roles allowed to use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members">
-      Chat Roles</label>
+    <label for="serverLinkConfigPlayerRole" class="label"
+           title="Discord roles allowed to get server info and use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members">
+      Player Roles</label>
     <div class="control">
-      <input id="serverLinkConfigChatRole" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.CHAT_ROLE}>
+      <input id="serverLinkConfigPlayerRole" class="input" type="text"
+             disabled={processing} bind:value={serverLinkForm.PLAYER_ROLE}>
     </div>
   </div>
   <div class="field">

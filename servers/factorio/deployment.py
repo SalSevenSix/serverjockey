@@ -197,21 +197,24 @@ class Deployment:
             await io.create_symlink(self._autosave_dir, self._save_dir)
 
     async def sync_mods(self):
-        # TODO put timeouts on HTTP calls
         mods = util.json_to_dict(await io.read_file(self._mods_list))
+        if not util.get('mods', mods):
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
+            return
         settings = util.json_to_dict(await io.read_file(self._server_settings))
         if not settings.get('username') or not settings.get('token'):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods...')
         baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], io.DEFAULT_CHUNK_SIZE
+        timeout = aiohttp.ClientTimeout(total=8.0)
         credentials = '?username=' + settings['username'] + '&token=' + settings['token']
         async with aiohttp.ClientSession() as session:
             for mod in mods['mods']:
                 mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
                 if mod['name'] != 'base':
                     mod_meta_url = baseurl + '/api/mods/' + mod['name']
-                    async with session.get(mod_meta_url) as meta_response:
+                    async with session.get(mod_meta_url, timeout=timeout) as meta_response:
                         assert meta_response.status == 200
                         meta = await meta_response.json()
                         if not mod.get('version'):

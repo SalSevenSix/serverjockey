@@ -10,7 +10,7 @@ function initialise() {
     process.exit(1);
   }
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
-  config.CHAT_ROLE = util.listifyRoles(config.CHAT_ROLE);
+  config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);
   logger.info('*** START ServerLink Bot ***');
   logger.info('Version: 0.2.0 ({timestamp})');
   logger.info('Nodejs: ' + process.version);

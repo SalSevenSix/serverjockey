@@ -12,7 +12,7 @@ def _default_config():
     return {
         'CMD_PREFIX': '!',
         'ADMIN_ROLE': 'pzadmin',
-        'CHAT_ROLE': None,
+        'PLAYER_ROLE': 'everyone',
         'BOT_TOKEN': None,
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to our server.\nYour login is ${user} and password is ${pass}'
@@ -76,16 +76,13 @@ class Server(svrabc.Server):
         # Migration from 0.1.0 to 0.2.0
         update_needed = False
         config = util.json_to_dict(await io.read_file(self._config))
-        if 'CHAT_ROLE' not in config:
+        if 'PLAYER_ROLE' not in config:
             update_needed = True
-            config['CHAT_ROLE'] = None
+            config['PLAYER_ROLE'] = 'everyone'
         if 'EVENT_CHANNELS' not in config:
             update_needed = True
             cid = config.pop('EVENTS_CHANNEL_ID') if 'EVENTS_CHANNEL_ID' in config else None
-            if cid:
-                config['EVENT_CHANNELS'] = {'server': cid, 'login': cid, 'chat': cid}
-            else:
-                config['EVENT_CHANNELS'] = {'server': None, 'login': None, 'chat': None}
+            config['EVENT_CHANNELS'] = {'server': cid, 'login': cid, 'chat': cid}
         if update_needed:
             await io.write_file(self._config, util.obj_to_json(config))
 

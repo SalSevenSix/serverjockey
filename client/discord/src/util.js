@@ -91,9 +91,12 @@ exports.listifyRoles = function(line) {
 }
 
 exports.checkHasRole = function(message, roles) {
-  let hasRole = message.member.roles.cache.find(function(role) {
-    return roles.includes(role.name);
-  });
+  let hasRole = roles.includes('everyone');
+  if (!hasRole && roles.length > 0) {
+    hasRole = message.member.roles.cache.find(function(role) {
+      return roles.includes(role.name);
+    });
+  }
   if (hasRole) return true;
   message.react('🔒');
   return false;

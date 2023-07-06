@@ -59,6 +59,7 @@ exports.modules = function($) {
 }
 
 exports.instances = function($) {
+  if (!util.checkHasRole($.message, $.context.config.PLAYER_ROLE)) return;
   let result = $.context.instancesService.getInstancesText();
   $.message.channel.send(result);
 }

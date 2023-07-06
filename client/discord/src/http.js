@@ -28,8 +28,10 @@ exports.MessageHttpTool = class MessageHttpTool {
 
   doGet(path, dataHandler) {
     let self = this;
+    let context = this.#context;
     let message = this.#message;
-    fetch(this.#baseurl + path, util.newGetRequest(this.#context.config.SERVER_TOKEN))
+    if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
+    fetch(this.#baseurl + path, util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         let ct = response.headers.get('Content-Type');
