@@ -6,20 +6,19 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
-  import FileSystem from '$lib/FileSystem.svelte';
+  import LogFiles from '$lib/LogFiles.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
+  import Autosaves from './Autosaves.svelte';
 
   let deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-config', 'name': 'World Config',
       'desc': 'Reset the configuration files only.' },
-    { 'key': 'wipe-world-autosaves', 'name': 'World Autosaves',
-      'desc': 'Delete all the autosave files.' },
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 
@@ -90,11 +89,14 @@
         </ConfigFile>
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <FileSystem />
+        <LogFiles />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Version (optional)" />
         <DeploymentActions actions={deploymentActions} />
+      </Collapsible>
+      <Collapsible icon="fa-floppy-disk" title="Autosaves">
+        <Autosaves />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />

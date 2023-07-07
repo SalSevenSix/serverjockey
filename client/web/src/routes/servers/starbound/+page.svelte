@@ -6,7 +6,7 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
-  import FileSystem from '$lib/FileSystem.svelte';
+  import LogFiles from '$lib/LogFiles.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
@@ -59,7 +59,7 @@
         <ConfigFile name="Settings" path="/config/settings" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <FileSystem allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
+        <LogFiles allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

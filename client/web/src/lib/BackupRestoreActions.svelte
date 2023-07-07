@@ -152,12 +152,12 @@
           <tr>
             <td>{path.updated}</td>
             <td>{humanFileSize(path.size)}</td>
-            <td class="word-break-all"><a href="{$instance.url + '/backups/' + path.name}">{path.name}</a></td>
+            <td class="word-break-all"><a href={$instance.url + '/backups/' + path.name}>{path.name}</a></td>
             <td>
-              <button name="{path.name}" title="Restore" class="button is-warning mb-1"
+              <button name={path.name} title="Restore" class="button is-warning mb-1"
                       disabled={cannotProcess} on:click={restoreBackup}>
                       <i class="fa fa-undo fa-lg"></button>
-              <button name="{path.name}" title="Delete" class="button is-danger"
+              <button name={path.name} title="Delete" class="button is-danger"
                       disabled={cannotMaintenance} on:click={deleteBackup}>
                       <i class="fa fa-trash-can fa-lg"></i></button>
             </td>

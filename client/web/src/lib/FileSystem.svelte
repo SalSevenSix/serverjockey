@@ -1,20 +1,31 @@
 <script>
   import { onMount } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { humanFileSize } from '$lib/util';
+  import { notifyInfo, notifyError } from '$lib/notifications';
+  import { isString, humanFileSize } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
+  export let rootPath;
   export let allowDelete = false;
+  export let customMeta = null;
+  export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
   export let sortFunction = function(a, b) {
       let typeCompare = b.type.localeCompare(a.type);
       if (typeCompare != 0) return typeCompare;
       return b.mtime - a.mtime;
     };
 
-  let reloading = true;
-  let root = $instance.url + '/logs';
+  let root = $instance.url + rootPath;
   let pwd = root;
-  let paths = [];
+  let hasActions = allowDelete || customMeta;
+  let columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0) + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
+
+  $: cannotAction = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+
+  let notifyText = null;
+  $: if (!cannotAction && notifyText) {
+    notifyInfo(notifyText);
+    notifyText = null;
+  }
 
   let lastRunning = $serverStatus.running;
   $: serverRunningChange($serverStatus.running);
@@ -34,18 +45,8 @@
     lastState = serverState;
   }
 
-  onMount(rootDirectory);
-
-  function rootDirectory() {
-    reload(root);
-  }
-
-  function upDirectory() {
-    let parts = pwd.split('/');
-    parts.pop();
-    reload(parts.join('/'));
-  }
-
+  let reloading = true;
+  let paths = [];
   function reload(url) {
     reloading = true;
     fetch(url, newGetRequest())
@@ -71,17 +72,34 @@
       });
   }
 
+  function rootDirectory() {
+    reload(root);
+  }
+
   function openDirectory() {
     reload(this.name);
   }
 
-  function deletePath() {
-    let url = this.name;
+  function upDirectory() {
+    let parts = pwd.split('/');
+    parts.pop();
+    reload(parts.join('/'));
+  }
+
+  function customAction(url) {
+    customMeta.action(url,
+      function() { cannotAction = true; },
+      function(text) { notifyText = text; });
+  }
+
+  function deleteAction(url) {
     fetch(url, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to delete ' + url.substring(root.length)); })
       .finally(function() { reload(pwd); });
   }
+
+  onMount(rootDirectory);
 </script>
 
 
@@ -89,47 +107,67 @@
   <table class="table">
     <thead>
       <tr>
-        <th>Type</th>
-        <th>File</th>
-        <th>Size</th>
-        {#if allowDelete}<th></th>{/if}
+        {#if columnsMeta.type}<th>{isString(columnsMeta.type) ? columnsMeta.type : ''}</th>{/if}
+        {#if columnsMeta.date}<th>{isString(columnsMeta.date) ? columnsMeta.date : ''}</th>{/if}
+        {#if columnsMeta.name}<th>{isString(columnsMeta.name) ? columnsMeta.name : ''}</th>{/if}
+        {#if columnsMeta.size}<th>{isString(columnsMeta.size) ? columnsMeta.size : ''}</th>{/if}
+        {#if hasActions}<th></th>{/if}
       </tr>
     </thead>
     <tbody>
       {#if pwd != root}
         <tr>
-          <td>
-            <button name="root" class="button" title="ROOT" on:click={rootDirectory}>
+          <td colspan={columnCount}>
+            <button name="root" class="button mr-2 mb-1" title="ROOT" on:click={rootDirectory}>
               &nbsp;<i class="fa fa-angle-double-up fa-lg"></i>&nbsp;</button>
-          </td>
-          <td colspan={allowDelete ? '3' : '2'}>
             <button name="up" class="button" title="UP" on:click={upDirectory}>
               &nbsp;<i class="fa fa-level-up-alt fa-lg"></i>&nbsp;&nbsp;{pwd.substring(root.length)}</button>
           </td>
         </tr>
       {/if}
       {#if paths.length === 0}
-        <tr><td colspan={allowDelete ? '4' : '3'}>
-          {reloading ? 'Loading...' : 'No Logs found.'}
+        <tr><td colspan={columnCount}>
+          {reloading ? 'Loading...' : 'No files found.'}
         </td></tr>
       {:else}
         {#each paths as path}
           <tr>
-            {#if path.type === 'directory'}
-              <td><i class="fa fa-folder fa-2x"></i></td>
-              <td colspan="2" class="word-break-all">
-                <a href={'#'} name="{path.url}" on:click|preventDefault={openDirectory}>{path.name}</a></td>
-            {/if}
-            {#if path.type === 'file'}
-              <td><i class="fa fa-file-alt fa-2x"></i></td>
-              <td class="word-break-all"><a href={path.url} target="_blank">{path.name}</a></td>
-              <td>{humanFileSize(path.size)}</td>
-            {/if}
-            {#if allowDelete}
+            {#if columnsMeta.type}
               <td>
-                <button name="{path.url}" class="button is-danger" title="Delete"
-                        disabled={$serverStatus.running} on:click={deletePath}>
-                  <i class="fa fa-trash-can fa-lg"></i></button>
+                {#if path.type === 'directory'}<i class="fa fa-folder fa-2x fileico"></i>{/if}
+                {#if path.type === 'file'}<i class="fa fa-file-alt fa-2x fileico"></i>{/if}
+              </td>
+            {/if}
+            {#if columnsMeta.date}
+              <td>{path.updated}</td>
+            {/if}
+            {#if columnsMeta.name && path.type === 'directory'}
+              <td class="word-break-all" colspan={columnsMeta.size ? 2 : 1}>
+                <a href={'#'} name={path.url} on:click|preventDefault={openDirectory}>{path.name}</a>
+              </td>
+            {/if}
+            {#if columnsMeta.name && path.type === 'file'}
+              <td class="word-break-all">
+                <a href={path.url} target="_blank">{path.name}</a>
+              </td>
+              {#if columnsMeta.size}
+                <td>{humanFileSize(path.size)}</td>
+              {/if}
+            {/if}
+            {#if hasActions}
+              <td>
+                {#if customMeta}
+                  <button name={customMeta.name} title={customMeta.name} disabled={cannotAction}
+                          class={'button ' + customMeta.button + (allowDelete ? ' mb-1' : '')}
+                          on:click={function() { customAction(path.url); }}>
+                    <i class="fa {customMeta.icon} fa-lg"></i></button>
+                {/if}
+                {#if allowDelete}
+                  <button name="Delete" title="Delete" disabled={cannotAction}
+                          class="button is-danger"
+                          on:click={function() { deleteAction(path.url); }}>
+                    <i class="fa fa-trash-can fa-lg"></i></button>
+                {/if}
               </td>
             {/if}
           </tr>
@@ -138,3 +176,10 @@
     </tbody>
   </table>
 </div>
+
+
+<style>
+  .fileico {
+    width: 0.6em;
+  }
+</style>

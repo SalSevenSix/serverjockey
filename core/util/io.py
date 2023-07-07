@@ -162,6 +162,14 @@ async def copy_text_file(from_path: str, to_path: str) -> int:
     return len(data)
 
 
+async def stream_copy_file(
+        from_path: str, to_path: str,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+        tracker: BytesTracker = None):
+    async with aiofiles.open(from_path, mode='rb') as file:
+        await stream_write_file(to_path, WrapReader(file), chunk_size, tracker)
+
+
 async def stream_write_file(
         filename: str, stream: Readable,
         chunk_size: int = DEFAULT_CHUNK_SIZE,

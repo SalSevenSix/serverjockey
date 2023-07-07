@@ -9,18 +9,20 @@ SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches(
         '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
-DEPLOYMENT_MSG, INSTALL_START, INSTALL_DONE = 'Deployment.Message', 'Install.Start', 'Install.Done'
+DEPLOYMENT_MSG, DEPLOYMENT_START, DEPLOYMENT_DONE = 'Deployment.Message', 'Deployment.Start', 'Deployment.Done'
 FILTER_DEPLOYMENT_MSG = msgftr.NameIs(DEPLOYMENT_MSG)
-FILTER_INSTALL_START = msgftr.NameIs(INSTALL_START)
-FILTER_INSTALL_DONE = msgftr.NameIs(INSTALL_DONE)
+FILTER_DEPLOYMENT_START = msgftr.NameIs(DEPLOYMENT_START)
+FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
     rconsvc.RconService.FILTER_OUTPUT,
     msglog.LoggingPublisher.FILTER_ALL_LEVELS,
     FILTER_DEPLOYMENT_MSG)
-MAINTENANCE_STATE_FILTER = msgftr.Or(FILTER_INSTALL_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(FILTER_INSTALL_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+MAINTENANCE_STATE_FILTER = msgftr.Or(
+    FILTER_DEPLOYMENT_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+READY_STATE_FILTER = msgftr.Or(
+    FILTER_DEPLOYMENT_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
 async def initialise(mailer: msgabc.MulticastMailer):

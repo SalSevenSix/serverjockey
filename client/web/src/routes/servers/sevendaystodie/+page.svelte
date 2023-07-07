@@ -6,7 +6,7 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
-  import FileSystem from '$lib/FileSystem.svelte';
+  import LogFiles from '$lib/LogFiles.svelte';
   import Iframe from '$lib/Iframe.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
@@ -55,7 +55,7 @@
         <ConfigFile name="Admin" path="/config/admin" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <FileSystem allowDelete />
+        <LogFiles allowDelete />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

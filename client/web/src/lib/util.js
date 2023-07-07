@@ -3,6 +3,10 @@ export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }
 
+export function isString(value) {
+  return (value != null && typeof value === 'string');
+}
+
 export function sleep(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
 }

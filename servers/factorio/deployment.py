@@ -9,6 +9,8 @@ from core.proc import proch, jobh
 from core.common import interceptors, rconsvc
 from servers.factorio import messaging as msg
 
+_MAP = 'map.zip'
+
 
 class Deployment:
 
@@ -47,7 +49,7 @@ class Deployment:
         self._map_gen_settings_def = self._runtime_dir + '/data/map-gen-settings.example.json'
         self._world_dir = self._home_dir + '/world'
         self._save_dir = self._world_dir + '/saves'
-        self._map_file = self._save_dir + '/map.zip'
+        self._map_file = self._save_dir + '/' + _MAP
         self._config_dir = self._world_dir + '/config'
         self._cmdargs_settings = self._config_dir + '/cmdargs-settings.json'
         self._server_settings = self._config_dir + '/server-settings.json'
@@ -93,13 +95,16 @@ class Deployment:
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
-        r.put('wipe-world-autosaves', _WipeAutosavesHandler(self._save_dir), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
+        r.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.pop()
+        r.psh('autosaves', httpext.FileSystemHandler(self._save_dir, ls_filter=_autosaves))
+        r.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
 
     async def new_server_process(self) -> proch.ServerProcess:
         cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_settings))
@@ -159,7 +164,7 @@ class Deployment:
         unpack_dir = self._home_dir + '/factorio'
         chunk_size = io.DEFAULT_CHUNK_SIZE
         try:
-            self._mailer.post(self, msg.INSTALL_START)
+            self._mailer.post(self, msg.DEPLOYMENT_START)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'START Install')
             await io.delete_file(install_package)
             await io.delete_directory(unpack_dir)
@@ -169,10 +174,9 @@ class Deployment:
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, read_bufsize=chunk_size) as response:
                     assert response.status == 200
-                    tracker = None
-                    content_length = response.headers.get('Content-Length')
+                    tracker, content_length = None, response.headers.get('Content-Length')
                     if content_length:
-                        tracker = _DownloadTracker(self._mailer, msg.DEPLOYMENT_MSG, int(content_length), 10)
+                        tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG, int(content_length), 10, 'downloaded')
                     await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
@@ -184,7 +188,7 @@ class Deployment:
         except Exception as e:
             self._mailer.post(self, msg.DEPLOYMENT_MSG, repr(e))
         finally:
-            self._mailer.post(self, msg.INSTALL_DONE)
+            self._mailer.post(self, msg.DEPLOYMENT_DONE)
 
     async def ensure_map(self):
         if not await io.file_exists(self._map_file):
@@ -235,8 +239,12 @@ class Deployment:
                                 download_url = baseurl + release['download_url'] + credentials
                                 async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
                                     assert modfile_response.status == 200
+                                    tracker, content_length = None, modfile_response.headers.get('Content-Length')
+                                    if content_length:
+                                        tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG,
+                                                           int(content_length), 5, 'downloaded')
                                     await io.stream_write_file(
-                                        filename_part, io.WrapReader(modfile_response.content), chunk_size)
+                                        filename_part, io.WrapReader(modfile_response.content), chunk_size, tracker)
                                 await io.rename_path(filename_part, filename)
                     if not mod_version_found:
                         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR: Mod ' + mod['name'] + ' version '
@@ -245,6 +253,26 @@ class Deployment:
             if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
                 await io.delete_file(self._mods_dir + '/' + file['name'])
         await io.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
+
+    async def restore_autosave(self, filename: str):
+        map_backup, chunk_size = self._map_file + '.backup', io.DEFAULT_CHUNK_SIZE * 2
+        try:
+            self._mailer.post(self, msg.DEPLOYMENT_START)
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Restoring ' + filename)
+            autosave_file = self._save_dir + '/' + filename
+            if not await io.file_exists(autosave_file):
+                raise FileNotFoundError(autosave_file)  # TODO Test this
+            autosave_size = await io.file_size(autosave_file)
+            tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG, autosave_size, 4)
+            if await io.file_exists(self._map_file):
+                await io.rename_path(self._map_file, map_backup)
+            await io.stream_copy_file(autosave_file, self._map_file, chunk_size, tracker)
+            await io.delete_file(map_backup)
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Autosave ' + filename + ' restored')
+        except Exception as e:
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, repr(e))
+        finally:
+            self._mailer.post(self, msg.DEPLOYMENT_DONE)
 
 
 class _InstallRuntimeHandler(httpabc.PostHandler):
@@ -257,45 +285,51 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
         subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
             self._mailer, self, httpsubs.Selector(
                 msg_filter=msg.FILTER_DEPLOYMENT_MSG,
-                completed_filter=msg.FILTER_INSTALL_DONE,
+                completed_filter=msg.FILTER_DEPLOYMENT_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
         version = util.get('beta', data, 'stable')
         tasks.task_fork(self._deployment.install_runtime(version), 'factorio.install_runtime()')
         return {'url': util.get('baseurl', data, '') + subscription_path}
 
 
-class _WipeAutosavesHandler(httpabc.PostHandler):
+class _RestoreAutosaveHandler(httpabc.PostHandler):
 
-    def __init__(self, path: str):
-        self._path = path
+    def __init__(self, deployment: Deployment):
+        self._deployment = deployment
 
-    async def handle_post(self, resource, data):
-        for file in await io.directory_list(self._path):
-            ftype, fname = file['type'], file['name']
-            if ftype == 'file' and fname.startswith('_autosave') and fname.endswith('.zip'):
-                await io.delete_file(self._path + '/' + fname)
+    def handle_post(self, resource, data):
+        filename = util.get('filename', data)
+        if not filename or filename.endswith(_MAP):
+            return httpabc.ResponseBody.BAD_REQUEST
+        tasks.task_fork(self._deployment.restore_autosave(filename), 'factorio.restore_autosave()')
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class _DownloadTracker(io.BytesTracker):
+class _Tracker(io.BytesTracker):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, msg_name: str, expected: int, notifications: int):
+    def __init__(self, mailer: msgabc.MulticastMailer,
+                 msg_name: str, expected: int, notifications: int, prefix: str = 'progress'):
         self._mailer = mailer
         self._msg_name = msg_name
         self._expected = expected
         self._progress = 0
         self._increment = int(expected / notifications)
         self._next_target = self._increment
+        self._prefix = prefix
 
     def processed(self, chunk: bytes):
         self._progress += len(chunk)
         if self._progress >= self._expected:
-            self._mailer.post(self, self._msg_name, 'downloaded 100%')
+            self._mailer.post(self, self._msg_name, self._prefix + ' 100%')
         elif self._progress > self._next_target:
             self._next_target += self._increment
-            message = 'downloaded  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
+            message = self._prefix + '  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
             self._mailer.post(self, self._msg_name, message)
 
 
 def _logfiles(entry) -> bool:
     return entry['type'] == 'file' and entry['name'].endswith('.log')
+
+
+def _autosaves(entry) -> bool:
+    return entry['type'] == 'file' and entry['name'].startswith('_autosave')
