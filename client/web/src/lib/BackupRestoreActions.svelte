@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { sleep, humanFileSize } from '$lib/util';
@@ -7,11 +7,11 @@
 
   let reloading = true;
   let uploading = false;
-  let rotatorText = '';
+  let uploadFiles = [];
+  let rotationDegrees = 0;
   let reloadRequired = false;
   let notifyText = null;
   let paths = [];
-  let uploadFiles = [];
 
   $: cannotMaintenance = $serverStatus.state === 'MAINTENANCE';
   $: cannotProcess = $serverStatus.running || cannotMaintenance;
@@ -25,8 +25,6 @@
     notifyInfo(notifyText);
     notifyText = null;
   }
-
-  onMount(reload);
 
   function reload() {
     reloading = true;
@@ -121,16 +119,19 @@
   }
 
   async function uploadTicker() {
-    let index = 0;
-    let rotators = ['--', '\\', '|', '/'];
+    rotationDegrees = 0;
     while (uploading) {
-      rotatorText = rotators[index];
-      index += 1;
-      if (index > 3) { index = 0; }
-      await sleep(1000);
+      rotationDegrees += 5;
+      if (rotationDegrees >= 360) { rotationDegrees = 0; }
+      await sleep(50);
     }
-    rotatorText = '';
   }
+
+  onMount(reload);
+
+  onDestroy(function() {
+    uploading = false;
+  });
 </script>
 
 
@@ -177,7 +178,8 @@
   </p>
   {#if uploading}
     <p class="has-text-weight-bold">
-      Uploads require this section to remain open until complete... {rotatorText}
+      Uploads require this section to remain open until complete...
+      <i style="transform: rotate({rotationDegrees}deg);" class="fa fa-arrows-spin fa-xl ml-2"></i>
     </p>
   {/if}
 </div>

@@ -123,8 +123,12 @@
           <tr>
             {#if columnsMeta.type}
               <td>
-                {#if path.type === 'directory'}<i class="fa fa-folder fa-2x fileico"></i>{/if}
-                {#if path.type === 'file'}<i class="fa fa-file-alt fa-2x fileico"></i>{/if}
+                {#if path.type === 'directory'}
+                  <i class="fa fa-folder fa-2x fileico"></i>
+                {/if}
+                {#if path.type === 'file'}
+                  <i class="fa {guessTextFile(path.name) ? 'fa-file-lines' : 'fa-file'} fa-2x fileico"></i>
+                {/if}
               </td>
             {/if}
             {#if columnsMeta.date}

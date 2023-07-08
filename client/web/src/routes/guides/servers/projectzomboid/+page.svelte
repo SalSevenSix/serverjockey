@@ -31,6 +31,7 @@
       <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
       <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
       <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
+      <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
     </ul>
   </div>
 </div>
@@ -131,6 +132,25 @@ UPnP=false</pre>
       </tr>
     </tbody>
   </table>
+</div>
+
+<div class="content" id="dockerPtero">
+  <h4 class="title is-5">Docker/Pterodactyl Issue</h4>
+  <p>
+    There is
+    <a href="https://theindiestone.com/forums/index.php?/topic/49783-javautilconcurrentexecutionexception-javaioioexception-no-space-left-on-device/" target="_blank">
+        a known issue <i class="fa fa-up-right-from-square"></i></a>
+    running the Project Zomboid dedicated server on Docker as well as Pterodactyl because it uses Docker.
+    The server will often crash while starting around the automatic map backup stage.
+    The workaround is simply to disable all of the automatic map backups in the INI file.
+  </p>
+  <pre class="pre is-thinner">BackupsOnStart=false
+BackupsOnVersionChange=false</pre>
+  <p>
+    Also delete any map backups that the server made
+    (there is a button to do this under Deployment in the Webapp to do this).
+    Then restart the Docker container.
+  </p>
 </div>
 
 <BackToTop />
