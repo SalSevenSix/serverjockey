@@ -1,12 +1,36 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { get } from 'svelte/store';
   import { generateId, sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, eventStarted, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+
+  let subs = new SubscriptionHelper();
+  let triggering = false;
 
   serverStatus.set({});
-  let subs = new SubscriptionHelper();
+  eventDown.set(false);
+  eventStarted.set(false);
+
+  let lastRunning = null;
+  $: serverRunningChange($serverStatus.running);
+  function serverRunningChange(serverRunning) {
+    if (triggering && lastRunning != serverRunning && serverRunning === false) {
+      eventDown.set(true);
+      tick().then(function() { eventDown.set(false); });
+    }
+    lastRunning = serverRunning;
+  }
+
+  let lastState = null;
+  $: serverStateChange($serverStatus.state);
+  function serverStateChange(serverState) {
+    if (triggering && lastState != serverState && serverState === 'STARTED') {
+      eventStarted.set(true);
+      tick().then(function() { eventStarted.set(false); });
+    }
+    lastState = serverState;
+  }
 
   async function setServerStatus(data) {
     let id = generateId();
@@ -34,8 +58,11 @@
         return response.json();
       })
       .then(function(json) {
+        lastRunning = json.running;
+        lastState = json.state;
         setServerStatus(json);
         subs.start($instance.url + '/server/subscribe', function(data) {
+          triggering = true;
           setServerStatus(data);
           return true;
         });

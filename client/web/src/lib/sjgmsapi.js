@@ -7,6 +7,8 @@ export const baseurl = (dev ? 'http://localhost:6164' : '');
 export const securityToken = writable();
 export const instance = writable({});
 export const serverStatus = writable({});
+export const eventDown = writable();
+export const eventStarted = writable();
 
 
 export function newGetRequest() {

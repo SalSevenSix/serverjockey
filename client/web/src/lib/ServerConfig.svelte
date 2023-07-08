@@ -1,28 +1,23 @@
 <script>
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, newPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, newPostRequest } from '$lib/sjgmsapi';
 
   let autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
-  let lastRunning = $serverStatus.running;
   let currentOption = null;
   let selectedOption = null;
 
   $: cannotChange = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+
+  $: if ($eventDown) {
+    currentOption = autoOptions[$serverStatus.auto];
+    selectedOption = currentOption;
+  }
 
   $: if ($serverStatus.auto > -1) {
     if (selectedOption === null) {
       currentOption = autoOptions[$serverStatus.auto];
       selectedOption = currentOption;
     }
-  }
-
-  $: serverRunningChange($serverStatus.running);
-  function serverRunningChange(running) {
-    if (lastRunning === true && running === false) {
-      currentOption = autoOptions[$serverStatus.auto];
-      selectedOption = currentOption;
-    }
-    lastRunning = running;
   }
 
   $: if (selectedOption) {

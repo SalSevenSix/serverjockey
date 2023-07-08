@@ -15,10 +15,12 @@
 
   $: cannotMaintenance = $serverStatus.state === 'MAINTENANCE';
   $: cannotProcess = $serverStatus.running || cannotMaintenance;
+
   $: if (!cannotProcess && reloadRequired) {
     reloadRequired = false;
     reload();
   }
+
   $: if (!cannotProcess && notifyText) {
     notifyInfo(notifyText);
     notifyText = null;

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { isString, guessTextFile, humanFileSize } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, eventStarted, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let rootPath;
   export let allowDelete = false;
@@ -24,22 +24,8 @@
     notifyText = null;
   }
 
-  let lastRunning = $serverStatus.running;
-  $: serverRunningChange($serverStatus.running);
-  function serverRunningChange(running) {
-    if (lastRunning === true && running === false) {
-      reload(pwd);
-    }
-    lastRunning = running;
-  }
-
-  let lastState = $serverStatus.state;
-  $: serverStateChange($serverStatus.state);
-  function serverStateChange(serverState) {
-    if (lastState != 'STARTED' && serverState === 'STARTED') {
-      reload(pwd);
-    }
-    lastState = serverState;
+  $: if ($eventDown || $eventStarted) {
+    reload(pwd);
   }
 
   function defaultSorter(a, b) {
