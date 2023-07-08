@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing
+import re
 from aiohttp import abc as webabc
 # ALLOW util.* msg.* context.* http.httpabc
 from core.util import util
@@ -37,6 +38,8 @@ def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
 
 class ContentTypeImpl(httpabc.ContentType):
 
+    _STAMP_REGEX = re.compile(r'^[0-9_-]+$')
+
     def __init__(self, content_type: str):
         self._content_type = content_type
         self._mime_type, self._encoding = ContentTypeImpl._parse(content_type)
@@ -44,7 +47,23 @@ class ContentTypeImpl(httpabc.ContentType):
 
     @staticmethod
     def lookup(path: str) -> httpabc.ContentType:
-        return util.get(path.split('.')[-1], _CONTENT_TYPES, CONTENT_TYPE_APPLICATION_BIN)
+        parts = path.split('.')
+        size = len(parts)
+        if size < 2:
+            return CONTENT_TYPE_APPLICATION_BIN
+        extension = parts[-1].lower()
+        extension_type = util.get(extension, _CONTENT_TYPES, CONTENT_TYPE_APPLICATION_BIN)
+        if size < 3 or extension_type.is_text_type():
+            return extension_type
+        prextion = parts[-2].lower()
+        prextion_type = util.get(prextion, _CONTENT_TYPES, CONTENT_TYPE_APPLICATION_BIN)
+        if not prextion_type.is_text_type():
+            return extension_type
+        if extension.startswith('prev') or extension.startswith('back'):
+            return prextion_type
+        if ContentTypeImpl._STAMP_REGEX.match(extension):
+            return prextion_type
+        return extension_type
 
     def content_type(self) -> str:
         return self._content_type

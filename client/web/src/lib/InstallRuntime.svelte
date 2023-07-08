@@ -113,7 +113,7 @@
               disabled={cannotProcess} on:click={installRuntime}>
         <i class="fa fa-gear fa-lg"></i>&nbsp;&nbsp;Install Runtime</button>
       <button name="runtime-meta" title="Runtime Runtime" class="button is-primary"
-              disabled={cannotProcess} on:click={runtimeMeta}>
+              on:click={runtimeMeta}>
         <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;Runtime Meta</button>
     </div>
   </div>

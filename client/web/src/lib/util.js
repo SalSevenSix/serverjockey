@@ -1,4 +1,22 @@
 
+const textExtensions = ['txt', 'text', 'log'];
+const stampExtRegex = /^[0-9_-]+$/;
+
+export function guessTextFile(filename) {
+    let parts = filename.split('.');
+    if (parts.length < 2) return false;
+    let extension = parts[parts.length - 1].toLowerCase();
+    if (textExtensions.includes(extension)) return true;
+    let prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
+    if (!prextion) return false;
+    if (textExtensions.includes(prextion)) {
+      if (stampExtRegex.test(extension)) return true;
+      if (extension.startsWith('prev')) return true;
+      if (extension.startsWith('back')) return true;
+    }
+    return false;
+}
+
 export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }

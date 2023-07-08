@@ -2,27 +2,21 @@
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { textAreaModal } from '$lib/modals';
-  import { instance, newPostRequest, newGetRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, newPostRequest, newGetRequest } from '$lib/sjgmsapi';
 
   export let name;
   export let path;
+
   let configFileTextId = 'configFileText' + name.replaceAll(' ', '');
   let updating = true;
   let originalText = '';
   let configText = '';
 
-  onMount(reload);
-
-  function clear() {
-    configText = '';
-  }
-
-  function openEditor() {
-    textAreaModal(name, configText, function(updatedText) {
-      configText = updatedText;
-      save();
-    });
-  }
+  $: cannotAction = updating || $serverStatus.state === 'MAINTENANCE';
+  $: cannotEdit = cannotAction;
+  $: cannotClear = cannotAction || !configText;
+  $: cannotReload = cannotAction;
+  $: cannotSave = cannotAction || originalText === configText;
 
   function reload() {
     updating = true;
@@ -40,6 +34,17 @@
       .finally(function() { updating = false; });
   }
 
+  function editor() {
+    textAreaModal(name, configText, function(updatedText) {
+      configText = updatedText;
+      save();
+    });
+  }
+
+  function clear() {
+    configText = '';
+  }
+
   function save() {
     updating = true;
     let request = newPostRequest('text/plain');
@@ -53,6 +58,8 @@
       .catch(function(error) { notifyError('Failed to update ' + name); })
       .finally(function() { updating = false; });
   }
+
+  onMount(reload);
 </script>
 
 
@@ -64,19 +71,18 @@
     <slot />
     <div class="control pr-6">
       <textarea id={configFileTextId} class="textarea is-family-monospace is-size-7"
-                disabled={updating} bind:value={configText}></textarea>
+                disabled={cannotEdit} bind:value={configText}></textarea>
     </div>
   </div>
   <div class="field">
     <div class="control buttons">
-      <button disabled={updating} on:click={openEditor} name="editor" title="Editor" class="button">
+      <button disabled={cannotEdit} on:click={editor} name="editor" title="Editor" class="button">
         <i class="fa fa-expand-arrows-alt fa-lg"></i>&nbsp;&nbsp;Editor</button>
-      <button disabled={updating || !configText} on:click={clear} name="clear" title="Clear" class="button is-danger">
+      <button disabled={cannotClear} on:click={clear} name="clear" title="Clear" class="button is-danger">
         <i class="fa fa-eraser fa-lg"></i>&nbsp;&nbsp;Clear</button>
-      <button disabled={updating} on:click={reload} name="reload" title="Reload" class="button is-warning">
+      <button disabled={cannotReload} on:click={reload} name="reload" title="Reload" class="button is-warning">
         <i class="fa fa-rotate-right fa-lg"></i>&nbsp;&nbsp;Reload</button>
-      <button disabled={updating || originalText === configText} on:click={save}
-              name="save" title="Save" class="button is-primary">
+      <button disabled={cannotSave} on:click={save} name="save" title="Save" class="button is-primary">
         <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
     </div>
   </div>

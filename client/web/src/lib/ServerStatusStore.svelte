@@ -13,6 +13,7 @@
     data.id = id;
     serverStatus.set(data);
     if (!data.uptime) return;
+    // TODO try a better way to update uptime, perhaps use a seperate store and use real clock time
     let looping = true;
     while (looping) {
       await sleep(10000);

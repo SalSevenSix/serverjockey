@@ -1,23 +1,20 @@
 <script>
   import { onMount } from 'svelte';
-  import { notifyInfo, notifyError } from '$lib/notifications';
-  import { isString, humanFileSize } from '$lib/util';
+  import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
+  import { isString, guessTextFile, humanFileSize } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let rootPath;
   export let allowDelete = false;
   export let customMeta = null;
   export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
-  export let sortFunction = function(a, b) {
-      let typeCompare = b.type.localeCompare(a.type);
-      if (typeCompare != 0) return typeCompare;
-      return b.mtime - a.mtime;
-    };
+  export let sorter = null;
 
   let root = $instance.url + rootPath;
   let pwd = root;
   let hasActions = allowDelete || customMeta;
-  let columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0) + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
+  let columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
+                  + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
   $: cannotAction = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
@@ -45,6 +42,12 @@
     lastState = serverState;
   }
 
+  function defaultSorter(a, b) {
+    let typeCompare = b.type.localeCompare(a.type);
+    if (typeCompare != 0) return typeCompare;
+    return b.mtime - a.mtime;
+  }
+
   let reloading = true;
   let paths = [];
   function reload(url) {
@@ -54,9 +57,9 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       }).then(function(json) {
-        json.sort(sortFunction);
-        json = json.slice(0, 60);
-        paths = json;
+        json.sort(sorter ? sorter : defaultSorter);
+        if (json.length > 60) { notifyWarning('Only 60 of ' + json.length + ' entries shown'); }
+        paths = json.slice(0, 60);
         pwd = url;
       })
       .catch(function(error) {
@@ -148,7 +151,8 @@
             {/if}
             {#if columnsMeta.name && path.type === 'file'}
               <td class="word-break-all">
-                <a href={path.url} target="_blank">{path.name}</a>
+                <a href={path.url} name={path.name} target={guessTextFile(path.name) ? '_blank' : '_self'}>
+                  {path.name}</a>
               </td>
               {#if columnsMeta.size}
                 <td>{humanFileSize(path.size)}</td>

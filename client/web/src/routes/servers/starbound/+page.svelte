@@ -59,7 +59,7 @@
         <ConfigFile name="Settings" path="/config/settings" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <LogFiles allowDelete sortFunction={function(a, b) { return a.name.localeCompare(b.name); }} />
+        <LogFiles allowDelete sorter={function(a, b) { return a.name.localeCompare(b.name); }} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />
