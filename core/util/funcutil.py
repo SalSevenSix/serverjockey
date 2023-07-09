@@ -39,7 +39,15 @@ async def silently_cleanup(obj: typing.Any):
         await silently_call(obj.cleanup)
 
 
-async def silently_call(invokable: typing.Callable):
+async def silently_call(invokable: typing.Union[typing.Callable, typing.Coroutine]):
+    if not invokable:
+        return
+    if inspect.iscoroutine(invokable):
+        try:
+            await invokable
+        except Exception as e:
+            logging.debug('silently_call(coroutine) ' + repr(e))
+        return
     if not callable(invokable):
         return
     try:
@@ -48,4 +56,4 @@ async def silently_call(invokable: typing.Callable):
         else:
             invokable()
     except Exception as e:
-        logging.debug('silently_call() ' + repr(e))
+        logging.debug('silently_call(callable) ' + repr(e))

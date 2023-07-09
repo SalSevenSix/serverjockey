@@ -234,7 +234,7 @@ class Deployment:
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await io.file_exists(filename):
                                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
-                                filename_part = filename + '.part'  # TODO this is now redundant
+                                filename_part = filename + '.part'
                                 await io.delete_file(filename_part)
                                 download_url = baseurl + release['download_url'] + credentials
                                 async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
@@ -261,7 +261,7 @@ class Deployment:
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Restoring ' + filename)
             autosave_file = self._save_dir + '/' + filename
             if not await io.file_exists(autosave_file):
-                raise FileNotFoundError(autosave_file)  # TODO Test this
+                raise FileNotFoundError(autosave_file)
             autosave_size = await io.file_size(autosave_file)
             tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG, autosave_size, 4)
             if await io.file_exists(self._map_file):

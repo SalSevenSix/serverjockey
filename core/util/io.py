@@ -179,7 +179,7 @@ async def stream_write_file(
         async with aiofiles.open(filename, mode='wb') as file:
             await copy_bytes(stream, file, chunk_size, tracker)
     except Exception as e:
-        await delete_file(filename)
+        await funcutil.silently_call(delete_file(filename))
         raise e
 
 

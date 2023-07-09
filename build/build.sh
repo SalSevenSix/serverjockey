@@ -108,7 +108,7 @@ if [ -d "$LIB64_DIR" ]; then
 fi
 
 echo "Running tests"
-python3.10 -m test > /dev/null
+python3.10 -m unittest discover -t . -s test -p *.py
 [ $? -eq 0 ] || exit 1
 
 echo "Removing ServerJockey junk"
