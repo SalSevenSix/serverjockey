@@ -1,14 +1,14 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-  import { sleep, humanFileSize } from '$lib/util';
+  import { humanFileSize } from '$lib/util';
   import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
+  import Spinner from '$lib/Spinner.svelte';
 
   let reloading = true;
   let uploading = false;
   let uploadFiles = [];
-  let rotationDegrees = 0;
   let reloadRequired = false;
   let notifyText = null;
   let paths = [];
@@ -100,7 +100,6 @@
         'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
     }
     uploading = true;
-    uploadTicker();
     let request = rawPostRequest();
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
@@ -118,20 +117,7 @@
       });
   }
 
-  async function uploadTicker() {
-    rotationDegrees = 0;
-    while (uploading) {
-      rotationDegrees += 5;
-      if (rotationDegrees >= 360) { rotationDegrees = 0; }
-      await sleep(50);
-    }
-  }
-
   onMount(reload);
-
-  onDestroy(function() {
-    uploading = false;
-  });
 </script>
 
 
@@ -148,7 +134,11 @@
     <tbody>
       {#if paths.length === 0}
         <tr><td colspan="4">
-          {reloading ? 'Loading...' : 'No Backups found.'}
+          {#if reloading}
+            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+          {:else}
+            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No Backups found
+          {/if}
         </td></tr>
       {:else}
         {#each paths as path}
@@ -179,7 +169,7 @@
   {#if uploading}
     <p class="has-text-weight-bold">
       Uploads require this section to remain open until complete...
-      <i style="transform: rotate({rotationDegrees}deg);" class="fa fa-arrows-spin fa-xl ml-2"></i>
+      <Spinner clazz="fa fa-arrows-spin fa-xl ml-2" />
     </p>
   {/if}
 </div>

@@ -3,6 +3,7 @@
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { isString, guessTextFile, humanFileSize } from '$lib/util';
   import { instance, serverStatus, eventDown, eventStarted, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import Spinner from '$lib/Spinner.svelte';
 
   export let rootPath;
   export let allowDelete = false;
@@ -116,7 +117,11 @@
       {/if}
       {#if paths.length === 0}
         <tr><td colspan={columnCount}>
-          {reloading ? 'Loading...' : 'No files found.'}
+          {#if reloading}
+            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+          {:else}
+            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No files found
+          {/if}
         </td></tr>
       {:else}
         {#each paths as path}

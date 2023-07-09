@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { instance, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import Spinner from '$lib/Spinner.svelte';
   // TODO probably should HTML escape names
 
   let subs = new SubscriptionHelper();
@@ -57,7 +58,11 @@
     <tbody>
       {#if players.length === 0}
         <tr><td colspan="2">
-          {loading ? 'Loading...' : '0 players online.'}
+          {#if loading}
+            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+          {:else}
+            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> Zero players online
+          {/if}
         </td></tr>
       {:else}
         {#each players as player}

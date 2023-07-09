@@ -4,6 +4,7 @@
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
   import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
+  import Spinner from '$lib/Spinner.svelte';
 
   instance.set({});
   serverStatus.set({});
@@ -77,7 +78,11 @@
     <tbody>
       {#if instances.length === 0}
         <tr><td colspan="3">
-          {loading ? 'Loading...' : '0 instances found.'}
+          {#if loading}
+            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+          {:else}
+            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No instances found
+          {/if}
         </td></tr>
       {:else}
         {#each instances as instance, index}
