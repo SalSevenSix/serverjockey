@@ -55,7 +55,6 @@ const helpText = {
     'deployment wipe-world-save        : Delete only map files',
     'deployment wipe-world-playerdb    : Delete only player DB',
     'deployment wipe-world-config      : Delete only config files',
-    'deployment wipe-world-backups     : Delete all server made backups',
     'deployment wipe-world-all         : Delete game world folder',
     'deployment install-runtime {beta} : Install game server'
   ],

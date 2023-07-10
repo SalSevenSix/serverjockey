@@ -4,7 +4,7 @@ import tarfile
 import gzip
 import time
 # ALLOW util.*
-from core.util import funcutil, io, logutil
+from core.util import util, funcutil, io, logutil
 
 _make_archive = funcutil.to_async(shutil.make_archive)
 _unpack_archive = funcutil.to_async(shutil.unpack_archive)
@@ -14,47 +14,69 @@ _gzip_decompress = funcutil.to_async(gzip.decompress)
 
 async def archive_directory(unpacked_dir: str, archives_dir: str,
                             prune_hours: int = 0, logger=logutil.NullLogger()) -> str | None:
-    if unpacked_dir[-1] == '/':
-        unpacked_dir = unpacked_dir[:-1]
-    if not await io.directory_exists(unpacked_dir):
-        logger.warning('WARNING No directory to archive')
-        return None
-    if archives_dir[-1] == '/':
-        archives_dir = archives_dir[:-1]
-    assert await io.directory_exists(archives_dir)
-    archive_kind = unpacked_dir.split('/')[-1]
-    archive, now = archives_dir + '/' + archive_kind, time.time()
-    local_now = time.localtime(now)
-    archive += '-' + time.strftime('%Y%m%d', local_now)
-    archive += '-' + time.strftime('%H%M%S', local_now)
-    logger.info('START Archive Directory')
-    result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)
-    logger.info('Created ' + result)
-    if prune_hours > 0:
-        logger.info('Pruning archives older than ' + str(prune_hours) + ' hours')
-        prune_time = now - float(prune_hours * 60 * 60)
-        files = [o for o in await io.directory_list(archives_dir) if o['type'] == 'file']
-        files = [o for o in files if o['name'].startswith(archive_kind) and o['mtime'] < prune_time]
-        for file in [o['name'] for o in files]:
-            logger.info('Deleting ' + file)
-            await io.delete_file(archives_dir + '/' + file)
-    logger.info('END Archive Directory')
-    return result
+    try:
+        if unpacked_dir[-1] == '/':
+            unpacked_dir = unpacked_dir[:-1]
+        if not await io.directory_exists(unpacked_dir):
+            logger.warning('WARNING No directory to archive')
+            return None
+        logger.info('START Archive Directory')
+        if archives_dir[-1] == '/':
+            archives_dir = archives_dir[:-1]
+        assert await io.directory_exists(archives_dir)
+        archive_kind = unpacked_dir.split('/')[-1]
+        archive, now = archives_dir + '/' + archive_kind, time.time()
+        local_now = time.localtime(now)
+        archive += '-' + time.strftime('%Y%m%d', local_now)
+        archive += '-' + time.strftime('%H%M%S', local_now)
+        result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)
+        logger.info('Created ' + result)
+        if prune_hours > 0:
+            logger.info('Pruning archives older than ' + str(prune_hours) + ' hours')
+            prune_time = now - float(prune_hours * 60 * 60)
+            files = [o for o in await io.directory_list(archives_dir) if o['type'] == 'file']
+            files = [o for o in files if o['name'].startswith(archive_kind) and o['mtime'] < prune_time]
+            for file in [o['name'] for o in files]:
+                logger.info('Deleting ' + file)
+                await io.delete_file(archives_dir + '/' + file)
+        logger.info('END Archive Directory')
+        return result
+    except Exception as e:
+        logger.error('ERROR archiving ' + unpacked_dir + ' ' + repr(e))
+        raise e
 
 
-async def unpack_directory(archive: str, unpack_dir: str, logger=logutil.NullLogger()):
-    assert await io.file_exists(archive)
-    if unpack_dir[-1] == '/':
-        unpack_dir = unpack_dir[:-1]
-    await io.delete_directory(unpack_dir)
-    await io.create_directory(unpack_dir)
-    logger.info('START Unpack Directory')
-    logger.info(archive + ' => ' + unpack_dir)
-    logger.info('No progress updates on unpacking, please be patient...')
-    await _unpack_archive(archive, unpack_dir)
-    logger.info('SET file permissions')
-    await io.auto_chmod(unpack_dir)
-    logger.info('END Unpack Directory')
+async def unpack_directory(archive: str, unpack_dir: str, wipe: bool = True, logger=logutil.NullLogger()):
+    working_dir = None
+    try:
+        logger.info('START Unpack Directory')
+        assert await io.file_exists(archive)
+        logger.info(archive + ' => ' + unpack_dir)
+        logger.info('No progress updates on unpacking, please be patient...')
+        if unpack_dir[-1] == '/':
+            unpack_dir = unpack_dir[:-1]
+        working_dir = unpack_dir
+        if wipe:
+            await io.delete_directory(working_dir)
+        else:
+            working_dir = '/tmp/' + util.generate_id()
+        await io.create_directory(working_dir)
+        await _unpack_archive(archive, working_dir)
+        logger.info('SET file permissions')
+        await io.auto_chmod(working_dir)
+        if not wipe:
+            logger.info('MOVING files')
+            for name in [o['name'] for o in await io.directory_list(working_dir)]:
+                source_path, target_path = working_dir + '/' + name, unpack_dir + '/' + name
+                await io.delete_any(target_path)
+                await io.move_path(source_path, target_path)
+        logger.info('END Unpack Directory')
+    except Exception as e:
+        logger.error('ERROR unpacking ' + archive + ' ' + repr(e))
+        raise e
+    finally:
+        if not wipe:
+            await funcutil.silently_call(io.delete_directory(working_dir))
 
 
 async def gzip_compress(data: bytes) -> bytes:

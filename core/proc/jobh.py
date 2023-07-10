@@ -115,7 +115,7 @@ class _CommandHelper:
             raise Exception('Invalid job request')
         if not self._pty:
             return
-        self._work_dir = '/tmp/' + util.generate_token(6) + str(util.now_millis())
+        self._work_dir = '/tmp/' + util.generate_id()
         await io.create_directory(self._work_dir)
         command = [self._python, await wrapper.write_wrapper(self._work_dir)]
         if isinstance(self._command, str):

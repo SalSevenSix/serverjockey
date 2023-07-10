@@ -30,6 +30,10 @@ def generate_token(length: int, readable: bool = False) -> str:
     return ''.join(result)
 
 
+def generate_id() -> str:
+    return generate_token(6) + str(now_millis())
+
+
 def is_format(text: str) -> bool:
     open_index, close_index = text.count('{'), text.count('}')
     if open_index == 0 and close_index == 0:

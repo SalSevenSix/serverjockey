@@ -12,6 +12,7 @@
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
+  import Autobackups from './Autobackups.svelte';
 
   let deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
@@ -20,10 +21,8 @@
       'desc': 'Reset the player database only. This is logins, whitelist, banlist.' },
     { 'key': 'wipe-world-config', 'name': 'World Config',
       'desc': 'Reset the configuration files only. INI, Sandbox and Spawn config files.' },
-    { 'key': 'wipe-world-backups', 'name': 'World Backups',
-      'desc': 'Delete all the map backups created by the Project Zomboid server.' },
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
-      'desc': 'Reset all of the above.' }];
+      'desc': 'Reset all of the above, including logs and auto backups.' }];
 
   let consoleCommands = {
     'world': {
@@ -146,6 +145,9 @@
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />
         <DeploymentActions actions={deploymentActions} />
+      </Collapsible>
+      <Collapsible icon="fa-file-zipper" title="Autobackups">
+        <Autobackups />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />

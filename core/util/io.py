@@ -34,6 +34,7 @@ class WrapReader(Readable):
 _listdir = funcutil.to_async(os.listdir)
 _is_symlink = funcutil.to_async(os.path.islink)
 _create_symlink = funcutil.to_async(os.symlink)
+_move = funcutil.to_async(shutil.move)
 _rmtree = funcutil.to_async(shutil.rmtree)
 
 
@@ -89,6 +90,10 @@ async def rename_path(source: str, target: str):
     await aioos.rename(source, target)
 
 
+async def move_path(source: str, target: str):
+    await _move(source, target)
+
+
 async def delete_directory(path: str):
     if await directory_exists(path):
         await _rmtree(path)
@@ -97,6 +102,13 @@ async def delete_directory(path: str):
 async def delete_file(file: str):
     if await file_exists(file) or await symlink_exists(file):
         await aioos.remove(file)
+
+
+async def delete_any(path: str):
+    if await directory_exists(path):
+        await _rmtree(path)
+    else:
+        await delete_file(path)
 
 
 async def find_in_env_path(env_path: str | None, executable: str) -> str | None:

@@ -17,6 +17,7 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
+        self._autobackups_dir = self._world_dir + '/backups'
         self._player_dir = self._world_dir + '/db'
         self._logs_dir = self._world_dir + '/Logs'
         self._config_dir = self._world_dir + '/Server'
@@ -50,10 +51,11 @@ class Deployment:
         r.put('wipe-world-playerdb', httpext.WipeHandler(self._mailer, self._player_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
-        r.put('wipe-world-backups', httpext.WipeHandler(self._mailer, self._world_dir + '/backups'), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
+        r.put('restore-autobackup', httpext.UnpackerHandler(
+            self._mailer, self._autobackups_dir, self._world_dir, to_root=True, wipe=False), 'r')
         r.pop()
         r.put('log', httpext.FileSystemHandler(self._world_dir + '/server-console.txt'))
         r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
@@ -61,6 +63,9 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.pop()
+        r.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_autobackups))
+        r.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_autobackups), 'r')
         r.pop()
         r.psh('config')
         r.put('db', httpext.FileSystemHandler(self._player_dir + '/' + _WORLD + '.db'), 'r')
@@ -75,7 +80,14 @@ class Deployment:
     async def build_world(self):
         await io.create_directory(self._backups_dir)
         await io.create_directory(self._world_dir)
+        await io.create_directory(self._autobackups_dir)
         await io.create_directory(self._player_dir)
         await io.create_directory(self._config_dir)
         await io.create_directory(self._save_dir)
         await io.create_directory(self._lua_dir)
+
+
+def _autobackups(entry) -> bool:
+    if entry['type'] == 'directory':
+        return True
+    return entry['type'] == 'file' and entry['name'].endswith('.zip')

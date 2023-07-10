@@ -26,7 +26,7 @@
   }
 
   $: if ($eventDown || $eventStarted) {
-    reload(pwd);
+    reload();
   }
 
   function defaultSorter(a, b) {
@@ -39,6 +39,7 @@
   let paths = [];
   function reload(url) {
     reloading = true;
+    if (!url) { url = pwd; }
     fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -77,7 +78,8 @@
   }
 
   function customAction(url) {
-    customMeta.action(url,
+    customMeta.action(
+      url.substring(root.length),
       function() { cannotAction = true; },
       function(text) { notifyText = text; });
   }
@@ -86,7 +88,7 @@
     fetch(url, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to delete ' + url.substring(root.length)); })
-      .finally(function() { reload(pwd); });
+      .finally(reload);
   }
 
   onMount(rootDirectory);
@@ -109,9 +111,9 @@
         <tr>
           <td colspan={columnCount}>
             <button name="root" class="button mr-2 mb-1" title="ROOT" on:click={rootDirectory}>
-              &nbsp;<i class="fa fa-angle-double-up fa-lg"></i>&nbsp;</button>
+              &nbsp;<i class="fa fa-angles-up fa-lg"></i>&nbsp;</button>
             <button name="up" class="button" title="UP" on:click={upDirectory}>
-              &nbsp;<i class="fa fa-level-up-alt fa-lg"></i>&nbsp;&nbsp;{pwd.substring(root.length)}</button>
+              <i class="fa fa-turn-down fa-lg"></i>&nbsp;&nbsp;&nbsp;{pwd.substring(root.length)}</button>
           </td>
         </tr>
       {/if}
@@ -146,7 +148,7 @@
             {/if}
             {#if columnsMeta.name && path.type === 'file'}
               <td class="word-break-all">
-                <a href={path.url} name={path.name} target={guessTextFile(path.name) ? '_blank' : '_self'}>
+                <a href={path.url} name={path.url} target={guessTextFile(path.name) ? '_blank' : '_self'}>
                   {path.name}</a>
               </td>
               {#if columnsMeta.size}
@@ -156,14 +158,14 @@
             {#if hasActions}
               <td>
                 {#if customMeta}
-                  <button name={customMeta.name} title={customMeta.name} disabled={cannotAction}
+                  <button name={customMeta.name} title={customMeta.name}
+                          disabled={cannotAction || path.type === 'directory'}
                           class={'button ' + customMeta.button + (allowDelete ? ' mb-1' : '')}
                           on:click={function() { customAction(path.url); }}>
                     <i class="fa {customMeta.icon} fa-lg"></i></button>
                 {/if}
                 {#if allowDelete}
-                  <button name="Delete" title="Delete" disabled={cannotAction}
-                          class="button is-danger"
+                  <button name="Delete" title="Delete" disabled={cannotAction} class="button is-danger"
                           on:click={function() { deleteAction(path.url); }}>
                     <i class="fa fa-trash-can fa-lg"></i></button>
                 {/if}
@@ -180,5 +182,9 @@
 <style>
   .fileico {
     width: 0.6em;
+  }
+
+  .fa-turn-down {
+    transform: rotate(180deg);
   }
 </style>

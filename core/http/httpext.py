@@ -83,10 +83,11 @@ class ArchiveHandler(httpabc.PostHandler):
 
 class UnpackerHandler(httpabc.PostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, root_dir: str):
+    def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, root_dir: str,
+                 to_root: bool = False, wipe: bool = True):
         self._handler = MessengerHandler(
             mailer, msgext.Unpacker.REQUEST,
-            {'backups_dir': backups_dir, 'root_dir': root_dir},
+            {'backups_dir': backups_dir, 'root_dir': root_dir, 'to_root': to_root, 'wipe': wipe},
             httpsubs.Selector(
                 msg_filter=msglog.LoggingPublisher.FILTER_ALL_LEVELS,
                 completed_filter=msgext.Unpacker.FILTER_DONE,
