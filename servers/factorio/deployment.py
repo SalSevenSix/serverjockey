@@ -2,7 +2,7 @@ import aiohttp
 import socket
 # ALLOW core.* factorio.messaging
 from core.util import util, tasks, io, pack, aggtrf
-from core.msg import msgabc, msgext, msgftr
+from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
@@ -101,7 +101,8 @@ class Deployment:
         r.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
         r.pop()
         r.psh('autosaves', httpext.FileSystemHandler(self._save_dir, ls_filter=_autosaves))
         r.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
@@ -176,7 +177,7 @@ class Deployment:
                     assert response.status == 200
                     tracker, content_length = None, response.headers.get('Content-Length')
                     if content_length:
-                        tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG, int(content_length), 10, 'downloaded')
+                        tracker = msglog.PercentTracker(self._mailer, int(content_length), prefix='downloaded')
                     await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
@@ -234,18 +235,15 @@ class Deployment:
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await io.file_exists(filename):
                                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
-                                filename_part = filename + '.part'
-                                await io.delete_file(filename_part)
                                 download_url = baseurl + release['download_url'] + credentials
                                 async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
                                     assert modfile_response.status == 200
                                     tracker, content_length = None, modfile_response.headers.get('Content-Length')
                                     if content_length:
-                                        tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG,
-                                                           int(content_length), 5, 'downloaded')
+                                        tracker = msglog.PercentTracker(
+                                            self._mailer, int(content_length), notifications=5, prefix='downloaded')
                                     await io.stream_write_file(
-                                        filename_part, io.WrapReader(modfile_response.content), chunk_size, tracker)
-                                await io.rename_path(filename_part, filename)
+                                        filename, io.WrapReader(modfile_response.content), chunk_size, tracker)
                     if not mod_version_found:
                         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR: Mod ' + mod['name'] + ' version '
                                           + mod['version'] + ' not found, see ' + mod_meta_url)
@@ -263,7 +261,7 @@ class Deployment:
             if not await io.file_exists(autosave_file):
                 raise FileNotFoundError(autosave_file)
             autosave_size = await io.file_size(autosave_file)
-            tracker = _Tracker(self._mailer, msg.DEPLOYMENT_MSG, autosave_size, 4)
+            tracker = msglog.PercentTracker(self._mailer, autosave_size, notifications=4)
             if await io.file_exists(self._map_file):
                 await io.rename_path(self._map_file, map_backup)
             await io.stream_copy_file(autosave_file, self._map_file, chunk_size, tracker)
@@ -303,28 +301,6 @@ class _RestoreAutosaveHandler(httpabc.PostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         tasks.task_fork(self._deployment.restore_autosave(filename), 'factorio.restore_autosave()')
         return httpabc.ResponseBody.NO_CONTENT
-
-
-class _Tracker(io.BytesTracker):
-
-    def __init__(self, mailer: msgabc.MulticastMailer,
-                 msg_name: str, expected: int, notifications: int, prefix: str = 'progress'):
-        self._mailer = mailer
-        self._msg_name = msg_name
-        self._expected = expected
-        self._progress = 0
-        self._increment = int(expected / notifications)
-        self._next_target = self._increment
-        self._prefix = prefix
-
-    def processed(self, chunk: bytes):
-        self._progress += len(chunk)
-        if self._progress >= self._expected:
-            self._mailer.post(self, self._msg_name, self._prefix + ' 100%')
-        elif self._progress > self._next_target:
-            self._next_target += self._increment
-            message = self._prefix + '  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
-            self._mailer.post(self, self._msg_name, message)
 
 
 def _logfiles(entry) -> bool:

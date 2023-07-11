@@ -1,6 +1,6 @@
 # ALLOW core.* starbound.messaging
 from core.util import util, io
-from core.msg import msgext, msgftr
+from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
@@ -57,7 +57,8 @@ class Deployment:
         r.put('input', steam.SteamCmdInputHandler(self._mailer))
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self):
         await self._rcon_config()
@@ -94,7 +95,7 @@ class Deployment:
         if await io.directory_exists(workshop_dir):
             workshop_files = await io.directory_list(workshop_dir)
         workshop_items, mods_dir = [], self._runtime_dir + '/mods'
-        for workshop_item in [o['name'] for o in workshop_files if o['type'] == 'directory']:
+        for workshop_item in [str(o['name']) for o in workshop_files if o['type'] == 'directory']:
             pack_file = workshop_dir + '/' + workshop_item + '/contents.pak'
             if await io.file_exists(pack_file):
                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Adding   ' + workshop_item)

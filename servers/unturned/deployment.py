@@ -1,6 +1,6 @@
 # ALLOW core.* unturned.messaging
 from core.util import util, io
-from core.msg import msgftr, msgext
+from core.msg import msgftr, msgext, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh, prcenc, wrapper
@@ -76,7 +76,8 @@ class Deployment:
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_file))

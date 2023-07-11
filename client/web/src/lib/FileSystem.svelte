@@ -1,23 +1,30 @@
 <script>
   import { onMount } from 'svelte';
+  import { confirmModal } from '$lib/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { isString, guessTextFile, humanFileSize } from '$lib/util';
-  import { instance, serverStatus, eventDown, eventStarted, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint,
+           newGetRequest, newPostRequest } from '$lib/sjgmsapi';
   import Spinner from '$lib/Spinner.svelte';
 
   export let rootPath;
-  export let allowDelete = false;
-  export let customMeta = null;
-  export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
+  export let allowDelete = 0;  // 0=Never 1=!RunOrMaint 2=!Maint 3=Always
+  export let confirmDelete = true;
   export let sorter = null;
+  export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
+  export let customMeta = null;
 
   let root = $instance.url + rootPath;
   let pwd = root;
-  let hasActions = allowDelete || customMeta;
+  let loading = true;
+  let paths = [];
+  let hasActions = allowDelete > 0 || customMeta;
   let columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
                   + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
-  $: cannotAction = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+  $: isMaint = $serverStatus.state === 'MAINTENANCE';
+  $: cannotAction = $serverStatus.running || isMaint;
+  $: cannotDelete = (allowDelete === 1 && cannotAction) || (allowDelete === 2 && isMaint);
 
   let notifyText = null;
   $: if (!cannotAction && notifyText) {
@@ -25,7 +32,7 @@
     notifyText = null;
   }
 
-  $: if ($eventDown || $eventStarted) {
+  $: if ($eventDown || $eventStarted || $eventEndMaint) {
     reload();
   }
 
@@ -35,16 +42,14 @@
     return b.mtime - a.mtime;
   }
 
-  let reloading = true;
-  let paths = [];
-  function reload(url) {
-    reloading = true;
-    if (!url) { url = pwd; }
+  function load(url) {
+    loading = true;
     fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
-      }).then(function(json) {
+      })
+      .then(function(json) {
         json.sort(sorter ? sorter : defaultSorter);
         if (json.length > 60) { notifyWarning('Only 60 of ' + json.length + ' entries shown'); }
         paths = json.slice(0, 60);
@@ -52,39 +57,66 @@
       })
       .catch(function(error) {
         if (url === root) {
-          paths = [];
+          paths = [];  // TODO maybe add single error entry
           pwd = root;
+          notifyError('Failed to load ' + rootPath);
         } else {
           rootDirectory();
         }
       })
       .finally(function() {
-        reloading = false;
+        loading = false;
       });
   }
 
+  export function reload() {
+    load(pwd);
+  }
+
   function rootDirectory() {
-    reload(root);
+    load(root);
   }
 
   function openDirectory() {
-    reload(this.name);
+    load(this.name);
   }
 
   function upDirectory() {
     let parts = pwd.split('/');
     parts.pop();
-    reload(parts.join('/'));
+    load(parts.join('/'));
   }
 
   function customAction(url) {
     customMeta.action(
       url.substring(root.length),
-      function() { cannotAction = true; },
-      function(text) { notifyText = text; });
+      { // callbacks
+        start: function() {
+          isMaint = true;
+          return true;
+        },
+        started: function(text) {
+          notifyText = text;
+        },
+        error: function(text) {
+          isMaint = false;
+          notifyError(text);
+          return false;
+        }
+      });
   }
 
   function deleteAction(url) {
+    if (confirmDelete) {
+      confirmModal('Delete?\n' + url.substring(root.length), function() {
+        deleteUrl(url);
+      });
+    } else {
+      deleteUrl(url);
+    }
+  }
+
+  function deleteUrl(url) {
     fetch(url, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to delete ' + url.substring(root.length)); })
@@ -119,7 +151,7 @@
       {/if}
       {#if paths.length === 0}
         <tr><td colspan={columnCount}>
-          {#if reloading}
+          {#if loading}
             <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
           {:else}
             <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No files found
@@ -160,12 +192,12 @@
                 {#if customMeta}
                   <button name={customMeta.name} title={customMeta.name}
                           disabled={cannotAction || path.type === 'directory'}
-                          class={'button ' + customMeta.button + (allowDelete ? ' mb-1' : '')}
+                          class={'button ' + customMeta.button + (allowDelete > 0 ? ' mb-1' : '')}
                           on:click={function() { customAction(path.url); }}>
                     <i class="fa {customMeta.icon} fa-lg"></i></button>
                 {/if}
-                {#if allowDelete}
-                  <button name="Delete" title="Delete" disabled={cannotAction} class="button is-danger"
+                {#if allowDelete > 0}
+                  <button name="Delete" title="Delete" disabled={cannotDelete} class="button is-danger"
                           on:click={function() { deleteAction(path.url); }}>
                     <i class="fa fa-trash-can fa-lg"></i></button>
                 {/if}

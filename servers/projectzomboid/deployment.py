@@ -1,6 +1,6 @@
 # ALLOW core.* projectzomboid.messaging
 from core.util import io
-from core.msg import msgext, msgftr
+from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
@@ -62,7 +62,8 @@ class Deployment:
         r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'), 'r')
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
         r.pop()
         r.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_autobackups))
         r.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_autobackups), 'r')

@@ -17,7 +17,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
     rconsvc.RconService.FILTER_OUTPUT,
-    msglog.LoggingPublisher.FILTER_ALL_LEVELS,
+    msglog.FILTER_ALL_LEVELS,
     FILTER_DEPLOYMENT_MSG)
 MAINTENANCE_STATE_FILTER = msgftr.Or(
     FILTER_DEPLOYMENT_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)

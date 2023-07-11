@@ -1,25 +1,26 @@
 <script>
-  import { notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { instance, newPostRequest } from '$lib/sjgmsapi';
   import FileSystem from '$lib/FileSystem.svelte';
 
-  function restoreAutobackup(path, callbackStart, callbackStarted) {
+  function restoreAutobackup(path, callbacks) {
     confirmModal('Restore ' + path + ' ?\nCurrent save will be overwritten.', function() {
-      callbackStart();
+      callbacks.start();
       let request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
       fetch($instance.url + '/deployment/restore-autobackup', request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
-          callbackStarted('Autobackup restore complete. Please check console log output.');
+          callbacks.started('Autobackup restore complete. Please check console log output.');
         })
-        .catch(function(error) { notifyError('Failed to restore ' + path); });
+        .catch(function(error) {
+          callbacks.error('Failed to restore ' + path);
+        });
     });
   }
 </script>
 
 
-<FileSystem rootPath="/autobackups" allowDelete
+<FileSystem rootPath="/autobackups" allowDelete={1}
             columnsMeta={{ type: false, date: 'Date', name: 'Name', size: 'Size' }}
             customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-undo', action: restoreAutobackup }} />

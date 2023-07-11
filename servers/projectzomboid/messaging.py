@@ -17,7 +17,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
             msgftr.DataStrContains('token', True),
             msgftr.DataStrContains('command entered via server console', True)))),
     jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.LoggingPublisher.FILTER_ALL_LEVELS)
+    msglog.FILTER_ALL_LEVELS)
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General")))

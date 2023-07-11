@@ -3,16 +3,18 @@ import time
 import typing
 import aiofiles
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import funcutil
+from core.util import io, funcutil
 from core.msg import msgabc, msgftr, msgtrf
+
+CRITICAL = 'MessageLogging.CRITICAL'
+ERROR = 'MessageLogging.ERROR'
+WARNING = 'MessageLogging.WARNING'
+INFO = 'MessageLogging.INFO'
+DEBUG = 'MessageLogging.DEBUG'
+FILTER_ALL_LEVELS = msgftr.NameIn((DEBUG, INFO, WARNING, ERROR, CRITICAL))
 
 
 class LoggingPublisher:
-    CRITICAL = 'LoggingPublisher.CRITICAL'
-    ERROR = 'LoggingPublisher.ERROR'
-    WARNING = 'LoggingPublisher.WARNING'
-    INFO = 'LoggingPublisher.INFO'
-    DEBUG = 'LoggingPublisher.DEBUG'
     _LEVEL_MAP = {
         logging.CRITICAL: CRITICAL,
         logging.ERROR: ERROR,
@@ -20,7 +22,6 @@ class LoggingPublisher:
         logging.INFO: INFO,
         logging.DEBUG: DEBUG
     }
-    FILTER_ALL_LEVELS = msgftr.NameIn((DEBUG, INFO, WARNING, ERROR, CRITICAL))
 
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
         self._mailer = mailer
@@ -110,3 +111,54 @@ class PrintSubscriber(msgabc.AbcSubscriber):
     def handle(self, message):
         print(self._transformer.transform(message))
         return None
+
+
+class PercentTracker(io.BytesTracker):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, expected: int, msg_name: str = INFO,
+                 notifications: int = 10, prefix: str = 'progress'):
+        self._mailer = mailer
+        self._msg_name = msg_name
+        self._expected = expected
+        self._increment = int(expected / notifications)
+        self._prefix = prefix
+        self._progress, self._next_target = 0, self._increment
+
+    def processed(self, chunk: bytes | None):
+        if chunk is None:
+            self._progress, self._next_target = 0, self._increment
+            return
+        self._progress += len(chunk)
+        if self._progress >= self._expected:
+            self._mailer.post(self, self._msg_name, self._prefix + ' 100%')
+        elif self._progress > self._next_target:
+            self._next_target += self._increment
+            message = self._prefix + '  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
+            self._mailer.post(self, self._msg_name, message)
+
+
+class IntervalTracker(io.BytesTracker):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, msg_name: str = INFO, interval: float = 1.0,
+                 initial_message: str = 'Receiving data...', prefix: str = 'received'):
+        self._mailer = mailer
+        self._msg_name = msg_name
+        self._initial_message = initial_message
+        self._interval = interval
+        self._prefix = prefix
+        self._progress, self._last_time = 0, 0
+
+    def processed(self, chunk: bytes | None):
+        if chunk is None:
+            self._mailer.post(self, self._msg_name, self._prefix + ' ' + str(self._progress) + ' bytes total')
+            self._progress, self._last_time = 0, 0
+            return
+        if not self._last_time:
+            self._last_time = time.time()
+            if self._initial_message:
+                self._mailer.post(self, self._msg_name, self._initial_message)
+        self._progress += len(chunk)
+        now = time.time()
+        if now - self._last_time > self._interval:
+            self._mailer.post(self, self._msg_name, self._prefix + ' ' + str(self._progress) + ' bytes')
+            self._last_time = now

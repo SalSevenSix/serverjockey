@@ -14,6 +14,7 @@ _gzip_decompress = funcutil.to_async(gzip.decompress)
 
 async def archive_directory(unpacked_dir: str, archives_dir: str,
                             prune_hours: int = 0, logger=logutil.NullLogger()) -> str | None:
+    working_dir = '/tmp/' + util.generate_id()
     try:
         if unpacked_dir[-1] == '/':
             unpacked_dir = unpacked_dir[:-1]
@@ -24,13 +25,16 @@ async def archive_directory(unpacked_dir: str, archives_dir: str,
         if archives_dir[-1] == '/':
             archives_dir = archives_dir[:-1]
         assert await io.directory_exists(archives_dir)
+        await io.create_directory(working_dir)
+        now = time.time()
+        lnow = time.localtime(now)
         archive_kind = unpacked_dir.split('/')[-1]
-        archive, now = archives_dir + '/' + archive_kind, time.time()
-        local_now = time.localtime(now)
-        archive += '-' + time.strftime('%Y%m%d', local_now)
-        archive += '-' + time.strftime('%H%M%S', local_now)
-        result = await _make_archive(archive, 'zip', root_dir=unpacked_dir, logger=logger)
-        logger.info('Created ' + result)
+        archive_name = archive_kind + '-' + time.strftime('%Y%m%d', lnow) + '-' + time.strftime('%H%M%S', lnow)
+        archive_tmp = await _make_archive(working_dir + '/' + archive_name, 'zip', root_dir=unpacked_dir, logger=logger)
+        assert archive_tmp.endswith('.zip')
+        archive_path = archives_dir + '/' + archive_name + '.zip'
+        await io.move_path(archive_tmp, archive_path)
+        logger.info('Created ' + archive_path)
         if prune_hours > 0:
             logger.info('Pruning archives older than ' + str(prune_hours) + ' hours')
             prune_time = now - float(prune_hours * 60 * 60)
@@ -40,10 +44,12 @@ async def archive_directory(unpacked_dir: str, archives_dir: str,
                 logger.info('Deleting ' + file)
                 await io.delete_file(archives_dir + '/' + file)
         logger.info('END Archive Directory')
-        return result
+        return archive_path
     except Exception as e:
         logger.error('ERROR archiving ' + unpacked_dir + ' ' + repr(e))
         raise e
+    finally:
+        await funcutil.silently_call(io.delete_directory(working_dir))
 
 
 async def unpack_directory(archive: str, unpack_dir: str, wipe: bool = True, logger=logutil.NullLogger()):

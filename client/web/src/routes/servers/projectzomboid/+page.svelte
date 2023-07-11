@@ -140,7 +140,7 @@
         </ConfigFile>
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <LogFiles allowDelete />
+        <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

@@ -73,7 +73,7 @@ class ArchiveHandler(httpabc.PostHandler):
             mailer, msgext.Archiver.REQUEST,
             {'backups_dir': backups_dir, 'source_dir': source_dir},
             httpsubs.Selector(
-                msg_filter=msglog.LoggingPublisher.FILTER_ALL_LEVELS,
+                msg_filter=msglog.FILTER_ALL_LEVELS,
                 completed_filter=msgext.Archiver.FILTER_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 
@@ -89,7 +89,7 @@ class UnpackerHandler(httpabc.PostHandler):
             mailer, msgext.Unpacker.REQUEST,
             {'backups_dir': backups_dir, 'root_dir': root_dir, 'to_root': to_root, 'wipe': wipe},
             httpsubs.Selector(
-                msg_filter=msglog.LoggingPublisher.FILTER_ALL_LEVELS,
+                msg_filter=msglog.FILTER_ALL_LEVELS,
                 completed_filter=msgext.Unpacker.FILTER_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 
@@ -128,12 +128,13 @@ class WipeHandler(httpabc.PostHandler):
 
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
-    def __init__(self, path: str, tail: typing.Optional[str] = None,
-                 protected: bool = True, ls_filter: typing.Callable = None):
+    def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True,
+                 ls_filter: typing.Callable = None, write_tracker: io.BytesTracker = None):
         self._path = path
         self._tail = tail
         self._protected = protected
         self._ls_filter = ls_filter
+        self._write_tracker = write_tracker
 
     async def handle_get(self, resource, data):
         if self._protected and not httpcnt.is_secure(data):
@@ -169,7 +170,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
             await io.write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
         if isinstance(body, httpabc.ByteStream):
-            await io.stream_write_file(path, body)
+            await io.stream_write_file(path, body, tracker=self._write_tracker)
             return httpabc.ResponseBody.NO_CONTENT
         return httpabc.ResponseBody.BAD_REQUEST
 

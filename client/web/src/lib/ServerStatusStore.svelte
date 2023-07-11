@@ -3,7 +3,8 @@
   import { get } from 'svelte/store';
   import { generateId, sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, eventDown, eventStarted, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint,
+           SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
   let subs = new SubscriptionHelper();
   let triggering = false;
@@ -11,6 +12,7 @@
   serverStatus.set({});
   eventDown.set(false);
   eventStarted.set(false);
+  eventEndMaint.set(false);
 
   let lastRunning = null;
   $: serverRunningChange($serverStatus.running);
@@ -28,6 +30,10 @@
     if (triggering && lastState != serverState && serverState === 'STARTED') {
       eventStarted.set(true);
       tick().then(function() { eventStarted.set(false); });
+    }
+    if (triggering && lastState != serverState && lastState === 'MAINTENANCE') {
+      eventEndMaint.set(true);
+      tick().then(function() { eventEndMaint.set(false); });
     }
     lastState = serverState;
   }

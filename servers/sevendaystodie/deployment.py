@@ -68,7 +68,8 @@ class Deployment:
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._backups_dir, 'path'), 'm')
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     def new_server_process(self) -> proch.ServerProcess:
         return proch.ServerProcess(self._mailer, self._executable) \

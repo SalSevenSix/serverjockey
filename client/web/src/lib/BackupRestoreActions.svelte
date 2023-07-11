@@ -1,91 +1,49 @@
 <script>
-  import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-  import { humanFileSize } from '$lib/util';
-  import { instance, serverStatus, newGetRequest, newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
+  import FileSystem from '$lib/FileSystem.svelte';
   import Spinner from '$lib/Spinner.svelte';
 
-  let reloading = true;
+  let fileSystem;
   let uploading = false;
   let uploadFiles = [];
-  let reloadRequired = false;
   let notifyText = null;
-  let paths = [];
 
-  $: cannotMaintenance = $serverStatus.state === 'MAINTENANCE';
-  $: cannotProcess = $serverStatus.running || cannotMaintenance;
+  $: cannotUpload = uploading || $serverStatus.state === 'MAINTENANCE';
+  $: cannotBackup = $serverStatus.running || cannotUpload;
 
-  $: if (!cannotProcess && reloadRequired) {
-    reloadRequired = false;
-    reload();
-  }
-
-  $: if (!cannotProcess && notifyText) {
+  $: if (!cannotBackup && notifyText) {
     notifyInfo(notifyText);
     notifyText = null;
   }
 
-  function reload() {
-    reloading = true;
-    fetch($instance.url + '/backups', newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) {
-        json.sort(function(a, b) {
-          return b.name.localeCompare(a.name);
-        });
-        paths = json;
-      })
-      .catch(function(error) {
-        notifyError('Failed to load Backup files.');
-      })
-      .finally(function() {
-        reloading = false;
-      });
-  }
-
   function createBackup() {
-    cannotProcess = true;
+    cannotBackup = true;
     fetch($instance.url + '/deployment/backup-' + this.name, newPostRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
-        reloadRequired = true;
         notifyText = 'Backup completed. Please check log output for details.';
       })
       .catch(function(error) {
+        cannotBackup = false;
         notifyError('Failed to create Backup.');
-        cannotProcess = false;
       });
   }
 
-  function restoreBackup() {
-    let backupName = this.name;
-    confirmModal('Restore ' + backupName + ' ?\nExisting files will be overwritten.', function() {
-      cannotProcess = true;
+  function restoreBackup(path, callbacks) {
+    confirmModal('Restore ' + path + ' ?\nExisting files will be overwritten.', function() {
+      cannotBackup = callbacks.start();
       let request = newPostRequest();
-      request.body = JSON.stringify({ filename: backupName });
+      request.body = JSON.stringify({ filename: path });
       fetch($instance.url + '/deployment/restore-backup', request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
-          notifyText = 'Restored ' + backupName;
+          callbacks.started('Restored backup. Please check console log output.');
         })
         .catch(function(error) {
-          notifyError('Failed to restore ' + backupName);
-          cannotProcess = false;
+          cannotBackup = callbacks.error('Failed to restore ' + path);
         });
-    });
-  }
-
-  function deleteBackup() {
-    let backupName = this.name;
-    confirmModal('Delete ' + backupName + ' ?', function() {
-      fetch($instance.url + '/backups/' + backupName, newPostRequest())
-        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(function(error) { notifyError('Failed to delete ' + backupName); })
-        .finally(reload);
     });
   }
 
@@ -103,7 +61,7 @@
     let request = rawPostRequest();
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
-    fetch($instance.url + '/backups/' + filename, request)
+    fetch($instance.url + '/backups/' + filename, request)  // Blocks until complete
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(filename + ' uploaded successfully.');
@@ -113,53 +71,16 @@
       })
       .finally(function() {
         uploading = false;
-        reload();
+        fileSystem.reload();  // Manual reload bacause upload does not use MAINTENANCE state
       });
   }
-
-  onMount(reload);
 </script>
 
 
-<div class="block">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Size</th>
-        <th>Backup</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {#if paths.length === 0}
-        <tr><td colspan="4">
-          {#if reloading}
-            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
-          {:else}
-            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No Backups found
-          {/if}
-        </td></tr>
-      {:else}
-        {#each paths as path}
-          <tr>
-            <td>{path.updated}</td>
-            <td>{humanFileSize(path.size)}</td>
-            <td class="word-break-all"><a href={$instance.url + '/backups/' + path.name}>{path.name}</a></td>
-            <td>
-              <button name={path.name} title="Restore" class="button is-warning mb-1"
-                      disabled={cannotProcess} on:click={restoreBackup}>
-                      <i class="fa fa-undo fa-lg"></button>
-              <button name={path.name} title="Delete" class="button is-danger"
-                      disabled={cannotMaintenance} on:click={deleteBackup}>
-                      <i class="fa fa-trash-can fa-lg"></i></button>
-            </td>
-          </tr>
-        {/each}
-      {/if}
-    </tbody>
-  </table>
-</div>
+<FileSystem bind:this={fileSystem} rootPath="/backups" allowDelete={2}
+            columnsMeta={{ type: false, date: 'Date', name: 'Backup', size: 'Size' }}
+            customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-undo', action: restoreBackup,
+                          sorter: function(a, b) { return b.name.localeCompare(a.name); }}} />
 
 <div class="content">
   <p>
@@ -168,8 +89,8 @@
   </p>
   {#if uploading}
     <p class="has-text-weight-bold">
-      Uploads require this section to remain open until complete...
-      <Spinner clazz="fa fa-arrows-spin fa-xl ml-2" />
+      <Spinner clazz="fa fa-arrows-spin fa-xl mr-1" />
+      Please keep this section open while uploading...
     </p>
   {/if}
 </div>
@@ -178,7 +99,7 @@
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
       <button name="upload" title="Upload File" class="button is-success"
-              disabled={cannotMaintenance} on:click={uploadFile}>
+              disabled={cannotUpload} on:click={uploadFile}>
         <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload</button>
     </div>
     <label class="file-label pr-6">
@@ -187,15 +108,15 @@
         <span class="file-icon"><i class="fa fa-file-circle-plus"></i></span>
         <span class="file-label">Choose file…</span>
       </span>
-      <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected.'}</span>
+      <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected'}</span>
     </label>
   </div>
   <div class="block buttons">
     <button name="runtime" title="Backup Runtime" class="button is-primary"
-            disabled={cannotProcess} on:click={createBackup}>
+            disabled={cannotBackup} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
     <button name="world" title="Backup World" class="button is-primary"
-            disabled={cannotProcess} on:click={createBackup}>
+            disabled={cannotBackup} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
   </div>
 </div>

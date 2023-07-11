@@ -6,14 +6,14 @@ import typing
 import aiofiles
 from aiofiles import os as aioos
 # ALLOW util.*
-from core.util import funcutil
+from core.util import util, funcutil
 
 DEFAULT_CHUNK_SIZE = 65536  # 64Kb
 
 
 class BytesTracker(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def processed(self, chunk: bytes):
+    def processed(self, chunk: bytes | None):
         pass
 
 
@@ -186,13 +186,16 @@ async def stream_write_file(
         filename: str, stream: Readable,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         tracker: BytesTracker = None):
-    # noinspection PyBroadException
+    working_dir = '/tmp/' + util.generate_id()
     try:
-        async with aiofiles.open(filename, mode='wb') as file:
+        await create_directory(working_dir)
+        tempfile = working_dir + '/' + filename.split('/')[-1]
+        async with aiofiles.open(tempfile, mode='wb') as file:
             await copy_bytes(stream, file, chunk_size, tracker)
-    except Exception as e:
-        await funcutil.silently_call(delete_file(filename))
-        raise e
+        await delete_file(filename)
+        await move_path(tempfile, filename)
+    finally:
+        await funcutil.silently_call(delete_directory(working_dir))
 
 
 async def copy_bytes(
@@ -207,3 +210,5 @@ async def copy_bytes(
             await target.write(chunk)
             if tracker:
                 tracker.processed(chunk)
+        elif tracker:
+            tracker.processed(None)

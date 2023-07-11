@@ -14,7 +14,7 @@ SERVER_STARTED_FILTER = msgftr.And(
 CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.LoggingPublisher.FILTER_ALL_LEVELS)
+    msglog.FILTER_ALL_LEVELS)
 
 
 class Server(svrabc.Server):
