@@ -122,6 +122,18 @@ def build_url(scheme: str = 'http', host: str = 'localhost', port: int = 80, pat
     return ''.join(parts)
 
 
+def human_file_size(value: int | None):
+    if value is None:
+        return ''
+    if value < 1024:
+        return str(value) + ' B'
+    for unit in ('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB'):
+        if abs(value) < 1024.0:
+            return f'{value:3.1f} {unit}'
+        value /= 1024.0
+    return f'{value:.1f} YiB'
+
+
 def get(key: typing.Any, dictionary: dict, default: typing.Any = None):
     if key and dictionary and key in dictionary:
         return dictionary[key]

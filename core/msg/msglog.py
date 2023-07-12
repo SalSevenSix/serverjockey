@@ -3,7 +3,7 @@ import time
 import typing
 import aiofiles
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import io, funcutil
+from core.util import util, io, funcutil
 from core.msg import msgabc, msgftr, msgtrf
 
 CRITICAL = 'MessageLogging.CRITICAL'
@@ -115,50 +115,75 @@ class PrintSubscriber(msgabc.AbcSubscriber):
 
 class PercentTracker(io.BytesTracker):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, expected: int, msg_name: str = INFO,
-                 notifications: int = 10, prefix: str = 'progress'):
+    def __init__(self, mailer: msgabc.MulticastMailer, expected: int, notifications: int = 10,
+                 prefix: str = 'progress', msg_name: str = INFO):
         self._mailer = mailer
         self._msg_name = msg_name
         self._expected = expected
-        self._increment = int(expected / notifications)
         self._prefix = prefix
-        self._progress, self._next_target = 0, self._increment
+        self._increment = int(expected / notifications)
+        self._bytes, self._next_target = _Bytes(), self._increment
 
     def processed(self, chunk: bytes | None):
         if chunk is None:
-            self._progress, self._next_target = 0, self._increment
+            self._bytes, self._next_target = _Bytes(), self._increment
             return
-        self._progress += len(chunk)
-        if self._progress >= self._expected:
-            self._mailer.post(self, self._msg_name, self._prefix + ' 100%')
-        elif self._progress > self._next_target:
+        total = self._bytes.add(chunk)
+        if total >= self._expected:
+            message = self._prefix + ' 100% (' + self._bytes.rate() + ')'
+            self._mailer.post(self, self._msg_name, message)
+        elif total > self._next_target:
             self._next_target += self._increment
-            message = self._prefix + '  ' + str(int((self._progress / self._expected) * 100.0)) + '%'
+            percentage = str(int((total / self._expected) * 100.0))
+            message = self._prefix + '  ' + percentage + '% (' + self._bytes.rate() + ')'
             self._mailer.post(self, self._msg_name, message)
 
 
 class IntervalTracker(io.BytesTracker):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, msg_name: str = INFO, interval: float = 1.0,
-                 initial_message: str = 'Receiving data...', prefix: str = 'received'):
+    def __init__(self, mailer: msgabc.MulticastMailer, interval: float = 1.0, msg_name: str = INFO,
+                 initial_message: str = 'RECEIVING data...', prefix: str = 'received'):
         self._mailer = mailer
         self._msg_name = msg_name
         self._initial_message = initial_message
         self._interval = interval
         self._prefix = prefix
-        self._progress, self._last_time = 0, 0
+        self._bytes, self._last_time = _Bytes(), 0
 
     def processed(self, chunk: bytes | None):
         if chunk is None:
-            self._mailer.post(self, self._msg_name, self._prefix + ' ' + str(self._progress) + ' bytes total')
-            self._progress, self._last_time = 0, 0
+            message = self._prefix + ' ' + util.human_file_size(self._bytes.total())
+            message += ' Total (' + self._bytes.rate() + ')'
+            self._mailer.post(self, self._msg_name, message)
+            self._bytes, self._last_time = _Bytes(), 0
             return
         if not self._last_time:
             self._last_time = time.time()
             if self._initial_message:
                 self._mailer.post(self, self._msg_name, self._initial_message)
-        self._progress += len(chunk)
+        self._bytes.add(chunk)
         now = time.time()
         if now - self._last_time > self._interval:
-            self._mailer.post(self, self._msg_name, self._prefix + ' ' + str(self._progress) + ' bytes')
+            message = self._prefix + ' ' + util.human_file_size(self._bytes.total())
+            message += ' (' + self._bytes.rate() + ')'
+            self._mailer.post(self, self._msg_name, message)
             self._last_time = now
+
+
+class _Bytes:
+
+    def __init__(self):
+        self._start_time = 0
+        self._total = 0
+
+    def add(self, chunk: bytes) -> int:
+        if not self._start_time:
+            self._start_time = time.time()
+        self._total += len(chunk)
+        return self._total
+
+    def total(self) -> int:
+        return self._total
+
+    def rate(self) -> str:
+        return util.human_file_size(int(self._total / (time.time() - self._start_time))) + '/s'

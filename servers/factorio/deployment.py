@@ -212,7 +212,7 @@ class Deployment:
         if not settings.get('username') or not settings.get('token'):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             return
-        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Syncing mods...')
+        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
         baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], io.DEFAULT_CHUNK_SIZE
         connector = aiohttp.TCPConnector(family=socket.AF_INET)  # Force IPv4
         timeout = aiohttp.ClientTimeout(total=8.0)
@@ -234,7 +234,7 @@ class Deployment:
                             mod_files.append(release['file_name'])
                             filename = self._mods_dir + '/' + release['file_name']
                             if not await io.file_exists(filename):
-                                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Downloading ' + release['file_name'])
+                                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
                                 download_url = baseurl + release['download_url'] + credentials
                                 async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
                                     assert modfile_response.status == 200
@@ -245,7 +245,7 @@ class Deployment:
                                     await io.stream_write_file(
                                         filename, io.WrapReader(modfile_response.content), chunk_size, tracker)
                     if not mod_version_found:
-                        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR: Mod ' + mod['name'] + ' version '
+                        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
                                           + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
@@ -256,7 +256,7 @@ class Deployment:
         map_backup, chunk_size = self._map_file + '.backup', io.DEFAULT_CHUNK_SIZE * 2
         try:
             self._mailer.post(self, msg.DEPLOYMENT_START)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Restoring ' + filename)
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'RESTORING ' + filename)
             autosave_file = self._save_dir + '/' + filename
             if not await io.file_exists(autosave_file):
                 raise FileNotFoundError(autosave_file)

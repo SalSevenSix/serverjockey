@@ -36,3 +36,15 @@ class TestCoreUtil(unittest.TestCase):
         self.assertEqual('', util.right_chop_and_strip('', ''))
         self.assertEqual('Hello world ({ hey yo',
                          util.right_chop_and_strip('Hello world ({ hey yo }) the end bit', '})'))
+
+    def test_human_file_size(self):
+        self.assertEqual('', util.human_file_size(None))
+        self.assertEqual('0 B', util.human_file_size(0))
+        self.assertEqual('512 B', util.human_file_size(512))
+        self.assertEqual('1023 B', util.human_file_size(1023))
+        self.assertEqual('1.0 KiB', util.human_file_size(1024))
+        self.assertEqual('1.5 KiB', util.human_file_size(512 * 3))
+        self.assertEqual('1.0 MiB', util.human_file_size(1024 * 1024))
+        self.assertEqual('1.2 MiB', util.human_file_size(int(1024 * 1024 * 1.2)))
+        self.assertEqual('1.0 GiB', util.human_file_size(1024 * 1024 * 1024))
+        self.assertEqual('1.0 TiB', util.human_file_size(1024 * 1024 * 1024 * 1024))
