@@ -48,7 +48,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     INGAMETIME = '> IngameTime'
     INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
             SERVER_RESTART_REQUIRED_FILTER,
             msgftr.And(
@@ -86,7 +86,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 class _ModUpdatedSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             CONSOLE_OUTPUT_FILTER,
             msgftr.DataStrContains('[ModzCheck] Mod update required')))

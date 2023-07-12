@@ -100,7 +100,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
 
 class _Subscriber(msgabc.AbcSubscriber):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, identity: str, selector: Selector):
+    def __init__(self, mailer: msgabc.Mailer, identity: str, selector: Selector):
         super().__init__(msgftr.Or(_InactivityCheck.FILTER, msgftr.IsStop(),
                                    selector.msg_filter, selector.completed_filter))
         self._mailer = mailer

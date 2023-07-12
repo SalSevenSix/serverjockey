@@ -13,7 +13,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
     GET_FILTER = msgftr.NameIs(GET)
     GET_RESPONSE = 'PlayersSubscriber.GetResponse'
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
             PlayersSubscriber.EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
@@ -22,15 +22,15 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         self._players = []
 
     @staticmethod
-    def event_login(mailer: msgabc.MulticastMailer, source: typing.Any, name: str):
+    def event_login(mailer: msgabc.Mailer, source: typing.Any, name: str):
         mailer.post(source, PlayersSubscriber.EVENT, {'event': 'login', 'player': {'name': name}})
 
     @staticmethod
-    def event_logout(mailer: msgabc.MulticastMailer, source: typing.Any, name: str):
+    def event_logout(mailer: msgabc.Mailer, source: typing.Any, name: str):
         mailer.post(source, PlayersSubscriber.EVENT, {'event': 'logout', 'player': {'name': name}})
 
     @staticmethod
-    def event_chat(mailer: msgabc.MulticastMailer, source: typing.Any, name: str, text: str):
+    def event_chat(mailer: msgabc.Mailer, source: typing.Any, name: str, text: str):
         mailer.post(source, PlayersSubscriber.EVENT, {'event': 'chat', 'player': {'name': name}, 'text': text})
 
     @staticmethod

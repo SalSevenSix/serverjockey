@@ -115,7 +115,7 @@ class PrintSubscriber(msgabc.AbcSubscriber):
 
 class PercentTracker(io.BytesTracker):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, expected: int, notifications: int = 10,
+    def __init__(self, mailer: msgabc.Mailer, expected: int, notifications: int = 10,
                  prefix: str = 'progress', msg_name: str = INFO):
         self._mailer = mailer
         self._msg_name = msg_name
@@ -141,7 +141,7 @@ class PercentTracker(io.BytesTracker):
 
 class IntervalTracker(io.BytesTracker):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, interval: float = 1.0, msg_name: str = INFO,
+    def __init__(self, mailer: msgabc.Mailer, interval: float = 1.0, msg_name: str = INFO,
                  initial_message: str = 'RECEIVING data...', prefix: str = 'received'):
         self._mailer = mailer
         self._msg_name = msg_name

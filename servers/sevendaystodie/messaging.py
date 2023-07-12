@@ -37,7 +37,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     CON_PORT_PREFIX = 'GamePref.ControlPanelPort ='
     CON_PORT_FILTER = msgftr.DataStrContains(CON_PORT_PREFIX)
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
@@ -77,7 +77,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     JOIN_FILTER = msgftr.DataMatches('.*' + PREFIX + '.*' + JOIN_SUFFIX + '.*')
     LEAVE_FILTER = msgftr.DataMatches('.*' + PREFIX + '.*' + LEAVE_SUFFIX + '.*')
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,

@@ -51,7 +51,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         logging.debug('SCRIPT\n' + script)
         data['command'], data['pty'] = script, True
         if not self._anon:
-            self._mailer.register(_KillSteamOnSolicitPassword(self._mailer))
+            self._mailer.register(_KillSteamOnSolicitPassword())
         return await self._handler.handle_post(resource, data)
 
 
@@ -75,7 +75,7 @@ class SteamCmdLoginHandler(httpabc.PostHandler):
         script += ' +quit'
         logging.debug('SCRIPT\n' + script)
         data['command'], data['pty'] = script, True
-        self._mailer.register(_KillSteamOnNoHeartbeat(self._mailer))
+        self._mailer.register(_KillSteamOnNoHeartbeat())
         return await self._handler.handle_post(resource, data)
 
 
@@ -97,12 +97,11 @@ class SteamCmdInputHandler(httpabc.PostHandler):
 
 class _KillSteamOnSolicitPassword(msgabc.AbcSubscriber):
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self):
         super().__init__(msgftr.Or(
             jobh.JobProcess.FILTER_STDOUT_LINE,
             jobh.JobProcess.FILTER_STARTED,
             jobh.JobProcess.FILTER_DONE))
-        self._mailer = mailer
         self._process: subprocess.Process | None = None
         self._solicit_password = re.compile(r'^Logging in user \'.*\' to Steam Public\.\.\.$')
 
@@ -123,12 +122,11 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
     HEARTBEAT = '_KillSteamOnNoHeartbeat.Hearbeat'
     FILTER_HEARTBEAT = msgftr.NameIs(HEARTBEAT)
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self):
         super().__init__(msgftr.Or(
             _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT,
             jobh.JobProcess.FILTER_STARTED,
             jobh.JobProcess.FILTER_DONE))
-        self._mailer = mailer
         self._queue = asyncio.Queue()
         self._process: subprocess.Process | None = None
         self._task = None
@@ -148,8 +146,8 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
         return None
 
     async def _monitor(self):
+        looping = True
         try:
-            looping = True
             while looping:
                 looping = await asyncio.wait_for(self._queue.get(), 3.0)
                 self._queue.task_done()

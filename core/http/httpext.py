@@ -116,7 +116,7 @@ class WipeHandler(httpabc.PostHandler):
     WIPED = 'WipeHandler.Wiped'
     FILTER_DONE = msgftr.NameIs(WIPED)
 
-    def __init__(self, mailer: msgabc.MulticastMailer, path: str):
+    def __init__(self, mailer: msgabc.Mailer, path: str):
         self._mailer = mailer
         self._path = path
 

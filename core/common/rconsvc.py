@@ -36,10 +36,10 @@ class RconService(msgabc.AbcSubscriber):
         return response.data()
 
     @staticmethod
-    def set_config(mailer: msgabc.MulticastMailer, source: typing.Any, port: int, password: str):
+    def set_config(mailer: msgabc.Mailer, source: typing.Any, port: int, password: str):
         mailer.post(source, RconService.CONFIG, {'port': port, 'password': password})
 
-    def __init__(self, mailer: msgabc.MulticastMailer, out_prefix: str = ''):
+    def __init__(self, mailer: msgabc.Mailer, out_prefix: str = ''):
         super().__init__(msgftr.NameIn((RconService.CONFIG, RconService.REQUEST)))
         self._mailer, self._out_prefix = mailer, out_prefix
         self._port, self._password = None, None

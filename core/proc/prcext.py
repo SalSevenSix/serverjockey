@@ -11,7 +11,7 @@ from core.proc import proch
 
 class ServerStateSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(proch.ServerProcess.FILTER_STATE_ALL)
         self._mailer = mailer
 

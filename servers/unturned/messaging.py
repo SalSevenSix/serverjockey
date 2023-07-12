@@ -32,7 +32,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_PREFIX, VERSION_SUFFIX = 'Game version:', 'Engine version:'
     VERSION_FILTER = msgftr.DataMatches('.*' + VERSION_PREFIX + '.*' + VERSION_SUFFIX + '.*')
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             _ServerDetailsSubscriber.VERSION_FILTER))
@@ -57,7 +57,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN_FILTER = msgftr.DataMatches('.*Connecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
     LOGOUT_FILTER = msgftr.DataMatches('.*Disconnecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,

@@ -88,7 +88,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     INGAMETIME = 'Ingametime'
     INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             _ServerDetailsSubscriber.INGAMETIME_FILTER))

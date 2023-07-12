@@ -38,7 +38,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         '.*' + VERSION_PREFIX.replace('[', r'\[').replace(']', r'\]') + '.*' + VERSION_SUFFIX + '.*')
     PORT_FILTER = msgftr.DataStrContains('[Info] UniverseServer: listening for incoming TCP connections on')
 
-    def __init__(self, mailer: msgabc.MulticastMailer, public_ip: str):
+    def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER, _ServerDetailsSubscriber.PORT_FILTER)))
@@ -72,7 +72,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     CONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) connected.*')
     DISCONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) disconnected for reason.*')
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,

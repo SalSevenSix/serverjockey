@@ -64,7 +64,7 @@ class CheckServerStateInterceptor(httpabc.InterceptorHandler):
 class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
     READY, MAINTENANCE = 'READY', 'MAINTENANCE'
 
-    def __init__(self, mailer: msgabc.MulticastMailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):
+    def __init__(self, mailer: msgabc.Mailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):
         super().__init__(msgftr.Or(maintenance_filter, ready_filter))
         self._mailer = mailer
         self._maintenance_filter = maintenance_filter

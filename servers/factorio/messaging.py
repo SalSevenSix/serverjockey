@@ -40,7 +40,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         msgftr.DataMatches('.*Info.*Own address is IP ADDR.*confirmed by pingpong.*'),
         msgftr.DataMatches('.*Warning.*Determining own address has failed. Best guess: IP ADDR.*'))
 
-    def __init__(self, mailer: msgabc.MulticastMailer, local_ip: str):
+    def __init__(self, mailer: msgabc.Mailer, local_ip: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
@@ -81,7 +81,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     JOIN_FILTER = msgftr.DataStrContains(JOIN)
     LEAVE_FILTER = msgftr.DataStrContains(LEAVE)
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
