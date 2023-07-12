@@ -1,7 +1,8 @@
 <script>
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
-  import { instance, serverStatus, newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
+  import { newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus } from '$lib/instancestores';
   import FileSystem from '$lib/FileSystem.svelte';
   import Spinner from '$lib/Spinner.svelte';
 

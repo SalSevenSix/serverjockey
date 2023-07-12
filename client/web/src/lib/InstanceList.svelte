@@ -3,7 +3,8 @@
   import { notifyError } from '$lib/notifications';
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
-  import { baseurl, instance, serverStatus, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
+  import { baseurl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
+  import { instance, serverStatus } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
 
   instance.set({});

@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { textAreaModal } from '$lib/modals';
-  import { instance, serverStatus, newPostRequest, newGetRequest } from '$lib/sjgmsapi';
+  import { newPostRequest, newGetRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus } from '$lib/instancestores';
 
   export let name;
   export let path;

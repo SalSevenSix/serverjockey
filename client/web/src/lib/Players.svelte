@@ -1,7 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { instance, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { instance } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
   // TODO probably should HTML escape names
 

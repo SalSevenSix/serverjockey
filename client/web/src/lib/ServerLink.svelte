@@ -1,5 +1,6 @@
 <script>
-  import { baseurl, instance } from '$lib/sjgmsapi';
+  import { baseurl } from '$lib/sjgmsapi';
+  import { instance } from '$lib/instancestores';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';

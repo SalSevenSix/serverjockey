@@ -1,6 +1,7 @@
 <script>
   import { confirmModal } from '$lib/modals';
-  import { instance, newPostRequest } from '$lib/sjgmsapi';
+  import { newPostRequest } from '$lib/sjgmsapi';
+  import { instance } from '$lib/instancestores';
   import FileSystem from '$lib/FileSystem.svelte';
 
   function restoreAutosave(path, callbacks) {

@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { serverStatus } from '$lib/sjgmsapi';
+  import { serverStatus } from '$lib/instancestores';
 
   let baseurl = '';
   onMount(function() {

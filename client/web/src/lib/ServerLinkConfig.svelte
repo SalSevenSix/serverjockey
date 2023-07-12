@@ -1,9 +1,11 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
-  import { instance, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { instance } from '$lib/instancestores';
 
   export let noHints = false;
+
   let serverLinkForm = { 'EVENT_CHANNELS': {} };
   let botToken = null;
   let processing = true;

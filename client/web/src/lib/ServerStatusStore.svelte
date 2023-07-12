@@ -3,8 +3,8 @@
   import { get } from 'svelte/store';
   import { generateId, sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint,
-           SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint } from '$lib/instancestores';
 
   let subs = new SubscriptionHelper();
   let triggering = false;

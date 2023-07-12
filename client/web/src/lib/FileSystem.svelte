@@ -3,8 +3,8 @@
   import { confirmModal } from '$lib/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { isString, guessTextFile, humanFileSize } from '$lib/util';
-  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint,
-           newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
 
   export let rootPath;

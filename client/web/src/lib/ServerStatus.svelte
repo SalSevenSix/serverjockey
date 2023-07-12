@@ -1,6 +1,6 @@
 <script>
   import { capitalize, humanDuration } from '$lib/util';
-  import { serverStatus } from '$lib/sjgmsapi';
+  import { serverStatus } from '$lib/instancestores';
 
   export let stateOnly = false;
 

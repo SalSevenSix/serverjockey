@@ -5,12 +5,6 @@ import { notifyError } from '$lib/notifications';
 
 export const baseurl = (dev ? 'http://localhost:6164' : '');
 export const securityToken = writable();
-// TODO put the stores below in a instancestores.js
-export const instance = writable({});
-export const serverStatus = writable({});
-export const eventDown = writable();
-export const eventStarted = writable();
-export const eventEndMaint = writable();
 
 
 export function newGetRequest() {

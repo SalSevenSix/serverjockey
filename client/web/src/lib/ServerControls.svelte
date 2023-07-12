@@ -1,6 +1,7 @@
 <script>
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, newPostRequest } from '$lib/sjgmsapi';
+  import { newPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus } from '$lib/instancestores';
 
   $: transientState = $serverStatus.running && $serverStatus.state === 'STOPPED';
   $: cannotStop = !$serverStatus.running || $serverStatus.state === 'STOPPING' || transientState;

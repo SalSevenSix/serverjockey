@@ -1,6 +1,7 @@
 <script>
   import { notifyError } from '$lib/notifications';
-  import { instance, serverStatus, eventDown, newPostRequest } from '$lib/sjgmsapi';
+  import { newPostRequest } from '$lib/sjgmsapi';
+  import { instance, serverStatus, eventDown } from '$lib/instancestores';
 
   let autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
   let currentOption = null;
