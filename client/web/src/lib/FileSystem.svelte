@@ -77,10 +77,6 @@
     load(root);
   }
 
-  function openDirectory() {
-    load(this.name);
-  }
-
   function upDirectory() {
     let parts = pwd.split('/');
     parts.pop();
@@ -175,13 +171,12 @@
             {/if}
             {#if columnsMeta.name && path.type === 'directory'}
               <td class="word-break-all" colspan={columnsMeta.size ? 2 : 1}>
-                <a href={'#'} name={path.url} on:click|preventDefault={openDirectory}>{path.name}</a>
+                <a href={'#'} on:click|preventDefault={function() { load(path.url); }}>{path.name}</a>
               </td>
             {/if}
             {#if columnsMeta.name && path.type === 'file'}
               <td class="word-break-all">
-                <a href={path.url} name={path.url} target={guessTextFile(path.name) ? '_blank' : '_self'}>
-                  {path.name}</a>
+                <a href={path.url} target={guessTextFile(path.name) ? '_blank' : '_self'}>{path.name}</a>
               </td>
               {#if columnsMeta.size}
                 <td>{humanFileSize(path.size)}</td>

@@ -1,12 +1,8 @@
 <script>
-  import { onMount } from 'svelte';
   import RubiksCube from '$lib/RubiksCube.svelte';
+  import ThemeToggler from '$lib/ThemeToggler.svelte';
 
   let menuOpen = false;
-  let theme = 'light';
-  let themeLink;
-
-  $: themeIcon = theme === 'light' ? 'fa-sun' : 'fa-moon';
 
   function closeMenu() {
     menuOpen = false;
@@ -15,29 +11,6 @@
   function toggleMenu() {
     menuOpen = !menuOpen;
   }
-
-  function setTheme(current) {
-    document.body.classList.remove(current === 'light' ? 'dark' : 'light');
-    document.body.classList.add(current);
-  }
-
-  function toggleTheme() {
-    if (themeLink.blur) { themeLink.blur(); }
-    theme = theme === 'light' ? 'dark' : 'light';
-    setTheme(theme);
-    if (typeof(Storage) !== 'undefined') {
-      localStorage.setItem('sjgmsTheme', theme);
-    }
-    closeMenu();
-  }
-
-  onMount(function() {
-    if (typeof(Storage) !== 'undefined') {
-      let storedTheme = localStorage.getItem('sjgmsTheme');
-      theme = storedTheme ? storedTheme : 'light';
-    }
-    setTheme(theme);
-  });
 </script>
 
 
@@ -65,8 +38,7 @@
           <i class="fa fa-book fa-lg"></i>&nbsp;&nbsp;Guides</a>
         <a on:click={closeMenu} class="navbar-item" href="/about">
           <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;About</a>
-        <a on:click|preventDefault={toggleTheme} class="navbar-item" href={'#'} bind:this={themeLink}>
-          &nbsp;<i class="fa {themeIcon} fa-lg"></i>&nbsp;</a>
+        <ThemeToggler clazz="navbar-item" onAfterToggle={closeMenu} />
       </div>
     </div>
   </nav>

@@ -47,14 +47,12 @@
     subs.stop();
   });
 
-  function viewInstance() {
-    let selected = instances[this.name];
+  function viewInstance(selected) {
     instance.set(selected);
     goto('/servers/' + selected.module);
   }
 
-  function deleteInstance() {
-    let selected = instances[this.name];
+  function deleteInstance(selected) {
     let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
     confirmDangerModal(message, selected.identity, function() {
       fetch(selected.url + '/server/delete', newPostRequest())
@@ -90,10 +88,12 @@
             <td class="word-break-all">{instance.identity}</td>
             <td>{instance.module}</td>
             <td>
-              <button name={index} class="button is-primary mb-1" title="View"
-                      on:click={viewInstance}>&nbsp;<i class="fa fa-folder-open fa-lg"></i>&nbsp;</button>
-              <button name={index} class="button is-danger ml-1" title="Delete"
-                      on:click={deleteInstance}><i class="fa fa-trash-can fa-lg"></i></button>
+              <button title="View" class="button is-primary mb-1"
+                      on:click={function() { viewInstance(instance); }}>
+                <i class="fa fa-folder-open fa-lg"></i></button>
+              <button title="Delete" class="button is-danger ml-1"
+                      on:click={function() { deleteInstance(instance); }}>
+                <i class="fa fa-trash-can fa-lg"></i></button>
             </td>
           </tr>
         {/each}
@@ -101,3 +101,10 @@
     </tbody>
   </table>
 </div>
+
+
+<style>
+  .fa-folder-open {
+    width: 1.5em;
+  }
+</style>
