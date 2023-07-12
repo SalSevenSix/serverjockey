@@ -15,8 +15,7 @@
   eventEndMaint.set(false);
 
   let lastRunning = null;
-  $: serverRunningChange($serverStatus.running);
-  function serverRunningChange(serverRunning) {
+  $: serverRunningChange($serverStatus.running); function serverRunningChange(serverRunning) {
     if (triggering && lastRunning != serverRunning && serverRunning === false) {
       eventDown.set(true);
       tick().then(function() { eventDown.set(false); });
@@ -25,8 +24,7 @@
   }
 
   let lastState = null;
-  $: serverStateChange($serverStatus.state);
-  function serverStateChange(serverState) {
+  $: serverStateChange($serverStatus.state); function serverStateChange(serverState) {
     if (triggering && lastState != serverState && serverState === 'STARTED') {
       eventStarted.set(true);
       tick().then(function() { eventStarted.set(false); });

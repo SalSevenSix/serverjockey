@@ -5,6 +5,7 @@
   import { instance, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
   export let hasConsoleLogFile = false;
+
   let subs = new SubscriptionHelper();
   let logLines = new RollingLog();
   let logText = '';

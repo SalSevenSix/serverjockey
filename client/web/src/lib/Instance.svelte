@@ -5,7 +5,7 @@
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
 
   onMount(function() {
-    if (!$instance.identity) return goto('/servers');
+    if (!$instance.identity) { goto('/servers'); }
   });
 </script>
 

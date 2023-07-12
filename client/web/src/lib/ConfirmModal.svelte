@@ -5,6 +5,7 @@
   export let onConfirm;
   export let message = 'Confirm action';
   export let confirmName = '';
+
   let enteredName = '';
 
   function confirm() {

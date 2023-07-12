@@ -9,6 +9,7 @@
   }
 </script>
 
+
 <hr />
 <div class="columns is-mobile mb-0">
   <div class="column">
@@ -33,6 +34,7 @@
   h2 i {
     width: 1.4em;
   }
+
   button i {
     width: 0.9em;
   }

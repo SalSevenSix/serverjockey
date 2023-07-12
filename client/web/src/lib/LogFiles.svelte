@@ -8,6 +8,7 @@
   export let sorter = null;
 </script>
 
+
 <FileSystem rootPath={rootPath}
             allowDelete={allowDelete} confirmDelete={confirmDelete}
             columnsMeta={columnsMeta} sorter={sorter} />

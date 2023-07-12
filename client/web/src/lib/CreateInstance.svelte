@@ -5,7 +5,26 @@
 
   let modules = [];
   let serverForm = {};
-  let creating = false;
+  let processing = true;
+
+  function kpCreate(event) {
+    if (event.key === 'Enter') { create(); }
+  }
+
+  function create() {
+    if (!serverForm.module) return notifyError('Module not selected.');
+    if (!serverForm.identity) return notifyError('Name not set.');
+    processing = true;
+    let request = newPostRequest();
+    request.body = JSON.stringify(serverForm);
+    fetch(baseurl + '/instances', request)
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        serverForm.identity = null;
+      })
+      .catch(function(error) { notifyError('Failed to create new instance.'); })
+      .finally(function() { processing = false; });
+  }
 
   onMount(function() {
     fetch(baseurl + '/modules', newGetRequest())
@@ -16,27 +35,9 @@
       .then(function(json) {
         modules = json;
       })
-      .catch(function(error) { notifyError('Failed to load module list.'); });
+      .catch(function(error) { notifyError('Failed to load module list.'); })
+      .finally(function() { processing = false; });
   });
-
-  function kpCreate(event) {
-    if (event.key === 'Enter') { create(); }
-  }
-
-  function create() {
-    if (!serverForm.module) return notifyError('Module not selected.');
-    if (!serverForm.identity) return notifyError('Name not set.');
-    creating = true;
-    let request = newPostRequest();
-    request.body = JSON.stringify(serverForm);
-    fetch(baseurl + '/instances', request)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        serverForm.identity = null;
-      })
-      .catch(function(error) { notifyError('Failed to create new instance.'); })
-      .finally(function() { creating = false; });
-  }
 </script>
 
 
@@ -46,7 +47,7 @@
     <label for="createInstanceModule" class="label" title="Module (game server)">Module</label>
     <div class="control">
       <div class="select">
-        <select id="createInstanceModule" disabled={creating} bind:value={serverForm.module}>
+        <select id="createInstanceModule" disabled={processing} bind:value={serverForm.module}>
           {#each modules as module}
             <option>{module}</option>
           {/each}
@@ -60,11 +61,11 @@
       Name</label>
     <div class="control">
       <input id="createInstanceIdentity" class="input" type="text"
-             disabled={creating} on:keypress={kpCreate} bind:value={serverForm.identity}>
+             disabled={processing} on:keypress={kpCreate} bind:value={serverForm.identity}>
     </div>
   </div>
   <div class="block buttons">
-    <button name="create" title="Create" class="button is-primary is-fullwidth" disabled={creating} on:click={create}>
+    <button name="create" title="Create" class="button is-primary is-fullwidth" disabled={processing} on:click={create}>
       <i class="fa-solid fa-square-plus fa-lg"></i>&nbsp;&nbsp;Create</button>
   </div>
 </div>

@@ -4,21 +4,21 @@
   import { instance, serverStatus, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   export let commands;
+
   let args = [null, null, null, null, null, null, null, null, null, null];
   let action = null;
   let command = Object.keys(commands).length === 1 ? Object.keys(commands)[0] : null;
+  let sending = false;
 
-  $: commandUpdated(command);
-  function commandUpdated(cmd) {
-    action = cmd && Object.keys(commands[cmd]).length === 1 ? Object.keys(commands[cmd])[0] : null;
+  $: commandUpdated(command); function commandUpdated(current) {
+    action = current && Object.keys(commands[current]).length === 1 ? Object.keys(commands[current])[0] : null;
   }
 
-  $: actionUpdated(action);
-  function actionUpdated(acn) {
+  $: actionUpdated(action); function actionUpdated(current) {
     args = [null, null, null, null, null, null, null, null, null, null];
   }
 
-  $: cannotSend = !($serverStatus.state === 'STARTED');
+  $: cannotSend = sending || !($serverStatus.state === 'STARTED');
 
   function loadDisplay(index) {
     args[index] = 'loading...\n\n\n';
@@ -44,6 +44,7 @@
 
   function send() {
     if (cannotSend) return;
+    sending = true;
     let path = '/' + command;
     let body = {};
     commands[command][action].forEach(function(value, index) {
@@ -65,7 +66,8 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(capitalizeKebabCase(command) + ' command sent.');
       })
-      .catch(function(error) { notifyError('Failed to send command to server.'); });
+      .catch(function(error) { notifyError('Failed to send command to server.'); })
+      .finally(function() { sending = false; });
   }
 </script>
 

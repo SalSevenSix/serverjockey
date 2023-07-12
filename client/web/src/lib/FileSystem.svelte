@@ -88,14 +88,14 @@
       url.substring(root.length),
       { // callbacks
         start: function() {
-          isMaint = true;
+          isMaint = true;  // TODO No no no
           return true;
         },
         started: function(text) {
           notifyText = text;
         },
         error: function(text) {
-          isMaint = false;
+          isMaint = false;  // TODO No no no
           notifyError(text);
           return false;
         }

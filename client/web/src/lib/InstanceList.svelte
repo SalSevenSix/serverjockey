@@ -13,6 +13,20 @@
   let instances = [];
   let loading = true;
 
+  function viewInstance(selected) {
+    instance.set(selected);
+    goto('/servers/' + selected.module);
+  }
+
+  function deleteInstance(selected) {
+    let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
+    confirmDangerModal(message, selected.identity, function() {
+      fetch(selected.url + '/server/delete', newPostRequest())
+        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
+    });
+  }
+
   onMount(function() {
     fetch(baseurl + '/instances', newGetRequest())
       .then(function(response) {
@@ -46,20 +60,6 @@
   onDestroy(function() {
     subs.stop();
   });
-
-  function viewInstance(selected) {
-    instance.set(selected);
-    goto('/servers/' + selected.module);
-  }
-
-  function deleteInstance(selected) {
-    let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
-    confirmDangerModal(message, selected.identity, function() {
-      fetch(selected.url + '/server/delete', newPostRequest())
-        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
-    });
-  }
 </script>
 
 

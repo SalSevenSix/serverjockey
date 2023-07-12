@@ -3,6 +3,7 @@
   import { serverStatus } from '$lib/sjgmsapi';
 
   export let stateOnly = false;
+
   let commonKeys = ['version', 'ip', 'port'];
 </script>
 
@@ -53,6 +54,7 @@
   .ss-running {
     color: #48C78E;
   }
+
   .ss-maint {
     color: #F14668;
   }

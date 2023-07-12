@@ -6,9 +6,10 @@
   import { instance, serverStatus, SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/sjgmsapi';
 
   export let qualifierName = null;
-  let qualifier = '';
+
   let subs = new SubscriptionHelper();
   let logLines = new RollingLog();
+  let qualifier = '';
   let endInstallMessage = 'Install Runtime completed. Please check console log output for details.'
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
@@ -21,7 +22,7 @@
 
   function wipeRuntime() {
     confirmModal('Are you sure you want to Delete Runtime ?', function() {
-      cannotProcess = true;
+      cannotProcess = true;  // TODO No no no
       fetch($instance.url + '/deployment/wipe-runtime', newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
@@ -39,7 +40,7 @@
   }
 
   function doInstallRuntime() {
-    cannotProcess = true;
+    cannotProcess = true;  // TODO No no no
     let request = newPostRequest();
     let body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }

@@ -8,20 +8,6 @@
   let botToken = null;
   let processing = true;
 
-  onMount(function() {
-    fetch($instance.url + '/config', newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) {
-        serverLinkForm = json;
-        botToken = json.BOT_TOKEN;
-      })
-      .catch(function(error) { notifyError('Failed to load ServerLink Config.'); })
-      .finally(function() { processing = false; });
-  });
-
   function save() {
     processing = true;
     let request = newPostRequest('text/plain');
@@ -35,6 +21,20 @@
       .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
       .finally(function() { processing = false; });
   }
+
+  onMount(function() {
+    fetch($instance.url + '/config', newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) {
+        serverLinkForm = json;
+        botToken = json.BOT_TOKEN;
+      })
+      .catch(function(error) { notifyError('Failed to load ServerLink Config.'); })
+      .finally(function() { processing = false; });
+  });
 </script>
 
 

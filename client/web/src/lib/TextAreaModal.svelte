@@ -42,6 +42,7 @@
     width: 95%;
     max-height: calc(100vh - 40px);
   }
+
   #textAreaModalEditor {
     height: 100%;
     min-height: calc(90vh - 8em);
