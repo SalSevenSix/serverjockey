@@ -5,19 +5,17 @@
   import FileSystem from '$lib/FileSystem.svelte';
 
   function restoreAutosave(path, callbacks) {
-    let filename = path.split('/');
-    filename = filename[filename.length - 1];
-    confirmModal('Restore ' + filename + ' ?\nCurrent map will be overwritten.', function() {
+    confirmModal('Restore ' + path + ' ?\nCurrent map will be overwritten.', function() {
       callbacks.start();
       let request = newPostRequest();
-      request.body = JSON.stringify({ filename: filename });
+      request.body = JSON.stringify({ filename: path });
       fetch($instance.url + '/deployment/restore-autosave', request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           callbacks.started('Autosave restore complete. Please check console log output.');
         })
         .catch(function(error) {
-          callbacks.error('Failed to restore ' + filename);
+          callbacks.error('Failed to restore ' + path);
         });
     });
   }

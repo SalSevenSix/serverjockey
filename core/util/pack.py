@@ -57,10 +57,10 @@ async def unpack_directory(archive: str, unpack_dir: str, wipe: bool = True, log
     try:
         logger.info('START Unpack Directory')
         assert await io.file_exists(archive)
-        logger.info(archive + ' => ' + unpack_dir)
-        logger.info('No progress updates on unpacking, please be patient...')
         if unpack_dir[-1] == '/':
             unpack_dir = unpack_dir[:-1]
+        logger.info(archive + ' => ' + unpack_dir)
+        logger.info('No progress updates on unpacking, please be patient...')
         working_dir = unpack_dir
         if wipe:
             await io.delete_directory(working_dir)

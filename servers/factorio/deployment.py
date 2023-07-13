@@ -1,7 +1,7 @@
 import aiohttp
 import socket
 # ALLOW core.* factorio.messaging
-from core.util import util, tasks, io, pack, aggtrf
+from core.util import util, tasks, io, pack, aggtrf, funcutil
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -9,7 +9,8 @@ from core.proc import proch, jobh
 from core.common import interceptors, rconsvc
 from servers.factorio import messaging as msg
 
-_MAP = 'map.zip'
+_MAP, _ZIP = 'map', '.zip'
+_AUTOSAVE_PREFIX = '_autosave'
 
 
 class Deployment:
@@ -49,7 +50,7 @@ class Deployment:
         self._map_gen_settings_def = self._runtime_dir + '/data/map-gen-settings.example.json'
         self._world_dir = self._home_dir + '/world'
         self._save_dir = self._world_dir + '/saves'
-        self._map_file = self._save_dir + '/' + _MAP
+        self._map_file = self._save_dir + '/' + _MAP + _ZIP
         self._config_dir = self._world_dir + '/config'
         self._cmdargs_settings = self._config_dir + '/cmdargs-settings.json'
         self._server_settings = self._config_dir + '/server-settings.json'
@@ -94,7 +95,7 @@ class Deployment:
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
-        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
+        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._map_file), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
@@ -248,14 +249,15 @@ class Deployment:
                         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
                                           + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
-            if file['type'] == 'file' and file['name'].endswith('.zip') and file['name'] not in mod_files:
+            if file['type'] == 'file' and file['name'].endswith(_ZIP) and file['name'] not in mod_files:
                 await io.delete_file(self._mods_dir + '/' + file['name'])
         await io.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
 
     async def restore_autosave(self, filename: str):
-        map_backup, chunk_size = self._map_file + '.backup', io.DEFAULT_CHUNK_SIZE * 2
+        map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP
         try:
             self._mailer.post(self, msg.DEPLOYMENT_START)
+            filename = filename[1:] if filename[0] == '/' else filename
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'RESTORING ' + filename)
             autosave_file = self._save_dir + '/' + filename
             if not await io.file_exists(autosave_file):
@@ -263,10 +265,14 @@ class Deployment:
             autosave_size = await io.file_size(autosave_file)
             tracker = msglog.PercentTracker(self._mailer, autosave_size, notifications=4)
             if await io.file_exists(self._map_file):
-                await io.rename_path(self._map_file, map_backup)
-            await io.stream_copy_file(autosave_file, self._map_file, chunk_size, tracker)
-            await io.delete_file(map_backup)
+                if map_backup == autosave_file:
+                    await io.delete_file(self._map_file)
+                else:
+                    await io.delete_file(map_backup)
+                    await io.rename_path(self._map_file, map_backup)
+            await io.stream_copy_file(autosave_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Autosave ' + filename + ' restored')
+            await funcutil.silently_call(io.delete_file(map_backup))
         except Exception as e:
             self._mailer.post(self, msg.DEPLOYMENT_MSG, repr(e))
         finally:
@@ -297,7 +303,7 @@ class _RestoreAutosaveHandler(httpabc.PostHandler):
 
     def handle_post(self, resource, data):
         filename = util.get('filename', data)
-        if not filename or filename.endswith(_MAP):
+        if not filename or filename.endswith(_MAP + _ZIP):
             return httpabc.ResponseBody.BAD_REQUEST
         tasks.task_fork(self._deployment.restore_autosave(filename), 'factorio.restore_autosave()')
         return httpabc.ResponseBody.NO_CONTENT
@@ -308,4 +314,4 @@ def _logfiles(entry) -> bool:
 
 
 def _autosaves(entry) -> bool:
-    return entry['type'] == 'file' and entry['name'].startswith('_autosave')
+    return entry['type'] == 'file' and entry['name'].startswith(_AUTOSAVE_PREFIX) and entry['name'].endswith(_ZIP)

@@ -91,4 +91,4 @@ class Deployment:
 def _autobackups(entry) -> bool:
     if entry['type'] == 'directory':
         return True
-    return entry['type'] == 'file' and entry['name'].endswith('.zip')
+    return entry['name'].startswith('backup_') and entry['name'].endswith('.zip')

@@ -121,7 +121,7 @@ class WipeHandler(httpabc.PostHandler):
         self._path = path
 
     async def handle_post(self, resource, data):
-        await io.delete_directory(self._path)
+        await io.delete_any(self._path)
         self._mailer.post(self, WipeHandler.WIPED, self._path)
         return httpabc.ResponseBody.NO_CONTENT
 
