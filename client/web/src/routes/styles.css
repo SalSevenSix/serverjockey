@@ -21,6 +21,10 @@ a[target="_blank"] {
 
 /* Utilities */
 
+.position-relative {
+  position: relative;
+}
+
 figure.is-bordered img {
   border: 8px solid #DBDBDB;
   border-radius: 8px;

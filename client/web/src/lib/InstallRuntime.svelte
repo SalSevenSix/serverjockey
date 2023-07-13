@@ -23,7 +23,7 @@
 
   function wipeRuntime() {
     confirmModal('Are you sure you want to Delete Runtime ?', function() {
-      cannotProcess = true;  // TODO No no no
+      cannotProcess = true;
       fetch($instance.url + '/deployment/wipe-runtime', newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
@@ -41,7 +41,7 @@
   }
 
   function doInstallRuntime() {
-    cannotProcess = true;  // TODO No no no
+    cannotProcess = true;
     let request = newPostRequest();
     let body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }

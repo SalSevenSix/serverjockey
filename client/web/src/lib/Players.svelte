@@ -4,7 +4,6 @@
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
   import { instance } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
-  // TODO probably should HTML escape names
 
   let subs = new SubscriptionHelper();
   let players = [];
@@ -60,9 +59,9 @@
       {#if players.length === 0}
         <tr><td colspan="2">
           {#if loading}
-            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+            <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
           {:else}
-            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> Zero players online
+            <i class="fa fa-diamond fa-lg mr-1"></i> Zero players online
           {/if}
         </td></tr>
       {:else}

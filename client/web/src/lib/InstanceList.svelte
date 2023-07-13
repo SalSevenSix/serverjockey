@@ -78,9 +78,9 @@
       {#if instances.length === 0}
         <tr><td colspan="3">
           {#if loading}
-            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+            <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
           {:else}
-            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No instances found
+            <i class="fa fa-diamond fa-lg mr-1"></i> No instances found
           {/if}
         </td></tr>
       {:else}

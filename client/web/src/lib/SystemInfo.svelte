@@ -4,11 +4,13 @@
   import { sleep, humanFileSize, humanDuration } from '$lib/util';
   import { baseurl, newGetRequest } from '$lib/sjgmsapi';
   import RubiksCube from '$lib/RubiksCube.svelte';
+  import Overlay from '$lib/Overlay.svelte';
+  import SpinnerCss from '$lib/SpinnerCss.svelte';
 
   let looping = true;
   let info = null;
 
-  async function updateSystemInfo() {
+  onMount(async function() {
     while (looping) {
       await fetch(baseurl + '/system/info', newGetRequest())
         .then(function(response) {
@@ -22,11 +24,10 @@
           looping = false;
           notifyError('Failed to load System Info.');
         });
-      if (looping) { await sleep(20000); }
+      if (looping) { await sleep(28000); }
     }
-  };
+  });
 
-  onMount(updateSystemInfo);
   onDestroy(function() { looping = false; });
 </script>
 
@@ -35,7 +36,8 @@
   <div class="column is-one-third">
     <div class="pl-5 pr-6"><RubiksCube /></div>
   </div>
-  <div class="column is-one-third">
+  <div class="column is-one-third position-relative">
+    {#if !info}<Overlay><SpinnerCss /></Overlay>{/if}
     <table class="table is-thinner">
       {#if info}
         <tbody>
@@ -50,7 +52,7 @@
           <tr><td>Usage</td><td>{info.memory.percent}%</td></tr>
         </tbody>
       {:else}
-        <tbody class="gray">
+        <tbody>
           <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">OS</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
@@ -64,7 +66,8 @@
       {/if}
     </table>
   </div>
-  <div class="column is-one-third">
+  <div class="column is-one-third position-relative">
+    {#if !info}<Overlay><SpinnerCss /></Overlay>{/if}
     <table class="table is-thinner">
       {#if info}
         <tbody>
@@ -79,7 +82,7 @@
           <tr><td>Public</td><td>{info.net.public}</td></tr>
         </tbody>
       {:else}
-        <tbody class="gray">
+        <tbody>
           <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">Disk</td><td>...</td></tr>
           <tr><td>Total</td><td>...</td></tr>
@@ -94,10 +97,3 @@
     </table>
   </div>
 </div>
-
-
-<style>
-  .gray {
-    color: #DBDBDB;
-  }
-</style>

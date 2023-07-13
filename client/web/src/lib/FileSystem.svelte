@@ -88,14 +88,14 @@
       url.substring(root.length),
       { // callbacks
         start: function() {
-          isMaint = true;  // TODO No no no
+          isMaint = true;
           return true;
         },
         started: function(text) {
           notifyText = text;
         },
         error: function(text) {
-          isMaint = false;  // TODO No no no
+          isMaint = false;
           notifyError(text);
           return false;
         }
@@ -148,9 +148,9 @@
       {#if paths.length === 0}
         <tr><td colspan={columnCount}>
           {#if loading}
-            <Spinner clazz="fa fa-arrows-spin fa-lg mr-1" /> Loading...
+            <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
           {:else}
-            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> No files found
+            <i class="fa fa-diamond fa-lg mr-1"></i> No files found
           {/if}
         </td></tr>
       {:else}

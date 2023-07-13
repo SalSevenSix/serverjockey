@@ -20,7 +20,7 @@
   }
 
   function createBackup() {
-    cannotBackup = true;  // TODO No no no
+    cannotBackup = true;
     fetch($instance.url + '/deployment/backup-' + this.name, newPostRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -34,7 +34,7 @@
 
   function restoreBackup(path, callbacks) {
     confirmModal('Restore ' + path + ' ?\nExisting files will be overwritten.', function() {
-      cannotBackup = callbacks.start();  // TODO No no no
+      cannotBackup = callbacks.start();
       let request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
       fetch($instance.url + '/deployment/restore-backup', request)
@@ -90,7 +90,7 @@
   </p>
   {#if uploading}
     <p class="has-text-weight-bold">
-      <Spinner clazz="fa fa-arrows-spin fa-xl mr-1" />
+      <Spinner clazz="fa fa-spinner fa-xl mr-1" />
       Please keep this section open while uploading...
     </p>
   {/if}
