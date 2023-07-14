@@ -1,3 +1,4 @@
+import logging
 import asyncio
 import typing
 import aiofiles
@@ -129,11 +130,14 @@ class WipeHandler(httpabc.PostHandler):
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True,
-                 ls_filter: typing.Callable = None, write_tracker: io.BytesTracker = None):
+                 ls_filter: typing.Callable = None,
+                 read_tracker: io.BytesTracker = io.NullBytesTracker(),
+                 write_tracker: io.BytesTracker = io.NullBytesTracker()):
         self._path = path
         self._tail = tail
         self._protected = protected
         self._ls_filter = ls_filter
+        self._read_tracker = read_tracker
         self._write_tracker = write_tracker
 
     async def handle_get(self, resource, data):
@@ -145,7 +149,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
             size = await io.file_size(path)
             if content_type.is_text_type() and size < 1048576:
                 return await io.read_file(path)
-            return _FileByteStream(path)
+            return _FileByteStream(path, self._read_tracker)
         if await io.directory_exists(path):
             result = await io.directory_list(path, data['baseurl'] + resource.path(data))
             return [e for e in result if self._ls_filter(e)] if self._ls_filter else result
@@ -177,13 +181,13 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
 class _FileByteStream(httpabc.ByteStream):
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, tracker: io.BytesTracker = io.NullBytesTracker()):
         self._name = filename.split('/')[-1]
         self._filename = filename
         self._content_type = httpcnt.ContentTypeImpl.lookup(filename)
-        self._queue = asyncio.Queue(maxsize=1)
-        self._task = None
-        self._length = -1
+        self._queue = asyncio.Queue(maxsize=2)
+        self._tracker = tracker
+        self._task, self._length = None, -1
 
     def name(self) -> str:
         return self._name
@@ -206,15 +210,18 @@ class _FileByteStream(httpabc.ByteStream):
             raise Exception('Timeout waiting for file read ' + self._filename)
 
     async def _run(self):
+        pumping = True
         try:
             async with aiofiles.open(self._filename, mode='rb') as file:
-                pumping = True
                 while pumping:
                     chunk = await file.read(self._length)
                     await asyncio.wait_for(self._queue.put(chunk), 60.0)
-                    pumping = chunk is not None and chunk != b''
-        except asyncio.TimeoutError:
-            pass
+                    pumping = not io.end_of_stream(chunk)
+                    if pumping:
+                        self._tracker.processed(chunk)
+        except Exception as e:
+            logging.error('Error reading ' + self._filename + ': ' + repr(e))
         finally:
+            self._tracker.processed(None)
             tasks.task_end(self._task)
             self._task = None

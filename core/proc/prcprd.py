@@ -2,7 +2,7 @@ import logging
 import typing
 from asyncio import streams
 # ALLOW util.* msg.* context.* proc.prcenc
-from core.util import funcutil
+from core.util import funcutil, io
 from core.msg import msgabc, msgext
 from core.proc import prcenc
 
@@ -25,7 +25,7 @@ class PipeOutLineProducer(msgabc.Producer):
         # noinspection PyBroadException
         try:
             line = await self._pipe.readline()
-            if line is None or line == b'':
+            if io.end_of_stream(line):
                 logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
                 return None
             return msgabc.Message(self._source, self._name, self._decoder.decode(line))

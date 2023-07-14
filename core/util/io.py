@@ -17,6 +17,12 @@ class BytesTracker(metaclass=abc.ABCMeta):
         pass
 
 
+class NullBytesTracker(BytesTracker):
+
+    def processed(self, chunk: bytes | None):
+        pass
+
+
 class Readable(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def read(self, length: int = -1) -> bytes:
@@ -47,6 +53,10 @@ def _auto_chmod(path: str):
 
 
 auto_chmod = funcutil.to_async(_auto_chmod)
+
+
+def end_of_stream(chunk: bytes | None):
+    return chunk is None or chunk == b''
 
 
 async def directory_exists(path: typing.Optional[str]) -> bool:
@@ -177,7 +187,7 @@ async def copy_text_file(from_path: str, to_path: str) -> int:
 async def stream_copy_file(
         from_path: str, to_path: str,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
-        tracker: BytesTracker = None):
+        tracker: BytesTracker = NullBytesTracker()):
     async with aiofiles.open(from_path, mode='rb') as file:
         await stream_write_file(to_path, WrapReader(file), chunk_size, tracker)
 
@@ -185,7 +195,7 @@ async def stream_copy_file(
 async def stream_write_file(
         filename: str, stream: Readable,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
-        tracker: BytesTracker = None):
+        tracker: BytesTracker = NullBytesTracker()):
     working_dir = '/tmp/' + util.generate_id()
     try:
         await create_directory(working_dir)
@@ -201,14 +211,14 @@ async def stream_write_file(
 async def copy_bytes(
         source: Readable, target,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
-        tracker: BytesTracker = None):
+        tracker: BytesTracker = NullBytesTracker()):
     pumping = True
-    while pumping:
-        chunk = await source.read(chunk_size)
-        pumping = chunk is not None and chunk != b''
-        if pumping:
-            await target.write(chunk)
-            if tracker:
+    try:
+        while pumping:
+            chunk = await source.read(chunk_size)
+            pumping = not end_of_stream(chunk)
+            if pumping:
+                await target.write(chunk)
                 tracker.processed(chunk)
-        elif tracker:
-            tracker.processed(None)
+    finally:
+        tracker.processed(None)

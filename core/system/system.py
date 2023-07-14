@@ -42,7 +42,7 @@ class SystemService:
         context.register(_DeleteInstanceSubscriber(self))
         context.register(_AutoStartsSubscriber(self._context))
 
-    def resources(self):
+    def resources(self) -> httprsc.WebResource:
         return self._resource
 
     def instances_info(self, baseurl: str) -> dict:

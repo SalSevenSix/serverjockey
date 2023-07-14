@@ -69,7 +69,9 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
+            self._backups_dir, 'path',
+            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
+            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     def new_server_process(self) -> proch.ServerProcess:
         return proch.ServerProcess(self._mailer, self._executable) \

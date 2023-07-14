@@ -28,6 +28,8 @@ class ClientFile:
         return self._clientfile
 
     async def write(self):
+        if not self._clientfile:
+            return
         data = util.obj_to_json({
             'SERVER_URL': RootUrl(self._context).build(),
             'SERVER_TOKEN': self._context.config('secret')
@@ -37,6 +39,8 @@ class ClientFile:
 
     # noinspection PyBroadException
     async def delete(self):
+        if not self._clientfile:
+            return
         try:
             await io.delete_file(self._clientfile)
         except Exception:

@@ -214,7 +214,7 @@ class _MultipartFormByteStream(httpabc.ByteStream):
         if not self._part:
             self._part = await self._reader.next()
         chunk = await self._part.read_chunk(length)
-        if chunk is None or chunk == b'':
+        if io.end_of_stream(chunk):
             while self._part is not None:  # Drain remaining parts if any
                 self._part = await self._reader.next()
         return chunk

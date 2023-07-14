@@ -40,6 +40,7 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
+        config_pre = self._config_dir + '/' + _WORLD
         r = httprsc.ResourceBuilder(resource)
         r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
@@ -63,7 +64,9 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
+            self._backups_dir, 'path',
+            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
+            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
         r.pop()
         r.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_autobackups))
         r.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_autobackups), 'r')
@@ -71,7 +74,6 @@ class Deployment:
         r.psh('config')
         r.put('db', httpext.FileSystemHandler(self._player_dir + '/' + _WORLD + '.db'), 'r')
         r.put('jvm', httpext.FileSystemHandler(self._runtime_dir + '/ProjectZomboid64.json'), 'm')
-        config_pre = self._config_dir + '/' + _WORLD
         r.put('ini', httpext.FileSystemHandler(config_pre + '.ini'), 'm')
         r.put('sandbox', httpext.FileSystemHandler(config_pre + '_SandboxVars.lua'), 'm')
         r.put('spawnpoints', httpext.FileSystemHandler(config_pre + '_spawnpoints.lua'), 'm')

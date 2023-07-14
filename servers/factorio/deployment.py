@@ -101,12 +101,14 @@ class Deployment:
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
         r.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
         r.pop()
-        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
-        r.pop()
         r.psh('autosaves', httpext.FileSystemHandler(self._save_dir, ls_filter=_autosaves))
         r.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
+        r.pop()
+        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path',
+            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
+            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_settings))
