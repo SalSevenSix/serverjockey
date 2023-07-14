@@ -1,5 +1,5 @@
 # ALLOW core.* unturned.messaging
-from core.util import util, io
+from core.util import io, objconv
 from core.msg import msgftr, msgext, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -82,7 +82,7 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
-        cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_file))
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         return proch.ServerProcess(self._mailer, self._python) \
             .use_env(self._env) \
             .use_out_decoder(prcenc.PtyLineDecoder()) \
@@ -99,7 +99,7 @@ class Deployment:
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):
-            await io.write_file(self._cmdargs_file, util.obj_to_json(Deployment._default_cmdargs(), pretty=True))
+            await io.write_file(self._cmdargs_file, objconv.obj_to_json(Deployment._default_cmdargs(), pretty=True))
         logs_dir = self._runtime_dir + '/Logs'
         if not await io.symlink_exists(logs_dir):
             await io.create_symlink(logs_dir, self._logs_dir)

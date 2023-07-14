@@ -1,5 +1,5 @@
 # ALLOW util.* msg.* contextsvc.*
-from core.util import util, io
+from core.util import util, io, objconv, funcutil
 from core.context import contextsvc
 
 
@@ -30,7 +30,7 @@ class ClientFile:
     async def write(self):
         if not self._clientfile:
             return
-        data = util.obj_to_json({
+        data = objconv.obj_to_json({
             'SERVER_URL': RootUrl(self._context).build(),
             'SERVER_TOKEN': self._context.config('secret')
         })
@@ -39,9 +39,4 @@ class ClientFile:
 
     # noinspection PyBroadException
     async def delete(self):
-        if not self._clientfile:
-            return
-        try:
-            await io.delete_file(self._clientfile)
-        except Exception:
-            pass
+        await funcutil.silently_call(io.delete_file(self._clientfile))

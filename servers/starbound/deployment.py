@@ -1,5 +1,5 @@
 # ALLOW core.* starbound.messaging
-from core.util import util, io
+from core.util import util, io, objconv
 from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -80,7 +80,7 @@ class Deployment:
     async def _rcon_config(self):
         if not await io.file_exists(self._config_file):
             return
-        config = util.json_to_dict(await io.read_file(self._config_file))
+        config = objconv.json_to_dict(await io.read_file(self._config_file))
         port, password = util.get('rconServerPort', config), util.get('rconServerPassword', config)
         if not port:
             port = 21026
@@ -89,7 +89,7 @@ class Deployment:
         rconsvc.RconService.set_config(self._mailer, self, port, password)
         config['rconServerPort'], config['rconServerPassword'] = port, password
         config['runRconServer'] = True
-        await io.write_file(self._config_file, util.obj_to_json(config, pretty=True))
+        await io.write_file(self._config_file, objconv.obj_to_json(config, pretty=True))
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')

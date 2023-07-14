@@ -3,7 +3,7 @@ import logging
 import typing
 from yarl import URL
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt
-from core.util import util
+from core.util import util, objconv
 from core.http import httpabc, httpcnt
 
 ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL)
@@ -78,7 +78,7 @@ class ResourceBuilder:
         if resource.allows(httpabc.Method.POST):
             allows += '|' if allows else ''
             allows += httpabc.Method.POST.value
-        logging.debug('trs> BIND {} {} => {}'.format(resource.path(), allows, util.obj_to_str(handler)))
+        logging.debug('trs> BIND {} {} => {}'.format(resource.path(), allows, objconv.obj_to_str(handler)))
 
 
 class WebResource(httpabc.Resource):

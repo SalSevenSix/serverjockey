@@ -4,7 +4,7 @@ import logging
 import re
 import os
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
-from core.util import util, io, pkg, sysutil, signals
+from core.util import util, io, pkg, sysutil, signals, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
@@ -67,7 +67,7 @@ class SystemService:
         if auto is None:
             return persist
         persist['auto'] = auto
-        await io.write_file(current['home'] + '/instance.json', util.obj_to_json(persist))
+        await io.write_file(current['home'] + '/instance.json', objconv.obj_to_json(persist))
         subcontext.set_config('auto', auto)
         return persist
 
@@ -77,7 +77,7 @@ class SystemService:
             config_file = self._home_dir + '/' + identity + '/instance.json'
             if await io.file_exists(config_file):
                 configuration = await io.read_file(config_file)
-                configuration = util.json_to_dict(configuration)
+                configuration = objconv.json_to_dict(configuration)
                 await _AutoStartsSubscriber.migrate(config_file, configuration)
                 configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
                 subcontext = await self._initialise_instance(configuration)
@@ -105,7 +105,7 @@ class SystemService:
             raise Exception('Unable to create instance. Directory already exists.')
         logging.debug('CREATING instance ' + identity)
         await io.create_directory(home_dir)
-        await io.write_file(home_dir + '/instance.json', util.obj_to_json(configuration))
+        await io.write_file(home_dir + '/instance.json', objconv.obj_to_json(configuration))
         configuration.update({'identity': identity, 'home': home_dir})
         return await self._initialise_instance(configuration)
 
@@ -165,7 +165,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
             configuration['auto'] = 1
         if auto == 'daemon':
             configuration['auto'] = 3
-        await io.write_file(config_file, util.obj_to_json(configuration))
+        await io.write_file(config_file, objconv.obj_to_json(configuration))
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
@@ -264,4 +264,4 @@ class _InstanceEventTransformer(msgabc.Transformer):
 
     def transform(self, message):
         event = 'created' if message.name() is SystemService.SERVER_INITIALISED else 'deleted'
-        return {'event': event, 'instance': util.obj_to_dict(message.data())}
+        return {'event': event, 'instance': objconv.obj_to_dict(message.data())}

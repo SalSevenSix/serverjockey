@@ -48,3 +48,12 @@ class TestCoreUtil(unittest.TestCase):
         self.assertEqual('1.2 MiB', util.human_file_size(int(1024 * 1024 * 1.2)))
         self.assertEqual('1.0 GiB', util.human_file_size(1024 * 1024 * 1024))
         self.assertEqual('1.0 TiB', util.human_file_size(1024 * 1024 * 1024 * 1024))
+
+    def test_split_lines(self):
+        self.assertEqual(('aaa', 'bbb', 'ccc'), util.split_lines('aaa\nbbb\nccc'))
+        self.assertEqual(None, util.split_lines('aaa\nbbb\nccc', lines_limit=2))
+        self.assertEqual(('aaa', 'bbb', 'ccc'), util.split_lines('aaa\nbbb\nccc', lines_limit=3))
+        self.assertEqual(None, util.split_lines('aaa\nbbb\nccc', line_char_limit=2))
+        self.assertEqual(('aaa', 'bbb', 'ccc'), util.split_lines('aaa\nbbb\nccc', line_char_limit=3))
+        self.assertEqual(None, util.split_lines('aaa\nbbb\nccc', total_char_limit=10))
+        self.assertEqual(('aaa', 'bbb', 'ccc'), util.split_lines('aaa\nbbb\nccc', total_char_limit=11))

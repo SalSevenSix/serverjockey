@@ -2,7 +2,7 @@ import logging
 import asyncio
 import typing
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import tasks, util
+from core.util import tasks, objconv
 from core.msg import msgabc, msgftr
 
 
@@ -17,7 +17,7 @@ class TaskMailer(msgabc.Mailer):
 
     def start(self) -> asyncio.Task:
         self._queue = asyncio.Queue()
-        self._task = tasks.task_start(self._run(), name=util.obj_to_str(self))
+        self._task = tasks.task_start(self._run(), name=objconv.obj_to_str(self))
         return self._task
 
     def get_subscriber(self) -> msgabc.Subscriber:

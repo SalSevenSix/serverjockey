@@ -1,7 +1,6 @@
 import asyncio
 import random
 import base64
-import json
 import time
 import typing
 # ALLOW NONE
@@ -54,49 +53,6 @@ def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
         return None
     for item in collection:
         return item
-
-
-def obj_to_str(obj: typing.Any) -> str:
-    value = repr(obj)
-    if obj is None or isinstance(obj, (str, tuple, list, dict, bool, int, float)):
-        return value
-    result = value.replace(' object at ', ':')
-    if result == value:
-        return result
-    return result[:-1].split('.')[-1]
-
-
-def obj_to_dict(obj: typing.Any) -> typing.Optional[dict]:
-    if obj is None or isinstance(obj, dict):
-        return obj
-    if hasattr(obj, 'asdict'):
-        return obj.asdict()
-    if hasattr(obj, '__dict__'):
-        return obj.__dict__
-    raise Exception('obj_to_dict() failed converting {} to dict'.format(obj))
-
-
-def obj_to_json(obj: typing.Any, pretty: bool = False) -> typing.Optional[str]:
-    if obj is None:
-        return None
-    encoder = None if isinstance(obj, dict) else _JsonEncoder
-    if hasattr(obj, '__dict__'):
-        obj = obj.__dict__
-    # noinspection PyBroadException
-    try:
-        if pretty:
-            return json.dumps(obj, cls=encoder, indent=2, separators=(',', ': '))
-        return json.dumps(obj, cls=encoder)
-    except Exception:
-        return None
-
-
-def json_to_dict(text: str) -> typing.Optional[dict]:
-    # noinspection PyBroadException
-    try:
-        return json.loads(text)
-    except Exception:
-        return None
 
 
 def urlsafe_b64encode(value: str) -> str:
@@ -195,10 +151,3 @@ def clear_queue(queue: asyncio.Queue):
             queue.task_done()
     except Exception:
         pass
-
-
-class _JsonEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if obj is None or type(obj) in (str, tuple, list, dict):
-            return obj
-        return obj_to_str(obj)

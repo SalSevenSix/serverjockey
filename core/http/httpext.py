@@ -3,7 +3,7 @@ import asyncio
 import typing
 import aiofiles
 # ALLOW util.* msg.* context.* http.*
-from core.util import util, io, tasks, aggtrf
+from core.util import util, io, tasks, aggtrf, objconv
 from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
 from core.http import httpabc, httpcnt, httpsubs
 
@@ -31,7 +31,7 @@ class MessengerHandler(httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         messenger = msgext.SynchronousMessenger(self._mailer)
-        subscription_path, source = None, util.obj_to_str(messenger)
+        subscription_path, source = None, objconv.obj_to_str(messenger)
         data['resource'] = resource.name()
         if self._data:
             data = {**self._data, **data}

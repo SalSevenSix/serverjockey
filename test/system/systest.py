@@ -35,21 +35,16 @@ _BASEURL = 'http://localhost:6164'
 CONTEXT = TestContext()
 
 
-async def setup():
+async def _resources() -> httprsc.WebResource:
     await CONTEXT.initialise()
-
-
-def context() -> contextsvc.Context:
-    return CONTEXT.context()
-
-
-def resources() -> httprsc.WebResource:
     return CONTEXT.resources()
 
 
 async def get(path: str, secure: bool = True):
-    return await resources().lookup(path).handle_get(URL(_BASEURL + path), secure)
+    resources = await _resources()
+    return await resources.lookup(path).handle_get(URL(_BASEURL + path), secure)
 
 
 async def post(path: str, body: dict = None):
-    return await resources().lookup(path).handle_post(URL(_BASEURL + path), body if body else {})
+    resources = await _resources()
+    return await resources.lookup(path).handle_post(URL(_BASEURL + path), body if body else {})

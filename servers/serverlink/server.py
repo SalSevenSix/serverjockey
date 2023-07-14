@@ -1,6 +1,6 @@
 import logging
 # ALLOW core.* serverlink.*
-from core.util import util, logutil, io, aggtrf
+from core.util import util, logutil, io, aggtrf, objconv
 from core.msg import msgtrf, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
@@ -37,7 +37,7 @@ class Server(svrabc.Server):
         if await io.file_exists(self._config):
             await self._migrate_config()
         else:
-            await io.write_file(self._config, util.obj_to_json(_default_config()))
+            await io.write_file(self._config, objconv.obj_to_json(_default_config()))
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream(logging.getLogger()):
@@ -75,7 +75,7 @@ class Server(svrabc.Server):
     async def _migrate_config(self):
         # Migration from 0.1.0 to 0.2.0
         update_needed = False
-        config = util.json_to_dict(await io.read_file(self._config))
+        config = objconv.json_to_dict(await io.read_file(self._config))
         if 'PLAYER_ROLE' not in config:
             update_needed = True
             config['PLAYER_ROLE'] = 'everyone'
@@ -84,7 +84,7 @@ class Server(svrabc.Server):
             cid = config.pop('EVENTS_CHANNEL_ID') if 'EVENTS_CHANNEL_ID' in config else None
             config['EVENT_CHANNELS'] = {'server': cid, 'login': cid, 'chat': cid}
         if update_needed:
-            await io.write_file(self._config, util.obj_to_json(config))
+            await io.write_file(self._config, objconv.obj_to_json(config))
 
 
 class _ServerProcessFactory:

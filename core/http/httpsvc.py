@@ -4,7 +4,7 @@ import ssl
 import aiohttp
 from aiohttp import web, streams, abc as webabc, web_exceptions as err
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
-from core.util import util, pack, io
+from core.util import pack, io, objconv
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics
 
@@ -120,7 +120,7 @@ class _RequestHandler:
             encoding = content_type.encoding() if content_type.encoding() else httpcnt.UTF8
             request_body = request_body.decode(encoding).strip()
             if content_type.mime_type() == httpcnt.MIME_APPLICATION_JSON:
-                request_body = util.json_to_dict(request_body)
+                request_body = objconv.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
         response_body = await self._resource.handle_post(self._request.url, request_body)
@@ -150,7 +150,7 @@ class _RequestHandler:
             body = body.encode(httpcnt.UTF8)
         if isinstance(body, (dict, tuple, list)):
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
-            body = util.obj_to_json(body)
+            body = objconv.obj_to_json(body)
             body = body.encode(httpcnt.UTF8)
         if isinstance(body, bytes) and len(body) > 512 and headers.accepts_encoding(httpcnt.GZIP):
             body = await pack.gzip_compress(body)

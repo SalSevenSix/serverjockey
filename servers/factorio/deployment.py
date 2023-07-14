@@ -1,7 +1,7 @@
 import aiohttp
 import socket
 # ALLOW core.* factorio.messaging
-from core.util import util, tasks, io, pack, aggtrf, funcutil
+from core.util import util, tasks, io, pack, aggtrf, funcutil, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -111,7 +111,7 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
-        cmdargs = util.json_to_dict(await io.read_file(self._cmdargs_settings))
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_settings))
         server = proch.ServerProcess(self._mailer, self._executable)
         port = util.get('port', cmdargs)
         if port:
@@ -157,10 +157,10 @@ class Deployment:
             await io.write_file(self._server_adminlist, '[]')
         if not await io.file_exists(self._cmdargs_settings):
             await io.write_file(
-                self._cmdargs_settings, util.obj_to_json(Deployment._default_cmdargs_settings(), pretty=True))
+                self._cmdargs_settings, objconv.obj_to_json(Deployment._default_cmdargs_settings(), pretty=True))
         if not await io.file_exists(self._mods_list):
             await io.write_file(
-                self._mods_list, util.obj_to_json(Deployment._default_mods_list(), pretty=True))
+                self._mods_list, objconv.obj_to_json(Deployment._default_mods_list(), pretty=True))
 
     async def install_runtime(self, version: str):
         url = 'https://factorio.com/get-download/' + version + '/headless/linux64'
@@ -207,11 +207,11 @@ class Deployment:
             await io.create_symlink(self._autosave_dir, self._save_dir)
 
     async def sync_mods(self):
-        mods = util.json_to_dict(await io.read_file(self._mods_list))
+        mods = objconv.json_to_dict(await io.read_file(self._mods_list))
         if not util.get('mods', mods):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
             return
-        settings = util.json_to_dict(await io.read_file(self._server_settings))
+        settings = objconv.json_to_dict(await io.read_file(self._server_settings))
         if not settings.get('username') or not settings.get('token'):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             return
@@ -253,7 +253,7 @@ class Deployment:
         for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith(_ZIP) and file['name'] not in mod_files:
                 await io.delete_file(self._mods_dir + '/' + file['name'])
-        await io.write_file(self._mods_dir + '/mod-list.json', util.obj_to_json({'mods': mod_list}))
+        await io.write_file(self._mods_dir + '/mod-list.json', objconv.obj_to_json({'mods': mod_list}))
 
     async def restore_autosave(self, filename: str):
         map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP

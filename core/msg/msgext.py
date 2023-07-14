@@ -5,7 +5,7 @@ import uuid
 import collections
 import typing
 # ALLOW util.* msg.*
-from core.util import aggtrf, tasks, util, io, pack, funcutil
+from core.util import aggtrf, tasks, util, io, pack, funcutil, objconv
 from core.msg import msgabc, msgftr, msgtrf, msglog
 
 
@@ -120,7 +120,7 @@ class Publisher:
     def __init__(self, mailer: msgabc.Mailer, producer: msgabc.Producer):
         self._mailer = mailer
         self._producer = producer
-        self._task = tasks.task_start(self._run(), name=util.obj_to_str(producer))
+        self._task = tasks.task_start(self._run(), name=objconv.obj_to_str(producer))
         self._mailer.post(self, Publisher.START, producer)
 
     async def stop(self):
