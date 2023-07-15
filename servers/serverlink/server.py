@@ -26,9 +26,9 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         home = context.config('home')
         self._context = context
-        self._log_file = home + '/serverlink.log'
-        self._config = home + '/serverlink.json'
-        self._clientfile = contextext.ClientFile(context, home + '/serverjockey-client.json')
+        self._log_file = util.full_path(home, 'serverlink.log')
+        self._config = util.full_path(home, 'serverlink.json')
+        self._clientfile = contextext.ClientFile(context, util.full_path(home, 'serverjockey-client.json'))
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._stopper = prcext.ServerProcessStopper(context, 10.0)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)

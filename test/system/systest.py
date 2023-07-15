@@ -1,19 +1,22 @@
 import os
 import sys
 from yarl import URL
+from core.util import util
 from core.context import contextsvc
 from core.http import httprsc
 from core.system import system
+
+_SJ_DIR = '/serverjockey'
 
 
 class TestContext:
 
     def __init__(self):
-        self._syssvc, self._resources = None, None
-        env = os.environ.copy()
+        cwd, self._syssvc, self._resources = os.getcwd(), None, None
+        home = util.right_chop_and_strip(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
         self._context = contextsvc.Context(
-            debug=False, home=env['HOME'] + '/serverjockey', secret='test', showtoken=False,
-            scheme='http', sslcert=None, sslkey=None, env=env,
+            debug=False, home=home, secret='token', showtoken=False,
+            scheme='http', sslcert=None, sslkey=None, env=os.environ.copy(),
             python=sys.executable, logfile=None, clientfile=None, host=None, port=None)
 
     async def initialise(self):
@@ -23,9 +26,6 @@ class TestContext:
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
         self._resources = self._syssvc.resources()
-
-    def context(self):
-        return self._context
 
     def resources(self):
         return self._resources

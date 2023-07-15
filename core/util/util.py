@@ -133,12 +133,22 @@ def split_lines(text: str, lines_limit: int = 0, line_char_limit: int = 0, total
     return tuple(lines)
 
 
-def overridable_full_path(base: typing.Optional[str], path: typing.Optional[str]):
-    if base is None or path is None or path[0] in ('.', '/'):
+def full_path(base: str | None, path: str | None):
+    if not path:
+        return None
+    if path[0] == '/':
         return path
-    if not base.endswith('/'):
-        base += '/'
-    return base + path
+    if base is None:
+        base = ''
+    if path == '.':
+        path = ''
+    if base and base[-1] == '/':
+        base = base[:-1]
+    if path.startswith('./'):
+        path = path[2:]
+    sep = '/' if base and path else ''
+    start = '' if base and base[0] == '/' else '/'
+    return start + base + sep + path
 
 
 def clear_queue(queue: asyncio.Queue):

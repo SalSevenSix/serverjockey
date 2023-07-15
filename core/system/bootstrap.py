@@ -41,7 +41,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     if args.version:
         print(sysutil.system_version())
         return None
-    home = os.getcwd() if args.home == '.' else args.home
+    home = util.full_path(os.getcwd(), args.home)
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
         debug=args.debug, home=home, secret=util.generate_token(10, True), showtoken=args.showtoken,
@@ -53,7 +53,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
 def _setup_logging(context: contextsvc.Context):
     logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y-%m-%d %H:%M:%S'
     level = logging.DEBUG if context.is_debug() else logging.INFO
-    filename = util.overridable_full_path(context.config('home'), context.config('logfile'))
+    filename = util.full_path(context.config('home'), context.config('logfile'))
     if not filename:
         logging.basicConfig(level=level, format=logfmt, datefmt=datefmt, stream=sys.stdout)
         return
