@@ -1,8 +1,9 @@
 import unittest
+from yarl import URL
 from core.util import util
 
 
-class TestCoreUtil(unittest.TestCase):
+class TestCoreUtilUtil(unittest.TestCase):
 
     def test_base64_coding(self):
         value = 'So?<p> $ – _ . + ! * ‘ ( ) , [ ] { } | \\ " % ~ # < >'
@@ -16,7 +17,16 @@ class TestCoreUtil(unittest.TestCase):
         self.assertEqual('1.8.3', util.script_escape('1.8.3'))
         self.assertEqual(r'\#\$\*\&', util.script_escape('#$*&'))
 
+    def test_test_url(self):
+        url = URL('test:///path/file.html?foo=bar&a=b')
+        self.assertEqual('test', url.scheme)
+        self.assertEqual(None, url.host)
+        self.assertEqual(None, url.port)
+        self.assertEqual('/path/file.html', url.path)
+        self.assertEqual('foo=bar&a=b', url.query_string)
+
     def test_build_url(self):
+        self.assertEqual('test:///path/resource', util.build_url('test', None, None, 'path/resource'))
         self.assertEqual('http://foo.bar', util.build_url(host='foo.bar'))
         self.assertEqual('http://foo.bar/', util.build_url(host='foo.bar', path='/'))
         self.assertEqual('http://foo.bar/aaa/bbb', util.build_url(host='foo.bar', path='aaa/bbb'))

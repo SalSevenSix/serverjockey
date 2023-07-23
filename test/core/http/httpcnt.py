@@ -2,7 +2,7 @@ import unittest
 from core.http import httpcnt
 
 
-class TestCoreUtil(unittest.TestCase):
+class TestCoreHttpHttpCnt(unittest.TestCase):
 
     def test_content_type_lookup(self):
         self.assertFalse(httpcnt.ContentTypeImpl.lookup('file').is_text_type())

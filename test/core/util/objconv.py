@@ -2,7 +2,7 @@ import unittest
 from core.util import objconv
 
 
-class TestCoreObjConversion(unittest.TestCase):
+class TestCoreUtilObjConv(unittest.TestCase):
 
     def test_obj_to_str(self):
         self.assertEqual('None', objconv.obj_to_str(None))

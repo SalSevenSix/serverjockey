@@ -19,4 +19,4 @@ class TestSystem(unittest.IsolatedAsyncioTestCase):
 
 
 def _expected_get_instances():
-    return '{"testserver": {"module": "testserver", "url": "http://localhost:6164/instances/testserver"}}'
+    return '{"testserver": {"module": "testserver", "url": "test:///instances/testserver"}}'

@@ -1,44 +1,39 @@
 import unittest
-import asyncio
-from core.msg import msgsvc, msgext, msgftr, msglog
+from core.util import util
+from core.msg import msgsvc, msgext, msgftr
 
 
-async def send_test_messages(mailer):
-    mailer.post('test-message', 'mot')
-    mailer.post('test-message', 'hai')
-    mailer.post('test-message', 'ba')
-    mailer.post('test-message', 'bon')
-    mailer.post('test-message', 'nam')
-    mailer.post('test-message', 'sau')
+class TestCoreMsg(unittest.IsolatedAsyncioTestCase):
 
-
-class TestCoreUtil(unittest.IsolatedAsyncioTestCase):
-
-    async def test_mailer(self):
-        subscriber = msglog.PrintSubscriber()
-        mailer = msgsvc.TaskMailer(subscriber)
+    async def test_task_mailer(self):
+        catcher = msgext.MultiCatcher(msgftr.AcceptAll(), msgftr.IsStop())
+        mailer = msgsvc.TaskMailer(catcher)
         mailer.start()
-        test_messages = asyncio.create_task(send_test_messages(mailer))
-        await test_messages
+        mailer.post('source', 'test-message', 'payload')
         await mailer.stop()
+        message = util.single(await catcher.get())
+        self.assertEqual('source', message.source())
+        self.assertEqual('test-message', message.name())
+        self.assertEqual('payload', message.data())
 
-    async def test_multicastmailer(self):
+    async def test_task_multicast_mailer(self):
         mailer = msgsvc.TaskMulticastMailer()
         mailer.start()
-        mailer.register(msglog.PrintSubscriber())
-        mailer.register(msglog.PrintSubscriber())
-        test_messages = asyncio.create_task(send_test_messages(mailer))
-        await test_messages
+        c1, c2 = msgext.SingleCatcher(msgftr.AcceptAll()), msgext.SingleCatcher(msgftr.AcceptAll())
+        mailer.register(c1)
+        mailer.register(c2)
+        mailer.post('test-message', 'mot')
+        self.assertIsNotNone(await c1.get())
+        self.assertIsNotNone(await c2.get())
         await mailer.stop()
 
-    async def test_catching(self):
+    async def test_single_catcher(self):
         mailer = msgsvc.TaskMulticastMailer()
         mailer.start()
-        mailer.register(msglog.PrintSubscriber())
-        catcher = msgext.SingleCatcher(msgftr.NameEquals('bon'))
+        catcher = msgext.SingleCatcher(msgftr.NameEquals('mot'))
         mailer.register(catcher)
-        test_messages = asyncio.create_task(send_test_messages(mailer))
+        mailer.post('test-message', 'mot')
         message = await catcher.get()
-        await test_messages
-        self.assertEqual(message.name(), 'bon')
+        self.assertEqual(message.source(), 'test-message')
+        self.assertEqual(message.name(), 'mot')
         await mailer.stop()

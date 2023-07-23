@@ -66,11 +66,13 @@ def urlsafe_b64decode(value: str) -> str:
     return str(value, 'utf-8')
 
 
-def build_url(scheme: str = 'http', host: str = 'localhost', port: int = 80, path: str = '') -> str:
-    parts = [scheme, '://', host]
-    if port != 80:
-        parts.append(':')
-        parts.append(str(port))
+def build_url(scheme: str = 'http', host: str | None = 'localhost', port: int | None = 80, path: str = '') -> str:
+    parts = [scheme, '://']
+    if host:
+        parts.append(host)
+        if port and port != 80:
+            parts.append(':')
+            parts.append(str(port))
     if path:
         if not path.startswith('/'):
             parts.append('/')

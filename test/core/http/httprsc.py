@@ -3,7 +3,7 @@ from yarl import URL
 from core.http import httprsc
 
 
-class TestCoreUtil(unittest.TestCase):
+class TestCoreHttpHttpRsc(unittest.TestCase):
 
     def test_only_one_arg_allowed(self):
         builder = httprsc.ResourceBuilder(httprsc.WebResource())

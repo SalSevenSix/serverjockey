@@ -7,6 +7,7 @@ from core.http import httprsc
 from core.system import system
 
 _SJ_DIR = '/serverjockey'
+_BASEURL = 'test://'
 
 
 class TestContext:
@@ -31,7 +32,6 @@ class TestContext:
         return self._resources
 
 
-_BASEURL = 'http://localhost:6164'
 CONTEXT = TestContext()
 
 
