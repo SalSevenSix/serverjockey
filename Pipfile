@@ -10,6 +10,7 @@ aiohttp = "*"
 aiofiles = "*"
 vdf = "*"
 rcon = "*"
+upnpy = "*"
 
 [requires]
 python_version = "3.10"

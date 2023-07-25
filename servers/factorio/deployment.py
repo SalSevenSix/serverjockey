@@ -6,6 +6,7 @@ from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
+from core.system import igd
 from core.common import interceptors, rconsvc
 from servers.factorio import messaging as msg
 
@@ -13,27 +14,29 @@ _MAP, _ZIP = 'map', '.zip'
 _AUTOSAVE_PREFIX = '_autosave'
 
 
+def _default_cmdargs_settings():
+    return {
+        '_comment_port': 'Port for the Factorio server to use. Default 34197 used if null.',
+        'port': None,
+        '_comment_rcon-port': 'Optional RCON port.',
+        'rcon-port': None,
+        '_comment_rcon-password': 'RCON password. Required if RCON port specified.',
+        'rcon-password': None,
+        '_comment_use-server-whitelist': 'If the whitelist should be used.',
+        'use-server-whitelist': False,
+        '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer'
+                                        ' and inform Factorio.com about ban/unban commands.',
+        'use-authserver-bans': False,
+        '_comment_upnp': 'Try to automatically redirect port on home network using UPnP.',
+        'upnp': True
+    }
+
+
+def _default_mods_list():
+    return {'mods': [{'name': 'base', 'enabled': True}]}
+
+
 class Deployment:
-
-    @staticmethod
-    def _default_cmdargs_settings():
-        return {
-            '_comment_port': 'Port for the Factorio server to use. Default 34197 used if null.',
-            'port': None,
-            '_comment_rcon-port': 'Optional RCON port.',
-            'rcon-port': None,
-            '_comment_rcon-password': 'RCON password. Required if RCON port specified.',
-            'rcon-password': None,
-            '_comment_use-server-whitelist': 'If the whitelist should be used.',
-            'use-server-whitelist': False,
-            '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer'
-                                            ' and inform Factorio.com about ban/unban commands.',
-            'use-authserver-bans': False
-        }
-
-    @staticmethod
-    def _default_mods_list():
-        return {'mods': [{'name': 'base', 'enabled': True}]}
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
@@ -133,6 +136,10 @@ class Deployment:
         server.append_arg('--server-adminlist').append_arg(self._server_adminlist)
         server.append_arg('--server-settings').append_arg(self._server_settings)
         server.append_arg('--start-server').append_arg(self._map_file)
+        if util.get('upnp', cmdargs, True):
+            igd.IgdService.add_port_mapping(self._mailer, self, port, igd.UDP, 'Factorio server')
+        else:
+            igd.IgdService.delete_port_mapping(self._mailer, self, port, igd.UDP)
         return server
 
     async def build_world(self):
@@ -156,11 +163,9 @@ class Deployment:
         if not await io.file_exists(self._server_adminlist):
             await io.write_file(self._server_adminlist, '[]')
         if not await io.file_exists(self._cmdargs_settings):
-            await io.write_file(
-                self._cmdargs_settings, objconv.obj_to_json(Deployment._default_cmdargs_settings(), pretty=True))
+            await io.write_file(self._cmdargs_settings, objconv.obj_to_json(_default_cmdargs_settings(), pretty=True))
         if not await io.file_exists(self._mods_list):
-            await io.write_file(
-                self._mods_list, objconv.obj_to_json(Deployment._default_mods_list(), pretty=True))
+            await io.write_file(self._mods_list, objconv.obj_to_json(_default_mods_list(), pretty=True))
 
     async def install_runtime(self, version: str):
         url = 'https://factorio.com/get-download/' + version + '/headless/linux64'

@@ -49,6 +49,7 @@
             on the wiki.<br /> Default Admin config file is not generated until after first server start.
           </p>
         </div>
+        <ConfigFile name="Launch Options" path="/config/cmdargs" />
         <ConfigFile name="Settings" path="/config/settings">
           <p>Note that &quot;Folder and file locations&quot; settings will be ignored.</p>
         </ConfigFile>

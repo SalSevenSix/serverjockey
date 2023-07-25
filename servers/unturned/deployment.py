@@ -1,23 +1,26 @@
 # ALLOW core.* unturned.messaging
-from core.util import io, objconv
+from core.util import util, io, objconv
 from core.msg import msgftr, msgext, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh, prcenc, wrapper
+from core.system import igd
 from core.common import steam, interceptors
 
 # https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Launch-Server-on-Linux
 # https://unturned.info/Server-Hosting/ServerHosting/
 
 
-class Deployment:
+def _default_cmdargs():
+    return {
+        '_comment_scope': 'Server scope. Options are InternetServer or LanServer',
+        'scope': 'InternetServer',
+        '_comment_upnp': 'Try to automatically redirect ports on home network using UPnP',
+        'upnp': True
+    }
 
-    @staticmethod
-    def _default_cmdargs():
-        return {
-            '_comment_scope': 'Server scope. Options are InternetServer or LanServer',
-            'scope': 'InternetServer'
-        }
+
+class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
@@ -82,13 +85,17 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
-        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        scope, upnp = 'InternetServer', True
+        if await io.file_exists(self._cmdargs_file):
+            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+            scope, upnp = util.get('scope', cmdargs), util.get('upnp', cmdargs, True)
+        await self._map_ports(upnp)
         return proch.ServerProcess(self._mailer, self._python) \
             .use_env(self._env) \
             .use_out_decoder(prcenc.PtyLineDecoder()) \
             .append_arg(self._wrapper).append_arg(self._executable) \
             .append_arg('-batchmode').append_arg('-nographics') \
-            .append_arg('+' + cmdargs['scope'] + '/Save')
+            .append_arg('+' + scope + '/Save')
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)
@@ -99,7 +106,7 @@ class Deployment:
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):
-            await io.write_file(self._cmdargs_file, objconv.obj_to_json(Deployment._default_cmdargs(), pretty=True))
+            await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         logs_dir = self._runtime_dir + '/Logs'
         if not await io.symlink_exists(logs_dir):
             await io.create_symlink(logs_dir, self._logs_dir)
@@ -108,3 +115,17 @@ class Deployment:
         save_dir = servers_dir + '/Save'
         if not await io.symlink_exists(save_dir):
             await io.create_symlink(save_dir, self._save_dir)
+
+    async def _map_ports(self, upnp: bool):
+        port_key, port = 'Port', 27015
+        if await io.file_exists(self._commands_file):
+            commands = await io.read_file(self._commands_file)
+            for line in commands.split('\n'):
+                if line.find(port_key) > -1:
+                    port = int(util.left_chop_and_strip(line, port_key))
+        if upnp:
+            igd.IgdService.add_port_mapping(self._mailer, self, port, igd.UDP, 'Unturned query port')
+            igd.IgdService.add_port_mapping(self._mailer, self, port + 1, igd.UDP, 'Unturned server port')
+        else:
+            igd.IgdService.delete_port_mapping(self._mailer, self, port, igd.UDP)
+            igd.IgdService.delete_port_mapping(self._mailer, self, port + 1, igd.UDP)

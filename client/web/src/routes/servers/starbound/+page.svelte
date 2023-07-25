@@ -56,6 +56,7 @@
             on the Starbound wiki.<br /> Default Settings file is not generated until after first server start.
           </p>
         </div>
+        <ConfigFile name="Launch Options" path="/config/cmdargs" />
         <ConfigFile name="Settings" path="/config/settings" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">

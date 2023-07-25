@@ -3,6 +3,18 @@ import typing
 # ALLOW util.*
 
 
+def to_bool(value: typing.Any) -> bool:
+    if not value:
+        return False
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() in ('true', '1', 'y', 'yes')
+    if isinstance(value, (int, float)):
+        return value > 0.0
+    return True
+
+
 def obj_to_str(obj: typing.Any) -> str:
     value = repr(obj)
     if obj is None or isinstance(obj, (str, tuple, list, dict, bool, int, float)):

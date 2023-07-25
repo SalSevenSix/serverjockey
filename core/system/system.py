@@ -8,7 +8,7 @@ from core.util import util, io, pkg, sysutil, signals, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
-from core.system import svrabc, svrsvc
+from core.system import svrabc, svrsvc, igd
 
 MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
 
@@ -71,6 +71,7 @@ class SystemService:
         return persist
 
     async def initialise(self) -> SystemService:
+        igd.initialise(self._context)
         autos, ls = [], await io.directory_list(self._home_dir)
         for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
             config_file = self._home_dir + '/' + identity + '/instance.json'
@@ -119,7 +120,8 @@ class SystemService:
     async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
         subcontext.start()
-        subcontext.register(msgext.RelaySubscriber(self._context, _DeleteInstanceSubscriber.FILTER))
+        subcontext.register(msgext.RelaySubscriber(
+            self._context, msgftr.Or(igd.IgdService.FILTER, _DeleteInstanceSubscriber.FILTER)))
         if subcontext.is_debug():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         server = await self._create_server(subcontext)

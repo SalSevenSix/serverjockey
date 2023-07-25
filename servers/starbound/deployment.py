@@ -4,10 +4,21 @@ from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
+from core.system import igd
 from core.common import steam, rconsvc, interceptors
 from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
+
+_DEFAULT_SERVER_PORT = 21025  # TCP
+_DEFAULT_RCON_PORT = 21026    # TCP
+
+
+def _default_cmdargs():
+    return {
+        '_comment_upnp': 'Try to automatically redirect ports on home network using UPnP',
+        'upnp': True
+    }
 
 
 class Deployment:
@@ -18,6 +29,7 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
+        self._cmdargs_file = self._world_dir + '/cmdargs.json'
         self._config_file = self._world_dir + '/starbound_server.config'
 
     async def initialise(self):
@@ -40,6 +52,7 @@ class Deployment:
         r.put('*{path}', httpext.FileSystemHandler(self._world_dir, 'path'), 'r')
         r.pop()
         r.psh('config')
+        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
         r.put('settings', httpext.FileSystemHandler(self._config_file), 'm')
         r.pop()
         r.psh('deployment')
@@ -63,7 +76,11 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self):
-        await self._rcon_config()
+        config = None
+        if await io.file_exists(self._config_file):
+            config = objconv.json_to_dict(await io.read_file(self._config_file))
+            await self._rcon_config(config)
+        await self._map_ports(config)
         await self._link_mods()
         bin_dir = self._runtime_dir + '/linux'
         return proch.ServerProcess(self._mailer, bin_dir + '/starbound_server').use_cwd(bin_dir)
@@ -73,23 +90,38 @@ class Deployment:
         await io.create_directory(self._world_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
+        if not await io.file_exists(self._cmdargs_file):
+            await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         storage_dir = self._runtime_dir + '/storage'
         if not await io.symlink_exists(storage_dir):
             await io.create_symlink(storage_dir, self._world_dir)
 
-    async def _rcon_config(self):
-        if not await io.file_exists(self._config_file):
-            return
-        config = objconv.json_to_dict(await io.read_file(self._config_file))
+    async def _rcon_config(self, config: dict):
         port, password = util.get('rconServerPort', config), util.get('rconServerPassword', config)
         if not port:
-            port = 21026
+            port = _DEFAULT_RCON_PORT
         if not password:
             password = util.generate_token(10)
         rconsvc.RconService.set_config(self._mailer, self, port, password)
         config['rconServerPort'], config['rconServerPassword'] = port, password
         config['runRconServer'] = True
         await io.write_file(self._config_file, objconv.obj_to_json(config, pretty=True))
+
+    async def _map_ports(self, config: dict | None):
+        server_port = util.get('gameServerPort', config, _DEFAULT_SERVER_PORT)
+        query_port = util.get('queryServerPort', config, _DEFAULT_SERVER_PORT)
+        upnp = True
+        if await io.file_exists(self._cmdargs_file):
+            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+            upnp = util.get('upnp', cmdargs, True)
+        if upnp:
+            igd.IgdService.add_port_mapping(self._mailer, self, server_port, igd.TCP, 'Starbound server port')
+            if query_port != server_port:
+                igd.IgdService.add_port_mapping(self._mailer, self, query_port, igd.TCP, 'Starbound query port')
+        else:
+            igd.IgdService.delete_port_mapping(self._mailer, self, server_port, igd.TCP)
+            if query_port != server_port:
+                igd.IgdService.delete_port_mapping(self._mailer, self, query_port, igd.TCP)
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')
