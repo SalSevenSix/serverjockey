@@ -12,6 +12,6 @@ async def run_script(script: str) -> str:
         logging.error('STDERR\n' + stderr.decode())
     result = None
     if stdout:
-        result = stdout.decode()
+        result = stdout.decode().strip()
         logging.debug('STDOUT\n' + result)
     return result

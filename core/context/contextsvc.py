@@ -42,7 +42,10 @@ class Context(msgabc.MulticastMailer):
         self._configuration[key] = value
 
     def is_debug(self) -> bool:
-        return self.config('debug')
+        return self.config('debug') or self.is_trace()
+
+    def is_trace(self) -> bool:
+        return self.config('trace')
 
     def register(self, subscriber: msgabc.Subscriber) -> asyncio.Task:
         return self._mailer.register(subscriber)

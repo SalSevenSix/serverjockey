@@ -122,7 +122,7 @@ class SystemService:
         subcontext.start()
         subcontext.register(msgext.RelaySubscriber(
             self._context, msgftr.Or(igd.IgdService.FILTER, _DeleteInstanceSubscriber.FILTER)))
-        if subcontext.is_debug():
+        if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         server = await self._create_server(subcontext)
         await server.initialise()

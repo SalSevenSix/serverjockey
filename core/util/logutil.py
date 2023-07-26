@@ -2,6 +2,10 @@ import logging
 # ALLOW util.util
 
 
+def prev_logname(logname: str) -> str:
+    return logname[:-4] + '_prev.log' if logname.endswith('.log') else logname + '.prev'
+
+
 def is_logging_to_file(logger: logging.Logger) -> bool:
     for handler in logger.handlers:
         if type(handler) is logging.FileHandler:
