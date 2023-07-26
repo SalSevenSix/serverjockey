@@ -4,9 +4,9 @@ from core.util import util, objconv, io
 from core.msg import msgftr, msgtrf, msglog, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
-from core.system import svrsvc, igd
+from core.system import svrsvc
 from core.proc import proch, jobh
-from core.common import steam, interceptors
+from core.common import steam, interceptors, portmapper
 from servers.sevendaystodie import messaging as msg
 
 
@@ -40,6 +40,7 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
+        self._mailer.register(portmapper.PortMapperService(self._mailer))
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
@@ -50,8 +51,7 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
         self._mailer.register(msglog.LogfileSubscriber(
             self._log_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER,
-            msgftr.And(msgftr.NameIs(svrsvc.ServerStatus.NOTIFY_RUNNING), msgftr.DataEquals(False)),
-            msgtrf.GetData()))
+            svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)
@@ -147,33 +147,24 @@ class Deployment:
         return live_dict
 
     async def _map_ports(self, config: dict):
+        upnp = True
+        if await io.file_exists(self._cmdargs_file):
+            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+            upnp = util.get('upnp', cmdargs, True)
+        if not upnp:
+            return
         server_port = int(util.get('ServerPort', config, 26900))
         udp_p1, udp_p2, udp_p3 = server_port + 1, server_port + 2, server_port + 3
         console_enabled = objconv.to_bool(util.get('WebDashboardEnabled', config, False))
         console_port = int(util.get('WebDashboardPort', config, 8080))
         telnet_enabled = objconv.to_bool(util.get('TelnetEnabled', config, False))
         telnet_port = int(util.get('TelnetPort', config, 8081))
-        upnp = True
-        if await io.file_exists(self._cmdargs_file):
-            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-            upnp = util.get('upnp', cmdargs, True)
-        if upnp:
-            igd.IgdService.add_port_mapping(self._mailer, self, server_port, igd.TCP, '7D2D server port TCP')
-            igd.IgdService.add_port_mapping(self._mailer, self, server_port, igd.UDP, '7D2D server port UDP')
-            igd.IgdService.add_port_mapping(self._mailer, self, udp_p1, igd.UDP, '7D2D Aux1 port')
-            igd.IgdService.add_port_mapping(self._mailer, self, udp_p2, igd.UDP, '7D2D Aux2 port')
-            igd.IgdService.add_port_mapping(self._mailer, self, udp_p3, igd.UDP, '7D2D Aux3 port')
-            if console_enabled:
-                igd.IgdService.add_port_mapping(self._mailer, self, console_port, igd.TCP, '7D2D web console port')
-            if telnet_enabled:
-                igd.IgdService.add_port_mapping(self._mailer, self, telnet_port, igd.TCP, '7D2D telnet port')
-        else:
-            igd.IgdService.delete_port_mapping(self._mailer, self, server_port, igd.TCP)
-            igd.IgdService.delete_port_mapping(self._mailer, self, server_port, igd.UDP)
-            igd.IgdService.delete_port_mapping(self._mailer, self, udp_p1, igd.UDP)
-            igd.IgdService.delete_port_mapping(self._mailer, self, udp_p2, igd.UDP)
-            igd.IgdService.delete_port_mapping(self._mailer, self, udp_p3, igd.UDP)
-            if console_enabled:
-                igd.IgdService.delete_port_mapping(self._mailer, self, console_port, igd.TCP)
-            if telnet_enabled:
-                igd.IgdService.delete_port_mapping(self._mailer, self, telnet_port, igd.TCP)
+        portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, '7D2D TCP server port')
+        portmapper.map_port(self._mailer, self, server_port, portmapper.UDP, '7D2D UDP server port')
+        portmapper.map_port(self._mailer, self, udp_p1, portmapper.UDP, '7D2D aux1 port')
+        portmapper.map_port(self._mailer, self, udp_p2, portmapper.UDP, '7D2D aux2 port')
+        portmapper.map_port(self._mailer, self, udp_p3, portmapper.UDP, '7D2D aux3 port')
+        if console_enabled:
+            portmapper.map_port(self._mailer, self, console_port, portmapper.TCP, '7D2D console port')
+        if telnet_enabled:
+            portmapper.map_port(self._mailer, self, telnet_port, portmapper.TCP, '7D2D telnet port')

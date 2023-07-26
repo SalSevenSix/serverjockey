@@ -14,17 +14,21 @@ class _Tasker:
         return _Tasker.__instance
 
     def __init__(self):
-        self._task_count = 0
+        self._tasks = []
 
     def task_start(self, coro: typing.Coroutine, name: str) -> asyncio.Task:
         task = asyncio.create_task(coro, name=name)
-        self._task_count += 1
-        logging.debug('tsk> START ({}) : {}'.format(self._task_count, task))
+        self._tasks.append(task)
+        logging.debug('tsk> START ({}) : {}'.format(len(self._tasks), task))
         return task
 
     def task_end(self, task: asyncio.Task):
-        self._task_count -= 1
-        logging.debug('tsk> END   ({}) : {}'.format(self._task_count, task))
+        self._tasks.remove(task)
+        logging.debug('tsk> END   ({}) : {}'.format(len(self._tasks), task))
+
+    def dump(self):
+        for task in self._tasks:
+            logging.debug('tsk> REMAINING ' + repr(task))
 
 
 def task_start(coro: typing.Coroutine, name: str) -> asyncio.Task:
@@ -39,6 +43,10 @@ def task_fork(coro: typing.Coroutine, name: str) -> asyncio.Task:
 
 def task_end(task: asyncio.Task):
     _Tasker.instance().task_end(task)
+
+
+def dump():
+    _Tasker.instance().dump()
 
 
 async def wait_for(task: asyncio.Task, timeout: float):

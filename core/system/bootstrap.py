@@ -4,7 +4,7 @@ import sys
 import os
 import typing
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
-from core.util import util, funcutil, sysutil, steamutil, logutil
+from core.util import util, funcutil, sysutil, steamutil, logutil, tasks
 from core.msg import msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsvc
@@ -105,6 +105,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
     async def shutdown(self):
         await funcutil.silently_cleanup(self._syssvc)
         await funcutil.silently_cleanup(self._context)
+        tasks.dump()
 
 
 def main(args: typing.Optional[typing.Collection] = None) -> int:

@@ -10,40 +10,38 @@ class TaskMailer(msgabc.Mailer):
 
     def __init__(self, subscriber: msgabc.Subscriber):
         self._subscriber = subscriber
-        self._task, self._queue = None, None
-
-    def is_running(self) -> bool:
-        return self._task is not None
+        self._queue = asyncio.Queue()
+        self._running, self._task = False, None
 
     def start(self) -> asyncio.Task:
-        self._queue = asyncio.Queue()
         self._task = tasks.task_start(self._run(), name=objconv.obj_to_str(self))
+        self._running = True
         return self._task
 
     def get_subscriber(self) -> msgabc.Subscriber:
         return self._subscriber
 
     def post(self, *vargs):
-        if not self.is_running():
+        if not self._running:
             return False
         message = msgabc.Message.from_vargs(*vargs)
-        if message is msgabc.STOP:
-            self._task = None
         try:
-            if message is msgabc.STOP or self._subscriber.accepts(message):
+            if message is msgabc.STOP:
+                self._running = False
+                self._queue.put_nowait(message)
+            elif self._subscriber.accepts(message):
                 self._queue.put_nowait(message)
         except Exception as e:
             logging.warning('Posting exception. raised: %s', repr(e))
-        return self.is_running()
+        return self._running
 
     async def stop(self):
-        task = self._task
-        if not self.is_running():
+        if not self._running:
             return
         # Not calling queue.join() because STOP will end the tasks.
         # Any message after STOP should stay in queue and be ignored.
         self.post(msgabc.STOP)
-        await task
+        await self._task
 
     async def _run(self) -> typing.Any:
         result, running = None, True
@@ -58,7 +56,6 @@ class TaskMailer(msgabc.Mailer):
                     result = True
             self._queue.task_done()
         tasks.task_end(self._task)
-        self._task, self._queue = None, None
         return result
 
 

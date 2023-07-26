@@ -4,8 +4,7 @@ from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
-from core.system import igd
-from core.common import steam, rconsvc, interceptors
+from core.common import steam, rconsvc, interceptors, portmapper
 from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
@@ -34,6 +33,7 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
+        self._mailer.register(portmapper.PortMapperService(self._mailer))
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
@@ -108,20 +108,17 @@ class Deployment:
         await io.write_file(self._config_file, objconv.obj_to_json(config, pretty=True))
 
     async def _map_ports(self, config: dict | None):
-        server_port = util.get('gameServerPort', config, _DEFAULT_SERVER_PORT)
-        query_port = util.get('queryServerPort', config, _DEFAULT_SERVER_PORT)
         upnp = True
         if await io.file_exists(self._cmdargs_file):
             cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
             upnp = util.get('upnp', cmdargs, True)
-        if upnp:
-            igd.IgdService.add_port_mapping(self._mailer, self, server_port, igd.TCP, 'Starbound server port')
-            if query_port != server_port:
-                igd.IgdService.add_port_mapping(self._mailer, self, query_port, igd.TCP, 'Starbound query port')
-        else:
-            igd.IgdService.delete_port_mapping(self._mailer, self, server_port, igd.TCP)
-            if query_port != server_port:
-                igd.IgdService.delete_port_mapping(self._mailer, self, query_port, igd.TCP)
+        if not upnp:
+            return
+        server_port = util.get('gameServerPort', config, _DEFAULT_SERVER_PORT)
+        query_port = util.get('queryServerPort', config, server_port)
+        portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, 'Starbound server port')
+        if query_port != server_port:
+            portmapper.map_port(self._mailer, self, query_port, portmapper.TCP, 'Starbound query port')
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')

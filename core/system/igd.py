@@ -16,22 +16,21 @@ def initialise(mailer: msgabc.MulticastMailer):
     mailer.post('core.system.idg.initialise()', IgdService.DISCOVER)
 
 
+def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
+    assert protocal in _VALID_PROTOCALS
+    mailer.post(source, IgdService.ADD_PORT_MAPPING, {'port': port, 'protocal': protocal, 'description': description})
+
+
+def delete_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, sync: bool = False):
+    assert protocal in _VALID_PROTOCALS
+    mailer.post(source, IgdService.DELETE_PORT_MAPPING, {'port': port, 'protocal': protocal, 'sync': sync})
+
+
 class IgdService(msgabc.AbcSubscriber):
     DISCOVER = 'IgdService.Discover'
     ADD_PORT_MAPPING = 'IgdService.AddPortMapping'
     DELETE_PORT_MAPPING = 'IgdService.DeletePortMapping'
     FILTER = msgftr.NameIn((ADD_PORT_MAPPING, DELETE_PORT_MAPPING))
-
-    @staticmethod
-    def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
-        assert protocal in _VALID_PROTOCALS
-        mailer.post(source, IgdService.ADD_PORT_MAPPING,
-                    {'port': port, 'protocal': protocal, 'description': description})
-
-    @staticmethod
-    def delete_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str):
-        assert protocal in _VALID_PROTOCALS
-        mailer.post(source, IgdService.DELETE_PORT_MAPPING, {'port': port, 'protocal': protocal})
 
     def __init__(self):
         super().__init__(msgftr.NameIn((
@@ -57,14 +56,16 @@ class IgdService(msgabc.AbcSubscriber):
             return False
         if action is IgdService.ADD_PORT_MAPPING:
             local_ip = await sysutil.get_local_ip()
-            coro = _add_port_mapping(
-                self._service, local_ip,
-                util.get('port', data), util.get('protocal', data), util.get('description', data))
-            await asyncio.wait_for(coro, 5.0)
+            port, protocal = util.get('port', data), util.get('protocal', data)
+            description = util.get('description', data)
+            await asyncio.wait_for(_add_port_mapping(self._service, local_ip, port, protocal, description), 4.0)
             return None
         if action is IgdService.DELETE_PORT_MAPPING:
-            coro = _delete_port_mapping(self._service, util.get('port', data), util.get('protocal', data))
-            await asyncio.wait_for(coro, 5.0)
+            sync, port, protocal = util.get('sync', data, False), util.get('port', data), util.get('protocal', data)
+            if sync:  # Allowing sync option because aiohttp aggressively kills tasks upon shutdown
+                _sync_delete_port_mapping(self._service, port, protocal)
+            else:
+                await asyncio.wait_for(_delete_port_mapping(self._service, port, protocal), 4.0)
             return None
         return None
 
@@ -76,7 +77,7 @@ def _sync_get_mapping_service(upnp):
             for service in device.get_services():
                 for action in service.get_actions():
                     if action.name == 'AddPortMapping':
-                        logging.info('Found port mapping service: ' + repr(service))
+                        logging.debug('Found port mapping service: ' + repr(service))
                         return service
         logging.debug('No IGD port mapping service found.')
     except Exception as e:

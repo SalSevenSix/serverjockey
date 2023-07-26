@@ -11,13 +11,12 @@ from core.system import svrabc
 
 class ServerService(msgabc.AbcSubscriber):
     START = 'ServerService.Start'
-    DAEMON = 'ServerService.Daemon'
+    DAEMON = 'ServerService.Daemon'  # TODO can this be removed now?
     RESTART = 'ServerService.Restart'
     STOP = 'ServerService.Stop'
-    DELETE = 'ServerService.Delete'
-    DELETE_ME = 'ServerService.DeletedMe'
-    SHUTDOWN = 'ServerService.Shutdown'
-    SHUTDOWN_RESPONSE = 'ServerService.ShutdownResponse'
+    DELETE, DELETE_ME = 'ServerService.Delete', 'ServerService.DeletedMe'
+    SHUTDOWN, SHUTDOWN_RESPONSE = 'ServerService.Shutdown', 'ServerService.ShutdownResponse'
+    CLEANUP_FILTER = msgftr.NameIn((DELETE, SHUTDOWN))
 
     @staticmethod
     def signal_start(mailer: msgabc.Mailer, source: typing.Any):
@@ -150,6 +149,7 @@ class ServerStatus(msgabc.AbcSubscriber):
     NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'
     NOTIFY_STATE = 'ServerStatus.NotifyState'
     NOTIFY_DETAILS = 'ServerStatus.NotifyDetails'
+    RUNNING_FALSE_FILTER = msgftr.And(msgftr.NameIs(NOTIFY_RUNNING), msgftr.DataEquals(False))
 
     @staticmethod
     async def get_status(mailer: msgabc.MulticastMailer, source: typing.Any):
@@ -158,16 +158,16 @@ class ServerStatus(msgabc.AbcSubscriber):
         return response.data()
 
     @staticmethod
-    def notify_running(mailer: msgabc.Mailer, source: typing.Any, value: bool):
-        mailer.post(source, ServerStatus.NOTIFY_RUNNING, value)
+    def notify_running(mailer: msgabc.Mailer, source: typing.Any, running: bool):
+        mailer.post(source, ServerStatus.NOTIFY_RUNNING, running)
 
     @staticmethod
-    def notify_state(mailer: msgabc.Mailer, source: typing.Any, value: str):
-        mailer.post(source, ServerStatus.NOTIFY_STATE, value)
+    def notify_state(mailer: msgabc.Mailer, source: typing.Any, state: str):
+        mailer.post(source, ServerStatus.NOTIFY_STATE, state)
 
     @staticmethod
-    def notify_details(mailer: msgabc.Mailer, source: typing.Any, value: typing.Dict[str, typing.Any]):
-        mailer.post(source, ServerStatus.NOTIFY_DETAILS, value)
+    def notify_details(mailer: msgabc.Mailer, source: typing.Any, data: typing.Dict[str, typing.Any]):
+        mailer.post(source, ServerStatus.NOTIFY_DETAILS, data)
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,

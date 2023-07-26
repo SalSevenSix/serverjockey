@@ -4,8 +4,7 @@ from core.msg import msgftr, msgext, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh, prcenc, wrapper
-from core.system import igd
-from core.common import steam, interceptors
+from core.common import steam, interceptors, portmapper
 
 # https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Launch-Server-on-Linux
 # https://unturned.info/Server-Hosting/ServerHosting/
@@ -46,6 +45,7 @@ class Deployment:
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
         await self.build_world()
+        self._mailer.register(portmapper.PortMapperService(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
             self.build_world))
@@ -89,7 +89,8 @@ class Deployment:
         if await io.file_exists(self._cmdargs_file):
             cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
             scope, upnp = util.get('scope', cmdargs), util.get('upnp', cmdargs, True)
-        await self._map_ports(upnp)
+        if upnp:
+            await self._map_ports()
         return proch.ServerProcess(self._mailer, self._python) \
             .use_env(self._env) \
             .use_out_decoder(prcenc.PtyLineDecoder()) \
@@ -116,16 +117,12 @@ class Deployment:
         if not await io.symlink_exists(save_dir):
             await io.create_symlink(save_dir, self._save_dir)
 
-    async def _map_ports(self, upnp: bool):
+    async def _map_ports(self):
         port_key, port = 'Port', 27015
         if await io.file_exists(self._commands_file):
             commands = await io.read_file(self._commands_file)
             for line in commands.split('\n'):
                 if line.find(port_key) > -1:
                     port = int(util.left_chop_and_strip(line, port_key))
-        if upnp:
-            igd.IgdService.add_port_mapping(self._mailer, self, port, igd.UDP, 'Unturned query port')
-            igd.IgdService.add_port_mapping(self._mailer, self, port + 1, igd.UDP, 'Unturned server port')
-        else:
-            igd.IgdService.delete_port_mapping(self._mailer, self, port, igd.UDP)
-            igd.IgdService.delete_port_mapping(self._mailer, self, port + 1, igd.UDP)
+        portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Unturned query port')
+        portmapper.map_port(self._mailer, self, port + 1, portmapper.UDP, 'Unturned server port')

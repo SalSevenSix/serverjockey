@@ -1,9 +1,9 @@
 import typing
 # ALLOW util.* msg.* context.* http.* system.* proc.*
+from core.util import util
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
 from core.proc import proch
-from core.util import util
 
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
@@ -17,7 +17,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             PlayersSubscriber.EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
-            proch.ServerProcess.FILTER_STATES_DOWN))
+            proch.ServerProcess.FILTER_STATES_DOWN))  # TODO consider using Not Running
         self._mailer = mailer
         self._players = []
 

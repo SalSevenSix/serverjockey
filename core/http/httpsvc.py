@@ -94,7 +94,7 @@ class _RequestHandler:
             return self._build_response_options()
 
         # GET
-        secure = self._context.is_debug() or self._security.check(self._request)
+        secure = self._security.check(self._request)
         if self._method is httpabc.Method.GET:
             response_body = await self._resource.handle_get(self._request.url, secure)
             if response_body is None:

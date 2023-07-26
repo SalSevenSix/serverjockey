@@ -6,8 +6,7 @@ from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch, jobh
-from core.system import igd
-from core.common import interceptors, rconsvc
+from core.common import interceptors, rconsvc, portmapper
 from servers.factorio import messaging as msg
 
 _MAP, _ZIP = 'map', '.zip'
@@ -66,6 +65,7 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
+        self._mailer.register(portmapper.PortMapperService(self._mailer))
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE), self.build_world))
@@ -120,6 +120,8 @@ class Deployment:
         if port:
             server.append_arg('--port').append_arg(port)
         port = port if port else 34197
+        if util.get('upnp', cmdargs, True):
+            portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Factorio server')
         rcon_port = util.get('rcon-port', cmdargs)
         rcon_port = rcon_port if rcon_port else port + 1
         server.append_arg('--rcon-port').append_arg(rcon_port)
@@ -136,10 +138,6 @@ class Deployment:
         server.append_arg('--server-adminlist').append_arg(self._server_adminlist)
         server.append_arg('--server-settings').append_arg(self._server_settings)
         server.append_arg('--start-server').append_arg(self._map_file)
-        if util.get('upnp', cmdargs, True):
-            igd.IgdService.add_port_mapping(self._mailer, self, port, igd.UDP, 'Factorio server')
-        else:
-            igd.IgdService.delete_port_mapping(self._mailer, self, port, igd.UDP)
         return server
 
     async def build_world(self):
