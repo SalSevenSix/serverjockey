@@ -11,9 +11,9 @@ TCP, UDP = 'TCP', 'UDP'
 _VALID_PROTOCALS = TCP, UDP
 
 
-def initialise(mailer: msgabc.MulticastMailer):
+def initialise(mailer: msgabc.MulticastMailer, source: typing.Any):
     mailer.register(IgdService())
-    mailer.post('core.system.idg.initialise()', IgdService.DISCOVER)
+    mailer.post(source, IgdService.DISCOVER)
 
 
 def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):

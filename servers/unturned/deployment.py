@@ -85,6 +85,8 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
+        if not await io.file_exists(self._executable):
+            raise FileNotFoundError('Unturned game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('upnp', cmdargs, True):
             await self._map_ports()

@@ -87,6 +87,8 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
+        if not await io.file_exists(self._executable):
+            raise FileNotFoundError('7D2D game server not installed. Please Install Runtime first.')
         config = await self._build_live_config()
         await self._map_ports(config)
         return proch.ServerProcess(self._mailer, self._executable) \

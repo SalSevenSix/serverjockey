@@ -71,7 +71,7 @@ class SystemService:
         return persist
 
     async def initialise(self) -> SystemService:
-        igd.initialise(self._context)
+        igd.initialise(self._context, self)
         autos, ls = [], await io.directory_list(self._home_dir)
         for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
             config_file = self._home_dir + '/' + identity + '/instance.json'

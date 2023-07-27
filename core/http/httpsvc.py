@@ -36,7 +36,7 @@ class HttpService:
 
     def run(self):
         access_logger = logging.getLogger('aiohttp.access')
-        access_logger.addFilter(_AccessLogFilter())
+        access_logger.addFilter(_AccessLogFilter(self._context.is_trace()))
         ssl_context = None
         if self._context.config('scheme') == 'https':
             # noinspection PyTypeChecker
@@ -240,7 +240,14 @@ class _RequestByteStream(httpabc.ByteStream):
 
 
 class _AccessLogFilter(logging.Filter):
-    REGEX = re.compile(r'.*(GET|POST|OPTIONS) /.*HTTP/1.1" (200|204|404|409).*')
+
+    def __init__(self, trace: bool = False):
+        super().__init__('HttpAccessLogFilter')
+        if trace:
+            self._regex = re.compile(
+                r'.*GET.*/(subscriptions|assets|_app)/.*HTTP/1.1" (204|200).*|.*OPTIONS.*HTTP/1.1" 204.*')
+        else:
+            self._regex = re.compile(r'.*(GET|POST|OPTIONS) /.*HTTP/1.1" (200|204|404|409).*')
 
     def filter(self, record):
-        return _AccessLogFilter.REGEX.match(record.getMessage()) is None
+        return self._regex.match(record.getMessage()) is None

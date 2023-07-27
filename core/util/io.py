@@ -91,8 +91,7 @@ async def create_directories(path: str):
 
 
 async def create_symlink(symlink_path: str, target_path: str):
-    await delete_directory(symlink_path)
-    await delete_file(symlink_path)
+    await delete_any(symlink_path)
     await _create_symlink(target_path, symlink_path)
 
 

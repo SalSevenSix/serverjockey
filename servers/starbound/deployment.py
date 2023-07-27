@@ -75,14 +75,16 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self):
-        config = {}
+        config, bin_dir = {}, self._runtime_dir + '/linux'
+        executable = bin_dir + '/starbound_server'
+        if not await io.file_exists(executable):
+            raise FileNotFoundError('Starbound game server not installed. Please Install Runtime first.')
         if await io.file_exists(self._config_file):
             config = objconv.json_to_dict(await io.read_file(self._config_file))
             config = await self._rcon_config(config)
         await self._map_ports(config)
         await self._link_mods()
-        bin_dir = self._runtime_dir + '/linux'
-        return proch.ServerProcess(self._mailer, bin_dir + '/starbound_server').use_cwd(bin_dir)
+        return proch.ServerProcess(self._mailer, executable).use_cwd(bin_dir)
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)

@@ -24,9 +24,11 @@ class Deployment:
         self._save_dir = self._world_dir + '/Saves'
         self._lua_dir = self._world_dir + '/Lua'
 
-    def new_server_process(self):
-        return proch.ServerProcess(self._mailer, self._runtime_dir + '/start-server.sh') \
-            .append_arg('-cachedir=' + self._world_dir)
+    async def new_server_process(self):
+        executable = self._runtime_dir + '/start-server.sh'
+        if not await io.file_exists(executable):
+            raise FileNotFoundError('Project Zomboid game server not installed. Please Install Runtime first.')
+        return proch.ServerProcess(self._mailer, executable).append_arg('-cachedir=' + self._world_dir)
 
     async def initialise(self):
         await self.build_world()

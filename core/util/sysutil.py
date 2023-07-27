@@ -50,7 +50,7 @@ async def get_public_ip() -> str:
     result = util.get('public_ip', _CACHE)
     if result:
         return result
-    for url in ('https://ipv4.seeip.org', 'https://api.ipify.org'):
+    for url in ('https://api.ipify.org', 'https://ipv4.seeip.org'):
         _CACHE['public_ip'] = await _fetch_text(url)
         if _CACHE['public_ip']:
             logging.debug('Public IP sourced from ' + url)

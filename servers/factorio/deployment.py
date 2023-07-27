@@ -116,7 +116,11 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
+        if not await io.file_exists(self._executable):
+            raise FileNotFoundError('Factorio game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_settings))
+        await self._sync_mods()
+        await self._ensure_map()
         server = proch.ServerProcess(self._mailer, self._executable)
         port = util.get('port', cmdargs)
         if port:
@@ -201,10 +205,8 @@ class Deployment:
         finally:
             self._mailer.post(self, msg.DEPLOYMENT_DONE)
 
-    async def ensure_map(self):
+    async def _ensure_map(self):
         if not await io.file_exists(self._map_file):
-            await io.delete_directory(self._save_dir)
-            await io.create_directory(self._save_dir)
             await jobh.JobProcess.run_job(self._mailer, self, (
                 self._executable,
                 '--create', self._map_file,
@@ -213,7 +215,7 @@ class Deployment:
         if not await io.symlink_exists(self._autosave_dir):
             await io.create_symlink(self._autosave_dir, self._save_dir)
 
-    async def sync_mods(self):
+    async def _sync_mods(self):
         mods = objconv.json_to_dict(await io.read_file(self._mods_list))
         if not util.get('mods', mods):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
