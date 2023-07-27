@@ -85,18 +85,15 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
-        scope, upnp = 'InternetServer', True
-        if await io.file_exists(self._cmdargs_file):
-            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-            scope, upnp = util.get('scope', cmdargs), util.get('upnp', cmdargs, True)
-        if upnp:
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        if util.get('upnp', cmdargs, True):
             await self._map_ports()
         return proch.ServerProcess(self._mailer, self._python) \
             .use_env(self._env) \
             .use_out_decoder(prcenc.PtyLineDecoder()) \
             .append_arg(self._wrapper).append_arg(self._executable) \
             .append_arg('-batchmode').append_arg('-nographics') \
-            .append_arg('+' + scope + '/Save')
+            .append_arg('+' + util.get('scope', cmdargs, 'InternetServer') + '/Save')
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)
@@ -124,5 +121,5 @@ class Deployment:
             for line in commands.split('\n'):
                 if line.find(port_key) > -1:
                     port = int(util.left_chop_and_strip(line, port_key))
-        portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Unturned query port')
-        portmapper.map_port(self._mailer, self, port + 1, portmapper.UDP, 'Unturned server port')
+        portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Unturned query')
+        portmapper.map_port(self._mailer, self, port + 1, portmapper.UDP, 'Unturned server')

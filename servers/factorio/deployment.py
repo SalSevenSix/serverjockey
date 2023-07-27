@@ -26,8 +26,10 @@ def _default_cmdargs_settings():
         '_comment_use-authserver-bans': 'Verify that connecting players are not banned from multiplayer'
                                         ' and inform Factorio.com about ban/unban commands.',
         'use-authserver-bans': False,
-        '_comment_upnp': 'Try to automatically redirect port on home network using UPnP.',
-        'upnp': True
+        '_comment_server-upnp': 'Try to automatically redirect server port on home network using UPnP.',
+        'server-upnp': True,
+        '_comment_rcon-upnp': 'Try to automatically redirect rcon port on home network using UPnP.',
+        'rcon-upnp': False
     }
 
 
@@ -120,7 +122,7 @@ class Deployment:
         if port:
             server.append_arg('--port').append_arg(port)
         port = port if port else 34197
-        if util.get('upnp', cmdargs, True):
+        if util.get('server-upnp', cmdargs, True):
             portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Factorio server')
         rcon_port = util.get('rcon-port', cmdargs)
         rcon_port = rcon_port if rcon_port else port + 1
@@ -129,6 +131,8 @@ class Deployment:
         rcon_password = rcon_password if rcon_password else util.generate_token(10)
         server.append_arg('--rcon-password').append_arg(rcon_password)
         rconsvc.RconService.set_config(self._mailer, self, rcon_port, rcon_password)
+        if util.get('rcon-upnp', cmdargs, False):
+            portmapper.map_port(self._mailer, self, rcon_port, portmapper.TCP, 'Factorio rcon')
         if cmdargs['use-authserver-bans']:
             server.append_arg('--use-authserver-bans')
         if cmdargs['use-server-whitelist']:

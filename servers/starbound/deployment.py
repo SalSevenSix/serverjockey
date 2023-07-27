@@ -9,14 +9,13 @@ from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
 
-_DEFAULT_SERVER_PORT = 21025  # TCP
-_DEFAULT_RCON_PORT = 21026    # TCP
-
 
 def _default_cmdargs():
     return {
-        '_comment_upnp': 'Try to automatically redirect ports on home network using UPnP',
-        'upnp': True
+        '_comment_server_upnp': 'Try to automatically redirect server ports on home network using UPnP',
+        'server_upnp': True,
+        '_comment_rcon_upnp': 'Try to automatically redirect rcon port on home network using UPnP',
+        'rcon_upnp': False
     }
 
 
@@ -76,10 +75,10 @@ class Deployment:
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
     async def new_server_process(self):
-        config = None
+        config = {}
         if await io.file_exists(self._config_file):
             config = objconv.json_to_dict(await io.read_file(self._config_file))
-            await self._rcon_config(config)
+            config = await self._rcon_config(config)
         await self._map_ports(config)
         await self._link_mods()
         bin_dir = self._runtime_dir + '/linux'
@@ -96,29 +95,26 @@ class Deployment:
         if not await io.symlink_exists(storage_dir):
             await io.create_symlink(storage_dir, self._world_dir)
 
-    async def _rcon_config(self, config: dict):
+    async def _rcon_config(self, config: dict) -> dict:
         port, password = util.get('rconServerPort', config), util.get('rconServerPassword', config)
-        if not port:
-            port = _DEFAULT_RCON_PORT
-        if not password:
-            password = util.generate_token(10)
+        port = port if port else 21026
+        password = password if password else util.generate_token(10)
         rconsvc.RconService.set_config(self._mailer, self, port, password)
-        config['rconServerPort'], config['rconServerPassword'] = port, password
-        config['runRconServer'] = True
+        config['runRconServer'], config['rconServerPort'], config['rconServerPassword'] = True, port, password
         await io.write_file(self._config_file, objconv.obj_to_json(config, pretty=True))
+        return config
 
-    async def _map_ports(self, config: dict | None):
-        upnp = True
-        if await io.file_exists(self._cmdargs_file):
-            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-            upnp = util.get('upnp', cmdargs, True)
-        if not upnp:
-            return
-        server_port = util.get('gameServerPort', config, _DEFAULT_SERVER_PORT)
-        query_port = util.get('queryServerPort', config, server_port)
-        portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, 'Starbound server port')
-        if query_port != server_port:
-            portmapper.map_port(self._mailer, self, query_port, portmapper.TCP, 'Starbound query port')
+    async def _map_ports(self, config: dict):
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        if util.get('server_upnp', cmdargs, True):
+            server_port = util.get('gameServerPort', config, 21025)
+            query_port = util.get('queryServerPort', config, server_port)
+            portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, 'Starbound server')
+            if query_port != server_port:
+                portmapper.map_port(self._mailer, self, query_port, portmapper.TCP, 'Starbound query')
+        if util.get('rcon_upnp', cmdargs, False):
+            rcon_port = util.get('rconServerPort', config)
+            portmapper.map_port(self._mailer, self, rcon_port, portmapper.TCP, 'Starbound rcon')
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')

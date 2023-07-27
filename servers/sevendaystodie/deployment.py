@@ -12,8 +12,12 @@ from servers.sevendaystodie import messaging as msg
 
 def _default_cmdargs():
     return {
-        '_comment_upnp': 'Try to automatically redirect ports on home network using UPnP',
-        'upnp': True
+        '_comment_server_upnp': 'Try to automatically redirect server ports on home network using UPnP',
+        'server_upnp': True,
+        '_comment_console_upnp': 'Try to automatically redirect web console port on home network using UPnP',
+        'console_upnp': False,
+        '_comment_telnet_upnp': 'Try to automatically redirect telnet port on home network using UPnP',
+        'telnet_upnp': False
     }
 
 
@@ -147,24 +151,17 @@ class Deployment:
         return live_dict
 
     async def _map_ports(self, config: dict):
-        upnp = True
-        if await io.file_exists(self._cmdargs_file):
-            cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-            upnp = util.get('upnp', cmdargs, True)
-        if not upnp:
-            return
-        server_port = int(util.get('ServerPort', config, 26900))
-        udp_p1, udp_p2, udp_p3 = server_port + 1, server_port + 2, server_port + 3
-        console_enabled = objconv.to_bool(util.get('WebDashboardEnabled', config, False))
-        console_port = int(util.get('WebDashboardPort', config, 8080))
-        telnet_enabled = objconv.to_bool(util.get('TelnetEnabled', config, False))
-        telnet_port = int(util.get('TelnetPort', config, 8081))
-        portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, '7D2D TCP server port')
-        portmapper.map_port(self._mailer, self, server_port, portmapper.UDP, '7D2D UDP server port')
-        portmapper.map_port(self._mailer, self, udp_p1, portmapper.UDP, '7D2D aux1 port')
-        portmapper.map_port(self._mailer, self, udp_p2, portmapper.UDP, '7D2D aux2 port')
-        portmapper.map_port(self._mailer, self, udp_p3, portmapper.UDP, '7D2D aux3 port')
-        if console_enabled:
-            portmapper.map_port(self._mailer, self, console_port, portmapper.TCP, '7D2D console port')
-        if telnet_enabled:
-            portmapper.map_port(self._mailer, self, telnet_port, portmapper.TCP, '7D2D telnet port')
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        if util.get('server_upnp', cmdargs, True):
+            server_port = int(util.get('ServerPort', config, 26900))
+            portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, '7D2D TCP server')
+            portmapper.map_port(self._mailer, self, server_port, portmapper.UDP, '7D2D UDP server')
+            portmapper.map_port(self._mailer, self, server_port + 1, portmapper.UDP, '7D2D aux1')
+            portmapper.map_port(self._mailer, self, server_port + 2, portmapper.UDP, '7D2D aux2')
+            portmapper.map_port(self._mailer, self, server_port + 3, portmapper.UDP, '7D2D aux3')
+        if util.get('console_upnp', cmdargs, False) and objconv.to_bool(util.get('WebDashboardEnabled', config)):
+            console_port = int(util.get('WebDashboardPort', config, 8080))
+            portmapper.map_port(self._mailer, self, console_port, portmapper.TCP, '7D2D web console')
+        if util.get('telnet_upnp', cmdargs, False) and objconv.to_bool(util.get('TelnetEnabled', config)):
+            telnet_port = int(util.get('TelnetPort', config, 8081))
+            portmapper.map_port(self._mailer, self, telnet_port, portmapper.TCP, '7D2D telnet')

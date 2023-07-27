@@ -50,7 +50,7 @@ class IgdService(msgabc.AbcSubscriber):
 
     async def _handle(self, action, data):
         if action is IgdService.DISCOVER:
-            self._service = await asyncio.wait_for(_get_mapping_service(self._upnp), 10.0)
+            self._service = await asyncio.wait_for(_get_mapping_service(self._upnp), 20.0)
             return None if self._service else False
         if not self._service:
             return False
