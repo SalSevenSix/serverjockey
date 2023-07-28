@@ -10,10 +10,7 @@ from core.system import svrabc
 
 
 class ServerService(msgabc.AbcSubscriber):
-    START = 'ServerService.Start'
-    DAEMON = 'ServerService.Daemon'  # TODO can this be removed now?
-    RESTART = 'ServerService.Restart'
-    STOP = 'ServerService.Stop'
+    START, RESTART, STOP = 'ServerService.Start', 'ServerService.Restart', 'ServerService.Stop'
     DELETE, DELETE_ME = 'ServerService.Delete', 'ServerService.DeletedMe'
     SHUTDOWN, SHUTDOWN_RESPONSE = 'ServerService.Shutdown', 'ServerService.ShutdownResponse'
     CLEANUP_FILTER = msgftr.NameIn((DELETE, SHUTDOWN))
@@ -21,10 +18,6 @@ class ServerService(msgabc.AbcSubscriber):
     @staticmethod
     def signal_start(mailer: msgabc.Mailer, source: typing.Any):
         mailer.post(source, ServerService.START)
-
-    @staticmethod
-    def signal_daemon(mailer: msgabc.Mailer, source: typing.Any):
-        mailer.post(source, ServerService.DAEMON)
 
     @staticmethod
     def signal_restart(mailer: msgabc.Mailer, source: typing.Any):
@@ -46,8 +39,8 @@ class ServerService(msgabc.AbcSubscriber):
 
     def __init__(self, context: contextsvc.Context, server: svrabc.Server):
         super().__init__(msgftr.NameIn((
-            ServerService.DAEMON, ServerService.START, ServerService.RESTART,
-            ServerService.STOP, ServerService.DELETE, ServerService.SHUTDOWN)))
+            ServerService.START, ServerService.RESTART, ServerService.STOP,
+            ServerService.DELETE, ServerService.SHUTDOWN)))
         self._context = context
         self._server = server
         self._queue = asyncio.Queue(maxsize=1)
@@ -73,7 +66,7 @@ class ServerService(msgabc.AbcSubscriber):
             if controller.daemon() and self._queue.empty():
                 self._running = controller.call_run()
             else:
-                controller.update(await self._queue.get())
+                controller = await self._queue.get()
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
@@ -94,18 +87,12 @@ class ServerService(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         action = message.name()
-        if not self._running and action is ServerService.DAEMON:
-            self._queue.put_nowait(_RunController(True, True, True))
-            await self._queue_join()
-            return None
         if not self._running and action is ServerService.START:
-            auto = self._context.config('auto')
-            self._queue.put_nowait(_RunController(True, True, auto and auto > 1))
+            self._queue.put_nowait(_RunController(True, True, self._is_daemon()))
             await self._queue_join()
             return None
         if self._running and action is ServerService.RESTART:
-            auto = self._context.config('auto')
-            self._queue.put_nowait(_RunController(True, True, auto and auto > 1))
+            self._queue.put_nowait(_RunController(True, True, self._is_daemon()))
             await self._server_stop()
             await self._queue_join()
             return None
@@ -125,6 +112,10 @@ class ServerService(msgabc.AbcSubscriber):
                 self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
             return True
         return None
+
+    def _is_daemon(self):
+        auto = self._context.config('auto')
+        return auto and auto > 1
 
     async def _server_stop(self):
         if not self._running:
@@ -176,7 +167,7 @@ class ServerStatus(msgabc.AbcSubscriber):
         self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': ServerStatus._READY, 'details': {}}
         self._running_millis = 0
 
-    async def handle(self, message):
+    def handle(self, message):
         action, updated = message.name(), False
         if action is ServerStatus.REQUEST:
             self._context.post(self, ServerStatus.RESPONSE, self._prep_status(), message)
@@ -216,17 +207,11 @@ class ServerStatus(msgabc.AbcSubscriber):
 
 class _RunController:
 
-    def __init__(self, looping: bool, call_run: bool, daemon: typing.Optional[bool]):
+    def __init__(self, looping: bool, call_run: bool, daemon: bool):
         self._looping = looping
         self._call_run = looping and call_run
         self._daemon = daemon
         self._daemon_attempts = 3
-
-    def update(self, controller: _RunController):
-        self._looping = controller.looping()
-        self._call_run = controller.call_run()
-        self._daemon = controller.daemon() if controller.daemon() is not None else self._daemon
-        self._daemon_attempts = controller._daemon_attempts
 
     def check_uptime(self, uptime: int):
         if not self._daemon:

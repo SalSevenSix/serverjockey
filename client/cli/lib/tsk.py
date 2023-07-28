@@ -127,14 +127,6 @@ class TaskProcessor:
                 response.close()
             connection.close()
 
-    # TODO Figure out proper way to launch editor
-    def _serverlink_edit(self):
-        script = _serverlink_edit_script().strip().replace('{user}', self._user)
-        result = subprocess.run(script, shell=True, capture_output=True)
-        self._dump_to_log(result.stdout, result.stderr)
-        if result.returncode != 0:
-            raise Exception('ServerLink Edit task failed')
-
     def _service(self, argument: str):
         args = argument + ' ' + ('serverjockey' if self._user == _DEFAULT_USER else self._user)
         script = _systemctl_script().strip().format(args=args)

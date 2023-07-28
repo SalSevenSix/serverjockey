@@ -3,7 +3,7 @@ import typing
 from core.util import util
 from core.msg import msgabc, msgftr, msgext
 from core.http import httpabc
-from core.proc import proch
+from core.system import svrsvc
 
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
@@ -17,7 +17,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             PlayersSubscriber.EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
-            proch.ServerProcess.FILTER_STATES_DOWN))  # TODO consider using Not Running
+            svrsvc.ServerStatus.RUNNING_FALSE_FILTER))
         self._mailer = mailer
         self._players = []
 
@@ -40,7 +40,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         return response.data()
 
     def handle(self, message):
-        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
+        if svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             self._mailer.post(self, PlayersSubscriber.EVENT, {'event': 'clear'})
             return None
         if PlayersSubscriber.EVENT_FILTER.accepts(message):

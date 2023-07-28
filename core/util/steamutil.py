@@ -2,8 +2,6 @@ import logging
 # ALLOW util.util
 from core.util import shellutil, io, tasks
 
-# TODO This should be in core.common.steam but don't want to reference that in core.system.boostrap
-
 
 async def check_steam(home_dir: str):
     if not home_dir:

@@ -105,7 +105,7 @@ class _KillSteamOnSolicitPassword(msgabc.AbcSubscriber):
         self._process: subprocess.Process | None = None
         self._solicit_password = re.compile(r'^Logging in user \'.*\' to Steam Public\.\.\.$')
 
-    async def handle(self, message):
+    def handle(self, message):
         if jobh.JobProcess.FILTER_STDOUT_LINE.accepts(message):
             if self._solicit_password.match(message.data()) is not None:
                 _terminate_process(self._process)
@@ -131,7 +131,7 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
         self._process: subprocess.Process | None = None
         self._task = None
 
-    async def handle(self, message):
+    def handle(self, message):
         if _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT.accepts(message):
             if self._task:
                 self._queue.put_nowait(True)

@@ -160,7 +160,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
-            proch.ServerProcess.FILTER_STATES_DOWN,  # TODO consider using Not Running
+            proch.ServerProcess.FILTER_STATES_DOWN,
             msgftr.And(
                 msg.CONSOLE_OUTPUT_FILTER,
                 msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER,

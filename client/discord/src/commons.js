@@ -87,14 +87,14 @@ exports.server = function($) {
     });
     return;
   }
-  let cmd = $.data[0];
-  if (cmd === 'delete') {  // Blocking this. Webapp and CLI only.
+  let cmd = $.data[0].toLowerCase();
+  if (!['start', 'restart', 'stop'].includes(cmd)) {
     $.message.react('⛔');
     return;
   }
   $.httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
     let currentState = json.current.state;
-    let targetUp = (cmd === 'start' || cmd === 'daemon');
+    let targetUp = cmd === 'start';
     if (targetUp && ['START', 'STARTING', 'STARTED', 'STOPPING'].includes(currentState)) {
       $.message.react('⛔');
       return;

@@ -16,8 +16,7 @@ class ServerStatusHandler(httpabc.GetHandler):
 
 class ServerCommandHandler(httpabc.PostHandler):
     COMMANDS = funcutil.callable_dict(
-        svrsvc.ServerService,
-        ('signal_start', 'signal_daemon', 'signal_restart', 'signal_stop', 'signal_delete'))
+        svrsvc.ServerService, ('signal_start', 'signal_restart', 'signal_stop', 'signal_delete'))
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer

@@ -39,7 +39,7 @@ class SystemService:
             .put('{identity}', subs.subscriptions_handler('identity'))
         self._instances = self._resource.child('instances')
         context.register(_DeleteInstanceSubscriber(self))
-        context.register(_AutoStartsSubscriber(self._context))
+        context.register(_AutoStartsSubscriber())
 
     def resources(self) -> httprsc.WebResource:
         return self._resource
@@ -168,14 +168,13 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
             configuration['auto'] = 3
         await io.write_file(config_file, objconv.obj_to_json(configuration))
 
-    def __init__(self, mailer: msgabc.Mailer):
+    def __init__(self):
         super().__init__(msgftr.Or(
             msgftr.NameIs(_AutoStartsSubscriber.AUTOS),
             msgftr.NameIs(httpcnt.RESOURCES_READY)))
-        self._mailer = mailer
         self._autos = []
 
-    async def handle(self, message):
+    def handle(self, message):
         if message.name() is _AutoStartsSubscriber.AUTOS:
             self._autos = message.data()
             return None

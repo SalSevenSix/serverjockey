@@ -34,7 +34,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     IP_FILTER = msgftr.DataStrContains(IP_PREFIX)
     PORT_PREFIX = 'GamePref.ConnectToServerPort ='
     PORT_FILTER = msgftr.DataStrContains(PORT_PREFIX)
-    CON_PORT_PREFIX = 'GamePref.UNUSED_ControlPanelPort ='  # TODO test latest patch to see if this is fixed
+    CON_PORT_PREFIX = 'GamePref.UNUSED_ControlPanelPort ='
     CON_PORT_FILTER = msgftr.DataStrContains(CON_PORT_PREFIX)
 
     def __init__(self, mailer: msgabc.Mailer):

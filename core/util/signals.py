@@ -6,7 +6,7 @@ from core.util import shellutil
 
 
 def interrupt(pid: int):
-    os.kill(pid, signal.SIGINT)  # TODO probably blocking io
+    os.kill(pid, signal.SIGINT)  # This is probably blocking io but quick
 
 
 async def kill_tree(pid: int):
