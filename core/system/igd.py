@@ -45,7 +45,7 @@ class IgdService(msgabc.AbcSubscriber):
         try:
             return await self._handle(action, data)
         except Exception as e:
-            logging.warning('Error handling ' + action + ': ' + repr(e))
+            logging.error('Error handling ' + action + ': ' + repr(e))
         return False
 
     async def _handle(self, action, data):
@@ -79,9 +79,9 @@ def _sync_get_mapping_service(upnp):
                     if action.name == 'AddPortMapping':
                         logging.debug('Found port mapping service: ' + repr(service))
                         return service
-        logging.debug('No IGD port mapping service found.')
+        logging.info('No IGD port mapping service found.')
     except Exception as e:
-        logging.debug('UPnP discovery error: ' + repr(e))
+        logging.error('UPnP discovery error: ' + repr(e))
     return None
 
 
@@ -98,7 +98,7 @@ def _sync_add_port_mapping(service, local_ip: str, port: int, protocal: str, des
             NewPortMappingDescription=description,
             NewLeaseDuration=0)
     except Exception as e:
-        logging.debug('Add port mapping error: ' + repr(e))
+        logging.error('Add port mapping error: ' + repr(e))
 
 
 def _sync_delete_port_mapping(service, port: int, protocal: str):
@@ -106,7 +106,7 @@ def _sync_delete_port_mapping(service, port: int, protocal: str):
         logging.debug('Closing port ' + str(port) + ' for ' + protocal)
         service.DeletePortMapping(NewRemoteHost='', NewExternalPort=port, NewProtocol=protocal)
     except Exception as e:
-        logging.debug('Delete port mapping error: ' + repr(e))
+        logging.error('Delete port mapping error: ' + repr(e))
 
 
 _get_mapping_service = funcutil.to_async(_sync_get_mapping_service)

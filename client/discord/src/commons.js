@@ -30,8 +30,8 @@ exports.startupEventLogging = function(context, channels, instance, url) {
       return true;
     }
     let action = null;
-    if (json.event === 'login') { action = ' ➡️ '; }
-    if (json.event === 'logout') { action = ' ⬅️ '; }
+    if (json.event === 'login') { action = ' ▶️ '; }
+    if (json.event === 'logout') { action = ' ⏹️ '; }
     if (!action) return true;
     let result = '`' + instance + '`' + action + json.player.name;
     if (json.player.steamid) {

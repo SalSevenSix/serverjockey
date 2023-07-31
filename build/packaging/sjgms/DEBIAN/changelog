@@ -1,5 +1,5 @@
 sjgms (0.2.0) unstable; urgency=low
-* Feature release v0.2.0
+* Discord chat integration and UPnP support
 -- Bowden Salis <bsalis76@gmail.com>
 
 sjgms (0.1.0) unstable; urgency=low

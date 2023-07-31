@@ -16,8 +16,8 @@ class TestContext:
         cwd, self._syssvc, self._resources = os.getcwd(), None, None
         home = util.right_chop_and_strip(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
         self._context = contextsvc.Context(
-            debug=False, home=home, secret='token', showtoken=False,
-            scheme='http', sslcert=None, sslkey=None, env=os.environ.copy(),
+            debug=False, trace=False, home=home, secret='token', showtoken=False,
+            scheme='test', sslcert=None, sslkey=None, env=os.environ.copy(),
             python=sys.executable, logfile=None, clientfile=None, host=None, port=None)
 
     async def initialise(self):

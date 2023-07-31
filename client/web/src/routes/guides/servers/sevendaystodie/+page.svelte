@@ -38,11 +38,15 @@
 <div class="content" id="portForwarding">
   <h4 class="title is-5">Port Forwarding</h4>
   <p>
-    7 Days to Die requires the ports shown below to be open and redirected. However if you are using a home network,
-    the server does not automatically redirect ports behind a NAT. Please read the
-    <a href="https://developer.valvesoftware.com/wiki/7_Days_to_Die_Dedicated_Server#Firewall_Ports" target="_blank">
-      ports section <i class="fa fa-up-right-from-square"></i></a>
-    on the dedicated server wiki page for more help on ports.
+    In order for people to connect to your 7 Days to Die server over the internet, your home
+    router (internet gateway / &quot;modem&quot;) needs to be configured to forward ports to the server.
+    <span class="is-italic">By default ServerJockey will automatically forward ports using UPnP.</span>
+    However, if this is not working on your LAN, you can manually add the port forwarding.
+  </p>
+  <p>
+    To do this, login to your router then forward ports as shown below. Use the local IP address as shown on the
+    ServerJockey webapp home page. More detailed instructions cannot be provided because each router will have
+    a different webapp interface depending on the brand and model.
   </p>
   <table class="table is-thinner">
     <thead>
@@ -55,6 +59,17 @@
       <tr><td>Telnet (optional)</td><td>8081</td><td>TCP</td></tr>
     </tbody>
   </table>
+  <p>
+    If using manual port forwarding you should also disable UPnP in the
+    <span class="has-text-weight-bold">Launch Options</span>.
+  </p>
+  <pre class="pre is-thinner"
+>&quot;_comment_server_upnp&quot;: &quot;Try to automatically redirect server ports on home network using UPnP&quot;,
+&quot;server_upnp&quot;: false,
+&quot;_comment_console_upnp&quot;: &quot;Try to automatically redirect web console port on home network using UPnP&quot;,
+&quot;console_upnp&quot;: false,
+&quot;_comment_telnet_upnp&quot;: &quot;Try to automatically redirect telnet port on home network using UPnP&quot;,
+&quot;telnet_upnp&quot;: false</pre>
 </div>
 
 <BackToTop />

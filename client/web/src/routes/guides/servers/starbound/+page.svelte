@@ -44,11 +44,15 @@
 <div class="content" id="portForwarding">
   <h4 class="title is-5">Port Forwarding</h4>
   <p>
-    Starbound only needs a single port opened and redirected for TCP traffic.
-    However if you are using a home network, the server does not automatically redirect ports behind a NAT.
-    To setup redirections, login to your home router then forward ports as shown below.
-    Use of the public IP address as shown on the ServerJockey console. More detailed instructions cannot be
-    provided because each router will have a different webapp interface depending on the brand and model.
+    In order for people to connect to your Starbound server over the internet, your home
+    router (internet gateway / &quot;modem&quot;) needs to be configured to forward ports to the server.
+    <span class="is-italic">By default ServerJockey will automatically forward ports using UPnP.</span>
+    However, if this is not working on your LAN, you can manually add the port forwarding.
+  </p>
+  <p>
+    To do this, login to your router then forward ports as shown below. Use the local IP address as shown on the
+    ServerJockey webapp home page. More detailed instructions cannot be provided because each router will have
+    a different webapp interface depending on the brand and model.
   </p>
   <table class="table is-thinner">
     <thead>
@@ -58,6 +62,15 @@
       <tr><td>Server</td><td>21025</td><td>TCP</td></tr>
     </tbody>
   </table>
+  <p>
+    If using manual port forwarding you should also disable UPnP in the
+    <span class="has-text-weight-bold">Launch Options</span>.
+  </p>
+  <pre class="pre is-thinner"
+>&quot;_comment_server_upnp&quot;: &quot;Try to automatically redirect server ports on home network using UPnP&quot;,
+&quot;server_upnp&quot;: false,
+&quot;_comment_rcon_upnp&quot;: &quot;Try to automatically redirect rcon port on home network using UPnP&quot;,
+&quot;rcon_upnp&quot;: false</pre>
 </div>
 
 <div class="content" id="mods">

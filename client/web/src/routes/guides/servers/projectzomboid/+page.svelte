@@ -6,6 +6,7 @@
   import WebappGenerateConfig from '../WebappGenerateConfig.svelte';
 </script>
 
+
 <div class="columns">
   <div class="column is-one-quarter">
     <figure class="image pt-3"><img src="/assets/icons/pz_icon.jpg" alt="Project Zomboid icon" /></figure>
@@ -54,8 +55,8 @@
     However, if this is not working on your LAN, you can manually add the port forwarding.
   </p>
   <p>
-    To do this, login to your router then forward ports as shown below. Use of the public IP address as shown
-    on the ServerJockey console. More detailed instructions cannot be provided because each router will have
+    To do this, login to your router then forward ports as shown below. Use the local IP address as shown on the
+    ServerJockey webapp home page. More detailed instructions cannot be provided because each router will have
     a different webapp interface depending on the brand and model.
   </p>
   <table class="table is-thinner">
@@ -147,8 +148,8 @@ UPnP=false</pre>
   <pre class="pre is-thinner">BackupsOnStart=false
 BackupsOnVersionChange=false</pre>
   <p>
-    Also delete any map backups that the server made
-    (there is a button to do this under Deployment in the Webapp to do this).
+    Also delete any map backups that the server made.
+    Use the <span class="has-text-weight-bold">Autobackups</span> section in the webapp to do this.
     Then restart the Docker container.
   </p>
 </div>
