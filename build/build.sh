@@ -100,15 +100,17 @@ pipenv install
 echo "Merging ServerJockey dependencies"
 if [ -d "$LIB32_DIR" ]; then
   rm -rf "$LIB32_DIR/pip"* > /dev/null 2>&1
+  rm -rf "$LIB32_DIR/test"* > /dev/null 2>&1
   cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 if [ -d "$LIB64_DIR" ]; then
   rm -rf "$LIB64_DIR/pip"* > /dev/null 2>&1
+  rm -rf "$LIB64_DIR/test"* > /dev/null 2>&1
   cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 
 echo "Running tests"
-python3.10 -m unittest discover -t . -s test -p *.py
+python3.10 -m unittest discover -t . -s test -p "*.py"
 [ $? -eq 0 ] || exit 1
 
 echo "Removing ServerJockey junk"

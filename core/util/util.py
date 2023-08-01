@@ -40,12 +40,9 @@ def is_format(text: str) -> bool:
     return open_index == close_index
 
 
-def to_millis(seconds: float) -> int:
-    return int(seconds * 1000.0) + 1
-
-
+# TODO deprecated. Migrate uses to float seconds.
 def now_millis() -> int:
-    return to_millis(time.time())
+    return int(time.time() * 1000.0) + 1
 
 
 def single(collection: typing.Optional[typing.Collection]) -> typing.Any:

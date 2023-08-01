@@ -4,74 +4,99 @@ import asyncio
 import aiohttp
 import socket
 # ALLOW util.*
-from core.util import util, io, funcutil, shellutil
+from core.util import io, funcutil, shellutil, tasks
 
-_CACHE = {}  # TODO utils probably should not cache or hold statefulness
 
-_disk_usage = funcutil.to_async(shutil.disk_usage)
-# _virtual_memory = funcutil.to_async(psutil.virtual_memory)
-# _cpu_percent = funcutil.to_async(psutil.cpu_percent)
+class _Cacher:
+    __instance = None
+
+    @staticmethod
+    def instance():
+        if not _Cacher.__instance:
+            _Cacher.__instance = _Cacher()
+        return _Cacher.__instance
+
+    def __init__(self):
+        self._data = {
+            'os_name': {'task': tasks.task_fork(self._get_os_name(), 'sysutil.os_name'), 'done': False},
+            'local_ip': {'task': tasks.task_fork(self._get_local_ip(), 'sysutil.local_ip'), 'done': False},
+            'public_ip': {'task': tasks.task_fork(self._get_public_ip(), 'sysutil.public_ip'), 'done': False}
+        }
+
+    async def get(self, item: str) -> str:
+        data = self._data[item]
+        if data['done']:
+            return data['value']
+        await data['task']
+        return data['value']
+
+    async def _get_os_name(self):
+        file = '/etc/os-release'
+        self._data['os_name']['value'] = 'UNKNOWN'
+        # noinspection PyBroadException
+        try:
+            if await io.file_exists(file):
+                data = await io.read_file(file)
+                for line in data.split('\n'):
+                    if line.startswith('PRETTY_NAME="'):
+                        self._data['os_name']['value'] = line[13:-1]
+        except Exception as e:
+            logging.error('_get_os_name() failed %s', repr(e))
+        finally:
+            self._data['os_name']['done'] = True
+
+    async def _get_local_ip(self):
+        self._data['local_ip']['value'] = 'localhost'
+        # noinspection PyBroadException
+        try:
+            result = await shellutil.run_executable('hostname', '-I')
+            self._data['local_ip']['value'] = result.strip().split()[0]
+        except Exception as e:
+            logging.error('_get_local_ip() failed %s', repr(e))
+        finally:
+            self._data['local_ip']['done'] = True
+
+    async def _get_public_ip(self):
+        self._data['public_ip']['value'] = 'UNAVAILABLE'
+        try:
+            for url in ('https://api.ipify.org', 'https://ipv4.seeip.org'):
+                result = await _Cacher._fetch_text(url)
+                if result:
+                    self._data['public_ip']['value'] = result
+                    logging.debug('Public IP sourced from ' + url)
+                    return
+        finally:
+            self._data['public_ip']['done'] = True
+
+    @staticmethod
+    async def _fetch_text(url: str) -> str | None:
+        connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
+        timeout = aiohttp.ClientTimeout(total=4.0)
+        # noinspection PyBroadException
+        try:
+            async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+                async with session.get(url) as response:
+                    assert response.status == 200
+                    result = await response.text()
+                    return result.strip()
+        except Exception as e:
+            logging.warning('Failed to get public ip from %s because %s', url, repr(e))
+        return None
 
 
 async def get_os_name() -> str:
-    result = util.get('os_name', _CACHE)
-    if result:
-        return result
-    file = '/etc/os-release'
-    # noinspection PyBroadException
-    try:
-        if await io.file_exists(file):
-            data = await io.read_file(file)
-            for line in data.split('\n'):
-                if line.startswith('PRETTY_NAME="'):
-                    _CACHE['os_name'] = line[13:-1]
-                    return _CACHE['os_name']
-    except Exception as e:
-        logging.error('get_os_name() failed %s', repr(e))
-    _CACHE['os_name'] = 'UNKNOWN'
-    return _CACHE['os_name']
+    return await _Cacher.instance().get('os_name')
 
 
 async def get_local_ip() -> str:
-    result = util.get('local_ip', _CACHE)
-    if result:
-        return result
-    # noinspection PyBroadException
-    try:
-        result = await shellutil.run_script('hostname -I')
-        _CACHE['local_ip'] = result.strip().split()[0]
-        return _CACHE['local_ip']
-    except Exception as e:
-        logging.error('get_local_ip() failed %s', repr(e))
-    return 'localhost'
+    return await _Cacher.instance().get('local_ip')
 
 
 async def get_public_ip() -> str:
-    result = util.get('public_ip', _CACHE)
-    if result:
-        return result
-    for url in ('https://api.ipify.org', 'https://ipv4.seeip.org'):
-        _CACHE['public_ip'] = await _fetch_text(url)
-        if _CACHE['public_ip']:
-            logging.debug('Public IP sourced from ' + url)
-            return _CACHE['public_ip']
-    _CACHE['public_ip'] = 'UNAVAILABLE'
-    return _CACHE['public_ip']
+    return await _Cacher.instance().get('public_ip')
 
 
-async def _fetch_text(url: str) -> str | None:
-    connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
-    timeout = aiohttp.ClientTimeout(total=4.0)
-    # noinspection PyBroadException
-    try:
-        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
-            async with session.get(url) as response:
-                assert response.status == 200
-                result = await response.text()
-                return result.strip()
-    except Exception as e:
-        logging.warning('Failed to get public ip from %s because %s', url, repr(e))
-    return None
+_disk_usage = funcutil.to_async(shutil.disk_usage)
 
 
 async def _virtual_memory() -> tuple:
