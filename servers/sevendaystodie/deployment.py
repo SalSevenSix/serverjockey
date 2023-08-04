@@ -25,7 +25,7 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._home_dir = context.config('home')
+        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._settings_def_file = self._runtime_dir + '/serverconfig.xml'
@@ -50,9 +50,9 @@ class Deployment:
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
             self.build_world))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
         self._mailer.register(msglog.LogfileSubscriber(
             self._log_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER,
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
@@ -82,7 +82,7 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path',
+            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 

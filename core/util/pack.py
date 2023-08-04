@@ -12,9 +12,10 @@ _gzip_compress = funcutil.to_async(gzip.compress)
 _gzip_decompress = funcutil.to_async(gzip.decompress)
 
 
-async def archive_directory(unpacked_dir: str, archives_dir: str,
-                            prune_hours: int = 0, logger=logutil.NullLogger()) -> str | None:
-    working_dir = '/tmp/' + util.generate_id()
+async def archive_directory(
+        unpacked_dir: str, archives_dir: str, prune_hours: int = 0,
+        tmp_dir: str = '/tmp', logger=logutil.NullLogger()) -> str | None:
+    working_dir = tmp_dir + '/' + util.generate_id()
     try:
         if unpacked_dir[-1] == '/':
             unpacked_dir = unpacked_dir[:-1]
@@ -52,7 +53,9 @@ async def archive_directory(unpacked_dir: str, archives_dir: str,
         await funcutil.silently_call(io.delete_directory(working_dir))
 
 
-async def unpack_directory(archive: str, unpack_dir: str, wipe: bool = True, logger=logutil.NullLogger()):
+async def unpack_directory(
+        archive: str, unpack_dir: str, wipe: bool = True,
+        tmp_dir: str = '/tmp', logger=logutil.NullLogger()):
     working_dir = None
     try:
         logger.info('START Unpack Directory')
@@ -65,7 +68,7 @@ async def unpack_directory(archive: str, unpack_dir: str, wipe: bool = True, log
         if wipe:
             await io.delete_directory(working_dir)
         else:
-            working_dir = '/tmp/' + util.generate_id()
+            working_dir = tmp_dir + '/' + util.generate_id()
         await io.create_directory(working_dir)
         await _unpack_archive(archive, working_dir)
         logger.info('SET file permissions')

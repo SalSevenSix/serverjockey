@@ -184,18 +184,16 @@ async def copy_text_file(from_path: str, to_path: str) -> int:
 
 
 async def stream_copy_file(
-        from_path: str, to_path: str,
-        chunk_size: int = DEFAULT_CHUNK_SIZE,
-        tracker: BytesTracker = NullBytesTracker()):
+        from_path: str, to_path: str, chunk_size: int = DEFAULT_CHUNK_SIZE,
+        tmp_dir: str = '/tmp', tracker: BytesTracker = NullBytesTracker()):
     async with aiofiles.open(from_path, mode='rb') as file:
-        await stream_write_file(to_path, WrapReader(file), chunk_size, tracker)
+        await stream_write_file(to_path, WrapReader(file), chunk_size, tmp_dir, tracker)
 
 
 async def stream_write_file(
-        filename: str, stream: Readable,
-        chunk_size: int = DEFAULT_CHUNK_SIZE,
-        tracker: BytesTracker = NullBytesTracker()):
-    working_dir = '/tmp/' + util.generate_id()
+        filename: str, stream: Readable, chunk_size: int = DEFAULT_CHUNK_SIZE,
+        tmp_dir: str = '/tmp', tracker: BytesTracker = NullBytesTracker()):
+    working_dir = tmp_dir + '/' + util.generate_id()
     try:
         await create_directory(working_dir)
         tempfile = working_dir + '/' + filename.split('/')[-1]

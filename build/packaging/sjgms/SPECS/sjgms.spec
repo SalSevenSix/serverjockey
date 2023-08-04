@@ -53,7 +53,7 @@ exit 0
 
 
 %changelog
-* Thu Aug 03 2023 Bowden Salis <bsalis76@gmail.com> - 0.2.0
+* Sat Aug 05 2023 Bowden Salis <bsalis76@gmail.com> - 0.2.0
 - Discord chat integration and UPnP support
 * Thu Jun 29 2023 Bowden Salis <bsalis76@gmail.com> - 0.1.0
 - Small features and polish release for milestone v0.1.0

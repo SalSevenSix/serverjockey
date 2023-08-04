@@ -41,7 +41,7 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._home_dir = context.config('home')
+        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._runtime_metafile = self._runtime_dir + '/data/changelog.txt'
@@ -72,9 +72,9 @@ class Deployment:
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE), self.build_world))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)
@@ -111,7 +111,7 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path',
+            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
@@ -192,7 +192,8 @@ class Deployment:
                     tracker, content_length = None, response.headers.get('Content-Length')
                     if content_length:
                         tracker = msglog.PercentTracker(self._mailer, int(content_length), prefix='downloaded')
-                    await io.stream_write_file(install_package, io.WrapReader(response.content), chunk_size, tracker)
+                    await io.stream_write_file(
+                        install_package, io.WrapReader(response.content), chunk_size, self._tmp_dir, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INSTALLING Factorio server')
@@ -255,7 +256,8 @@ class Deployment:
                                         tracker = msglog.PercentTracker(
                                             self._mailer, int(content_length), notifications=5, prefix='downloaded')
                                     await io.stream_write_file(
-                                        filename, io.WrapReader(modfile_response.content), chunk_size, tracker)
+                                        filename, io.WrapReader(modfile_response.content),
+                                        chunk_size, self._tmp_dir, tracker)
                     if not mod_version_found:
                         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
                                           + mod['version'] + ' not found, see ' + mod_meta_url)
@@ -281,7 +283,7 @@ class Deployment:
                 else:
                     await io.delete_file(map_backup)
                     await io.rename_path(self._map_file, map_backup)
-            await io.stream_copy_file(autosave_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, tracker)
+            await io.stream_copy_file(autosave_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, self._tmp_dir, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Autosave ' + filename + ' restored')
             await funcutil.silently_call(io.delete_file(map_backup))
         except Exception as e:

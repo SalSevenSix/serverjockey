@@ -130,15 +130,12 @@ class WipeHandler(httpabc.PostHandler):
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True,
-                 ls_filter: typing.Callable = None,
+                 tmp_dir: str = '/tmp', ls_filter: typing.Callable = None,
                  read_tracker: io.BytesTracker = io.NullBytesTracker(),
                  write_tracker: io.BytesTracker = io.NullBytesTracker()):
-        self._path = path
-        self._tail = tail
-        self._protected = protected
-        self._ls_filter = ls_filter
-        self._read_tracker = read_tracker
-        self._write_tracker = write_tracker
+        self._path, self._tail, self._protected = path, tail, protected
+        self._tmp_dir, self._ls_filter = tmp_dir, ls_filter
+        self._read_tracker, self._write_tracker = read_tracker, write_tracker
 
     async def handle_get(self, resource, data):
         if self._protected and not httpcnt.is_secure(data):
@@ -174,7 +171,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
             await io.write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
         if isinstance(body, httpabc.ByteStream):
-            await io.stream_write_file(path, body, tracker=self._write_tracker)
+            await io.stream_write_file(path, body, tmp_dir=self._tmp_dir, tracker=self._write_tracker)
             return httpabc.ResponseBody.NO_CONTENT
         return httpabc.ResponseBody.BAD_REQUEST
 

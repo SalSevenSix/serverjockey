@@ -4,7 +4,7 @@ import sys
 import os
 import typing
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
-from core.util import util, funcutil, sysutil, steamutil, logutil, tasks
+from core.util import util, funcutil, sysutil, steamutil, logutil, io, tasks
 from core.msg import msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsvc
@@ -43,6 +43,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Port for http service, default is 6164')
     p.add_argument('--home', type=str, default='.',
                    help='Home directory to use for server instances, default is current working directory')
+    p.add_argument('--tmpdir', type=str, default='tmp',
+                   help='Directory to use for temporary files, default is tmp under home')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
@@ -53,9 +55,10 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
         print(sysutil.system_version())
         return None
     home = util.full_path(os.getcwd(), args.home)
+    tmpdir = util.full_path(home, args.tmpdir)
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
-        debug=args.debug, trace=args.trace, home=home,
+        debug=args.debug, trace=args.trace, home=home, tmpdir=tmpdir,
         secret=util.generate_token(10, True), showtoken=args.showtoken,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
         python=sys.executable, logfile=args.logfile, clientfile=args.clientfile,
@@ -97,6 +100,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
             print('TOKEN : ' + self._context.config('secret'))
         if self._context.is_trace():
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
+        await io.create_directories(self._context.config('tmpdir'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
         await steamutil.check_steam(util.get('HOME', self._context.config('env')))
