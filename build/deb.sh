@@ -6,6 +6,7 @@ TARGET_DIR="sjgms"
 [ -f "$TARGET_DIR/build.ok" ] || exit 1
 rm $TARGET_DIR/build.ok > /dev/null 2>&1
 VERSION=$(awk '/^Version:/{print $2}' "$TARGET_DIR/DEBIAN/control")
+OSVER="ub$(grep 'VERSION_ID=' /etc/os-release | tr '"' ' ' | tr '.' ' ' | awk '{print $2}')"
 DEB_FILE="sjgms.deb"
 rm $DEB_FILE > /dev/null 2>&1
 rm -rf $TARGET_DIR/SPECS > /dev/null 2>&1
@@ -25,7 +26,7 @@ if [ ! -z $SUDO_USER ]; then
   chown $SUDO_USER $DEB_FILE
   chgrp $SUDO_USER $DEB_FILE
 fi
-mv "$DEB_FILE" "sjgms-${VERSION}.x86_64.deb"
+mv "$DEB_FILE" "sjgms-${VERSION}.${OSVER}.x86_64.deb"
 
 echo "Cleanup"
 rm -rf $TARGET_DIR > /dev/null 2>&1

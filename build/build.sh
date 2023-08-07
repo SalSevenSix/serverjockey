@@ -45,8 +45,7 @@ else
   unzip "$BRANCH.zip" > /dev/null 2>&1
   [ $? -eq 0 ] || exit 1
   [ -d "${SERVERJOCKEY}-${BRANCH}" ] || exit 1
-  mv "${SERVERJOCKEY}-${BRANCH}" "$SERVERJOCKEY"
-  [ $? -eq 0 ] || exit 1
+  mv "${SERVERJOCKEY}-${BRANCH}" "$SERVERJOCKEY" || exit 1
 fi
 
 cd $DIST_DIR || exit 1
@@ -59,7 +58,7 @@ if [ ! -d "../../.git" ]; then
       exit 1
     fi
     cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh"
-    chmod 755 $BUILD_DIR/deb.sh
+    chmod 755 $BUILD_DIR/deb.sh || exit 1
   fi
   if which yum > /dev/null; then
     echo "Updating RPM scripts"
@@ -69,7 +68,7 @@ if [ ! -d "../../.git" ]; then
       exit 1
     fi
     cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
-    chmod 755 $BUILD_DIR/rpm.sh
+    chmod 755 $BUILD_DIR/rpm.sh || exit 1
   fi
 fi
 
@@ -81,8 +80,7 @@ sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py 
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/index.js || exit 1
 
 echo "Copying target directory into build directory"
-cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR"
-[ $? -eq 0 ] || exit 1
+cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
 [ -d "$TARGET_DIR" ] || exit 1
 mkdir -p $TARGET_DIR/usr/local/bin
 [ -d "$TARGET_DIR/usr/local/bin" ] || exit 1
@@ -101,8 +99,7 @@ cp -r "$SERVERJOCKEY_DIR/build/hax" "$HAX_DIR"
 [ -d "$HAX_DIR" ] || exit 1
 
 echo "Building web client"
-$SERVERJOCKEY_DIR/client/web/build.sh
-[ $? -eq 0 ] || exit 1
+$SERVERJOCKEY_DIR/client/web/build.sh || exit 1
 [ -d "$SERVERJOCKEY_DIR/web" ] || exit 1
 
 echo "Downloading ServerJockey dependencies"
