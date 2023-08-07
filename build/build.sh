@@ -50,16 +50,30 @@ else
 fi
 
 cd $DIST_DIR || exit 1
-if which yum > /dev/null; then
-  echo "Updating RPM scripts"
-  if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
-    cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
-    echo "Build script updated. Please run again."
-    exit 1
+if [ ! -d "../../.git" ]; then
+  if which apt > /dev/null; then
+    echo "Updating DEB scripts"
+    if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
+      cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
+      echo "Build script updated. Please run again."
+      exit 1
+    fi
+    cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh"
+    chmod 755 $BUILD_DIR/deb.sh
   fi
-  cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
-  chmod 755 $BUILD_DIR/rpm.sh
+  if which yum > /dev/null; then
+    echo "Updating RPM scripts"
+    if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
+      cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
+      echo "Build script updated. Please run again."
+      exit 1
+    fi
+    cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
+    chmod 755 $BUILD_DIR/rpm.sh
+  fi
 fi
+
+echo "Delete source zip"
 rm "$BRANCH.zip" > /dev/null 2>&1
 
 echo "Applying build timestamp"
@@ -93,7 +107,7 @@ $SERVERJOCKEY_DIR/client/web/build.sh
 
 echo "Downloading ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
-pipenv install
+python3.10 -m pipenv install
 [ $? -eq 0 ] || exit 1
 [ -d ".venv" ] || exit 1
 
@@ -146,6 +160,9 @@ nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=
 
 echo "Cleanup"
 rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" > /dev/null 2>&1
+
+echo "Stamping"
+echo $TIMESTAMP > "$TARGET_DIR/build.ok"
 
 echo "Done"
 exit 0

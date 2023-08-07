@@ -85,6 +85,7 @@ class Deployment:
     async def build_world(self):
         await io.create_directory(self._backups_dir)
         await io.create_directory(self._world_dir)
+        await io.create_directory(self._logs_dir)
         await io.create_directory(self._autobackups_dir)
         await io.create_directory(self._player_dir)
         await io.create_directory(self._config_dir)

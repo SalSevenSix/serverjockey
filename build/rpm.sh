@@ -4,7 +4,7 @@ cd "$(dirname $0)/dist" || exit 1
 DIST_DIR="$(pwd)"
 RPMBUILD_DIR="$HOME/rpmbuild"
 TARGET_DIR="$DIST_DIR/sjgms"
-[ -f "$TARGET_DIR/SPECS/sjgms.spec" ] || exit 1
+[ -f "$TARGET_DIR/build.ok" ] || exit 1
 VERSION=$(awk '/^Version:/{print $2}' "$TARGET_DIR/SPECS/sjgms.spec")
 OSVER="fc$(cat /etc/fedora-release | awk {'print$3'})"
 RPM_FILE="$RPMBUILD_DIR/RPMS/x86_64/sjgms-${VERSION}-1.${OSVER}.x86_64.rpm"
