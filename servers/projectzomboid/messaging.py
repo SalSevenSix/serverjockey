@@ -5,6 +5,7 @@ from core.msg import msgabc, msglog, msgftr, msgext
 from core.context import contextsvc
 from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
+from core.common import cachelock
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -17,7 +18,8 @@ CONSOLE_LOG_FILTER = msgftr.Or(
             msgftr.DataStrContains('token', True),
             msgftr.DataStrContains('command entered via server console', True)))),
     jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS)
+    msglog.FILTER_ALL_LEVELS,
+    cachelock.FILTER_NOTIFICATIONS)
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General")))

@@ -305,7 +305,7 @@
 <div class="content">
   <p><span class="step-title"></span>
     Paste the token into the <span class="has-text-weight-bold">Discord Bot Token</span> field in the form below.
-    Optionally copy and paste a Channel ID into the <span class="has-text-weight-bold">Log Channel ID</span> field.
+    Optionally copy and paste a channel ID into the <span class="has-text-weight-bold">Channel ID</span> fields.
     Then click the <span class="has-text-weight-bold">Save</span> button to save changes.
   </p>
 </div>

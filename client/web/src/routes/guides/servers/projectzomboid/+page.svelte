@@ -32,6 +32,7 @@
       <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
       <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
       <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
+      <li><a href="#cacheLockingMapFiles" use:scrollto={'#cacheLockingMapFiles'}>Cache Locking Map Files</a></li>
       <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
     </ul>
   </div>
@@ -78,7 +79,7 @@
 UPnP=false</pre>
 </div>
 
-<div class="content" id="memoryAllocation">
+<div class="content pt-4" id="memoryAllocation">
   <h4 class="title is-5">Memory Allocation</h4>
   <p>
     The Project Zomboid server has a memory allocation.
@@ -101,7 +102,7 @@ UPnP=false</pre>
 ]</pre>
 </div>
 
-<div class="content" id="integrationMods">
+<div class="content pt-4" id="integrationMods">
   <h4 class="title is-5">Integration Mods</h4>
   <p>
     Project Zomboid mods are available to integrate with ServerJockey.
@@ -135,7 +136,34 @@ UPnP=false</pre>
   </table>
 </div>
 
-<div class="content" id="dockerPtero">
+<div class="content" id="cacheLockingMapFiles">
+  <h4 class="title is-5">Cache Locking Map Files</h4>
+  <p>
+    ServerJockey has an experimental feature to boost performance on high player count servers.
+    The game map is stored in many small files which can cause disk IO to be a bottleneck.
+    The Cache Lock feature will pre-cache all map files in memory, same as the OS would normally do when
+    files are read. However this feature will also lock them in, preventing eviction until the server has stopped.
+    Therefore all map files will be read from memory. Writes are still done to disk,
+    avoiding risks of ramdisk solutions to this issue.
+  </p>
+  <p>
+    For this feature to work, you need <span class="is-family-monospace">vmtouch</span> installed on the machine.
+    The VirtualBox and Docker distributions of ServerJockey already have it pre-installed.
+    For the DEB, RPM and Source distributions, use the appropriate package manager to install;
+    e.g.
+  </p>
+  <pre class="pre is-thinner">sudo apt install vmtouch</pre>
+  <p>
+    With <span class="is-family-monospace">vmtouch</span> installed, this feature can be enabled in the
+    <span class="has-text-weight-bold">Launch Options</span> configuration.
+    Please ensure enough free memory is available when cache locking the map files.
+  </p>
+  <pre class="pre is-thinner"
+>&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
+&quot;cache_map_files&quot;: true</pre>
+</div>
+
+<div class="content pt-4" id="dockerPtero">
   <h4 class="title is-5">Docker/Pterodactyl Issue</h4>
   <p>
     There is
@@ -143,7 +171,8 @@ UPnP=false</pre>
         a known issue <i class="fa fa-up-right-from-square"></i></a>
     running the Project Zomboid dedicated server on Docker as well as Pterodactyl because it uses Docker.
     The server will often crash while starting around the automatic map backup stage.
-    The workaround is simply to disable all of the automatic map backups in the INI file.
+    The workaround is simply to disable all of the automatic map backups in the
+    <span class="has-text-weight-bold">INI Settings</span>.
   </p>
   <pre class="pre is-thinner">BackupsOnStart=false
 BackupsOnVersionChange=false</pre>

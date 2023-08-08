@@ -1,7 +1,7 @@
 FROM ubuntu:jammy
 LABEL maintainer="bsalis76@gmail.com"
 RUN apt update && apt -y upgrade
-RUN apt -y install locales wget lib32gcc-s1 software-properties-common
+RUN apt -y install locales vmtouch lib32gcc-s1 software-properties-common
 RUN rm -rf /var/lib/apt/lists/* && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
 RUN add-apt-repository multiverse
