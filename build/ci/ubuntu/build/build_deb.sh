@@ -19,7 +19,7 @@ su - $BUILD_USER -c "gh api repos/SalSevenSix/serverjockey/branches/$BRANCH" > $
 CURRENT_URL="$(jq -r .commit.url $BRANCH_FILE)"
 rm $BRANCH_FILE > /dev/null 2>&1
 echo "  current commit  $CURRENT_URL"
-if [ "$LAST_URL" == "$CURRENT_URL" ]; then
+if [ "$LAST_URL" = "$CURRENT_URL" ]; then
   echo "No new commit found NOT building"
   exit 0
 fi
@@ -38,7 +38,7 @@ echo "CI Building"
 su - $BUILD_USER -c "$BUILD_DIR/build.sh $BRANCH"
 [ $? -eq 0 ] || su - $BUILD_USER -c "$BUILD_DIR/build.sh $BRANCH"
 [ $? -eq 0 ] || exit 1
-TIMESTAMP="$(cat $BUILD_DIR/dist/sjgms/build.ok)"
+TIMESTAMP="$(head -1 $BUILD_DIR/dist/sjgms/build.ok)"
 
 echo "CI Packaging"
 $BUILD_DIR/deb.sh || exit 1

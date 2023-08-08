@@ -19,7 +19,7 @@ export PIPENV_VENV_IN_PROJECT=1
 rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" "$TARGET_DIR" > /dev/null 2>&1
 
 cd $DIST_DIR || exit 1
-if [ "$BRANCH" == "local" ]; then
+if [ "$BRANCH" = "local" ]; then
   echo "Copying local source files to build"
   cd ../.. || exit 1
   [ -d "build" ] || exit 1

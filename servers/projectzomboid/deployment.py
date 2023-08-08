@@ -1,12 +1,19 @@
 # ALLOW core.* projectzomboid.messaging
-from core.util import io
+from core.util import util, io, objconv
 from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
-from core.common import steam, interceptors
+from core.common import steam, interceptors, cachelock
 
 _WORLD = 'servertest'
+
+
+def _default_cmdargs():
+    return {
+        '_comment_cache_map_files': 'Force map files to be cached in memory while server is running (EXPERIMENTAL)',
+        'cache_map_files': False
+    }
 
 
 class Deployment:
@@ -23,15 +30,11 @@ class Deployment:
         self._config_dir = self._world_dir + '/Server'
         self._save_dir = self._world_dir + '/Saves'
         self._lua_dir = self._world_dir + '/Lua'
-
-    async def new_server_process(self):
-        executable = self._runtime_dir + '/start-server.sh'
-        if not await io.file_exists(executable):
-            raise FileNotFoundError('Project Zomboid game server not installed. Please Install Runtime first.')
-        return proch.ServerProcess(self._mailer, executable).append_arg('-cachedir=' + self._world_dir)
+        self._cmdargs_file = self._config_dir + '/cmdargs.json'
 
     async def initialise(self):
         await self.build_world()
+        await cachelock.initialise(self._mailer)
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
             self.build_world))
@@ -76,11 +79,21 @@ class Deployment:
         r.psh('config')
         r.put('db', httpext.FileSystemHandler(self._player_dir + '/' + _WORLD + '.db'), 'r')
         r.put('jvm', httpext.FileSystemHandler(self._runtime_dir + '/ProjectZomboid64.json'), 'm')
+        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
         r.put('ini', httpext.FileSystemHandler(config_pre + '.ini'), 'm')
         r.put('sandbox', httpext.FileSystemHandler(config_pre + '_SandboxVars.lua'), 'm')
         r.put('spawnpoints', httpext.FileSystemHandler(config_pre + '_spawnpoints.lua'), 'm')
         r.put('spawnregions', httpext.FileSystemHandler(config_pre + '_spawnregions.lua'), 'm')
         r.put('shop', httpext.FileSystemHandler(self._lua_dir + '/ServerPointsListings.ini'), 'm')
+
+    async def new_server_process(self):
+        executable = self._runtime_dir + '/start-server.sh'
+        if not await io.file_exists(executable):
+            raise FileNotFoundError('Project Zomboid game server not installed. Please Install Runtime first.')
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        if util.get('cache_map_files', cmdargs, False):
+            cachelock.cache_path(self._mailer, self, self._save_dir)
+        return proch.ServerProcess(self._mailer, executable).append_arg('-cachedir=' + self._world_dir)
 
     async def build_world(self):
         await io.create_directory(self._backups_dir)
@@ -91,6 +104,10 @@ class Deployment:
         await io.create_directory(self._config_dir)
         await io.create_directory(self._save_dir)
         await io.create_directory(self._lua_dir)
+        if not await io.directory_exists(self._runtime_dir):
+            return
+        if not await io.file_exists(self._cmdargs_file):
+            await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
 
 
 def _autobackups(entry) -> bool:
