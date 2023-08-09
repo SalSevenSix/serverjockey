@@ -7,7 +7,7 @@
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
   import Collapsible from '$lib/Collapsible.svelte';
-  import ConsoleLog from '$lib/ConsoleLog.svelte';
+  import InstanceLog from '$lib/InstanceLog.svelte';
 
   // used by ServerStatusStore
   instance.set({ url: baseurl + '/instances/serverlink' });
@@ -30,7 +30,7 @@
         </div>
       </div>
       <Collapsible title="ServerLink Log">
-        <ConsoleLog />
+        <InstanceLog title={''} />
       </Collapsible>
     </div>
   </div>

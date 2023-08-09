@@ -4,7 +4,7 @@
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
-  import ConsoleLog from '$lib/ConsoleLog.svelte';
+  import InstanceLog from '$lib/InstanceLog.svelte';
 </script>
 
 
@@ -18,7 +18,7 @@
   </div>
   <div class="columns">
     <div class="column">
-      <ConsoleLog />
+      <InstanceLog />
     </div>
   </div>
 </Instance>

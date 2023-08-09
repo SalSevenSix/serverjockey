@@ -5,7 +5,7 @@
   import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
-  import ConsoleLog from '$lib/ConsoleLog.svelte';
+  import InstanceLog from '$lib/InstanceLog.svelte';
   import LogFiles from '$lib/LogFiles.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
@@ -43,7 +43,7 @@
           <Players />
         </div>
       </div>
-      <ConsoleLog />
+      <InstanceLog />
       <Collapsible icon="fa-keyboard" title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
       </Collapsible>

@@ -95,7 +95,7 @@ export class RollingLog {
       return this;
     }
     this.#lines = [...this.#lines, ...newLines];
-    if (this.#lines > 200) {
+    if (this.#lines.length > 200) {
       this.#lines = this.#lines.slice(-200);
     }
     return this;
