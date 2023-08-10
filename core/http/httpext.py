@@ -103,14 +103,11 @@ class RollingLogHandler(httpabc.GetHandler):
     def __init__(self, mailer: msgabc.MulticastMailer, msg_filter: msgabc.Filter, size: int = 100):
         self._mailer = mailer
         self._subscriber = msgext.RollingLogSubscriber(
-            mailer, size=size,
-            msg_filter=msg_filter,
-            transformer=msgtrf.GetData(),
-            aggregator=aggtrf.StrJoin('\n'))
+            mailer, size, msg_filter, msgtrf.GetData(), aggtrf.StrJoin('\n'))
         mailer.register(self._subscriber)
 
     async def handle_get(self, resource, data):
-        return await msgext.RollingLogSubscriber.get_log(self._mailer, self, self._subscriber.get_identity())
+        return await msgext.RollingLogSubscriber.get(self._mailer, self, self._subscriber.identity())
 
 
 class WipeHandler(httpabc.PostHandler):

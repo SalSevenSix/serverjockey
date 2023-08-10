@@ -39,7 +39,7 @@ class Deployment:
         self._settings_file = self._config_dir + '/serverconfig.xml'
         self._live_file = self._config_dir + '/serverconfig-live.xml'
         self._admin_file = self._config_dir + '/serveradmin.xml'
-        self._env = context.config('env').copy()
+        self._env = context.env()
         self._env['LD_LIBRARY_PATH'] = '.'
 
     async def initialise(self):

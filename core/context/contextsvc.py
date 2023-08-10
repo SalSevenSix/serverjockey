@@ -41,6 +41,12 @@ class Context(msgabc.MulticastMailer):
     def set_config(self, key: str, value: typing.Any):
         self._configuration[key] = value
 
+    def env(self, key: str = None) -> dict | str | None:
+        env = self.config('env')
+        if key is None:
+            return env.copy() if env else {}
+        return util.get(key, env)
+
     def is_debug(self) -> bool:
         return self.config('debug') or self.is_trace()
 

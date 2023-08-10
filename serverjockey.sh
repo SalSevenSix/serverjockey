@@ -128,7 +128,7 @@ check_discord() {
     mkdir -p $serverlink_dir
     cd $serverlink_dir || exit 1
     ln -s "$discord_dir/index.js" "index.js"
-    echo '{ "module": "serverlink", "auto": "daemon", "hidden": true }' > instance.json
+    echo '{ "module": "serverlink", "auto": 3, "hidden": true }' > instance.json
   fi
 }
 

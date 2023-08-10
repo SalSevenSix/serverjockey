@@ -103,7 +103,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         await io.create_directories(self._context.config('tmpdir'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
-        await steamutil.check_steam(util.get('HOME', self._context.config('env')))
+        await steamutil.check_steam(self._context.env('HOME'))
         return self._syssvc.resources()
 
     async def shutdown(self):

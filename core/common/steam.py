@@ -24,7 +24,7 @@ echo "Running SteamCMD, log output may be delayed..."
 class SteamCmdInstallHandler(httpabc.PostHandler):
 
     def __init__(self, context: contextsvc.Context, path: str, app_id: int, anon: bool = True):
-        self._mailer, self._steam_config = context, _SteamConfig(context.config('env'))
+        self._mailer, self._steam_config = context, _SteamConfig(context.env('HOME'))
         self._path, self._app_id, self._anon = path, app_id, anon
         self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
@@ -58,7 +58,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
 class SteamCmdLoginHandler(httpabc.PostHandler):
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer, self._steam_config = context, _SteamConfig(context.config('env'))
+        self._mailer, self._steam_config = context, _SteamConfig(context.env('HOME'))
         self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
             completed_filter=jobh.JobProcess.FILTER_DONE,
@@ -160,8 +160,8 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
 
 class _SteamConfig:
 
-    def __init__(self, env: dict):
-        self._path = env['HOME'] + '/Steam/config/config.vdf'
+    def __init__(self, home_dir: str):
+        self._path = home_dir + '/Steam/config/config.vdf'
 
     async def _load(self) -> tuple:
         try:

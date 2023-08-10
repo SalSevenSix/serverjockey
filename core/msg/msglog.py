@@ -3,7 +3,7 @@ import time
 import typing
 import aiofiles
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import util, io, funcutil
+from core.util import util, io, funcutil, logutil
 from core.msg import msgabc, msgftr, msgtrf
 
 CRITICAL = 'MessageLogging.CRITICAL'
@@ -50,18 +50,33 @@ class LoggingPublisher:
         self.critical(msg, *args, **kwargs)
 
 
+class HandlerPublisher(logging.Handler):
+    LOG = 'HandlerPublisher.Log'
+    LOG_FILTER = msgftr.NameIs(LOG)
+
+    @staticmethod
+    def log(mailer: msgabc.Mailer, source: typing.Any, message: str):
+        mailer.post(source, HandlerPublisher.LOG, message)
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(logutil.get_level())
+        self.setFormatter(logutil.get_formatter())
+        self._mailer = mailer
+
+    def emit(self, record: logging.LogRecord):
+        HandlerPublisher.log(self._mailer, self, self.format(record))
+
+
 class LogfileSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self,
-                 filename: str,
+    def __init__(self, filename: str,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  roll_filter: msgabc.Filter = msgftr.AcceptNothing(),
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
         super().__init__(msgftr.Or(msg_filter, roll_filter, msgftr.IsStop()))
+        self._filename, self._file = filename, None
         self._roll_filter = roll_filter
         self._transformer = transformer
-        self._filename = filename
-        self._file = None
 
     async def handle(self, message):
         if message is msgabc.STOP:
@@ -78,22 +93,21 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
             await self._file.write(self._transformer.transform(message))
             await self._file.write('\n')
             await self._file.flush()
+            return None
         except Exception as e:
             await funcutil.silently_cleanup(self._file)
             logging.error('LogfileSubscriber raised: %s', repr(e))
-            return False
-        return None
+        return False
 
 
 class LoggerSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
-                 level: int = logging.DEBUG,
-                 transformer: msgabc.Transformer = msgtrf.ToLogLine()):
+                 transformer: msgabc.Transformer = msgtrf.ToLogLine(),
+                 level: int = logging.DEBUG):
         super().__init__(msg_filter)
-        self._level = level
-        self._transformer = transformer
+        self._transformer, self._level = transformer, level
 
     def handle(self, message):
         logging.log(self._level, self._transformer.transform(message))

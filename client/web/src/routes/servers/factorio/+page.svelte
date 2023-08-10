@@ -95,7 +95,7 @@
         <InstallRuntime qualifierName="Version (optional)" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
-      <Collapsible icon="fa-floppy-disk" title="Autosaves">
+      <Collapsible icon="fa-file-zipper" title="Autosaves">
         <Autosaves />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">

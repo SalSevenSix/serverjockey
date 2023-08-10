@@ -3,6 +3,7 @@
   import { baseurl, newGetRequest } from '$lib/sjgmsapi';
   import SystemInfo from '$lib/SystemInfo.svelte';
   import ServerLink from '$lib/ServerLink.svelte';
+  import SystemLog from '$lib/SystemLog.svelte';
 
   let showServerLink = false;
 
@@ -18,3 +19,4 @@
   <hr />
   <ServerLink />
 {/if}
+<SystemLog />

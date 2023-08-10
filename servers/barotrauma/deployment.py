@@ -24,7 +24,7 @@ class Deployment:
         self._executable = self._runtime_dir + '/DedicatedServer'
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/ServerLogs'
-        self._env = context.config('env').copy()
+        self._env = context.env()
         self._env['TERM'] = 'screen'
         self._env['SteamAppID'] = str(Deployment._APP_ID)
         self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'

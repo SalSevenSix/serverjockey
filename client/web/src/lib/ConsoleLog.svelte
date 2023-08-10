@@ -9,12 +9,12 @@
   export let subscribeUrl;
   export let downloadUrl = null;
   export let heightSmall = '100px';
-  export let heightBig = '500px';
+  export let heightBig = '420px';
 
   let subs = new SubscriptionHelper();
   let logLines = new RollingLog();
-  let logText = '';
   let logBox;
+  let logText = '';
   let logPlay = true;
   let logScroll = true;
   let logSmall = true;
@@ -46,7 +46,7 @@
     logScroll = !logScroll;
   }
 
-  function resetLog() {
+  function clearLog() {
     logText = logLines.reset().toText();
   }
 
@@ -85,7 +85,7 @@
         {title}
       {/if}
     </span>
-    <span class="pl-2"><a href={'#'} title="Clear" on:click|preventDefault={resetLog}>
+    <span class="pl-2"><a href={'#'} title="Clear" on:click|preventDefault={clearLog}>
       <i class="fa fa-eraser fa-lg clear-button"></i>
     </a></span>
     <span class="pl-2"><a href={'#'} title={titlePlay} on:click|preventDefault={togglePlay}>
@@ -109,12 +109,15 @@
   .clear-button {
     width: 1.2em;
   }
+
   .play-button {
     width: 0.8em;
   }
+
   .scroll-button {
     width: 0.9em;
   }
+
   .height-button {
     width: 1em;
   }

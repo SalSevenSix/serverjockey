@@ -38,7 +38,7 @@ class Deployment:
         self._settings_file = self._save_dir + '/Config.json'
         self._workshop_file = self._save_dir + '/WorkshopDownloadConfig.json'
         self._commands_file = self._savesvr_dir + '/Commands.dat'
-        self._env = context.config('env').copy()
+        self._env = context.env()
         self._env['TERM'] = 'xterm'
         self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
 

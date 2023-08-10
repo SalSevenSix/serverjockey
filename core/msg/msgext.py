@@ -1,7 +1,6 @@
 import asyncio
 import enum
 import logging
-import uuid
 import collections
 import typing
 # ALLOW util.* msg.*
@@ -248,36 +247,31 @@ class RelaySubscriber(msgabc.AbcSubscriber):
 
 
 class RollingLogSubscriber(msgabc.Subscriber):
-    INIT = 'RollingLogSubscriber.Init'
     REQUEST = 'RollingLogSubscriber.Request'
     RESPONSE = 'RollingLogSubscriber.Response'
-    REQUEST_FILTER = msgftr.NameIs(REQUEST)
 
-    def __init__(self, mailer: msgabc.Mailer,
+    def __init__(self, mailer: msgabc.Mailer, size: int = 20,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  transformer: msgabc.Transformer = msgtrf.Noop(),
-                 aggregator: aggtrf.Aggregator = aggtrf.Noop(),
-                 size: int = 20,
-                 identity: typing.Optional[str] = None):
+                 aggregator: aggtrf.Aggregator = aggtrf.Noop()):
         self._mailer = mailer
-        self._identity = identity if identity else str(uuid.uuid4())
+        self._size = size
         self._transformer = transformer
         self._aggregator = aggregator
+        self._identity = util.generate_id()
         self._request_filter = msgftr.And(
-            RollingLogSubscriber.REQUEST_FILTER,
+            msgftr.NameIs(RollingLogSubscriber.REQUEST),
             msgftr.DataEquals(self._identity))
         self._msg_filter = msgftr.Or(msg_filter, self._request_filter)
-        self._size = size
         self._container = collections.deque()
-        mailer.post(self, RollingLogSubscriber.INIT, self._identity)
 
     @staticmethod
-    async def get_log(mailer: msgabc.MulticastMailer, source: typing.Any, identity: str) -> typing.Any:
+    async def get(mailer: msgabc.MulticastMailer, source: typing.Any, identity: str) -> typing.Any:
         messenger = SynchronousMessenger(mailer)
         response = await messenger.request(source, RollingLogSubscriber.REQUEST, identity)
         return response.data()
 
-    def get_identity(self) -> str:
+    def identity(self) -> str:
         return self._identity
 
     def accepts(self, message):

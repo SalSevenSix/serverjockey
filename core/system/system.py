@@ -4,7 +4,7 @@ import logging
 import re
 import os
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
-from core.util import util, io, pkg, sysutil, signals, objconv
+from core.util import util, io, pkg, sysutil, signals, objconv, aggtrf
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
@@ -23,26 +23,66 @@ class SystemService:
         self._modules = {}
         self._home_dir = context.config('home')
         self._clientfile = contextext.ClientFile(context, util.full_path(self._home_dir, context.config('clientfile')))
-        subs = httpsubs.HttpSubscriptionService(context)
-        self._resource = httprsc.WebResource()
-        httprsc.ResourceBuilder(self._resource) \
-            .put('login', httpext.LoginHandler(context.config('secret'))) \
-            .put('modules', httpext.StaticHandler(MODULES)) \
-            .psh('system') \
-            .put('info', _SystemInfoHandler()) \
-            .put('shutdown', _ShutdownHandler(self)) \
-            .pop() \
-            .psh('instances', _InstancesHandler(self)) \
-            .put('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer())) \
-            .pop() \
-            .psh(subs.resource(self._resource, 'subscriptions')) \
-            .put('{identity}', subs.subscriptions_handler('identity'))
+        self._resource = self._build_resources(context)
         self._instances = self._resource.child('instances')
-        context.register(_DeleteInstanceSubscriber(self))
-        context.register(_AutoStartsSubscriber())
+
+    def _build_resources(self, context: contextsvc.Context) -> httprsc.WebResource:
+        subs = httpsubs.HttpSubscriptionService(context)
+        resource = httprsc.WebResource()
+        r = httprsc.ResourceBuilder(resource)
+        r.put('login', httpext.LoginHandler(context.config('secret')))
+        r.put('modules', httpext.StaticHandler(MODULES))
+        r.psh('system')
+        r.put('info', _SystemInfoHandler())
+        r.put('shutdown', _ShutdownHandler(self))
+        r.psh('log')
+        r.put('tail', httpext.RollingLogHandler(context, msglog.HandlerPublisher.LOG_FILTER))
+        r.put('subscribe', subs.handler(msglog.HandlerPublisher.LOG_FILTER, aggtrf.StrJoin('\n')))
+        r.pop()
+        r.pop()
+        r.psh('instances', _InstancesHandler(self))
+        r.put('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer()))
+        r.pop()
+        r.psh(subs.resource(resource, 'subscriptions'))
+        r.put('{identity}', subs.subscriptions_handler('identity'))
+        return resource
+
+    async def initialise(self) -> SystemService:
+        if self._context.is_trace():
+            msglog.HandlerPublisher.log(self._context, self, 'LOG UNAVAVAILABLE IN TRACE MODE')
+        else:
+            logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
+        igd.initialise(self._context, self)
+        self._context.register(_DeleteInstanceSubscriber(self))
+        self._context.register(_AutoStartsSubscriber())
+        await self._initialise_instances()
+        await self._clientfile.write()
+        return self
+
+    async def _initialise_instances(self):
+        autos, ls = [], await io.directory_list(self._home_dir)
+        for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
+            config_file = self._home_dir + '/' + identity + '/instance.json'
+            if await io.file_exists(config_file):
+                configuration = objconv.json_to_dict(await io.read_file(config_file))
+                await _AutoStartsSubscriber.migrate(config_file, configuration)
+                configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
+                subcontext = await self._initialise_instance(configuration)
+                if subcontext.config('auto'):
+                    autos.append(subcontext)
+        self._context.post(self, _AutoStartsSubscriber.AUTOS, autos)
 
     def resources(self) -> httprsc.WebResource:
         return self._resource
+
+    async def shutdown(self):
+        await self._clientfile.delete()
+        subcontexts = self._context.subcontexts()
+        for subcontext in subcontexts:
+            self._instances.remove(subcontext.config('identity'))
+        for subcontext in subcontexts:
+            await svrsvc.ServerService.shutdown(subcontext, self)
+            await self._context.destroy_subcontext(subcontext)
 
     def instances_info(self, baseurl: str) -> dict:
         result = {}
@@ -70,32 +110,6 @@ class SystemService:
         subcontext.set_config('auto', auto)
         return persist
 
-    async def initialise(self) -> SystemService:
-        igd.initialise(self._context, self)
-        autos, ls = [], await io.directory_list(self._home_dir)
-        for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
-            config_file = self._home_dir + '/' + identity + '/instance.json'
-            if await io.file_exists(config_file):
-                configuration = await io.read_file(config_file)
-                configuration = objconv.json_to_dict(configuration)
-                await _AutoStartsSubscriber.migrate(config_file, configuration)
-                configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
-                subcontext = await self._initialise_instance(configuration)
-                if subcontext.config('auto'):
-                    autos.append(subcontext)
-        await self._clientfile.write()
-        self._context.post(self, _AutoStartsSubscriber.AUTOS, autos)
-        return self
-
-    async def shutdown(self):
-        await self._clientfile.delete()
-        subcontexts = self._context.subcontexts()
-        for subcontext in subcontexts:
-            self._instances.remove(subcontext.config('identity'))
-        for subcontext in subcontexts:
-            await svrsvc.ServerService.shutdown(subcontext, self)
-            await self._context.destroy_subcontext(subcontext)
-
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
         assert util.get('identity', configuration)
         assert util.get('module', configuration) in MODULES
@@ -110,10 +124,10 @@ class SystemService:
         return await self._initialise_instance(configuration)
 
     async def delete_instance(self, subcontext: contextsvc.Context):
-        identity = subcontext.config('identity')
+        identity, home_dir = subcontext.config('identity'), subcontext.config('home')
         self._instances.remove(identity)
         await self._context.destroy_subcontext(subcontext)
-        await io.delete_directory(subcontext.config('home'))
+        await io.delete_directory(home_dir)
         self._context.post(self, SystemService.SERVER_DELETED, subcontext)
         logging.debug('DELETED instance ' + identity)
 

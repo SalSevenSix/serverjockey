@@ -12,12 +12,11 @@ FILTER_NOTIFICATIONS = msgftr.NameIs(NOTIFICATION)
 
 
 async def initialise(context: contextsvc.Context):
-    env_path = util.get('PATH', context.config('env'))
-    executable = await io.find_in_env_path(env_path, 'vmtouch')
+    executable = await io.find_in_env_path(context.env('PATH'), 'vmtouch')
     if executable:
         context.register(CachLockService(context, executable))
     else:
-        logging.debug('vmtouch not installed or not in path')
+        logging.info('vmtouch not installed or not in path')
 
 
 def cache_path(mailer: msgabc.Mailer, source: typing.Any, path: str):
