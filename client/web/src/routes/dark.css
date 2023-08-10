@@ -20,16 +20,12 @@ body.dark .navbar, body.dark .navbar-menu.is-active {
   background-color: #223C5B;
 }
 
-body.dark .navbar-item, body.dark .navbar-link {
-  color: #4A6488;
+body.dark .navbar-item, body.dark .navbar-link, body.dark .navbar-burger, body.dark svg.navbar-rubiks {
+  color: #B6B6D7;
 }
 
 body.dark .navbar-start .navbar-item:hover {
   background-color: #091C32;
-}
-
-body.dark .navbar-burger {
-  color: #DBDBDB;
 }
 
 body.dark .title {
@@ -75,7 +71,7 @@ body.dark .radio {
 }
 
 body.dark .modal-card-title {
-  color: #4A6488;
+  color: #B6B6D7;
 }
 
 body.dark .modal-card-head, body.dark .modal-card-foot {

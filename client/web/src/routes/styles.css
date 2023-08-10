@@ -76,7 +76,7 @@ table.is-thinner {
 
 /* Specific cases */
 
-svg.rubiks {
+svg.rubiks, svg.navbar-rubiks {
   color: #FFFDF8;
 }
 

@@ -18,7 +18,7 @@
   <nav class="navbar is-spaced" aria-label="main navigation">
     <div class="navbar-brand">
       <div class="navbar-item">
-        <RubiksCube size="30" />
+        <RubiksCube size="30" clazz="navbar-rubiks" />
         <span class="ml-1 is-size-5 has-text-weight-bold">ServerJockey</span>
       </div>
       <a href={'#'} role="button" on:click|preventDefault={toggleMenu} class:is-active={menuOpen}

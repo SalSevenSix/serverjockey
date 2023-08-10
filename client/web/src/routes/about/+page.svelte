@@ -22,7 +22,7 @@
     <div class="columns is-centered">
       <div class="column is-two-thirds">
         <a href="https://discord.gg/TEuurWAhHn" target="_blank">
-          <figure class="image lightbg pl-4 pr-4 pt-4 pb-2">
+          <figure class="image background-frame pl-4 pr-4 pt-4 pb-2">
             <img src="/assets/icons/discord_full_logo_black_RGB.svg"
                  alt="ServerJockey on Discord" title="ServerJockey on Discord" />
           </figure>
@@ -48,7 +48,7 @@
     <div class="columns is-centered">
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
-          <figure class="image lightbg">
+          <figure class="image background-frame">
             <img src="/assets/icons/GitHub_Logo.png"
                  alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>
@@ -60,7 +60,7 @@
 
 
 <style>
-  .lightbg {
+  .background-frame {
     background-color: white;
     border-radius: 1em;
   }
