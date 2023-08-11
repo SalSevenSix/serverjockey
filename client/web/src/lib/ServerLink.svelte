@@ -30,7 +30,7 @@
         </div>
       </div>
       <Collapsible title="ServerLink Log">
-        <InstanceLog title={''} />
+        <InstanceLog title={''} canDownload />
       </Collapsible>
     </div>
   </div>

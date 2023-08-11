@@ -56,19 +56,21 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
         return None
     home = util.full_path(os.getcwd(), args.home)
     tmpdir = util.full_path(home, args.tmpdir)
+    clientfile = util.full_path(home, args.clientfile)
+    logfile = util.full_path(home, args.logfile)
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
         debug=args.debug, trace=args.trace, home=home, tmpdir=tmpdir,
         secret=util.generate_token(10, True), showtoken=args.showtoken,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
-        python=sys.executable, logfile=args.logfile, clientfile=args.clientfile,
+        python=sys.executable, clientfile=clientfile, logfile=logfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 
 
 def _setup_logging(context: contextsvc.Context):
     logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y-%m-%d %H:%M:%S'
     level = logging.DEBUG if context.is_debug() else logging.INFO
-    filename = util.full_path(context.config('home'), context.config('logfile'))
+    filename = context.config('logfile')
     if filename:
         filename_prev = logutil.prev_logname(filename)
         if os.path.isfile(filename):

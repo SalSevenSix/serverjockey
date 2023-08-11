@@ -10,7 +10,8 @@ from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
 from core.system import svrabc, svrsvc, igd
 
-MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
+_NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
+_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
 
 
 class SystemService:
@@ -22,20 +23,21 @@ class SystemService:
         self._context = context
         self._modules = {}
         self._home_dir = context.config('home')
-        self._clientfile = contextext.ClientFile(context, util.full_path(self._home_dir, context.config('clientfile')))
+        self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
         self._resource = self._build_resources(context)
         self._instances = self._resource.child('instances')
 
     def _build_resources(self, context: contextsvc.Context) -> httprsc.WebResource:
+        logfile = self._context.config('logfile')
         subs = httpsubs.HttpSubscriptionService(context)
         resource = httprsc.WebResource()
         r = httprsc.ResourceBuilder(resource)
         r.put('login', httpext.LoginHandler(context.config('secret')))
-        r.put('modules', httpext.StaticHandler(MODULES))
+        r.put('modules', httpext.StaticHandler(_MODULES))
         r.psh('system')
         r.put('info', _SystemInfoHandler())
         r.put('shutdown', _ShutdownHandler(self))
-        r.psh('log')
+        r.psh('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
         r.put('tail', httpext.RollingLogHandler(context, msglog.HandlerPublisher.LOG_FILTER))
         r.put('subscribe', subs.handler(msglog.HandlerPublisher.LOG_FILTER, aggtrf.StrJoin('\n')))
         r.pop()
@@ -112,7 +114,7 @@ class SystemService:
 
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
         assert util.get('identity', configuration)
-        assert util.get('module', configuration) in MODULES
+        assert util.get('module', configuration) in _MODULES
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
@@ -221,7 +223,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
-        if not identity or module not in MODULES:
+        if not identity or module not in _MODULES:
             return httpabc.ResponseBody.BAD_REQUEST
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):

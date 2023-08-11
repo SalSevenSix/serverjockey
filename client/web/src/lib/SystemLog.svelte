@@ -7,5 +7,6 @@
 
 <Collapsible title="ServerJockey Log">
   <ConsoleLog loadUrl={baseurl + '/system/log/tail'}
-              subscribeUrl={baseurl + '/system/log/subscribe'} />
+              subscribeUrl={baseurl + '/system/log/subscribe'}
+              downloadUrl={baseurl + '/system/log'} />
 </Collapsible>

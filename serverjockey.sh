@@ -137,7 +137,7 @@ check_webapp() {
   echo "  checking for webapp."
   if [ ! -d "$JOCKEY_DIR/web" ]; then
     echo "  webapp not found, building it now."
-    $JOCKEY_DIR/client/web/build.sh
+    $JOCKEY_DIR/client/web/build.sh ci
     if [ $? -ne 0 ]; then
       echo "ERROR Failed building webapp. Sorry."
       exit 1

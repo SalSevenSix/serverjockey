@@ -1,4 +1,3 @@
-import logging
 # ALLOW core.* serverlink.*
 from core.util import util, logutil, io, aggtrf, objconv
 from core.msg import msgtrf, msglog
@@ -6,6 +5,8 @@ from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
+
+_NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 
 
 def _default_config():
@@ -25,8 +26,8 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         home = context.config('home')
         self._context = context
-        self._log_file = util.full_path(home, 'serverlink.log')
         self._config = util.full_path(home, 'serverlink.json')
+        self._log_file = util.full_path(home, 'serverlink.log') if logutil.is_logging_to_file() else None
         self._clientfile = contextext.ClientFile(context, util.full_path(home, 'serverjockey-client.json'))
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._stopper = prcext.ServerProcessStopper(context, 10.0)
@@ -41,25 +42,24 @@ class Server(svrabc.Server):
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream():
             self._context.register(msglog.PrintSubscriber(Server.LOG_FILTER, transformer=msgtrf.GetData()))
-        if logutil.is_logging_to_file():
+        if self._log_file:
+            await io.write_file(self._log_file, '\n')
             self._context.register(msglog.LogfileSubscriber(
                 self._log_file, msg_filter=Server.LOG_FILTER, transformer=msgtrf.GetData()))
-        else:
-            await io.write_file(self._log_file, 'NO FILE LOGGING. STDOUT ONLY.')
 
     def resources(self, resource: httpabc.Resource):
-        httprsc.ResourceBuilder(resource) \
-            .psh('server', svrext.ServerStatusHandler(self._context)) \
-            .put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .put('{command}', svrext.ServerCommandHandler(self._context)) \
-            .pop() \
-            .put('config', httpext.FileSystemHandler(self._config)) \
-            .psh('log', httpext.FileSystemHandler(self._log_file)) \
-            .put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER)) \
-            .put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
-            .pop() \
-            .psh(self._httpsubs.resource(resource, 'subscriptions')) \
-            .put('{identity}', self._httpsubs.subscriptions_handler('identity'))
+        r = httprsc.ResourceBuilder(resource)
+        r.psh('server', svrext.ServerStatusHandler(self._context))
+        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('{command}', svrext.ServerCommandHandler(self._context))
+        r.pop()
+        r.put('config', httpext.FileSystemHandler(self._config))
+        r.psh('log', httpext.FileSystemHandler(self._log_file) if self._log_file else httpext.StaticHandler(_NO_LOG))
+        r.put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER))
+        r.put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n')))
+        r.pop()
+        r.psh(self._httpsubs.resource(resource, 'subscriptions'))
+        r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._clientfile.write()
