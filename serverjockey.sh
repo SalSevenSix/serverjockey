@@ -68,7 +68,7 @@ check_jockey() {
   echo
   echo "  installing ServerJockey module dependencies."
   cd "$JOCKEY_DIR" || exit 1
-  python3 -m pipenv install
+  python3 -m pipenv sync
   if [ $? -ne 0 ]; then
     echo "ERROR Failed installing ServerJockey dependencies. Sorry."
     exit 1

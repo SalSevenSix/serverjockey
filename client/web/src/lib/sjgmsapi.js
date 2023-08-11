@@ -67,7 +67,7 @@ export class SubscriptionHelper {
       while (this.#running && url == null) {
         url = await this.#subscribe(subscribeUrl);
         if (this.#running && url == null) {
-          await sleep(10000);
+          await sleep(12000);
         }
       }
       if (url === false) {
@@ -101,30 +101,39 @@ export class SubscriptionHelper {
         return json.url;
       })
       .catch(function(error) {
-        return notifyError('Subscription failed. Check connection and server. Refresh page.');
+        return notifyError('Communication error. Check connection and server. Refresh page.');
       });
   }
 
   async #doPoll(url, signal, dataHandler) {
+    let failcount = 5;
     let polling = (url != null);
     while (this.#running && polling) {
       polling = await fetch(url, { signal })
         .then(function(response) {
           if (response.status === 404) return false;
           if (!response.ok) throw new Error('Status: ' + response.status);
-          if (response.status === 204) return null;
+          if (response.status === 204) return true;
           let ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })
         .then(function(data) {
           if (data === false) return false;
-          if (data == null) return true;
-          return dataHandler(data);
+          if (data === true) return true;
+          let result = dataHandler(data);
+          if (!result) return false;
+          failcount = 5;
+          return true;
         })
         .catch(function(error) {
-          return false;
+          return null;
         });
+      if (this.#running && polling == null && failcount > 0) {
+        failcount -= 1;
+        await sleep(1200);
+        polling = true;
+      }
     }
   }
 }

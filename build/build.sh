@@ -99,12 +99,12 @@ cp -r "$SERVERJOCKEY_DIR/build/hax" "$HAX_DIR"
 [ -d "$HAX_DIR" ] || exit 1
 
 echo "Building web client"
-$SERVERJOCKEY_DIR/client/web/build.sh || exit 1
+$SERVERJOCKEY_DIR/client/web/build.sh ci || exit 1
 [ -d "$SERVERJOCKEY_DIR/web" ] || exit 1
 
 echo "Downloading ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
-python3.10 -m pipenv install
+python3.10 -m pipenv sync
 [ $? -eq 0 ] || exit 1
 [ -d ".venv" ] || exit 1
 

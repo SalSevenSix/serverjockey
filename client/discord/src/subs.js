@@ -54,14 +54,14 @@ exports.Helper = class Helper {
         .then(function(response) {
           if (response.status === 404) return false;
           if (!response.ok) throw new Error('Status: ' + response.status);
-          if (response.status === 204) return null;
+          if (response.status === 204) return true;
           let ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })
         .then(function(data) {
           if (data === false) return false;
-          if (data == null) return true;
+          if (data === true) return true;
           return dataHandler(data);
         })
         .catch(function(error) {
