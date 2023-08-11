@@ -1,4 +1,3 @@
-
 <div class="overlay">
   <div class="inner">
     <slot />

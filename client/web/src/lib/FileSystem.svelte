@@ -14,8 +14,9 @@
   export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
   export let customMeta = null;
 
-  let root = $instance.url + rootPath;
-  let pwd = root;
+  let root = null;
+  let pwd = null;
+  let notifyText = null;
   let loading = true;
   let paths = [];
   let hasActions = allowDelete > 0 || customMeta;
@@ -26,7 +27,6 @@
   $: cannotAction = $serverStatus.running || isMaint;
   $: cannotDelete = (allowDelete === 1 && cannotAction) || (allowDelete === 2 && isMaint);
 
-  let notifyText = null;
   $: if (!cannotAction && notifyText) {
     notifyInfo(notifyText);
     notifyText = null;
@@ -119,7 +119,11 @@
       .finally(reload);
   }
 
-  onMount(rootDirectory);
+  onMount(function() {
+    root = $instance.url + rootPath;
+    pwd = root;
+    rootDirectory();
+  });
 </script>
 
 
