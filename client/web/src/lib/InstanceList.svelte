@@ -28,6 +28,19 @@
     });
   }
 
+  function newInstanceUrl(identity) {
+    let result = baseurl;
+    if (!result) {
+      result = window.location.protocol + '//';
+      result += window.location.hostname;
+      if (window.location.port) {
+        result += ':' + window.location.port;
+      }
+    }
+    result += '/instances/' + identity;
+    return result;
+  }
+
   onMount(function() {
     fetch(baseurl + '/instances', newGetRequest())
       .then(function(response) {
@@ -40,7 +53,7 @@
         });
         subs.start(baseurl + '/instances/subscribe', function(data) {
           if (data.event === 'created') {
-            data.instance.url = baseurl + '/instances/' + data.instance.identity;
+            data.instance.url = newInstanceUrl(data.instance.identity);
             instances = [...instances, data.instance];
           } else if (data.event === 'deleted') {
             instances = instances.filter(function(value) {
