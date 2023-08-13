@@ -5,7 +5,7 @@
   import FileSystem from '$lib/FileSystem.svelte';
 
   function restoreAutosave(path, callbacks) {
-    confirmModal('Restore ' + path + ' ?\nCurrent map will be overwritten.', function() {
+    confirmModal('Restore?\n' + path + '\nCurrent map will be overwritten.', function() {
       callbacks.start();
       let request = newPostRequest();
       request.body = JSON.stringify({ filename: path });

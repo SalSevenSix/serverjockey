@@ -14,10 +14,10 @@
   export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
   export let customMeta = null;
 
-  let root = null;
-  let pwd = null;
+  let pwdUrl = null;
   let notifyText = null;
   let loading = true;
+  let loadingError = false;
   let paths = [];
   let hasActions = allowDelete > 0 || customMeta;
   let columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
@@ -36,6 +36,15 @@
     reload();
   }
 
+  function rootUrl() {
+    return $instance.url + rootPath;
+  }
+
+  function urlToPath(url) {
+    if (!url) return 'UNKNOWN';
+    return url.substring(rootUrl().length);
+  }
+
   function defaultSorter(a, b) {
     let typeCompare = b.type.localeCompare(a.type);
     if (typeCompare != 0) return typeCompare;
@@ -44,6 +53,9 @@
 
   function load(url) {
     loading = true;
+    loadingError = false;
+    if (!url) { url = rootUrl(); }
+    if (!pwdUrl) { pwdUrl = url; }
     fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -53,15 +65,16 @@
         json.sort(sorter ? sorter : defaultSorter);
         if (json.length > 60) { notifyWarning('Only 60 of ' + json.length + ' entries shown'); }
         paths = json.slice(0, 60);
-        pwd = url;
+        pwdUrl = url;
       })
       .catch(function(error) {
-        if (url === root) {
-          paths = [];  // TODO maybe add single error entry
-          pwd = root;
+        if (url === rootUrl()) {
+          loadingError = true;
+          pwdUrl = rootUrl();
+          paths = [];
           notifyError('Failed to load ' + rootPath);
         } else {
-          rootDirectory();
+          loadRoot();
         }
       })
       .finally(function() {
@@ -70,22 +83,22 @@
   }
 
   export function reload() {
-    load(pwd);
+    load(pwdUrl);
   }
 
-  function rootDirectory() {
-    load(root);
+  function loadRoot() {
+    load(rootUrl());
   }
 
   function upDirectory() {
-    let parts = pwd.split('/');
+    let parts = pwdUrl.split('/');
     parts.pop();
     load(parts.join('/'));
   }
 
   function customAction(url) {
     customMeta.action(
-      url.substring(root.length),
+      urlToPath(url),
       { // callbacks
         start: function() {
           isMaint = true;
@@ -104,7 +117,7 @@
 
   function deleteAction(url) {
     if (confirmDelete) {
-      confirmModal('Delete?\n' + url.substring(root.length), function() {
+      confirmModal('Delete?\n' + urlToPath(url), function() {
         deleteUrl(url);
       });
     } else {
@@ -115,15 +128,11 @@
   function deleteUrl(url) {
     fetch(url, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { notifyError('Failed to delete ' + url.substring(root.length)); })
+      .catch(function(error) { notifyError('Failed to delete ' + urlToPath(url)); })
       .finally(reload);
   }
 
-  onMount(function() {
-    root = $instance.url + rootPath;
-    pwd = root;
-    rootDirectory();
-  });
+  onMount(loadRoot);
 </script>
 
 
@@ -139,22 +148,26 @@
       </tr>
     </thead>
     <tbody>
-      {#if pwd != root}
+      {#if pwdUrl && pwdUrl != rootUrl()}
         <tr>
           <td colspan={columnCount}>
-            <button name="root" class="button mr-2 mb-1" title="ROOT" on:click={rootDirectory}>
+            <button name="root" title="ROOT" class="button mr-2 mb-1" on:click={loadRoot}>
               &nbsp;<i class="fa fa-angles-up fa-lg"></i>&nbsp;</button>
-            <button name="up" class="button" title="UP" on:click={upDirectory}>
-              <i class="fa fa-turn-down fa-lg"></i>&nbsp;&nbsp;&nbsp;{pwd.substring(root.length)}</button>
+            <button name="up" title="UP" class="button" on:click={upDirectory}>
+              <i class="fa fa-turn-down fa-lg"></i>&nbsp;&nbsp;&nbsp;{urlToPath(pwdUrl)}</button>
           </td>
         </tr>
       {/if}
       {#if paths.length === 0}
         <tr><td colspan={columnCount}>
-          {#if loading}
-            <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
+          {#if loadingError}
+            <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> Error loading files
           {:else}
-            <i class="fa fa-diamond fa-lg mr-1"></i> No files found
+            {#if loading}
+              <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
+            {:else}
+              <i class="fa fa-diamond fa-lg mr-1"></i> No files found
+            {/if}
           {/if}
         </td></tr>
       {:else}

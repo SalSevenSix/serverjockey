@@ -53,7 +53,7 @@ exit 0
 
 
 %changelog
-* Sat Aug 12 2023 Bowden Salis <bsalis76@gmail.com> - 0.3.0
+* Mon Aug 14 2023 Bowden Salis <bsalis76@gmail.com> - 0.3.0
 - Cachelock feature and webapp improvements
 * Sat Aug 05 2023 Bowden Salis <bsalis76@gmail.com> - 0.2.0
 - Discord chat integration and UPnP support

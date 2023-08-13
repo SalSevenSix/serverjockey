@@ -33,7 +33,7 @@
   }
 
   function restoreBackup(path, callbacks) {
-    confirmModal('Restore ' + path + ' ?\nExisting files will be overwritten.', function() {
+    confirmModal('Restore?\n' + path + '\nExisting files will be overwritten.', function() {
       cannotBackup = callbacks.start();
       let request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
