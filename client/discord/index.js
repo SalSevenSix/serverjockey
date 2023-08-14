@@ -12,7 +12,7 @@ function initialise() {
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
   config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);
   logger.info('*** START ServerLink Bot ***');
-  logger.info('Version: 0.3.0 ({timestamp})');
+  logger.info('Version: 0.4.0 ({timestamp})');
   logger.info('Nodejs: ' + process.version);
   logger.info('discord.js: ' + require('discord.js/package.json').version);
   logger.info('Initialised with config...');

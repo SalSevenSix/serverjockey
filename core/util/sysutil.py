@@ -135,7 +135,7 @@ async def _cpu_percent() -> float:
 
 
 def system_version() -> str:
-    return '0.3.0 ({timestamp})'
+    return '0.4.0 ({timestamp})'
 
 
 async def system_info() -> dict:
