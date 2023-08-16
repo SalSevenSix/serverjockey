@@ -3,7 +3,7 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { textAreaModal } from '$lib/modals';
   import { newPostRequest, newGetRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
+  import { instance, serverStatus, eventStarted } from '$lib/instancestores';
 
   export let name;
   export let path;
@@ -18,6 +18,10 @@
   $: cannotClear = cannotAction || !configText;
   $: cannotReload = cannotAction;
   $: cannotSave = cannotAction || originalText === configText;
+
+  $: if ($eventStarted && !originalText && !configText) {
+    reload();
+  }
 
   function reload() {
     updating = true;

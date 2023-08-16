@@ -77,6 +77,7 @@ class _CacheLock:
         except Exception as e:
             logging.warning('Error waiting vmtouch ' + repr(e))
         finally:
+            self._mailer.post(self, NOTIFICATION, 'CacheLock UNLOCKED ' + self._path)
             tasks.task_end(self._task)
 
     def stop(self):
@@ -84,7 +85,6 @@ class _CacheLock:
             return
         # noinspection PyBroadException
         try:
-            self._mailer.post(self, NOTIFICATION, 'CacheLock UNLOCKED ' + self._path)
             self._process.terminate()
             # TODO should wait for task to complete, kill process if needed
         except Exception as e:
