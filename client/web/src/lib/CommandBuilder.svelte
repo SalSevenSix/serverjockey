@@ -1,8 +1,11 @@
 <script>
+  import { getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
   import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
 
   export let commands;
 
@@ -24,7 +27,7 @@
   function loadDisplay(index) {
     args[index] = 'loading...\n\n\n';
     let name = commands[command][action][index].name;
-    fetch($instance.url + '/' + command + '/' + name, newGetRequest())
+    fetch(instance.url('/' + command + '/' + name), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
@@ -62,7 +65,7 @@
     path += '/' + action;
     let request = newPostRequest();
     request.body = JSON.stringify(body);
-    fetch($instance.url + path, request)
+    fetch(instance.url(path), request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(capitalizeKebabCase(command) + ' command sent.');

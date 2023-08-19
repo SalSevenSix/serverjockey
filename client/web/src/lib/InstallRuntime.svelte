@@ -1,10 +1,12 @@
 <script>
-  import { onDestroy } from 'svelte';
+  import { onDestroy, getContext } from 'svelte';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal, steamLoginModal } from '$lib/modals';
   import { RollingLog } from '$lib/util';
   import { SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
 
   export let qualifierName = null;
 
@@ -16,7 +18,7 @@
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   function runtimeMeta() {
-    openFileInNewTab($instance.url + '/deployment/runtime-meta', function(error) {
+    openFileInNewTab(instance.url('/deployment/runtime-meta'), function(error) {
       notifyWarning('Meta not found. No runtime installed.');
     });
   }
@@ -24,7 +26,7 @@
   function wipeRuntime() {
     confirmModal('Are you sure you want to Delete Runtime ?', function() {
       cannotProcess = true;
-      fetch($instance.url + '/deployment/wipe-runtime', newPostRequest())
+      fetch(instance.url('/deployment/wipe-runtime'), newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo('Delete runtime completed.');
@@ -46,7 +48,7 @@
     let body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }
     request.body = JSON.stringify(body);
-    fetch($instance.url + '/deployment/install-runtime', request)
+    fetch(instance.url('/deployment/install-runtime'), request)
       .then(function(response) {
         if (response.status === 204) return true;
         if (response.status === 409) return false;

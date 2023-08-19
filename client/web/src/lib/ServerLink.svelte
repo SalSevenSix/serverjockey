@@ -1,6 +1,5 @@
 <script>
   import { baseurl } from '$lib/sjgmsapi';
-  import { instance } from '$lib/instancestores';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
@@ -8,13 +7,10 @@
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
   import Collapsible from '$lib/Collapsible.svelte';
   import InstanceLog from '$lib/InstanceLog.svelte';
-
-  // used by ServerStatusStore
-  instance.set({ url: baseurl + '/instances/serverlink' });
 </script>
 
 
-<ServerStatusStore>
+<ServerStatusStore identity="serverlink">
   <div class="columns">
     <div class="column">
       <div class="columns">

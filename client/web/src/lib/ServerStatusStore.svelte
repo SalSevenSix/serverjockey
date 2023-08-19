@@ -1,18 +1,52 @@
 <script>
-  import { onMount, onDestroy, tick } from 'svelte';
-  import { get } from 'svelte/store';
+  import { onMount, onDestroy, tick, setContext } from 'svelte';
+  import { get, writable } from 'svelte/store';
   import { generateId, sleep } from '$lib/util';
   import { notifyError } from '$lib/notifications';
-  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint } from '$lib/instancestores';
+  import { baseurl, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+
+  export let identity = null;
 
   let subs = new SubscriptionHelper();
   let triggering = false;
 
-  serverStatus.set({});
-  eventDown.set(false);
-  eventStarted.set(false);
-  eventEndMaint.set(false);
+  function getInstanceModule() {
+    let parts = window.location.pathname.split('/');
+    return parts[parts.length - 1];
+  }
+
+  function getInstanceIdentity() {
+    if (identity) return identity;
+    return new URLSearchParams(window.location.search).get('i');
+  }
+
+  function getInstanceUrl(path = null) {
+    let url = baseurl;
+    if (!url) {
+      url = window.location.protocol + '//';
+      url += window.location.hostname;
+      if (window.location.port) {
+        url += ':' + window.location.port;
+      }
+    }
+    url += '/instances/' + getInstanceIdentity();
+    return path ? url + path : url;
+  }
+
+  const instance = { module: getInstanceModule, identity: getInstanceIdentity, url: getInstanceUrl };
+  setContext('instance', instance);
+
+  const serverStatus = writable({});
+  setContext('serverStatus', serverStatus);
+
+  const eventDown = writable(false);
+  setContext('eventDown', eventDown);
+
+  const eventStarted = writable(false);
+  setContext('eventStarted', eventStarted);
+
+  const eventEndMaint = writable(false);
+  setContext('eventEndMaint', eventEndMaint);
 
   let lastRunning = null;
   $: serverRunningChange($serverStatus.running); function serverRunningChange(serverRunning) {
@@ -55,8 +89,7 @@
   }
 
   onMount(function() {
-    if (!$instance.url) return;
-    fetch($instance.url + '/server', newGetRequest())
+    fetch(instance.url('/server'), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -65,13 +98,15 @@
         lastRunning = json.running;
         lastState = json.state;
         setServerStatus(json);
-        subs.start($instance.url + '/server/subscribe', function(data) {
+        subs.start(instance.url('/server/subscribe'), function(data) {
           triggering = true;
           setServerStatus(data);
           return true;
         });
       })
-      .catch(function(error) { notifyError('Failed to load Server Status.'); });
+      .catch(function(error) {
+        notifyError('Failed to load Server Status.');
+      });
   });
 
   onDestroy(function() {

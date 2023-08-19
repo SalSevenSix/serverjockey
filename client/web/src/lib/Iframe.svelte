@@ -1,6 +1,7 @@
 <script>
-  import { onMount } from 'svelte';
-  import { serverStatus } from '$lib/instancestores';
+  import { onMount, getContext } from 'svelte';
+
+  const serverStatus = getContext('serverStatus');
 
   let baseurl = '';
   onMount(function() {

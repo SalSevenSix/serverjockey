@@ -1,4 +1,5 @@
 <script>
+  import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import Instance from '$lib/Instance.svelte';
   import Collapsible from '$lib/Collapsible.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
@@ -30,7 +31,7 @@
 </script>
 
 
-<Instance>
+<ServerStatusStore><Instance>
   <div class="columns">
     <div class="column">
       <div class="columns">
@@ -71,4 +72,4 @@
       </Collapsible>
     </div>
   </div>
-</Instance>
+</Instance></ServerStatusStore>

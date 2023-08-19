@@ -1,23 +1,24 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, getContext } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
-  import { instance } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
+
+  const instance = getContext('instance');
 
   let subs = new SubscriptionHelper();
   let players = [];
   let loading = true;
 
   onMount(function() {
-    fetch($instance.url + '/players', newGetRequest())
+    fetch(instance.url('/players'), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .then(function(json) {
         players = json;
-        subs.start($instance.url + '/players/subscribe', function(data) {
+        subs.start(instance.url('/players/subscribe'), function(data) {
           if (data.event === 'clear') {
             players = [];
             return true;

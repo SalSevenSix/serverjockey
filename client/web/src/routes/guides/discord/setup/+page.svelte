@@ -1,18 +1,16 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import { baseurl } from '$lib/sjgmsapi';
-  import { instance } from '$lib/instancestores';
   import BackToTop from '$lib/BackToTop.svelte';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
   import Clyde from '$lib/Clyde.svelte';
-
-  // used by ServerStatusStore
-  instance.set({ url: baseurl + '/instances/serverlink' });
 </script>
 
+
+<ServerStatusStore identity="serverlink">
 
 <div class="columns">
   <div class="column is-one-quarter">
@@ -327,10 +325,8 @@
 <hr />
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
-    <ServerStatusStore>
-      <ServerStatus stateOnly />
-      <ServerControls />
-    </ServerStatusStore>
+    <ServerStatus stateOnly />
+    <ServerControls />
   </div>
 </div>
 <hr />
@@ -466,4 +462,5 @@
   </p>
 </div>
 
+</ServerStatusStore>
 <BackToTop />

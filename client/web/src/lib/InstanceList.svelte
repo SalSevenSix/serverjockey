@@ -4,19 +4,14 @@
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
   import { baseurl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
-
-  instance.set({});
-  serverStatus.set({});
 
   let subs = new SubscriptionHelper();
   let instances = [];
   let loading = true;
 
   function viewInstance(selected) {
-    instance.set(selected);
-    goto('/servers/' + selected.module);
+    goto('/servers/' + selected.module + '?i=' + selected.identity);
   }
 
   function deleteInstance(selected) {
@@ -28,6 +23,7 @@
     });
   }
 
+  // TODO refactor out, possibly not use url in instance object, always build
   function newInstanceUrl(identity) {
     let result = baseurl;
     if (!result) {

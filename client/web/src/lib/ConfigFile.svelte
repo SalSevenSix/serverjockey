@@ -1,9 +1,12 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { textAreaModal } from '$lib/modals';
   import { newPostRequest, newGetRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus, eventStarted } from '$lib/instancestores';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
+  const eventStarted = getContext('eventStarted');
 
   export let name;
   export let path;
@@ -25,7 +28,7 @@
 
   function reload() {
     updating = true;
-    fetch($instance.url + path, newGetRequest())
+    fetch(instance.url(path), newGetRequest())
       .then(function(response) {
         if (response.status === 404) return '';
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -54,7 +57,7 @@
     updating = true;
     let request = newPostRequest('text/plain');
     request.body = configText;
-    fetch($instance.url + path, request)
+    fetch(instance.url(path), request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         originalText = configText;
@@ -71,7 +74,7 @@
 <div class="block">
   <div class="field">
     <label for={configFileTextId} class="label">
-      <a href={$instance.url + path} target="_blank">{name} &nbsp;<i class="fa fa-up-right-from-square"></i></a>
+      <a href={instance.url(path)} target="_blank">{name} &nbsp;<i class="fa fa-up-right-from-square"></i></a>
     </label>
     <slot />
     <div class="control pr-6">

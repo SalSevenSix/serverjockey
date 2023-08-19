@@ -1,8 +1,9 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
-  import { instance } from '$lib/instancestores';
+
+  const instance = getContext('instance');
 
   export let noHints = false;
 
@@ -14,7 +15,7 @@
     processing = true;
     let request = newPostRequest('text/plain');
     request.body = JSON.stringify(serverLinkForm);
-    fetch($instance.url + '/config', request)
+    fetch(instance.url('/config'), request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         botToken = serverLinkForm.BOT_TOKEN;
@@ -25,7 +26,7 @@
   }
 
   onMount(function() {
-    fetch($instance.url + '/config', newGetRequest())
+    fetch(instance.url('/config'), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();

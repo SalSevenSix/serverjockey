@@ -1,11 +1,16 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { confirmModal } from '$lib/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { isString, guessTextFile, humanFileSize } from '$lib/util';
   import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus, eventDown, eventStarted, eventEndMaint } from '$lib/instancestores';
   import Spinner from '$lib/Spinner.svelte';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
+  const eventDown = getContext('eventDown');
+  const eventStarted = getContext('eventStarted');
+  const eventEndMaint = getContext('eventEndMaint');
 
   export let rootPath;
   export let allowDelete = 0;  // 0=Never 1=!RunOrMaint 2=!Maint 3=Always
@@ -37,7 +42,7 @@
   }
 
   function rootUrl() {
-    return $instance.url + rootPath;
+    return instance.url(rootPath);
   }
 
   function urlToPath(url) {

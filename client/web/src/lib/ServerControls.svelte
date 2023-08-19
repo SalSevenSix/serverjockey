@@ -1,7 +1,10 @@
 <script>
+  import { getContext } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
 
   $: transientState = $serverStatus.running && $serverStatus.state === 'STOPPED';
   $: cannotStop = !$serverStatus.running || $serverStatus.state === 'STOPPING' || transientState;
@@ -9,7 +12,7 @@
   $: cannotStart = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   function doCommand() {
-    fetch($instance.url + '/server/' + this.name, newPostRequest())
+    fetch(instance.url('/server/' + this.name), newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to send server command.'); });
   }

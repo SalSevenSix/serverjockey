@@ -1,9 +1,12 @@
 <script>
+  import { getContext } from 'svelte';
   import { capitalizeKebabCase } from '$lib/util';
   import { confirmModal } from '$lib/modals';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
 
   export let actions = [];
 
@@ -16,7 +19,7 @@
     let actionTitle = this.title;
     confirmModal('Are you sure you want to ' + actionTitle + ' ?', function() {
       processing = true;
-      fetch($instance.url + '/deployment/' + actionKey, newPostRequest())
+      fetch(instance.url('/deployment/' + actionKey), newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo(actionTitle + ' completed.');

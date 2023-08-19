@@ -1,10 +1,13 @@
 <script>
+  import { getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { confirmModal } from '$lib/modals';
   import { newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus } from '$lib/instancestores';
   import FileSystem from '$lib/FileSystem.svelte';
   import Spinner from '$lib/Spinner.svelte';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
 
   let fileSystem;
   let uploading = false;
@@ -21,7 +24,7 @@
 
   function createBackup() {
     cannotBackup = true;
-    fetch($instance.url + '/deployment/backup-' + this.name, newPostRequest())
+    fetch(instance.url('/deployment/backup-' + this.name), newPostRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyText = 'Backup completed. Please check log output for details.';
@@ -37,7 +40,7 @@
       cannotBackup = callbacks.start();
       let request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
-      fetch($instance.url + '/deployment/restore-backup', request)
+      fetch(instance.url('/deployment/restore-backup'), request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           callbacks.started('Restored backup. Please check console log output.');
@@ -62,7 +65,7 @@
     let request = rawPostRequest();
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
-    fetch($instance.url + '/backups/' + filename, request)  // Blocks until complete
+    fetch(instance.url('/backups/' + filename), request)  // Blocks until complete
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(filename + ' uploaded successfully.');

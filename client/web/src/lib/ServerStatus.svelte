@@ -1,6 +1,8 @@
 <script>
+  import { getContext } from 'svelte';
   import { capitalize, humanDuration } from '$lib/util';
-  import { serverStatus } from '$lib/instancestores';
+
+  const serverStatus = getContext('serverStatus');
 
   export let stateOnly = false;
 

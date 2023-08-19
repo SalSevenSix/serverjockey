@@ -1,10 +1,11 @@
 <script>
+  import { onDestroy, tick, getContext } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { onDestroy, tick } from 'svelte';
   import { closeModal } from 'svelte-modals';
   import { sleep, RollingLog } from '$lib/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/sjgmsapi';
-  import { instance } from '$lib/instancestores';
+
+  const instance = getContext('instance');
 
   export let isOpen;
   export let onSuccess;
@@ -27,7 +28,7 @@
   async function heartbeat() {
     while (stage > 0) {
       await sleep(1000);
-      await fetch($instance.url + '/steamcmd/input', newPostRequest());
+      await fetch(instance.url('/steamcmd/input'), newPostRequest());
     }
   }
 
@@ -44,7 +45,7 @@
     heartbeat();
     let request = newPostRequest();
     request.body = JSON.stringify({ login: steamLogin });
-    fetch($instance.url + '/steamcmd/login', request)
+    fetch(instance.url('/steamcmd/login'), request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -79,7 +80,7 @@
     }
     let request = newPostRequest();
     request.body = JSON.stringify({ value: steamPassword });
-    fetch($instance.url + '/steamcmd/input', request)
+    fetch(instance.url('/steamcmd/input'), request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to send password.'); });
   }
@@ -95,7 +96,7 @@
     }
     let request = newPostRequest();
     request.body = JSON.stringify({ value: steamCode });
-    fetch($instance.url + '/steamcmd/input', request)
+    fetch(instance.url('/steamcmd/input'), request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
       .catch(function(error) { notifyError('Failed to send code.'); });
   }

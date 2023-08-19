@@ -1,7 +1,11 @@
 <script>
+  import { getContext } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
-  import { instance, serverStatus, eventDown } from '$lib/instancestores';
+
+  const instance = getContext('instance');
+  const serverStatus = getContext('serverStatus');
+  const eventDown = getContext('eventDown');
 
   let autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
   let currentOption = null;
@@ -27,7 +31,7 @@
       currentOption = selectedOption;  // lock it in now to block another trigger
       let request = newPostRequest();
       request.body = JSON.stringify({ auto: autoOptions.indexOf(selectedOption) });
-      fetch($instance.url, request)
+      fetch(instance.url(), request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
         })
