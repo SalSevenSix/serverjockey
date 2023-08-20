@@ -1,17 +1,13 @@
-from __future__ import annotations
-import inspect
 import logging
 import re
-import os
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
-from core.util import util, io, pkg, sysutil, signals, objconv, aggtrf
+from core.util import util, io, sysutil, signals, objconv, aggtrf
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
-from core.system import svrabc, svrsvc, igd
+from core.system import svrmodules, svrsvc, igd
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
-_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
 
 
 class SystemService:
@@ -21,7 +17,7 @@ class SystemService:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._modules = {}
+        self._modules = svrmodules.ModulesService(context)
         self._home_dir = context.config('home')
         self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
         self._resource = self._build_resources(context)
@@ -33,7 +29,7 @@ class SystemService:
         resource = httprsc.WebResource()
         r = httprsc.ResourceBuilder(resource)
         r.put('login', httpext.LoginHandler(context.config('secret')))
-        r.put('modules', httpext.StaticHandler(_MODULES))
+        r.put('modules', httpext.StaticHandler(self._modules.names()))
         r.psh('system')
         r.put('info', _SystemInfoHandler())
         r.put('shutdown', _ShutdownHandler(self))
@@ -49,7 +45,7 @@ class SystemService:
         r.put('{identity}', subs.subscriptions_handler('identity'))
         return resource
 
-    async def initialise(self) -> SystemService:
+    async def initialise(self):
         if self._context.is_trace():
             msglog.HandlerPublisher.log(self._context, self, 'LOG UNAVAVAILABLE IN TRACE MODE')
         else:
@@ -59,7 +55,6 @@ class SystemService:
         self._context.register(_AutoStartsSubscriber())
         await self._initialise_instances()
         await self._clientfile.write()
-        return self
 
     async def _initialise_instances(self):
         autos, ls = [], await io.directory_list(self._home_dir)
@@ -85,6 +80,9 @@ class SystemService:
         for subcontext in subcontexts:
             await svrsvc.ServerService.shutdown(subcontext, self)
             await self._context.destroy_subcontext(subcontext)
+
+    def valid_module(self, module_name: str | None) -> bool:
+        return self._modules.valid(module_name)
 
     def instances_info(self, baseurl: str) -> dict:
         result = {}
@@ -114,7 +112,7 @@ class SystemService:
 
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
         assert util.get('identity', configuration)
-        assert util.get('module', configuration) in _MODULES
+        assert self.valid_module(util.get('module', configuration))
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
@@ -140,7 +138,7 @@ class SystemService:
             self._context, msgftr.Or(igd.IgdService.FILTER, _DeleteInstanceSubscriber.FILTER)))
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
-        server = await self._create_server(subcontext)
+        server = await self._modules.create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(self))
         self._instances.append(resource)
@@ -148,17 +146,6 @@ class SystemService:
         svrsvc.ServerService(subcontext, server).start()
         self._context.post(self, SystemService.SERVER_INITIALISED, subcontext)
         return subcontext
-
-    async def _create_server(self, subcontext: contextsvc.Context) -> svrabc.Server:
-        module_name = subcontext.config('module')
-        module = util.get(module_name, self._modules)
-        if not module:
-            module = await pkg.import_module('servers.' + module_name + '.server')
-            self._modules.update({module_name: module})
-        for name, member in inspect.getmembers(module):
-            if inspect.isclass(member) and svrabc.Server in inspect.getmro(member):
-                return member(subcontext)
-        raise Exception('Server class implementation not found in module: ' + repr(module))
 
     def _get_subcontext(self, identity: str, include_hidden: bool) -> contextsvc.Context | None:
         for subcontext in self._context.subcontexts():
@@ -223,7 +210,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
-        if not identity or module not in _MODULES:
+        if not identity or not self._system.valid_module(module):
             return httpabc.ResponseBody.BAD_REQUEST
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):
@@ -272,7 +259,7 @@ class _ShutdownHandler(httpabc.PostHandler):
         self._system = system
 
     def handle_post(self, resource, data):
-        signals.interrupt(os.getpid())
+        signals.interrupt_self()
         return httpabc.ResponseBody.NO_CONTENT
 
 

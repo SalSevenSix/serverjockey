@@ -1,11 +1,22 @@
 from collections.abc import Iterable
 # ALLOW core.*
-from core.util import util, cmdutil, aggtrf
-from core.msg import msgabc, msgext, msgftr
+from core.util import util, io, cmdutil, aggtrf, pkg
+from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
+from core.common import interceptors, playerstore
+
+_MAIN_PY = 'main.py'
+_COMMANDS = cmdutil.CommandLines({'send': '{line}'})
+_COMMANDS_HELP_TEXT = '''CONSOLE HELP
+kick {player}
+todo more
+'''
+
+MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
 class Server(svrabc.Server):
@@ -17,52 +28,92 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._python = context.config('python')
+        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
+        self._backups_dir = self._home_dir + '/backups'
+        self._runtime_dir = self._home_dir + '/runtime'
+        self._executable = self._runtime_dir + '/' + _MAIN_PY
+        self._runtime_metafile = self._runtime_dir + '/readme.text'
         self._pipeinsvc = proch.PipeInLineService(context)
         self._stopper = prcext.ServerProcessStopper(context, 10.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
+        await io.create_directory(self._backups_dir)
+        self._context.register(svrext.MaintenanceStateSubscriber(
+            self._context, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
         self._context.register(prcext.ServerStateSubscriber(self._context))
+        self._context.register(playerstore.PlayersSubscriber(self._context))
         self._context.register(_ServerDetailsSubscriber(self._context))
+        self._context.register(_PlayerEventSubscriber(self._context))
+        self._context.register(msgext.SyncWrapper(
+            self._context, msgext.Archiver(self._context, self._tmp_dir), msgext.SyncReply.AT_START))
+        self._context.register(msgext.SyncWrapper(
+            self._context, msgext.Unpacker(self._context, self._tmp_dir), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
-        httprsc.ResourceBuilder(resource) \
-            .psh('server', svrext.ServerStatusHandler(self._context)) \
-            .put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER)) \
-            .put('{command}', svrext.ServerCommandHandler(self._context)) \
-            .pop() \
-            .psh('log') \
-            .put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER, size=200)) \
-            .put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n'))) \
-            .pop() \
-            .put('players', _PlayersHandler(self._context)) \
-            .psh('console') \
-            .put('{command}', _ConsoleHandler(self._context)) \
-            .pop() \
-            .psh(self._httpsubs.resource(resource, 'subscriptions')) \
-            .put('{identity}', self._httpsubs.subscriptions_handler('identity'))
+        r = httprsc.ResourceBuilder(resource)
+        r.reg('r', interceptors.block_running_or_maintenance(self._context))
+        r.reg('m', interceptors.block_maintenance_only(self._context))
+        r.psh('server', svrext.ServerStatusHandler(self._context))
+        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('{command}', svrext.ServerCommandHandler(self._context))
+        r.pop()
+        r.psh('log')
+        r.put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER, size=200))
+        r.put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n')))
+        r.pop()
+        r.psh('players', _PlayersHandler(self._context))
+        r.put('subscribe', self._httpsubs.handler(playerstore.PlayersSubscriber.EVENT_FILTER))
+        r.pop()
+        r.psh('console')
+        r.put('help', httpext.StaticHandler(_COMMANDS_HELP_TEXT))
+        r.put('{command}', prcext.ConsoleCommandHandler(self._context, _COMMANDS))
+        r.pop()
+        r.psh('deployment')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
+        r.put('install-runtime', _InstallRuntimeHandler(self), 'r')
+        r.put('wipe-runtime', httpext.WipeHandler(self._context, self._runtime_dir), 'r')
+        r.put('backup-runtime', httpext.ArchiveHandler(self._context, self._backups_dir, self._runtime_dir), 'r')
+        r.put('restore-backup', httpext.UnpackerHandler(self._context, self._backups_dir, self._home_dir), 'r')
+        r.pop()
+        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
+        r.put('*{path}', httpext.FileSystemHandler(
+            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
+            read_tracker=msglog.IntervalTracker(self._context, initial_message='SENDING data...', prefix='sent'),
+            write_tracker=msglog.IntervalTracker(self._context)), 'm')
+        r.pop()
+        r.psh(self._httpsubs.resource(resource, 'subscriptions'))
+        r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
+        if not await io.file_exists(self._executable):
+            raise FileNotFoundError('Testserver game server not installed. Please Install Runtime first.')
         await proch.ServerProcess(self._context, self._python) \
-            .append_arg('../projects/serverjockey/servers/testserver/main.py') \
+            .append_arg(self._executable) \
             .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(Server.STARTED_FILTER, 60) \
+            .wait_for_started(Server.STARTED_FILTER, 10) \
             .run()
 
     async def stop(self):
         await self._stopper.stop()
 
+    async def install_runtime(self, beta: str | None):
+        main_py = await pkg.pkg_load('servers.testserver', _MAIN_PY)
+        await io.delete_directory(self._runtime_dir)
+        await io.create_directory(self._runtime_dir)
+        await io.write_file(self._executable, main_py)
+        await io.write_file(self._runtime_metafile, 'build : ' + str(util.now_millis()) + '\nbeta  : ' + beta)
+        return None
 
-class _ConsoleHandler(httpabc.PostHandler):
-    COMMANDS = cmdutil.CommandLines({
-        'kick': 'kick {player}'
-    })
 
-    def __init__(self, context: contextsvc.Context):
-        self._handler = prcext.ConsoleCommandHandler(context, _ConsoleHandler.COMMANDS)
+class _InstallRuntimeHandler(httpabc.PostHandler):
+
+    def __init__(self, server: Server):
+        self._server = server
 
     async def handle_post(self, resource, data):
-        return await self._handler.handle_post(resource, data)
+        await self._server.install_runtime(util.get('beta', data, 'none'))
+        return httpabc.ResponseBody.NO_CONTENT
 
 
 class _PlayersHandler(httpabc.GetHandler):
@@ -101,4 +152,29 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             data = {'ingametime': value}
         if data:
             svrsvc.ServerStatus.notify_details(self._mailer, self, data)
+        return None
+
+
+class _PlayerEventSubscriber(msgabc.AbcSubscriber):
+    PREFIX, JOIN, LEAVE = '### Player', 'has joined the server', 'has left the server'
+    JOIN_FILTER = msgftr.And(msgftr.DataStrContains(PREFIX), msgftr.DataStrContains(JOIN))
+    LEAVE_FILTER = msgftr.And(msgftr.DataStrContains(PREFIX), msgftr.DataStrContains(LEAVE))
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.And(
+            proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(_PlayerEventSubscriber.JOIN_FILTER, _PlayerEventSubscriber.LEAVE_FILTER)))
+        self._mailer = mailer
+
+    def handle(self, message):
+        if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
+            value = util.right_chop_and_strip(value, _PlayerEventSubscriber.JOIN)
+            playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
+            return None
+        if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
+            value = util.right_chop_and_strip(value, _PlayerEventSubscriber.LEAVE)
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            return None
         return None

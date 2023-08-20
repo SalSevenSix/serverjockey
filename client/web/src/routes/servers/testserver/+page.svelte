@@ -5,21 +5,46 @@
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
+  import Players from '$lib/Players.svelte';
   import InstanceLog from '$lib/InstanceLog.svelte';
+  import CommandBuilder from '$lib/CommandBuilder.svelte';
+  import InstallRuntime from '$lib/InstallRuntime.svelte';
+  import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+
+  let consoleCommands = {
+    'console': {
+      'send': [
+        {name: 'help', input: 'display'},
+        {name: 'line', input: 'text>', type: 'string'}
+      ]
+    }
+  };
 </script>
 
 
 <ServerStatusStore><Instance>
   <div class="columns">
     <div class="column">
-      <ServerControls />
-      <ServerConfig />
-      <ServerStatus />
-    </div>
-  </div>
-  <div class="columns">
-    <div class="column">
+      <div class="columns">
+        <div class="column">
+          <ServerControls />
+          <ServerConfig />
+          <ServerStatus />
+        </div>
+        <div class="column">
+          <Players />
+        </div>
+      </div>
       <InstanceLog />
+      <Collapsible icon="fa-keyboard" title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
+      <Collapsible icon="fa-gears" title="Deployment">
+        <InstallRuntime qualifierName="Beta (optional)" />
+      </Collapsible>
+      <Collapsible icon="fa-box-archive" title="Backups">
+        <BackupRestoreActions hasWorld={false} />
+      </Collapsible>
     </div>
   </div>
 </Instance></ServerStatusStore>

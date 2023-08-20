@@ -9,6 +9,8 @@
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
 
+  export let hasWorld = true;
+
   let fileSystem;
   let uploading = false;
   let uploadFiles = [];
@@ -119,8 +121,10 @@
     <button name="runtime" title="Backup Runtime" class="button is-primary"
             disabled={cannotBackup} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
-    <button name="world" title="Backup World" class="button is-primary"
-            disabled={cannotBackup} on:click={createBackup}>
-      <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
+    {#if hasWorld}
+      <button name="world" title="Backup World" class="button is-primary"
+              disabled={cannotBackup} on:click={createBackup}>
+        <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
+    {/if}
   </div>
 </div>

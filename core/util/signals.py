@@ -9,6 +9,10 @@ def interrupt(pid: int):
     os.kill(pid, signal.SIGINT)  # This is probably blocking io but quick
 
 
+def interrupt_self():
+    interrupt(os.getpid())
+
+
 async def kill_tree(pid: int):
     pid_str = str(pid)
     script = '\n'.join(
