@@ -7,18 +7,20 @@
 
   export let noHints = false;
 
-  let serverLinkForm = { 'EVENT_CHANNELS': {} };
-  let botToken = null;
+  let loadedData = { 'EVENT_CHANNELS': {} };
+  let formData = loadedData;
   let processing = true;
+
+  $: cannotSave = processing || JSON.stringify(loadedData) === JSON.stringify(formData);
 
   function save() {
     processing = true;
     let request = newPostRequest('text/plain');
-    request.body = JSON.stringify(serverLinkForm);
+    request.body = JSON.stringify(formData);
     fetch(instance.url('/config'), request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
-        botToken = serverLinkForm.BOT_TOKEN;
+        loadedData = JSON.parse(JSON.stringify(formData));
         notifyInfo('ServerLink Config saved.');
       })
       .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
@@ -32,8 +34,8 @@
         return response.json();
       })
       .then(function(json) {
-        serverLinkForm = json;
-        botToken = json.BOT_TOKEN;
+        loadedData = json;
+        formData = JSON.parse(JSON.stringify(json));
       })
       .catch(function(error) { notifyError('Failed to load ServerLink Config.'); })
       .finally(function() { processing = false; });
@@ -42,7 +44,7 @@
 
 
 <div class="block">
-  {#if !noHints && !botToken}
+  {#if !noHints && !loadedData.BOT_TOKEN}
     <div class="content">
       <p>For help setting up the ServerLink discord bot, please see <a href="/guides/discord/setup">the guide</a>.</p>
     </div>
@@ -53,7 +55,7 @@
       Discord Bot Token</label>
     <div class="control">
       <input id="serverLinkConfigBotToken" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.BOT_TOKEN}>
+             disabled={processing} bind:value={formData.BOT_TOKEN}>
     </div>
   </div>
   <div class="field">
@@ -62,7 +64,7 @@
       Command Prefix</label>
     <div class="control">
       <input id="serverLinkConfigCommandPrefix" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.CMD_PREFIX}>
+             disabled={processing} bind:value={formData.CMD_PREFIX}>
     </div>
   </div>
   <div class="field">
@@ -71,7 +73,7 @@
       Admin Roles</label>
     <div class="control">
       <input id="serverLinkConfigAdminRole" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.ADMIN_ROLE}>
+             disabled={processing} bind:value={formData.ADMIN_ROLE}>
     </div>
   </div>
   <div class="field">
@@ -80,7 +82,7 @@
       Player Roles</label>
     <div class="control">
       <input id="serverLinkConfigPlayerRole" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.PLAYER_ROLE}>
+             disabled={processing} bind:value={formData.PLAYER_ROLE}>
     </div>
   </div>
   <div class="field">
@@ -89,7 +91,7 @@
       Server Event Channel ID</label>
     <div class="control">
       <input id="serverLinkConfigChannelEventsServer" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.EVENT_CHANNELS.server}>
+             disabled={processing} bind:value={formData.EVENT_CHANNELS.server}>
     </div>
   </div>
   <div class="field">
@@ -98,7 +100,7 @@
       Player Event Channel ID</label>
     <div class="control">
       <input id="serverLinkConfigChannelEventsPlayerLogin" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.EVENT_CHANNELS.login}>
+             disabled={processing} bind:value={formData.EVENT_CHANNELS.login}>
     </div>
   </div>
   <div class="field">
@@ -107,7 +109,7 @@
       Chat Integration Channel ID</label>
     <div class="control">
       <input id="serverLinkConfigChannelEventsPlayerChat" class="input" type="text"
-             disabled={processing} bind:value={serverLinkForm.EVENT_CHANNELS.chat}>
+             disabled={processing} bind:value={formData.EVENT_CHANNELS.chat}>
     </div>
   </div>
   <div class="field">
@@ -116,11 +118,12 @@
       Whitelist DM</label>
     <div class="control">
       <textarea id="serverLinkConfigWhitelistDm" class="textarea"
-                disabled={processing} bind:value={serverLinkForm.WHITELIST_DM}></textarea>
+                disabled={processing} bind:value={formData.WHITELIST_DM}></textarea>
     </div>
   </div>
   <div class="block buttons">
-    <button name="save" title="Save" class="button is-primary is-fullwidth" disabled={processing} on:click={save}>
+    <button name="save" title="Save" class="button is-primary is-fullwidth"
+            disabled={cannotSave} on:click={save}>
       <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
   </div>
 </div>

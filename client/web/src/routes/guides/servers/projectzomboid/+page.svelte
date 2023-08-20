@@ -31,6 +31,7 @@
     <ul>
       <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
       <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
+      <li><a href="#adminCharacter" use:scrollto={'#adminCharacter'}>Admin Character</a></li>
       <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
       <li><a href="#cacheLockingMapFiles" use:scrollto={'#cacheLockingMapFiles'}>Cache Locking Map Files</a></li>
       <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
@@ -101,6 +102,22 @@ UPnP=false</pre>
     "-XX:-OmitStackTraceInFastThrow"
 ]</pre>
 </div>
+
+
+<div class="content pt-4" id="adminCharacter">
+  <h4 class="title is-5">Admin Character</h4>
+  <p>
+    When a Project Zomboid server starts it will generate a new map if one does not exist.
+    It will also create an Admin user called <span class="is-family-monospace">admin</span>.
+    You can login to the game world with this user to play as the admin character.
+    The password is the same as the Webapp login token. It will not change when the token changes.
+  </p>
+  <p>
+    Note that in the <span class="has-text-weight-bold">Console Commands</span>
+    section you can make any user an admin by using Set Access Level to admin.
+  </p>
+</div>
+
 
 <div class="content pt-4" id="integrationMods">
   <h4 class="title is-5">Integration Mods</h4>

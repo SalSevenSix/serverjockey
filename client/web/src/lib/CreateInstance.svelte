@@ -7,13 +7,14 @@
   let serverForm = {};
   let processing = true;
 
+  $: cannotCreate = processing || !serverForm.module || !serverForm.identity;
+
   function kpCreate(event) {
     if (event.key === 'Enter') { create(); }
   }
 
   function create() {
-    if (!serverForm.module) return notifyError('Module not selected.');
-    if (!serverForm.identity) return notifyError('Name not set.');
+    if (cannotCreate) return;
     processing = true;
     let request = newPostRequest();
     request.body = JSON.stringify(serverForm);
@@ -65,7 +66,8 @@
     </div>
   </div>
   <div class="block buttons">
-    <button name="create" title="Create" class="button is-primary is-fullwidth" disabled={processing} on:click={create}>
+    <button name="create" title="Create" class="button is-primary is-fullwidth"
+            disabled={cannotCreate} on:click={create}>
       <i class="fa-solid fa-square-plus fa-lg"></i>&nbsp;&nbsp;Create</button>
   </div>
 </div>
