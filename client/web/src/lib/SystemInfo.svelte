@@ -10,9 +10,11 @@
 
   let looping = true;
   let info = null;
-  let uptimeClock = { setUptime: function(uptime) {} };
+  let uptimeClock;
 
-  $: uptimeClock.setUptime(info ? info.uptime : null);
+  $: if (uptimeClock && info) {
+    uptimeClock.setUptime(info.uptime);
+  }
 
   function osIcon(os_pretty_name) {
     let parts = os_pretty_name.split(' ');

@@ -8,9 +8,11 @@
 
   export let stateOnly = false;
 
-  let uptimeClock = { setUptime: function(uptime) {} };
+  let uptimeClock;
 
-  $: uptimeClock.setUptime($serverStatus.uptime);
+  $: if (uptimeClock && $serverStatus) {
+    uptimeClock.setUptime($serverStatus.uptime);
+  }
 </script>
 
 
