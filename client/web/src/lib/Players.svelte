@@ -6,9 +6,12 @@
 
   const instance = getContext('instance');
 
+  export let hasSteamId = false;
+
   let subs = new SubscriptionHelper();
   let players = [];
   let loading = true;
+  let columnCount = 1 + (hasSteamId ? 1 : 0);
 
   onMount(function() {
     fetch(instance.url('/players'), newGetRequest())
@@ -53,12 +56,12 @@
     <thead>
       <tr>
         <th>Player</th>
-        <th>Steam ID</th>
+        {#if hasSteamId}<th>Steam ID</th>{/if}
       </tr>
     </thead>
     <tbody>
       {#if players.length === 0}
-        <tr><td colspan="2">
+        <tr><td colspan={columnCount}>
           {#if loading}
             <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
           {:else}
@@ -69,7 +72,9 @@
         {#each players as player}
           <tr>
             <td>{player.name}</td>
-            <td>{(!player.hasOwnProperty('steamid')) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
+            {#if hasSteamId}
+              <td>{(!player.hasOwnProperty('steamid')) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
+            {/if}
           </tr>
         {/each}
       {/if}

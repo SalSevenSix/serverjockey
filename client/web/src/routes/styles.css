@@ -5,6 +5,10 @@ body {
   counter-reset: section;
 }
 
+hr {
+  background-color: #DBDBDB;
+}
+
 a[target="_blank"] {
   font-weight: bold;
 }
@@ -73,13 +77,14 @@ table.is-thinner {
   white-space: nowrap;
 }
 
+.theme-black-white {
+  fill: black;
+  color: black;
+}
+
 
 /* Specific cases */
 
 svg.rubiks, svg.navbar-rubiks {
   color: #FFFDF8;
-}
-
-.clyde {
-  fill: black;
 }

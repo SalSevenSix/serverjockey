@@ -38,15 +38,17 @@
         <div class="column">
           <ServerControls />
           <ServerConfig />
-          <ServerStatus />
         </div>
         <div class="column">
-          <Players />
+          <ServerStatus />
         </div>
       </div>
       <InstanceLog />
       <Collapsible icon="fa-keyboard" title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
+      <Collapsible icon="fa-user" title="Players">
+        <Players />
       </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">

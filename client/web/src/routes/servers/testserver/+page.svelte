@@ -7,6 +7,8 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import InstanceLog from '$lib/InstanceLog.svelte';
+  import ConfigFile from '$lib/ConfigFile.svelte';
+  import LogFiles from '$lib/LogFiles.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
@@ -29,15 +31,23 @@
         <div class="column">
           <ServerControls />
           <ServerConfig />
-          <ServerStatus />
         </div>
         <div class="column">
-          <Players />
+          <ServerStatus />
         </div>
       </div>
       <InstanceLog />
       <Collapsible icon="fa-keyboard" title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
+      <Collapsible icon="fa-user" title="Players">
+        <Players />
+      </Collapsible>
+      <Collapsible icon="fa-file-code" title="Configuration">
+        <ConfigFile name="Command Line Args" path="/config/cmdargs" />
+      </Collapsible>
+      <Collapsible icon="fa-scroll" title="Logging">
+        <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <InstallRuntime qualifierName="Beta (optional)" />

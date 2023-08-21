@@ -10,6 +10,11 @@
   let looping = true;
   let info = null;
 
+  function osIcon(os_pretty_name) {
+    let parts = os_pretty_name.split(' ');
+    return 'fa-' + parts[0].toLowerCase();
+  }
+
   onMount(async function() {
     while (looping) {
       await fetch(baseurl + '/system/info', newGetRequest())
@@ -24,7 +29,7 @@
           looping = false;
           notifyError('Failed to load System Info.');
         });
-      if (looping) { await sleep(28000); }
+      if (looping) { await sleep(32000); }
     }
   });
 
@@ -42,7 +47,8 @@
       {#if info}
         <tbody>
           <tr><td class="has-text-weight-bold">Version</td><td>{info.version}</td></tr>
-          <tr><td class="has-text-weight-bold">OS</td><td>{info.os}</td></tr>
+          <tr><td class="has-text-weight-bold">OS</td>
+              <td><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
           <tr><td class="has-text-weight-bold">CPU</td><td>{info.cpu.percent}%</td></tr>
           <tr><td class="has-text-weight-bold">Memory</td><td></td></tr>
           <tr><td>Total</td><td>{humanFileSize(info.memory.total)}</td></tr>

@@ -9,18 +9,22 @@ def p(line):
     print(line, flush=True)
 
 
-def fork():
+def ingametime():
     while True:
         p('### Ingametime ' + repr(int(time.time() * 1000.0) + 1))
-        time.sleep(60)
+        time.sleep(80)
 
 
 def main() -> int:
     p('### Initialising')
-    p('1599635857306 versionNumber=40.43 demo=false')
+    p('1599635857306 versionNumber=1.8.42')
     time.sleep(0.5)
-    p('server is listening on port 16261')
+    p('Launch args...')
+    for i, arg in enumerate(sys.argv[1:]):
+        p('  #' + str(i) + ' ' + str(arg))
+    p('public ip: 101.201.301.404')
     time.sleep(0.5)
+    p('server is listening on port: 27001')
     p('Server Steam ID 90138653263221765')
     p('### *** SERVER STARTED ***')
     players = ['MrGoober', 'StabMasterArson', 'YouMadNow']
@@ -28,7 +32,7 @@ def main() -> int:
         time.sleep(0.2)
         p('### Player {} has joined the server'.format(player))
         p("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
-    threading.Thread(target=fork, daemon=True).start()
+    threading.Thread(target=ingametime, daemon=True).start()
 
     running = True
     while running:
@@ -41,18 +45,9 @@ def main() -> int:
             p('Players connected ({}):'.format(len(players)))
             for player in players:
                 p('-{}'.format(player))
-                time.sleep(1)
+                time.sleep(0.2)
             p('')
             p('### some more junk')
-        elif line == 'showoptions':
-            p('List of Server Options:')
-            p('* PvP=False')
-            p('* MaxPlayerCount=16')
-            p('* ModsList=better_guns,hydro,survivor_radio')
-            p('* SaveOnExit=True')
-            p('* DayLength=12')
-            p('* ServerWelcomeMessage=Welcome to PZ test-script.sh <LINE> Enjoy testing!')
-            p('end')
         elif line.find('kick') != -1:
             found = None
             for player in players:

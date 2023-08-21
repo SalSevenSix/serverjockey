@@ -86,6 +86,7 @@ body.dark svg.rubiks {
   color: #4A6488;
 }
 
-body.dark .clyde {
+body.dark .theme-black-white {
   fill: white;
+  color: white;
 }
