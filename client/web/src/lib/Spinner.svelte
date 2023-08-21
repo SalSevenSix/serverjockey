@@ -1,26 +1,24 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { sleep } from '$lib/util';
 
   export let clazz = 'fa fa-spinner fa-lg';
   export let increment = 5;
   export let delay = 50;
 
-  let spinning = true;
+  let clock = null;
   let current = 0;
 
-  onMount(async function() {
+  onMount(function() {
     increment = parseInt(increment);
     delay = parseInt(delay);
-    while (spinning) {
+    clock = setInterval(function() {
       current += increment;
       if (current >= 360) { current = 0; }
-      await sleep(delay);
-    }
+    }, delay);
   });
 
   onDestroy(function() {
-    spinning = false;
+    if (clock) { clearInterval(clock); }
   });
 </script>
 

@@ -1,14 +1,18 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
-  import { sleep, humanFileSize, humanDuration } from '$lib/util';
+  import { sleep, humanFileSize } from '$lib/util';
   import { baseurl, newGetRequest } from '$lib/sjgmsapi';
   import RubiksCube from '$lib/RubiksCube.svelte';
   import Overlay from '$lib/Overlay.svelte';
+  import UptimeClock from '$lib/UptimeClock.svelte';
   import SpinnerCss from '$lib/SpinnerCss.svelte';
 
   let looping = true;
   let info = null;
+  let uptimeClock = { setUptime: function(uptime) {} };
+
+  $: uptimeClock.setUptime(info ? info.uptime : null);
 
   function osIcon(os_pretty_name) {
     let parts = os_pretty_name.split(' ');
@@ -77,7 +81,7 @@
     <table class="table is-thinner">
       {#if info}
         <tbody>
-          <tr><td class="has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
+          <tr><td class="has-text-weight-bold">Uptime</td><td><UptimeClock bind:this={uptimeClock} /></td></tr>
           <tr><td class="has-text-weight-bold">Disk</td><td></td></tr>
           <tr><td>Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
           <tr><td>Used</td><td>{humanFileSize(info.disk.used)}</td></tr>

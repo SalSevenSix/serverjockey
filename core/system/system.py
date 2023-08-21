@@ -245,11 +245,12 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
 class _SystemInfoHandler(httpabc.GetHandler):
 
     def __init__(self):
-        self._start_time = util.now_millis()
+        self._startmillis = util.now_millis()
 
     async def handle_get(self, resource, data):
         info = await sysutil.system_info()
-        info.update({'uptime': util.now_millis() - self._start_time})
+        info['startmillis'] = self._startmillis
+        info['uptime'] = util.now_millis() - self._startmillis
         return info
 
 

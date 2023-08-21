@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy, tick, setContext } from 'svelte';
-  import { get, writable } from 'svelte/store';
-  import { generateId, sleep } from '$lib/util';
+  import { writable } from 'svelte/store';
   import { notifyError } from '$lib/notifications';
   import { baseurl, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
@@ -70,24 +69,6 @@
     lastState = serverState;
   }
 
-  async function setServerStatus(data) {
-    let id = generateId();
-    data.id = id;
-    serverStatus.set(data);
-    if (!data.uptime) return;
-    // TODO try a better way to update uptime, perhaps use a seperate store and use real clock time
-    let looping = true;
-    while (looping) {
-      await sleep(10000);
-      if (id === get(serverStatus).id) {
-        data.uptime += 10000;
-        serverStatus.set(data);
-      } else {
-        looping = false;
-      }
-    }
-  }
-
   onMount(function() {
     fetch(instance.url('/server'), newGetRequest())
       .then(function(response) {
@@ -97,10 +78,10 @@
       .then(function(json) {
         lastRunning = json.running;
         lastState = json.state;
-        setServerStatus(json);
+        serverStatus.set(json);
         subs.start(instance.url('/server/subscribe'), function(data) {
           triggering = true;
-          setServerStatus(data);
+          serverStatus.set(data);
           return true;
         });
       })

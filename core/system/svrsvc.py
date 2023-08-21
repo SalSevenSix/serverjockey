@@ -132,8 +132,35 @@ class ServerService(msgabc.AbcSubscriber):
             util.clear_queue(self._queue)
 
 
+class _RunController:
+
+    def __init__(self, looping: bool, call_run: bool, daemon: bool):
+        self._looping = looping
+        self._call_run = looping and call_run
+        self._daemon = daemon
+        self._daemon_attempts = 3
+
+    def check_uptime(self, uptime: int):
+        if not self._daemon:
+            return
+        if uptime < 10000:
+            self._daemon_attempts -= 1
+            if self._daemon_attempts <= 0:
+                self._daemon = False
+        else:
+            self._daemon_attempts = 3
+
+    def looping(self) -> bool:
+        return self._looping
+
+    def call_run(self) -> bool:
+        return self._call_run
+
+    def daemon(self) -> bool:
+        return self._daemon
+
+
 class ServerStatus(msgabc.AbcSubscriber):
-    _READY = 'READY'
     UPDATED = 'ServerStatus.Updated'
     UPDATED_FILTER = msgftr.NameIs(UPDATED)
     REQUEST, RESPONSE = 'ServerStatus.Request', 'ServerStatus.Response'
@@ -164,70 +191,63 @@ class ServerStatus(msgabc.AbcSubscriber):
         super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,
                                         ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
         self._context = context
-        self._status: typing.Dict[str, typing.Any] = {'running': False, 'state': ServerStatus._READY, 'details': {}}
-        self._running_millis = 0
+        self._status = _Status(context)
 
     def handle(self, message):
-        action, updated = message.name(), False
+        action = message.name()
         if action is ServerStatus.REQUEST:
-            self._context.post(self, ServerStatus.RESPONSE, self._prep_status(), message)
-        elif action is ServerStatus.NOTIFY_RUNNING:
-            running = message.data()
-            if self._status['running'] != running:
-                self._status['running'] = running
-                if running:
-                    self._status['details'] = {}
-                    self._running_millis = util.now_millis()
-                else:
-                    self._running_millis = 0
-                updated = True
+            self._context.post(self, ServerStatus.RESPONSE, self._status.asdict(), message)
+            return None
+        data, updated = message.data(), False
+        if action is ServerStatus.NOTIFY_RUNNING:
+            updated = self._status.nofify_running(data)
         elif action is ServerStatus.NOTIFY_STATE:
-            state = message.data()
-            self._status['state'] = state
-            if state == ServerStatus._READY:
-                self._status['details'] = {}
-            updated = True
+            updated = self._status.nofify_state(data)
         elif action is ServerStatus.NOTIFY_DETAILS:
-            if isinstance(message.data(), dict):
-                self._status['details'].update(message.data())
-                updated = True
+            updated = self._status.nofify_details(data)
         if updated:
-            self._context.post(self, ServerStatus.UPDATED, self._prep_status())
+            self._context.post(self, ServerStatus.UPDATED, self._status.asdict())
         return None
 
-    def _prep_status(self) -> typing.Dict[str, typing.Any]:
-        status = self._status.copy()
-        status['details'] = self._status['details'].copy()
+
+class _Status:
+    READY = 'READY'
+
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
+        self._running, self._state = False, _Status.READY
+        self._details, self._startmillis = {}, 0
+
+    def nofify_running(self, running) -> bool:
+        if self._running == running:
+            return False
+        self._running = running
+        if running:
+            self._details = {}
+            self._startmillis = util.now_millis()
+        else:
+            self._startmillis = 0
+        return True
+
+    def nofify_state(self, state) -> bool:
+        if self._state == state:
+            return False
+        self._state = state
+        if state == _Status.READY:
+            self._details = {}
+        return True
+
+    def nofify_details(self, details) -> bool:
+        if not isinstance(details, dict):
+            return False
+        self._details.update(details)
+        return True
+
+    def asdict(self) -> typing.Dict[str, typing.Any]:
+        status = {'running': self._running, 'state': self._state, 'details': self._details.copy()}
         auto = self._context.config('auto')
         status['auto'] = auto if auto else 0
-        if self._running_millis > 0:
-            status['uptime'] = util.now_millis() - self._running_millis
+        if self._startmillis > 0:
+            status['startmillis'] = self._startmillis
+            status['uptime'] = util.now_millis() - self._startmillis
         return status
-
-
-class _RunController:
-
-    def __init__(self, looping: bool, call_run: bool, daemon: bool):
-        self._looping = looping
-        self._call_run = looping and call_run
-        self._daemon = daemon
-        self._daemon_attempts = 3
-
-    def check_uptime(self, uptime: int):
-        if not self._daemon:
-            return
-        if uptime < 10000:
-            self._daemon_attempts -= 1
-            if self._daemon_attempts <= 0:
-                self._daemon = False
-        else:
-            self._daemon_attempts = 3
-
-    def looping(self) -> bool:
-        return self._looping
-
-    def call_run(self) -> bool:
-        return self._call_run
-
-    def daemon(self) -> bool:
-        return self._daemon
