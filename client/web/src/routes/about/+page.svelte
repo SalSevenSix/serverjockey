@@ -17,7 +17,7 @@
       use Discord you will need to <a href="/guides/discord/setup">setup a discord bot</a> first.
     </p>
     <p class="has-text-weight-bold">
-      Join the ServerJockey Discord.
+      Join the ServerJockey Discord
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
@@ -30,12 +30,12 @@
       </div>
     </div>
     <p class="has-text-weight-bold">
-      If your like using this system, please consider supporting me on Ko-fi.
+      If you like using this system, please consider supporting me on Ko-fi
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
-          <figure class="image pt-2">
+          <figure class="image">
             <img src="/assets/icons/KoFi_button_black.png"
                  alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
           </figure>
@@ -43,12 +43,25 @@
       </div>
     </div>
     <p class="has-text-weight-bold">
-      ServerJockey can be found on GitHub.
+      For instructional guides and dev updates, visit the YouTube channel
+    </p>
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <a href="https://www.youtube.com/@BSALIS76" target="_blank">
+          <figure class="image background-frame pl-5 pr-5 pt-4 pb-3">
+            <img src="/assets/icons/yt_logo_rgb_light.png"
+                 alt="ServerJockey on YouTube" title="ServerJockey on YouTube" />
+          </figure>
+        </a>
+      </div>
+    </div>
+    <p class="has-text-weight-bold">
+      Install instructions and source can be found on GitHub
     </p>
     <div class="columns is-centered">
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
-          <figure class="image background-frame">
+          <figure class="image background-frame pl-1 pr-1">
             <img src="/assets/icons/GitHub_Logo.png"
                  alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>

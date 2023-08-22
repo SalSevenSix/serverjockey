@@ -26,6 +26,8 @@ exports.about = function($) {
   result += ' https://discord.gg/TEuurWAhHn\n';
   result += '**ServerJockey on Ko-fi**\n';
   result += ' <https://ko-fi.com/D1D4E4ZYZ>\n';
+  result += '**ServerJockey on YouTube**\n';
+  result += ' <https://www.youtube.com/@BSALIS76>\n';
   result += '**ServerJockey on GitHub**\n';
   result += ' <https://github.com/SalSevenSix/serverjockey>';
   $.message.channel.send(result);

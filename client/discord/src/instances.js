@@ -5,6 +5,7 @@ const logger = require('./logger.js');
 const util = require('./util.js');
 const subs = require('./subs.js');
 const servers = {
+  testserver: require('./servers/testserver.js'),
   projectzomboid: require('./servers/projectzomboid.js'),
   factorio: require('./servers/factorio.js'),
   sevendaystodie: require('./servers/sevendaystodie.js'),

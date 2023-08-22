@@ -11,6 +11,10 @@
            alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" /></a>
   </p></div>
   <div class="block i-icon-container"><p class="has-text-right">
+    <a href="https://www.youtube.com/@BSALIS76/videos" target="_blank">
+      <i class="fa-brands fa-youtube fa-xl theme-black-white" title="ServerJockey on YouTube"></i></a>
+  </p></div>
+  <div class="block i-icon-container"><p class="has-text-right">
     <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
       <i class="fa-brands fa-github fa-xl theme-black-white" title="ServerJockey on GitHub"></i></a>
   </p></div>

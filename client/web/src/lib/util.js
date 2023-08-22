@@ -40,6 +40,7 @@ export function capitalize(value) {
 }
 
 export function humanDuration(millis) {
+  if (!millis) { millis = 0; }
   let days = Math.floor(millis / 86400000);
   millis -= days * 86400000;
   let hours = Math.floor(millis / 3600000);

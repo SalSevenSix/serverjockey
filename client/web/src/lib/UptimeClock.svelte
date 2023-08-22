@@ -27,4 +27,4 @@
 </script>
 
 
-{#if uptimeNow}{humanDuration(uptimeNow)}{/if}
+{humanDuration(uptimeNow)}
