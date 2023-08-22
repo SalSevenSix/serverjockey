@@ -1,18 +1,22 @@
 <script>
-  import { getContext } from 'svelte';
-  import { capitalize } from '$lib/util';
-  import UptimeClock from '$lib/UptimeClock.svelte';
+  import { onDestroy, getContext } from 'svelte';
+  import { capitalize, humanDuration } from '$lib/util';
 
   const serverStatus = getContext('serverStatus');
   const commonKeys = ['version', 'ip', 'port'];
 
   export let stateOnly = false;
 
-  let uptimeClock;
+  let uptime = 0;
+  let uptimeClock = setInterval(function() { uptime += 10000; }, 10000);
 
-  $: if (uptimeClock && $serverStatus) {
-    uptimeClock.setUptime($serverStatus.uptime);
+  $: if ($serverStatus.uptime) {
+    uptime = $serverStatus.uptime;
   }
+
+  onDestroy(function() {
+    clearInterval(uptimeClock);
+  });
 </script>
 
 
@@ -27,7 +31,7 @@
             <i class="fa {$serverStatus.state === 'MAINTENANCE' ? 'fa-toggle-on ss-maint' : 'fa-toggle-off'} fa-lg"></i>
           {/if}
           &nbsp;{$serverStatus.state}
-          {#if $serverStatus.state === 'STARTED'}(<UptimeClock bind:this={uptimeClock} />){/if}
+          {#if $serverStatus.state === 'STARTED'}({humanDuration(uptime)}){/if}
         {:else}
           <i class="fa fa-toggle-off fa-lg"></i>&nbsp;&nbsp;...
         {/if}

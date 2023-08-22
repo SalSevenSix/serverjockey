@@ -32,7 +32,7 @@ class Server(svrabc.Server):
         r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
         r.pop()
         r.psh('players', playerstore.PlayersHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(playerstore.PlayersSubscriber.EVENT_FILTER))
+        r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
         r.pop()
         r.psh('log')
         r.put('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER))

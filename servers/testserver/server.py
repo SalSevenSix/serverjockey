@@ -11,8 +11,9 @@ from core.common import interceptors, playerstore
 _MAIN_PY = 'main.py'
 _COMMANDS = cmdutil.CommandLines({'send': '{line}'})
 _COMMANDS_HELP_TEXT = '''CONSOLE COMMANDS
-crash        players
-quit         kick {player}
+quit        players
+crash       login {player}
+            logout {player}
 '''
 
 MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
@@ -80,8 +81,9 @@ class Server(svrabc.Server):
         r.psh('logs', httpext.FileSystemHandler(self._log_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._log_dir, 'path'), 'r')
         r.pop()
-        r.psh('players', _PlayersHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(playerstore.PlayersSubscriber.EVENT_FILTER))
+        # r.psh('players', _PlayersHandler(self._context))
+        r.psh('players', playerstore.PlayersHandler(self._context))
+        r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
         r.pop()
         r.psh('console')
         r.put('help', httpext.StaticHandler(_COMMANDS_HELP_TEXT))

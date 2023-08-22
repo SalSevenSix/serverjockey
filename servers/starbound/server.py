@@ -35,7 +35,7 @@ class Server(svrabc.Server):
         r.put('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n')))
         r.pop()
         r.psh('players', playerstore.PlayersHandler(self._mailer))
-        r.put('subscribe', self._httpsubs.handler(playerstore.PlayersSubscriber.EVENT_FILTER))
+        r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
         r.pop()
         r.psh(self._httpsubs.resource(resource, 'subscriptions'))
         r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))

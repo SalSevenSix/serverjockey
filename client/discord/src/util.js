@@ -28,13 +28,24 @@ exports.commandLineToList = function(line) {
   return result;
 }
 
-exports.humanDuration = function(millis) {
-  let days = Math.floor(millis / 86400000);
-  millis -= days * 86400000;
-  let hours = Math.floor(millis / 3600000);
-  millis -= hours * 3600000;
+exports.humanDuration = function(millis, parts = 3) {
+  if (!millis) { millis = 0; }
+  let days = -1;
+  if (parts > 2) {
+    days = Math.floor(millis / 86400000);
+    millis -= days * 86400000;
+  }
+  let hours = -1;
+  if (parts > 1) {
+    hours = Math.floor(millis / 3600000);
+    millis -= hours * 3600000;
+  }
   let minutes = Math.floor(millis / 60000);
-  return days + 'd ' + hours + 'h ' + minutes + 'm';
+  let result = '';
+  if (days > -1) { result += days + 'd '; }
+  if (hours > -1) { result += hours + 'h '; }
+  result += minutes + 'm';
+  return result;
 }
 
 exports.humanFileSize = function(bytes, si=false, dp=1) {

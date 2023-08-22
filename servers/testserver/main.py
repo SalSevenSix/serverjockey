@@ -48,7 +48,11 @@ def main() -> int:
                 time.sleep(0.2)
             p('')
             p('### some more junk')
-        elif line.find('kick') != -1:
+        elif line.find('login') != -1:
+            player = line.split(' ')[-1]
+            players.append(player)
+            p('### Player {} has joined the server'.format(player))
+        elif line.find('logout') != -1:
             found = None
             for player in players:
                 if line.find(player) != -1:

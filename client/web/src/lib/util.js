@@ -39,14 +39,24 @@ export function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export function humanDuration(millis) {
+export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
-  let days = Math.floor(millis / 86400000);
-  millis -= days * 86400000;
-  let hours = Math.floor(millis / 3600000);
-  millis -= hours * 3600000;
+  let days = -1;
+  if (parts > 2) {
+    days = Math.floor(millis / 86400000);
+    millis -= days * 86400000;
+  }
+  let hours = -1;
+  if (parts > 1) {
+    hours = Math.floor(millis / 3600000);
+    millis -= hours * 3600000;
+  }
   let minutes = Math.floor(millis / 60000);
-  return days + 'd ' + hours + 'h ' + minutes + 'm';
+  let result = '';
+  if (days > -1) { result += days + 'd '; }
+  if (hours > -1) { result += hours + 'h '; }
+  result += minutes + 'm';
+  return result;
 }
 
 export function humanFileSize(bytes, si=false, dp=1) {
@@ -73,11 +83,8 @@ export function urlSafeB64encode(value) {
 
 
 export class RollingLog {
-  #lines;
 
-  constructor() {
-    this.#lines = [];
-  }
+  #lines = [];
 
   reset() {
     this.#lines = [];

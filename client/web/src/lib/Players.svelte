@@ -2,6 +2,7 @@
   import { onMount, onDestroy, getContext } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import PlayerRow from '$lib/PlayerRow.svelte';
   import Spinner from '$lib/Spinner.svelte';
 
   const instance = getContext('instance');
@@ -11,7 +12,25 @@
   let subs = new SubscriptionHelper();
   let players = [];
   let loading = true;
-  let columnCount = 1 + (hasSteamId ? 1 : 0);
+  let columnCount = 2 + (hasSteamId ? 1 : 0);
+
+  function handlePlayerEvent(data) {
+    if (data.event === 'clear') {
+      players = [];
+      return true;
+    }
+    let loginEvent = (data.event === 'login');
+    if (loginEvent || data.event === 'logout') {
+      let result = players.filter(function(value) {
+        return value.name != data.player.name;
+      });
+      if (loginEvent) {
+        result.push(data.player);
+      }
+      players = result;
+    }
+    return true;
+  }
 
   onMount(function() {
     fetch(instance.url('/players'), newGetRequest())
@@ -21,21 +40,7 @@
       })
       .then(function(json) {
         players = json;
-        subs.start(instance.url('/players/subscribe'), function(data) {
-          if (data.event === 'clear') {
-            players = [];
-            return true;
-          }
-          if (data.event === 'login' || data.event === 'logout') {
-            players = players.filter(function(value) {
-              return value.name != data.player.name;
-            });
-          }
-          if (data.event === 'login') {
-            players = [...players, data.player];
-          }
-          return true;
-        });
+        subs.start(instance.url('/players/subscribe'), handlePlayerEvent);
       })
       .catch(function(error) {
         notifyError('Failed to load Player list.');
@@ -55,8 +60,9 @@
   <table class="table">
     <thead>
       <tr>
-        <th>Player</th>
         {#if hasSteamId}<th>Steam ID</th>{/if}
+        <th>Player</th>
+        <th>Online</th>
       </tr>
     </thead>
     <tbody>
@@ -70,12 +76,7 @@
         </td></tr>
       {:else}
         {#each players as player}
-          <tr>
-            <td>{player.name}</td>
-            {#if hasSteamId}
-              <td>{(!player.hasOwnProperty('steamid')) ? 'n/a' : player.steamid ? player.steamid : 'LOGGING IN'}</td>
-            {/if}
-          </tr>
+          <PlayerRow player={player} hasSteamId={hasSteamId} />
         {/each}
       {/if}
     </tbody>

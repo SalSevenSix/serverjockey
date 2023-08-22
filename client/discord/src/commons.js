@@ -246,13 +246,26 @@ exports.players = function($) {
     let chars = line.length;
     let chunk = [line];
     let result = [];
+    let maxlength = 0;
+    let hasSteamId = false;
+    for (let i = 0; i < body.length; i++) {
+      if (body[i].name.length > maxlength) { maxlength = body[i].name.length; }
+    }
     for (let i = 0; i < body.length; i++) {
       if (body[i].hasOwnProperty('steamid')) {
         line = 'LOGGING IN       ';
+        if (!hasSteamId) {
+          maxlength += line.length + 1;
+          hasSteamId = true;
+        }
         if (body[i].steamid != null) { line = body[i].steamid; }
         line += ' ' + body[i].name;
       } else {
         line = body[i].name;
+      }
+      if (body[i].hasOwnProperty('uptime')) {
+        line = line.padEnd(maxlength + 3);
+        line += util.humanDuration(body[i].uptime, 2);
       }
       chunk.push(line);
       chars += line.length;
