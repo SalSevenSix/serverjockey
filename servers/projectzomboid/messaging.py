@@ -5,7 +5,7 @@ from core.msg import msgabc, msglog, msgftr, msgext
 from core.context import contextsvc
 from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
-from core.common import cachelock
+from core.common import cachelock, playerstore
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -34,7 +34,9 @@ SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 def initialise(context: contextsvc.Context):
     context.register(prcext.ServerStateSubscriber(context))
     context.register(svrext.MaintenanceStateSubscriber(context, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
+    context.register(playerstore.PlayersSubscriber(context))
     context.register(_ServerDetailsSubscriber(context))
+    context.register(_PlayerEventSubscriber(context))
     context.register(_RestartSubscriber(context))
     context.register(_ModUpdatedSubscriber(context))
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
@@ -82,6 +84,39 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT)
             value = util.right_chop_and_strip(value, 'port for connections')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': int(value)})
+            return None
+        return None
+
+
+class _PlayerEventSubscriber(msgabc.AbcSubscriber):
+    # TODO remove KEY from names
+    LOGIN_KEY = '> ConnectionManager: [fully-connected]'
+    LOGOUT_KEY = '> Disconnected player'
+    LOGIN_KEY_FILTER = msgftr.DataStrContains(LOGIN_KEY)
+    LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.And(
+            CONSOLE_OUTPUT_FILTER,
+            msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER,
+                      _PlayerEventSubscriber.LOGOUT_KEY_FILTER)))
+        self._mailer = mailer
+
+    def handle(self, message):
+        if _PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
+            steamid = str(message.data())
+            steamid = util.left_chop_and_strip(steamid, 'steam-id=')
+            steamid = util.right_chop_and_strip(steamid, 'access=')
+            name = str(message.data())
+            name = util.left_chop_and_strip(name, 'username="')
+            name = util.right_chop_and_strip(name, '" connection-type=')
+            playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
+            return None
+        if _PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
+            line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT_KEY)
+            parts = line.split(' ')
+            steamid, name = parts[-1], ' '.join(parts[:-1])
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
             return None
         return None
 

@@ -1,10 +1,11 @@
+import typing
+from collections.abc import Iterable
 # ALLOW core.* projectzomboid.messaging projectzomboid.playerstore
 from core.util import cmdutil, util
-from core.msg import msgabc
-from core.http import httpabc, httpcnt, httprsc
+from core.msg import msgabc, msgext, msgftr
+from core.http import httpabc, httprsc
 from core.proc import proch, prcext
-from core.common import interceptors
-from servers.projectzomboid import playerstore as pls
+from core.common import interceptors, playerstore
 
 _OPTIONS_RELOAD = cmdutil.CommandLines({'reload': 'reloadoptions'})
 _WORLD = cmdutil.CommandLines({
@@ -50,7 +51,6 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.psh('x{option}')
     r.put('{command}', _OptionCommandHandler(mailer), 's')
     r.pop().pop().pop()
-    r.put('steamids', _SteamIdsHandler(mailer))
     r.psh('players', _PlayersHandler(mailer))
     r.psh('x{player}')
     r.put('{command}', prcext.ConsoleCommandHandler(mailer, _PLAYER), 's')
@@ -62,26 +62,25 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.put('{command}', prcext.ConsoleCommandHandler(mailer, _BANLIST), 's')
 
 
-class _SteamIdsHandler(httpabc.GetHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
-            return httpabc.ResponseBody.UNAUTHORISED
-        result = await pls.PlayerStoreService.get(self._mailer, self)
-        return result.asdict()
-
-
 class _PlayersHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        players = await pls.PlayerLoader(self._mailer, self).all()
-        return [o.asdict() for o in players]
+        response = await proch.PipeInLineService.request(
+            self._mailer, self, 'players', msgext.MultiCatcher(
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
+                stop_filter=msgftr.DataEquals(''), include_stop=False,
+                timeout=10.0))
+        players = []
+        if response is None or not isinstance(response, Iterable):
+            return players
+        for line in [m.data() for m in response]:
+            if line.startswith('-'):
+                players.append(playerstore.Player(line[1:], ''))
+        return await playerstore.PlayersSubscriber.get(self._mailer, self, players)
 
 
 class _OptionsHandler(httpabc.GetHandler):
@@ -90,7 +89,7 @@ class _OptionsHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        options = await pls.OptionLoader(self._mailer, self).all()
+        options = await _OptionLoader(self._mailer, self).all()
         return [o.asdict() for o in options]
 
 
@@ -101,10 +100,51 @@ class _OptionCommandHandler(httpabc.PostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        if not await pls.OptionLoader(self._mailer, self).get(util.get('option', data)):
+        if not await _OptionLoader(self._mailer, self).get(util.get('option', data)):
             return httpabc.ResponseBody.NOT_FOUND
         cmdline = _OptionCommandHandler.COMMANDS.get(data)
         if not cmdline or util.get('value', data) is None:
             return httpabc.ResponseBody.BAD_REQUEST
         await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class _Option:
+
+    def __init__(self, option: str, value: str):
+        self._data = {'option': option, 'value': value}
+
+    def option(self) -> str:
+        return self._data['option']
+
+    def asdict(self) -> dict:
+        return self._data.copy()
+
+
+class _OptionLoader:
+
+    def __init__(self, mailer: msgabc.MulticastMailer, source: typing.Any):
+        self._mailer = mailer
+        self._source = source
+
+    async def all(self) -> typing.Collection[_Option]:
+        response = await proch.PipeInLineService.request(
+            self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
+                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                start_filter=msgftr.DataStrContains('List of Server Options:'), include_start=False,
+                stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True,
+                timeout=10.0))
+        options = []
+        if response is None or not isinstance(response, Iterable):
+            return options
+        for line in [m.data() for m in response]:
+            if line.startswith('* '):
+                option, value = line[2:].split('=')
+                options.append(_Option(option, value))
+        return options
+
+    async def get(self, option: str) -> typing.Optional[_Option]:
+        if option is None:
+            return None
+        options = [o for o in await self.all() if o.option() == option]
+        return util.single(options)

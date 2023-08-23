@@ -6,12 +6,18 @@ from core.msg import msgabc, msgftr, msgext, msgtrf
 from core.http import httpabc
 from core.system import svrsvc
 
-# TODO add a feature to inject an interface to fetch real list of players
-
-
 _EVENT = 'PlayersSubscriber.Event'
 EVENT_FILTER = msgftr.NameIs(_EVENT)
 EVENT_TRF = msgtrf.DataAsDict()
+
+
+class PlayersHandler(httpabc.GetHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+
+    async def handle_get(self, resource, data):
+        return await PlayersSubscriber.get(self._mailer, self)
 
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
@@ -28,21 +34,22 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         self._players = _Players()
 
     @staticmethod
-    def event_login(mailer: msgabc.Mailer, source: typing.Any, name: str):
-        mailer.post(source, _EVENT, _EventLogin(name))
+    def event_login(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):
+        mailer.post(source, _EVENT, _EventLogin(name, steamid))
 
     @staticmethod
-    def event_logout(mailer: msgabc.Mailer, source: typing.Any, name: str):
-        mailer.post(source, _EVENT, _EventLogout(name))
+    def event_logout(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):
+        mailer.post(source, _EVENT, _EventLogout(name, steamid))
 
     @staticmethod
     def event_chat(mailer: msgabc.Mailer, source: typing.Any, name: str, text: str):
         mailer.post(source, _EVENT, _EventChat(name, text))
 
     @staticmethod
-    async def get(mailer: msgabc.MulticastMailer, source: typing.Any):
+    async def get(mailer: msgabc.MulticastMailer, source: typing.Any,
+                  canonical: typing.Optional[typing.Collection[Player]] = None):
         messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, PlayersSubscriber.GET)
+        response = await messenger.request(source, PlayersSubscriber.GET, canonical)
         return response.data()
 
     def handle(self, message):
@@ -59,23 +66,45 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
             self._mailer.post(self, _EVENT, _EventClear())
             return None
         if PlayersSubscriber.GET_FILTER.accepts(message):
-            self._mailer.post(self, PlayersSubscriber.GET_RESPONSE, self._players.asdict(), message)
+            data = self._players.get(message.data())
+            self._mailer.post(self, PlayersSubscriber.GET_RESPONSE, data, message)
             return None
         return None
 
 
-class PlayersHandler(httpabc.GetHandler):
+class Player:
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
+    def __init__(self, name: str, steamid: str | None = None, startmillis: int = -1):
+        self._name = name
+        self._steamid = steamid
+        self._startmillis = startmillis
 
-    async def handle_get(self, resource, data):
-        return await PlayersSubscriber.get(self._mailer, self)
+    def name(self) -> str:
+        return self._name
+
+    def is_same(self, player: Player) -> bool:
+        return self._name == player._name
+
+    def update(self, player: Player):
+        if self._steamid is None or (self._steamid == '' and player._steamid):
+            self._steamid = player._steamid
+        if self._startmillis == -1:
+            self._startmillis = player._startmillis
+
+    def asdict(self) -> dict:
+        result = {'name': self._name, 'steamid': self._steamid}
+        if self._startmillis > -1:
+            result['startmillis'] = self._startmillis
+            result['uptime'] = util.now_millis() - self._startmillis
+        return result
 
 
 class _Players:
 
     def __init__(self):
+        self._players = []
+
+    def clear(self):
         self._players = []
 
     def login_or_logout(self, event):
@@ -87,39 +116,37 @@ class _Players:
             players.append(player)
         self._players = players
 
-    def clear(self):
-        self._players = []
-
-    def asdict(self) -> tuple:
+    def get(self, canonical: typing.Optional[typing.Collection[Player]]) -> tuple:
         players = []
-        for current in self._players:
-            players.append(current.asdict())
+        if canonical is None:
+            for current in self._players:
+                players.append(current.asdict())
+            return tuple(players)
+        if len(canonical) == 0:
+            return tuple(players)
+        keyed = self._keyed()
+        for current in canonical:
+            if current.name() in keyed:
+                stored = keyed[current.name()]
+                stored.update(current)
+                players.append(stored.asdict())
+            else:
+                players.append(current.asdict())
         return tuple(players)
 
-
-class _Player:
-
-    def __init__(self, name: str, startmillis: int = -1):
-        self._name = name
-        self._startmillis = startmillis
-
-    def is_same(self, player: _Player) -> bool:
-        return self._name == player._name
-
-    def asdict(self) -> dict:
-        result = {'name': self._name}
-        if self._startmillis > -1:
-            result['startmillis'] = self._startmillis
-            result['uptime'] = util.now_millis() - self._startmillis
+    def _keyed(self):
+        result = {}
+        for current in self._players:
+            result[current.name()] = current
         return result
 
 
 class _EventLogin:
 
-    def __init__(self, name: str):
-        self._player = _Player(name, util.now_millis())
+    def __init__(self, name: str, steamid: str | None = None):
+        self._player = Player(name, steamid, util.now_millis())
 
-    def player(self) -> _Player:
+    def player(self) -> Player:
         return self._player
 
     def asdict(self) -> dict:
@@ -129,7 +156,7 @@ class _EventLogin:
 class _EventChat:
 
     def __init__(self, name: str, text: str):
-        self._player = _Player(name)
+        self._player = Player(name)
         self._text = text
 
     def asdict(self) -> dict:
@@ -138,10 +165,10 @@ class _EventChat:
 
 class _EventLogout:
 
-    def __init__(self, name: str):
-        self._player = _Player(name)
+    def __init__(self, name: str, steamid: str | None = None):
+        self._player = Player(name, steamid)
 
-    def player(self) -> _Player:
+    def player(self) -> Player:
         return self._player
 
     def asdict(self) -> dict:
@@ -150,5 +177,6 @@ class _EventLogout:
 
 class _EventClear:
 
+    # noinspection PyMethodMayBeStatic
     def asdict(self) -> dict:
         return {'event': 'clear'}

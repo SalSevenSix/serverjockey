@@ -242,37 +242,35 @@ exports.say = function($) {
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
+    const nosteamid = 'CONNECTED         ';
     let line = $.instance + ' players online: ' + body.length;
     let chars = line.length;
     let chunk = [line];
     let result = [];
     let maxlength = 0;
-    let hasSteamId = false;
-    for (let i = 0; i < body.length; i++) {
-      if (body[i].name.length > maxlength) { maxlength = body[i].name.length; }
-    }
-    for (let i = 0; i < body.length; i++) {
-      if (body[i].hasOwnProperty('steamid')) {
-        line = 'CONNECTED        ';
-        if (!hasSteamId) {
-          maxlength += line.length + 1;
-          hasSteamId = true;
+    if (body.length > 0) {
+      for (let i = 0; i < body.length; i++) {
+        if (body[i].name.length > maxlength) { maxlength = body[i].name.length; }
+      }
+      if (body[0].steamid != null) { maxlength += nosteamid.length; }
+      for (let i = 0; i < body.length; i++) {
+        if (body[i].steamid == null) {
+          line = body[i].name;
+        } else {
+          line = (body[i].steamid === '') ? nosteamid : body[i].steamid + ' ';
+          line += body[i].name;
         }
-        if (body[i].steamid != null) { line = body[i].steamid; }
-        line += ' ' + body[i].name;
-      } else {
-        line = body[i].name;
-      }
-      if (body[i].hasOwnProperty('uptime')) {
-        line = line.padEnd(maxlength + 3);
-        line += util.humanDuration(body[i].uptime, 2);
-      }
-      chunk.push(line);
-      chars += line.length;
-      if (chars > 1600) {
-        result.push('```\n' + chunk.join('\n') + '\n```');
-        chars = 0;
-        chunk = [];
+        if (body[i].hasOwnProperty('uptime')) {
+          line = line.padEnd(maxlength + 3);
+          line += util.humanDuration(body[i].uptime, 2);
+        }
+        chunk.push(line);
+        chars += line.length;
+        if (chars > 1600) {
+          result.push('```\n' + chunk.join('\n') + '\n```');
+          chars = 0;
+          chunk = [];
+        }
       }
     }
     if (chunk.length > 0) {

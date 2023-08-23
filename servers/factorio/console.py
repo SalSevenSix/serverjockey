@@ -5,7 +5,7 @@ from core.http import httpabc, httprsc, httpext
 from core.common import rconsvc, interceptors
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
+def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(rconsvc.RconService(mailer, 'RCON> '))
 
 

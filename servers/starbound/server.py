@@ -17,8 +17,8 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
+        con.initialise(self._mailer)
         await msg.initialise(self._mailer)
-        await con.initialise(self._mailer)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):

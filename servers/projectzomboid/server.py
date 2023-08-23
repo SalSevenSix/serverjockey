@@ -1,12 +1,11 @@
 # ALLOW core.* projectzomboid.*
 from core.util import aggtrf
-from core.msg import msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
-from core.common import interceptors
-from servers.projectzomboid import deployment as dep, playerstore as pls, console as con, messaging as msg
+from core.common import interceptors, playerstore
+from servers.projectzomboid import deployment as dep, console as con, messaging as msg
 
 
 class Server(svrabc.Server):
@@ -17,11 +16,9 @@ class Server(svrabc.Server):
         self._stopper = prcext.ServerProcessStopper(context, 20.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
         self._deployment = dep.Deployment(context)
-        self._playerstore = pls.PlayerStoreService(context)
 
     async def initialise(self):
         msg.initialise(self._context)
-        self._playerstore.initialise()
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
@@ -34,7 +31,7 @@ class Server(svrabc.Server):
         r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
         r.pop()
         r.psh('players')
-        r.put('subscribe', self._httpsubs.handler(pls.PLAYER_EVENT_FILTER, msgtrf.DataAsDict()))
+        r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
         r.pop()
         r.psh('log')
         r.put('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER))

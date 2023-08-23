@@ -232,10 +232,11 @@ class CommandProcessor:
             line += ' '
             line += str(player['uptime']) if 'uptime' in player else '0'
             line += ' '
-            if 'steamid' in player:
-                line += player['steamid'] if player['steamid'] else 'CONNECTED'
+            steamid = player['steamid'] if 'steamid' in player else None
+            if steamid:
+                line += steamid
             else:
-                line += 'NONE'
+                line += 'NONE' if steamid is None else 'CONNECTED'
             line += ' ' + player['name']
             logging.info(line)
         return True
