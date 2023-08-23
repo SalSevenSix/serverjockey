@@ -253,7 +253,7 @@ exports.players = function($) {
     }
     for (let i = 0; i < body.length; i++) {
       if (body[i].hasOwnProperty('steamid')) {
-        line = 'LOGGING IN       ';
+        line = 'CONNECTED        ';
         if (!hasSteamId) {
           maxlength += line.length + 1;
           hasSteamId = true;

@@ -9,6 +9,7 @@
   let subs = new SubscriptionHelper();
   let instances = [];
   let loading = true;
+  let deleting = false;
 
   function viewInstance(selected) {
     goto('/servers/' + selected.module + '?i=' + selected.identity);
@@ -17,9 +18,11 @@
   function deleteInstance(selected) {
     let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
     confirmDangerModal(message, selected.identity, function() {
+      deleting = true;
       fetch(selected.url + '/server/delete', newPostRequest())
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
+        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); })
+        .finally(function() { deleting = false; });
     });
   }
 
@@ -84,10 +87,10 @@
             <td class="word-break-all">{instance.identity}</td>
             <td>{instance.module}</td>
             <td>
-              <button title="View" class="button is-primary mb-1"
+              <button title="View" class="button is-primary mb-1" disabled={deleting}
                       on:click={function() { viewInstance(instance); }}>
                 <i class="fa fa-folder-open fa-lg"></i></button>
-              <button title="Delete" class="button is-danger ml-1"
+              <button title="Delete" class="button is-danger ml-1" disabled={deleting}
                       on:click={function() { deleteInstance(instance); }}>
                 <i class="fa fa-trash-can fa-lg"></i></button>
             </td>

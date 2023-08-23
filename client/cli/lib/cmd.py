@@ -225,11 +225,18 @@ class CommandProcessor:
 
     def _players(self) -> bool:
         result: list = self._connection.get(self._instance_path('/players'))
-        logging.info(self._out + 'Players online: ' + str(len(result)))
+        # logging.info(self._out + 'Players online: ' + str(len(result)))
         for player in result:
-            line = self._out + player['name']
-            if 'steamid' in player and player['steamid']:
-                line += ' [' + player['steamid'] + ']'
+            line = self._out
+            line += str(player['startmillis']) if 'startmillis' in player else '0'
+            line += ' '
+            line += str(player['uptime']) if 'uptime' in player else '0'
+            line += ' '
+            if 'steamid' in player:
+                line += player['steamid'] if player['steamid'] else 'CONNECTED'
+            else:
+                line += 'NONE'
+            line += ' ' + player['name']
             logging.info(line)
         return True
 

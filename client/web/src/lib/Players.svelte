@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
+  import { humanDuration } from '$lib/util';
   import { notifyError } from '$lib/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
-  import PlayerRow from '$lib/PlayerRow.svelte';
   import Spinner from '$lib/Spinner.svelte';
 
   const instance = getContext('instance');
@@ -13,6 +13,20 @@
   let players = [];
   let loading = true;
   let columnCount = 2 + (hasSteamId ? 1 : 0);
+
+  let uptimeClock = setInterval(function() {
+    let currentPlayers = players;
+    let updatedPlayers = [];
+    currentPlayers.forEach(function(player) {
+      if (player.hasOwnProperty('uptime')) {
+        player.uptime += 10000;
+      }
+      updatedPlayers.push(player);
+    });
+    if (players === currentPlayers) {
+      players = updatedPlayers;
+    }
+  }, 10000);
 
   function handlePlayerEvent(data) {
     if (data.event === 'clear') {
@@ -52,6 +66,7 @@
 
   onDestroy(function() {
     subs.stop();
+    clearInterval(uptimeClock);
   });
 </script>
 
@@ -76,7 +91,13 @@
         </td></tr>
       {:else}
         {#each players as player}
-          <PlayerRow player={player} hasSteamId={hasSteamId} />
+          <tr>
+            {#if hasSteamId}
+              <td>{player.steamid ? player.steamid : 'CONNECTED'}</td>
+            {/if}
+            <td>{player.name}</td>
+            <td>{player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
+          </tr>
         {/each}
       {/if}
     </tbody>
