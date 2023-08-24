@@ -1,6 +1,9 @@
 import sys
+import os
+import signal
 import threading
 import time
+import json
 from random import randint
 # ALLOW NONE
 
@@ -9,30 +12,58 @@ def p(line):
     print(line, flush=True)
 
 
-def ingametime():
-    while True:
-        p('### Ingametime ' + repr(int(time.time() * 1000.0) + 1))
-        time.sleep(80)
+class InGameTime:
+    def __init__(self, interval_seconds: float):
+        self._interval_seconds = interval_seconds
+
+    def run(self):
+        while True:
+            now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            p('### Ingametime ' + now)
+            time.sleep(self._interval_seconds)
+
+
+class CrashAfterDelay:
+    def __init__(self, delay_seconds: float):
+        self._delay_seconds = delay_seconds
+
+    def run(self):
+        if self._delay_seconds > 0:
+            time.sleep(self._delay_seconds)
+            p('### FATAL error, shutdown')
+            time.sleep(0.1)
+            os.kill(os.getpid(), signal.SIGTERM)
+
+
+def parse_config() -> dict:
+    p('Launch args...')
+    config = {
+        'start_speed_modifier': int(sys.argv[1]),
+        'crash_on_start_seconds': float(sys.argv[2]),
+        'ingametime_interval_seconds': float(sys.argv[3])
+    }
+    p(json.dumps(config))
+    return config
 
 
 def main() -> int:
     p('### Initialising')
+    config = parse_config()
+    start_speed_modifier = config['start_speed_modifier']
+    threading.Thread(target=CrashAfterDelay(config['crash_on_start_seconds']).run, daemon=False).start()
     p('1599635857306 versionNumber=1.8.42')
-    time.sleep(0.5)
-    p('Launch args...')
-    for i, arg in enumerate(sys.argv[1:]):
-        p('  #' + str(i) + ' ' + str(arg))
+    time.sleep(0.5 * start_speed_modifier)
     p('public ip: 101.201.301.404')
-    time.sleep(0.5)
+    time.sleep(0.5 * start_speed_modifier)
     p('server is listening on port: 27001')
     p('Server Steam ID 90138653263221765')
     p('### *** SERVER STARTED ***')
     players = ['MrGoober', 'StabMasterArson', 'YouMadNow']
     for player in players:
-        time.sleep(0.2)
+        time.sleep(0.2 * start_speed_modifier)
         p('### Player {} has joined the server'.format(player))
         p("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
-    threading.Thread(target=ingametime, daemon=True).start()
+    threading.Thread(target=InGameTime(config['ingametime_interval_seconds']).run, daemon=True).start()
 
     running = True
     while running:

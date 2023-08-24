@@ -117,11 +117,11 @@ class Deployment:
             await io.create_symlink(save_dir, self._save_dir)
 
     async def _map_ports(self):
-        port_key, port = 'Port', 27015
+        port_key, port = 'port', 27015
         if await io.file_exists(self._commands_file):
             commands = await io.read_file(self._commands_file)
             for line in commands.split('\n'):
-                if line.find(port_key) > -1:
-                    port = int(util.left_chop_and_strip(line, port_key))
+                if line and line.lower().startswith(port_key):
+                    port = int(util.left_chop_and_strip(line.lower(), port_key))
         portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Unturned query')
         portmapper.map_port(self._mailer, self, port + 1, portmapper.UDP, 'Unturned server')

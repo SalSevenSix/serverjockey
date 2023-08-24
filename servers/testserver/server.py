@@ -22,7 +22,9 @@ READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILT
 
 def _default_config():
     return {
-        'crash-on-start-seconds': 0
+        'start_speed_modifier': 1,
+        'crash_on_start_seconds': 0.0,
+        'ingametime_interval_seconds': 80.0
     }
 
 
@@ -112,12 +114,13 @@ class Server(svrabc.Server):
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('Testserver game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._config_file))
-        await proch.ServerProcess(self._context, self._python) \
-            .append_arg(self._executable) \
-            .append_arg(cmdargs['crash-on-start-seconds']) \
-            .use_pipeinsvc(self._pipeinsvc) \
-            .wait_for_started(Server.STARTED_FILTER, 10) \
-            .run()
+        process = proch.ServerProcess(self._context, self._python)
+        process.use_pipeinsvc(self._pipeinsvc)
+        process.wait_for_started(Server.STARTED_FILTER, 10)
+        process.append_arg(self._executable)
+        for key in cmdargs.keys():
+            process.append_arg(cmdargs[key])
+        await process.run()
 
     async def stop(self):
         await self._stopper.stop()

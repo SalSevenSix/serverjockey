@@ -7,12 +7,8 @@
 
   export let stateOnly = false;
 
-  let uptime = 0;
+  $: uptime = $serverStatus.uptime ? $serverStatus.uptime : 0;
   let uptimeClock = setInterval(function() { uptime += 10000; }, 10000);
-
-  $: if ($serverStatus.uptime) {
-    uptime = $serverStatus.uptime;
-  }
 
   onDestroy(function() {
     clearInterval(uptimeClock);
