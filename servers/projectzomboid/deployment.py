@@ -95,6 +95,14 @@ class Deployment:
             cachelock.cache_path(self._mailer, self, self._save_dir)
         return proch.ServerProcess(self._mailer, executable).append_arg('-cachedir=' + self._world_dir)
 
+    # async def _setup_cache_lock(self):
+    #     cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+    #     if not util.get('cache_map_files', cmdargs, False):
+    #         return
+    #     world_dir = self._save_dir + '/Multiplayer/' + _WORLD + '/'
+    #     paths = (world_dir + 'map_*.bin', world_dir + 'chunkdata_*.bin', world_dir + 'zpop_*.bin')
+    #     cachelock.cache_path(self._mailer, self, paths)
+
     async def build_world(self):
         await io.create_directory(self._backups_dir)
         await io.create_directory(self._world_dir)

@@ -4,27 +4,22 @@ from core.util import util, pkg
 from core.context import contextsvc
 from core.system import svrabc
 
-_TESTSERVER_MODULE = 'testserver'
-_SERVERLINK_MODULE = 'serverlink'
-_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
+_PUBLIC_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound')
+_ALL_MODULES = _PUBLIC_MODULES + ('serverlink', 'testserver')
 
 
-class ModulesService:
+class Modules:
 
-    def __init__(self, context: contextsvc.Context):
+    def __init__(self):
         self._cache = {}
-        modules = list(_MODULES)
-        if context.is_debug():
-            modules.append(_TESTSERVER_MODULE)
-        self._public_modules = tuple(modules)
-        modules.append(_SERVERLINK_MODULE)
-        self._all_modules = tuple(modules)
 
-    def names(self) -> tuple:
-        return self._public_modules
+    @staticmethod
+    def names() -> tuple:
+        return _PUBLIC_MODULES
 
-    def valid(self, module_name: str) -> bool:
-        return module_name and module_name in self._all_modules
+    @staticmethod
+    def valid(module_name: str) -> bool:
+        return module_name and module_name in _ALL_MODULES
 
     async def create_server(self, context: contextsvc.Context) -> svrabc.Server:
         module = await self._load(context.config('module'))
@@ -34,7 +29,7 @@ class ModulesService:
         raise Exception('Server class implementation not found in module: ' + repr(module))
 
     async def _load(self, module_name: str) -> types.ModuleType:
-        assert self.valid(module_name)
+        assert Modules.valid(module_name)
         module = util.get(module_name, self._cache)
         if not module:
             module = await pkg.import_module('servers.' + module_name + '.server')

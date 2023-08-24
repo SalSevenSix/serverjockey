@@ -17,7 +17,7 @@ class SystemService:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._modules = svrmodules.ModulesService(context)
+        self._modules = svrmodules.Modules()
         self._home_dir = context.config('home')
         self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
         self._resource = self._build_resources(context)
@@ -29,7 +29,7 @@ class SystemService:
         resource = httprsc.WebResource()
         r = httprsc.ResourceBuilder(resource)
         r.put('login', httpext.LoginHandler(context.config('secret')))
-        r.put('modules', httpext.StaticHandler(self._modules.names()))
+        r.put('modules', httpext.StaticHandler(svrmodules.Modules.names()))
         r.psh('system')
         r.put('info', _SystemInfoHandler())
         r.put('shutdown', _ShutdownHandler(self))
@@ -81,9 +81,6 @@ class SystemService:
             await svrsvc.ServerService.shutdown(subcontext, self)
             await self._context.destroy_subcontext(subcontext)
 
-    def valid_module(self, module_name: str | None) -> bool:
-        return self._modules.valid(module_name)
-
     def instances_info(self, baseurl: str) -> dict:
         result = {}
         for child in self._instances.children():
@@ -112,7 +109,7 @@ class SystemService:
 
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
         assert util.get('identity', configuration)
-        assert self.valid_module(util.get('module', configuration))
+        assert svrmodules.Modules.valid(util.get('module', configuration))
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
@@ -210,7 +207,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
-        if not identity or not self._system.valid_module(module):
+        if not identity or not svrmodules.Modules.valid(module):
             return httpabc.ResponseBody.BAD_REQUEST
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):

@@ -6,6 +6,7 @@ from core.util import util, io, tasks
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 from core.system import svrsvc
+from core.proc import proch
 
 NOTIFICATION = 'cachelock.Notification'
 FILTER_NOTIFICATIONS = msgftr.NameIs(NOTIFICATION)
@@ -31,6 +32,7 @@ class CachLockService(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             msgftr.IsStop(),
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
+            proch.ServerProcess.FILTER_STATE_STARTED,
             CachLockService.CACH_PATH_FILTER))
         self._mailer, self._executable = mailer, executable
         self._caches = []
@@ -41,11 +43,17 @@ class CachLockService(msgabc.AbcSubscriber):
                 cache_lock.stop()
             self._caches = []
             return None
+        if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+            caches = []
+            for cache_lock in self._caches:
+                if await cache_lock.start():
+                    caches.append(cache_lock)
+            self._caches = caches
+            return None
         if CachLockService.CACH_PATH_FILTER.accepts(message):
             path = util.get('path', message.data())
             cache_lock = _CacheLock(self._mailer, self._executable, path)
-            if await cache_lock.start():
-                self._caches.append(cache_lock)
+            self._caches.append(cache_lock)
             return None
         return None
 
@@ -60,24 +68,27 @@ class _CacheLock:
     async def start(self) -> bool:
         # noinspection PyBroadException
         try:
-            self._mailer.post(self, NOTIFICATION, 'CacheLock LOCKING ' + self._path)
             self._process = await asyncio.create_subprocess_exec(self._executable, '-tlq', self._path)
             self._task = tasks.task_start(self._run(), 'CacheLock(' + self._path + ')')
             return True
         except Exception as e:
-            logging.warning('Error starting vmtouch ' + repr(e))
+            e_repr = repr(e)
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] EXCEPTION starting vmtouch ' + e_repr)
+            logging.warning('Error starting vmtouch ' + e_repr)
         return False
 
     async def _run(self):
         # noinspection PyBroadException
         try:
-            self._mailer.post(self, NOTIFICATION, 'CacheLock LOCKED ' + self._path)
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] LOCKED ' + self._path)
             rc = await self._process.wait()
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] UNLOCKED ' + self._path)
             logging.debug('vmtouch exit code: ' + str(rc))
         except Exception as e:
-            logging.warning('Error waiting vmtouch ' + repr(e))
+            e_repr = repr(e)
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] EXCEPTION ' + self._path + ' ' + e_repr)
+            logging.warning('Error waiting vmtouch ' + e_repr)
         finally:
-            self._mailer.post(self, NOTIFICATION, 'CacheLock UNLOCKED ' + self._path)
             tasks.task_end(self._task)
 
     def stop(self):
