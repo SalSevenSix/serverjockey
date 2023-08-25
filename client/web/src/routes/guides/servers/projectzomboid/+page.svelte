@@ -165,8 +165,8 @@ UPnP=false</pre>
   </p>
   <p>
     For this feature to work, you need <span class="is-family-monospace">vmtouch</span> installed on the machine.
-    The VirtualBox and Docker distributions of ServerJockey already have it pre-installed.
-    For the DEB, RPM and Source distributions, use the appropriate package manager to install;
+    <span class="is-italic">The VirtualBox and Docker distributions of ServerJockey already have this
+    pre-installed.</span> For the DEB, RPM and Source distributions, use the appropriate package manager to install;
     e.g.
   </p>
   <pre class="pre is-thinner">sudo apt install vmtouch</pre>
@@ -178,6 +178,14 @@ UPnP=false</pre>
   <pre class="pre is-thinner"
 >&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
 &quot;cache_map_files&quot;: true</pre>
+  <p>
+    Finally, the OS has a limit on how much memory can be locked. This has been raised to
+    <span class="has-text-weight-bold">4Gb</span> in all distributions except Source.<br />
+    For DEB, RPM and VirtualBox the higher limit is set in the systemd service file;<br />
+    <span class="is-family-monospace pl-2">/etc/systemd/system/serverjockey.service</span><br />
+    For Docker and Pterodactyl the higher limit is set for the user called container in;<br />
+    <span class="is-family-monospace pl-2">/etc/security/limits.conf</span>
+  </p>
 </div>
 
 <div class="content pt-4" id="dockerPtero">

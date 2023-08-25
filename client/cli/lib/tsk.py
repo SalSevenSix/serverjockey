@@ -5,7 +5,6 @@ from http import client
 # ALLOW lib.util
 from . import util
 
-
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
 
@@ -128,7 +127,9 @@ class TaskProcessor:
             connection.close()
 
     def _service(self, argument: str):
-        args = argument + ' ' + ('serverjockey' if self._user == _DEFAULT_USER else self._user)
+        args = argument if argument else 'status'
+        args += ' '
+        args += 'serverjockey' if self._user == _DEFAULT_USER else self._user
         script = _systemctl_script().strip().format(args=args)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
@@ -150,6 +151,7 @@ ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/{user}" --logfile{args}
 KillMode=mixed
 TimeoutStopSec=90
 OOMScoreAdjust=-800
+LimitMEMLOCK=4294967296
 
 [Install]
 WantedBy=multi-user.target

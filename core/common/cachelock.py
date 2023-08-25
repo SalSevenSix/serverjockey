@@ -8,6 +8,12 @@ from core.context import contextsvc
 from core.system import svrsvc
 from core.proc import proch
 
+# vmtouch & memlock
+#  https://github.com/hoytech/vmtouch/issues/18
+#  https://unix.stackexchange.com/questions/366352/etc-security-limits-conf-not-applied
+#  https://www.thegeekdiary.com/how-to-set-resource-limits-for-a-process-with-systemd-in-centos-rhel-7-and-8/
+
+
 NOTIFICATION = 'cachelock.Notification'
 FILTER_NOTIFICATIONS = msgftr.NameIs(NOTIFICATION)
 
@@ -20,40 +26,37 @@ async def initialise(context: contextsvc.Context):
         logging.info('vmtouch not installed or not in path')
 
 
-def cache_path(mailer: msgabc.Mailer, source: typing.Any, path: str):
-    mailer.post(source, CachLockService.CACH_PATH, {'path': path})
+def set_path(mailer: msgabc.Mailer, source: typing.Any, path: str):
+    mailer.post(source, CachLockService.CACHE_PATH, path)
 
 
 class CachLockService(msgabc.AbcSubscriber):
-    CACH_PATH = 'CachLockService.CachePath'
-    CACH_PATH_FILTER = msgftr.NameIs(CACH_PATH)
+    CACHE_PATH = 'CachLockService.CachePath'
+    CACHE_PATH_FILTER = msgftr.NameIs(CACHE_PATH)
 
     def __init__(self, mailer: msgabc.Mailer, executable: str):
         super().__init__(msgftr.Or(
             msgftr.IsStop(),
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
             proch.ServerProcess.FILTER_STATE_STARTED,
-            CachLockService.CACH_PATH_FILTER))
+            CachLockService.CACHE_PATH_FILTER))
         self._mailer, self._executable = mailer, executable
-        self._caches = []
+        self._cachelock = None
 
     async def handle(self, message):
         if message is msgabc.STOP or svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
-            for cache_lock in self._caches:
-                cache_lock.stop()
-            self._caches = []
+            if self._cachelock:
+                self._cachelock.stop()
+            self._cachelock = None
             return None
         if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
-            caches = []
-            for cache_lock in self._caches:
-                if await cache_lock.start():
-                    caches.append(cache_lock)
-            self._caches = caches
+            if self._cachelock and not await self._cachelock.start():
+                self._cachelock = None
             return None
-        if CachLockService.CACH_PATH_FILTER.accepts(message):
-            path = util.get('path', message.data())
-            cache_lock = _CacheLock(self._mailer, self._executable, path)
-            self._caches.append(cache_lock)
+        if CachLockService.CACHE_PATH_FILTER.accepts(message):
+            if self._cachelock:
+                self._cachelock.stop()
+            self._cachelock = _CacheLock(self._mailer, self._executable, message.data())
             return None
         return None
 
@@ -66,6 +69,8 @@ class _CacheLock:
         self._process: asyncio.subprocess.Process | None = None
 
     async def start(self) -> bool:
+        if self._process:
+            return True
         # noinspection PyBroadException
         try:
             self._process = await asyncio.create_subprocess_exec(self._executable, '-tlq', self._path)
@@ -73,16 +78,16 @@ class _CacheLock:
             return True
         except Exception as e:
             e_repr = repr(e)
-            self._mailer.post(self, NOTIFICATION, '[CacheLock] EXCEPTION starting vmtouch ' + e_repr)
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] EXCEPTION starting ' + e_repr)
             logging.warning('Error starting vmtouch ' + e_repr)
         return False
 
     async def _run(self):
         # noinspection PyBroadException
         try:
-            self._mailer.post(self, NOTIFICATION, '[CacheLock] LOCKED ' + self._path)
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] STARTED ' + self._path)
             rc = await self._process.wait()
-            self._mailer.post(self, NOTIFICATION, '[CacheLock] UNLOCKED ' + self._path)
+            self._mailer.post(self, NOTIFICATION, '[CacheLock] STOPPED ' + self._path)
             logging.debug('vmtouch exit code: ' + str(rc))
         except Exception as e:
             e_repr = repr(e)

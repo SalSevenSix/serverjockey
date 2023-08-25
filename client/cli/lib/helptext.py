@@ -16,7 +16,7 @@ tasks:
                          | called <name> with webapp using <port>
   userdel:<name>         | Delete alternate service user and home folder
   For tasks below, use --user option to set alternate user if needed
-  service:status         | Show ServerJockey service status
+  service                | Show ServerJockey service status
   service:start          | Start ServerJockey service
   service:restart        | Restart ServerJockey service
   service:stop           | Stop ServerJockey service

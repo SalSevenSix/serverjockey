@@ -4,6 +4,10 @@ RUN apt update && apt -y upgrade
 RUN apt -y install locales vmtouch lib32gcc-s1 software-properties-common
 RUN rm -rf /var/lib/apt/lists/* && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
+RUN { echo; \
+      echo "container        soft    memlock         4194304"; \
+      echo "container        hard    memlock         4194304"; \
+    } >> /etc/security/limits.conf
 RUN add-apt-repository multiverse
 RUN dpkg --add-architecture i386
 RUN apt update
