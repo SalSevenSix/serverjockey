@@ -2,7 +2,7 @@ import logging
 import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, io, sysutil, signals, objconv, aggtrf
-from core.msg import msgabc, msgext, msgftr, msglog
+from core.msg import msgabc, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
 from core.system import svrmodules, svrsvc, igd
@@ -131,8 +131,6 @@ class SystemService:
     async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(**configuration)
         subcontext.start()
-        subcontext.register(msgext.RelaySubscriber(
-            self._context, msgftr.Or(igd.IgdService.FILTER, _DeleteInstanceSubscriber.FILTER)))
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         server = await self._modules.create_server(subcontext)
@@ -185,10 +183,9 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
 
 
 class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
-    FILTER = msgftr.NameIs(svrsvc.ServerService.DELETE_ME)
 
     def __init__(self, system: SystemService):
-        super().__init__(_DeleteInstanceSubscriber.FILTER)
+        super().__init__(msgftr.NameIs(svrsvc.ServerService.DELETE_ME))
         self._system = system
 
     async def handle(self, message):

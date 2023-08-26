@@ -6,7 +6,6 @@ import upnpy
 from core.util import util, funcutil, sysutil
 from core.msg import msgabc, msgftr
 
-
 TCP, UDP = 'TCP', 'UDP'
 _VALID_PROTOCALS = TCP, UDP
 
@@ -30,7 +29,6 @@ class IgdService(msgabc.AbcSubscriber):
     DISCOVER = 'IgdService.Discover'
     ADD_PORT_MAPPING = 'IgdService.AddPortMapping'
     DELETE_PORT_MAPPING = 'IgdService.DeletePortMapping'
-    FILTER = msgftr.NameIn((ADD_PORT_MAPPING, DELETE_PORT_MAPPING))
 
     def __init__(self):
         super().__init__(msgftr.NameIn((

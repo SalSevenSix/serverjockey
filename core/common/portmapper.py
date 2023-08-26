@@ -2,6 +2,7 @@ import typing
 # ALLOW util.* msg.* context.* http.* system.* proc.*
 from core.util import util
 from core.msg import msgabc, msgftr
+from core.context import contextsvc
 from core.system import svrsvc, igd
 from core.proc import proch
 
@@ -16,13 +17,13 @@ class PortMapperService(msgabc.AbcSubscriber):
     MAP_PORT = 'PortMapperService.MapPort'
     MAP_PORT_FILTER = msgftr.NameIs(MAP_PORT)
 
-    def __init__(self, mailer: msgabc.Mailer):
+    def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(
             svrsvc.ServerService.CLEANUP_FILTER,
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
             proch.ServerProcess.FILTER_STATE_STARTED,
             PortMapperService.MAP_PORT_FILTER))
-        self._mailer = mailer
+        self._root_context = context.root()
         self._active, self._trash = [], []
 
     def handle(self, message):
@@ -46,12 +47,12 @@ class PortMapperService(msgabc.AbcSubscriber):
                 self._trash.remove(signature)
             else:
                 description = util.get('description', data)
-                igd.add_port_mapping(self._mailer, message.source(), port, protocal, description)
+                igd.add_port_mapping(self._root_context, message.source(), port, protocal, description)
             return None
         return None
 
     def _delete_trash(self, sync: bool):
         for signature in self._trash:
             port, protocal = util.get('port', signature), util.get('protocal', signature)
-            igd.delete_port_mapping(self._mailer, self, port, protocal, sync)
+            igd.delete_port_mapping(self._root_context, self, port, protocal, sync)
         self._trash = []

@@ -43,8 +43,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Port for http service, default is 6164')
     p.add_argument('--home', type=str, default='.',
                    help='Home directory to use for server instances, default is current working directory')
-    p.add_argument('--tmpdir', type=str, default='tmp',
-                   help='Directory to use for temporary files, default is tmp under home')
+    p.add_argument('--tmpdir', type=str, default='.tmp',
+                   help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',

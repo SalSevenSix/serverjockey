@@ -107,7 +107,7 @@ class ServerService(msgabc.AbcSubscriber):
             await self._queue_join()
             await tasks.wait_for(self._task, 10.0)
             if action is ServerService.DELETE:
-                self._context.post(self, ServerService.DELETE_ME, self._context)
+                self._context.root().post(self, ServerService.DELETE_ME, self._context)
             if action is ServerService.SHUTDOWN:
                 self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
             return True

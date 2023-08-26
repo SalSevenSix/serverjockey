@@ -27,6 +27,11 @@ class Context(msgabc.MulticastMailer):
         await subcontext.shutdown()
         self._children.remove(subcontext)
 
+    def root(self):
+        if self._parent:
+            return self._parent.root()
+        return self
+
     def subcontexts(self) -> typing.Collection[Context]:
         return tuple(self._children)
 
