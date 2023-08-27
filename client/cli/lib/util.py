@@ -1,5 +1,11 @@
 import subprocess
+import pkgutil
 # ALLOW NONE
+
+
+def get_resource(name: str) -> str | None:
+    result = pkgutil.get_data('rsc', name)
+    return result.decode() if result else None
 
 
 def split_argument(argument: str | None, expected: int) -> tuple:

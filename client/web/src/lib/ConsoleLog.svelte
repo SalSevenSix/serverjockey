@@ -28,6 +28,10 @@
   $: logHeight = logSmall ? heightSmall : heightBig;
 
   $: if (logScroll && logText && logBox) {
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
     tick().then(function() {
       logBox.scroll({ top: logBox.scrollHeight });
     });
@@ -35,11 +39,16 @@
 
   function toggleHeight() {
     logSmall = !logSmall;
+    if (logScroll && logSmall) {
+      scrollToBottom();
+    }
   }
 
   function togglePlay() {
     logPlay = !logPlay;
-    if (logPlay) { logText = logLines.toText(); }
+    if (logPlay) {
+      logText = logLines.toText();
+    }
   }
 
   function toggleScroll() {

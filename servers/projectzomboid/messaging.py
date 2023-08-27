@@ -89,21 +89,18 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    # TODO remove KEY from names
-    LOGIN_KEY = '> ConnectionManager: [fully-connected]'
-    LOGOUT_KEY = '> Disconnected player'
-    LOGIN_KEY_FILTER = msgftr.DataStrContains(LOGIN_KEY)
-    LOGOUT_KEY_FILTER = msgftr.DataStrContains(LOGOUT_KEY)
+    LOGIN, LOGOUT = '> ConnectionManager: [fully-connected]', '> Disconnected player'
+    LOGIN_FILTER, LOGOUT_FILTER = msgftr.DataStrContains(LOGIN), msgftr.DataStrContains(LOGOUT)
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             CONSOLE_OUTPUT_FILTER,
-            msgftr.Or(_PlayerEventSubscriber.LOGIN_KEY_FILTER,
-                      _PlayerEventSubscriber.LOGOUT_KEY_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.LOGIN_FILTER,
+                      _PlayerEventSubscriber.LOGOUT_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
-        if _PlayerEventSubscriber.LOGIN_KEY_FILTER.accepts(message):
+        if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             steamid = str(message.data())
             steamid = util.left_chop_and_strip(steamid, 'steam-id=')
             steamid = util.right_chop_and_strip(steamid, 'access=')
@@ -112,8 +109,8 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.right_chop_and_strip(name, '" connection-type=')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
             return None
-        if _PlayerEventSubscriber.LOGOUT_KEY_FILTER.accepts(message):
-            line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT_KEY)
+        if _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
+            line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT)
             parts = line.split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)

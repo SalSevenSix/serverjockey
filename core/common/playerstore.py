@@ -55,12 +55,10 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
     def handle(self, message):
         if EVENT_FILTER.accepts(message):
             event = message.data()
-            if isinstance(event, _EventChat):
-                return None
-            if isinstance(event, _EventClear):
+            if isinstance(event, (_EventLogin, _EventLogout)):
+                self._players.login_or_logout(event)
+            elif isinstance(event, _EventClear):
                 self._players.clear()
-                return None
-            self._players.login_or_logout(event)
             return None
         if svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             self._mailer.post(self, _EVENT, _EventClear())
@@ -117,14 +115,11 @@ class _Players:
         self._players = players
 
     def get(self, canonical: typing.Optional[typing.Collection[Player]]) -> tuple:
-        players = []
         if canonical is None:
-            for current in self._players:
-                players.append(current.asdict())
-            return tuple(players)
+            return tuple([o.asdict() for o in self._players])
         if len(canonical) == 0:
-            return tuple(players)
-        keyed = self._keyed()
+            return ()
+        keyed, players = self._keyed(), []
         for current in canonical:
             if current.name() in keyed:
                 stored = keyed[current.name()]

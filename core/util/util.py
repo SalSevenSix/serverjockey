@@ -40,7 +40,6 @@ def is_format(text: str) -> bool:
     return open_index == close_index
 
 
-# TODO deprecated. Migrate uses to float seconds.
 def now_millis() -> int:
     return int(time.time() * 1000.0) + 1
 

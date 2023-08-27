@@ -6,7 +6,7 @@ import sys
 import os
 import json
 # ALLOW lib.*
-from . import tsk, cmd, comms, helptext
+from . import util, tsk, cmd, comms
 
 _OUT = '    '
 
@@ -65,7 +65,7 @@ def _load_clientfile(clientfile: str) -> tuple:
 def _initialise(args: typing.Collection) -> dict:
     p = argparse.ArgumentParser(
         description='ServerJockey CLI.',
-        epilog=helptext.epilog(),
+        epilog=util.get_resource('help.text'),
         formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')

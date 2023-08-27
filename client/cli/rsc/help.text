@@ -1,8 +1,3 @@
-# ALLOW lib.util
-
-
-def epilog() -> str:
-    return '''
 examples:
   serverjockey_cmd.pyz -c use:myserver server:start
   sudo serverjockey_cmd.pyz -t upgrade
@@ -68,4 +63,3 @@ commands:
   exit-pl-lt:<#>    | Exit processing if players less or equal to <#>
   delete            | Delete the current instance
   shutdown          | Shutdown the ServerJockey system
-'''

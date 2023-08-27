@@ -139,7 +139,7 @@ python3.10 -m zipapp "cli" -p "/usr/bin/env python3.10" -m "serverjockey_cmd:mai
 [ -f "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz" ] || exit 1
 
 echo "Generating systemd service file"
-$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz -nt ctrld > $TARGET_DIR/etc/systemd/system/serverjockey.service
+$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz -nt sysdsvc > $TARGET_DIR/etc/systemd/system/serverjockey.service
 [ $? -eq 0 ] || exit 1
 [ -f "$TARGET_DIR/etc/systemd/system/serverjockey.service" ] || exit 1
 

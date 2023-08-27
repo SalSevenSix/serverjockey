@@ -1,0 +1,16 @@
+[Unit]
+Description=ServerJockey game server management system ({user})
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User={user}
+ExecStart=/usr/local/bin/serverjockey.pyz --home "/home/{user}" --logfile{args}
+KillMode=mixed
+TimeoutStopSec=90
+OOMScoreAdjust=-800
+LimitMEMLOCK=4294967296
+
+[Install]
+WantedBy=multi-user.target

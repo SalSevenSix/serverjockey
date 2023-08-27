@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 from yarl import URL
 from core.util import util
 from core.context import contextsvc
@@ -14,12 +15,20 @@ _BASEURL = _SCHEME + '://'
 class TestContext:
 
     def __init__(self):
-        cwd, self._syssvc, self._resources = os.getcwd(), None, None
-        home = util.right_chop_and_strip(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
+        self._syssvc, self._resources = None, None
+        home, cwd = '/tmp/sjgmstest', os.getcwd()
+        if os.path.isdir(home):
+            shutil.rmtree(home)
+        template = util.right_chop_and_strip(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
+        shutil.copytree(template, home)
+        tmpdir = home + '/.tmp'
+        os.makedirs(tmpdir)
         self._context = contextsvc.Context(
-            debug=True, trace=False, home=home, tmpdir='/tmp', secret='token', showtoken=False,
-            scheme=_SCHEME, sslcert=None, sslkey=None, env=os.environ.copy(),
-            python=sys.executable, logfile=None, clientfile=None, host=None, port=None)
+            debug=True, trace=False, home=home, tmpdir=tmpdir,
+            secret='token', showtoken=False,
+            scheme=_SCHEME, sslcert=None, sslkey=None,
+            env=os.environ.copy(), python=sys.executable,
+            logfile=None, clientfile=None, host=None, port=None)
 
     async def initialise(self):
         if self._resources:
