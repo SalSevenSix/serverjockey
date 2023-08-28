@@ -29,7 +29,7 @@ class LoggingPublisher:
 
     # noinspection PyUnusedLocal
     def log(self, level, msg, *args, **kwargs):
-        self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args)
+        self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args if args else msg)
 
     def debug(self, msg, *args, **kwargs):
         self.log(logging.DEBUG, msg, *args, **kwargs)

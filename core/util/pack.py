@@ -2,9 +2,12 @@ import shutil
 import lzma
 import tarfile
 import gzip
+import asyncio
 import time
+import random
+import itertools
 # ALLOW util.*
-from core.util import util, funcutil, io, logutil
+from core.util import util, funcutil, io, logutil, tasks, pkg
 
 _make_archive = funcutil.to_async(shutil.make_archive)
 _unpack_archive = funcutil.to_async(shutil.unpack_archive)
@@ -56,14 +59,15 @@ async def archive_directory(
 async def unpack_directory(
         archive: str, unpack_dir: str, wipe: bool = True,
         tmp_dir: str = '/tmp', logger=logutil.NullLogger()):
-    working_dir = None
+    working_dir, progress_logger = None, _ProgressLogger(logger)
     try:
         logger.info('START Unpack Directory')
         assert await io.file_exists(archive)
         if unpack_dir[-1] == '/':
             unpack_dir = unpack_dir[:-1]
         logger.info(archive + ' => ' + unpack_dir)
-        logger.info('No progress updates on unpacking, please be patient...')
+        if await io.file_size(archive) > 104857600:  # 100Mb
+            progress_logger.start()
         working_dir = unpack_dir
         if wipe:
             await io.delete_directory(working_dir)
@@ -71,6 +75,7 @@ async def unpack_directory(
             working_dir = tmp_dir + '/' + util.generate_id()
         await io.create_directory(working_dir)
         await _unpack_archive(archive, working_dir)
+        progress_logger.stop()
         logger.info('SET file permissions')
         await io.auto_chmod(working_dir)
         if not wipe:
@@ -84,6 +89,7 @@ async def unpack_directory(
         logger.error('ERROR unpacking ' + archive + ' ' + repr(e))
         raise e
     finally:
+        progress_logger.stop()
         if not wipe:
             await funcutil.silently_call(io.delete_directory(working_dir))
 
@@ -103,3 +109,48 @@ def _unpack_tarxz(file_path: str, target_directory: str):
 
 
 unpack_tarxz = funcutil.to_async(_unpack_tarxz)
+
+
+class _ProgressLogger:
+
+    def __init__(self, logger):
+        self._logger = logger
+        self._running, self._task = False, None
+
+    def start(self):
+        self._running = True
+        self._task = tasks.task_start(self._run(), 'pack.ProgressLogger.run()')
+
+    @staticmethod
+    async def _load_lines() -> tuple:
+        lines = await pkg.pkg_load('core.util', 'art.txt')
+        lines = lines.decode().strip().split('\n')
+        arts, current, divider = [], [], ''.join(list(itertools.repeat('_', 80)))
+        for line in lines:
+            if line == divider:
+                if len(current) > 0:
+                    arts.append(current)
+                current = [line]
+            else:
+                current.append(line)
+        arts.append(current)
+        random.shuffle(arts)
+        lines = []
+        for art in arts:
+            lines.extend(art)
+        return tuple(lines)
+
+    async def _run(self):
+        try:
+            self._logger.info('unpacking... enjoy some ascii art while you wait!')
+            lines = await _ProgressLogger._load_lines()
+            index, end = 0, len(lines) - 1
+            while self._running:
+                self._logger.info(lines[index])
+                await asyncio.sleep(1.0)
+                index = index + 1 if index < end else 0
+        finally:
+            tasks.task_end(self._task)
+
+    def stop(self):
+        self._running = False

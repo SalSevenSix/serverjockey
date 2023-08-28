@@ -12,6 +12,10 @@ body.dark {
   color: #4A6488;
 }
 
+body.dark a:hover {
+  color: #B6B6D7;
+}
+
 body.dark hr {
   background-color: #293045;
 }
