@@ -39,7 +39,6 @@ class HttpService:
         access_logger.addFilter(_AccessLogFilter(self._context.is_trace()))
         ssl_context = None
         if self._context.config('scheme') == 'https':
-            # noinspection PyTypeChecker
             ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             ssl_context.load_cert_chain(self._context.config('sslcert'), self._context.config('sslkey'))
         web.run_app(
