@@ -1,12 +1,15 @@
 # ALLOW core.* serverlink.*
 from core.util import util, logutil, io, aggtrf, objconv
-from core.msg import msgtrf, msglog
+from core.msg import msgtrf, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
+_SERVER_STARTED_FILTER = msgftr.And(
+    proch.ServerProcess.FILTER_STDOUT_LINE,
+    msgftr.DataStrContains('ServerLink Bot has Started'))
 
 
 def _default_config():
@@ -111,6 +114,7 @@ class _ServerProcessFactory:
 
     def build(self) -> proch.ServerProcess:
         server_process = proch.ServerProcess(self._context, self._executable)
+        server_process.wait_for_started(_SERVER_STARTED_FILTER, 30.0)
         if self._script:
             server_process.append_arg(self._script)
         server_process.append_arg(self._config)

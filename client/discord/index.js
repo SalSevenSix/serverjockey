@@ -26,33 +26,38 @@ function initialise() {
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  // TODO Should probably try to await all the channel fetches, then call startup
-  let channels = { server: null, login: null, chat: null };
-  context.instancesService.startup(channels);
-  if (context.config.EVENT_CHANNELS.server) {
-    context.client.channels.fetch(context.config.EVENT_CHANNELS.server)
-      .then(function(channel) {
-        channels.server = channel;
-        logger.info('Publishing server events to ' + channel.name + ' (' + channel.id + ')');
-      })
-      .catch(logger.error);
+  const configChannels = context.config.EVENT_CHANNELS;
+  let channelIds = [];
+  if (configChannels.server) { channelIds.push(configChannels.server); }
+  if (configChannels.login) { channelIds.push(configChannels.login); }
+  if (configChannels.chat) { channelIds.push(configChannels.chat); }
+  let promises = [];
+  for (let index in channelIds) {
+    promises.push(context.client.channels.fetch(channelIds[index])
+      .then(function(channel) { return channel; })
+      .catch(logger.error));
   }
-  if (context.config.EVENT_CHANNELS.login) {
-    context.client.channels.fetch(context.config.EVENT_CHANNELS.login)
-      .then(function(channel) {
-        channels.login = channel;
-        logger.info('Publishing player events to ' + channel.name + ' (' + channel.id + ')');
-      })
-      .catch(logger.error);
-  }
-  if (context.config.EVENT_CHANNELS.chat) {
-    context.client.channels.fetch(context.config.EVENT_CHANNELS.chat)
-      .then(function(channel) {
-        channels.chat = channel;
-        logger.info('Publishing chat to ' + channel.name + ' (' + channel.id + ')');
-      })
-      .catch(logger.error);
-  }
+  Promise.all(promises).then(function(channels) {
+    let channelsMap = {};
+    for (let index in channels) {
+      if (channels[index]) { channelsMap[channels[index].id] = channels[index]; }
+    }
+    let startupArgs = { server: null, login: null, chat: null };
+    if (configChannels.server && channelsMap.hasOwnProperty(configChannels.server)) {
+      startupArgs.server = channelsMap[configChannels.server];
+      logger.info('Publishing server events to ' + startupArgs.server.name + ' (' + startupArgs.server.id + ')');
+    }
+    if (configChannels.login && channelsMap.hasOwnProperty(configChannels.login)) {
+      startupArgs.login = channelsMap[configChannels.login];
+      logger.info('Publishing login events to ' + startupArgs.login.name + ' (' + startupArgs.login.id + ')');
+    }
+    if (configChannels.chat && channelsMap.hasOwnProperty(configChannels.chat)) {
+      startupArgs.chat = channelsMap[configChannels.chat];
+      logger.info('Publishing chat events to ' + startupArgs.chat.name + ' (' + startupArgs.chat.id + ')');
+    }
+    context.instancesService.startup(startupArgs)
+      .then(function() { logger.info('ServerLink Bot has Started'); })
+  });
 }
 
 function handleMessage(message) {
