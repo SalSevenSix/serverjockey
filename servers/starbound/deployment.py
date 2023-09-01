@@ -87,8 +87,7 @@ class Deployment:
         return proch.ServerProcess(self._mailer, executable).use_cwd(bin_dir)
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir)
-        await io.create_directory(self._world_dir)
+        await io.create_directory(self._backups_dir, self._world_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):

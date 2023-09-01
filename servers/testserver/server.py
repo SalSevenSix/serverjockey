@@ -51,8 +51,7 @@ class Server(svrabc.Server):
     async def initialise(self):
         if not await io.file_exists(self._config_file):
             await io.write_file(self._config_file, objconv.obj_to_json(_default_config(), pretty=True))
-        await io.create_directory(self._backups_dir)
-        await io.create_directory(self._log_dir)
+        await io.create_directory(self._backups_dir, self._log_dir)
         self._context.register(svrext.MaintenanceStateSubscriber(
             self._context, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
         self._context.register(prcext.ServerStateSubscriber(self._context))

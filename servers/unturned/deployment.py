@@ -98,11 +98,7 @@ class Deployment:
             .append_arg('+' + util.get('scope', cmdargs, 'InternetServer') + '/Save')
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir)
-        await io.create_directory(self._world_dir)
-        await io.create_directory(self._logs_dir)
-        await io.create_directory(self._save_dir)
-        await io.create_directory(self._savesvr_dir)
+        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._save_dir, self._savesvr_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):

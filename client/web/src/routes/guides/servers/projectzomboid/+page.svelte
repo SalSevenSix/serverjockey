@@ -4,6 +4,7 @@
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
   import WebappGenerateConfig from '../WebappGenerateConfig.svelte';
+  import WebappPortForward from '../WebappPortForward.svelte';
 </script>
 
 
@@ -48,37 +49,12 @@
   <h3 class="title is-4">Additional Information</h3>
 </div>
 
-<div class="content" id="portForwarding">
-  <h4 class="title is-5">Port Forwarding</h4>
-  <p>
-    In order for people to connect to your Project Zomboid server over the internet, your home
-    router (internet gateway / &quot;modem&quot;) needs to be configured to forward ports to the server.
-    <span class="is-italic">By default the server will automatically forward ports using UPnP.</span>
-    However, if this is not working on your LAN, you can manually add the port forwarding.
-  </p>
-  <p>
-    To do this, login to your router then forward ports as shown below. Use the local IP address as shown on the
-    ServerJockey webapp home page. More detailed instructions cannot be provided because each router will have
-    a different webapp interface depending on the brand and model.
-  </p>
-  <table class="table is-thinner">
-    <thead>
-      <tr><th>Purpose</th><th>Port</th><th>Protocal</th></tr>
-    </thead>
-    <tbody class="is-family-monospace">
-      <tr><td>Steam</td><td>16261</td><td>UDP</td></tr>
-      <tr><td>Direct</td><td>16262</td><td>UDP</td></tr>
-    </tbody>
-  </table>
-  <p>
-    If using manual port forwarding you should also disable UPnP in the
-    <span class="has-text-weight-bold">INI Settings</span>.
-  </p>
-  <pre class="pre is-thinner"
-># Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules.
+<WebappPortForward serverName="Project Zomboid" configName="INI Settings" upnpService="the server"
+  portsList={[{ purpose: 'Steam', port: 16261, protocal: 'UDP' }, { purpose: 'Direct', port: 16262, protocal: 'UDP' }]}>
+# Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules.
 # The server will fall back to default ports if this fails.
-UPnP=false</pre>
-</div>
+UPnP=false
+</WebappPortForward>
 
 <div class="content pt-4" id="memoryAllocation">
   <h4 class="title is-5">Memory Allocation</h4>
@@ -103,7 +79,6 @@ UPnP=false</pre>
 ]</pre>
 </div>
 
-
 <div class="content pt-4" id="adminCharacter">
   <h4 class="title is-5">Admin Character</h4>
   <p>
@@ -117,7 +92,6 @@ UPnP=false</pre>
     section you can make any user an admin by using Set Access Level to admin.
   </p>
 </div>
-
 
 <div class="content pt-4" id="integrationMods">
   <h4 class="title is-5">Integration Mods</h4>

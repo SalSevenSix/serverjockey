@@ -96,14 +96,8 @@ class Deployment:
         return proch.ServerProcess(self._mailer, executable).append_arg('-cachedir=' + self._world_dir)
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir)
-        await io.create_directory(self._world_dir)
-        await io.create_directory(self._logs_dir)
-        await io.create_directory(self._autobackups_dir)
-        await io.create_directory(self._player_dir)
-        await io.create_directory(self._config_dir)
-        await io.create_directory(self._save_dir)
-        await io.create_directory(self._lua_dir)
+        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._autobackups_dir,
+                                  self._player_dir, self._config_dir, self._save_dir, self._lua_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):

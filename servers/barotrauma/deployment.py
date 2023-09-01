@@ -42,5 +42,4 @@ class Deployment:
             .append_arg(self._executable)
 
     async def build_world(self):
-        await io.create_directory(self._world_dir)
-        await io.create_directory(self._logs_dir)
+        await io.create_directory(self._world_dir, self._logs_dir)

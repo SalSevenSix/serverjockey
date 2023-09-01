@@ -77,9 +77,10 @@ async def symlink_exists(path: typing.Optional[str]) -> bool:
     return await _is_symlink(path)
 
 
-async def create_directory(path: str):
-    if not await directory_exists(path):
-        await aioos.mkdir(path)
+async def create_directory(*paths: str):
+    for path in paths:
+        if not await directory_exists(path):
+            await aioos.mkdir(path)
 
 
 async def create_directories(path: str):
