@@ -6,6 +6,7 @@ TIMESTAMP=$(date '+%Y%m%d%H%M')
 BUILD_DIR="$(pwd)"
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
+NODE_OUT_DIR=~/.nexe/$(node --version | cut -c2-)/out/Release
 SERVERJOCKEY="serverjockey"
 SERVERLINK="serverlink"
 SERVERJOCKEY_DIR="$DIST_DIR/$SERVERJOCKEY"
@@ -110,13 +111,13 @@ python3.10 -m pipenv sync
 
 echo "Merging ServerJockey dependencies"
 if [ -d "$LIB32_DIR" ]; then
-  rm -rf "$LIB32_DIR/pip"* > /dev/null 2>&1
-  rm -rf "$LIB32_DIR/test"* > /dev/null 2>&1
+  rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* > /dev/null 2>&1
+  rm -rf $LIB32_DIR/setuptools* $LIB32_DIR/pkg_resources* > /dev/null 2>&1
   cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 if [ -d "$LIB64_DIR" ]; then
-  rm -rf "$LIB64_DIR/pip"* > /dev/null 2>&1
-  rm -rf "$LIB64_DIR/test"* > /dev/null 2>&1
+  rm -rf $LIB64_DIR/pip* $LIB64_DIR/test* $LIB64_DIR/wheel* > /dev/null 2>&1
+  rm -rf $LIB64_DIR/setuptools* $LIB64_DIR/pkg_resources* > /dev/null 2>&1
   cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 
@@ -151,8 +152,15 @@ npm ci
 cp "$HAX_DIR/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"
 
 echo "Building ServerLink nexe"
-nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10)
-[ $? -eq 0 ] || exit 1
+nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10) || exit 1
+[ -d "$NODE_OUT_DIR" ] || exit 1
+if [ ! -f "$NODE_OUT_DIR/node_unstripped" ]; then
+  echo "Stripping node executable and rebuilding ServerLink"
+  rm "$TARGET_DIR/usr/local/bin/$SERVERLINK" > /dev/null 2>&1
+  cp "$NODE_OUT_DIR/node" "$NODE_OUT_DIR/node_unstripped" || exit 1
+  strip "$NODE_OUT_DIR/node" || exit 1
+  nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10) || exit 1
+fi
 [ -f "$TARGET_DIR/usr/local/bin/$SERVERLINK" ] || exit 1
 
 echo "Cleanup"
