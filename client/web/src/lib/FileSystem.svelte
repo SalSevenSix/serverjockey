@@ -4,7 +4,7 @@
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { isString, guessTextFile, humanFileSize } from '$lib/util';
   import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
-  import Spinner from '$lib/Spinner.svelte';
+  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
@@ -169,7 +169,7 @@
             <i class="fa fa-triangle-exclamation fa-lg mr-1"></i> Error loading files
           {:else}
             {#if loading}
-              <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
+              <SpinnerIcon /> Loading...
             {:else}
               <i class="fa fa-diamond fa-lg mr-1"></i> No files found
             {/if}

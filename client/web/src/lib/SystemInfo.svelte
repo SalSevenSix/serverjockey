@@ -5,7 +5,7 @@
   import { baseurl, newGetRequest } from '$lib/sjgmsapi';
   import RubiksCube from '$lib/RubiksCube.svelte';
   import Overlay from '$lib/Overlay.svelte';
-  import SpinnerCss from '$lib/SpinnerCss.svelte';
+  import SpinnerOverlay from '$lib/SpinnerOverlay.svelte';
 
   let looping = true;
   let info = null;
@@ -42,7 +42,7 @@
     <div class="pl-5 pr-6"><RubiksCube /></div>
   </div>
   <div class="column is-one-third position-relative">
-    {#if !info}<Overlay><SpinnerCss /></Overlay>{/if}
+    {#if !info}<Overlay><SpinnerOverlay /></Overlay>{/if}
     <table class="table is-thinner">
       {#if info}
         <tbody>
@@ -73,7 +73,7 @@
     </table>
   </div>
   <div class="column is-one-third position-relative">
-    {#if !info}<Overlay><SpinnerCss /></Overlay>{/if}
+    {#if !info}<Overlay><SpinnerOverlay /></Overlay>{/if}
     <table class="table is-thinner">
       {#if info}
         <tbody>

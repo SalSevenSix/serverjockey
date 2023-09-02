@@ -3,7 +3,7 @@
   import { humanDuration } from '$lib/util';
   import { notifyError } from '$lib/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
-  import Spinner from '$lib/Spinner.svelte';
+  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
 
@@ -84,7 +84,7 @@
       {#if players.length === 0}
         <tr><td colspan={columnCount}>
           {#if loading}
-            <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
+            <SpinnerIcon /> Loading...
           {:else}
             <i class="fa fa-diamond fa-lg mr-1"></i> Zero players online
           {/if}

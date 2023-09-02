@@ -32,7 +32,7 @@ class MessengerHandler(httpabc.PostHandler):
     async def handle_post(self, resource, data):
         messenger = msgext.SynchronousMessenger(self._mailer)
         subscription_path, source = None, objconv.obj_to_str(messenger)
-        data['resource'] = resource.name()
+        data['resource'] = resource.name()  # TODO I don't think this is ever used
         if self._data:
             data = {**self._data, **data}
         if self._selector:

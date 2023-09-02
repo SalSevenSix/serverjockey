@@ -4,7 +4,7 @@
   import { confirmModal } from '$lib/modals';
   import { newPostRequest, rawPostRequest } from '$lib/sjgmsapi';
   import FileSystem from '$lib/FileSystem.svelte';
-  import Spinner from '$lib/Spinner.svelte';
+  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
@@ -95,8 +95,7 @@
   </p>
   {#if uploading}
     <p class="has-text-weight-bold">
-      <Spinner clazz="fa fa-spinner fa-xl mr-1" />
-      Please keep this section open while uploading...
+      <SpinnerIcon /> Please keep this section open while uploading...
     </p>
   {/if}
 </div>

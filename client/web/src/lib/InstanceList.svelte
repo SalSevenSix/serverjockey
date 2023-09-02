@@ -4,7 +4,7 @@
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
   import { baseurl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
-  import Spinner from '$lib/Spinner.svelte';
+  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   let subs = new SubscriptionHelper();
   let instances = [];
@@ -76,7 +76,7 @@
       {#if instances.length === 0}
         <tr><td colspan="3">
           {#if loading}
-            <Spinner clazz="fa fa-spinner fa-lg mr-1" /> Loading...
+            <SpinnerIcon /> Loading...
           {:else}
             <i class="fa fa-diamond fa-lg mr-1"></i> No instances found
           {/if}
