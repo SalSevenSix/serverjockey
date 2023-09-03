@@ -59,6 +59,10 @@ body.dark .content table th, body.dark .content table td {
   border-color: #293045;
 }
 
+body.dark .control.has-icons-left .icon, body.dark .control.has-icons-right .icon {
+  color: #DBDBDB;
+}
+
 body.dark .input, body.dark .textarea, body.dark .select select {
   background-color: #293045;
   color: #DBDBDB;

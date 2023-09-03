@@ -1,6 +1,7 @@
 <script>
   import { onDestroy, getContext } from 'svelte';
   import { capitalize, humanDuration } from '$lib/util';
+  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const serverStatus = getContext('serverStatus');
   const commonKeys = ['version', 'ip', 'port'];
@@ -29,20 +30,21 @@
           &nbsp;{$serverStatus.state}
           {#if $serverStatus.state === 'STARTED'}({humanDuration(uptime)}){/if}
         {:else}
-          <i class="fa fa-toggle-off fa-lg"></i>&nbsp;&nbsp;...
+          <SpinnerIcon /> ...
         {/if}
       </td></tr>
       {#if !stateOnly}
-        <tr><td class="has-text-weight-bold">Version</td><td>
-          {#if $serverStatus.details}
+        {#if $serverStatus.details}
+          <tr><td class="has-text-weight-bold">Version</td><td>
             {$serverStatus.details.version ? $serverStatus.details.version : ''}
-          {/if}
-        </td></tr>
-        <tr><td class="has-text-weight-bold">Connect</td><td>
-          {#if $serverStatus.details}
+          </td></tr>
+          <tr><td class="has-text-weight-bold">Connect</td><td>
             {$serverStatus.details.ip ? $serverStatus.details.ip : ''}{$serverStatus.details.ip && $serverStatus.details.port ? ':' : ''}{$serverStatus.details.port ? $serverStatus.details.port : ''}
-          {/if}
-        </td></tr>
+          </td></tr>
+        {:else}
+          <tr><td class="has-text-weight-bold">Version</td><td></td></tr>
+          <tr><td class="has-text-weight-bold">Connect</td><td></td></tr>
+        {/if}
       {/if}
       {#if $serverStatus.details}
         {#each Object.keys($serverStatus.details) as key}

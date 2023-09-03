@@ -46,15 +46,16 @@
   <h2 class="title is-5">New Instance</h2>
   <div class="field">
     <label for="createInstanceModule" class="label" title="Module (game server)">Module</label>
-    <div class="control">
-      <div class="select">
+    <p class="control has-icons-left">
+      <span class="select is-fullwidth">
         <select id="createInstanceModule" disabled={processing} bind:value={serverForm.module}>
           {#each modules as module}
             <option>{module}</option>
           {/each}
         </select>
-      </div>
-    </div>
+      </span>
+      <span class="icon is-small is-left"><i class="fa fa-cube"></i></span>
+    </p>
   </div>
   <div class="field">
     <label for="createInstanceIdentity" class="label"

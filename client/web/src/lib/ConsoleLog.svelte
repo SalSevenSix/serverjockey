@@ -12,6 +12,7 @@
   export let heightBig = '420px';
 
   let subs = new SubscriptionHelper();
+  let loading = true;
   let logLines = new RollingLog();
   let logBox;
   let logText = '';
@@ -73,9 +74,8 @@
           return true;
         });
       })
-      .catch(function(error) {
-        notifyError('Failed to load Console Log.');
-      });
+      .catch(function(error) { notifyError('Failed to load Console Log.'); })
+      .finally(function() { loading = false; });
   });
 
   onDestroy(function() {
@@ -94,22 +94,29 @@
         {title}
       {/if}
     </span>
-    <span class="pl-2"><a href={'#'} title="Clear" on:click|preventDefault={clearLog}>
-      <i class="fa fa-eraser fa-lg clear-button"></i>
-    </a></span>
-    <span class="pl-2"><a href={'#'} title={titlePlay} on:click|preventDefault={togglePlay}>
-      <i class="fa {classPlay} fa-lg play-button"></i>
-    </a></span>
-    <span class="pl-2"><a href={'#'} title={titleScroll} on:click|preventDefault={toggleScroll}>
-      <i class="fa {classScroll} fa-lg scroll-button"></i>
-    </a></span>
-    <span class="pl-2"><a href={'#'} title={titleHeight} on:click|preventDefault={toggleHeight}>
-      <i class="fa {classHeight} fa-lg height-button"></i>
-    </a></span>
+    {#if loading}
+      <span class="pl-2"><i class="fa fa-eraser fa-lg clear-button"></i></span>
+      <span class="pl-2"><i class="fa {classPlay} fa-lg play-button"></i></span>
+      <span class="pl-2"><i class="fa {classScroll} fa-lg scroll-button"></i></span>
+      <span class="pl-2"><i class="fa {classHeight} fa-lg height-button"></i></span>
+    {:else}
+      <span class="pl-2"><a href={'#'} title="Clear" on:click|preventDefault={clearLog}>
+        <i class="fa fa-eraser fa-lg clear-button"></i>
+      </a></span>
+      <span class="pl-2"><a href={'#'} title={titlePlay} on:click|preventDefault={togglePlay}>
+        <i class="fa {classPlay} fa-lg play-button"></i>
+      </a></span>
+      <span class="pl-2"><a href={'#'} title={titleScroll} on:click|preventDefault={toggleScroll}>
+        <i class="fa {classScroll} fa-lg scroll-button"></i>
+      </a></span>
+      <span class="pl-2"><a href={'#'} title={titleHeight} on:click|preventDefault={toggleHeight}>
+        <i class="fa {classHeight} fa-lg height-button"></i>
+      </a></span>
+    {/if}
   </div>
   <div class="block">
-    <textarea bind:this={logBox} class="textarea is-family-monospace is-size-7"
-              style:height={logHeight} readonly>{logText}</textarea>
+    <textarea bind:this={logBox} class="textarea is-family-monospace is-size-7" style:height={logHeight}
+              disabled={loading} readonly>{logText}</textarea>
   </div>
 </div>
 
