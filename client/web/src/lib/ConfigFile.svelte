@@ -7,6 +7,7 @@
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
   const eventStarted = getContext('eventStarted');
+  const eventEndMaint = getContext('eventEndMaint');
 
   export let name;
   export let path;
@@ -22,7 +23,7 @@
   $: cannotReload = cannotAction;
   $: cannotSave = cannotAction || originalText === configText;
 
-  $: if ($eventStarted && !originalText && !configText) {
+  $: if (($eventStarted || $eventEndMaint) && !originalText && !configText) {
     reload();
   }
 

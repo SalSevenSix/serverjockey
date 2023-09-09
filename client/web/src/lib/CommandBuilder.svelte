@@ -23,6 +23,7 @@
   }
 
   $: cannotSend = sending || !($serverStatus.state === 'STARTED');
+  $: sendTitle = cannotSend ? 'Cannot send commands, server not STARTED' : 'Send command';
 
   function loadDisplay(index) {
     args[index] = 'loading...\n\n\n';
@@ -82,7 +83,7 @@
     <div class="control">
       {#each Object.keys(commands) as commandOption}
         <label class="radio m-1 p-2">
-          <input type="radio" bind:group={command} name="command" value="{commandOption}">
+          <input type="radio" bind:group={command} name="command" value={commandOption}>
           {capitalizeKebabCase(commandOption)}
         </label>
       {/each}
@@ -96,7 +97,7 @@
       <div class="control">
         {#each Object.keys(commands[command]) as actionOption}
           <label class="radio m-1 p-2">
-            <input type="radio" bind:group={action} name="action" value="{actionOption}">
+            <input type="radio" bind:group={action} name="action" value={actionOption}>
             {capitalizeKebabCase(actionOption)}
           </label>
         {/each}
@@ -133,7 +134,7 @@
             <div class="control">
               {#each arg.options as option}
                 <label class="radio m-1 p-2">
-                  <input type="radio" name="{arg.name}" value="{option}"
+                  <input type="radio" name={arg.name} value={option}
                          bind:group={args[commands[command][action].indexOf(arg)]}>
                   {capitalizeKebabCase(option)}
                 </label>
@@ -144,7 +145,7 @@
       {/each}
     </div>
     <div class="block buttons">
-      <button name="send" title="Send" class="button is-primary" disabled={cannotSend} on:click={send}>
+      <button name="send" title={sendTitle} class="button is-primary" disabled={cannotSend} on:click={send}>
         <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
     </div>
   {/if}

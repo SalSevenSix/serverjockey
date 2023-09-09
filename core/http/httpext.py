@@ -20,8 +20,7 @@ class LoginHandler(httpabc.PostHandler):
 class MessengerHandler(httpabc.PostHandler):
 
     def __init__(self,
-                 mailer: msgabc.MulticastMailer,
-                 name: str,
+                 mailer: msgabc.MulticastMailer, name: str,
                  data: typing.Optional[httpabc.ABC_DATA_GET] = None,
                  selector: typing.Optional[httpsubs.Selector] = None):
         self._mailer = mailer
@@ -46,7 +45,7 @@ class MessengerHandler(httpabc.PostHandler):
         if isinstance(result, Exception):
             if subscription_path:
                 httpsubs.HttpSubscriptionService.unsubscribe(self._mailer, source, subscription_path)
-            return {'error': str(result)}
+            return {'error': str(result)}  # TODO probably should just throw error
         if subscription_path:
             return {'url': util.get('baseurl', data, '') + subscription_path}
         if result is False:

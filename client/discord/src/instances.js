@@ -68,11 +68,9 @@ exports.Service = class Service {
   }
 
   useInstance(instance) {
-    if (this.#instances.hasOwnProperty(instance)) {
-      this.setInstance(instance);
-      return true;
-    }
-    return false;
+    if (!this.#instances.hasOwnProperty(instance)) return false;
+    this.setInstance(instance);
+    return true;
   }
 
   getData(instance) {

@@ -66,6 +66,10 @@ function handleMessage(message) {
   if (!message.member || !message.member.user) return;  // broken message
   logger.info(message.member.user.tag + ' ' + message.content);
   let data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
+  if (data.length === 0) {
+    message.react('❓');
+    return;
+  }
   let command = data.shift().toLowerCase();
   let instance = context.instancesService.currentInstance();
   let parts = command.split('.');

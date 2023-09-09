@@ -28,7 +28,7 @@ exports.commandLineToList = function(line) {
   return result;
 }
 
-exports.humanDuration = function(millis, parts = 3) {
+exports.humanDuration = function(millis, parts=3) {
   if (!millis) { millis = 0; }
   let days = -1;
   if (parts > 2) {
