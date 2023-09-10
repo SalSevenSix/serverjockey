@@ -14,7 +14,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter">
-    <figure class="image pt-3"><img src="/assets/icons/7d2d_icon.png" alt="7d2d icon" /></figure>
+    <figure class="image pt-3"><img src="/assets/icons/7d2d_icon.jpg" alt="7d2d icon" /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">7 Days to Die</h2>

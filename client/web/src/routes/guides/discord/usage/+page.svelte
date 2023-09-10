@@ -182,7 +182,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     <img src="/assets/setup/49_console_commands.png" alt="Console Commands" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/49_world_broadcast.png" alt="World Broadcast" loading="lazy" />
+    <img src="/assets/setup/49_world_broadcast.jpg" alt="World Broadcast" loading="lazy" />
   </figure>
   <figure class="image max-800">
     <img src="/assets/setup/49_give_item.png" alt="Give Item" loading="lazy" />

@@ -95,7 +95,7 @@
         <header class="card-header card-header-title">7 Days to Die</header>
         <div class="card-image">
           <figure class="image is-square">
-            <img src="/assets/icons/7d2d_icon.png" alt="7d2d icon" />
+            <img src="/assets/icons/7d2d_icon.jpg" alt="7d2d icon" />
           </figure>
         </div>
       </div>
