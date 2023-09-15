@@ -80,6 +80,12 @@ Images are compatible with [Pterodactyl](https://pterodactyl.io/).
 * [Docker Images](https://hub.docker.com/r/salsevensix/serverjockey/tags)
 * [Pterodactyl Egg](https://4sas.short.gy/ptero-egg-latest)
 
+Start ServerJockey using Docker as follows.
+Open additional ports for game servers as needed.
+```bash
+sudo docker run -p 6164:6164/tcp &lt;image&gt;:&lt;tag&gt;
+```
+
 
 ## Running from source
 ServerJockey can be run from the source code. This option should work on

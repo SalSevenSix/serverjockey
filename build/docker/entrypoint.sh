@@ -8,7 +8,7 @@ graceful_shutdown() {
 
 setup_serverlink() {
   mkdir serverlink || exit 1
-  echo '{ "module": "serverlink", "auto": 3, "hidden": true }' > serverlink/instance.json
+  echo '{ "module": "serverlink", "hidden": true }' > serverlink/instance.json
 }
 
 sleep 1

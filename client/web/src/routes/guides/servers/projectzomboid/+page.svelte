@@ -132,34 +132,46 @@ UPnP=false
   <p>
     ServerJockey has an experimental feature to boost performance on high player count servers.
     The game map is stored in many small files which can cause disk IO to be a bottleneck.
-    The Cache Lock feature will pre-cache all map files in memory, same as the OS would normally do when
-    files are read. However this feature will also lock them in, preventing eviction until the server has stopped.
-    Therefore all map files will be read from memory. Writes are still done to disk,
-    avoiding risks of ramdisk solutions to this issue.
+    The Cache Lock feature will pre-cache all map files in memory, same as the OS would normally
+    do when files are read. However this feature will also lock them in, preventing eviction until
+    the server has stopped. Therefore all map files will be read from memory, with writes still
+    done to disk.
   </p>
   <p>
     For this feature to work, you need <span class="is-family-monospace">vmtouch</span> installed on the machine.
-    <span class="is-italic">The VirtualBox and Docker distributions of ServerJockey already have this
+    <span class="is-italic">The VirtualBox and Docker/Pterodactyl distributions of ServerJockey already have this
     pre-installed.</span> For the DEB, RPM and Source distributions, use the appropriate package manager to install;
     e.g.
   </p>
   <pre class="pre is-thinner">sudo apt install vmtouch</pre>
   <p>
-    With <span class="is-family-monospace">vmtouch</span> installed, this feature can be enabled in the
+    The OS has a limit on how much memory can be locked. This has been raised to
+    <span class="has-text-weight-bold">8Gb</span> in the DEB, RPM and VirtualBox distributions.
+    For these distributions the higher limit is set in the systemd service file;
+  </p>
+  <pre class="pre is-thinner">/etc/systemd/system/serverjockey.service</pre>
+  <p>
+    For the Docker distribution, a higher limit can be set when the image is first run;
+  </p>
+  <pre class="pre is-thinner">docker run --ulimit memlock=8589934592:8589934592 -p 6164:6164/tcp &lt;image&gt;:&lt;tag&gt;</pre>
+  <p>
+    For the Pterodactyl distribution It&#39;s not possible to add arguments when the docker image is run.
+    You can raise the global limit for systemd which will apply to all docker containers.
+  </p>
+  <pre class="pre is-thinner">/etc/systemd/system.conf</pre>
+  <pre class="pre is-thinner">DefaultLimitMEMLOCK=8589934592:8589934592</pre>
+  <p>
+    For the Source distribution, you must raise the limit yourself by editing the limits configuration;
+  </p>
+  <pre class="pre is-thinner">/etc/security/limits.conf</pre>
+  <p>
+    Finally, with <span class="is-family-monospace">vmtouch</span> installed, this feature can be enabled in the
     <span class="has-text-weight-bold">Launch Options</span> configuration.
     Please ensure enough free memory is available when cache locking the map files.
   </p>
   <pre class="pre is-thinner"
 >&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
 &quot;cache_map_files&quot;: true</pre>
-  <p>
-    Finally, the OS has a limit on how much memory can be locked. This has been raised to
-    <span class="has-text-weight-bold">4Gb</span> in all distributions except Source.<br />
-    For DEB, RPM and VirtualBox the higher limit is set in the systemd service file;<br />
-    <span class="is-family-monospace pl-2">/etc/systemd/system/serverjockey.service</span><br />
-    For Docker and Pterodactyl the higher limit is set for the user called container in;<br />
-    <span class="is-family-monospace pl-2">/etc/security/limits.conf</span>
-  </p>
 </div>
 
 <div class="content pt-4" id="dockerPtero">

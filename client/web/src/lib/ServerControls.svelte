@@ -1,5 +1,6 @@
 <script>
   import { getContext } from 'svelte';
+  import { isBoolean } from '$lib/util';
   import { notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
 
@@ -9,7 +10,7 @@
   $: transientState = $serverStatus.running && $serverStatus.state === 'STOPPED';
   $: cannotStop = !$serverStatus.running || $serverStatus.state === 'STOPPING' || transientState;
   $: cannotRestart = !$serverStatus.running || $serverStatus.state != 'STARTED';
-  $: cannotStart = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+  $: cannotStart = !isBoolean($serverStatus.running) || $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   function doCommand() {
     fetch(instance.url('/server/' + this.name), newPostRequest())

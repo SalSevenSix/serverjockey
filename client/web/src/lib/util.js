@@ -21,6 +21,10 @@ export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }
 
+export function isBoolean(value) {
+   return (value === false || value === true);
+}
+
 export function isString(value) {
   return (value != null && typeof value === 'string');
 }

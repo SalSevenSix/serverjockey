@@ -316,9 +316,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Finally time to start the bot. Don&#39;t worry if you first see an error below.
-    The bot failed to login when you started ServerJockey for the first time because no login token was set.
-    It is now, so click the <span class="has-text-weight-bold">Start</span> button.
+    Finally time to start the bot! Click the <span class="has-text-weight-bold">Start</span> button below.
   </p>
 </div>
 <hr />
