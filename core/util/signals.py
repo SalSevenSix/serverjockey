@@ -13,13 +13,8 @@ def interrupt_self():
     interrupt(os.getpid())
 
 
-# TODO should support full tree kill
 async def kill_tree(pid: int):
-    pid_str = str(pid)
-    script = '\n'.join(
-        ['ps --ppid ' + pid_str + ' -o pid= | awk {\'print$1\'} | while read pid; do',
-         '  kill -9 $pid', 'done',
-         'kill -9 ' + pid_str])
+    script = _kill_tree_script().strip().replace('{rootpid}', str(pid))
     await shellutil.run_script(script)
 
 
@@ -28,3 +23,16 @@ async def silently_kill_tree(pid: int):
         await kill_tree(pid)
     except Exception as e:
         logging.debug('silent_kill_tree() ' + repr(e))
+
+
+def _kill_tree_script():
+    return '''
+gather_pids() {
+  local children=$(ps -o pid= --ppid "$1")
+  for pid in $children; do
+    gather_pids "$pid"
+  done
+  echo "$children"
+}
+kill -9 $(gather_pids "{rootpid}") {rootpid}
+'''

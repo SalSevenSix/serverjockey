@@ -1,4 +1,4 @@
-# ALLOW core.* unturned.messaging
+# ALLOW core.* csgo.messaging
 from core.util import util, cmdutil
 from core.msg import msgabc
 from core.http import httpabc, httprsc, httpext

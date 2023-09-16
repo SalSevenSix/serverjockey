@@ -12,7 +12,7 @@ from core.system import system
 
 
 class _NoTraceFilter(logging.Filter):
-    PREFIXES = 'tsk>', 'trs>', 'msg>'
+    PREFIXES = 'tsk>', 'trs>', 'msg>', 'shl>'
 
     def filter(self, record):
         message = record.getMessage()

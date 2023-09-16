@@ -12,7 +12,7 @@ async def run_script(script: str) -> str:
 
 
 async def run_executable(program: str, *arguments) -> str:
-    _log('PROGRAM', program + ' ' + repr(arguments))
+    _log('shl> PROGRAM', program + ' ' + repr(arguments))
     process = await asyncio.create_subprocess_exec(
         program, *arguments, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()
@@ -25,7 +25,7 @@ def _handle_results(stdout, stderr) -> str:
         _log('STDERR', stderr.decode())
     if stdout:
         result = stdout.decode().strip()
-        _log('STDOUT', result)
+        _log('shl> STDOUT', result)
     return result
 
 

@@ -27,9 +27,12 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
-        self._logs_dir = self._runtime_dir + '/garrysmod/logs'
-        self._config_dir = self._runtime_dir + '/garrysmod/cfg'
+        self._logs_dir = self._world_dir + '/logs'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
+        self._config_dir = self._world_dir + '/cfg'
+        config_dir = self._runtime_dir + '/garrysmod/cfg'
+        self._config_files = []
+        self._config_files.append(_ConfigFile('server', 'server.cfg', config_dir, self._config_dir))
 
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
@@ -70,7 +73,8 @@ class Deployment:
         r.pop()
         r.psh('config')
         r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
-        r.put('server', httpext.FileSystemHandler(self._config_dir + '/server.cfg'), 'm')
+        for config_file in self._config_files:
+            r.put(config_file.identity(), httpext.FileSystemHandler(config_file.world_path()), 'm')
 
     async def new_server_process(self):
         executable = self._runtime_dir + '/srcds_run'
@@ -89,8 +93,38 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir, self._world_dir)
+        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._config_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
+        logs_dir = self._runtime_dir + '/garrysmod/logs'
+        if not await io.symlink_exists(logs_dir):
+            await io.create_symlink(logs_dir, self._logs_dir)
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
+        for config_file in self._config_files:
+            if not await io.symlink_exists(config_file.runtime_path()):
+                if await io.file_exists(config_file.runtime_path()):
+                    await io.copy_text_file(config_file.runtime_path(), config_file.world_path())
+                else:
+                    await io.write_file(config_file.world_path(), '')
+                await io.create_symlink(config_file.runtime_path(), config_file.world_path())
+
+
+class _ConfigFile:
+
+    def __init__(self, identity: str, name: str, runtime_path: str, world_path: str):
+        self._identity, self._name = identity, name
+        self._runtime_path = runtime_path + '/' + name
+        self._world_path = world_path + '/' + name
+
+    def identity(self):
+        return self._identity
+
+    def name(self):
+        return self._name
+
+    def runtime_path(self):
+        return self._runtime_path
+
+    def world_path(self):
+        return self._world_path

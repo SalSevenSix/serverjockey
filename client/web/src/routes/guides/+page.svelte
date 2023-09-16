@@ -125,6 +125,18 @@
       </div>
     </a>
   </div>
+  <div class="column is-one-quarter-desktop is-one-third-tablet">
+    <a href="/guides/servers/csgo" title="CSGO guide">
+      <div class="card">
+        <header class="card-header card-header-title">CSGO</header>
+        <div class="card-image">
+          <figure class="image is-square">
+            <img src="/assets/icons/csgo_icon.jpg" alt="CSGO icon" />
+          </figure>
+        </div>
+      </div>
+    </a>
+  </div>
 </div>
 
 
