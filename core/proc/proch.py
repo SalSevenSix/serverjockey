@@ -137,9 +137,13 @@ class ServerProcess:
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
         self._out_decoder = prcenc.DefaultLineDecoder()
+        self._success_rcs = {0}
         self._pipeinsvc, self._started_catcher = None, None
-        self._env, self._cwd = None, None
-        self._process = None
+        self._process, self._env, self._cwd = None, None, None
+
+    def add_success_rc(self, rc: int) -> ServerProcess:
+        self._success_rcs.add(rc)
+        return self
 
     def append_arg(self, arg: typing.Any) -> ServerProcess:
         self._command.append(arg)
@@ -194,7 +198,7 @@ class ServerProcess:
             else:
                 self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
             rc = await self._process.wait()
-            if rc != 0:
+            if rc not in self._success_rcs:
                 raise Exception('PID {} non-zero exit after STARTED, rc={}'.format(pid, rc))
             self._mailer.post(self, ServerProcess.STATE_STOPPED, self._process)
         except Exception as e:

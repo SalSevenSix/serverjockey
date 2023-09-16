@@ -13,6 +13,7 @@ def interrupt_self():
     interrupt(os.getpid())
 
 
+# TODO should support full tree kill
 async def kill_tree(pid: int):
     pid_str = str(pid)
     script = '\n'.join(

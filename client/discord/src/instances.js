@@ -10,7 +10,8 @@ const servers = {
   factorio: require('./servers/factorio.js'),
   sevendaystodie: require('./servers/sevendaystodie.js'),
   unturned: require('./servers/unturned.js'),
-  starbound: require('./servers/starbound.js')
+  starbound: require('./servers/starbound.js'),
+  csgo: require('./servers/csgo.js')
 };
 
 exports.Service = class Service {

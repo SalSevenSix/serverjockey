@@ -1,0 +1,71 @@
+<script>
+  import ServerStatusStore from '$lib/ServerStatusStore.svelte';
+  import Instance from '$lib/Instance.svelte';
+  import Collapsible from '$lib/Collapsible.svelte';
+  import ServerStatus from '$lib/ServerStatus.svelte';
+  import ServerConfig from '$lib/ServerConfig.svelte';
+  import ServerControls from '$lib/ServerControls.svelte';
+  import InstanceLog from '$lib/InstanceLog.svelte';
+  import Players from '$lib/Players.svelte';
+  import ConfigFile from '$lib/ConfigFile.svelte';
+  import LogFiles from '$lib/LogFiles.svelte';
+  import InstallRuntime from '$lib/InstallRuntime.svelte';
+  import DeploymentActions from '$lib/DeploymentActions.svelte';
+  import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import CommandBuilder from '$lib/CommandBuilder.svelte';
+
+  let deploymentActions = [
+    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
+      'desc': 'Reset all configuration and delete all logs.' }];
+
+  let consoleCommands = {
+    'console': {
+      'send': [
+        {name: 'help', input: 'display'},
+        {name: 'line', input: 'text>', type: 'string'}
+      ]
+    }
+  };
+</script>
+
+
+<ServerStatusStore><Instance>
+  <div class="columns">
+    <div class="column">
+      <div class="columns">
+        <div class="column">
+          <ServerControls />
+          <ServerConfig />
+        </div>
+        <div class="column">
+          <ServerStatus />
+        </div>
+      </div>
+      <InstanceLog />
+      <Collapsible icon="fa-keyboard" title="Console Commands">
+        <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
+      <Collapsible icon="fa-user" title="Players">
+        <Players />
+      </Collapsible>
+      <Collapsible icon="fa-file-code" title="Configuration">
+        <ConfigFile name="Command Line Args" path="/config/cmdargs">
+          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+        </ConfigFile>
+        <ConfigFile name="Server" path="/config/server">
+          <p>TODO</p>
+        </ConfigFile>
+      </Collapsible>
+      <Collapsible icon="fa-scroll" title="Logging">
+        <LogFiles allowDelete={1} />
+      </Collapsible>
+      <Collapsible icon="fa-gears" title="Deployment">
+        <InstallRuntime qualifierName="Version (optional)" />
+        <DeploymentActions actions={deploymentActions} />
+      </Collapsible>
+      <Collapsible icon="fa-box-archive" title="Backups">
+        <BackupRestoreActions />
+      </Collapsible>
+    </div>
+  </div>
+</Instance></ServerStatusStore>

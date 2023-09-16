@@ -25,7 +25,7 @@ def _handle_results(stdout, stderr) -> str:
         _log('STDERR', stderr.decode())
     if stdout:
         result = stdout.decode().strip()
-        # _log('STDOUT', result)
+        _log('STDOUT', result)
     return result
 
 
