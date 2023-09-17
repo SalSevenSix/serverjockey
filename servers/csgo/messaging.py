@@ -26,11 +26,12 @@ def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(_PlayerEventSubscriber(mailer))
 
 
+# Log file started (file "logs/L0917010.log") (game "/home/bsalis/serverjockey/gm/runtime/garrysmod") (version "9040")
 # Public IP is 117.20.112.122.
 # Network: IP 127.0.1.1, mode MP, dedicated Yes, ports 27015 SV / 27005 CL
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_FILTER = msgftr.AcceptNothing()
+    VERSION_FILTER = msgftr.DataMatches(r'.*Log file started \(file.*\) \(game ".*"\)$')
     IP_FILTER = msgftr.DataMatches(r'^Public IP is.*\.$')
     PORT_FILTER = msgftr.DataMatches(r'^Network: IP.*mode.*dedicated.*ports.*CL$')
 
@@ -45,7 +46,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            # svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            value = util.left_chop_and_strip(message.data(), '(version "')[:-2]
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), 'Public IP is')[:-1]

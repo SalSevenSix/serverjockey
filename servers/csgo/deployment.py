@@ -5,15 +5,19 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.system import svrsvc
 from core.proc import proch, jobh, wrapper
-from core.common import steam, interceptors, portmapper
+from core.common import steam, interceptors, portmapper, rconsvc
 from servers.csgo import messaging as msg
 
 
 def _default_cmdargs():
     return {
-        '_map_comment': 'Initial map to use.',
+        '_comment_ip': 'IP binding.',
+        '-ip': '0.0.0.0',
+        '_comment_rcon_password': 'Password to use for rcon, also enables rcon.',
+        '+rcon_password': util.generate_token(8),
+        '_comment_map': 'Initial map to use.',
         '+map': 'gm_construct',
-        '_comment_upnp': 'Try to automatically redirect server port on home network using UPnP',
+        '_comment_upnp': 'Try to automatically redirect server port on home network using UPnP.',
         'upnp': True
     }
 
@@ -29,8 +33,7 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
-        self._config_dir = self._world_dir + '/cfg'
-        config_dir = self._runtime_dir + '/garrysmod/cfg'
+        self._config_dir, config_dir = self._world_dir + '/cfg', self._runtime_dir + '/garrysmod/cfg'
         self._config_files = []
         self._config_files.append(_ConfigFile('server', 'server.cfg', config_dir, self._config_dir))
 
@@ -81,15 +84,20 @@ class Deployment:
         if not await io.file_exists(executable):
             raise FileNotFoundError('CSGO game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        # TODO need to use whatever it's set to not assume default
         if util.get('upnp', cmdargs, True):
             portmapper.map_port(self._mailer, self, 27015, portmapper.TCP, 'CSGO server')
+        rconsvc.RconService.set_config(self._mailer, self, 27015, util.get('+rcon_password', cmdargs))
         server = proch.ServerProcess(self._mailer, self._python)
         server.add_success_rc(2)  # For some reason clean shutdown is rc=2
         server.append_arg(self._wrapper).append_arg(executable)
         server.append_arg('-game').append_arg('garrysmod')
         for key, value in cmdargs.items():
             if key != 'upnp' and not key.startswith('_'):
-                server.append_arg(key).append_arg(value)
+                if value and isinstance(value, bool):
+                    server.append_arg(key)
+                else:
+                    server.append_arg(key).append_arg(value)
         return server
 
     async def build_world(self):
@@ -103,7 +111,9 @@ class Deployment:
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         for config_file in self._config_files:
             if not await io.symlink_exists(config_file.runtime_path()):
-                if await io.file_exists(config_file.runtime_path()):
+                runtime_exists = await io.file_exists(config_file.runtime_path())
+                world_exists = await io.file_exists(config_file.world_path())
+                if runtime_exists and not world_exists:
                     await io.copy_text_file(config_file.runtime_path(), config_file.world_path())
                 else:
                     await io.write_file(config_file.world_path(), '')

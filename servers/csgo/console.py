@@ -1,11 +1,13 @@
 # ALLOW core.* csgo.messaging
-from core.util import util, cmdutil
+from core.util import util
 from core.msg import msgabc
 from core.http import httpabc, httprsc, httpext
-from core.proc import prcext, proch
-from core.common import interceptors
+from core.proc import proch
+from core.common import interceptors, rconsvc
 
-_COMMANDS = cmdutil.CommandLines({'send': '{line}'})
+
+def initialise(mailer: msgabc.MulticastMailer):
+    mailer.register(rconsvc.RconService(mailer, 'RCON> '))
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
@@ -13,8 +15,8 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.reg('s', interceptors.block_not_started(mailer))
     r.psh('console')
     r.put('help', httpext.StaticHandler(HELP_TEXT))
+    r.put('send', rconsvc.RconHandler(mailer), 's')
     r.put('say', _SayHandler(mailer), 's')
-    r.put('{command}', prcext.ConsoleCommandHandler(mailer, _COMMANDS), 's')  # TODO swap RCON in
 
 
 class _SayHandler(httpabc.PostHandler):

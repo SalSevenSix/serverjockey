@@ -18,6 +18,7 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
+        con.initialise(self._context)
         msg.initialise(self._context)
         await self._deployment.initialise()
 
