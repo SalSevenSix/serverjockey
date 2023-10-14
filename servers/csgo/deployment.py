@@ -84,7 +84,7 @@ class Deployment:
         if not await io.file_exists(executable):
             raise FileNotFoundError('CSGO game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-        # TODO need to use whatever it's set to not assume default
+        # TODO need to use whatever port it's set to not assume default
         if util.get('upnp', cmdargs, True):
             portmapper.map_port(self._mailer, self, 27015, portmapper.TCP, 'CSGO server')
         rconsvc.RconService.set_config(self._mailer, self, 27015, util.get('+rcon_password', cmdargs))

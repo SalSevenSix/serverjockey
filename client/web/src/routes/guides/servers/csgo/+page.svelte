@@ -15,7 +15,7 @@
     <h2 class="title is-3 mt-2">Counter-Strike: Global Offensive</h2>
     <p>
       <a href="https://www.counter-strike.net" target="_blank">SCGO <i class="fa fa-up-right-from-square"></i></a>
-      is a popular competative PvP FPS built on the Source engine.
+      is a popular competitive PvP FPS built on the Source engine.
       This guide will show you how to install, configure and run a SCGO server using this Webapp.
     </p>
     <p>

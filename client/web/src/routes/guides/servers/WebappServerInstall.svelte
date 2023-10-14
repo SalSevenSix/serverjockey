@@ -44,8 +44,6 @@
   <p><span class="step-title"></span>
     Welcome to the control panel for your new instance! An instance is just a container for a game server.
     You can now install the actual server using this page.
-  </p>
-  <p>
     Scroll down and find the <span class="has-text-weight-bold">Deployment</span> section.
     Expand it using the black button on the right.
     Now click the <span class="has-text-weight-bold">Install Runtime</span> button.
