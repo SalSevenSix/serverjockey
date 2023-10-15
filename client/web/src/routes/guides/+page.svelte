@@ -126,12 +126,12 @@
     </a>
   </div>
   <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/csgo" title="CSGO guide">
+    <a href="/guides/servers/csii" title="CS2 guide">
       <div class="card">
-        <header class="card-header card-header-title">CSGO</header>
+        <header class="card-header card-header-title">CS2</header>
         <div class="card-image">
           <figure class="image is-square">
-            <img src="/assets/icons/csgo_icon.jpg" alt="CSGO icon" />
+            <img src="/assets/icons/csgo_icon.jpg" alt="CS2 icon" />
           </figure>
         </div>
       </div>

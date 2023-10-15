@@ -1,9 +1,7 @@
-import { dev } from '$app/environment';
 import { writable, get } from 'svelte/store';
 import { sleep } from '$lib/util';
 import { notifyError } from '$lib/notifications';
 
-export const baseurl = (dev ? 'http://localhost:6164' : '');
 export const securityToken = writable();
 
 

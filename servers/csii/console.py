@@ -1,4 +1,4 @@
-# ALLOW core.* csgo.messaging
+# ALLOW core.* csii.messaging
 from core.util import util
 from core.msg import msgabc
 from core.http import httpabc, httprsc, httpext
@@ -37,6 +37,6 @@ class _SayHandler(httpabc.PostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-HELP_TEXT = '''CSGO CONSOLE HELP
+HELP_TEXT = '''CS2 CONSOLE HELP
 TODO
 '''

@@ -5,7 +5,7 @@ from core.context import contextsvc
 from core.system import svrabc
 
 # TODO Consider pulling this list from meta data under servers package, maybe use init.py files
-_PUBLIC_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csgo')
+_PUBLIC_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii')
 _ALL_MODULES = _PUBLIC_MODULES + ('serverlink', 'testserver')
 
 

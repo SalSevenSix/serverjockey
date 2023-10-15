@@ -25,7 +25,7 @@
   </div>
 </div>
 
-<WebappServerInstall module="csgo" />
+<WebappServerInstall module="csii" />
 <WebappConfigRun />
 
 <div class="content" id="additionalInformation">

@@ -1,11 +1,11 @@
-# ALLOW core.* csgo.*
+# ALLOW core.* csii.*
 from core.util import aggtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
 from core.common import interceptors, playerstore
-from servers.csgo import deployment as dep, console as con, messaging as msg
+from servers.csii import deployment as dep, console as con, messaging as msg
 
 
 class Server(svrabc.Server):

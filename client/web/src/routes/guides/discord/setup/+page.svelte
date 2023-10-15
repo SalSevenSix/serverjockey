@@ -1,13 +1,13 @@
 <script>
   import { onMount } from 'svelte';
-  import { baseurl, newGetRequest } from '$lib/sjgmsapi';
+  import { newGetRequest } from '$lib/sjgmsapi';
   import DiscordBotSetupGuide from './DiscordBotSetupGuide.svelte';
 
   let loaded = false;
   let showGuide = false;
 
   onMount(function() {
-    fetch(baseurl + '/instances/serverlink', newGetRequest())
+    fetch('/instances/serverlink', newGetRequest())
       .then(function(response) { showGuide = response.ok; })
       .finally(function() { loaded = true; });
   });

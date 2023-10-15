@@ -1,12 +1,11 @@
 <script>
-  import { baseurl } from '$lib/sjgmsapi';
   import Collapsible from '$lib/Collapsible.svelte';
   import ConsoleLog from '$lib/ConsoleLog.svelte';
 </script>
 
 
 <Collapsible title="ServerJockey Log">
-  <ConsoleLog loadUrl={baseurl + '/system/log/tail'}
-              subscribeUrl={baseurl + '/system/log/subscribe'}
-              downloadUrl={baseurl + '/system/log'} />
+  <ConsoleLog loadUrl={'/system/log/tail'}
+              subscribeUrl={'/system/log/subscribe'}
+              downloadUrl={'/system/log'} />
 </Collapsible>

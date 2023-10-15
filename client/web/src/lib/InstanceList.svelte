@@ -3,7 +3,7 @@
   import { notifyError } from '$lib/notifications';
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
-  import { baseurl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
+  import { newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   let subs = new SubscriptionHelper();
@@ -27,7 +27,7 @@
   }
 
   onMount(function() {
-    fetch(baseurl + '/instances', newGetRequest())
+    fetch('/instances', newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -36,9 +36,9 @@
         Object.keys(json).forEach(function(key) {
           instances = [...instances, { identity: key, module: json[key].module, url: json[key].url }];
         });
-        subs.start(baseurl + '/instances/subscribe', function(data) {
+        subs.start('/instances/subscribe', function(data) {
           if (data.event === 'created') {
-            data.instance.url = baseurl + '/instances/' + data.instance.identity;
+            data.instance.url = '/instances/' + data.instance.identity;
             instances = [...instances, data.instance];
           } else if (data.event === 'deleted') {
             instances = instances.filter(function(value) {

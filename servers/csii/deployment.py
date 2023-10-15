@@ -1,4 +1,4 @@
-# ALLOW core.* csgo.messaging
+# ALLOW core.* csii.messaging
 from core.util import util, io, objconv
 from core.msg import msgext, msgftr, msglog, msgtrf
 from core.context import contextsvc
@@ -6,7 +6,7 @@ from core.http import httpabc, httprsc, httpext
 from core.system import svrsvc
 from core.proc import proch, jobh, wrapper
 from core.common import steam, interceptors, portmapper, rconsvc
-from servers.csgo import messaging as msg
+from servers.csii import messaging as msg
 
 
 def _default_cmdargs():
@@ -82,11 +82,11 @@ class Deployment:
     async def new_server_process(self):
         executable = self._runtime_dir + '/srcds_run'
         if not await io.file_exists(executable):
-            raise FileNotFoundError('CSGO game server not installed. Please Install Runtime first.')
+            raise FileNotFoundError('CS2 game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         # TODO need to use whatever port it's set to not assume default
         if util.get('upnp', cmdargs, True):
-            portmapper.map_port(self._mailer, self, 27015, portmapper.TCP, 'CSGO server')
+            portmapper.map_port(self._mailer, self, 27015, portmapper.TCP, 'CS2 server')
         rconsvc.RconService.set_config(self._mailer, self, 27015, util.get('+rcon_password', cmdargs))
         server = proch.ServerProcess(self._mailer, self._python)
         server.add_success_rc(2)  # For some reason clean shutdown is rc=2

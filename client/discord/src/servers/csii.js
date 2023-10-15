@@ -2,7 +2,7 @@
 
 const commons = require('../commons.js');
 const helpText = {
-  title: 'CSGO COMMANDS',
+  title: 'CS2 COMMANDS',
   help1: [
     'server            : Server status',
     'server start      : Start server',

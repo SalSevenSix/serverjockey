@@ -13,7 +13,7 @@ class TestSystem(unittest.IsolatedAsyncioTestCase):
         self.assertTrue('sevendaystodie' in result)
         self.assertTrue('unturned' in result)
         self.assertTrue('starbound' in result)
-        self.assertTrue('csgo' in result)
+        self.assertTrue('csii' in result)
 
     async def test_get_instances(self):
         self.assertEqual(objconv.json_to_dict(_expected_get_instances()), await systest.get('/instances'))

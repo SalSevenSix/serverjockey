@@ -2,7 +2,7 @@
   import { onMount, onDestroy, tick, setContext } from 'svelte';
   import { writable } from 'svelte/store';
   import { notifyError } from '$lib/notifications';
-  import { baseurl, SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
   export let identity = null;
 
@@ -20,13 +20,10 @@
   }
 
   function getInstanceUrl(path = null) {
-    let url = baseurl;
-    if (!url) {
-      url = window.location.protocol + '//';
-      url += window.location.hostname;
-      if (window.location.port) {
-        url += ':' + window.location.port;
-      }
+    let url = window.location.protocol + '//';
+    url += window.location.hostname;
+    if (window.location.port) {
+      url += ':' + window.location.port;
     }
     url += '/instances/' + getInstanceIdentity();
     return path ? url + path : url;

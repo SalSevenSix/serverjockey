@@ -11,7 +11,7 @@ const servers = {
   sevendaystodie: require('./servers/sevendaystodie.js'),
   unturned: require('./servers/unturned.js'),
   starbound: require('./servers/starbound.js'),
-  csgo: require('./servers/csgo.js')
+  csii: require('./servers/csii.js')
 };
 
 exports.Service = class Service {

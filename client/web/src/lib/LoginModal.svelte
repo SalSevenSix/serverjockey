@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { closeModal } from 'svelte-modals';
   import { notifyError } from '$lib/notifications';
-  import { baseurl, securityToken } from '$lib/sjgmsapi';
+  import { securityToken } from '$lib/sjgmsapi';
 
   export let isOpen;
 
@@ -16,7 +16,7 @@
 
   function login() {
     if (!token) return notifyError('No token entered');
-    fetch(baseurl + '/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
+    fetch('/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);
