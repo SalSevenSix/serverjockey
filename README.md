@@ -38,6 +38,7 @@ serverjockey_cmd.pyz -nc showtoken
 ```
 
 
+<!--
 ## RPM Package Install
 Arch x86_64 only. Requires Python 3.10 installed. Tested and works on **Fedora 36**
 
@@ -61,6 +62,7 @@ Find the login details for the webapp by using the CLI client as shown below.
 ```bash
 serverjockey_cmd.pyz -nc showtoken
 ```
+-->
 
 
 ## VirtualBox Appliance

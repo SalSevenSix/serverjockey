@@ -7,7 +7,7 @@ from core.common import interceptors, rconsvc
 
 
 def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(rconsvc.RconService(mailer, 'RCON> '))
+    mailer.register(rconsvc.RconService(mailer))
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
@@ -38,5 +38,6 @@ class _SayHandler(httpabc.PostHandler):
 
 
 HELP_TEXT = '''CS2 CONSOLE HELP
-TODO
+Help on commands can be found on the Total CS:GO site.
+  https://totalcsgo.com/commands
 '''

@@ -7,6 +7,8 @@ from core.proc import proch, prcext
 from core.common import interceptors, playerstore
 from servers.csii import deployment as dep, console as con, messaging as msg
 
+# https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers
+
 
 class Server(svrabc.Server):
 
@@ -19,7 +21,7 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         con.initialise(self._context)
-        msg.initialise(self._context)
+        await msg.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):

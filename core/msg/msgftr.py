@@ -99,6 +99,15 @@ class NameEquals(msgabc.Filter):
         return self._name == message.name()
 
 
+class DataIn(msgabc.Filter):
+
+    def __init__(self, values):
+        self._values = values
+
+    def accepts(self, message):
+        return message.data() in self._values
+
+
 class DataEquals(msgabc.Filter):
 
     def __init__(self, data):

@@ -1,15 +1,23 @@
 # ALLOW core.*
-from core.util import util
+from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
-from core.common import playerstore
+from core.common import rconsvc, playerstore
+
+_SPAM_ERRORS = (
+    'src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(3579): Assertion Failed: usecElapsed >= 0',
+    'sv: Lag comp - full interp info doesn\'t match target time, using target time instead.'
+)
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataEquals('Connection to Steam servers successful.'))
+    msgftr.DataMatches(r'^SV: .* player server started$'))
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_ALL_LINES,
+    msgftr.And(
+        proch.ServerProcess.FILTER_ALL_LINES,
+        msgftr.Not(msgftr.DataIn(_SPAM_ERRORS))),
+    rconsvc.RconService.FILTER_OUTPUT,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
 MAINTENANCE_STATE_FILTER = msgftr.Or(
@@ -18,87 +26,81 @@ READY_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
-def initialise(mailer: msgabc.MulticastMailer):
+async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
     mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer))
+    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.get_public_ip()))
     mailer.register(_PlayerEventSubscriber(mailer))
 
 
-# Log file started (file "logs/L0917010.log") (game "/home/bsalis/serverjockey/gm/runtime/garrysmod") (version "9040")
-# Public IP is 117.20.112.122.
-# Network: IP 127.0.1.1, mode MP, dedicated Yes, ports 27015 SV / 27005 CL
+# GC Connection established for server version 2000166, instance idx 1
+# Network socket 'server' opened on port 27015
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_FILTER = msgftr.DataMatches(r'.*Log file started \(file.*\) \(game ".*"\)$')
-    IP_FILTER = msgftr.DataMatches(r'^Public IP is.*\.$')
-    PORT_FILTER = msgftr.DataMatches(r'^Network: IP.*mode.*dedicated.*ports.*CL$')
+    VERSION_FILTER = msgftr.DataMatches(r'^GC Connection established for server version .*, instance idx.*')
+    PORT_FILTER = msgftr.DataMatches(r'^Network socket \'server\' opened on port.*')
 
-    def __init__(self, mailer: msgabc.Mailer):
+    def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.VERSION_FILTER,
-                _ServerDetailsSubscriber.IP_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER)))
         self._mailer = mailer
+        self._public_ip = public_ip
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), '(version "')[:-2]
+            value = util.left_chop_and_strip(message.data(), 'server version')
+            value = util.right_chop_and_strip(value, ',')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
-        if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'Public IP is')[:-1]
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
-            return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), ', ports')
-            value = util.right_chop_and_strip(value, 'SV')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': value})
+            value = util.left_chop_and_strip(message.data(), 'port')
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': self._public_ip, 'port': value})
             return None
         return None
 
 
-# Apollo: Hello from game
+# [All Chat][Apollo (8723357)]: Hello from Game
 # say Hello from console
-# Console: Hello from console
+# [All Chat][Console (0)]: @sjgms: Hello from Discord
 
-# Client "Apollo" connected (192.168.64.99:27005).
-# Dropped Apollo from server (Disconnect by user.)
+# Client #2 "Apollo" connected @ 192.168.0.104:63939
+# SV:  Dropped client 'Apollo' from server(2): NETWORK_DISCONNECT_DISCONNECT_BY_USER
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    CHAT_FILTER = msgftr.DataStrContains(': ')
-    JOIN_FILTER = msgftr.DataMatches(r'^Client ".*" connected .*\.$')
-    LEAVE_FILTER = msgftr.DataMatches(r'^Dropped .* from server .*\)$')
+    CHAT_FILTER = msgftr.DataMatches(r'^\[All Chat\]\[.* \(.*\)\]: .*')
+    JOIN_FILTER = msgftr.DataMatches(r'^Client .* ".*" connected @ .*')
+    LEAVE_FILTER = msgftr.DataMatches(r'^SV:  Dropped client \'.*\' from server.*')
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE,
+                      rconsvc.RconService.FILTER_OUTPUT),
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
                       _PlayerEventSubscriber.LEAVE_FILTER)))
         self._mailer = mailer
-        self._names = set()
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            name = util.right_chop_and_strip(message.data(), ':')
-            if name not in self._names:
+            if message.data().startswith('[All Chat][Console (0)]: @'):
                 return None
-            text = util.left_chop_and_strip(message.data(), ':')
+            name = util.left_chop_and_strip(message.data(), '[All Chat][')
+            name = util.right_chop_and_strip(name, '(')
+            text = util.left_chop_and_strip(message.data(), ')]:')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'Client "')
-            value = util.right_chop_and_strip(value, '" connected (')
-            self._names.add(value)
+            value = util.left_chop_and_strip(message.data(), ' "')
+            value = util.right_chop_and_strip(value, '" connected')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'Dropped')
-            value = util.right_chop_and_strip(value, 'from server (')
+            value = util.left_chop_and_strip(message.data(), 'Dropped client \'')
+            value = util.right_chop_and_strip(value, '\' from server')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         return None

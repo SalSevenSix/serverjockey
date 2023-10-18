@@ -50,11 +50,18 @@
       </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
         <ConfigFile name="Command Line Args" path="/config/cmdargs">
-          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+          <p>
+            See &quot;_comment_...&quot; fields for description of configuration fields.
+            Additional launch options can be added. Fields starting with an underscore
+            and the &quot;upnp&quot; field are ignored as launch options.
+          </p>
         </ConfigFile>
-        <ConfigFile name="Server" path="/config/server">
-          <p>TODO</p>
-        </ConfigFile>
+        <ConfigFile name="Server" path="/config/server" />
+        <ConfigFile name="Competitive" path="/config/gamemode-competitive" />
+        <ConfigFile name="Wingman" path="/config/gamemode-wingman" />
+        <ConfigFile name="Casual" path="/config/gamemode-casual" />
+        <ConfigFile name="Deathmatch" path="/config/gamemode-deathmatch" />
+        <ConfigFile name="Custom" path="/config/gamemode-custom" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

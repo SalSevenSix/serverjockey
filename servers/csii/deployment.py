@@ -1,5 +1,5 @@
 # ALLOW core.* csii.messaging
-from core.util import util, io, objconv
+from core.util import util, io, objconv, steamutil
 from core.msg import msgext, msgftr, msglog, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -13,19 +13,37 @@ def _default_cmdargs():
     return {
         '_comment_ip': 'IP binding.',
         '-ip': '0.0.0.0',
+        '_comment_port': 'Port for server to open and use.',
+        '-port': 27015,
         '_comment_rcon_password': 'Password to use for rcon, also enables rcon.',
         '+rcon_password': util.generate_token(8),
+        '_comment_game_type': 'Game type.',
+        '+game_type': 0,
+        '_comment_game_mode': 'Game mode.',
+        '+game_mode': 1,
         '_comment_map': 'Initial map to use.',
-        '+map': 'gm_construct',
+        '+map': 'de_dust2',
         '_comment_upnp': 'Try to automatically redirect server port on home network using UPnP.',
         'upnp': True
     }
+
+
+def _init_config_files(runtime_path: str, world_path: str) -> tuple:
+    return (
+        _ConfigFile('server', 'server.cfg', runtime_path, world_path),
+        _ConfigFile('gamemode-competitive', 'gamemode_competitive.cfg', runtime_path, world_path),
+        _ConfigFile('gamemode-wingman', 'gamemode_competitive2v2.cfg', runtime_path, world_path),
+        _ConfigFile('gamemode-casual', 'gamemode_casual.cfg', runtime_path, world_path),
+        _ConfigFile('gamemode-deathmatch', 'gamemode_deathmatch.cfg', runtime_path, world_path),
+        _ConfigFile('gamemode-custom', 'gamemode_custom.cfg', runtime_path, world_path)
+    )
 
 
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
+        self._user_home_dir = context.env('HOME')
         self._python, self._wrapper = context.config('python'), None
         self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
         self._backups_dir = self._home_dir + '/backups'
@@ -33,12 +51,12 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
-        self._config_dir, config_dir = self._world_dir + '/cfg', self._runtime_dir + '/garrysmod/cfg'
-        self._config_files = []
-        self._config_files.append(_ConfigFile('server', 'server.cfg', config_dir, self._config_dir))
+        self._config_dir = self._world_dir + '/cfg'
+        self._config_files = _init_config_files(self._runtime_dir + '/game/csgo/cfg', self._config_dir)
 
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
+        await steamutil.link_steamclient_to_sdk(self._user_home_dir)
         await self.build_world()
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
@@ -57,13 +75,17 @@ class Deployment:
         r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_4020.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 4020), 'r')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/VERSIONS.txt'))
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 730, anon=False), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
+        r.pop()
+        r.psh('steamcmd')
+        r.put('login', steam.SteamCmdLoginHandler(self._mailer))
+        r.put('input', steam.SteamCmdInputHandler(self._mailer))
         r.pop()
         r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'), 'r')
@@ -80,20 +102,20 @@ class Deployment:
             r.put(config_file.identity(), httpext.FileSystemHandler(config_file.world_path()), 'm')
 
     async def new_server_process(self):
-        executable = self._runtime_dir + '/srcds_run'
+        bin_dir = self._runtime_dir + '/game/bin/linuxsteamrt64'
+        executable = bin_dir + '/cs2'
         if not await io.file_exists(executable):
             raise FileNotFoundError('CS2 game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-        # TODO need to use whatever port it's set to not assume default
+        server_port = util.get('-port', cmdargs, 27015)
         if util.get('upnp', cmdargs, True):
-            portmapper.map_port(self._mailer, self, 27015, portmapper.TCP, 'CS2 server')
-        rconsvc.RconService.set_config(self._mailer, self, 27015, util.get('+rcon_password', cmdargs))
-        server = proch.ServerProcess(self._mailer, self._python)
-        server.add_success_rc(2)  # For some reason clean shutdown is rc=2
-        server.append_arg(self._wrapper).append_arg(executable)
-        server.append_arg('-game').append_arg('garrysmod')
+            portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, 'CS2 TCP server')
+            portmapper.map_port(self._mailer, self, server_port, portmapper.UDP, 'CS2 UDP server')
+        rconsvc.RconService.set_config(self._mailer, self, server_port, util.get('+rcon_password', cmdargs))
+        server = proch.ServerProcess(self._mailer, self._python).use_cwd(bin_dir)
+        server.append_arg(self._wrapper).append_arg(executable).append_arg('-dedicated')
         for key, value in cmdargs.items():
-            if key != 'upnp' and not key.startswith('_'):
+            if key != 'upnp' and key != '-dedicated' and not key.startswith('_'):
                 if value and isinstance(value, bool):
                     server.append_arg(key)
                 else:
@@ -104,9 +126,9 @@ class Deployment:
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._config_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
-        logs_dir = self._runtime_dir + '/garrysmod/logs'
-        if not await io.symlink_exists(logs_dir):
-            await io.create_symlink(logs_dir, self._logs_dir)
+        # logs_dir = self._runtime_dir + '/game/csgo/logs'
+        # if not await io.symlink_exists(logs_dir):
+        #     await io.create_symlink(logs_dir, self._logs_dir)
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         for config_file in self._config_files:
