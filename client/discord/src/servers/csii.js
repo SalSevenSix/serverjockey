@@ -4,24 +4,32 @@ const commons = require('../commons.js');
 const helpText = {
   title: 'CS2 COMMANDS',
   help1: [
-    'server            : Server status',
-    'server start      : Start server',
-    'server restart    : Save world and restart server',
-    'server stop       : Save world and stop server',
-    'auto {mode}       : Set auto mode, valid values 0,1,2,3',
-    'log               : Get last 100 lines from the log',
-    'players           : Show players currently online',
-    'say {text}        : Send chat message to players',
-    'send {line}       : Send command to server console',
-    'getconfig cmdargs : Get cmd args as attachment',
-    'getconfig server  : Get server settings as attachment',
-    'setconfig cmdargs : Update cmd args using attached file',
-    'setconfig server  : Update server using attached file',
+    'server             : Server status',
+    'server start       : Start server',
+    'server restart     : Save world and restart server',
+    'server stop        : Save world and stop server',
+    'auto {mode}        : Set auto mode, valid values 0,1,2,3',
+    'log                : Get last 100 lines from the log',
+    'players            : Show players currently online',
+    'say {text}         : Send chat message to players',
+    'send {line}        : Send command to server console',
+    'getconfig {fileid} : Get config file as attachment',
+    'setconfig {fileid} : Update config using attached file',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment install-runtime {version} : Install game server'
   ],
-  send: '/console/help'
+  send: '/console/help',
+  getconfig: [
+    'Config fileid options for download are:',
+    '`cmdargs, server, gamemode-competitive, gamemode-wingman,`',
+    '`gamemode-casual, gamemode-deathmatch, gamemode-custom`'
+  ],
+  setconfig: [
+    'Config fileid options for upload are:',
+    '`cmdargs, server, gamemode-competitive, gamemode-wingman,`',
+    '`gamemode-casual, gamemode-deathmatch, gamemode-custom`'
+  ]
 };
 
 

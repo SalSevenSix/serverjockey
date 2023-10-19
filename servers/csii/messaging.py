@@ -36,8 +36,11 @@ async def initialise(mailer: msgabc.MulticastMailer):
 
 # GC Connection established for server version 2000166, instance idx 1
 # Network socket 'server' opened on port 27015
+# Host activate: Loading (de_dust2)
+# Host activate: Changelevel (de_inferno)
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
+    MAP_FILTER = msgftr.DataMatches(r'^Host activate: (Loading|Changelevel) \(.*\)$')
     VERSION_FILTER = msgftr.DataMatches(r'^GC Connection established for server version .*, instance idx.*')
     PORT_FILTER = msgftr.DataMatches(r'^Network socket \'server\' opened on port.*')
 
@@ -45,12 +48,17 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
+                _ServerDetailsSubscriber.MAP_FILTER,
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER)))
         self._mailer = mailer
         self._public_ip = public_ip
 
     def handle(self, message):
+        if _ServerDetailsSubscriber.MAP_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), '(')[:-1]
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'map': value})
+            return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), 'server version')
             value = util.right_chop_and_strip(value, ',')
