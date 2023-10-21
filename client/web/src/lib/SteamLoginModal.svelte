@@ -5,9 +5,8 @@
   import { sleep, RollingLog } from '$lib/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/sjgmsapi';
 
-  const instance = getContext('instance');
-
   export let isOpen;
+  export let instance;
   export let onSuccess;
 
   let subs = new SubscriptionHelper();

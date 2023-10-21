@@ -9,8 +9,8 @@ export function loginModal() {
   openModal(LoginModal);
 }
 
-export function steamLoginModal(successCallback) {
-  openModal(SteamLoginModal, { onSuccess: successCallback });
+export function steamLoginModal(instance, successCallback) {
+  openModal(SteamLoginModal, { instance: instance, onSuccess: successCallback });
 }
 
 export function confirmModal(messageText, confirmCallback) {

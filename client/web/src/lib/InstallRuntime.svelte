@@ -64,7 +64,7 @@
           .finally(function() {
             if (logLines.toText().includes('password:')) {
               logLines.reset();
-              steamLoginModal(doInstallRuntime);
+              steamLoginModal(instance, doInstallRuntime);
             } else {
               notifyInfo(endInstallMessage);
             }
@@ -73,7 +73,7 @@
           notifyInfo('Install Runtime completed.');
           cannotProcess = false;
         } else {
-          steamLoginModal(doInstallRuntime);
+          steamLoginModal(instance, doInstallRuntime);
           cannotProcess = false;
         }
       })

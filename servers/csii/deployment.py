@@ -132,14 +132,7 @@ class Deployment:
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         for config_file in self._config_files:
-            if not await io.symlink_exists(config_file.runtime_path()):
-                runtime_exists = await io.file_exists(config_file.runtime_path())
-                world_exists = await io.file_exists(config_file.world_path())
-                if runtime_exists and not world_exists:
-                    await io.copy_text_file(config_file.runtime_path(), config_file.world_path())
-                else:
-                    await io.write_file(config_file.world_path(), '')
-                await io.create_symlink(config_file.runtime_path(), config_file.world_path())
+            await config_file.build_link()
 
 
 class _ConfigFile:
@@ -155,8 +148,17 @@ class _ConfigFile:
     def name(self):
         return self._name
 
-    def runtime_path(self):
-        return self._runtime_path
-
     def world_path(self):
         return self._world_path
+
+    async def build_link(self):
+        if await io.symlink_exists(self._runtime_path):
+            if not await io.file_exists(self._world_path):
+                await io.write_file(self._world_path, '')
+        else:
+            if not await io.file_exists(self._world_path):
+                if await io.file_exists(self._runtime_path):
+                    await io.copy_text_file(self._runtime_path, self._world_path)
+                else:
+                    await io.write_file(self._world_path, '')
+            await io.create_symlink(self._runtime_path, self._world_path)
