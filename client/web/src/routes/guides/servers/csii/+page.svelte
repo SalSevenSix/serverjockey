@@ -34,7 +34,7 @@
 </div>
 
 <WebappPortForward serverName="Counter Strike 2" configName="Command Line Args"
-                   portsList={[{ purpose: 'Server', port: 27015, protocal: 'TCP' }]}>
+                   portsList={[{ purpose: 'Server', port: 27015, protocal: 'TCP and UDP' }]}>
 &quot;_comment_upnp&quot;: &quot;Try to automatically redirect server port on home network using UPnP&quot;,
 &quot;upnp&quot;: false
 </WebappPortForward>

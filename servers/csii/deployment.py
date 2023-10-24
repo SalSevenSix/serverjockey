@@ -58,6 +58,7 @@ class Deployment:
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
         await steamutil.link_steamclient_to_sdk(self._user_home_dir)
         await self.build_world()
+        self._mailer.register(portmapper.PortMapperService(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
             self.build_world))
@@ -126,9 +127,6 @@ class Deployment:
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._config_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
-        # logs_dir = self._runtime_dir + '/game/csgo/logs'
-        # if not await io.symlink_exists(logs_dir):
-        #     await io.create_symlink(logs_dir, self._logs_dir)
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         for config_file in self._config_files:
@@ -152,10 +150,7 @@ class _ConfigFile:
         return self._world_path
 
     async def build_link(self):
-        if await io.symlink_exists(self._runtime_path):
-            if not await io.file_exists(self._world_path):
-                await io.write_file(self._world_path, '')
-        else:
+        if not await io.symlink_exists(self._runtime_path):
             if not await io.file_exists(self._world_path):
                 if await io.file_exists(self._runtime_path):
                     await io.copy_text_file(self._runtime_path, self._world_path)
