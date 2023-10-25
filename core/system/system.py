@@ -5,7 +5,7 @@ from core.util import util, io, sysutil, signals, objconv, aggtrf
 from core.msg import msgabc, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
-from core.system import svrmodules, svrsvc, igd
+from core.system import svrmodules, svrsvc, sysstore, igd
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 
@@ -51,6 +51,7 @@ class SystemService:
         else:
             logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
         igd.initialise(self._context, self)
+        sysstore.initialise(self._context, self)
         self._context.register(_DeleteInstanceSubscriber(self))
         self._context.register(_AutoStartsSubscriber())
         await self._initialise_instances()

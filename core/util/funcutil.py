@@ -35,6 +35,8 @@ async def silently_cleanup(obj: typing.Any):
         await silently_call(obj.close)
     if hasattr(obj, 'shutdown'):
         await silently_call(obj.shutdown)
+    if hasattr(obj, 'dispose'):
+        await silently_call(obj.dispose)
     if hasattr(obj, 'cleanup'):
         await silently_call(obj.cleanup)
 

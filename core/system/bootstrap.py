@@ -47,6 +47,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
+    p.add_argument('--dbfile', type=str, default='serverjockey.db',
+                   help='Filename for database file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
     args = [] if args is None or len(args) < 2 else args[1:]
@@ -57,13 +59,14 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     home = util.full_path(os.getcwd(), args.home)
     tmpdir = util.full_path(home, args.tmpdir)
     clientfile = util.full_path(home, args.clientfile)
+    dbfile = util.full_path(home, args.dbfile)
     logfile = util.full_path(home, args.logfile)
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
         debug=args.debug, trace=args.trace, home=home, tmpdir=tmpdir,
         secret=util.generate_token(10, True), showtoken=args.showtoken,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
-        python=sys.executable, clientfile=clientfile, logfile=logfile,
+        python=sys.executable, clientfile=clientfile, dbfile=dbfile, logfile=logfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
 
 

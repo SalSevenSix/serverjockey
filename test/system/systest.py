@@ -28,7 +28,8 @@ class TestContext:
             secret='token', showtoken=False,
             scheme=_SCHEME, sslcert=None, sslkey=None,
             env=os.environ.copy(), python=sys.executable,
-            logfile=None, clientfile=None, host=None, port=None)
+            logfile=None, dbfile=None, clientfile=None,
+            host=None, port=None)
 
     async def initialise(self):
         if self._resources:
