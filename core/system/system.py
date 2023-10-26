@@ -134,6 +134,7 @@ class SystemService:
         subcontext.start()
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
+        subcontext.register(sysstore.InstanceRouting(subcontext))
         server = await self._modules.create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(self))

@@ -47,7 +47,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
-    p.add_argument('--dbfile', type=str, default='serverjockey.db',
+    p.add_argument('--dbfile', type=str, nargs='?', const='serverjockey.db',
                    help='Filename for database file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')

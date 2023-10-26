@@ -1,7 +1,7 @@
 import typing
 import abc
 from sqlalchemy import Column, ForeignKey, DateTime, Integer, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, backref
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.asyncio.session import AsyncSession
 # TODO ALLOW ???
@@ -32,8 +32,9 @@ class Instance(Base):
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
     name = Column(Text, unique=True)
     module = Column(Text)
-    # events = relationship(... cascade='all,delete')
-    # players = relationship(... cascade='all,delete')
+    created_at = Column(DateTime)
+    events = relationship('InstanceEvent', cascade='all,delete')
+    players = relationship('Player', cascade='all,delete')
 
 
 class InstanceEvent(Base):
@@ -41,25 +42,19 @@ class InstanceEvent(Base):
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     at = Column(DateTime)
     instance: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
-    type = Column(Text)
+    name = Column(Text)
     details = Column(Text, nullable=True)
-
-
-class User(Base):
-    __tablename__ = 'user'
-    id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    name = Column(Text, unique=True)
-    steamid = Column(Text, unique=True, nullable=True)
 
 
 class Player(Base):
     __tablename__ = 'player'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     instance: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
-    user: Mapped[Integer] = mapped_column(ForeignKey('user.id'))
+    user: Mapped[Integer] = mapped_column(ForeignKey('user.id'), nullable=True)
     name = Column(Text)
-    # events = relationship(... cascade='all,delete')
-    # chats = relationship(... cascade='all,delete')
+    steamid = Column(Text, nullable=True)
+    events = relationship('PlayerEvent', cascade='all,delete')
+    chats = relationship('PlayerChat', cascade='all,delete')
 
 
 class PlayerEvent(Base):
@@ -67,7 +62,7 @@ class PlayerEvent(Base):
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     at = Column(DateTime)
     player: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
-    type = Column(Text)
+    name = Column(Text)
 
 
 class PlayerChat(Base):

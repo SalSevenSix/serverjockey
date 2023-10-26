@@ -1,11 +1,11 @@
 import typing
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
 # TODO ALLOW ???
-from core.msg import msgabc
+from core.util import util, objconv
+from core.msg import msgabc, msgftr
 from core.context import contextsvc
-from core.system import system
-from core.store import storeabc, storesvc
+from core.system import system, svrsvc
+from core.common import playerstore  # TODO no No NO!
+from core.store import storeabc, storetxn, storesvc
 
 
 def initialise(context: contextsvc.Context, source: typing.Any):
@@ -23,37 +23,57 @@ class _SystemRouting(msgabc.AbcSubscriber):
     async def handle(self, message):
         source, name, data = message.source(), message.name(), message.data()
         if name is system.SystemService.SERVER_INITIALISED:
-            storeabc.execute(self._mailer, source, _InsertInstance(data))
+            storeabc.execute(self._mailer, source, storetxn.InsertInstance(data))
             return None
         if name is system.SystemService.SERVER_DELETED:
-            storeabc.execute(self._mailer, source, _DeleteInstance(data))
+            storeabc.execute(self._mailer, source, storetxn.DeleteInstance(data))
             return None
         return None
 
 
-class _InsertInstance(storeabc.Transaction):
+class InstanceRouting(msgabc.AbcSubscriber):
+    _LOGIN, _LOGOUT, _CLEAR, _CHAT = 'LOGIN', 'LOGOUT', 'CLEAR', 'CHAT'
 
-    def __init__(self, subcontext):
-        self._subcontext = subcontext
+    def __init__(self, subcontext: contextsvc.Context):
+        super().__init__(msgftr.Or(
+            svrsvc.ServerStatus.UPDATED_FILTER,
+            playerstore.EVENT_FILTER))
+        self._subcontext, self._mailer = subcontext, subcontext.root()
+        self._last_state, self._player_names = 'READY', set()
 
-    async def execute(self, session: AsyncSession) -> typing.Any:
-        name, module = self._subcontext.config('identity'), self._subcontext.config('module')
-        statement = select(storeabc.Instance).where(storeabc.Instance.name == str(name))
-        results = await session.scalars(statement)
-        if not results.first():
-            session.add(storeabc.Instance(name=name, module=module))
-        return None
-
-
-class _DeleteInstance(storeabc.Transaction):
-
-    def __init__(self, subcontext):
-        self._subcontext = subcontext
-
-    async def execute(self, session: AsyncSession) -> typing.Any:
-        statement = select(storeabc.Instance).where(storeabc.Instance.name == str(self._subcontext.config('identity')))
-        results = await session.scalars(statement)
-        instance = results.first()
-        if instance:
-            await session.delete(instance)
-        return None
+    async def handle(self, message):
+        source, data = message.source(), message.data()
+        if svrsvc.ServerStatus.UPDATED_FILTER.accepts(message):
+            state = util.get('state', data)
+            if state == self._last_state:
+                return None
+            self._last_state = state
+            details = objconv.obj_to_json(util.get('details', data))
+            storeabc.execute(self._mailer, source, storetxn.InsertInstanceEvent(self._subcontext, state, details))
+            return None
+        if playerstore.EVENT_FILTER.accepts(message):
+            event = data.asdict()
+            event_name = event['event'].upper()
+            if event_name == InstanceRouting._CLEAR:
+                for player_name in self._player_names:
+                    storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
+                        self._subcontext, InstanceRouting._LOGOUT, player_name, None))
+                self._player_names = set()
+                return None
+            player_name = event['player']['name']
+            if event_name == InstanceRouting._CHAT:
+                storeabc.execute(self._mailer, source, storetxn.InsertPlayerChat(
+                    self._subcontext, player_name, event['text']))
+                return None
+            steamid = event['player']['steamid']
+            if event_name == InstanceRouting._LOGIN:
+                self._player_names.add(player_name)
+                storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
+                    self._subcontext, event_name, player_name, steamid))
+                return None
+            if event_name == InstanceRouting._LOGOUT:
+                self._player_names.remove(player_name)
+                storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
+                    self._subcontext, event_name, player_name, steamid))
+                return None
+            return None
