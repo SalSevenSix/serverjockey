@@ -1,7 +1,7 @@
 import typing
 import abc
 from sqlalchemy import Column, ForeignKey, DateTime, Integer, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, backref
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.asyncio.session import AsyncSession
 # TODO ALLOW ???
@@ -50,7 +50,6 @@ class Player(Base):
     __tablename__ = 'player'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     instance: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
-    user: Mapped[Integer] = mapped_column(ForeignKey('user.id'), nullable=True)
     name = Column(Text)
     steamid = Column(Text, nullable=True)
     events = relationship('PlayerEvent', cascade='all,delete')

@@ -7,6 +7,7 @@ from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
 from core.common import cachelock, playerstore
 
+_CHAT_KEY_STRING = 'New message \'ChatMessage{chat=General'
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('*** SERVER STARTED ***'))
@@ -22,7 +23,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     cachelock.FILTER_NOTIFICATIONS)
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.Not(msgftr.DataStrContains("New message 'ChatMessage{chat=General")))
+    msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
 MAINTENANCE_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
 READY_STATE_FILTER = msgftr.Or(
@@ -37,6 +38,7 @@ def initialise(context: contextsvc.Context):
     context.register(playerstore.PlayersSubscriber(context))
     context.register(_ServerDetailsSubscriber(context))
     context.register(_PlayerEventSubscriber(context))
+    context.register(_PlayerChatSubscriber(context))
     context.register(_RestartSubscriber(context))
     context.register(_ModUpdatedSubscriber(context))
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
@@ -115,6 +117,25 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             steamid, name = parts[-1], ' '.join(parts[:-1])
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
             return None
+        return None
+
+
+# New message 'ChatMessage{chat=General, author='Sal', text='Helo Everyone'}' was sent members of chat '0'
+
+class _PlayerChatSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.And(
+            proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.DataStrContains(_CHAT_KEY_STRING)))
+        self._mailer = mailer
+
+    def handle(self, message):
+        name = util.left_chop_and_strip(message.data(), 'author=')
+        name = util.right_chop_and_strip(name, ', text=')
+        text = util.left_chop_and_strip(message.data(), ', text=')
+        text = util.right_chop_and_strip(text, '}\' was sent members of chat')
+        playerstore.PlayersSubscriber.event_chat(self._mailer, self, name[1:-1], text[1:-1])
         return None
 
 
