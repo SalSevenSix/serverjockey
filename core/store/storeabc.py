@@ -27,6 +27,14 @@ class Base(AsyncAttrs, DeclarativeBase):
     pass
 
 
+class SystemEvent(Base):
+    __tablename__ = 'system_event'
+    id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
+    at = Column(DateTime)
+    name = Column(Text)
+    details = Column(Text, nullable=True)
+
+
 class Instance(Base):
     __tablename__ = 'instance'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
@@ -62,6 +70,7 @@ class PlayerEvent(Base):
     at = Column(DateTime)
     player: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
     name = Column(Text)
+    details = Column(Text, nullable=True)
 
 
 class PlayerChat(Base):

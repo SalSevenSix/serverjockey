@@ -1,9 +1,10 @@
 import logging
+from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio.session import AsyncSession
 # TODO ALLOW ???
-from core.util import io, funcutil
+from core.util import io, funcutil, sysutil, objconv
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 from core.store import storeabc
@@ -33,24 +34,29 @@ class StoreService(msgabc.AbcSubscriber):
         return None
 
     async def _initialise(self) -> bool | None:
-        database_path = self._context.config('dbfile')
+        create_database, database_path = False, self._context.config('dbfile')
         if not database_path:
             return False
         try:
-            database_exists = await io.file_exists(database_path)
+            create_database = not await io.file_exists(database_path)
             self._engine = create_async_engine('sqlite+aiosqlite:///' + database_path)
-            if not database_exists:
-                async with self._engine.begin() as connection:
-                    await connection.run_sync(storeabc.Base.metadata.drop_all)
+            if create_database:
                 async with self._engine.begin() as connection:
                     await connection.run_sync(storeabc.Base.metadata.create_all)
-                logging.info('Created database: ' + database_path)
+                logging.debug('Created database: ' + database_path)
             session_maker = async_sessionmaker(self._engine)
             self._session = session_maker()
+            if create_database:
+                async with self._session.begin():
+                    self._session.add(storeabc.SystemEvent(
+                        at=datetime.now(), name='SCHEMA',
+                        details=objconv.obj_to_json(sysutil.system_version_dict())))
             return None
         except Exception as e:
             logging.error('Error initialising database: ' + repr(e))
             await self._close()
+            if create_database:
+                await funcutil.silently_call(io.delete_file(database_path))
         return False
 
     async def _transaction(self, message):

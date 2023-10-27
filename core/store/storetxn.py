@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # TODO ALLOW ???
 from core.store import storeabc
 
+# TODO use table joins to improve performance
+
 
 class InsertInstance(storeabc.Transaction):
 
@@ -61,7 +63,7 @@ class InsertPlayerEvent(storeabc.Transaction):
             player = storeabc.Player(instance=instance_id, name=self._player_name, steamid=self._steamid)
             session.add(player)
             await session.flush()
-        session.add(storeabc.PlayerEvent(at=datetime.now(), player=player.id, name=self._event_name))
+        session.add(storeabc.PlayerEvent(at=datetime.now(), player=player.id, name=self._event_name, details=None))
         return None
 
 

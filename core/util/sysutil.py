@@ -6,6 +6,18 @@ import socket
 # ALLOW util.*
 from core.util import io, funcutil, shellutil, tasks
 
+_VERSION, _BUILDSTAMP = '0.5.0', '{timestamp}'
+_VERSION_LABEL = _VERSION + '(' + _BUILDSTAMP + ')'
+_VERSION_DICT = {'version': _VERSION, 'buildstamp': _BUILDSTAMP}
+
+
+def system_version() -> str:
+    return _VERSION_LABEL
+
+
+def system_version_dict() -> dict:
+    return _VERSION_DICT
+
 
 class _Cacher:
     __instance = None
@@ -132,10 +144,6 @@ async def _cpu_percent() -> float:
     if result == 'ni,100.0':
         return 0.0
     return round(100.0 - float(result), 1)
-
-
-def system_version() -> str:
-    return '0.5.0 ({timestamp})'
 
 
 async def system_info() -> dict:
