@@ -46,6 +46,10 @@ class StoreService(msgabc.AbcSubscriber):
                 logging.debug('Created database: ' + database_path)
             session_maker = async_sessionmaker(self._engine)
             self._session = session_maker()
+            if self._context.is_debug():
+                aiosqlite_logger = logging.getLogger('aiosqlite')
+                if aiosqlite_logger:
+                    aiosqlite_logger.setLevel(logging.INFO)
             if create_database:
                 async with self._session.begin():
                     self._session.add(storeabc.SystemEvent(

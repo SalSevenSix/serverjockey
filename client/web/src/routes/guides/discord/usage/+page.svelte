@@ -2,7 +2,9 @@
   import { scrollto } from 'svelte-scrollto-element';
   import BackToTop from '$lib/BackToTop.svelte';
   import Clyde from '$lib/Clyde.svelte';
+  import CodeBlock from '$lib/CodeBlock.svelte';
 </script>
+
 
 <div class="columns">
   <div class="column is-one-quarter">
@@ -36,7 +38,7 @@
     This is the module, which is a supported game server. In this case, Project Zomboid.
     So this instance will be for a Project Zomboid server.
   </p>
-  <pre class="pre is-thinner">!create myserver projectzomboid</pre>
+  <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" />
   </figure>
@@ -47,7 +49,7 @@
     With an instance created, you can now view all of the commands
     for that type (module) of instance using the help command.
   </p>
-  <pre class="pre is-thinner">!help</pre>
+  <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/39_help_pz.png" alt="Help PZ" loading="lazy" />
   </figure>
@@ -61,7 +63,7 @@
     with a green tick. Also the log output from SteamCMD will be attached. You can check this to ensure
     the server was installed without issue.
   </p>
-  <pre class="pre is-thinner">!deployment install-runtime</pre>
+  <CodeBlock>!deployment install-runtime</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" loading="lazy" />
   </figure>
@@ -75,7 +77,7 @@
     With the server installed, it can now be started with the following command. Same as the server install,
     an hourglass emoji is shown then replaced with a green tick when the server has fully started.
   </p>
-  <pre class="pre is-thinner">!server start</pre>
+  <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" loading="lazy" />
   </figure>
@@ -89,7 +91,7 @@
     You can check the status of the server at any time with the following command.
     Now that the server is up, the server version and connection details are shown.
   </p>
-  <pre class="pre is-thinner">!server</pre>
+  <CodeBlock>!server</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" loading="lazy" />
   </figure>
@@ -101,7 +103,7 @@
     Project Zomboid server for the first time, the configuration files are created with default values.
     So stop the server with the following command.
   </p>
-  <pre class="pre is-thinner">!server stop</pre>
+  <CodeBlock>!server stop</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/43_server_stop.png" alt="Server Stop" loading="lazy" />
   </figure>
@@ -113,7 +115,7 @@
     See the server command list for other configuration files that can be downloaded.
     Save this file to disk somewhere to edit it.
   </p>
-  <pre class="pre is-thinner">!getconfig ini</pre>
+  <CodeBlock>!getconfig ini</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" loading="lazy" />
   </figure>
@@ -124,8 +126,8 @@
     For the purpose of this guide. I only updated a the public server name
     and welcome message in the downloaded INI file.
   </p>
-  <pre class="pre is-thinner">PublicName=ZomBox demo server
-ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
+  <CodeBlock>PublicName=ZomBox demo server
+ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
 </div>
 
 <div class="content">
@@ -134,7 +136,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Attach the INI file in Discord to upload it with the following command.
     Once again, the bot will react with a green tick emoji to show that the command was successful.
   </p>
-  <pre class="pre is-thinner">!setconfig ini</pre>
+  <CodeBlock>!setconfig ini</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" loading="lazy" />
   </figure>
@@ -145,7 +147,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     The server configuration has now been updated. However the server created a game world (map files)
     using the default configuration. You can delete the world with the following command.
   </p>
-  <pre class="pre is-thinner">!deployment wipe-world-save</pre>
+  <CodeBlock>!deployment wipe-world-save</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" loading="lazy" />
   </figure>
@@ -154,10 +156,10 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
 <div class="content">
   <p><span class="step-title"></span>
     Now start the server again. For this guide I used the local network IP to login to the Project Zomboid server.
-    After logging in I am greeted with the new Welcome Message I configured earlier. Also, if you have a
-    Log Channel ID set in the discord bot configuration, you should see a login event message in that channel.
+    After logging in I am greeted with the new Welcome Message I configured earlier. Also, if you have the
+    Player Event Channel ID set in the discord bot configuration, you should see a login event message in that channel.
   </p>
-  <pre class="pre is-thinner">!server start</pre>
+  <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" loading="lazy" />
   </figure>
@@ -176,8 +178,8 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</pre>
     Items can also be spawned in a players inventory.
     Use the help command for the full list of server console commands.
   </p>
-  <pre class="pre is-thinner">!world broadcast Hello Everyone</pre>
-  <pre class="pre is-thinner">!player Demo give-item Base Axe 2</pre>
+  <CodeBlock>!world broadcast Hello Everyone</CodeBlock>
+  <CodeBlock>!player Demo give-item Base Axe 2</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/49_console_commands.png" alt="Console Commands" loading="lazy" />
   </figure>

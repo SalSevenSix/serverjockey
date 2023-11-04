@@ -128,9 +128,8 @@ async def _virtual_memory() -> tuple:
     result = result.strip().split(' ')
     result.pop(0)
     result = [int(i) for i in result if i]
-    result = [result[0], result[5], round(float(result[1] / result[0] * 100), 1),
-              result[1], result[2], -1, -1, -1, result[4], -1, -1]
-    return tuple(result)
+    return (result[0], result[5], round(float(result[1] / result[0] * 100), 1),
+            result[1], result[2], -1, -1, -1, result[4], -1, -1)
 
 
 async def _cpu_percent() -> float:

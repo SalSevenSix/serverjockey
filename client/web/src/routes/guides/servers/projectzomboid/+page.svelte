@@ -1,6 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import BackToTop from '$lib/BackToTop.svelte';
+  import CodeBlock from '$lib/CodeBlock.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
   import WebappGenerateConfig from '../WebappGenerateConfig.svelte';
@@ -143,27 +144,27 @@ UPnP=false
     pre-installed.</span> For the DEB, RPM and Source distributions, use the appropriate package manager to install;
     e.g.
   </p>
-  <pre class="pre is-thinner">sudo apt install vmtouch</pre>
+  <CodeBlock>sudo apt install vmtouch</CodeBlock>
   <p>
     The OS has a limit on how much memory can be locked. This has been raised to
     <span class="has-text-weight-bold">8Gb</span> in the DEB, RPM and VirtualBox distributions.
     For these distributions the higher limit is set in the systemd service file;
   </p>
-  <pre class="pre is-thinner">/etc/systemd/system/serverjockey.service</pre>
+  <CodeBlock>/etc/systemd/system/serverjockey.service</CodeBlock>
   <p>
     For the Docker distribution, a higher limit can be set when the image is first run;
   </p>
-  <pre class="pre is-thinner">docker run --ulimit memlock=8589934592:8589934592 -p 6164:6164/tcp &lt;image&gt;:&lt;tag&gt;</pre>
+  <CodeBlock>docker run --ulimit memlock=8589934592:8589934592 -p 6164:6164/tcp &lt;image&gt;:&lt;tag&gt;</CodeBlock>
   <p>
     For the Pterodactyl distribution It&#39;s not possible to add arguments when the docker image is run.
     You can raise the global limit for systemd which will apply to all docker containers.
   </p>
-  <pre class="pre is-thinner">/etc/systemd/system.conf</pre>
-  <pre class="pre is-thinner">DefaultLimitMEMLOCK=8589934592:8589934592</pre>
+  <CodeBlock>/etc/systemd/system.conf</CodeBlock>
+  <CodeBlock>DefaultLimitMEMLOCK=8589934592:8589934592</CodeBlock>
   <p>
     For the Source distribution, you must raise the limit yourself by editing the limits configuration;
   </p>
-  <pre class="pre is-thinner">/etc/security/limits.conf</pre>
+  <CodeBlock>/etc/security/limits.conf</CodeBlock>
   <p>
     Finally, with <span class="is-family-monospace">vmtouch</span> installed, this feature can be enabled in the
     <span class="has-text-weight-bold">Launch Options</span> configuration.

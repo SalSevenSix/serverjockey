@@ -85,7 +85,7 @@ Images are compatible with [Pterodactyl](https://pterodactyl.io/).
 Start ServerJockey using Docker as follows.
 Open additional ports for game servers as needed.
 ```bash
-sudo docker run -p 6164:6164/tcp &lt;image&gt;:&lt;tag&gt;
+sudo docker run -p 6164:6164/tcp <image>:<tag>
 ```
 
 

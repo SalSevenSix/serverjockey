@@ -6,6 +6,7 @@
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
   import Clyde from '$lib/Clyde.svelte';
+  import CodeBlock from '$lib/CodeBlock.svelte';
 </script>
 
 
@@ -344,7 +345,7 @@
     Now it&#39;s time to try out the bot. The bot will work from any channel it has access to.
     First try the help command as shown below. The bot should reply with available commands.
   </p>
-  <pre class="pre is-thinner">!help</pre>
+  <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/30_help_system.png" alt="System Help" loading="lazy" />
   </figure>
@@ -355,7 +356,7 @@
     Now try the instances command. An instance is a game server container. This command will list them all.
     The response shows none are found because no instance has been created yet.
   </p>
-  <pre class="pre is-thinner">!instances</pre>
+  <CodeBlock>!instances</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/31_instances_empty.png" alt="Instances Empty" loading="lazy" />
   </figure>
@@ -366,7 +367,7 @@
     Now try creating an instance as shown below. The bot reacts with a lock emoji which means it didn&#39;t work!
     This is expected, you aren&#39;t authorised to create an instance yet. Next steps will remedy this.
   </p>
-  <pre class="pre is-thinner">!create myserver projectzomboid</pre>
+  <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/32_create_instance_locked.png" alt="Create Instances Locked" loading="lazy" />
   </figure>
@@ -435,7 +436,7 @@
     This is the module, which is a supported game server. In this case, Project Zomboid.
     So this instance will be for a Project Zomboid server.
   </p>
-  <pre class="pre is-thinner">!create myserver projectzomboid</pre>
+  <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" loading="lazy" />
   </figure>
@@ -443,7 +444,7 @@
     After creation, you can try the instances command again to see the new instance.
     The arrow will mark the current selected instance.
   </p>
-  <pre class="pre is-thinner">!instances</pre>
+  <CodeBlock>!instances</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/setup/38_list_new_instance.png" alt="View New Instance" loading="lazy" />
   </figure>

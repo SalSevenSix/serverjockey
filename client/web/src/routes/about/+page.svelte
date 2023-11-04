@@ -30,7 +30,7 @@
       </div>
     </div>
     <p class="has-text-weight-bold">
-      If you like using this system, please consider supporting me on Ko-fi
+      If you like using this system, please consider supporting it on Ko-fi
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
