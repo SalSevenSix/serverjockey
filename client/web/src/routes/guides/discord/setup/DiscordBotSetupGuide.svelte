@@ -13,8 +13,8 @@
 <ServerStatusStore identity="serverlink">
 
 <div class="columns">
-  <div class="column is-one-quarter">
-    <figure class="pl-5 pr-5 pt-5"><Clyde /></figure>
+  <div class="column is-one-quarter content mb-0">
+    <figure class="image ml-5 mr-5 mt-3 max-300"><Clyde /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Discord Bot Setup</h2>

@@ -1,37 +1,32 @@
 <script>
   import { scrollto } from 'svelte-scrollto-element';
   import BackToTop from '$lib/BackToTop.svelte';
+  import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
   import WebappPortForward from '../WebappPortForward.svelte';
 
-  let portsList=[{ purpose: 'Main', port: '26900', protocal: 'TCP and UDP' },
-                 { purpose: 'Additional', port: '26901-26903', protocal: 'UDP' },
-                 { purpose: 'Webcon (optional)', port: '8080', protocal: 'TCP' },
-                 { purpose: 'Telnet (optional)', port: '8081', protocal: 'TCP' }];
+  const portsList = [{ purpose: 'Main', port: '26900', protocal: 'TCP and UDP' },
+                     { purpose: 'Additional', port: '26901-26903', protocal: 'UDP' },
+                     { purpose: 'Webcon (optional)', port: '8080', protocal: 'TCP' },
+                     { purpose: 'Telnet (optional)', port: '8081', protocal: 'TCP' }];
 </script>
 
 
-<div class="columns">
-  <div class="column is-one-quarter">
-    <figure class="image pt-3"><img src="/assets/icons/7d2d_icon.jpg" alt="7d2d icon" /></figure>
-  </div>
-  <div class="column is-three-quarters content">
-    <h2 class="title is-3 mt-2">7 Days to Die</h2>
-    <p>
-      <a href="https://7daystodie.com" target="_blank">7 Days to Die <i class="fa fa-up-right-from-square"></i></a>
-      is zombie apocalypse survival horror game set in a 3D open world. It features combat, looting, mining, crafting,
-      base building &amp; defence, exploration, and RPG elements.
-    </p>
-    <p>
-      This guide will show you how to install, configure and run a 7 Days to Die server using this Webapp.
-    </p>
-    <p>
-      Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
-      section at the end for information on ports.
-    </p>
-  </div>
-</div>
+<WebappTitle serverName="7 Days to Die" imagePath="/assets/icons/7d2d_icon.jpg">
+  <p>
+    <a href="https://7daystodie.com" target="_blank">7 Days to Die <i class="fa fa-up-right-from-square"></i></a>
+    is zombie apocalypse survival horror game set in a 3D open world. It features combat, looting, mining, crafting,
+    base building &amp; defence, exploration, and RPG elements.
+  </p>
+  <p>
+    This guide will show you how to install, configure and run a 7 Days to Die server using this Webapp.
+  </p>
+  <p>
+    Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
+    section at the end for information on ports.
+  </p>
+</WebappTitle>
 
 <WebappServerInstall module="sevendaystodie" />
 <WebappConfigRun />

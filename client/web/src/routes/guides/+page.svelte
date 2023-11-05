@@ -1,6 +1,17 @@
+<script>
+  const games = [
+    { module: 'projectzomboid', serverName: 'Project Zomboid', imagePath: '/assets/icons/pz_icon.jpg' },
+    { module: 'factorio', serverName: 'Factorio', imagePath: '/assets/icons/ft_icon.jpg' },
+    { module: 'sevendaystodie', serverName: '7 Days to Die', imagePath: '/assets/icons/7d2d_icon.jpg' },
+    { module: 'starbound', serverName: 'Starbound', imagePath: '/assets/icons/sb_icon.jpg' },
+    { module: 'unturned', serverName: 'Unturned', imagePath: '/assets/icons/ut_icon.jpg' },
+    { module: 'csii', serverName: 'Counter Strike 2', imagePath: '/assets/icons/csii_icon.jpg' }];
+</script>
+
+
 <div class="columns">
-  <div class="column is-one-third">
-    <figure class="image"><img src="/assets/icons/box.svg" alt="Setup Box" /></figure>
+  <div class="column is-one-third content mb-0 pb-0">
+    <figure class="image ml-0 mr-0 max-400"><img src="/assets/icons/box.svg" alt="Setup Box" /></figure>
   </div>
   <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">Guides</h2>
@@ -63,80 +74,19 @@
   <hr />
   <h3 class="title is-4">Game Server Guides</h3>
 </div>
-
 <div class="columns is-multiline">
-  <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/projectzomboid" title="Project Zomboid guide">
-      <div class="card">
-        <header class="card-header card-header-title">Project Zomboid</header>
-        <div class="card-image">
-          <figure class="image is-square">
-            <img src="/assets/icons/pz_icon.jpg" alt="Project Zomboid icon" />
-          </figure>
+  {#each games as game}
+    <div class="column is-one-quarter-desktop is-one-third-tablet">
+      <a href="/guides/servers/{game.module}" title="{game.serverName} guide">
+        <div class="card">
+          <header class="card-header card-header-title">{game.serverName}</header>
+          <div class="card-image">
+            <figure class="image"><img src="{game.imagePath}" alt="{game.serverName} icon" /></figure>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
-  <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/factorio" title="Factorio guide">
-      <div class="card">
-        <header class="card-header card-header-title">Factorio</header>
-        <div class="card-image">
-          <figure class="image is-square">
-            <img src="/assets/icons/ft_icon.jpg" alt="Factorio icon" />
-          </figure>
-        </div>
-      </div>
-    </a>
-  </div>
-  <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/sevendaystodie" title="7 Days to Die guide">
-      <div class="card">
-        <header class="card-header card-header-title">7 Days to Die</header>
-        <div class="card-image">
-          <figure class="image is-square">
-            <img src="/assets/icons/7d2d_icon.jpg" alt="7d2d icon" />
-          </figure>
-        </div>
-      </div>
-    </a>
-  </div>
-  <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/starbound" title="Starbound guide">
-      <div class="card">
-        <header class="card-header card-header-title">Starbound</header>
-        <div class="card-image">
-          <figure class="image is-square">
-            <img src="/assets/icons/sb_icon.jpg" alt="Starbound icon" />
-          </figure>
-        </div>
-      </div>
-    </a>
-  </div>
-  <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/unturned" title="Unturned guide">
-      <div class="card">
-        <header class="card-header card-header-title">Unturned</header>
-        <div class="card-image">
-          <figure class="image is-square">
-            <img src="/assets/icons/ut_icon.jpg" alt="Unturned icon" />
-          </figure>
-        </div>
-      </div>
-    </a>
-  </div>
-  <div class="column is-one-quarter-desktop is-one-third-tablet">
-    <a href="/guides/servers/csii" title="Counter Strike 2 guide">
-      <div class="card">
-        <header class="card-header card-header-title">Counter Strike 2</header>
-        <div class="card-image">
-          <figure class="image is-square">
-            <img src="/assets/icons/csii_icon.jpg" alt="Counter Strike 2 icon" />
-          </figure>
-        </div>
-      </div>
-    </a>
-  </div>
+      </a>
+    </div>
+  {/each}
 </div>
 
 
@@ -144,10 +94,15 @@
   .card {
     background-color: #F5F5F5;
     color: #485fC7;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
+
   .card:hover {
     color: #363636;
   }
+
   .card-header-title {
     color: inherit;
   }

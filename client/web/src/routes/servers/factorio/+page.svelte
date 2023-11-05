@@ -15,7 +15,7 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
   import Autosaves from './Autosaves.svelte';
 
-  let deploymentActions = [
+  const deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-config', 'name': 'World Config',
@@ -23,7 +23,7 @@
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 
-  let consoleCommands = {
+  const consoleCommands = {
     'console': {
       'send': [
         {name: 'help', input: 'display'},

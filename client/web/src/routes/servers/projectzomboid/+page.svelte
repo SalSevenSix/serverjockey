@@ -15,7 +15,7 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
   import Autobackups from './Autobackups.svelte';
 
-  let deploymentActions = [
+  const deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only. This is the map and player characters.' },
     { 'key': 'wipe-world-playerdb', 'name': 'World Player DB',
@@ -25,7 +25,7 @@
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above, including logs and auto backups.' }];
 
-  let consoleCommands = {
+  const consoleCommands = {
     'world': {
       'save': [],
       'broadcast': [

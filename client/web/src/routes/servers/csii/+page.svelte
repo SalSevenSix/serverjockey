@@ -14,11 +14,11 @@
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
 
-  let deploymentActions = [
+  const deploymentActions = [
     { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
       'desc': 'Reset all configuration and delete all logs.' }];
 
-  let consoleCommands = {
+  const consoleCommands = {
     'console': {
       'send': [
         {name: 'help', input: 'display'},

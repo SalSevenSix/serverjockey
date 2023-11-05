@@ -4,8 +4,8 @@
 
 
 <div class="columns">
-  <div class="column is-one-quarter">
-    <figure class="image pl-3 pt-2"><img src="/assets/icons/Virtualbox_logo.png" alt="Virtualbox logo" /></figure>
+  <div class="column is-one-quarter content mb-0 pb-0">
+    <figure class="image mr-0 max-300"><img src="/assets/icons/Virtualbox_logo.png" alt="Virtualbox logo" /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">VirtualBox</h2>

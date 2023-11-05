@@ -13,7 +13,7 @@
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
 
-  let consoleCommands = {
+  const consoleCommands = {
     'console': {
       'send': [
         {name: 'help', input: 'display'},

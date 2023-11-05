@@ -14,7 +14,7 @@
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
 
-  let deploymentActions = [
+  const deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
       'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-config', 'name': 'World Config',

@@ -4,8 +4,8 @@
 
 
 <div class="columns">
-  <div class="column is-one-third">
-    <div class="pl-5 pr-6"><RubiksCube dazzle /></div>
+  <div class="column is-one-third content mb-0">
+    <figure class="image max-400"><RubiksCube dazzle /></figure>
   </div>
   <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">About</h2>

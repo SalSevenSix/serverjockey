@@ -50,8 +50,12 @@ figure.max-600 img {
   max-width: 600px;
 }
 
-figure.max-400 img {
+figure.max-400 img, figure.max-400 svg {
   max-width: 400px;
+}
+
+figure.max-300 img, figure.max-300 svg {
+  max-width: 300px;
 }
 
 .step-title {

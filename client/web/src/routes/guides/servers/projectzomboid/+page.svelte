@@ -2,6 +2,7 @@
   import { scrollto } from 'svelte-scrollto-element';
   import BackToTop from '$lib/BackToTop.svelte';
   import CodeBlock from '$lib/CodeBlock.svelte';
+  import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
   import WebappGenerateConfig from '../WebappGenerateConfig.svelte';
@@ -9,37 +10,30 @@
 </script>
 
 
-<div class="columns">
-  <div class="column is-one-quarter">
-    <figure class="image pt-3"><img src="/assets/icons/pz_icon.jpg" alt="Project Zomboid icon" /></figure>
-  </div>
-  <div class="column is-three-quarters content">
-    <h2 class="title is-3 mt-2">Project Zomboid</h2>
-    <p>
-      <a href="https://projectzomboid.com" target="_blank">
-        Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
-      is a zombie apocalypse survival horror game set in an open world using an isometric view with 3D elements.
-      Gameplay involves combat, crafting, base building and RPG elements with a focus on realism.
-      Survival is challenging, requiring the player to continually monitor both the surounding situation
-      and the physical and mental state of thier character.
-    </p>
-    <p>
-      This guide will show you how to install, configure and run a Project Zomboid server using this Webapp.
-    </p>
-    <p>
-      Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
-      section at the end for help on;
-    </p>
-    <ul>
-      <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
-      <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
-      <li><a href="#adminCharacter" use:scrollto={'#adminCharacter'}>Admin Character</a></li>
-      <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
-      <li><a href="#cacheLockingMapFiles" use:scrollto={'#cacheLockingMapFiles'}>Cache Locking Map Files</a></li>
-      <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
-    </ul>
-  </div>
-</div>
+<WebappTitle serverName="Project Zomboid" imagePath="/assets/icons/pz_icon.jpg">
+  <p>
+    <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
+    is a zombie apocalypse survival horror game set in an open world using an isometric view with 3D elements.
+    Gameplay involves combat, crafting, base building and RPG elements with a focus on realism.
+    Survival is challenging, requiring the player to continually monitor both the surounding situation
+    and the physical and mental state of thier character.
+  </p>
+  <p>
+    This guide will show you how to install, configure and run a Project Zomboid server using this Webapp.
+  </p>
+  <p>
+    Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
+    section at the end for help on;
+  </p>
+  <ul>
+    <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
+    <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
+    <li><a href="#adminCharacter" use:scrollto={'#adminCharacter'}>Admin Character</a></li>
+    <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
+    <li><a href="#cacheLockingMapFiles" use:scrollto={'#cacheLockingMapFiles'}>Cache Locking Map Files</a></li>
+    <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
+  </ul>
+</WebappTitle>
 
 <WebappServerInstall module="projectzomboid" />
 <WebappGenerateConfig />

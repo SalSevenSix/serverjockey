@@ -27,13 +27,13 @@ function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
   const configChannels = context.config.EVENT_CHANNELS;
-  let channelIds = [];
-  if (configChannels.server) { channelIds.push(configChannels.server); }
-  if (configChannels.login) { channelIds.push(configChannels.login); }
-  if (configChannels.chat) { channelIds.push(configChannels.chat); }
+  let channelIds = new Set();
+  if (configChannels.server) { channelIds.add(configChannels.server); }
+  if (configChannels.login) { channelIds.add(configChannels.login); }
+  if (configChannels.chat) { channelIds.add(configChannels.chat); }
   let promises = [];
-  for (let index in channelIds) {
-    promises.push(context.client.channels.fetch(channelIds[index])
+  for (let channelId of channelIds.values()) {
+    promises.push(context.client.channels.fetch(channelId)
       .then(function(channel) { return channel; })
       .catch(logger.error));
   }
