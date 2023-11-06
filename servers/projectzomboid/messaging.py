@@ -1,6 +1,6 @@
 import asyncio
 # ALLOW core.*
-from core.util import util
+from core.util import util, dtutil
 from core.msg import msgabc, msglog, msgftr, msgext
 from core.context import contextsvc
 from core.system import svrsvc, svrext
@@ -71,7 +71,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
             return None
         if SERVER_RESTART_REQUIRED_FILTER.accepts(message):
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': util.now_millis()})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': dtutil.now_millis()})
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
@@ -174,14 +174,14 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
             self._initiated, self._second_message = 0, False
             return None
         if self._initiated == 0 and SERVER_RESTART_REQUIRED_FILTER.accepts(message):
-            self._initiated, self._second_message = util.now_millis(), False
+            self._initiated, self._second_message = dtutil.now_millis(), False
             await proch.PipeInLineService.request(
                 self._mailer, self,
                 'servermsg "Mod updated. Server restart in 5 minutes. Please find a safe place and logout."')
             self._mailer.post(self, _RestartSubscriber.WAIT)
             return None
         if self._initiated > 0 and _RestartSubscriber.WAIT_FILTER.accepts(message):
-            waited = util.now_millis() - self._initiated
+            waited = dtutil.now_millis() - self._initiated
             if waited > 300000:  # 5 minutes
                 self._initiated, self._second_message = 0, False
                 svrsvc.ServerService.signal_restart(self._mailer, self)

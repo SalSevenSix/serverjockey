@@ -1,5 +1,5 @@
 # ALLOW core.* csii.messaging
-from core.util import util, io, objconv, steamutil
+from core.util import util, idutil, io, objconv, steamutil
 from core.msg import msgext, msgftr, msglog, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -16,7 +16,7 @@ def _default_cmdargs():
         '_comment_port': 'Port for server to open and use.',
         '-port': 27015,
         '_comment_rcon_password': 'Password to use for rcon, also enables rcon.',
-        '+rcon_password': util.generate_token(8),
+        '+rcon_password': idutil.generate_token(10),
         '_comment_game_type': 'Game type.',
         '+game_type': 0,
         '_comment_game_mode': 'Game mode.',

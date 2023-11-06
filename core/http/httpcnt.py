@@ -3,7 +3,7 @@ import typing
 import re
 from aiohttp import abc as webabc
 # ALLOW util.* msg.* context.* http.httpabc
-from core.util import util
+from core.util import util, dtutil
 from core.http import httpabc
 
 _SECURE = '_SECURE'
@@ -96,7 +96,7 @@ class SecurityService:
         self._failures = {}
 
     def check(self, request: webabc.Request) -> bool:
-        remote, now = request.remote, util.now_millis()
+        remote, now = request.remote, dtutil.now_millis()
         last_failure = util.get(remote, self._failures)
         if last_failure:
             if (now - last_failure) < 5000:

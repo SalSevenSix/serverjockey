@@ -1,7 +1,7 @@
 import aiohttp
 import socket
 # ALLOW core.* factorio.messaging
-from core.util import util, tasks, io, pack, aggtrf, funcutil, objconv
+from core.util import util, idutil, tasks, io, pack, aggtrf, funcutil, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -134,7 +134,7 @@ class Deployment:
         rcon_port = rcon_port if rcon_port else port + 1
         server.append_arg('--rcon-port').append_arg(rcon_port)
         rcon_password = util.get('rcon-password', cmdargs)
-        rcon_password = rcon_password if rcon_password else util.generate_token(10)
+        rcon_password = rcon_password if rcon_password else idutil.generate_token(10)
         server.append_arg('--rcon-password').append_arg(rcon_password)
         rconsvc.RconService.set_config(self._mailer, self, rcon_port, rcon_password)
         if util.get('rcon-upnp', cmdargs, False):

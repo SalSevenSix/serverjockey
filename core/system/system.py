@@ -1,7 +1,7 @@
 import logging
 import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
-from core.util import util, io, sysutil, signals, objconv, aggtrf
+from core.util import util, dtutil, io, sysutil, signals, objconv, aggtrf
 from core.msg import msgabc, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
@@ -242,12 +242,12 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
 class _SystemInfoHandler(httpabc.GetHandler):
 
     def __init__(self):
-        self._startmillis = util.now_millis()
+        self._startmillis = dtutil.now_millis()
 
     async def handle_get(self, resource, data):
         info = await sysutil.system_info()
         info['startmillis'] = self._startmillis
-        info['uptime'] = util.now_millis() - self._startmillis
+        info['uptime'] = dtutil.now_millis() - self._startmillis
         return info
 
 

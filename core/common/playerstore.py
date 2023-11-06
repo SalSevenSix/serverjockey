@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing
 # ALLOW util.* msg.* context.* http.* system.* proc.*
-from core.util import util
+from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext, msgtrf
 from core.http import httpabc
 from core.system import svrsvc
@@ -93,7 +93,7 @@ class Player:
         result = {'name': self._name, 'steamid': self._steamid}
         if self._startmillis > -1:
             result['startmillis'] = self._startmillis
-            result['uptime'] = util.now_millis() - self._startmillis
+            result['uptime'] = dtutil.now_millis() - self._startmillis
         return result
 
 
@@ -139,7 +139,7 @@ class _Players:
 class _EventLogin:
 
     def __init__(self, name: str, steamid: str | None = None):
-        self._player = Player(name, steamid, util.now_millis())
+        self._player = Player(name, steamid, dtutil.now_millis())
 
     def player(self) -> Player:
         return self._player

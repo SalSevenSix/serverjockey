@@ -1,11 +1,8 @@
-import asyncio
-import random
-import base64
-import time
 import typing
+import asyncio
+import base64
 # ALLOW NONE
 
-_BASE62_CHARS = 'Il1O0ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
     '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
@@ -20,28 +17,11 @@ def script_escape(value: str) -> str:
     return value.translate(_SCRIPT_SPECIALS)
 
 
-def generate_token(length: int, readable: bool = False) -> str:
-    begin = 5 if readable else 0
-    end = len(_BASE62_CHARS)
-    result = []
-    for i in range(length):
-        result.append(_BASE62_CHARS[random.randrange(begin, end)])
-    return ''.join(result)
-
-
-def generate_id() -> str:
-    return generate_token(6) + str(now_millis())
-
-
 def is_format(text: str) -> bool:
     open_index, close_index = text.count('{'), text.count('}')
     if open_index == 0 and close_index == 0:
         return False
     return open_index == close_index
-
-
-def now_millis() -> int:
-    return int(time.time() * 1000.0) + 1
 
 
 def single(collection: typing.Optional[typing.Collection]) -> typing.Any:

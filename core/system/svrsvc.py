@@ -3,7 +3,7 @@ import logging
 import asyncio
 import typing
 # ALLOW util.* msg.* context.* http.* system.svrabc
-from core.util import tasks, util, objconv
+from core.util import tasks, util, dtutil, objconv
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.system import svrabc
@@ -72,7 +72,7 @@ class ServerService(msgabc.AbcSubscriber):
             if self._running:
                 logging.debug('STARTING instance ' + identity)
                 ServerStatus.notify_running(self._context, self, self._running)
-                start = util.now_millis()
+                start = dtutil.now_millis()
                 try:
                     await self._server.run()
                 except Exception as e:
@@ -81,7 +81,7 @@ class ServerService(msgabc.AbcSubscriber):
                     logging.warning('EXCEPTION instance ' + identity + ' [' + repr(e) + ']')
                 finally:
                     self._running = False
-                    controller.check_uptime(util.now_millis() - start)
+                    controller.check_uptime(dtutil.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
                     logging.debug('STOPPED instance ' + identity)
 
@@ -224,7 +224,7 @@ class _Status:
         self._running = running
         if running:
             self._details = {}
-            self._startmillis = util.now_millis()
+            self._startmillis = dtutil.now_millis()
         else:
             self._startmillis = 0
         return True
@@ -249,5 +249,5 @@ class _Status:
         status['auto'] = auto if auto else 0
         if self._startmillis > 0:
             status['startmillis'] = self._startmillis
-            status['uptime'] = util.now_millis() - self._startmillis
+            status['uptime'] = dtutil.now_millis() - self._startmillis
         return status

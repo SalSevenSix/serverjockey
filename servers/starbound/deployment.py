@@ -1,5 +1,5 @@
 # ALLOW core.* starbound.messaging
-from core.util import util, io, objconv
+from core.util import util, idutil, io, objconv
 from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -99,7 +99,7 @@ class Deployment:
     async def _rcon_config(self, config: dict) -> dict:
         port, password = util.get('rconServerPort', config), util.get('rconServerPassword', config)
         port = port if port else 21026
-        password = password if password else util.generate_token(10)
+        password = password if password else idutil.generate_token(10)
         rconsvc.RconService.set_config(self._mailer, self, port, password)
         config['runRconServer'], config['rconServerPort'], config['rconServerPassword'] = True, port, password
         await io.write_file(self._config_file, objconv.obj_to_json(config, pretty=True))

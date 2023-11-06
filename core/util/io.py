@@ -6,7 +6,7 @@ import typing
 import aiofiles
 from aiofiles import os as aioos
 # ALLOW util.*
-from core.util import util, funcutil
+from core.util import idutil, funcutil
 
 DEFAULT_CHUNK_SIZE = 65536  # 64Kb
 
@@ -194,7 +194,7 @@ async def stream_copy_file(
 async def stream_write_file(
         filename: str, stream: Readable, chunk_size: int = DEFAULT_CHUNK_SIZE,
         tmp_dir: str = '/tmp', tracker: BytesTracker = NullBytesTracker()):
-    working_dir = tmp_dir + '/' + util.generate_id()
+    working_dir = tmp_dir + '/' + idutil.generate_id()
     try:
         await create_directory(working_dir)
         tempfile = working_dir + '/' + filename.split('/')[-1]

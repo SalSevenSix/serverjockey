@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 # ALLOW core.*
-from core.util import util, objconv, io, cmdutil, aggtrf, pkg
+from core.util import util, dtutil, objconv, io, cmdutil, aggtrf, pkg
 from core.msg import msgabc, msgext, msgftr, msglog, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
@@ -129,7 +129,7 @@ class Server(svrabc.Server):
         await io.delete_directory(self._runtime_dir)
         await io.create_directory(self._runtime_dir)
         await io.write_file(self._executable, main_py)
-        await io.write_file(self._runtime_metafile, 'build : ' + str(util.now_millis()) + '\nbeta  : ' + beta)
+        await io.write_file(self._runtime_metafile, 'build : ' + str(dtutil.now_millis()) + '\nbeta  : ' + beta)
         return None
 
 
@@ -158,7 +158,7 @@ class _PlayersHandler(httpabc.GetHandler):
         if response is None or not isinstance(response, Iterable):
             return result
         for line in [m.data() for m in response]:
-            result.append({'steamid': str(util.now_millis()), 'name': line[1:]})
+            result.append({'steamid': str(dtutil.now_millis()), 'name': line[1:]})
         return result
 
 

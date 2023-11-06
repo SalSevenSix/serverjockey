@@ -2,7 +2,7 @@ import typing
 import asyncio
 from asyncio import subprocess, streams
 # ALLOW util.* msg.* context.* proc.prcenc proc.prcprd
-from core.util import util, funcutil, io
+from core.util import util, idutil, funcutil, io
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.proc import prcprd, wrapper
@@ -116,7 +116,7 @@ class _CommandHelper:
             raise Exception('Invalid job request')
         if not self._pty:
             return
-        self._work_dir = self._tmp_dir + '/' + util.generate_id()
+        self._work_dir = self._tmp_dir + '/' + idutil.generate_id()
         await io.create_directory(self._work_dir)
         command = [self._python, await wrapper.write_wrapper(self._work_dir)]
         if isinstance(self._command, str):

@@ -4,7 +4,7 @@ import logging
 import collections
 import typing
 # ALLOW util.* msg.*
-from core.util import aggtrf, tasks, util, io, pack, funcutil, objconv
+from core.util import idutil, aggtrf, tasks, util, io, pack, funcutil, objconv
 from core.msg import msgabc, msgftr, msgtrf, msglog
 
 
@@ -258,7 +258,7 @@ class RollingLogSubscriber(msgabc.Subscriber):
         self._size = size
         self._transformer = transformer
         self._aggregator = aggregator
-        self._identity = util.generate_id()
+        self._identity = idutil.generate_id()
         self._request_filter = msgftr.And(
             msgftr.NameIs(RollingLogSubscriber.REQUEST),
             msgftr.DataEquals(self._identity))
