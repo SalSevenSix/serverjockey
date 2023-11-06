@@ -83,8 +83,7 @@ class ResourceBuilder:
 
 class WebResource(httpabc.Resource):
 
-    def __init__(self,
-                 name: str = '',
+    def __init__(self, name: str = '',
                  kind: httpabc.ResourceKind = httpabc.ResourceKind.PATH,
                  handler: typing.Optional[httpabc.ABC_HANDLER] = None):
         self._parent: typing.Optional[httpabc.Resource] = None
@@ -141,9 +140,9 @@ class WebResource(httpabc.Resource):
         return httpabc.AllowMethod.call(method, self._handler)
 
     async def handle_get(self, url: URL, secure: bool) -> httpabc.ABC_RESPONSE:
-        data = PathProcessor(self).extract_args_url(url)
-        if secure:
-            httpcnt.make_secure(data)
+        data = PathProcessor.extract_args_query(url)
+        data.update(PathProcessor(self).extract_args_url(url))
+        httpcnt.make_secure(data, secure)
         return await httpabc.GetHandler.call(self._handler, self, data)
 
     async def handle_post(
@@ -196,6 +195,13 @@ class PathProcessor:
                 parent, name, kind = parent.parent(), parent.name(), parent.kind()
         path.reverse()
         return '/'.join(path)
+
+    @staticmethod
+    def extract_args_query(url: URL) -> httpabc.ABC_DATA_GET:
+        data = {}
+        for key, value in url.query.items():
+            data[str(key).strip().lower()] = str(value)
+        return data
 
     def extract_args_url(self, url: URL) -> httpabc.ABC_DATA_GET:
         data = self.extract_args_path(url.path)

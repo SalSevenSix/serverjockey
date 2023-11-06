@@ -1,5 +1,6 @@
 import typing
 from datetime import datetime
+from sqlalchemy import Executable
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 # TODO ALLOW ???
@@ -35,7 +36,7 @@ async def _lookup_player_id(session: AsyncSession, instance_id: int, player_name
     if player_id:
         return player_id
     results = await session.scalars(select(storeabc.Player).where(
-        storeabc.Player.instance == instance_id,
+        storeabc.Player.instance_id == instance_id,
         storeabc.Player.name == player_name))
     player = results.first()
     if not player:
@@ -47,20 +48,20 @@ async def _lookup_player_id(session: AsyncSession, instance_id: int, player_name
 
 class InsertInstance(storeabc.Transaction):
 
-    def __init__(self, subcontext):
-        self._identity, self._module = str(subcontext.config('identity')), subcontext.config('module')
+    def __init__(self, identity: str, module: str):
+        self._identity, self._module = identity, module
 
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance = await _load_instance(session, self._identity)
         if not instance:
-            session.add(storeabc.Instance(created_at=datetime.now(), name=self._identity, module=self._module))
+            session.add(storeabc.Instance(at=datetime.now(), name=self._identity, module=self._module))
         return None
 
 
 class DeleteInstance(storeabc.Transaction):
 
-    def __init__(self, subcontext):
-        self._identity = str(subcontext.config('identity'))
+    def __init__(self, identity: str):
+        self._identity = identity
 
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance = await _load_instance(session, self._identity)
@@ -76,44 +77,73 @@ class DeleteInstance(storeabc.Transaction):
 
 class InsertInstanceEvent(storeabc.Transaction):
 
-    def __init__(self, subcontext, name: str, details: str):
-        self._identity = str(subcontext.config('identity'))
+    def __init__(self, identity: str, name: str, details: str):
+        self._identity = identity
         self._name, self._details = name, details
 
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance_id = await _get_instance_id(session, self._identity)
-        session.add(storeabc.InstanceEvent(at=datetime.now(), instance=instance_id,
+        session.add(storeabc.InstanceEvent(at=datetime.now(), instance_id=instance_id,
                                            name=self._name, details=self._details))
         return None
 
 
 class InsertPlayerEvent(storeabc.Transaction):
 
-    def __init__(self, subcontext, event_name: str, player_name: str, steamid: str | None):
-        self._identity = str(subcontext.config('identity'))
+    def __init__(self, identity: str, event_name: str, player_name: str, steamid: str | None):
+        self._identity = identity
         self._event_name, self._player_name, self._steamid = event_name, player_name, steamid
 
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance_id = await _get_instance_id(session, self._identity)
         player_id = await _lookup_player_id(session, instance_id, self._player_name)
+        now = datetime.now()
         if not player_id:
-            player = storeabc.Player(instance=instance_id, name=self._player_name, steamid=self._steamid)
+            player = storeabc.Player(at=now, instance_id=instance_id, name=self._player_name, steamid=self._steamid)
             session.add(player)
             await session.flush()
             player_id = player.id
-        session.add(storeabc.PlayerEvent(at=datetime.now(), player=player_id, name=self._event_name, details=None))
+        session.add(storeabc.PlayerEvent(at=now, player_id=player_id, name=self._event_name, details=None))
         return None
 
 
 class InsertPlayerChat(storeabc.Transaction):
 
-    def __init__(self, subcontext, player_name: str, text: str):
-        self._identity = str(subcontext.config('identity'))
+    def __init__(self, identity: str, player_name: str, text: str):
+        self._identity = identity
         self._player_name, self._text = player_name, text
 
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance_id = await _get_instance_id(session, self._identity)
         player_id = await _lookup_player_id(session, instance_id, self._player_name)
         if player_id:
-            session.add(storeabc.PlayerChat(at=datetime.now(), player=player_id, text=self._text))
+            session.add(storeabc.PlayerChat(at=datetime.now(), player_id=player_id, text=self._text))
         return None
+
+
+class SelectInstanceEvent(storeabc.Transaction):
+
+    def __init__(self, identity: str | None):
+        self._identity = identity
+
+    async def execute(self, session: AsyncSession) -> typing.Any:
+        statement = select(storeabc.InstanceEvent.at, storeabc.Instance.name, storeabc.InstanceEvent.name)
+        statement = statement.join(storeabc.Instance.events)
+        if self._identity:
+            instance_id = await _get_instance_id(session, self._identity)
+            statement = statement.where(storeabc.Instance.id == instance_id)
+        return await _execute_query(session, statement, 'at', 'instance', 'event')
+
+
+async def _execute_query(session: AsyncSession, statement: Executable, *columns: str) -> tuple:
+    results = []
+    for row in await session.execute(statement):
+        result, index = {}, 0
+        for column in columns:
+            value = row[index]
+            if isinstance(value, datetime):
+                value = str(value)
+            result[column] = value
+            index += 1
+        results.append(result)
+    return tuple(results)

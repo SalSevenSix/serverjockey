@@ -6,7 +6,7 @@ from aiohttp import abc as webabc
 from core.util import util
 from core.http import httpabc
 
-SECURE = '_SECURE'
+_SECURE = '_SECURE'
 X_SECRET = 'X-Secret'
 RESOURCES_READY = 'RESOURCES_READY'
 
@@ -28,16 +28,18 @@ ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
 WEBDEV_ORIGIN = 'http://localhost:5173'
 
 
-def make_secure(data: httpabc.ABC_DATA_GET):
-    data.update({SECURE: True})
+def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):
+    if _SECURE in data:
+        del data[_SECURE]
+    if secure:
+        data[_SECURE] = True
 
 
 def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
-    return util.get(SECURE, data) is True
+    return util.get(_SECURE, data, False) is True
 
 
 class ContentTypeImpl(httpabc.ContentType):
-
     _STAMP_REGEX = re.compile(r'^[0-9_-]+$')
 
     def __init__(self, content_type: str):

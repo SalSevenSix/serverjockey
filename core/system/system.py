@@ -27,6 +27,7 @@ class SystemService:
         logfile = self._context.config('logfile')
         subs = httpsubs.HttpSubscriptionService(context)
         resource = httprsc.WebResource()
+        sysstore.resources(context, resource)
         r = httprsc.ResourceBuilder(resource)
         r.put('login', httpext.LoginHandler(context.config('secret')))
         r.put('modules', httpext.StaticHandler(svrmodules.Modules.names()))

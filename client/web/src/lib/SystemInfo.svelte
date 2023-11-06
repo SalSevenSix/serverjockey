@@ -4,7 +4,6 @@
   import { sleep, humanFileSize, humanDuration } from '$lib/util';
   import { newGetRequest } from '$lib/sjgmsapi';
   import RubiksCube from '$lib/RubiksCube.svelte';
-  import Overlay from '$lib/Overlay.svelte';
   import SpinnerOverlay from '$lib/SpinnerOverlay.svelte';
 
   let looping = true;
@@ -42,7 +41,7 @@
     <figure class="image max-400"><RubiksCube /></figure>
   </div>
   <div class="column is-one-third position-relative">
-    {#if !info}<Overlay><SpinnerOverlay /></Overlay>{/if}
+    {#if !info}<SpinnerOverlay />{/if}
     <table class="table is-thinner">
       {#if info}
         <tbody>
@@ -73,7 +72,7 @@
     </table>
   </div>
   <div class="column is-one-third position-relative">
-    {#if !info}<Overlay><SpinnerOverlay /></Overlay>{/if}
+    {#if !info}<SpinnerOverlay />{/if}
     <table class="table is-thinner">
       {#if info}
         <tbody>

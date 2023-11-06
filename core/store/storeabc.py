@@ -1,3 +1,4 @@
+from __future__ import annotations
 import typing
 import abc
 from sqlalchemy import Column, ForeignKey, DateTime, Integer, Text
@@ -5,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.asyncio.session import AsyncSession
 # TODO ALLOW ???
-from core.msg import msgabc
+from core.msg import msgabc, msgext
 
 
 TRANSACTION = 'storeabc.TRANSACTION'
@@ -23,6 +24,11 @@ def execute(mailer: msgabc.Mailer, source: typing.Any, transaction: Transaction)
     mailer.post(source, TRANSACTION, transaction)
 
 
+async def query(mailer: msgabc.MulticastMailer, source: typing.Any, transaction: Transaction):
+    response = await msgext.SynchronousMessenger(mailer).request(source, TRANSACTION, transaction)
+    return response.data()
+
+
 class Base(AsyncAttrs, DeclarativeBase):
     pass
 
@@ -38,18 +44,19 @@ class SystemEvent(Base):
 class Instance(Base):
     __tablename__ = 'instance'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
+    at = Column(DateTime)
     name = Column(Text, unique=True)
     module = Column(Text)
-    created_at = Column(DateTime)
-    events = relationship('InstanceEvent', cascade='all,delete')
-    players = relationship('Player', cascade='all,delete')
+    events: Mapped[typing.List[InstanceEvent]] = relationship(back_populates='instance', cascade='all,delete')
+    players: Mapped[typing.List[Player]] = relationship(back_populates='instance', cascade='all,delete')
 
 
 class InstanceEvent(Base):
     __tablename__ = 'instance_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     at = Column(DateTime)
-    instance: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
+    instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
+    instance: Mapped[Instance] = relationship(back_populates='events')
     name = Column(Text)
     details = Column(Text, nullable=True)
 
@@ -57,18 +64,21 @@ class InstanceEvent(Base):
 class Player(Base):
     __tablename__ = 'player'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    instance: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
+    at = Column(DateTime)
+    instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
+    instance: Mapped[Instance] = relationship(back_populates='players')
     name = Column(Text)
     steamid = Column(Text, nullable=True)
-    events = relationship('PlayerEvent', cascade='all,delete')
-    chats = relationship('PlayerChat', cascade='all,delete')
+    events: Mapped[typing.List[PlayerEvent]] = relationship(back_populates='player', cascade='all,delete')
+    chats: Mapped[typing.List[PlayerChat]] = relationship(back_populates='player', cascade='all,delete')
 
 
 class PlayerEvent(Base):
     __tablename__ = 'player_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     at = Column(DateTime)
-    player: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
+    player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
+    player: Mapped[Player] = relationship(back_populates='events')
     name = Column(Text)
     details = Column(Text, nullable=True)
 
@@ -77,5 +87,6 @@ class PlayerChat(Base):
     __tablename__ = 'player_chat'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     at = Column(DateTime)
-    player: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
+    player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
+    player: Mapped[Player] = relationship(back_populates='chats')
     text = Column(Text)
