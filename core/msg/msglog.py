@@ -3,7 +3,7 @@ import time
 import typing
 import aiofiles
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import util, io, funcutil, logutil
+from core.util import util, dtutil, io, funcutil, logutil
 from core.msg import msgabc, msgftr, msgtrf
 
 CRITICAL = 'MessageLogging.CRITICAL'
@@ -88,7 +88,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
             return None
         try:
             if self._file is None:
-                filename = time.strftime(self._filename, time.localtime(time.time()))
+                filename = dtutil.format_time(self._filename, time.time())
                 self._file = await aiofiles.open(filename, mode='w')
             await self._file.write(self._transformer.transform(message))
             await self._file.write('\n')

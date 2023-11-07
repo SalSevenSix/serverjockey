@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing
 import abc
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, Text
+from sqlalchemy import Column, ForeignKey, Integer, Float, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -36,7 +36,7 @@ class Base(AsyncAttrs, DeclarativeBase):
 class SystemEvent(Base):
     __tablename__ = 'system_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(DateTime)
+    at = Column(Float)
     name = Column(Text)
     details = Column(Text, nullable=True)
 
@@ -44,7 +44,7 @@ class SystemEvent(Base):
 class Instance(Base):
     __tablename__ = 'instance'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
-    at = Column(DateTime)
+    at = Column(Float)
     name = Column(Text, unique=True)
     module = Column(Text)
     events: Mapped[typing.List[InstanceEvent]] = relationship(back_populates='instance', cascade='all,delete')
@@ -54,7 +54,7 @@ class Instance(Base):
 class InstanceEvent(Base):
     __tablename__ = 'instance_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(DateTime)
+    at = Column(Float)
     instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
     instance: Mapped[Instance] = relationship(back_populates='events')
     name = Column(Text)
@@ -64,7 +64,7 @@ class InstanceEvent(Base):
 class Player(Base):
     __tablename__ = 'player'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(DateTime)
+    at = Column(Float)
     instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
     instance: Mapped[Instance] = relationship(back_populates='players')
     name = Column(Text)
@@ -76,7 +76,7 @@ class Player(Base):
 class PlayerEvent(Base):
     __tablename__ = 'player_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(DateTime)
+    at = Column(Float)
     player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
     player: Mapped[Player] = relationship(back_populates='events')
     name = Column(Text)
@@ -86,7 +86,7 @@ class PlayerEvent(Base):
 class PlayerChat(Base):
     __tablename__ = 'player_chat'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(DateTime)
+    at = Column(Float)
     player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
     player: Mapped[Player] = relationship(back_populates='chats')
     text = Column(Text)

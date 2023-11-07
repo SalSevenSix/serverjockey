@@ -163,8 +163,7 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
             proch.ServerProcess.FILTER_STATES_DOWN,
             msgftr.IsStop()))
         self._mailer = mailer
-        self._second_message = False
-        self._initiated = 0
+        self._initiated, self._second_message = 0, False
 
     async def handle(self, message):
         if message is msgabc.STOP:

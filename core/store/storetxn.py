@@ -1,5 +1,5 @@
 import typing
-from datetime import datetime
+import time
 from sqlalchemy import Executable
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,7 +54,7 @@ class InsertInstance(storeabc.Transaction):
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance = await _load_instance(session, self._identity)
         if not instance:
-            session.add(storeabc.Instance(at=datetime.now(), name=self._identity, module=self._module))
+            session.add(storeabc.Instance(at=time.time(), name=self._identity, module=self._module))
         return None
 
 
@@ -83,7 +83,7 @@ class InsertInstanceEvent(storeabc.Transaction):
 
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance_id = await _get_instance_id(session, self._identity)
-        session.add(storeabc.InstanceEvent(at=datetime.now(), instance_id=instance_id,
+        session.add(storeabc.InstanceEvent(at=time.time(), instance_id=instance_id,
                                            name=self._name, details=self._details))
         return None
 
@@ -97,7 +97,7 @@ class InsertPlayerEvent(storeabc.Transaction):
     async def execute(self, session: AsyncSession) -> typing.Any:
         instance_id = await _get_instance_id(session, self._identity)
         player_id = await _lookup_player_id(session, instance_id, self._player_name)
-        now = datetime.now()
+        now = time.time()
         if not player_id:
             player = storeabc.Player(at=now, instance_id=instance_id, name=self._player_name, steamid=self._steamid)
             session.add(player)
@@ -117,7 +117,7 @@ class InsertPlayerChat(storeabc.Transaction):
         instance_id = await _get_instance_id(session, self._identity)
         player_id = await _lookup_player_id(session, instance_id, self._player_name)
         if player_id:
-            session.add(storeabc.PlayerChat(at=datetime.now(), player_id=player_id, text=self._text))
+            session.add(storeabc.PlayerChat(at=time.time(), player_id=player_id, text=self._text))
         return None
 
 
@@ -141,8 +141,6 @@ async def _execute_query(session: AsyncSession, statement: Executable, *columns:
         result, index = {}, 0
         for column in columns:
             value = row[index]
-            if isinstance(value, datetime):
-                value = str(value)
             result[column] = value
             index += 1
         results.append(result)

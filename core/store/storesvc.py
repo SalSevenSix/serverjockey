@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+import time
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -53,7 +53,7 @@ class StoreService(msgabc.AbcSubscriber):
             if create_database:
                 async with self._session.begin():
                     self._session.add(storeabc.SystemEvent(
-                        at=datetime.now(), name='SCHEMA',
+                        at=time.time(), name='SCHEMA',
                         details=objconv.obj_to_json(sysutil.system_version_dict())))
             return None
         except Exception as e:

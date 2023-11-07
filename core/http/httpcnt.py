@@ -1,9 +1,10 @@
 from __future__ import annotations
 import typing
 import re
+import time
 from aiohttp import abc as webabc
 # ALLOW util.* msg.* context.* http.httpabc
-from core.util import util, dtutil
+from core.util import util
 from core.http import httpabc
 
 _SECURE = '_SECURE'
@@ -90,16 +91,17 @@ class ContentTypeImpl(httpabc.ContentType):
 
 
 class SecurityService:
+    _TIMOUT = 5.0
 
     def __init__(self, secret: str):
         self._secret = secret
         self._failures = {}
 
     def check(self, request: webabc.Request) -> bool:
-        remote, now = request.remote, dtutil.now_millis()
+        remote, now = request.remote, time.time()
         last_failure = util.get(remote, self._failures)
         if last_failure:
-            if (now - last_failure) < 5000:
+            if (now - last_failure) < SecurityService._TIMOUT:
                 self._failures[remote] = now
                 raise httpabc.ResponseBody.UNAUTHORISED
             del self._failures[remote]
@@ -114,10 +116,10 @@ class SecurityService:
         self._failures[remote] = now
         raise httpabc.ResponseBody.UNAUTHORISED
 
-    def _clean_failures(self, now: int):
+    def _clean_failures(self, now: float):
         delete_keys = []
         for key, value in self._failures.items():
-            if (now - value) >= 5000:
+            if (now - value) >= SecurityService._TIMOUT:
                 delete_keys.append(key)
         for key in delete_keys:
             del self._failures[key]

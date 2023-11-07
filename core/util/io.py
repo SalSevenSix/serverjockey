@@ -1,12 +1,11 @@
 import abc
 import os
 import shutil
-import time
 import typing
 import aiofiles
 from aiofiles import os as aioos
 # ALLOW util.*
-from core.util import idutil, funcutil
+from core.util import dtutil, idutil, funcutil
 
 DEFAULT_CHUNK_SIZE = 65536  # 64Kb
 
@@ -136,14 +135,12 @@ async def file_size(file: str) -> int:
     return stats.st_size
 
 
-async def directory_list(
-        path: str, baseurl: str = None) -> typing.List[typing.Dict[str, typing.Union[str, float]]]:
+async def directory_list(path: str, baseurl: str = None) -> typing.List[typing.Dict[str, typing.Union[str, float]]]:
     if not path.endswith('/'):
         path += '/'
     result = []
     for name in await _listdir(path):
-        entry, file, ftype = {}, path + name, 'unknown'
-        exists, size, updated, mtime = False, -1, -1, ''
+        exists, file, ftype, size, updated, mtime = False, path + name, 'unknown', -1, '', -1.0
         if await _is_symlink(file):
             ftype = 'link'
             if await aioos.path.isfile(file):
@@ -156,12 +153,12 @@ async def directory_list(
             exists, ftype = True, 'directory'
         if exists:
             mtime = await aioos.path.getmtime(file)
-            updated = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
-        entry.update({'type': ftype, 'name': name, 'updated': updated, 'mtime': mtime})
+            updated = dtutil.format_time_standard(mtime)
+        entry = {'type': ftype, 'name': name, 'updated': updated, 'mtime': mtime}
         if size > -1:
-            entry.update({'size': size})
+            entry['size'] = size
         if baseurl:
-            entry.update({'url': baseurl + '/' + name})
+            entry['url'] = baseurl + '/' + name
         result.append(entry)
     return result
 

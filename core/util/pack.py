@@ -7,7 +7,7 @@ import time
 import random
 import itertools
 # ALLOW util.*
-from core.util import idutil, funcutil, io, logutil, tasks, pkg
+from core.util import dtutil, idutil, funcutil, io, logutil, tasks, pkg
 
 _make_archive = funcutil.to_async(shutil.make_archive)
 _unpack_archive = funcutil.to_async(shutil.unpack_archive)
@@ -30,10 +30,8 @@ async def archive_directory(
             archives_dir = archives_dir[:-1]
         assert await io.directory_exists(archives_dir)
         await io.create_directory(working_dir)
-        now = time.time()
-        lnow = time.localtime(now)
-        archive_kind = unpacked_dir.split('/')[-1]
-        archive_name = archive_kind + '-' + time.strftime('%Y%m%d', lnow) + '-' + time.strftime('%H%M%S', lnow)
+        now, archive_kind = time.time(), unpacked_dir.split('/')[-1]
+        archive_name = archive_kind + '-' + dtutil.format_time('%Y%m%d', now) + '-' + dtutil.format_time('%H%M%S', now)
         archive_tmp = await _make_archive(working_dir + '/' + archive_name, 'zip', root_dir=unpacked_dir, logger=logger)
         assert archive_tmp.endswith('.zip')
         archive_path = archives_dir + '/' + archive_name + '.zip'
