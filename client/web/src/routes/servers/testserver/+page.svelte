@@ -12,6 +12,8 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import ContextInstanceWrapper from '$lib/ContextInstanceWrapper.svelte';
+  import QueryInstanceEvent from '$lib/QueryInstanceEvent.svelte';
 
   const consoleCommands = {
     'console': {
@@ -54,6 +56,11 @@
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions hasWorld={false} />
+      </Collapsible>
+      <Collapsible icon="fa-chart-pie" title="History">
+        <ContextInstanceWrapper let:instance={instance}>
+          <QueryInstanceEvent identity={instance.identity()} />
+        </ContextInstanceWrapper>
       </Collapsible>
     </div>
   </div>

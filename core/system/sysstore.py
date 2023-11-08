@@ -18,7 +18,7 @@ def initialise(context: contextsvc.Context, source: typing.Any):
 def resources(context: contextsvc.Context, resource: httprsc.WebResource):
     r = httprsc.ResourceBuilder(resource)
     r.psh('store')
-    r.put('query-instance-event', _QueryInstanceHandler(context))
+    r.put('instance-event', _QueryInstanceHandler(context))
 
 
 class _SystemRouting(msgabc.AbcSubscriber):
@@ -93,8 +93,7 @@ class _QueryInstanceHandler(httpabc.GetHandler):
     async def handle_get(self, resource, data):
         if not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        instance = util.get('instance', data)
-        result = await storeabc.query(self._mailer, self, storetxn.SelectInstanceEvent(instance))
+        result = await storeabc.query(self._mailer, self, storetxn.SelectInstanceEvent(data))
         if isinstance(result, Exception):
             return httpabc.ResponseBody.BAD_REQUEST
         return result

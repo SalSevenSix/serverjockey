@@ -9,6 +9,7 @@ export default defineConfig({
       '/modules': 'http://localhost:6164',
       '/system': 'http://localhost:6164',
       '/instances': 'http://localhost:6164',
+      '/store': 'http://localhost:6164',
       '/subscriptions': 'http://localhost:6164'
     }
   }

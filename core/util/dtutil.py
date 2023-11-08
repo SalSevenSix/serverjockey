@@ -2,8 +2,16 @@ import time
 # ALLOW NONE
 
 
+def to_seconds(millis: int | None) -> float | None:
+    return float(millis / 1000)
+
+
+def to_millis(seconds: float | None) -> int | None:
+    return int(seconds * 1000.0)
+
+
 def now_millis() -> int:
-    return int(time.time() * 1000.0)
+    return to_millis(time.time())
 
 
 def format_time(ft: str, seconds: float, local: bool = True) -> str:

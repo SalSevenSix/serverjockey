@@ -4,7 +4,7 @@ from sqlalchemy import Executable
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 # TODO ALLOW ???
-from core.util import util
+from core.util import util, dtutil
 from core.store import storeabc
 
 _CACHE_INSTANCE_ID = {}
@@ -12,11 +12,13 @@ _CACHE_PLAYER_ID = {}
 
 
 async def _load_instance(session: AsyncSession, identity: str) -> storeabc.Instance | None:
+    assert identity == util.script_escape(identity)
     results = await session.scalars(select(storeabc.Instance).where(storeabc.Instance.name == identity))
     return results.first()
 
 
 async def _get_instance_id(session: AsyncSession, identity: str) -> int:
+    assert identity == util.script_escape(identity)
     instance_id = util.get(identity, _CACHE_INSTANCE_ID)
     if instance_id:
         return instance_id
@@ -123,25 +125,39 @@ class InsertPlayerChat(storeabc.Transaction):
 
 class SelectInstanceEvent(storeabc.Transaction):
 
-    def __init__(self, identity: str | None):
-        self._identity = identity
+    def __init__(self, data: dict):
+        self._data = data
 
     async def execute(self, session: AsyncSession) -> typing.Any:
+        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'events'), True)
+        instance, at_from, at_to, events = util.unpack_dict(criteria)
         statement = select(storeabc.InstanceEvent.at, storeabc.Instance.name, storeabc.InstanceEvent.name)
         statement = statement.join(storeabc.Instance.events)
-        if self._identity:
-            instance_id = await _get_instance_id(session, self._identity)
-            statement = statement.where(storeabc.Instance.id == instance_id)
-        return await _execute_query(session, statement, 'at', 'instance', 'event')
+        if instance:
+            statement = statement.where(storeabc.Instance.id == await _get_instance_id(session, instance))
+        if at_from:
+            at_from = int(at_from)
+            statement = statement.where(storeabc.InstanceEvent.at >= dtutil.to_seconds(at_from))
+        if at_to:
+            at_to = int(at_to)
+            statement = statement.where(storeabc.InstanceEvent.at <= dtutil.to_seconds(at_to))
+        if events:
+            statement = statement.where(storeabc.InstanceEvent.name.in_(str(events).split(',')))
+        statement = statement.order_by(storeabc.InstanceEvent.at)
+        criteria['atfrom'], criteria['atto'] = at_from, at_to
+        return await _execute_query(session, statement, criteria, 'at', 'instance', 'event')
 
 
-async def _execute_query(session: AsyncSession, statement: Executable, *columns: str) -> tuple:
-    results = []
+async def _execute_query(session: AsyncSession, statement: Executable, criteria: dict, *columns: str) -> dict:
+    result, records = {'created': dtutil.now_millis(), 'criteria': criteria, 'headers': columns}, []
     for row in await session.execute(statement):
-        result, index = {}, 0
+        record, index = [], 0
         for column in columns:
             value = row[index]
-            result[column] = value
+            if column == 'at':
+                value = dtutil.to_millis(value)
+            record.append(value)
             index += 1
-        results.append(result)
-    return tuple(results)
+        records.append(record)
+    result['records'] = records
+    return result

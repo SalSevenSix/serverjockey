@@ -74,12 +74,21 @@ def get(key: typing.Any, dictionary: dict, default: typing.Any = None):
     return default
 
 
-def filter_dict(dictionary: dict, keys: typing.Collection):
+def filter_dict(dictionary: dict, keys: typing.Collection, none_fill: bool = False):
     result = {}
     for key in keys:
         if key in dictionary:
             result[key] = dictionary[key]
+        elif none_fill:
+            result[key] = None
     return result
+
+
+def unpack_dict(dictionary: dict, keys: typing.Collection | None = None) -> tuple:
+    result = []
+    for key in keys if keys else dictionary.keys():
+        result.append(get(key, dictionary))
+    return tuple(result)
 
 
 def left_chop_and_strip(value: str, keyword: str) -> str:

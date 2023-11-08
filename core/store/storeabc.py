@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 # TODO ALLOW ???
 from core.msg import msgabc, msgext
 
+# TODO review indexes after all the queries are done
 
 TRANSACTION = 'storeabc.TRANSACTION'
 TRANSACTION_RESPONSE = TRANSACTION + '_RESPONSE'
