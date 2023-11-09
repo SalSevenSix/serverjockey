@@ -59,7 +59,7 @@
       </Collapsible>
       <Collapsible icon="fa-chart-pie" title="History">
         <ContextInstanceWrapper let:instance={instance}>
-          <QueryInstanceEvent identity={instance.identity()} />
+          <QueryInstanceEvent criteria={{ instance: instance.identity() }} />
         </ContextInstanceWrapper>
       </Collapsible>
     </div>

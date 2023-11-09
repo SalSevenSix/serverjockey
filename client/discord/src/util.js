@@ -28,6 +28,11 @@ exports.commandLineToList = function(line) {
   return result;
 }
 
+exports.shortISODateTimeString = function(dateobj) {
+  if (!dateobj) { dateobj = new Date(); }
+  return dateobj.toISOString().replace('T', ' ').substring(0, 19);
+}
+
 exports.humanDuration = function(millis, parts=3) {
   if (!millis) { millis = 0; }
   let days = -1;

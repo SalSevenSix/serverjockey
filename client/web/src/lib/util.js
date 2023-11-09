@@ -43,6 +43,17 @@ export function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+export function floatToPercent(value, rounding=1, suffix='%') {
+  let result = (value * 100.0).toFixed(rounding);
+  return suffix ? result + suffix : result;
+}
+
+export function shortISODateTimeString(millis, utc=false) {
+  let dateobj = new Date(millis);
+  if (!utc) { dateobj = new Date(dateobj.getTime() + dateobj.getTimezoneOffset() * -60000); }
+  return dateobj.toISOString().replace('T', ' ').substring(0, 19);
+}
+
 export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;
