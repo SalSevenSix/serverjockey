@@ -1,4 +1,3 @@
-import typing
 # TODO ALLOW ???
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
@@ -9,31 +8,30 @@ from core.common import playerstore  # TODO no No NO!
 from core.store import storeabc, storetxn, storesvc
 
 
-def _get_dbfile(context: contextsvc.Context):
-    return context.config('dbfile')
+class SystemStoreService:
 
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
+        self._dbfile = context.config('dbfile')
 
-def initialise(context: contextsvc.Context, source: typing.Any):
-    if not _get_dbfile(context):
-        return
-    context.register(storesvc.StoreService(context))
-    context.post(source, storesvc.StoreService.INITIALISE)
-    context.register(_SystemRouting(context))
+    def initialise(self):
+        if not self._dbfile:
+            return
+        self._context.register(storesvc.StoreService(self._context))
+        self._context.post(self, storesvc.StoreService.INITIALISE)
+        self._context.register(_SystemRouting(self._context))
 
+    def initialise_instance(self, subcontext: contextsvc.Context):
+        if not self._dbfile:
+            return
+        subcontext.register(_InstanceRouting(subcontext))
 
-def initialise_instance(subcontext: contextsvc.Context):
-    if not _get_dbfile(subcontext):
-        return
-    subcontext.register(_InstanceRouting(subcontext))
-
-
-def resources(context: contextsvc.Context, resource: httprsc.WebResource):
-    dbfile = _get_dbfile(context)
-    if not dbfile:
-        return
-    r = httprsc.ResourceBuilder(resource)
-    r.psh('store', httpext.StaticHandler(dbfile))
-    r.put('instance-event', _QueryInstanceHandler(context))
+    def resources(self, resource: httprsc.WebResource):
+        if not self._dbfile:
+            return
+        r = httprsc.ResourceBuilder(resource)
+        r.psh('store', httpext.StaticHandler(self._dbfile))
+        r.put('instance-event', _QueryInstanceHandler(self._context))
 
 
 class _SystemRouting(msgabc.AbcSubscriber):

@@ -18,29 +18,30 @@ class SystemService:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._modules = svrmodules.Modules()
         self._home_dir = context.config('home')
         self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
-        self._resource = self._build_resources(context)
+        self._modules = svrmodules.Modules(context)
+        self._sysstoresvc = sysstore.SystemStoreService(context)
+        self._resource = self._build_resources()
         self._instances = self._resource.child('instances')
 
-    def _build_resources(self, context: contextsvc.Context) -> httprsc.WebResource:
+    def _build_resources(self) -> httprsc.WebResource:
         logfile = self._context.config('logfile')
-        subs = httpsubs.HttpSubscriptionService(context)
+        subs = httpsubs.HttpSubscriptionService(self._context)
         resource = httprsc.WebResource()
-        sysstore.resources(context, resource)
+        self._sysstoresvc.resources(resource)
         r = httprsc.ResourceBuilder(resource)
-        r.put('login', httpext.LoginHandler(context.config('secret')))
-        r.put('modules', httpext.StaticHandler(svrmodules.Modules.names()))
+        r.put('login', httpext.LoginHandler(self._context.config('secret')))
+        r.put('modules', httpext.StaticHandler(self._modules.names()))
         r.psh('system')
         r.put('info', _SystemInfoHandler())
         r.put('shutdown', _ShutdownHandler(self))
         r.psh('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
-        r.put('tail', httpext.RollingLogHandler(context, msglog.HandlerPublisher.LOG_FILTER))
+        r.put('tail', httpext.RollingLogHandler(self._context, msglog.HandlerPublisher.LOG_FILTER))
         r.put('subscribe', subs.handler(msglog.HandlerPublisher.LOG_FILTER, aggtrf.StrJoin('\n')))
         r.pop()
         r.pop()
-        r.psh('instances', _InstancesHandler(self))
+        r.psh('instances', _InstancesHandler(self, self._modules))
         r.put('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer()))
         r.pop()
         r.psh(subs.resource(resource, 'subscriptions'))
@@ -53,7 +54,7 @@ class SystemService:
         else:
             logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
         igd.initialise(self._context, self)
-        sysstore.initialise(self._context, self)
+        self._sysstoresvc.initialise()
         self._context.register(_DeleteInstanceSubscriber(self))
         self._context.register(_AutoStartsSubscriber())
         await self._initialise_instances()
@@ -83,6 +84,7 @@ class SystemService:
             shutdowns.append(svrsvc.ServerService.shutdown(subcontext, self))
             destroys.append(self._context.destroy_subcontext(subcontext))
         await asyncio.gather(*shutdowns)
+        # TODO safe shutdown of sysstore here
         await asyncio.gather(*destroys)
 
     def instances_info(self, baseurl: str) -> dict:
@@ -113,7 +115,7 @@ class SystemService:
 
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
         assert util.get('identity', configuration)
-        assert svrmodules.Modules.valid(util.get('module', configuration))
+        assert self._modules.valid(util.get('module', configuration))
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
@@ -137,7 +139,7 @@ class SystemService:
         subcontext.start()
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
-        sysstore.initialise_instance(subcontext)
+        self._sysstoresvc.initialise_instance(subcontext)
         server = await self._modules.create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(self))
@@ -201,15 +203,15 @@ class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
 class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
     VALIDATOR = re.compile(r'[^a-z0-9_\-]')
 
-    def __init__(self, system: SystemService):
-        self._system = system
+    def __init__(self, system: SystemService, modules: svrmodules.Modules):
+        self._system, self._modules, = system, modules
 
     def handle_get(self, resource, data):
         return self._system.instances_info(util.get('baseurl', data, ''))
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
-        if not identity or not svrmodules.Modules.valid(module):
+        if not identity or not self._modules.valid(module):
             return httpabc.ResponseBody.BAD_REQUEST
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):

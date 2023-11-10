@@ -2,11 +2,11 @@ import time
 # ALLOW NONE
 
 
-def to_seconds(millis: int | None) -> float | None:
-    return float(millis / 1000)
+def to_seconds(millis: int) -> float:
+    return float(millis) / 1000.0
 
 
-def to_millis(seconds: float | None) -> int | None:
+def to_millis(seconds: float) -> int:
     return int(seconds * 1000.0)
 
 

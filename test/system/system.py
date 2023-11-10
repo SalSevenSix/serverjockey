@@ -7,7 +7,8 @@ class TestSystem(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_modules(self):
         result = await systest.get('/modules')
-        self.assertEqual(6, len(result))
+        self.assertEqual(7, len(result))
+        self.assertTrue('testserver' in result)
         self.assertTrue('projectzomboid' in result)
         self.assertTrue('factorio' in result)
         self.assertTrue('sevendaystodie' in result)

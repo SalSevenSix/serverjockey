@@ -142,7 +142,8 @@ class SelectInstanceEvent(storeabc.Transaction):
             at_to = int(at_to)
             statement = statement.where(storeabc.InstanceEvent.at <= dtutil.to_seconds(at_to))
         if events:
-            statement = statement.where(storeabc.InstanceEvent.name.in_(str(events).split(',')))
+            events = str(events).upper().split(',')
+            statement = statement.where(storeabc.InstanceEvent.name.in_(events))
         statement = statement.order_by(storeabc.InstanceEvent.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
         return await _execute_query(session, statement, criteria, 'at', 'instance', 'event')

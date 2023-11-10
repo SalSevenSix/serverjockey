@@ -4,33 +4,37 @@ from core.util import util, pkg
 from core.context import contextsvc
 from core.system import svrabc
 
-# TODO Consider pulling this list from meta data under servers package, maybe use init.py files
-_PUBLIC_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii')
-_ALL_MODULES = _PUBLIC_MODULES + ('serverlink', 'testserver')
+_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii')
 
 
 class Modules:
 
-    def __init__(self):
+    def __init__(self, context: contextsvc.Context):
+        public_modules, all_modules = [], ['serverlink']
+        if context.is_debug():
+            public_modules.append('testserver')
+        else:
+            all_modules.append('testserver')
+        public_modules.extend(_MODULES)
+        all_modules.extend(public_modules)
+        self._public_modules, self._all_modules = tuple(public_modules), tuple(all_modules)
         self._cache = {}
 
-    @staticmethod
-    def names() -> tuple:
-        return _PUBLIC_MODULES
+    def names(self) -> tuple:
+        return self._public_modules
 
-    @staticmethod
-    def valid(module_name: str) -> bool:
-        return module_name and module_name in _ALL_MODULES
+    def valid(self, module_name: str) -> bool:
+        return module_name and module_name in self._all_modules
 
-    async def create_server(self, context: contextsvc.Context) -> svrabc.Server:
-        module = await self._load(context.config('module'))
+    async def create_server(self, subcontext: contextsvc.Context) -> svrabc.Server:
+        module = await self._load(subcontext.config('module'))
         for name, member in inspect.getmembers(module):
             if inspect.isclass(member) and svrabc.Server in inspect.getmro(member):
-                return member(context)
+                return member(subcontext)
         raise Exception('Server class implementation not found in module: ' + repr(module))
 
     async def _load(self, module_name: str) -> types.ModuleType:
-        assert Modules.valid(module_name)
+        assert self.valid(module_name)
         module = util.get(module_name, self._cache)
         if not module:
             module = await pkg.import_module('servers.' + module_name + '.server')
