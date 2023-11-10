@@ -1,4 +1,5 @@
 import logging
+import asyncio
 import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, dtutil, io, sysutil, signals, objconv, aggtrf
@@ -76,12 +77,13 @@ class SystemService:
 
     async def shutdown(self):
         await self._clientfile.delete()
-        subcontexts = self._context.subcontexts()
-        for subcontext in subcontexts:
+        shutdowns, destroys = [], []
+        for subcontext in self._context.subcontexts():
             self._instances.remove(subcontext.config('identity'))
-        for subcontext in subcontexts:
-            await svrsvc.ServerService.shutdown(subcontext, self)
-            await self._context.destroy_subcontext(subcontext)
+            shutdowns.append(svrsvc.ServerService.shutdown(subcontext, self))
+            destroys.append(self._context.destroy_subcontext(subcontext))
+        await asyncio.gather(*shutdowns)
+        await asyncio.gather(*destroys)
 
     def instances_info(self, baseurl: str) -> dict:
         result = {}
@@ -135,7 +137,7 @@ class SystemService:
         subcontext.start()
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
-        subcontext.register(sysstore.InstanceRouting(subcontext))
+        sysstore.initialise_instance(subcontext)
         server = await self._modules.create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(self))

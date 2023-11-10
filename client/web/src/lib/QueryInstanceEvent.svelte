@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/notifications';
   import { newGetRequest } from '$lib/sjgmsapi';
   import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
@@ -8,7 +8,18 @@
 
   export let criteria;
 
+  let objectUrls = [];
+  let hasStore = null;
+  let queryResult = null;
   let uptimeStats = null;
+
+  function showQueryResult() {
+    if (!queryResult) return;
+    let blob = new Blob([JSON.stringify(queryResult)], { type : 'text/plain;charset=utf-8' });
+    let objectUrl = window.URL.createObjectURL(blob);
+    objectUrls.push(objectUrl);
+    window.open(objectUrl).focus();
+  }
 
   function buildInstanceChartData(entry) {
     let upTime = Math.round(entry.avail * 100.0 * 1000.0) / 1000.0;
@@ -17,7 +28,7 @@
       data: {
         labels: ['UP', 'DOWN'],
         datasets: [{
-          label: '%',
+          label: ' % ',
           borderColor: '#DBDBDB',
           backgroundColor: ['#48C78E', '#F14668'],
           data: [upTime, 100.0 - upTime]
@@ -54,16 +65,13 @@
         entry.event = event;
       }
     });
+    let result = { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
+                   atrange: data.criteria.atto - data.criteria.atfrom, instances: [] };
     Object.keys(entries).forEach(function(instance) {
       entry = entries[instance];
       if (entry.event === 'STARTED') {
         entry.uptime += data.criteria.atto - entry.at;
       }
-    });
-    let result = { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-                   atrange: data.criteria.atto - data.criteria.atfrom, instances: [] };
-    Object.keys(entries).forEach(function(instance) {
-      entry = entries[instance];
       result.instances.push({
         instance: instance, sessions: entry.sessions,
         uptime: entry.uptime, avail: entry.uptime / result.atrange });
@@ -72,6 +80,7 @@
   }
 
   export function queryInstanceEvent(qc) {
+    if (!hasStore) return;
     if (!qc.atto) { qc.atto = Date.now(); }
     if (!qc.atfrom) { qc.atfrom = qc.atto - 2592000000; }  // 30 days
     let url = '/store/instance-event?events=STARTED,STOPPED,EXCEPTION';
@@ -83,27 +92,42 @@
         return response.json();
       })
       .then(function(json) {
+        queryResult = json;
         uptimeStats = extractUptimeStats(json);
       })
       .catch(function(error) { notifyError('Failed to load query data.'); });
   }
 
   onMount(function() {
-    if (!criteria) return;
-    queryInstanceEvent(criteria);
+    fetch('/store', newGetRequest())
+      .then(function(response) {
+        hasStore = response.ok;
+        if (criteria) { queryInstanceEvent(criteria); }
+      })
+      .finally(function() {
+        if (hasStore === null) { hasStore = false; }
+      });
+  });
+
+  onDestroy(function() {
+    objectUrls.forEach(function(objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    });
   });
 </script>
 
 
-<div class="content">
-  {#if uptimeStats}
+{#if uptimeStats}
+  <div class="block">
     <div class="columns">
       <div class="column is-one-fifth mb-0 pb-0">
         <p><span class="has-text-weight-bold">Instance Uptime</span></p>
       </div>
       <div class="column is-four-fifths">
         <p>
-          <span class="white-space-nowrap">results from &nbsp;{shortISODateTimeString(uptimeStats.atfrom)}&nbsp;</span>
+          <a href={'#'} on:click|preventDefault={showQueryResult}>
+            results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
+          <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(uptimeStats.atfrom)}&nbsp;</span>
           <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(uptimeStats.atto)}&nbsp;</span>
           <span class="white-space-nowrap">({humanDuration(uptimeStats.atrange)})</span>
         </p>
@@ -124,10 +148,16 @@
         </div>
       </div>
     {/each}
-  {:else}
-    <p><SpinnerIcon /> Loading...</p>
-  {/if}
-</div>
+  </div>
+{:else}
+  <div class="content">
+    {#if hasStore === false}
+      <p><i class="fa fa-triangle-exclamation fa-lg"></i> Data Unavailable</p>
+    {:else}
+      <p><SpinnerIcon /> Loading...</p>
+    {/if}
+  </div>
+{/if}
 
 
 <style>

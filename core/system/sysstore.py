@@ -3,21 +3,36 @@ import typing
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
-from core.http import httpabc, httpcnt, httprsc
+from core.http import httpabc, httpcnt, httprsc, httpext
 from core.system import system, svrsvc
 from core.common import playerstore  # TODO no No NO!
 from core.store import storeabc, storetxn, storesvc
 
 
+def _get_dbfile(context: contextsvc.Context):
+    return context.config('dbfile')
+
+
 def initialise(context: contextsvc.Context, source: typing.Any):
+    if not _get_dbfile(context):
+        return
     context.register(storesvc.StoreService(context))
     context.post(source, storesvc.StoreService.INITIALISE)
     context.register(_SystemRouting(context))
 
 
+def initialise_instance(subcontext: contextsvc.Context):
+    if not _get_dbfile(subcontext):
+        return
+    subcontext.register(_InstanceRouting(subcontext))
+
+
 def resources(context: contextsvc.Context, resource: httprsc.WebResource):
+    dbfile = _get_dbfile(context)
+    if not dbfile:
+        return
     r = httprsc.ResourceBuilder(resource)
-    r.psh('store')
+    r.psh('store', httpext.StaticHandler(dbfile))
     r.put('instance-event', _QueryInstanceHandler(context))
 
 
@@ -39,7 +54,7 @@ class _SystemRouting(msgabc.AbcSubscriber):
         return None
 
 
-class InstanceRouting(msgabc.AbcSubscriber):
+class _InstanceRouting(msgabc.AbcSubscriber):
     _LOGIN, _LOGOUT, _CLEAR, _CHAT = 'LOGIN', 'LOGOUT', 'CLEAR', 'CHAT'
 
     def __init__(self, subcontext: contextsvc.Context):
@@ -60,24 +75,24 @@ class InstanceRouting(msgabc.AbcSubscriber):
         if playerstore.EVENT_FILTER.accepts(message):
             event = data.asdict()
             event_name = event['event'].upper()
-            if event_name == InstanceRouting._CLEAR:
+            if event_name == _InstanceRouting._CLEAR:
                 for player_name in self._player_names:
                     storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
-                        self._identity, InstanceRouting._LOGOUT, player_name, None))
+                        self._identity, _InstanceRouting._LOGOUT, player_name, None))
                 self._player_names = set()
                 return None
             player_name = event['player']['name']
-            if event_name == InstanceRouting._CHAT:
+            if event_name == _InstanceRouting._CHAT:
                 storeabc.execute(self._mailer, source, storetxn.InsertPlayerChat(
                     self._identity, player_name, event['text']))
                 return None
             steamid = event['player']['steamid']
-            if event_name == InstanceRouting._LOGIN:
+            if event_name == _InstanceRouting._LOGIN:
                 self._player_names.add(player_name)
                 storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
                     self._identity, event_name, player_name, steamid))
                 return None
-            if event_name == InstanceRouting._LOGOUT:
+            if event_name == _InstanceRouting._LOGOUT:
                 self._player_names.remove(player_name)
                 storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
                     self._identity, event_name, player_name, steamid))

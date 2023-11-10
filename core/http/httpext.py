@@ -59,10 +59,12 @@ class MessengerHandler(httpabc.PostHandler):
 
 class StaticHandler(httpabc.GetHandler):
 
-    def __init__(self, response: httpabc.ABC_RESPONSE):
-        self._response = response
+    def __init__(self, response: httpabc.ABC_RESPONSE, protected: bool = True):
+        self._response, self._protected = response, protected
 
     def handle_get(self, resource, data):
+        if self._protected and not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         return self._response
 
 

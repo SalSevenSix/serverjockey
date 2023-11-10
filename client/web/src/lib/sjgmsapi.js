@@ -31,13 +31,15 @@ export function newPostRequest(ct = 'application/json') {
 }
 
 export function openFileInNewTab(url, errorCallback=null) {
+  let objectUrl = null;
   fetch(url, newGetRequest())
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
       return response.blob();
     })
     .then(function(blob) {
-      window.open(window.URL.createObjectURL(blob)).focus();
+      objectUrl = window.URL.createObjectURL(blob);
+      window.open(objectUrl).focus();
     })
     .catch(function(error) {
       if (errorCallback) {
@@ -45,6 +47,12 @@ export function openFileInNewTab(url, errorCallback=null) {
       } else {
         notifyError('Failed to load. File may not exist.');
       }
+    })
+    .finally(function() {
+      if (!objectUrl) return;
+      sleep(300000).then(function() {  // 5 minutes
+        URL.revokeObjectURL(objectUrl);
+      });
     });
 }
 
