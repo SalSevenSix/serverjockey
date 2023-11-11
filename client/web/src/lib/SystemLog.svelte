@@ -4,7 +4,7 @@
 </script>
 
 
-<Collapsible title="ServerJockey Log">
+<Collapsible icon="fa-scroll" title="ServerJockey Log">
   <ConsoleLog loadUrl={'/system/log/tail'}
               subscribeUrl={'/system/log/subscribe'}
               downloadUrl={'/system/log'} />

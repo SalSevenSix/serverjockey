@@ -1,8 +1,9 @@
 <script>
+  export let open = false;
   export let icon = null;
   export let title;
 
-  let visible = false;
+  let visible = open;
 
   function toggle() {
     visible = !visible;
@@ -32,7 +33,7 @@
 
 <style>
   h2 i {
-    width: 1.4em;
+    width: 1.45em;
   }
 
   button i {

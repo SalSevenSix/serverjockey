@@ -1,22 +1,18 @@
 <script>
-  import { onMount } from 'svelte';
-  import { newGetRequest } from '$lib/sjgmsapi';
   import SystemInfo from '$lib/SystemInfo.svelte';
   import ServerLink from '$lib/ServerLink.svelte';
   import SystemLog from '$lib/SystemLog.svelte';
-
-  let showServerLink = false;
-
-  onMount(function() {
-    fetch('/instances/serverlink', newGetRequest())
-      .then(function(response) { showServerLink = response.ok; });
-  });
+  import Collapsible from '$lib/Collapsible.svelte';
+  import CheckStore from '$lib/CheckStore.svelte';
+  import InstanceActivity from '$lib/InstanceActivity.svelte';
 </script>
 
 
 <SystemInfo />
-{#if showServerLink}
-  <hr />
-  <ServerLink />
-{/if}
+<ServerLink />
 <SystemLog />
+<CheckStore>
+  <Collapsible icon="fa-chart-pie" title="Instance Activity">
+    <InstanceActivity criteria={{ instance: null }} />
+  </Collapsible>
+</CheckStore>
