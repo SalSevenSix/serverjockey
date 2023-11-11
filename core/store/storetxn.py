@@ -123,6 +123,20 @@ class InsertPlayerChat(storeabc.Transaction):
         return None
 
 
+class SelectInstance(storeabc.Transaction):
+
+    def __init__(self, data: dict):
+        self._data = data
+
+    async def execute(self, session: AsyncSession) -> typing.Any:
+        criteria = util.filter_dict(self._data, ('instance', ), True)
+        instance = util.get('instance', criteria)
+        statement = select(storeabc.Instance.at, storeabc.Instance.name, storeabc.Instance.module)
+        if instance:
+            statement = statement.where(storeabc.Instance.id == await _get_instance_id(session, instance))
+        return await _execute_query(session, statement, criteria, 'at', 'name', 'module')
+
+
 class SelectInstanceEvent(storeabc.Transaction):
 
     def __init__(self, data: dict):

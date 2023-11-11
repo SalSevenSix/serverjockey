@@ -1,3 +1,4 @@
+import abc
 # TODO ALLOW ???
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
@@ -31,7 +32,8 @@ class SystemStoreService:
             return
         r = httprsc.ResourceBuilder(resource)
         r.psh('store', httpext.StaticHandler(self._dbfile))
-        r.put('instance-event', _QueryInstanceHandler(self._context))
+        r.psh('instance', _QueryInstanceHandler(self._context))
+        r.put('event', _QueryInstanceEventHandler(self._context))
 
 
 class _SystemRouting(msgabc.AbcSubscriber):
@@ -98,7 +100,7 @@ class _InstanceRouting(msgabc.AbcSubscriber):
             return None
 
 
-class _QueryInstanceHandler(httpabc.GetHandler):
+class _AbstractQueryHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         self._mailer = mailer
@@ -106,7 +108,29 @@ class _QueryInstanceHandler(httpabc.GetHandler):
     async def handle_get(self, resource, data):
         if not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        result = await storeabc.query(self._mailer, self, storetxn.SelectInstanceEvent(data))
+        result = await storeabc.query(self._mailer, self, self.get_query(data))
         if isinstance(result, Exception):
             return httpabc.ResponseBody.BAD_REQUEST
         return result
+
+    @abc.abstractmethod
+    def get_query(self, data) -> storeabc.Transaction:
+        pass
+
+
+class _QueryInstanceHandler(_AbstractQueryHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(mailer)
+
+    def get_query(self, data):
+        return storetxn.SelectInstance(data)
+
+
+class _QueryInstanceEventHandler(_AbstractQueryHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(mailer)
+
+    def get_query(self, data):
+        return storetxn.SelectInstanceEvent(data)
