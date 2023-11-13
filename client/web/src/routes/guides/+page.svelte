@@ -1,17 +1,19 @@
 <script>
+  import GuideBooks from '$lib/GuideBooks.svelte';
+
   const games = [
-    { module: 'projectzomboid', serverName: 'Project Zomboid', imagePath: '/assets/icons/pz_icon.jpg' },
-    { module: 'factorio', serverName: 'Factorio', imagePath: '/assets/icons/ft_icon.jpg' },
-    { module: 'sevendaystodie', serverName: '7 Days to Die', imagePath: '/assets/icons/7d2d_icon.jpg' },
-    { module: 'starbound', serverName: 'Starbound', imagePath: '/assets/icons/sb_icon.jpg' },
-    { module: 'unturned', serverName: 'Unturned', imagePath: '/assets/icons/ut_icon.jpg' },
-    { module: 'csii', serverName: 'Counter Strike 2', imagePath: '/assets/icons/csii_icon.jpg' }];
+    { module: 'projectzomboid', serverName: 'Project Zomboid' },
+    { module: 'factorio', serverName: 'Factorio' },
+    { module: 'sevendaystodie', serverName: '7 Days to Die' },
+    { module: 'starbound', serverName: 'Starbound' },
+    { module: 'unturned', serverName: 'Unturned' },
+    { module: 'csii', serverName: 'Counter Strike 2' }];
 </script>
 
 
 <div class="columns">
   <div class="column is-one-third content mb-0 pb-0">
-    <figure class="image ml-0 mr-0 max-400"><img src="/assets/icons/box.svg" alt="Setup Box" /></figure>
+    <figure class="image ml-0 mr-0 max-300"><GuideBooks /></figure>
   </div>
   <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">Guides</h2>
@@ -81,7 +83,9 @@
         <div class="card">
           <header class="card-header card-header-title">{game.serverName}</header>
           <div class="card-image">
-            <figure class="image"><img src="{game.imagePath}" alt="{game.serverName} icon" /></figure>
+            <figure class="image">
+              <img src="/assets/games/{game.module}-tile.jpg" alt="{game.serverName} icon" />
+            </figure>
           </div>
         </div>
       </a>

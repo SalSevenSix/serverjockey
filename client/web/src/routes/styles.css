@@ -96,3 +96,7 @@ table.is-thinner {
 svg.rubiks, svg.navbar-rubiks {
   color: #FFFDF8;
 }
+
+svg.guidebooks {
+  fill: black;
+}

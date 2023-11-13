@@ -90,11 +90,18 @@ body.dark .modal-card-body, body.dark .modal-content .box {
   background-color: #091C32;
 }
 
+body.dark .theme-black-white {
+  fill: white;
+  color: white;
+}
+
+
+/* Specific cases */
+
 body.dark svg.rubiks {
   color: #4A6488;
 }
 
-body.dark .theme-black-white {
-  fill: white;
-  color: white;
+body.dark svg.guidebooks {
+  fill: #4A6488;
 }

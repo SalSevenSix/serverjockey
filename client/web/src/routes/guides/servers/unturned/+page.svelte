@@ -9,7 +9,7 @@
 </script>
 
 
-<WebappTitle serverName="Unturned" imagePath="/assets/icons/ut_icon.jpg">
+<WebappTitle module="unturned" serverName="Unturned">
   <p>
     <a href="https://smartlydressedgames.com" target="_blank">Unturned <i class="fa fa-up-right-from-square"></i></a>
     is a free-to-play zombie apocalypse survival game set in a 3D open world.

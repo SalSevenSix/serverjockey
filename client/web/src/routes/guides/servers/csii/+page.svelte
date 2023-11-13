@@ -8,7 +8,7 @@
 </script>
 
 
-<WebappTitle serverName="Counter Strike 2" imagePath="/assets/icons/csii_icon.jpg">
+<WebappTitle module="csii" serverName="Counter Strike 2">
   <p>
     <a href="https://www.counter-strike.net" target="_blank">Counter Strike 2
     <i class="fa fa-up-right-from-square"></i></a> is a popular competitive PvP FPS built on the Source 2 engine.

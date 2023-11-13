@@ -8,7 +8,7 @@
 </script>
 
 
-<WebappTitle serverName="Factorio" imagePath="/assets/icons/ft_icon.jpg">
+<WebappTitle module="factorio" serverName="Factorio">
   <p>
     <a href="https://www.factorio.com" target="_blank">Factorio <i class="fa fa-up-right-from-square"></i></a>
     is a game where you build, maintain and protect a factory. This involves mining resources,

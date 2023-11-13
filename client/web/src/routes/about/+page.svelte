@@ -23,7 +23,7 @@
       <div class="column is-two-thirds">
         <a href="https://discord.gg/TEuurWAhHn" target="_blank">
           <figure class="image background-frame pl-4 pr-4 pt-4 pb-2">
-            <img src="/assets/icons/discord_full_logo_black_RGB.svg"
+            <img src="/assets/brands/discord_full_logo_black_RGB.svg"
                  alt="ServerJockey on Discord" title="ServerJockey on Discord" />
           </figure>
         </a>
@@ -36,7 +36,7 @@
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
           <figure class="image">
-            <img src="/assets/icons/KoFi_button_black.png"
+            <img src="/assets/brands/KoFi_button_black.png"
                  alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
           </figure>
         </a>
@@ -49,7 +49,7 @@
       <div class="column is-two-thirds">
         <a href="https://www.youtube.com/@BSALIS76" target="_blank">
           <figure class="image background-frame pl-5 pr-5 pt-4 pb-3">
-            <img src="/assets/icons/yt_logo_rgb_light.png"
+            <img src="/assets/brands/yt_logo_rgb_light.png"
                  alt="ServerJockey on YouTube" title="ServerJockey on YouTube" />
           </figure>
         </a>
@@ -62,7 +62,7 @@
       <div class="column is-half">
         <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
           <figure class="image background-frame pl-1 pr-1">
-            <img src="/assets/icons/GitHub_Logo.png"
+            <img src="/assets/brands/GitHub_Logo.png"
                  alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>
         </a>

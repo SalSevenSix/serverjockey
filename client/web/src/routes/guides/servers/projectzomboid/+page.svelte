@@ -10,7 +10,7 @@
 </script>
 
 
-<WebappTitle serverName="Project Zomboid" imagePath="/assets/icons/pz_icon.jpg">
+<WebappTitle module="projectzomboid" serverName="Project Zomboid">
   <p>
     <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
     is a zombie apocalypse survival horror game set in an open world using an isometric view with 3D elements.
