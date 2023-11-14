@@ -4,9 +4,10 @@
   import { notifyError } from '$lib/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
+  const subs = new SubscriptionHelper();
+
   export let identity = null;
 
-  let subs = new SubscriptionHelper();
   let triggering = false;
 
   function getInstanceModule() {

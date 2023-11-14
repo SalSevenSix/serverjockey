@@ -15,4 +15,5 @@
   <Collapsible icon="fa-chart-pie" title="Instance Activity">
     <InstanceActivity criteria={{ instance: null }} />
   </Collapsible>
+  <!-- Player Activity -->
 </CheckStore>

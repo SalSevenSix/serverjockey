@@ -129,7 +129,7 @@ class _Players:
                 players.append(current.asdict())
         return tuple(players)
 
-    def _keyed(self):
+    def _keyed(self) -> dict:
         result = {}
         for current in self._players:
             result[current.name()] = current

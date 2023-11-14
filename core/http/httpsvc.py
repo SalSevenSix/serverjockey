@@ -136,7 +136,7 @@ class _RequestHandler:
         elif httpcnt.WEBDEV_ORIGIN == headers.get(httpcnt.ORIGIN):
             response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.WEBDEV_ORIGIN)
         if body == self._context.config('secret'):
-            response.set_cookie('secret', body, max_age=36000, httponly=True, samesite='Lax')
+            response.set_cookie('secret', body, max_age=86400, httponly=True, samesite='Lax')
             body = httpabc.ResponseBody.NO_CONTENT
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)

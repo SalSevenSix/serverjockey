@@ -92,7 +92,7 @@ class CommandProcessor:
             return False
         logging.info('Creating instance: ' + instance + ' (' + module + ')')
         self._connection.post('/instances', {'module': module, 'identity': instance})
-        self._instances.update({instance: {'module': module}})
+        self._instances[instance] = {'module': module}
         self._use(instance)
         return True
 

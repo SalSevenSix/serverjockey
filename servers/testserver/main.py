@@ -17,6 +17,8 @@ class InGameTime:
         self._interval_seconds = interval_seconds
 
     def run(self):
+        if self._interval_seconds <= 0.0:
+            return
         while True:
             now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             p('### Ingametime ' + now)

@@ -13,7 +13,7 @@
 
 <div class="columns">
   <div class="column is-one-third content mb-0 pb-0">
-    <figure class="image ml-0 mr-0 max-300"><GuideBooks /></figure>
+    <figure class="image max-300"><GuideBooks /></figure>
   </div>
   <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">Guides</h2>

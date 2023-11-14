@@ -11,18 +11,18 @@
 
 
 <CheckServerLink><ServerStatusStore identity="serverlink">
-  <Collapsible icon="fa-gears" title="ServerLink" open>
+  <Collapsible icon="fa-robot" title="ServerLink" open>
     <div class="columns">
       <div class="column">
         <div class="columns">
           <div class="column">
-            <h2 class="title is-5">ServerLink Controls</h2>
+            <h2 class="title is-5">Controls</h2>
             <ServerControls />
             <ServerConfig />
             <ServerStatus stateOnly />
           </div>
           <div class="column">
-            <h2 class="title is-5">ServerLink Configuration</h2>
+            <h2 class="title is-5">Configuration</h2>
             <ServerLinkConfig />
           </div>
         </div>

@@ -3,26 +3,24 @@
 
   function copyToClipboard() {
     if (!codeElement) return;
-    navigator.clipboard.writeText(codeElement.textContent.trim());
+    navigator.clipboard.writeText(codeElement.textContent);
   }
 </script>
 
 
-<pre bind:this={codeElement} class="pre is-thinner"><slot /><button
-  title="Copy" class="button is-dark" on:click={copyToClipboard}>
-  <i class="fa fa-copy fa-xl"></i>
-</button></pre>
+<div class="position-relative">
+  <pre class="pre is-thinner" bind:this={codeElement}><slot /></pre>
+  <button title="Copy" class="button is-dark" on:click={copyToClipboard}>
+    <i class="fa fa-copy fa-xl"></i>
+  </button>
+</div>
 
 
 <style>
-  .pre {
-    position: relative;
-  }
-
   .button {
     position: absolute;
     top: 0.4em;
-    right: 0.8em;
+    right: 2.5em;
     width: 3em;
   }
 </style>

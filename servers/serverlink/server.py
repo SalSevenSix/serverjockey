@@ -9,7 +9,7 @@ from core.proc import proch, prcext
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 _SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataStrContains('ServerLink Bot has Started'))
+    msgftr.DataStrContains('ServerLink Bot has STARTED'))
 
 
 def _default_config():

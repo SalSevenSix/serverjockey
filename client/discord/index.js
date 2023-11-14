@@ -56,7 +56,7 @@ function startup() {
       logger.info('Publishing chat events to ' + startupArgs.chat.name + ' (' + startupArgs.chat.id + ')');
     }
     context.instancesService.startup(startupArgs)
-      .then(function() { logger.info('ServerLink Bot has Started'); })
+      .then(function() { logger.info('ServerLink Bot has STARTED'); });
   });
 }
 

@@ -9,6 +9,8 @@
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
 
+  const fnHelp = 'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.';
+
   export let hasWorld = true;
 
   let fileSystem;
@@ -16,6 +18,7 @@
   let uploadFiles = [];
   let notifyText = null;
 
+  $: noFileSelected = uploadFiles.length === 0;
   $: cannotUpload = uploading || $serverStatus.state === 'MAINTENANCE';
   $: cannotBackup = $serverStatus.running || cannotUpload;
 
@@ -54,14 +57,13 @@
   }
 
   function uploadFile() {
-    if (uploadFiles.length === 0) return notifyError('No file selected.');
+    if (noFileSelected) return;
     let filename = uploadFiles[0].name;
     if (!(filename === filename.replaceAll(' ', '')
         && filename === filename.toLowerCase()
         && (filename.startsWith('runtime-') || filename.startsWith('world-'))
         && filename.endsWith('.zip'))) {
-      return notifyError(
-        'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.');
+      return notifyError(fnHelp);
     }
     uploading = true;
     let request = rawPostRequest();
@@ -104,16 +106,18 @@
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
       <button name="upload" title="Upload File" class="button is-success"
-              disabled={cannotUpload} on:click={uploadFile}>
+              disabled={noFileSelected || cannotUpload} on:click={uploadFile}>
         <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload</button>
     </div>
     <label class="file-label pr-6">
       <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
-      <span class="file-cta">
+      <span class="file-cta" title={fnHelp}>
         <span class="file-icon"><i class="fa fa-file-circle-plus"></i></span>
         <span class="file-label">Choose file…</span>
       </span>
-      <span class="file-name">{uploadFiles.length > 0 ? uploadFiles[0].name : 'No file selected'}</span>
+      <span class="file-name" title={fnHelp}>
+        {noFileSelected ? 'No file selected' : uploadFiles[0].name}
+      </span>
     </label>
   </div>
   <div class="block buttons">
