@@ -8,7 +8,6 @@
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
-
   const fnHelp = 'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.';
 
   export let hasWorld = true;

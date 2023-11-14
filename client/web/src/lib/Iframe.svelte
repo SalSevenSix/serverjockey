@@ -4,12 +4,13 @@
   const serverStatus = getContext('serverStatus');
 
   let baseurl = '';
-  onMount(function() {
-    baseurl = 'http://' + window.location.hostname;
-  });
 
   $: url = baseurl + ':' + $serverStatus.details.cport;
   $: showConsole = url.startsWith('http') && $serverStatus.state === 'STARTED';
+
+  onMount(function() {
+    baseurl = 'http://' + window.location.hostname;
+  });
 </script>
 
 

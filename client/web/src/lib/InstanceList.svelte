@@ -6,7 +6,8 @@
   import { newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
-  let subs = new SubscriptionHelper();
+  const subs = new SubscriptionHelper();
+
   let instances = [];
   let loading = true;
   let deleting = false;

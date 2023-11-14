@@ -9,8 +9,8 @@
   let looping = true;
   let info = null;
 
-  function osIcon(os_pretty_name) {
-    let parts = os_pretty_name.split(' ');
+  function osIcon(osPrettyName) {
+    let parts = osPrettyName.split(' ');
     return 'fa-' + parts[0].toLowerCase();
   }
 

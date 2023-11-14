@@ -6,8 +6,8 @@
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
   const eventDown = getContext('eventDown');
+  const autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
 
-  let autoOptions = ['Off', 'Start', 'Restart', 'Start and Restart'];
   let currentOption = null;
   let selectedOption = null;
 

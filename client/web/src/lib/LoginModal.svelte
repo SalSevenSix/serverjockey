@@ -4,9 +4,10 @@
   import { notifyError } from '$lib/notifications';
   import { securityToken } from '$lib/sjgmsapi';
 
+  const storageKey = 'sjgmsSecurityToken';
+
   export let isOpen;
 
-  const storageKey = 'sjgmsSecurityToken';
   let token = '';
   let remember = false;
 

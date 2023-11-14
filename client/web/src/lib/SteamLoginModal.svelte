@@ -5,16 +5,17 @@
   import { sleep, RollingLog } from '$lib/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/sjgmsapi';
 
+  const subs = new SubscriptionHelper();
+  const logLines = new RollingLog();
+
   export let isOpen;
   export let instance;
   export let onSuccess;
 
-  let subs = new SubscriptionHelper();
   let stage = 0;  // 0=ready 1=start 2=pass 3=code
   let steamLogin;
   let steamPassword;
   let steamCode;
-  let logLines = new RollingLog();
   let logText = '';
   let logBox;
 

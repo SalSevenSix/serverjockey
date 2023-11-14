@@ -1,5 +1,6 @@
 <script>
   export let showOnPx = 1000;
+
   let hidden = true;
 
   function gotoTop() {
@@ -35,6 +36,7 @@
     right: 1.2em;
     bottom: 1.2em;
   }
+
   .back-to-top.hidden {
     opacity: 0;
     visibility: hidden;

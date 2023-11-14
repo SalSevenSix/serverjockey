@@ -7,13 +7,13 @@
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
+  const subs = new SubscriptionHelper();
+  const logLines = new RollingLog();
 
   export let qualifierName = null;
 
-  let subs = new SubscriptionHelper();
-  let logLines = new RollingLog();
   let qualifier = '';
-  let endInstallMessage = 'Install Runtime completed. Please check console log output for details.'
+  let endInstallMessage = 'Install Runtime completed. Please check console log output for details.';
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
@@ -84,7 +84,7 @@
   }
 
   onDestroy(function() {
-    endInstallMessage = 'Please check console log output for install results.'
+    endInstallMessage = 'Please check console log output for install results.';
     subs.stop();
   });
 </script>

@@ -6,10 +6,10 @@
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
+  const subs = new SubscriptionHelper();
 
   export let hasSteamId = false;
 
-  let subs = new SubscriptionHelper();
   let players = [];
   let loading = true;
   let columnCount = 2 + (hasSteamId ? 1 : 0);

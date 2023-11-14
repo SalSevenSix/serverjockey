@@ -4,6 +4,9 @@
   import { RollingLog } from '$lib/util';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
 
+  const subs = new SubscriptionHelper();
+  const logLines = new RollingLog();
+
   export let title = '';
   export let loadUrl;
   export let subscribeUrl;
@@ -11,9 +14,7 @@
   export let heightSmall = '100px';
   export let heightBig = '420px';
 
-  let subs = new SubscriptionHelper();
   let loading = true;
-  let logLines = new RollingLog();
   let logBox;
   let logText = '';
   let logPlay = true;
