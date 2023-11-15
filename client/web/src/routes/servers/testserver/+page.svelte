@@ -13,7 +13,6 @@
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CheckStore from '$lib/CheckStore.svelte';
-  import ContextInstanceWrapper from '$lib/ContextInstanceWrapper.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
 
   const consoleCommands = {
@@ -60,9 +59,8 @@
       </Collapsible>
       <CheckStore>
         <Collapsible icon="fa-chart-pie" title="Activity">
-          <ContextInstanceWrapper let:instance={instance}>
-            <InstanceActivity criteria={{ instance: instance.identity() }} />
-          </ContextInstanceWrapper>
+          <InstanceActivity />
+          <!-- Player Activity -->
         </Collapsible>
       </CheckStore>
     </div>

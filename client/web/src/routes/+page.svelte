@@ -13,7 +13,9 @@
 <SystemLog />
 <CheckStore>
   <Collapsible icon="fa-chart-pie" title="Instance Activity">
-    <InstanceActivity criteria={{ instance: null }} />
+    <InstanceActivity />
   </Collapsible>
-  <!-- Player Activity -->
+  <Collapsible icon="fa-user-clock" title="Player Activity">
+    <!-- Player Activity -->
+  </Collapsible>
 </CheckStore>

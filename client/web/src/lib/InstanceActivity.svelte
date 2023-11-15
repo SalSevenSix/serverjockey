@@ -1,25 +1,26 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
-  import { queryInstance, queryEvents, extractActivity } from '$lib/InstanceActivity';
+  import { onMount, onDestroy, getContext } from 'svelte';
+  import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/InstanceActivity';
   import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
-  export let criteria;
+  const instance = getContext('instance');
 
   let objectUrls = [];
   let instanceResults = null;
   let eventResults = null;
+  let lastEventResults = null;
   let activity = null;
 
-  $: if (instanceResults && eventResults) { onResults(); }
+  $: if (instanceResults && eventResults && lastEventResults) { onResults(); }
   function onResults() {
-    activity = extractActivity(instanceResults, eventResults);
+    activity = extractActivity(instanceResults, eventResults, lastEventResults);
   }
 
   function showResults() {
     if (!activity) return;
-    let results = { instances: instanceResults, events: eventResults };
+    let results = { instances: instanceResults, lastevent: lastEventResults, events: eventResults };
     let blob = new Blob([JSON.stringify(results)], { type : 'text/plain;charset=utf-8' });
     let objectUrl = window.URL.createObjectURL(blob);
     objectUrls.push(objectUrl);
@@ -42,16 +43,22 @@
     };
   }
 
-  export function queryActivity(queryCriteria) {
+  function queryActivity(criteria) {
     activity = null;
     instanceResults = null;
     eventResults = null;
-    queryInstance(queryCriteria).then(function(results) { instanceResults = results; });
-    queryEvents(queryCriteria).then(function(results) { eventResults = results; });
+    lastEventResults = null;
+    queryInstance(criteria).then(function(results) { instanceResults = results; });
+    queryEvents(criteria).then(function(results) { eventResults = results; });
+    queryLastEvent(criteria).then(function(results) { lastEventResults = results; });
   }
 
   onMount(function() {
-    if (criteria) { queryActivity(criteria); }
+    let criteria = { instance: null };
+    if (instance) { criteria.instance = instance.identity(); }
+    criteria.atto = Date.now();
+    criteria.atfrom = criteria.atto - 2592000000;  // 30 days
+    queryActivity(criteria);
   });
 
   onDestroy(function() {
@@ -67,7 +74,7 @@
     <div class="columns">
       <div class="column is-one-fifth mb-0 pb-0">
         <p><span class="has-text-weight-bold">
-          {eventResults.criteria.instance ? 'Instance' : 'Instances'}
+          {instanceResults.criteria.instance ? 'Instance' : 'Instances'}
         </span></p>
       </div>
       <div class="column is-four-fifths">

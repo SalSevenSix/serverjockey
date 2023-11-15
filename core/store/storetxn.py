@@ -1,6 +1,6 @@
 import typing
 import time
-from sqlalchemy import Executable
+from sqlalchemy import Executable, func
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 # TODO ALLOW ???
@@ -143,21 +143,32 @@ class SelectInstanceEvent(storeabc.Transaction):
         self._data = data
 
     async def execute(self, session: AsyncSession) -> typing.Any:
-        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'events'), True)
-        instance, at_from, at_to, events = util.unpack_dict(criteria)
+        criteria = util.filter_dict(self._data, ('instance', 'events', 'atfrom', 'atto', 'atgroup'), True)
+        instance, events, at_from, at_to, at_group = util.unpack_dict(criteria)
         statement = select(storeabc.InstanceEvent.at, storeabc.Instance.name, storeabc.InstanceEvent.name)
         statement = statement.join(storeabc.Instance.events)
         if instance:
             statement = statement.where(storeabc.Instance.id == await _get_instance_id(session, instance))
+        if events:
+            statement = statement.where(storeabc.InstanceEvent.name.in_(str(events).upper().split(',')))
         if at_from:
             at_from = int(at_from)
-            statement = statement.where(storeabc.InstanceEvent.at >= dtutil.to_seconds(at_from))
+            if at_group:
+                statement = statement.where(storeabc.InstanceEvent.at > dtutil.to_seconds(at_from))
+            else:
+                statement = statement.where(storeabc.InstanceEvent.at >= dtutil.to_seconds(at_from))
         if at_to:
             at_to = int(at_to)
-            statement = statement.where(storeabc.InstanceEvent.at <= dtutil.to_seconds(at_to))
-        if events:
-            events = str(events).upper().split(',')
-            statement = statement.where(storeabc.InstanceEvent.name.in_(events))
+            if at_group:
+                statement = statement.where(storeabc.InstanceEvent.at < dtutil.to_seconds(at_to))
+            else:
+                statement = statement.where(storeabc.InstanceEvent.at <= dtutil.to_seconds(at_to))
+        if at_group:
+            if at_group not in ('min', 'max'):
+                raise Exception('Invalid atgroup')
+            statement = statement.group_by(storeabc.InstanceEvent.instance_id)
+            statement = statement.having(
+                func.max(storeabc.InstanceEvent.at) if at_group == 'max' else func.min(storeabc.InstanceEvent.at))
         statement = statement.order_by(storeabc.InstanceEvent.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
         return await _execute_query(session, statement, criteria, 'at', 'instance', 'event')

@@ -13,6 +13,8 @@
   import InstallRuntime from '$lib/InstallRuntime.svelte';
   import DeploymentActions from '$lib/DeploymentActions.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
+  import CheckStore from '$lib/CheckStore.svelte';
+  import InstanceActivity from '$lib/InstanceActivity.svelte';
 
   const deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
@@ -68,6 +70,12 @@
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
       </Collapsible>
+      <CheckStore>
+        <Collapsible icon="fa-chart-pie" title="Activity">
+          <InstanceActivity />
+          <!-- Player Activity -->
+        </Collapsible>
+      </CheckStore>
     </div>
   </div>
 </Instance></ServerStatusStore>
