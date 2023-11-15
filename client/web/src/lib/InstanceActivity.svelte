@@ -73,9 +73,9 @@
   <div class="block">
     <div class="columns">
       <div class="column is-one-fifth mb-0 pb-0">
-        <p><span class="has-text-weight-bold">
+        <p class="has-text-weight-bold">
           {instanceResults.criteria.instance ? 'Instance' : 'Instances'}
-        </span></p>
+        </p>
       </div>
       <div class="column is-four-fifths">
         <p>

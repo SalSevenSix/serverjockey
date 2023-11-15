@@ -34,6 +34,9 @@ class SystemStoreService:
         r.psh('store', httpext.StaticHandler(self._dbfile))
         r.psh('instance', _QueryInstanceHandler(self._context))
         r.put('event', _QueryInstanceEventHandler(self._context))
+        r.pop()
+        r.psh('player')
+        r.put('event', _QueryPlayerEventHandler(self._context))
 
 
 class _SystemRouting(msgabc.AbcSubscriber):
@@ -134,3 +137,12 @@ class _QueryInstanceEventHandler(_AbstractQueryHandler):
 
     def get_query(self, data):
         return storetxn.SelectInstanceEvent(data)
+
+
+class _QueryPlayerEventHandler(_AbstractQueryHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(mailer)
+
+    def get_query(self, data):
+        return storetxn.SelectPlayerEvent(data)

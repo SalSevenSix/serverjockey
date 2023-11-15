@@ -5,6 +5,7 @@
   import Collapsible from '$lib/Collapsible.svelte';
   import CheckStore from '$lib/CheckStore.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
+  import PlayerActivity from '$lib/PlayerActivity.svelte';
 </script>
 
 
@@ -16,6 +17,6 @@
     <InstanceActivity />
   </Collapsible>
   <Collapsible icon="fa-user-clock" title="Player Activity">
-    <!-- Player Activity -->
+    <PlayerActivity />
   </Collapsible>
 </CheckStore>

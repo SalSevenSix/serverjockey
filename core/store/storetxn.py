@@ -174,6 +174,42 @@ class SelectInstanceEvent(storeabc.Transaction):
         return await _execute_query(session, statement, criteria, 'at', 'instance', 'event')
 
 
+class SelectPlayerEvent(storeabc.Transaction):
+
+    def __init__(self, data: dict):
+        self._data = data
+
+    async def execute(self, session: AsyncSession) -> typing.Any:
+        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'atgroup'), True)
+        instance, at_from, at_to, at_group = util.unpack_dict(criteria)
+        statement = select(storeabc.PlayerEvent.at, storeabc.Instance.name,
+                           storeabc.Player.name, storeabc.PlayerEvent.name)
+        statement = statement.join(storeabc.Instance.players).join(storeabc.Player.events)
+        if instance:
+            statement = statement.where(storeabc.Instance.id == await _get_instance_id(session, instance))
+        if at_from:
+            at_from = int(at_from)
+            if at_group:
+                statement = statement.where(storeabc.PlayerEvent.at > dtutil.to_seconds(at_from))
+            else:
+                statement = statement.where(storeabc.PlayerEvent.at >= dtutil.to_seconds(at_from))
+        if at_to:
+            at_to = int(at_to)
+            if at_group:
+                statement = statement.where(storeabc.PlayerEvent.at < dtutil.to_seconds(at_to))
+            else:
+                statement = statement.where(storeabc.PlayerEvent.at <= dtutil.to_seconds(at_to))
+        if at_group:
+            if at_group not in ('min', 'max'):
+                raise Exception('Invalid atgroup')
+            statement = statement.group_by(storeabc.PlayerEvent.player_id)
+            statement = statement.having(
+                func.max(storeabc.PlayerEvent.at) if at_group == 'max' else func.min(storeabc.PlayerEvent.at))
+        statement = statement.order_by(storeabc.PlayerEvent.at)
+        criteria['atfrom'], criteria['atto'] = at_from, at_to
+        return await _execute_query(session, statement, criteria, 'at', 'instance', 'player', 'event')
+
+
 async def _execute_query(session: AsyncSession, statement: Executable, criteria: dict, *columns: str) -> dict:
     result, records = {'created': dtutil.now_millis(), 'criteria': criteria, 'headers': columns}, []
     for row in await session.execute(statement):
