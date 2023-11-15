@@ -1,3 +1,4 @@
+
 <div class="columns">
   <div class="column is-one-quarter content">
     <p class="has-text-centered">
@@ -10,9 +11,6 @@
       The ServerLink discord bot does not appear to be installed on this system.
       Therefore it is not possible to setup the bot.
     </p>
-    <p>
-      <br /><br /><br /><br /><br /><br />
-      <br /><br /><br /><br /><br />
-    </p>
   </div>
 </div>
+<div class="block pt-5"></div>

@@ -1,6 +1,7 @@
 
-<br />
+<div class="block pt-5"></div>
 <hr />
+
 <div class="block is-flex is-flex-direction-row is-justify-content-right is-flex-wrap-nowrap mr-3">
   <div class="block i-icon-container"><p class="has-text-right">
     <a href="https://discord.gg/TEuurWAhHn" target="_blank">
@@ -20,6 +21,7 @@
       <i class="fa-brands fa-github fa-xl theme-black-white" title="ServerJockey on GitHub"></i></a>
   </p></div>
 </div>
+
 <div id="footerPadding"></div>
 
 
@@ -38,6 +40,6 @@
   }
 
   #footerPadding {
-    margin-bottom: 10%;
+    margin-bottom: 120px;
   }
 </style>

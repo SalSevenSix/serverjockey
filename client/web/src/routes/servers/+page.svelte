@@ -7,7 +7,6 @@
 <div class="columns">
   <div class="column is-two-thirds">
     <InstanceList />
-    <div class="block"></div>
   </div>
   <div class="column is-one-third">
     <CreateInstance />
@@ -18,6 +17,6 @@
 
 <style>
   .big-margin-bottom {
-    margin-bottom: 185px;
+    margin-bottom: 40px;
   }
 </style>

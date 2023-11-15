@@ -7,6 +7,10 @@ https://www.schemecolor.com/mojave-dark-mode.php
 #52596E
 */
 
+html.dark {
+  background-color: #091C32;
+}
+
 body.dark {
   background-color: #091C32;
   color: #4A6488;

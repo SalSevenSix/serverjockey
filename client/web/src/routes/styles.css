@@ -1,5 +1,9 @@
 /* General site changes */
 
+html {
+  background-color: #FFFDF8;
+}
+
 body {
   background-color: #FFFDF8;
   counter-reset: section;
