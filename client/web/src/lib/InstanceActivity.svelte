@@ -8,49 +8,40 @@
   const instance = getContext('instance');
 
   let objectUrls = [];
-  let instanceResults = null;
-  let eventResults = null;
-  let lastEventResults = null;
+  let results = null;
   let activity = null;
-
-  $: if (instanceResults && eventResults && lastEventResults) { onResults(); }
-  function onResults() {
-    activity = extractActivity(instanceResults, eventResults, lastEventResults);
-  }
 
   function showResults() {
     if (!activity) return;
-    let results = { instances: instanceResults, lastevent: lastEventResults, events: eventResults };
     let blob = new Blob([JSON.stringify(results)], { type : 'text/plain;charset=utf-8' });
     let objectUrl = window.URL.createObjectURL(blob);
     objectUrls.push(objectUrl);
     window.open(objectUrl).focus();
   }
 
-  function chartData(entry) {
-    let upTime = Math.round(entry.available * 1000.0) / 10.0;
+  function chartData(instance) {
+    let upTime = Math.round(instance.available * 1000.0) / 10.0;
     return {
       type: 'pie',
       data: {
         labels: ['UP', 'DOWN'],
         datasets: [{
           label: ' % ',
-          borderColor: '#DBDBDB',
           backgroundColor: ['#48C78E', '#F14668'],
           data: [upTime, 100.0 - upTime]
-        }]
-      }
+        }],
+      },
+      options: { plugins: { legend: { position: 'right' }}}
     };
   }
 
   function queryActivity(criteria) {
     activity = null;
-    instanceResults = null;
-    eventResults = null;
-    lastEventResults = null;
-    queryInstance(criteria).then(function(results) { instanceResults = results; });
-    queryEvents(criteria).then(function(results) { eventResults = results; });
-    queryLastEvent(criteria).then(function(results) { lastEventResults = results; });
+    results = {};
+    Promise.all([queryInstance(criteria), queryLastEvent(criteria), queryEvents(criteria)]).then(function(data) {
+      [results.instances, results.lastevent, results.events] = data;
+      activity = extractActivity(results);
+    });
   }
 
   onMount(function() {
@@ -72,22 +63,22 @@
 {#if activity}
   <div class="block">
     <div class="columns">
-      <div class="column is-one-fifth mb-0 pb-0">
+      <div class="column is-2 mb-0 pb-0">
         <p class="has-text-weight-bold">
-          {instanceResults.criteria.instance ? 'Instance' : 'Instances'}
+          {activity.results.length > 1 ? 'Instances' : 'Instance'}
         </p>
       </div>
-      <div class="column is-four-fifths">
+      <div class="column is-10">
         <p>
           <a href={'#'} on:click|preventDefault={showResults}>
             results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
-          <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.atfrom)}&nbsp;</span>
-          <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.atto)}&nbsp;</span>
-          <span class="white-space-nowrap">({humanDuration(activity.atrange)})</span>
+          <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
+          <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
+          <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
         </p>
       </div>
     </div>
-    {#each activity.instances as entry}
+    {#each activity.results as entry}
       <div class="columns">
         <div class="column">
           <table class="table is-thinner"><tbody>
@@ -114,8 +105,8 @@
 
 <style>
   .chart {
-    width: 220px;
-    height: 220px;
-    margin: auto;
+    width: 280px;
+    height: 280px;
+    margin: -50px auto -50px 40px;
   }
 </style>

@@ -1,6 +1,7 @@
 import { newGetRequest } from '$lib/sjgmsapi';
 import { notifyError } from '$lib/notifications';
 
+
 function toInstanceCreatedMap(data) {
   let result = {};
   data.records.forEach(function(record) {
@@ -20,21 +21,22 @@ function toLastEventMap(instances, data) {
   return result;
 }
 
-export function extractActivity(iData, eData, lData) {
+export function extractActivity(queryResults) {
+  let data = queryResults.events;
+  let createdMap = toInstanceCreatedMap(queryResults.instances);
+  let instances = Object.keys(createdMap);
+  let lastEventMap = toLastEventMap(instances, queryResults.lastevent);
   let entries = {};
   let entry = null;
-  let createdMap = toInstanceCreatedMap(iData);
-  let instances = Object.keys(createdMap);
-  let lastEventMap = toLastEventMap(instances, lData);
   instances.forEach(function(instance) {  // Initialise entries for all instances
     entry = { at: 0, event: null, sessions: 0, uptime: 0 };
-    entry.from = createdMap[instance] > eData.criteria.atfrom ? createdMap[instance] : eData.criteria.atfrom;
+    entry.from = createdMap[instance] > data.criteria.atfrom ? createdMap[instance] : data.criteria.atfrom;
     entries[instance] = entry;
   });
-  eData.records.forEach(function(record) {  // Process event records to calculate uptime and session count
+  data.records.forEach(function(record) {  // Process event records to calculate uptime and session count
     let [at, instance, event] = record;
     entry = entries[instance];
-    if (!entry.event) {
+    if (!entry.event) {  // First event for instance
       entry.at = at;
       entry.event = event;
       if (event === 'STARTED') {
@@ -57,23 +59,23 @@ export function extractActivity(iData, eData, lData) {
   instances.forEach(function(instance) {  // Close off entries for running servers
     entry = entries[instance];
     if (!entry.event && lastEventMap[instance] === 'STARTED') {
-      entry.uptime += eData.criteria.atto - entry.from;
+      entry.uptime += data.criteria.atto - entry.from;
     } else if (entry.event === 'STARTED') {
-      entry.uptime += eData.criteria.atto - entry.at;
+      entry.uptime += data.criteria.atto - entry.at;
     }
   });
   // Generate report result object
-  let result = { created: eData.created, atfrom: eData.criteria.atfrom, atto: eData.criteria.atto,
-                 atrange: eData.criteria.atto - eData.criteria.atfrom, instances: [] };
+  let results = [];
   instances.forEach(function(instance) {
     entry = entries[instance];
-    let resultEntry = { instance: instance, created: createdMap[instance], sessions: entry.sessions };
-    resultEntry.uptime = entry.uptime;
-    resultEntry.range = eData.criteria.atto - entry.from;
-    resultEntry.available = resultEntry.uptime / resultEntry.range;
-    result.instances.push(resultEntry);
+    let instanceResult = { instance: instance, created: createdMap[instance], sessions: entry.sessions };
+    instanceResult.uptime = entry.uptime;
+    instanceResult.range = data.criteria.atto - entry.from;
+    instanceResult.available = instanceResult.uptime / instanceResult.range;
+    results.push(instanceResult);
   });
-  return result;
+  return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
+           atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
 }
 
 async function queryFetch(url, errorMessage) {
