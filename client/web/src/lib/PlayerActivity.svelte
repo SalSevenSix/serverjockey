@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/PlayerActivity';
+  import { queryEvents, queryLastEvent, extractActivity, compactPlayers } from '$lib/PlayerActivity';
   import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
@@ -20,16 +20,16 @@
   }
 
   function chartData(instance) {
-    let labels = instance.players.map(function(player) { return player.player; });
-    let data = instance.players.map(function(player) {
-      return Math.round((player.uptime / instance.summary.total) * 1000.0) / 10.0;
+    let players = compactPlayers(instance.players, 8);
+    let labels = players.map(function(player) {
+      return player.player;
+    });
+    let data = players.map(function(player) {
+      return Math.round((player.uptime / instance.summary.total.uptime) * 1000.0) / 10.0;
     });
     return {
       type: 'pie',
-      data: {
-        labels: labels,
-        datasets: [{ label: ' % ', data: data }]
-      },
+      data: { labels: labels, datasets: [{ label: ' % ', data: data }] },
       options: { plugins: { legend: { position: 'right' }}}
     }
   }
@@ -37,8 +37,8 @@
   function queryActivity(criteria) {
     activity = null;
     results = {};
-    Promise.all([queryInstance(criteria), queryLastEvent(criteria), queryEvents(criteria)]).then(function(data) {
-      [results.instances, results.lastevent, results.events] = data;
+    Promise.all([queryLastEvent(criteria), queryEvents(criteria)]).then(function(data) {
+      [results.lastevent, results.events] = data;
       activity = extractActivity(results);
     });
   }
@@ -81,10 +81,16 @@
           <table class="table is-thinner"><tbody>
             <tr><td class="has-text-weight-bold">Instance</td>
                 <td>{activity.results[instance].summary.instance}</td></tr>
-            <tr><td class="has-text-weight-bold">Unique Players</td>
+            <tr><td class="has-text-weight-bold">Players</td>
                 <td>{activity.results[instance].summary.unique}</td></tr>
-            <tr><td class="has-text-weight-bold">Total Online</td>
-                <td>{humanDuration(activity.results[instance].summary.total)}</td></tr>
+            <tr><td class="has-text-weight-bold">Players Max</td>
+                <td>{activity.results[instance].summary.online.max}</td></tr>
+            <tr><td class="has-text-weight-bold">Players Min</td>
+                <td>{activity.results[instance].summary.online.min}</td></tr>
+            <tr><td class="has-text-weight-bold">Total Time</td>
+                <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
+            <tr><td class="has-text-weight-bold">Total Sessions</td>
+                <td>{activity.results[instance].summary.total.sessions}</td></tr>
           </tbody></table>
         </div>
         <div class="column">
@@ -93,15 +99,26 @@
       </div>
       <div class="block">
         <table class="table"><tbody>
-        {#each activity.results[instance].players as entry}
+        {#each compactPlayers(activity.results[instance].players, 60) as entry}
           <tr>
             <td>{entry.player}</td>
-            <td>{humanDuration(entry.uptime, 2)}</td>
-            <td>{entry.sessions}</td>
+            <td title="{entry.sessions} sessions">{humanDuration(entry.uptime, 2)}</td>
           </tr>
         {/each}
         </tbody><table>
       </div>
+
+      <div class="block">
+        <table class="table"><tbody>
+        {#each activity.results[instance].days as entry}
+          <tr>
+            <td>{entry.atfrom}</td>
+            <td>{humanDuration(entry.uptime, 2)}</td>
+          </tr>
+        {/each}
+        </tbody><table>
+      </div>
+
     {/each}
   </div>
 {:else}
