@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
   import { queryEvents, queryLastEvent, extractActivity, compactPlayers } from '$lib/PlayerActivity';
-  import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
+  import { floatToPercent, humanDuration, shortISODateString, shortISODateTimeString } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
@@ -19,18 +19,36 @@
     window.open(objectUrl).focus();
   }
 
-  function chartData(instance) {
+  function chartDataPlayers(instance) {
     let players = compactPlayers(instance.players, 8);
     let labels = players.map(function(player) {
       return player.player;
     });
     let data = players.map(function(player) {
-      return Math.round((player.uptime / instance.summary.total.uptime) * 1000.0) / 10.0;
+      return Math.round(player.uptimepct * 1000.0) / 10.0;
     });
     return {
       type: 'pie',
       data: { labels: labels, datasets: [{ label: ' % ', data: data }] },
       options: { plugins: { legend: { position: 'right' }}}
+    }
+  }
+
+  function chartDataDays(instance) {
+    let labels = instance.days.map(function(day) {
+      return shortISODateString(day.atto);
+    });
+    let playerHours = instance.days.map(function(day) {
+      return day.uptime / 3600000;
+    });
+    let sessions = instance.days.map(function(day) {
+      return day.sessions;
+    });
+    return {
+      type: 'line',
+      data: { labels: labels,
+              datasets: [{ label: 'player hours', data: playerHours },
+                         { label: 'sessions', data: sessions }]}
     }
   }
 
@@ -93,9 +111,12 @@
                 <td>{activity.results[instance].summary.total.sessions}</td></tr>
           </tbody></table>
         </div>
-        <div class="column">
-          <div class="chart"><ChartCanvas data={chartData(activity.results[instance])} /></div>
+        <div class="column chart-container-players">
+          <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
         </div>
+      </div>
+      <div class="block chart-container-days">
+        <div><ChartCanvas data={chartDataDays(activity.results[instance])} /></div>
       </div>
       <div class="block">
         <table class="table"><tbody>
@@ -103,24 +124,18 @@
           <tr>
             <td>{entry.player}</td>
             <td title="{entry.sessions} sessions">{humanDuration(entry.uptime, 2)}</td>
+            <td>{Math.round(entry.uptimepct * 1000.0) / 10.0}%</td>
           </tr>
         {/each}
         </tbody><table>
       </div>
-
-      <div class="block">
-        <table class="table"><tbody>
-        {#each activity.results[instance].days as entry}
-          <tr>
-            <td>{entry.atfrom}</td>
-            <td>{humanDuration(entry.uptime, 2)}</td>
-          </tr>
-        {/each}
-        </tbody><table>
-      </div>
-
     {/each}
   </div>
+  {#if activity.meta.log}
+    <div class="content">
+      <pre class="pre">{activity.meta.log}</pre>
+    </div>
+  {/if}
 {:else}
   <div class="content">
     <p><SpinnerIcon /> Loading Player Activity...<br /><br /></p>
@@ -129,9 +144,19 @@
 
 
 <style>
-  .chart {
+  .chart-container-players div {
     width: 330px;
     height: 330px;
     margin: -80px auto -80px 40px;
+  }
+
+  .chart-container-days {
+    overflow-x: auto;
+  }
+
+  .chart-container-days div {
+    width: 800px;
+    height: 100%;
+    margin: 0px auto 8px auto;
   }
 </style>

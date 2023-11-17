@@ -64,9 +64,8 @@ export function extractActivity(queryResults) {
       entry.uptime += data.criteria.atto - entry.at;
     }
   });
-  // Generate report result object
   let results = [];
-  instances.forEach(function(instance) {
+  instances.forEach(function(instance) {  // Generate report result object
     entry = entries[instance];
     let instanceResult = { instance: instance, created: createdMap[instance], sessions: entry.sessions };
     instanceResult.uptime = entry.uptime;

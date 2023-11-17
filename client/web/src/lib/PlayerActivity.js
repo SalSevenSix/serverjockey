@@ -1,3 +1,4 @@
+import { RollingLog, humanDuration, shortISODateTimeString } from '$lib/util';
 import { newGetRequest } from '$lib/sjgmsapi';
 import { notifyError } from '$lib/notifications';
 
@@ -42,25 +43,32 @@ function newOnlineTracker() {
   return self;
 }
 
-function newDailyTracker(atfrom, atto) {
+function newDailyTracker(log, atfrom, atto) {
   let dayMillis = 24 * 60 * 60 * 1000;
   let self = { days: [] };
   let current = atfrom;
   while (current < atto) {
-    self.days.push({ uptime: 0, atfrom: current, atto: current + dayMillis });
+    self.days.push({ sessions: 0, uptime: 0, atfrom: current, atto: current + dayMillis });
     current += dayMillis;
   }
   self.session = function(login, logout) {
-    //if (login > logout) { alert('OH NOES'); }
     self.days.forEach(function(day) {
       if (login >= day.atfrom && logout <= day.atto) {
+        // log.append(shortISODateTimeString(day.atfrom) + ' >< ' + humanDuration(logout - login));
         day.uptime += logout - login;
-      } else if (login < day.atfrom && logout <= day.atto) {
+        day.sessions += 1;
+      } else if (logout >= day.atfrom && logout <= day.atto && login < day.atfrom) {
+        // log.append(shortISODateTimeString(day.atfrom) + ' << ' + humanDuration(logout - day.atfrom));
         day.uptime += logout - day.atfrom;
-      } else if (login >= day.atfrom && logout > day.atto) {
+        day.sessions += 1;
+      } else if (login >= day.atfrom && login <= day.atto && logout > day.atto) {
+        // log.append(shortISODateTimeString(day.atfrom) + ' >> ' + humanDuration(day.atto - login));
         day.uptime += day.atto - login;
+        day.sessions += 1;
       } else if (login < day.atfrom && logout > day.atto) {
+        // log.append(shortISODateTimeString(day.atfrom) + ' <> ' + humanDuration(dayMillis));
         day.uptime += dayMillis;
+        day.sessions += 1;
       }
     });
   };
@@ -68,6 +76,7 @@ function newDailyTracker(atfrom, atto) {
 }
 
 export function extractActivity(queryResults) {
+  let log = new RollingLog(1000);
   let data = queryResults.events;
   let instances = extractInstances(queryResults);
   let lastEventMap = toLastEventMap(instances, queryResults.lastevent);
@@ -77,7 +86,7 @@ export function extractActivity(queryResults) {
   let entry = null;
   instances.forEach(function(instance) {  // Initialise entries
     entries[instance] = {};
-    dailyTrackers[instance] = newDailyTracker(data.criteria.atfrom, data.criteria.atto);
+    dailyTrackers[instance] = newDailyTracker(log, data.criteria.atfrom, data.criteria.atto);
     onlineTrackers[instance] = newOnlineTracker();
     Object.keys(lastEventMap[instance]).forEach(function(player) {
       if (lastEventMap[instance][player] === 'LOGIN') {
@@ -104,6 +113,8 @@ export function extractActivity(queryResults) {
         entry.sessions += 1;
         onlineTrackers[instance].login();
       } else if (entry.event === 'LOGIN') {
+        /* log.append(shortISODateTimeString(entry.at) + '  ' + shortISODateTimeString(at) + ' '
+                 + humanDuration(at - entry.at) + '   - ' + player); */
         entry.uptime += at - entry.at;
         dailyTrackers[instance].session(entry.at, at);
         onlineTrackers[instance].logout();
@@ -116,20 +127,27 @@ export function extractActivity(queryResults) {
     Object.keys(entries[instance]).forEach(function(player) {
       entry = entries[instance][player];
       if (entry.event === 'LOGIN') {
+        /* log.append(shortISODateTimeString(entry.at) + '  '
+                 + shortISODateTimeString(data.criteria.atto) + ' '
+                 + humanDuration(data.criteria.atto - entry.at)
+                 + '  = ' + player); */
         entry.uptime += data.criteria.atto - entry.at;
         dailyTrackers[instance].session(entry.at, data.criteria.atto);
       }
     });
   });
   let results = {};
-  instances.forEach(function(instance) {
+  instances.forEach(function(instance) {  // Generate report result object
     let total = { sessions: 0, uptime: 0 };
     let players = [];
     Object.keys(entries[instance]).forEach(function(player) {
       entry = entries[instance][player];
       total.sessions += entry.sessions;
       total.uptime += entry.uptime;
-      players.push({ player: player, uptime: entry.uptime, sessions: entry.sessions });
+      players.push({ player: player, sessions: entry.sessions, uptime: entry.uptime });
+    });
+    players.forEach(function(player) {
+      player.uptimepct = player.uptime / total.uptime;
     });
     players.sort(function(left, right) {
       return right.uptime - left.uptime;
@@ -140,12 +158,12 @@ export function extractActivity(queryResults) {
     summary.online = { min: onlineTrackers[instance].min, max: onlineTrackers[instance].max };
     let days = [];
     dailyTrackers[instance].days.forEach(function(day) {
-      days.push({ atfrom: day.atfrom, atto: day.atfrom, uptime: day.uptime });
+      days.push({ atfrom: day.atfrom, atto: day.atfrom, sessions: day.sessions, uptime: day.uptime });
     });
     results[instance] = { summary: summary, players: players, days: days };
   });
   return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-           atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
+           atrange: data.criteria.atto - data.criteria.atfrom, log: log.toText() }, results: results };
 }
 
 export function compactPlayers(players, limit=10) {

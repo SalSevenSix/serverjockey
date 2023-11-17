@@ -54,6 +54,10 @@ export function shortISODateTimeString(millis, utc=false) {
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
 }
 
+export function shortISODateString(millis, utc=false) {
+  return shortISODateTimeString(millis, utc).substring(0, 10);
+}
+
 export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;
@@ -98,8 +102,13 @@ export function urlSafeB64encode(value) {
 
 
 export class RollingLog {
+  #lines;
+  #limit;
 
-  #lines = [];
+  constructor(limit=200) {
+    this.#limit = limit;
+    this.#lines = [];
+  }
 
   reset() {
     this.#lines = [];
@@ -113,13 +122,13 @@ export class RollingLog {
 
   append(text) {
     let newLines = text.split('\n');
-    if (newLines.length > 200) {
-      this.#lines = newLines.slice(-200);
+    if (newLines.length > this.#limit) {
+      this.#lines = newLines.slice(0 - this.#limit);
       return this;
     }
     this.#lines = [...this.#lines, ...newLines];
-    if (this.#lines.length > 200) {
-      this.#lines = this.#lines.slice(-200);
+    if (this.#lines.length > this.#limit) {
+      this.#lines = this.#lines.slice(0 - this.#limit);
     }
     return this;
   }
