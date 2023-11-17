@@ -176,13 +176,33 @@ export function compactPlayers(players, limit=10) {
       result.push(player);
       counter -= 1;
     } else {
-      if (!others) { others = { player: 'OTHERS', uptime: 0, sessions: 0 }; }
-      others.uptime += player.uptime;
+      if (!others) { others = { player: 'OTHERS', sessions: 0, uptime: 0, uptimepct: 0.0 }; }
       others.sessions += player.sessions;
+      others.uptime += player.uptime;
+      others.uptimepct += player.uptimepct;
     }
   });
   if (others) { result.push(others); }
   return result;
+}
+
+export function chunkPlayers(players) {
+  let [rows, columns, current] = [[], [], []];
+  compactPlayers(players, 48).forEach(function(player) {
+    current.push(player);
+    if (current.length == 8) {
+      columns.push(current);
+      current = [];
+      if (columns.length == 3) {
+        rows.push(columns);
+        columns = [];
+      }
+    }
+  });
+  if (current.length > 0) { columns.push(current); }
+  while (columns.length < 3) { columns.push([]); }
+  if (rows.length < 2 && columns.length > 0) { rows.push(columns); }
+  return rows;
 }
 
 async function queryFetch(url, errorMessage) {

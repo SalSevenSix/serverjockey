@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { queryEvents, queryLastEvent, extractActivity, compactPlayers } from '$lib/PlayerActivity';
+  import { queryEvents, queryLastEvent, extractActivity, compactPlayers, chunkPlayers } from '$lib/PlayerActivity';
   import { floatToPercent, humanDuration, shortISODateString, shortISODateTimeString } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
@@ -20,9 +20,9 @@
   }
 
   function chartDataPlayers(instance) {
-    let players = compactPlayers(instance.players, 8);
+    let players = compactPlayers(instance.players, 7);
     let labels = players.map(function(player) {
-      return player.player;
+      return player.player.substring(0, 13);
     });
     let data = players.map(function(player) {
       return Math.round(player.uptimepct * 1000.0) / 10.0;
@@ -93,43 +93,61 @@
         </p>
       </div>
     </div>
-    {#each Object.keys(activity.results) as instance}
-      <div class="columns">
-        <div class="column">
-          <table class="table is-thinner"><tbody>
-            <tr><td class="has-text-weight-bold">Instance</td>
-                <td>{activity.results[instance].summary.instance}</td></tr>
-            <tr><td class="has-text-weight-bold">Players</td>
-                <td>{activity.results[instance].summary.unique}</td></tr>
-            <tr><td class="has-text-weight-bold">Players Max</td>
-                <td>{activity.results[instance].summary.online.max}</td></tr>
-            <tr><td class="has-text-weight-bold">Players Min</td>
-                <td>{activity.results[instance].summary.online.min}</td></tr>
-            <tr><td class="has-text-weight-bold">Total Time</td>
-                <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
-            <tr><td class="has-text-weight-bold">Total Sessions</td>
-                <td>{activity.results[instance].summary.total.sessions}</td></tr>
-          </tbody></table>
+    {#if Object.keys(activity.results).length > 0}
+      {#each Object.keys(activity.results) as instance}
+        <div class="columns">
+          <div class="column mt-0 pt-0">
+            <table class="table is-thinner"><tbody>
+              <tr><td></td><td></td><tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Instance for reported player activity">Instance</td>
+                  <td>{activity.results[instance].summary.instance}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Number of unique players identified">Players</td>
+                  <td>{activity.results[instance].summary.unique}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Maximum recorded concurrent players">Players Max</td>
+                  <td>{activity.results[instance].summary.online.max}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Minimum recorded concurrent players">Players Min</td>
+                  <td>{activity.results[instance].summary.online.min}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Sum of time played by all players">Total Time</td>
+                  <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Sum of player sessions (logins)">Total Sessions</td>
+                  <td>{activity.results[instance].summary.total.sessions}</td></tr>
+            </tbody></table>
+          </div>
+          <div class="column chart-container-players">
+            <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
+          </div>
         </div>
-        <div class="column chart-container-players">
-          <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
+        <div class="block chart-container-days mb-3">
+          <div><ChartCanvas data={chartDataDays(activity.results[instance])} /></div>
         </div>
-      </div>
-      <div class="block chart-container-days">
-        <div><ChartCanvas data={chartDataDays(activity.results[instance])} /></div>
-      </div>
-      <div class="block">
-        <table class="table"><tbody>
-        {#each compactPlayers(activity.results[instance].players, 60) as entry}
-          <tr>
-            <td>{entry.player}</td>
-            <td title="{entry.sessions} sessions">{humanDuration(entry.uptime, 2)}</td>
-            <td>{Math.round(entry.uptimepct * 1000.0) / 10.0}%</td>
-          </tr>
+        {#each chunkPlayers(activity.results[instance].players) as entryRows}
+          <div class="columns">
+            {#each entryRows as entryColumns}
+              <div class="column is-one-third mt-0 mb-0 pt-0 pb-0"><table class="table is-thinner"><tbody>
+                <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+                {#each entryColumns as entry}
+                  <tr>
+                    <td class="word-break-all">{entry.player}</td>
+                    <td class="online-column" title="{entry.sessions} sessions">{humanDuration(entry.uptime, 2)}</td>
+                  </tr>
+                {/each}
+              </tbody><table></div>
+            {/each}
+          </div>
         {/each}
-        </tbody><table>
+        <div class="block pb-3"></div>
+      {/each}
+    {:else}
+      <div class="content">
+        <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No player activity found</p>
       </div>
-    {/each}
+    {/if}
   </div>
   {#if activity.meta.log}
     <div class="content">
@@ -145,9 +163,8 @@
 
 <style>
   .chart-container-players div {
-    width: 330px;
-    height: 330px;
-    margin: -80px auto -80px 40px;
+    max-width: 330px;
+    margin: -70px auto -60px auto;
   }
 
   .chart-container-days {
@@ -155,8 +172,13 @@
   }
 
   .chart-container-days div {
-    width: 800px;
-    height: 100%;
+    max-width: 860px;
+    min-width: 700px;
     margin: 0px auto 8px auto;
+  }
+
+  .online-column {
+    white-space: nowrap;
+    width: 10%;
   }
 </style>

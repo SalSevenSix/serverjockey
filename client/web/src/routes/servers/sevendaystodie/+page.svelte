@@ -15,6 +15,7 @@
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CheckStore from '$lib/CheckStore.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
+  import PlayerActivity from '$lib/PlayerActivity.svelte';
 
   const deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
@@ -73,7 +74,7 @@
       <CheckStore>
         <Collapsible icon="fa-chart-pie" title="Activity">
           <InstanceActivity />
-          <!-- Player Activity -->
+          <PlayerActivity />
         </Collapsible>
       </CheckStore>
     </div>
