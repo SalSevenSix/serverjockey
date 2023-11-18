@@ -48,7 +48,9 @@ function newDailyTracker(log, atfrom, atto) {
   let self = { days: [] };
   let current = atfrom;
   while (current < atto) {
-    self.days.push({ sessions: 0, uptime: 0, atfrom: current, atto: current + dayMillis });
+    let day = { sessions: 0, uptime: 0, atfrom: current, atto: current + dayMillis };
+    // log.append(shortISODateTimeString(day.atfrom) + '   ' + shortISODateTimeString(day.atto));
+    self.days.push(day);
     current += dayMillis;
   }
   self.session = function(login, logout) {
@@ -152,13 +154,11 @@ export function extractActivity(queryResults) {
     players.sort(function(left, right) {
       return right.uptime - left.uptime;
     });
-    let summary = { instance: instance };
-    summary.total = total;
-    summary.unique = players.length;
+    let summary = { instance: instance, total: total, unique: players.length };
     summary.online = { min: onlineTrackers[instance].min, max: onlineTrackers[instance].max };
     let days = [];
     dailyTrackers[instance].days.forEach(function(day) {
-      days.push({ atfrom: day.atfrom, atto: day.atfrom, sessions: day.sessions, uptime: day.uptime });
+      days.push({ atfrom: day.atfrom, atto: day.atto, sessions: day.sessions, uptime: day.uptime });
     });
     results[instance] = { summary: summary, players: players, days: days };
   });
@@ -199,9 +199,15 @@ export function chunkPlayers(players) {
       }
     }
   });
-  if (current.length > 0) { columns.push(current); }
-  while (columns.length < 3) { columns.push([]); }
-  if (rows.length < 2 && columns.length > 0) { rows.push(columns); }
+  if (current.length > 0) {
+    columns.push(current);
+  }
+  if (columns.length > 0) {
+    while (columns.length < 3) {
+      columns.push([]);
+    }
+    rows.push(columns);
+  }
   return rows;
 }
 

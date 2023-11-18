@@ -12,7 +12,7 @@ setup_serverlink() {
 }
 
 sleep 1
-[ -z "$STARTUP" ] && STARTUP="/usr/local/bin/serverjockey.pyz --showtoken"
+[ -z "$STARTUP" ] && STARTUP="/usr/local/bin/serverjockey.pyz --dbfile --showtoken"
 PATH="$PATH:/usr/games"
 export PATH
 TZ=${TZ:-UTC}

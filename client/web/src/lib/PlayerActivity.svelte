@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
   import { queryEvents, queryLastEvent, extractActivity, compactPlayers, chunkPlayers } from '$lib/PlayerActivity';
-  import { floatToPercent, humanDuration, shortISODateString, shortISODateTimeString } from '$lib/util';
+  import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
@@ -36,7 +36,7 @@
 
   function chartDataDays(instance) {
     let labels = instance.days.map(function(day) {
-      return shortISODateString(day.atto);
+      return shortISODateTimeString(day.atto).substring(5, 10);
     });
     let playerHours = instance.days.map(function(day) {
       return day.uptime / 3600000;
@@ -132,16 +132,16 @@
               <div class="column is-one-third mt-0 mb-0 pt-0 pb-0"><table class="table is-thinner"><tbody>
                 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
                 {#each entryColumns as entry}
-                  <tr>
+                  <tr title="{entry.sessions} sessions">
                     <td class="word-break-all">{entry.player}</td>
-                    <td class="online-column" title="{entry.sessions} sessions">{humanDuration(entry.uptime, 2)}</td>
+                    <td class="online-column">{humanDuration(entry.uptime, 2)}</td>
                   </tr>
                 {/each}
               </tbody><table></div>
             {/each}
           </div>
         {/each}
-        <div class="block pb-3"></div>
+        <div class="block pb-2"></div>
       {/each}
     {:else}
       <div class="content">

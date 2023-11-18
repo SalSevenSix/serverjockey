@@ -54,10 +54,6 @@ export function shortISODateTimeString(millis, utc=false) {
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
 }
 
-export function shortISODateString(millis, utc=false) {
-  return shortISODateTimeString(millis, utc).substring(0, 10);
-}
-
 export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;
