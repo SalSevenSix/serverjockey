@@ -5,12 +5,16 @@ import signal
 from core.util import shellutil
 
 
+def pid_self():
+    return os.getpid()
+
+
 def interrupt(pid: int):
     os.kill(pid, signal.SIGINT)  # This is probably blocking io but quick
 
 
 def interrupt_self():
-    interrupt(os.getpid())
+    interrupt(pid_self())
 
 
 async def kill_tree(pid: int):

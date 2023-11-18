@@ -25,7 +25,7 @@ class TestContext:
         os.makedirs(tmpdir)
         self._context = contextsvc.Context(
             debug=True, trace=False, home=home, tmpdir=tmpdir,
-            secret='token', showtoken=False,
+            stime=None, secret='token', showtoken=False,
             scheme=_SCHEME, sslcert=None, sslkey=None,
             env=os.environ.copy(), python=sys.executable,
             logfile=None, dbfile=None, clientfile=None,

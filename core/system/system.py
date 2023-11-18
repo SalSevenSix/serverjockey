@@ -2,7 +2,7 @@ import logging
 import asyncio
 import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
-from core.util import util, dtutil, io, sysutil, signals, objconv, aggtrf
+from core.util import util, dtutil, io, sysutil, signals, objconv, aggtrf, funcutil
 from core.msg import msgabc, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
@@ -19,6 +19,7 @@ class SystemService:
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._home_dir = context.config('home')
+        self._pidfile = _PidFileSubscriber(context)
         self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
         self._modules = svrmodules.Modules(context)
         self._sysstoresvc = sysstore.SystemStoreService(context)
@@ -53,6 +54,7 @@ class SystemService:
             msglog.HandlerPublisher.log(self._context, self, 'LOG UNAVAVAILABLE IN TRACE MODE')
         else:
             logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
+        self._context.register(self._pidfile)
         igd.initialise(self._context, self)
         self._sysstoresvc.initialise()
         self._context.register(_DeleteInstanceSubscriber(self))
@@ -78,7 +80,7 @@ class SystemService:
 
     async def shutdown(self):
         await self._clientfile.delete()
-        shutdowns, destroys = [], []
+        shutdowns, destroys = [self._pidfile.shutdown()], []
         for subcontext in self._context.subcontexts():
             self._instances.remove(subcontext.config('identity'))
             shutdowns.append(svrsvc.ServerService.shutdown(subcontext, self))
@@ -253,6 +255,30 @@ class _SystemInfoHandler(httpabc.GetHandler):
         info['startmillis'] = self._startmillis
         info['uptime'] = dtutil.now_millis() - self._startmillis
         return info
+
+
+class _PidFileSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, context: contextsvc.Context):
+        super().__init__(msgftr.AcceptAll())
+        self._pid, self._pidfile = str(signals.pid_self()), context.config('home') + '/.pid'
+        self._running, self._last = True, None
+
+    async def handle(self, message):
+        if not self._running:
+            return True
+        now = message.created()
+        if not self._last:
+            await funcutil.silently_call(io.write_file(self._pidfile, self._pid))
+            self._last = now
+        elif now - self._last > 600.0:  # 10 minutes
+            await funcutil.silently_call(io.touch_file(self._pidfile))
+            self._last = now
+        return None
+
+    async def shutdown(self):
+        self._running = False
+        await funcutil.silently_call(io.write_file(self._pidfile, self._pid))
 
 
 class _ShutdownHandler(httpabc.PostHandler):

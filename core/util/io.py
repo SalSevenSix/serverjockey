@@ -1,7 +1,8 @@
 import abc
+import typing
 import os
 import shutil
-import typing
+import pathlib
 import aiofiles
 from aiofiles import os as aioos
 # ALLOW util.*
@@ -43,6 +44,10 @@ _move = funcutil.to_async(shutil.move)
 _rmtree = funcutil.to_async(shutil.rmtree)
 
 
+def _touch_file(filename: str):
+    pathlib.Path(filename).touch()
+
+
 def _auto_chmod(path: str):
     for current_dir_path, subdir_names, file_names in os.walk(path):
         for file_name in file_names:
@@ -51,6 +56,7 @@ def _auto_chmod(path: str):
                 os.chmod(file_path, 0o774)
 
 
+touch_file = funcutil.to_async(_touch_file)
 auto_chmod = funcutil.to_async(_auto_chmod)
 
 

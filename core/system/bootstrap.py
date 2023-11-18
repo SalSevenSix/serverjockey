@@ -1,8 +1,8 @@
 import logging
+import typing
 import argparse
 import sys
 import os
-import typing
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
 from core.util import util, idutil, funcutil, sysutil, steamutil, logutil, io, tasks
 from core.msg import msglog
@@ -18,6 +18,11 @@ class _NoTraceFilter(logging.Filter):
         message = record.getMessage()
         trace = len(message) > 4 and message[:4] in _NoTraceFilter.PREFIXES
         return not trace
+
+
+def _stime(home: str) -> float | None:
+    pidfile = home + '/.pid'
+    return os.stat(pidfile).st_atime if os.path.isfile(pidfile) else None
 
 
 def _ssl_config(home: str) -> tuple:
@@ -64,7 +69,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
         debug=args.debug, trace=args.trace, home=home, tmpdir=tmpdir,
-        secret=idutil.generate_token(10, True), showtoken=args.showtoken,
+        stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=args.showtoken,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
         python=sys.executable, clientfile=clientfile, dbfile=dbfile, logfile=logfile,
         host=None if args.host == '0.0.0.0' else args.host, port=args.port)
