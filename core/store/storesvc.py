@@ -31,20 +31,21 @@ class StoreService(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         if message is msgabc.STOP:
-            return await self._close()
+            await self._close()
+            return True
         name = message.name()
-        if name is StoreService.INITIALISE:
-            return await self._initialise()
-        if not self._session:
-            return False
         if name is storeabc.TRANSACTION:
             await self._transaction(message)
+            return None
+        if name is StoreService.INITIALISE:
+            database_path = self._context.config('dbfile')
+            if not database_path:
+                return True
+            await self._initialise(database_path)
         return None
 
-    async def _initialise(self) -> bool | None:
-        create_database, database_path = False, self._context.config('dbfile')
-        if not database_path:
-            return False
+    async def _initialise(self, database_path: str):
+        create_database = False
         try:
             create_database = not await io.file_exists(database_path)
             self._engine = create_async_engine('sqlite+aiosqlite:///' + database_path)
@@ -62,30 +63,30 @@ class StoreService(msgabc.AbcSubscriber):
                 await _execute(self._session, _CreateDatabaseDone())
             else:
                 await _execute(self._session, _IntegrityChecks(self._context))
-            return None
         except Exception as e:
             logging.error('Error initialising database: ' + repr(e))
             await self._close()
             if create_database:
                 await funcutil.silently_call(io.delete_file(database_path))
-        return False
 
     async def _transaction(self, message):
-        transaction: storeabc.Transaction = message.data()
         result = None
+        if not self._session:
+            result = Exception('Session unavailable.')
+            self._context.post(message.source(), storeabc.TRANSACTION_RESPONSE, result, message)
+            return
         try:
-            result = await _execute(self._session, transaction)
+            result = await _execute(self._session, message.data())
         except Exception as e:
             result = e
             logging.error('Transation error: ' + repr(e))
         finally:
             self._context.post(message.source(), storeabc.TRANSACTION_RESPONSE, result, message)
 
-    async def _close(self) -> bool:
+    async def _close(self):
         await funcutil.silently_cleanup(self._session)
         await funcutil.silently_cleanup(self._engine)
         self._engine, self._session = None, None
-        return True
 
 
 class _CreateDatabaseDone(storeabc.Transaction):
