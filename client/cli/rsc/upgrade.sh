@@ -1,9 +1,3 @@
-if [ "$(whoami)" != "root" ]; then
-  echo "Not root user. Please run using sudo as follows..."
-  echo "  sudo serverjockey_cmd.pyz -t upgrade"
-  exit 1
-fi
-
 INSTALLER="apt"
 PKGTYPE="deb"
 if which yum > /dev/null 2>&1; then

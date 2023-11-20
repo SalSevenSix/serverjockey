@@ -1,9 +1,3 @@
-if [ "$(whoami)" != "root" ]; then
-  echo "Not root user. Please run using sudo as follows..."
-  echo "  sudo serverjockey_cmd.pyz -t userdel:<name>"
-  exit 1
-fi
-
 SJGMS_USER="{user}"
 SERVICE_FILE="/etc/systemd/system/$SJGMS_USER.service"
 

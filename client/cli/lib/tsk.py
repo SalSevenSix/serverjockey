@@ -3,7 +3,7 @@ import inspect
 import subprocess
 from http import client
 # ALLOW lib.util
-from . import util
+from . import util, natives
 
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
@@ -56,6 +56,13 @@ class TaskProcessor:
                 for line in text.strip().split('\n'):
                     logging.info(self._out + line)
 
+    def _checkroot(self, args: str):
+        script = util.get_resource('checkroot.sh').format(args=args)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Task not run')
+
     def _sysdsvc(self, argument: str):
         user, port = TaskProcessor._extract_user_and_port(argument)
         args = ' --port ' + str(port) if port != _DEFAULT_PORT else ''
@@ -63,6 +70,7 @@ class TaskProcessor:
         self._dump_to_log(result)
 
     def _upgrade(self):
+        self._checkroot('upgrade')
         script = util.get_resource('upgrade.sh')
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
@@ -70,13 +78,16 @@ class TaskProcessor:
             raise Exception('Upgrade task failed')
 
     def _uninstall(self):
+        self._checkroot('uninstall')
         script = util.get_resource('uninstall.sh').replace('{userdef}', _DEFAULT_USER)
         result = subprocess.run(script, shell=True, capture_output=True)
-        self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
+            self._dump_to_log(result.stdout, result.stderr)
             raise Exception('Uninstall task failed')
 
     def _adduser(self, argument: str):
+        self._checkroot('adduser:<name>,<port>')
+        natives.install()  # TODO probably should be in a _postinstall() that also calls _adduser()
         user, port = TaskProcessor._extract_user_and_port(argument)
         if user == 'serverjockey':
             raise Exception('User name not allowed')
@@ -88,6 +99,7 @@ class TaskProcessor:
             raise Exception('New user task failed')
 
     def _userdel(self, argument: str):
+        self._checkroot('userdel:<name>')
         user = TaskProcessor._extract_user_and_port(argument)[0]
         if user == _DEFAULT_USER:
             raise Exception('Unable to delete default user.')
@@ -96,6 +108,17 @@ class TaskProcessor:
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('Delete user task failed')
+
+    def _service(self, argument: str):
+        self._checkroot('service:<command>')
+        args = argument if argument else 'status'
+        args += ' '
+        args += 'serverjockey' if self._user == _DEFAULT_USER else self._user
+        script = util.get_resource('systemctl.sh').format(args=args)
+        result = subprocess.run(script, shell=True, capture_output=True)
+        self._dump_to_log(result.stdout, result.stderr)
+        if result.returncode != 0:
+            raise Exception('Service ' + argument + ' task failed')
 
     def _ddns(self, argument: str):
         provider, token, domain, ipv4, ipv6 = util.split_argument(argument, 5)
@@ -126,13 +149,3 @@ class TaskProcessor:
             if response:
                 response.close()
             connection.close()
-
-    def _service(self, argument: str):
-        args = argument if argument else 'status'
-        args += ' '
-        args += 'serverjockey' if self._user == _DEFAULT_USER else self._user
-        script = util.get_resource('systemctl.sh').format(args=args)
-        result = subprocess.run(script, shell=True, capture_output=True)
-        self._dump_to_log(result.stdout, result.stderr)
-        if result.returncode != 0:
-            raise Exception('Service ' + argument + ' task failed')

@@ -1,9 +1,3 @@
-if [ "$(whoami)" != "root" ]; then
-  echo "Not root user. Please run using sudo as follows..."
-  echo "  sudo serverjockey_cmd.pyz -t adduser:<name>,<port>"
-  exit 1
-fi
-
 SJGMS_USER_DEF="{userdef}"
 SJGMS_USER="{user}"
 SJGMS_PORT="{port}"

@@ -32,9 +32,6 @@ if [ "$BRANCH" = "local" ]; then
   find . -maxdepth 1 | while read file; do
     [[ $file == "." || $file == "./dist" ]] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
   done
-  find "$SERVERJOCKEY_DIR" -type d -name "__pycache__" | while read file; do
-    rm -rf $file
-  done
 else
   if [ ! -f "$BRANCH.zip" ]; then
     echo "Downloading zip from github"
@@ -127,6 +124,13 @@ python3.10 -m unittest discover -t . -s test -p "*.py"
 
 echo "Removing ServerJockey junk"
 rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1
+find . -name "__pycache__" -type d | while read file; do
+  rm -rf $file
+done
+
+echo "Rename modules with native libraries"
+mv greenlet-3.0.0.dist-info ___greenlet-3.0.0.dist-info || exit 1
+mv greenlet ___greenlet || exit 1
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
