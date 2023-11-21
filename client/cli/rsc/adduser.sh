@@ -20,7 +20,7 @@ if [ $? -ne 0 ]; then
   chgrp -R $(ls -ld $HOME_DIR | awk '{print $4}') $HOME_DIR
 fi
 
-[ -f $SERVICE_FILE ] || /usr/local/bin/serverjockey_cmd.pyz -nt sysdsvc:$SJGMS_USER,$SJGMS_PORT > $SERVICE_FILE
+/usr/local/bin/serverjockey_cmd.pyz -nt sysdsvc:$SJGMS_USER,$SJGMS_PORT > $SERVICE_FILE
 systemctl daemon-reload
 systemctl enable $SERVICE_NAME
 systemctl start $SERVICE_NAME
