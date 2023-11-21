@@ -79,8 +79,7 @@ class SystemService:
         return self._resource
 
     async def shutdown(self):
-        await self._clientfile.delete()
-        shutdowns, destroys = [self._pidfile.shutdown()], []
+        shutdowns, destroys = [self._clientfile.delete(), self._pidfile.shutdown()], []
         for subcontext in self._context.subcontexts():
             self._instances.remove(subcontext.config('identity'))
             shutdowns.append(svrsvc.ServerService.shutdown(subcontext, self))

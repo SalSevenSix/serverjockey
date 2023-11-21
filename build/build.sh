@@ -1,8 +1,8 @@
 #!/bin/bash
 
 BRANCH="${1-local}"
-cd "$(dirname $0)" || exit 1
 TIMESTAMP=$(date '+%Y%m%d%H%M')
+cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
@@ -128,9 +128,10 @@ find . -name "__pycache__" -type d | while read file; do
   rm -rf $file
 done
 
-echo "Rename modules with native libraries"
-mv greenlet-3.0.0.dist-info ___greenlet-3.0.0.dist-info || exit 1
-mv greenlet ___greenlet || exit 1
+# TODO Depricated, delete sometime
+#echo "Rename modules with native libraries"
+#mv greenlet-3.0.0.dist-info ___greenlet-3.0.0.dist-info || exit 1
+#mv greenlet ___greenlet || exit 1
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1

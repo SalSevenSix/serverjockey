@@ -4,6 +4,8 @@ import os
 import shutil
 import zipfile
 
+# TODO depricated, delete sometime
+
 
 def _find_packages_path():
     default_path = '/usr/local/lib/python3.10/dist-packages'

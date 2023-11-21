@@ -3,7 +3,7 @@ import inspect
 import subprocess
 from http import client
 # ALLOW lib.util
-from . import util, natives
+from . import util
 
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
@@ -87,7 +87,7 @@ class TaskProcessor:
 
     def _adduser(self, argument: str):
         self._checkroot('adduser:<name>,<port>')
-        natives.install()  # TODO probably should be in a _postinstall() that also calls _adduser()
+        # natives.install()
         user, port = TaskProcessor._extract_user_and_port(argument)
         if user == 'serverjockey':
             raise Exception('User name not allowed')

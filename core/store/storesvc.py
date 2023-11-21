@@ -1,21 +1,12 @@
 import logging
 import typing
-import time
-from sqlalchemy import func
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.ext.asyncio.engine import AsyncEngine
-from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 # TODO ALLOW ???
-from core.util import io, funcutil, sysutil, objconv
+from core.util import io, funcutil
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
-from core.store import storeabc
-
-
-async def _execute(session: AsyncSession, transaction: storeabc.Transaction) -> typing.Any:
-    async with session.begin():
-        return await transaction.execute(session)
+from core.store import storeabc, storesvctxn
 
 
 class StoreService(msgabc.AbcSubscriber):
@@ -26,12 +17,11 @@ class StoreService(msgabc.AbcSubscriber):
             msgftr.NameIn((StoreService.INITIALISE, storeabc.TRANSACTION)),
             msgftr.IsStop()))
         self._context = context
-        self._engine: AsyncEngine | None = None
-        self._session: AsyncSession | None = None
+        self._session: Session | None = None
 
     async def handle(self, message):
         if message is msgabc.STOP:
-            await self._close()
+            await _close_session(self._session)
             return True
         name = message.name()
         if name is storeabc.TRANSACTION:
@@ -48,24 +38,15 @@ class StoreService(msgabc.AbcSubscriber):
         create_database = False
         try:
             create_database = not await io.file_exists(database_path)
-            self._engine = create_async_engine('sqlite+aiosqlite:///' + database_path)
+            self._session = await _create_session(database_path, create_database)
             if create_database:
-                async with self._engine.begin() as connection:
-                    await connection.run_sync(storeabc.Base.metadata.create_all)
-                logging.debug('Created database: ' + database_path)
-            session_maker = async_sessionmaker(self._engine)
-            self._session = session_maker()
-            if self._context.is_debug():
-                aiosqlite_logger = logging.getLogger('aiosqlite')
-                if aiosqlite_logger:
-                    aiosqlite_logger.setLevel(logging.INFO)
-            if create_database:
-                await _execute(self._session, _CreateDatabaseDone())
+                await _execute(self._session, storesvctxn.CreateDatabaseDone())
             else:
-                await _execute(self._session, _IntegrityChecks(self._context))
+                await _execute(self._session, storesvctxn.IntegrityChecks(self._context))
         except Exception as e:
             logging.error('Error initialising database: ' + repr(e))
-            await self._close()
+            await _close_session(self._session)
+            self._session = None
             if create_database:
                 await funcutil.silently_call(io.delete_file(database_path))
 
@@ -79,54 +60,33 @@ class StoreService(msgabc.AbcSubscriber):
             result = await _execute(self._session, message.data())
         except Exception as e:
             result = e
-            logging.error('Transation error: ' + repr(e))
+            logging.error('Transaction error: ' + repr(e))
         finally:
             self._context.post(message.source(), storeabc.TRANSACTION_RESPONSE, result, message)
 
-    async def _close(self):
-        await funcutil.silently_cleanup(self._session)
-        await funcutil.silently_cleanup(self._engine)
-        self._engine, self._session = None, None
+
+def _sync_create_session(database_path: str, create_database: bool) -> Session:
+    engine = create_engine('sqlite:///' + database_path)
+    if create_database:
+        storeabc.Base.metadata.create_all(engine)
+        logging.debug('Created database: ' + database_path)
+    return Session(engine)
 
 
-class _CreateDatabaseDone(storeabc.Transaction):
-
-    async def execute(self, session: AsyncSession) -> typing.Any:
-        session.add(storeabc.SystemEvent(
-            at=time.time(), name='SCHEMA',
-            details=objconv.obj_to_json(sysutil.system_version_dict())))
-        return None
+def _sync_execute(session: Session, transaction: storeabc.Transaction) -> typing.Any:
+    with session.begin():
+        return transaction.execute(session)
 
 
-class _IntegrityChecks(storeabc.Transaction):
+def _sync_close_session(session: Session):
+    if not session:
+        return
+    try:
+        session.close()
+    except Exception as e:
+        logging.debug('Error closing session: ' + repr(e))
 
-    def __init__(self, context: contextsvc.Context):
-        self._stime = context.config('stime')
 
-    async def execute(self, session: AsyncSession) -> typing.Any:
-        corrections = 0
-        emap = {'START': 'EXCEPTION', 'STARTING': 'EXCEPTION', 'STARTED': 'EXCEPTION',
-                'STOPPING': 'STOPPED', 'MAINTENANCE': 'READY'}
-        details = objconv.obj_to_json({'error': 'Event inserted by startup integrity check'})
-        statement = select(storeabc.InstanceEvent)
-        statement = statement.group_by(storeabc.InstanceEvent.instance_id)
-        statement = statement.having(storeabc.InstanceEvent.name.in_(emap.keys()))
-        statement = statement.having(func.max(storeabc.InstanceEvent.at))
-        for event in await session.scalars(statement):
-            corrections += 1
-            event_at = self._stime if self._stime and self._stime > event.at else event.at + 1.0
-            session.add(storeabc.InstanceEvent(
-                at=event_at, instance_id=event.instance_id, name=emap[event.name], details=details))
-        statement = select(storeabc.PlayerEvent)
-        statement = statement.group_by(storeabc.PlayerEvent.player_id)
-        statement = statement.having(storeabc.PlayerEvent.name == 'LOGIN')
-        statement = statement.having(func.max(storeabc.PlayerEvent.at))
-        for event in await session.scalars(statement):
-            corrections += 1
-            event_at = self._stime if self._stime and self._stime > event.at else event.at + 1.0
-            session.add(storeabc.PlayerEvent(
-                at=event_at, player_id=event.player_id, name='LOGOUT', details=details))
-        if corrections and not self._stime:
-            logging.warning('Shutdown time unknown for db integrity check.'
-                            ' Used +1 second for ' + str(corrections) + ' correction events.')
-        return None
+_create_session = funcutil.to_async(_sync_create_session)
+_execute = funcutil.to_async(_sync_execute)
+_close_session = funcutil.to_async(_sync_close_session)

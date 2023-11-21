@@ -2,9 +2,7 @@ from __future__ import annotations
 import typing
 import abc
 from sqlalchemy import Column, ForeignKey, Integer, Float, Text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column, relationship
 # TODO ALLOW ???
 from core.msg import msgabc, msgext
 
@@ -17,7 +15,7 @@ TRANSACTION_RESPONSE = TRANSACTION + '_RESPONSE'
 class Transaction(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    async def execute(self, session: AsyncSession) -> typing.Any:
+    def execute(self, session: Session) -> typing.Any:
         pass
 
 
@@ -30,7 +28,7 @@ async def query(mailer: msgabc.MulticastMailer, source: typing.Any, transaction:
     return response.data()
 
 
-class Base(AsyncAttrs, DeclarativeBase):
+class Base(DeclarativeBase):
     pass
 
 
