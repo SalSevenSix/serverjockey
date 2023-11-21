@@ -3,7 +3,7 @@
   import { notifyError } from '$lib/notifications';
   import { confirmDangerModal } from '$lib/modals';
   import { goto } from '$app/navigation';
-  import { newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/sjgmsapi';
+  import { newGetRequest, newPostRequest, buildUnstanceUrl, SubscriptionHelper } from '$lib/sjgmsapi';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const subs = new SubscriptionHelper();
@@ -13,7 +13,7 @@
   let deleting = false;
 
   function viewInstance(selected) {
-    goto('/servers/' + selected.module + '?i=' + selected.identity);
+    goto(buildUnstanceUrl(selected.module, selected.identity));
   }
 
   function deleteInstance(selected) {

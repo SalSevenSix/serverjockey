@@ -30,6 +30,10 @@ export function newPostRequest(ct = 'application/json') {
   };
 }
 
+export function buildUnstanceUrl(module, identity) {
+  return '/servers/' + module + '?i=' + identity;
+}
+
 export function openFileInNewTab(url, errorCallback=null) {
   let objectUrl = null;
   fetch(url, newGetRequest())

@@ -12,12 +12,19 @@ from core.store import storeabc
 # Note that all this is blocking IO
 
 
-class CreateDatabaseDone(storeabc.Transaction):
+class StoreCreatedEvent(storeabc.Transaction):
 
     def execute(self, session: Session) -> typing.Any:
         session.add(storeabc.SystemEvent(
             at=time.time(), name='SCHEMA',
             details=objconv.obj_to_json(sysutil.system_version_dict())))
+        return None
+
+
+class StoreResetEvent(storeabc.Transaction):
+
+    def execute(self, session: Session) -> typing.Any:
+        session.add(storeabc.SystemEvent(at=time.time(), name='RESET', details=None))
         return None
 
 

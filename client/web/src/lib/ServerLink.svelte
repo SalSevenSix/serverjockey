@@ -7,6 +7,9 @@
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
   import Collapsible from '$lib/Collapsible.svelte';
   import InstanceLog from '$lib/InstanceLog.svelte';
+
+  // TODO ServerStatusStore is persistent even when collapsed.
+  // Fix by merging log into same section when default is closed
 </script>
 
 

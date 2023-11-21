@@ -78,36 +78,42 @@
         </p>
       </div>
     </div>
-    {#each activity.results as entry}
-      <div class="columns">
-        <div class="column mt-0 pt-0">
-          <table class="table is-thinner"><tbody>
-            <tr><td></td><td></td><tr>
-            <tr><td class="has-text-weight-bold"
-                    title="Name of the instance">Name</td>
-              <td>{entry.instance}</td></tr>
-            <tr><td class="has-text-weight-bold"
-                    title="Date and time the instance was created">Created</td>
-              <td>{shortISODateTimeString(entry.created)}</td></tr>
-            <tr><td class="has-text-weight-bold"
-                    title="Reporting period, starting at 'created' or 'from' date, whichever is latest">Range</td>
-              <td>{humanDuration(entry.range)}</td></tr>
-            <tr><td class="has-text-weight-bold"
-                    title="Total uptime of the instance">Uptime</td>
-              <td>{humanDuration(entry.uptime)}</td></tr>
-            <tr><td class="has-text-weight-bold"
-                    title="Uptime as percentage of range (reporting period)">Available</td>
-              <td>{floatToPercent(entry.available)}</td></tr>
-            <tr><td class="has-text-weight-bold"
-                    title="Number of times the instance was running">Sessions</td>
-              <td>{entry.sessions}</td></tr>
-          </tbody></table>
+    {#if Object.keys(activity.results).length > 0}
+      {#each activity.results as entry}
+        <div class="columns">
+          <div class="column mt-0 pt-0">
+            <table class="table is-thinner"><tbody>
+              <tr><td></td><td></td><tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Name of the instance">Name</td>
+                <td>{entry.instance}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Date and time the instance was created">Created</td>
+                <td>{shortISODateTimeString(entry.created)}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Reporting period, starting at 'created' or 'from' date, whichever is latest">Range</td>
+                <td>{humanDuration(entry.range)}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Total uptime of the instance">Uptime</td>
+                <td>{humanDuration(entry.uptime)}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Uptime as percentage of range (reporting period)">Available</td>
+                <td>{floatToPercent(entry.available)}</td></tr>
+              <tr><td class="has-text-weight-bold"
+                      title="Number of times the instance was running">Sessions</td>
+                <td>{entry.sessions}</td></tr>
+            </tbody></table>
+          </div>
+          <div class="column">
+            <div class="chart"><ChartCanvas data={chartData(entry)} /></div>
+          </div>
         </div>
-        <div class="column">
-          <div class="chart"><ChartCanvas data={chartData(entry)} /></div>
-        </div>
+      {/each}
+    {:else}
+      <div class="content pb-4">
+        <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No instance activity found</p>
       </div>
-    {/each}
+    {/if}
   </div>
 {:else}
   <div class="content">

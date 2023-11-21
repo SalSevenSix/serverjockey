@@ -144,7 +144,7 @@
         <div class="block pb-2"></div>
       {/each}
     {:else}
-      <div class="content">
+      <div class="content pb-4">
         <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No player activity found</p>
       </div>
     {/if}

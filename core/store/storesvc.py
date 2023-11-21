@@ -11,10 +11,11 @@ from core.store import storeabc, storesvctxn
 
 class StoreService(msgabc.AbcSubscriber):
     INITIALISE = 'StoreService.Initialise'
+    RESET = 'StoreService.Reset'
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(
-            msgftr.NameIn((StoreService.INITIALISE, storeabc.TRANSACTION)),
+            msgftr.NameIn((storeabc.TRANSACTION, StoreService.INITIALISE, StoreService.RESET)),
             msgftr.IsStop()))
         self._context = context
         self._session: Session | None = None
@@ -26,6 +27,9 @@ class StoreService(msgabc.AbcSubscriber):
         name = message.name()
         if name is storeabc.TRANSACTION:
             await self._transaction(message)
+            return None
+        if name is StoreService.RESET:
+            await self._reset_activity()
             return None
         if name is StoreService.INITIALISE:
             database_path = self._context.config('dbfile')
@@ -40,7 +44,7 @@ class StoreService(msgabc.AbcSubscriber):
             create_database = not await io.file_exists(database_path)
             self._session = await _create_session(database_path, create_database)
             if create_database:
-                await _execute(self._session, storesvctxn.CreateDatabaseDone())
+                await _execute(self._session, storesvctxn.StoreCreatedEvent())
             else:
                 await _execute(self._session, storesvctxn.IntegrityChecks(self._context))
         except Exception as e:
@@ -49,6 +53,15 @@ class StoreService(msgabc.AbcSubscriber):
             self._session = None
             if create_database:
                 await funcutil.silently_call(io.delete_file(database_path))
+
+    async def _reset_activity(self):
+        try:
+            if not self._session:
+                raise Exception('Session unavailable.')
+            await _reset_activity(self._session)
+            await _execute(self._session, storesvctxn.StoreResetEvent())
+        except Exception as e:
+            logging.error('Reset activity error: ' + repr(e))
 
     async def _transaction(self, message):
         result = None
@@ -73,6 +86,18 @@ def _sync_create_session(database_path: str, create_database: bool) -> Session:
     return Session(engine)
 
 
+def _sync_reset_activity(session: Session):
+    tables = (
+        storeabc.PlayerChat.__table__,
+        storeabc.PlayerEvent.__table__,
+        storeabc.Player.__table__,
+        storeabc.InstanceEvent.__table__)
+    bind = session.get_bind()
+    storeabc.Base.metadata.drop_all(bind, tables=tables)
+    storeabc.Base.metadata.create_all(bind, tables=tables)
+    logging.debug('Reset database activity')
+
+
 def _sync_execute(session: Session, transaction: storeabc.Transaction) -> typing.Any:
     with session.begin():
         return transaction.execute(session)
@@ -88,5 +113,6 @@ def _sync_close_session(session: Session):
 
 
 _create_session = funcutil.to_async(_sync_create_session)
+_reset_activity = funcutil.to_async(_sync_reset_activity)
 _execute = funcutil.to_async(_sync_execute)
 _close_session = funcutil.to_async(_sync_close_session)

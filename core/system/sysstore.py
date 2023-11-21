@@ -32,6 +32,7 @@ class SystemStoreService:
             return
         r = httprsc.ResourceBuilder(resource)
         r.psh('store', httpext.StaticHandler(self._dbfile))
+        r.put('reset', _StoreResetHandler(self._context))
         r.psh('instance', _QueryInstanceHandler(self._context))
         r.put('event', _QueryInstanceEventHandler(self._context))
         r.pop()
@@ -101,6 +102,16 @@ class _InstanceRouting(msgabc.AbcSubscriber):
                     self._identity, event_name, player_name, steamid))
                 return None
             return None
+
+
+class _StoreResetHandler(httpabc.PostHandler):
+
+    def __init__(self, mailer: msgabc.Mailer):
+        self._mailer = mailer
+
+    def handle_post(self, resource, data):
+        self._mailer.post(self, storesvc.StoreService.RESET)
+        return httpabc.ResponseBody.NO_CONTENT
 
 
 class _AbstractQueryHandler(httpabc.GetHandler):
