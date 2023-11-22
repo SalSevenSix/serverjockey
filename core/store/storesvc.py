@@ -2,7 +2,7 @@ import logging
 import typing
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-# TODO ALLOW ???
+# ALLOW util.* msg.* context.* store.storeabc store.storesvctxn
 from core.util import io, funcutil
 from core.msg import msgabc, msgftr
 from core.context import contextsvc

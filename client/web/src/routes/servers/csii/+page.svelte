@@ -19,7 +19,7 @@
   import ChatActivity from '$lib/ChatActivity.svelte';
 
   const deploymentActions = [
-    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
+    { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all configuration and delete all logs.' }];
 
   const consoleCommands = {

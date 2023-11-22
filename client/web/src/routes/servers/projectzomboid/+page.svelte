@@ -20,13 +20,13 @@
   import ChatActivity from '$lib/ChatActivity.svelte';
 
   const deploymentActions = [
-    { 'key': 'wipe-world-save', 'name': 'World Save',
+    { 'key': 'wipe-world-save', 'name': 'Reset Save',
       'desc': 'Reset the game world save only. This is the map and player characters.' },
-    { 'key': 'wipe-world-playerdb', 'name': 'World Player DB',
+    { 'key': 'wipe-world-playerdb', 'name': 'Reset Player DB',
       'desc': 'Reset the player database only. This is logins, whitelist, banlist.' },
-    { 'key': 'wipe-world-config', 'name': 'World Config',
+    { 'key': 'wipe-world-config', 'name': 'Reset Config',
       'desc': 'Reset the configuration files only. INI, Sandbox and Spawn config files.' },
-    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
+    { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above, including logs and auto backups.' }];
 
   const consoleCommands = {

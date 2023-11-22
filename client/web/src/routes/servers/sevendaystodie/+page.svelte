@@ -19,11 +19,11 @@
   import ChatActivity from '$lib/ChatActivity.svelte';
 
   const deploymentActions = [
-    { 'key': 'wipe-world-save', 'name': 'World Save',
+    { 'key': 'wipe-world-save', 'name': 'Reset Save',
       'desc': 'Reset the game world save only.' },
-    { 'key': 'wipe-world-config', 'name': 'World Config',
+    { 'key': 'wipe-world-config', 'name': 'Reset Config',
       'desc': 'Reset the configuration files only.' },
-    { 'key': 'wipe-world-all', 'name': 'World All', 'icon': 'fa-explosion',
+    { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 </script>
 

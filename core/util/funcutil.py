@@ -9,8 +9,6 @@ from functools import partial, wraps
 def to_async(func):
     @wraps(func)
     async def run(*args, loop=None, executor=None, **kwargs):
-        # TODO consider providing a thread pool executor with max workers limit
-        # also debug to make sure one isn't set already
         if loop is None:
             loop = asyncio.get_event_loop()
         return await loop.run_in_executor(executor, partial(func, *args, **kwargs))

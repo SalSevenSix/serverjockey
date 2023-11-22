@@ -3,7 +3,7 @@ import time
 from sqlalchemy import Executable, func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
-# TODO ALLOW ???
+# ALLOW util.* store.storeabc
 from core.util import util, dtutil
 from core.store import storeabc
 
@@ -151,8 +151,6 @@ class SelectInstanceEvent(storeabc.Transaction):
         statement = statement.join(storeabc.Instance.events)
         if instance:
             statement = statement.where(storeabc.Instance.id == _get_instance_id(session, instance))
-        if events:
-            statement = statement.where(storeabc.InstanceEvent.name.in_(str(events).upper().split(',')))
         if at_from:
             at_from = int(at_from)
             if at_group:
@@ -165,6 +163,8 @@ class SelectInstanceEvent(storeabc.Transaction):
                 statement = statement.where(storeabc.InstanceEvent.at < dtutil.to_seconds(at_to))
             else:
                 statement = statement.where(storeabc.InstanceEvent.at <= dtutil.to_seconds(at_to))
+        if events:
+            statement = statement.where(storeabc.InstanceEvent.name.in_(str(events).upper().split(',')))
         if at_group:
             if at_group not in ('min', 'max'):
                 raise Exception('Invalid atgroup')

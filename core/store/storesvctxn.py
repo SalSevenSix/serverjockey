@@ -4,7 +4,7 @@ import time
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
-# TODO ALLOW ???
+# ALLOW util.* msg.* context.* store.storeabc
 from core.util import sysutil, objconv
 from core.context import contextsvc
 from core.store import storeabc

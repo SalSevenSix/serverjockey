@@ -4,18 +4,29 @@
 
   let loaded = false;
   let hasServerLink = false;
+  let hasToken = false;
 
   onMount(function() {
-    fetch('/instances/serverlink', newGetRequest())
-      .then(function(response) { hasServerLink = response.ok; })
-      .finally(function() { loaded = true; });
+    fetch('/instances/serverlink/config', newGetRequest())
+      .then(function(response) {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then(function(json) {
+        if (!json) return;
+        hasServerLink = true;
+        if (json.BOT_TOKEN) { hasToken = true; }
+      })
+      .finally(function() {
+        loaded = true;
+      });
   });
 </script>
 
 
 {#if loaded}
   {#if hasServerLink}
-    <slot />
+    <slot {hasToken} />
   {:else}
     <slot name="placeholder" />
   {/if}

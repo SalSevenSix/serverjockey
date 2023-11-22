@@ -1,12 +1,13 @@
 import abc
-# TODO ALLOW ???
+# ALLOW util.* msg.* context.* http.* store.*
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httprsc, httpext
-from core.system import system, svrsvc
-from core.common import playerstore  # TODO no No NO!
 from core.store import storeabc, storetxn, storesvc
+# TODO dependencies below should not be used
+from core.system import system, svrsvc
+from core.common import playerstore
 
 
 class SystemStoreService:

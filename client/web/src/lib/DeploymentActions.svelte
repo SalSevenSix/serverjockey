@@ -1,6 +1,5 @@
 <script>
   import { getContext } from 'svelte';
-  import { capitalizeKebabCase } from '$lib/util';
   import { confirmModal } from '$lib/modals';
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
@@ -34,18 +33,16 @@
 
 
 <div class="block">
-  <table class="table">
-    <tbody>
-      {#each actions as action}
-        <tr>
-          <td>
-            <button name={action.key} title={capitalizeKebabCase(action.key)} class="button is-danger is-fullwidth"
-                    disabled={cannotAction} on:click={doAction}>
-              <i class="fa {action.icon ? action.icon : 'fa-burst'} fa-lg"></i>&nbsp;&nbsp;{action.name}</button>
-          </td>
-          <td>{action.desc}</td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+  <table class="table"><tbody>
+    {#each actions as action}
+      <tr>
+        <td>
+          <button title="{action.name}. This action cannot be undone." class="button is-danger is-fullwidth"
+                  name={action.key} disabled={cannotAction} on:click={doAction}>
+            <i class="fa {action.icon ? action.icon : 'fa-burst'} fa-lg"></i>&nbsp; {action.name}</button>
+        </td>
+        <td>{action.desc}</td>
+      </tr>
+    {/each}
+  </tbody></table>
 </div>

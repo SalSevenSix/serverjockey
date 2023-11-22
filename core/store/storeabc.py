@@ -3,10 +3,8 @@ import typing
 import abc
 from sqlalchemy import Column, ForeignKey, Integer, Float, Text
 from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column, relationship
-# TODO ALLOW ???
+# ALLOW util.* msg.* context.*
 from core.msg import msgabc, msgext
-
-# TODO review indexes after all the queries are done
 
 TRANSACTION = 'storeabc.TRANSACTION'
 TRANSACTION_RESPONSE = TRANSACTION + '_RESPONSE'
@@ -34,7 +32,7 @@ class Base(DeclarativeBase):
 
 class SystemEvent(Base):
     __tablename__ = 'system_event'
-    id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
+    id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
     at = Column(Float)
     name = Column(Text)
     details = Column(Text, nullable=True)
@@ -53,8 +51,8 @@ class Instance(Base):
 class InstanceEvent(Base):
     __tablename__ = 'instance_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(Float)
-    instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
+    at = Column(Float, index=True)
+    instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'), index=True)
     instance: Mapped[Instance] = relationship(back_populates='events')
     name = Column(Text)
     details = Column(Text, nullable=True)
@@ -64,7 +62,7 @@ class Player(Base):
     __tablename__ = 'player'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
     at = Column(Float)
-    instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'))
+    instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'), index=True)
     instance: Mapped[Instance] = relationship(back_populates='players')
     name = Column(Text)
     steamid = Column(Text, nullable=True)
@@ -75,8 +73,8 @@ class Player(Base):
 class PlayerEvent(Base):
     __tablename__ = 'player_event'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(Float)
-    player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
+    at = Column(Float, index=True)
+    player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'), index=True)
     player: Mapped[Player] = relationship(back_populates='events')
     name = Column(Text)
     details = Column(Text, nullable=True)
@@ -85,7 +83,7 @@ class PlayerEvent(Base):
 class PlayerChat(Base):
     __tablename__ = 'player_chat'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True, index=True)
-    at = Column(Float)
-    player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'))
+    at = Column(Float, index=True)
+    player_id: Mapped[Integer] = mapped_column(ForeignKey('player.id'), index=True)
     player: Mapped[Player] = relationship(back_populates='chats')
     text = Column(Text)
