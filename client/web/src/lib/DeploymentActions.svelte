@@ -5,6 +5,8 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
 
+  // TODO make the button names more clear, include Wipe or Reset in name
+
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
 

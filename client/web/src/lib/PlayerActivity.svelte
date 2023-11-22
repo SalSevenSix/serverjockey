@@ -1,23 +1,15 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
   import { queryEvents, queryLastEvent, extractActivity, compactPlayers, chunkPlayers } from '$lib/PlayerActivity';
-  import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
+  import { floatToPercent, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
   const instance = getContext('instance');
+  const objectUrls = new ObjectUrls();
 
-  let objectUrls = [];
   let results = null;
   let activity = null;
-
-  function showResults() {
-    if (!activity) return;
-    let blob = new Blob([JSON.stringify(results)], { type : 'text/plain;charset=utf-8' });
-    let objectUrl = window.URL.createObjectURL(blob);
-    objectUrls.push(objectUrl);
-    window.open(objectUrl).focus();
-  }
 
   function chartDataPlayers(instance) {
     let players = compactPlayers(instance.players, 7);
@@ -70,9 +62,7 @@
   });
 
   onDestroy(function() {
-    objectUrls.forEach(function(objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    });
+    objectUrls.cleanup();
   });
 </script>
 
@@ -85,7 +75,7 @@
       </div>
       <div class="column is-10">
         <p>
-          <a href={'#'} on:click|preventDefault={showResults}>
+          <a href={'#'} on:click|preventDefault={function() { objectUrls.openObjectAsText(results); }}>
             results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
           <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
           <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
@@ -129,7 +119,7 @@
         {#each chunkPlayers(activity.results[instance].players) as entryRows}
           <div class="columns">
             {#each entryRows as entryColumns}
-              <div class="column is-one-third mt-0 mb-0 pt-0 pb-0"><table class="table is-thinner"><tbody>
+              <div class="column is-one-third mt-0 mb-0 pt-0 pb-0"><table class="table is-narrow is-thinner"><tbody>
                 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
                 {#each entryColumns as entry}
                   <tr title="{entry.sessions} sessions">

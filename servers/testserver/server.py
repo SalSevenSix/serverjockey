@@ -11,9 +11,9 @@ from core.common import interceptors, playerstore
 _MAIN_PY = 'main.py'
 _COMMANDS = cmdutil.CommandLines({'send': '{line}'})
 _COMMANDS_HELP_TEXT = '''CONSOLE COMMANDS
-quit        players
-crash       login {player}
-            logout {player}
+players     say {player} {text}
+quit        login {player}
+crash       logout {player}
 '''
 
 MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
@@ -200,24 +200,32 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    PREFIX, JOIN, LEAVE = '### Player', 'has joined the server', 'has left the server'
-    JOIN_FILTER = msgftr.And(msgftr.DataStrContains(PREFIX), msgftr.DataStrContains(JOIN))
-    LEAVE_FILTER = msgftr.And(msgftr.DataStrContains(PREFIX), msgftr.DataStrContains(LEAVE))
+    CHAT, PLAYER, JOIN, LEAVE = '### Chat', '### Player', 'has joined the server', 'has left the server'
+    CHAT_FILTER = msgftr.DataStrContains(CHAT)
+    JOIN_FILTER = msgftr.And(msgftr.DataStrContains(PLAYER), msgftr.DataStrContains(JOIN))
+    LEAVE_FILTER = msgftr.And(msgftr.DataStrContains(PLAYER), msgftr.DataStrContains(LEAVE))
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.JOIN_FILTER, _PlayerEventSubscriber.LEAVE_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
+                      _PlayerEventSubscriber.JOIN_FILTER,
+                      _PlayerEventSubscriber.LEAVE_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
+        if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
+            name = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.right_chop_and_strip(name, ':')
+            text = util.left_chop_and_strip(message.data(), ':')
+            playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PLAYER)
             value = util.right_chop_and_strip(value, _PlayerEventSubscriber.JOIN)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PLAYER)
             value = util.right_chop_and_strip(value, _PlayerEventSubscriber.LEAVE)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None

@@ -81,11 +81,14 @@ def main() -> int:
                 time.sleep(0.2)
             p('')
             p('### some more junk')
-        elif line.find('login') != -1:
+        elif line.startswith('say'):
+            parts = line.split(' ')
+            p('### Chat ' + parts[1] + ': ' + ' '.join(parts[2:]))
+        elif line.startswith('login'):
             player = line.split(' ')[-1]
             players.append(player)
             p('### Player {} has joined the server'.format(player))
-        elif line.find('logout') != -1:
+        elif line.startswith('logout'):
             found = None
             for player in players:
                 if line.find(player) != -1:

@@ -2,12 +2,13 @@
   import { onDestroy, getContext } from 'svelte';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
   import { confirmModal, steamLoginModal } from '$lib/modals';
-  import { RollingLog } from '$lib/util';
-  import { SubscriptionHelper, newPostRequest, openFileInNewTab } from '$lib/sjgmsapi';
+  import { RollingLog, ObjectUrls } from '$lib/util';
+  import { SubscriptionHelper, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
   const subs = new SubscriptionHelper();
+  const objectUrls = new ObjectUrls();
   const logLines = new RollingLog();
 
   export let qualifierName = null;
@@ -18,9 +19,17 @@
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   function runtimeMeta() {
-    openFileInNewTab(instance.url('/deployment/runtime-meta'), function(error) {
-      notifyWarning('Meta not found. No runtime installed.');
-    });
+    fetch(instance.url('/deployment/runtime-meta'), newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.blob();
+      })
+      .then(function(blob) {
+        objectUrls.openBlob(blob);
+      })
+      .catch(function(error) {
+        notifyWarning('Meta not found. No runtime installed.');
+      });
   }
 
   function wipeRuntime() {
@@ -86,6 +95,7 @@
   onDestroy(function() {
     endInstallMessage = 'Please check console log output for install results.';
     subs.stop();
+    objectUrls.cleanup();
   });
 </script>
 

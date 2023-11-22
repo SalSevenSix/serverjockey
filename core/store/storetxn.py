@@ -20,7 +20,7 @@ def _load_instance(session: Session, identity: str) -> storeabc.Instance | None:
 
 
 def _get_instance_id(session: Session, identity: str) -> int:
-    assert identity == util.script_escape(identity)
+    assert identity and identity == util.script_escape(identity)
     instance_id = util.get(identity, _CACHE_INSTANCE_ID)
     if instance_id:
         return instance_id
@@ -210,6 +210,28 @@ class SelectPlayerEvent(storeabc.Transaction):
         statement = statement.order_by(storeabc.PlayerEvent.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
         return _execute_query(session, statement, criteria, 'at', 'instance', 'player', 'event')
+
+
+class SelectPlayerChat(storeabc.Transaction):
+
+    def __init__(self, data: dict):
+        self._data = data
+
+    def execute(self, session: Session) -> typing.Any:
+        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto'), True)
+        instance, at_from, at_to = util.unpack_dict(criteria)
+        statement = select(storeabc.PlayerChat.at, storeabc.Player.name, storeabc.PlayerChat.text)
+        statement = statement.join(storeabc.Player.chats)
+        statement = statement.where(storeabc.Player.instance_id == _get_instance_id(session, instance))
+        if at_from:
+            at_from = int(at_from)
+            statement = statement.where(storeabc.PlayerChat.at >= dtutil.to_seconds(at_from))
+        if at_to:
+            at_to = int(at_to)
+            statement = statement.where(storeabc.PlayerChat.at <= dtutil.to_seconds(at_to))
+        statement = statement.order_by(storeabc.PlayerChat.at)
+        criteria['atfrom'], criteria['atto'] = at_from, at_to
+        return _execute_query(session, statement, criteria, 'at', 'player', 'text')
 
 
 def _execute_query(session: Session, statement: Executable, criteria: dict, *columns: str) -> dict:

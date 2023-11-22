@@ -1,23 +1,15 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
   import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/InstanceActivity';
-  import { floatToPercent, humanDuration, shortISODateTimeString } from '$lib/util';
+  import { floatToPercent, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
   const instance = getContext('instance');
+  const objectUrls = new ObjectUrls();
 
-  let objectUrls = [];
   let results = null;
   let activity = null;
-
-  function showResults() {
-    if (!activity) return;
-    let blob = new Blob([JSON.stringify(results)], { type : 'text/plain;charset=utf-8' });
-    let objectUrl = window.URL.createObjectURL(blob);
-    objectUrls.push(objectUrl);
-    window.open(objectUrl).focus();
-  }
 
   function chartData(instance) {
     let upTime = Math.round(instance.available * 1000.0) / 10.0;
@@ -53,9 +45,7 @@
   });
 
   onDestroy(function() {
-    objectUrls.forEach(function(objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    });
+    objectUrls.cleanup();
   });
 </script>
 
@@ -70,7 +60,7 @@
       </div>
       <div class="column is-10">
         <p>
-          <a href={'#'} on:click|preventDefault={showResults}>
+          <a href={'#'} on:click|preventDefault={function() { objectUrls.openObjectAsText(results); }}>
             results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
           <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
           <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>

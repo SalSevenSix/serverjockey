@@ -134,3 +134,25 @@ export class RollingLog {
     return this.#lines.join('\n');
   }
 }
+
+
+export class ObjectUrls {
+  #urls = [];
+
+  openBlob(blob) {
+    let url = window.URL.createObjectURL(blob);
+    this.#urls.push(url);
+    window.open(url).focus();
+  }
+
+  openObjectAsText(data) {
+    let blob = new Blob([JSON.stringify(data)], { type : 'text/plain;charset=utf-8' });
+    this.openBlob(blob);
+  }
+
+  cleanup() {
+    this.#urls.forEach(function(url) {
+      URL.revokeObjectURL(url);
+    });
+  }
+}

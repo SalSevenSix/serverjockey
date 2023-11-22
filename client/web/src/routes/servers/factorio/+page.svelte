@@ -17,6 +17,7 @@
   import CheckStore from '$lib/CheckStore.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
   import PlayerActivity from '$lib/PlayerActivity.svelte';
+  import ChatActivity from '$lib/ChatActivity.svelte';
 
   const deploymentActions = [
     { 'key': 'wipe-world-save', 'name': 'World Save',
@@ -111,6 +112,9 @@
         <Collapsible icon="fa-chart-pie" title="Activity">
           <InstanceActivity />
           <PlayerActivity />
+        </Collapsible>
+        <Collapsible icon="fa-comments" title="Chat Log">
+          <ChatActivity />
         </Collapsible>
       </CheckStore>
     </div>

@@ -23,7 +23,7 @@ class IsStop(msgabc.Filter):
 
 class Not(msgabc.Filter):
 
-    def __init__(self, msg_filter):
+    def __init__(self, msg_filter: msgabc.Filter):
         self._msg_filter = msg_filter
 
     def accepts(self, message):
@@ -32,7 +32,7 @@ class Not(msgabc.Filter):
 
 class And(msgabc.Filter):
 
-    def __init__(self, *msg_filters):
+    def __init__(self, *msg_filters: msgabc.Filter):
         self._msg_filters = tuple(msg_filters)
 
     def accepts(self, message):
@@ -44,7 +44,7 @@ class And(msgabc.Filter):
 
 class Or(msgabc.Filter):
 
-    def __init__(self, *msg_filters):
+    def __init__(self, *msg_filters: msgabc.Filter):
         self._msg_filters = tuple(msg_filters)
 
     def accepts(self, message):
@@ -65,7 +65,7 @@ class SourceIs(msgabc.Filter):
 
 class ReplyToIs(msgabc.Filter):
 
-    def __init__(self, reply_to):
+    def __init__(self, reply_to: msgabc.Message):
         self._reply_to = reply_to
 
     def accepts(self, message):

@@ -38,6 +38,7 @@ class SystemStoreService:
         r.pop()
         r.psh('player')
         r.put('event', _QueryPlayerEventHandler(self._context))
+        r.put('chat', _QueryPlayerChatHandler(self._context))
 
 
 class _SystemRouting(msgabc.AbcSubscriber):
@@ -157,3 +158,12 @@ class _QueryPlayerEventHandler(_AbstractQueryHandler):
 
     def get_query(self, data):
         return storetxn.SelectPlayerEvent(data)
+
+
+class _QueryPlayerChatHandler(_AbstractQueryHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(mailer)
+
+    def get_query(self, data):
+        return storetxn.SelectPlayerChat(data)
