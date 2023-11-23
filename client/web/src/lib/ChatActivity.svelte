@@ -1,26 +1,33 @@
 <script>
-  import { onMount, onDestroy, getContext } from 'svelte';
+  import { onMount, onDestroy, getContext, tick } from 'svelte';
   import { shortISODateTimeString, humanDuration, ObjectUrls } from '$lib/util';
   import { newGetRequest } from '$lib/sjgmsapi';
   import { notifyError } from '$lib/notifications';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
+  const query = getContext('query');
   const objectUrls = new ObjectUrls();
 
+  let processing = true;
   let results = null;
   let activity = null;
 
+  $: query.blocker.notify('ChatActivityProcessing', processing);
+
   async function queryChats(criteria) {
-    let url = '/store/player/chat?instance=' + criteria.instance;
-    url += '&atfrom=' + criteria.atfrom + '&atto=' + criteria.atto;
+    processing = true;
+    let atrange = criteria.atrange();
+    let url = '/store/player/chat?instance=' + instance.identity();
+    url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
     return await fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .then(function(json) { return json; })
-      .catch(function(error) { notifyError(errorMessage); });
+      .catch(function(error) { notifyError('Failed to query chat logs.'); })
+      .finally(function() { processing = false; });
   }
 
   function extractActivity(data) {
@@ -45,19 +52,17 @@
              atrange: data.criteria.atto - data.criteria.atfrom }, results: chats };
   }
 
-  function queryActivity(criteria) {
-    activity = null;
-    queryChats(criteria).then(function(data) {
+  query.execute = function() {
+    queryChats(query.criteria).then(function(data) {
       results = data;
       activity = extractActivity(data);
     });
   }
 
   onMount(function() {
-    let criteria = { instance: instance.identity() };
-    criteria.atto = Date.now();
-    criteria.atfrom = criteria.atto - 21600000;  // 6 hours
-    queryActivity(criteria);
+    tick().then(function() {
+      query.execute();
+    });
   });
 
   onDestroy(function() {
@@ -66,46 +71,47 @@
 </script>
 
 
+{#if processing}
+  <div class="content ml-2 mb-4">
+    <p><SpinnerIcon /> Loading Chat Log...</p>
+  </div>
+{:else if activity}
+  <div class="content ml-2 mb-4">
+    <p>
+      <a href={'#'} on:click|preventDefault={function() { objectUrls.openObject(results); }}>
+        results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
+      <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
+      <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
+      <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
+    </p>
+  </div>
+{/if}
+
 {#if activity}
-  <div class="block">
-    <div class="content ml-2 mb-4">
-      <p>
-        <a href={'#'} on:click|preventDefault={function() { objectUrls.openObjectAsText(results); }}>
-          results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
-        <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
-        <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
-        <span class="white-space-nowrap">({humanDuration(activity.meta.atrange, 2)})</span>
-      </p>
+  {#if activity.results.length > 0}
+    <div class="block chat-log-container mr-6"><div>
+      <table class="table is-narrow is-log"><tbody>
+        {#each activity.results as entry}
+          {#if entry.player}
+            <tr class={entry.clazz}>
+              <td title={entry.ats}>{entry.at}</td>
+              <td>{entry.player}</td>
+              <td>{entry.text}</td>
+            </tr>
+          {:else}
+            <tr class={entry.clazz}>
+              <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
+              <td></td>
+            </tr>
+          {/if}
+        {/each}
+      </tbody><table>
+    </div></div>
+  {:else}
+    <div class="content pb-4">
+      <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No chat activity found</p>
     </div>
-    {#if activity.results.length > 0}
-      <div class="block chat-log-container mr-6"><div>
-        <table class="table is-narrow is-log"><tbody>
-          {#each activity.results as entry}
-            {#if entry.player}
-              <tr class={entry.clazz}>
-                <td title={entry.ats}>{entry.at}</td>
-                <td>{entry.player}</td>
-                <td>{entry.text}</td>
-              </tr>
-            {:else}
-              <tr class={entry.clazz}>
-                <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
-                <td></td>
-              </tr>
-            {/if}
-          {/each}
-        </tbody><table>
-      </div></div>
-    {:else}
-      <div class="content pb-4">
-        <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No chat activity found</p>
-      </div>
-    {/if}
-  </div>
-{:else}
-  <div class="content">
-    <p><SpinnerIcon /> Loading Chat Log...<br /><br /></p>
-  </div>
+  {/if}
 {/if}
 
 

@@ -145,7 +145,7 @@ export class ObjectUrls {
     window.open(url).focus();
   }
 
-  openObjectAsText(data) {
+  openObject(data) {
     let blob = new Blob([JSON.stringify(data)], { type : 'text/plain;charset=utf-8' });
     this.openBlob(blob);
   }
