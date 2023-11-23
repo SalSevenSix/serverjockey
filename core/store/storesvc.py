@@ -93,7 +93,9 @@ def _sync_reset_activity(session: Session):
         storeabc.Player.__table__,
         storeabc.InstanceEvent.__table__)
     bind = session.get_bind()
+    # noinspection PyTypeChecker
     storeabc.Base.metadata.drop_all(bind, tables=tables)
+    # noinspection PyTypeChecker
     storeabc.Base.metadata.create_all(bind, tables=tables)
     logging.debug('Reset database activity')
 

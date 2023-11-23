@@ -1,6 +1,5 @@
 <script>
-  import { onMount, getContext } from 'svelte';
-  import { goto } from '$app/navigation';
+  import { getContext } from 'svelte';
 
   const instance = getContext('instance');
 </script>
@@ -11,5 +10,3 @@
     <h1 class="title is-3">{instance.identity()} &nbsp;<i class="fa fa-cube"></i>&nbsp; {instance.module()}</h1>
   </div>
 </div>
-
-<slot />

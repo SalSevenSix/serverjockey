@@ -81,6 +81,27 @@ table.is-thinner {
   width: 90%;
 }
 
+.table.is-log {
+  color: black;
+  border: 1px solid #DBDBDB;
+}
+
+.table.is-log td:last-child {
+  border-left: 1px solid #DBDBDB;
+}
+
+.table.is-log tr.row-hdr {
+  background-color: #DBDBDB;
+}
+
+.table.is-log tr.row-nrm {
+  background-color: white;
+}
+
+.table.is-log tr.row-alt {
+  background-color: #EEEEEE;
+}
+
 .word-break-all {
   word-break: break-all;
 }

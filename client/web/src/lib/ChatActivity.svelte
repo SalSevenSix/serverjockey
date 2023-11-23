@@ -56,7 +56,7 @@
   onMount(function() {
     let criteria = { instance: instance.identity() };
     criteria.atto = Date.now();
-    criteria.atfrom = criteria.atto - 10800000;  // 3 hours
+    criteria.atfrom = criteria.atto - 21600000;  // 6 hours
     queryActivity(criteria);
   });
 
@@ -78,21 +78,24 @@
       </p>
     </div>
     {#if activity.results.length > 0}
-      <div class="block mr-6 chat-container"><table class="table is-narrow"><tbody>
-        {#each activity.results as entry}
-          {#if entry.player}
-            <tr class={entry.clazz}>
-              <td title={entry.ats}>{entry.at}</td>
-              <td>{entry.player}</td>
-              <td>{entry.text}</td>
-            </tr>
-          {:else}
-            <tr class={entry.clazz}>
-              <td class="has-text-weight-bold" colspan="3">{entry.at}</td>
-            </tr>
-          {/if}
-        {/each}
-      </tbody><table></div>
+      <div class="block chat-log-container mr-6"><div>
+        <table class="table is-narrow is-log"><tbody>
+          {#each activity.results as entry}
+            {#if entry.player}
+              <tr class={entry.clazz}>
+                <td title={entry.ats}>{entry.at}</td>
+                <td>{entry.player}</td>
+                <td>{entry.text}</td>
+              </tr>
+            {:else}
+              <tr class={entry.clazz}>
+                <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
+                <td></td>
+              </tr>
+            {/if}
+          {/each}
+        </tbody><table>
+      </div></div>
     {:else}
       <div class="content pb-4">
         <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No chat activity found</p>
@@ -107,37 +110,17 @@
 
 
 <style>
-  .chat-container {
-    height: 300px;
+  .chat-log-container {
+    height: 320px;
     overflow: scroll;
   }
 
-  .chat-container .table {
+  .chat-log-container div {
     min-width: 400px;
+    margin-right: auto;
   }
 
-  .chat-container .table tr {
-    background-color: white;
-  }
-
-  .chat-container .table tr td {
-    color: black;
-  }
-
-  .chat-container .table tr td:last-child {
-    border-left: 1px solid;
-    border-color: #DBDBDB;
-  }
-
-  .row-hdr {
-    opacity: 0.9;
-  }
-
-  .row-nrm {
-    opacity: 0.8;
-  }
-
-  .row-alt {
-    opacity: 0.7;
+  .table {
+    width: 100%;
   }
 </style>

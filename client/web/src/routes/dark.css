@@ -51,7 +51,7 @@ body.dark .pre {
 
 body.dark .table {
   color: #4A6488;
-  border: #4A6488;
+/*  border: #4A6488; */
 }
 
 body.dark .table th, body.dark .table td {
@@ -61,6 +61,31 @@ body.dark .table th, body.dark .table td {
 
 body.dark .content table th, body.dark .content table td {
   border-color: #293045;
+}
+
+body.dark .table.is-log {
+  border-color: #091C32;
+}
+
+body.dark .table.is-log th, body.dark .table.is-log td {
+  color: #DBDBDB;
+  border-color: #091C32;
+}
+
+body.dark .table.is-log td:last-child {
+  border-left: 1px solid #091C32;
+}
+
+body.dark .table.is-log tr.row-hdr {
+  background-color: #091C32;
+}
+
+body.dark .table.is-log tr.row-nrm {
+  background-color: #293045;
+}
+
+body.dark .table.is-log tr.row-alt {
+  background-color: #272846;
 }
 
 body.dark .control.has-icons-left .icon, body.dark .control.has-icons-right .icon {

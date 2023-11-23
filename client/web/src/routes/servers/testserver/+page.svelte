@@ -1,6 +1,6 @@
 <script>
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
-  import Instance from '$lib/Instance.svelte';
+  import InstanceHeader from '$lib/InstanceHeader.svelte';
   import Collapsible from '$lib/Collapsible.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
@@ -28,7 +28,8 @@
 </script>
 
 
-<ServerStatusStore><Instance>
+<ServerStatusStore>
+  <InstanceHeader />
   <div class="columns">
     <div class="column">
       <div class="columns">
@@ -70,4 +71,4 @@
       </CheckStore>
     </div>
   </div>
-</Instance></ServerStatusStore>
+</ServerStatusStore>
