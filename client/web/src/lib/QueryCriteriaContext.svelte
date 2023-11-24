@@ -16,7 +16,7 @@
           let index = blocks.indexOf(id);
           if (index === -1) return;
           blocks.splice(index, 1);
-          set(blocks.length > 0);
+          if (blocks.length === 0) { set(false); }
         }
       }
     };

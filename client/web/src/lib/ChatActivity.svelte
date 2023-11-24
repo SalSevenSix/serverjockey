@@ -94,7 +94,7 @@
         {#each activity.results as entry}
           {#if entry.player}
             <tr class={entry.clazz}>
-              <td title={entry.ats}>{entry.at}</td>
+              <td class="white-space-nowrap" title={entry.ats}>{entry.at}</td>
               <td>{entry.player}</td>
               <td>{entry.text}</td>
             </tr>
@@ -124,9 +124,5 @@
   .chat-log-container div {
     min-width: 400px;
     margin-right: auto;
-  }
-
-  .table {
-    width: 100%;
   }
 </style>

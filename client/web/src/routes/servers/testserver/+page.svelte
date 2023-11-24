@@ -15,11 +15,7 @@
   import CheckStore from '$lib/CheckStore.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
   import PlayerActivity from '$lib/PlayerActivity.svelte';
-  import ChatActivity from '$lib/ChatActivity.svelte';
-
-  import QueryCriteriaContext from '$lib/QueryCriteriaContext.svelte';
-  import QueryDateRange from '$lib/QueryDateRange.svelte';
-  import QueryExecute from '$lib/QueryExecute.svelte';
+  import ChatActivityGadget from '$lib/ChatActivityGadget.svelte';
 
   const consoleCommands = {
     'console': {
@@ -70,11 +66,7 @@
           <PlayerActivity />
         </Collapsible>
         <Collapsible icon="fa-comments" title="Chat Log">
-          <QueryCriteriaContext>
-            <QueryDateRange defaultFromMillis="604800000" />
-            <QueryExecute />
-            <ChatActivity />
-          </QueryCriteriaContext>
+          <ChatActivityGadget />
         </Collapsible>
       </CheckStore>
     </div>

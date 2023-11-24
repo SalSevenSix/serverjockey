@@ -84,6 +84,7 @@ table.is-thinner {
 .table.is-log {
   color: black;
   border: 1px solid #DBDBDB;
+  width: 100%;
 }
 
 .table.is-log td:last-child {
@@ -113,6 +114,13 @@ table.is-thinner {
 .theme-black-white {
   fill: black;
   color: black;
+}
+
+
+/* Component variables */
+
+:root {
+	--date-input-width: 100%;
 }
 
 

@@ -20,6 +20,7 @@
 		"@sveltejs/adapter-static": "^2.0.2",
 		"bulma": "^0.9.4",
 		"chart.js": "^4.4.0",
+		"date-picker-svelte": "^2.10.0",
 		"svelte-modals": "^1.2.1",
 		"svelte-scrollto-element": "^0.7.0"
 	}
