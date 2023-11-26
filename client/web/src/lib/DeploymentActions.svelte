@@ -4,8 +4,6 @@
   import { notifyInfo, notifyError } from '$lib/notifications';
   import { newPostRequest } from '$lib/sjgmsapi';
 
-  // TODO make the button names more clear, include Wipe or Reset in name
-
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
 
@@ -18,7 +16,7 @@
   function doAction() {
     let actionKey = this.name;
     let actionTitle = this.title;
-    confirmModal('Are you sure you want to ' + actionTitle + ' ?', function() {
+    confirmModal('Are you sure you want to ' + actionTitle + ' ?\nThis action cannot be undone.', function() {
       processing = true;
       fetch(instance.url('/deployment/' + actionKey), newPostRequest())
         .then(function(response) {
@@ -37,7 +35,7 @@
     {#each actions as action}
       <tr>
         <td>
-          <button title="{action.name}. This action cannot be undone." class="button is-danger is-fullwidth"
+          <button title={action.name} class="button is-danger is-fullwidth"
                   name={action.key} disabled={cannotAction} on:click={doAction}>
             <i class="fa {action.icon ? action.icon : 'fa-burst'} fa-lg"></i>&nbsp; {action.name}</button>
         </td>

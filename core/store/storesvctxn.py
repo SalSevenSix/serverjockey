@@ -47,6 +47,7 @@ class IntegrityChecks(storeabc.Transaction):
             event_at = stime if stime and stime > event.at else event.at + 1.0
             session.add(storeabc.InstanceEvent(
                 at=event_at, instance_id=event.instance_id, name=emap[event.name], details=details))
+            logging.debug('InstanceEvent correction: ' + str(event.instance_id) + ' ' + emap[event.name])
         statement = select(storeabc.PlayerEvent)
         statement = statement.group_by(storeabc.PlayerEvent.player_id)
         statement = statement.having(storeabc.PlayerEvent.name == 'LOGIN')
@@ -56,6 +57,7 @@ class IntegrityChecks(storeabc.Transaction):
             event_at = stime if stime and stime > event.at else event.at + 1.0
             session.add(storeabc.PlayerEvent(
                 at=event_at, player_id=event.player_id, name='LOGOUT', details=details))
+            logging.debug('PlayerEvent correction: ' + str(event.player_id) + ' LOGOUT')
         if corrections and not stime:
             logging.warning('Shutdown time unknown for db integrity check.'
                             ' Used +1 second for ' + str(corrections) + ' correction events.')

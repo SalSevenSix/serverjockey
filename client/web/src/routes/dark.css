@@ -127,10 +127,16 @@ body.dark .theme-black-white {
 
 /* Specific cases */
 
+body.dark .date-time-field input {
+  background-color: #293045;
+  border-color: #DBDBDB;
+  color: #DBDBDB;
+}
+
 body.dark svg.rubiks {
   color: #4A6488;
 }
 
 body.dark svg.guidebooks {
-  fill: #4A6488;
+  fill: #B6B6D7;
 }

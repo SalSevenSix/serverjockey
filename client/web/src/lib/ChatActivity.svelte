@@ -31,8 +31,8 @@
   }
 
   function extractActivity(data) {
-    let last = { at: '', player: ''};
-    let clazz = 'row-alt';
+    let last = { at: '', player: '' };
+    let clazz = null;
     let chats = [];
     data.records.forEach(function(record) {
       let [at, player, text] = record;
@@ -41,11 +41,12 @@
       if (last.at != atSection) {
         chats.push({ clazz: 'row-hdr', ats: atString, at: atSection + 'h', player: null, text: null });
         last.at = atSection;
+        clazz = null;
       }
-      if (last.player != player) {
+      if (!clazz || last.player != player) {
         clazz = clazz === 'row-nrm' ? 'row-alt' : 'row-nrm';
-        last.player = player;
       }
+      last.player = player;
       chats.push({ clazz: clazz, ats: atString, at: atString.substring(14), player: player, text: text });
     });
     return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
@@ -60,9 +61,7 @@
   }
 
   onMount(function() {
-    tick().then(function() {
-      query.execute();
-    });
+    tick().then(query.execute);
   });
 
   onDestroy(function() {
@@ -88,37 +87,35 @@
 {/if}
 
 {#if activity}
-  {#if activity.results.length > 0}
-    <div class="block chat-log-container mr-6"><div>
-      <table class="table is-narrow is-log"><tbody>
-        {#each activity.results as entry}
-          {#if entry.player}
-            <tr class={entry.clazz}>
-              <td class="white-space-nowrap" title={entry.ats}>{entry.at}</td>
-              <td>{entry.player}</td>
-              <td>{entry.text}</td>
-            </tr>
-          {:else}
-            <tr class={entry.clazz}>
-              <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
-              <td></td>
-            </tr>
-          {/if}
-        {/each}
-      </tbody><table>
-    </div></div>
-  {:else}
+  {#if activity.results.length === 0}
     <div class="content pb-4">
       <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No chat activity found</p>
     </div>
+  {:else}
+    <div class="block chat-log-container mr-6"><div>
+      <table class="table is-narrow is-log"><tbody>
+        {#each activity.results as entry}
+          <tr class={entry.clazz}>
+            {#if entry.player}
+              <td class="white-space-nowrap" title={entry.ats}>{entry.at}</td>
+              <td>{entry.player}</td>
+              <td>{entry.text}</td>
+            {:else}
+              <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
+              <td></td>
+            {/if}
+          </tr>
+        {/each}
+      </tbody><table>
+    </div></div>
   {/if}
 {/if}
 
 
 <style>
   .chat-log-container {
-    height: 320px;
-    overflow: scroll;
+    max-height: 380px;
+    overflow: auto;
   }
 
   .chat-log-container div {

@@ -56,6 +56,8 @@ class TaskMailer(msgabc.Mailer):
                     result = True
             self._queue.task_done()
         tasks.task_end(self._task)
+        if not self._queue.empty():
+            logging.warning('TaskMailer shutdown with messages in queue')
         return result
 
 

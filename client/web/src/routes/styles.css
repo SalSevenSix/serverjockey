@@ -126,6 +126,12 @@ table.is-thinner {
 
 /* Specific cases */
 
+.date-time-field input {
+  height: 40px;
+  font-size: 1.1em;
+  border-color: black;
+}
+
 svg.rubiks, svg.navbar-rubiks {
   color: #FFFDF8;
 }
