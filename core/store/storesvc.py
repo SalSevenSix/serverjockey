@@ -22,7 +22,6 @@ class StoreService(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         if message is msgabc.STOP:
-            # print('### STORE STOP')
             _sync_close_session(self._session)  # Intentional blocking IO
             return True
         name = message.name()
@@ -111,7 +110,6 @@ def _sync_close_session(session: Session):
         return
     try:
         session.close()
-        print('### SESSION CLOSED')
     except Exception as e:
         logging.debug('Error closing session: ' + repr(e))
 

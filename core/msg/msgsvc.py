@@ -2,7 +2,7 @@ import logging
 import asyncio
 import typing
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import tasks, objconv
+from core.util import util, tasks, objconv
 from core.msg import msgabc, msgftr
 
 
@@ -23,6 +23,7 @@ class TaskMailer(msgabc.Mailer):
 
     def post(self, *vargs):
         if not self._running:
+            util.clear_queue(self._queue)
             return False
         message = msgabc.Message.from_vargs(*vargs)
         try:
@@ -51,27 +52,28 @@ class TaskMailer(msgabc.Mailer):
             if (message is not msgabc.STOP) or (message is msgabc.STOP and self._subscriber.accepts(msgabc.STOP)):
                 result = await msgabc.try_handle(self._subscriber, message)
             if result is not None or message is msgabc.STOP:
-                running = False
+                self._running, running = False, False
                 if result is None:
                     result = True
             self._queue.task_done()
         tasks.task_end(self._task)
-        if not self._queue.empty():
-            logging.warning('TaskMailer shutdown with messages in queue')
         return result
 
 
 class TaskMulticastMailer(msgabc.MulticastMailer):
 
     def __init__(self, msg_filter: msgabc.Filter = msgftr.AcceptAll()):
-        self._subscriber = _TaskMulticastSubscriber(msg_filter)
+        self._subscriber = _MulticastSubscriber(msg_filter)
         self._mailer = TaskMailer(self._subscriber)
 
     def start(self) -> asyncio.Task:
         return self._mailer.start()
 
     def register(self, subscriber: msgabc.Subscriber):
-        return self._subscriber.add_mailer(subscriber).start()
+        mailer = TaskMailer(subscriber)
+        task = mailer.start()
+        self._subscriber.add(mailer)
+        return task
 
     def post(self, *vargs):
         return self._mailer.post(*vargs)
@@ -83,7 +85,7 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
             await mailer.stop()  # This may post STOP again, but they will just be ignored
 
 
-class _TaskMulticastSubscriber(msgabc.AbcSubscriber):
+class _MulticastSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, msg_filter: msgabc.Filter):
         super().__init__(msgftr.Or(msg_filter, msgftr.IsStop()))
@@ -92,10 +94,8 @@ class _TaskMulticastSubscriber(msgabc.AbcSubscriber):
     def mailers(self) -> tuple:
         return tuple(self._mailers)
 
-    def add_mailer(self, subscriber: msgabc.Subscriber) -> TaskMailer:
-        mailer = TaskMailer(subscriber)
+    def add(self, mailer: msgabc.Mailer):
         self._mailers.append(mailer)
-        return mailer
 
     def handle(self, message):
         expired = []

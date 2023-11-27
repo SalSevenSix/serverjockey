@@ -85,7 +85,7 @@ class SystemService:
             shutdowns.append(svrsvc.ServerService.shutdown(subcontext, self))
             destroys.append(self._context.destroy_subcontext(subcontext))
         await asyncio.gather(*shutdowns)
-        # TODO safe shutdown of sysstore here
+        await asyncio.sleep(1.0)  # TODO need to find a real solution
         await asyncio.gather(*destroys)
 
     def instances_info(self, baseurl: str) -> dict:

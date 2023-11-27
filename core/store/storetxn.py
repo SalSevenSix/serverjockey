@@ -89,7 +89,6 @@ class InsertInstanceEvent(storeabc.Transaction):
         instance_id = _get_instance_id(session, self._identity)
         session.add(storeabc.InstanceEvent(at=time.time(), instance_id=instance_id,
                                            name=self._name, details=self._details))
-        # print('### INSTANCE EVENT ' + self._identity + ' ' + self._name)
         return None
 
 
