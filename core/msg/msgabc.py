@@ -1,10 +1,9 @@
 from __future__ import annotations
-import abc
-import asyncio
-import inspect
 import logging
-import time
+import abc
 import typing
+import inspect
+import time
 # ALLOW util.*
 
 
@@ -81,7 +80,7 @@ class Mailer(metaclass=abc.ABCMeta):
 class MulticastMailer(Mailer, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def register(self, subscriber: Subscriber) -> asyncio.Task:
+    def register(self, subscriber: Subscriber) -> Mailer:
         pass
 
 

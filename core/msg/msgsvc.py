@@ -2,7 +2,7 @@ import logging
 import asyncio
 import typing
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import util, tasks, objconv
+from core.util import tasks, objconv
 from core.msg import msgabc, msgftr
 
 
@@ -18,12 +18,8 @@ class TaskMailer(msgabc.Mailer):
         self._running = True
         return self._task
 
-    def get_subscriber(self) -> msgabc.Subscriber:
-        return self._subscriber
-
-    def post(self, *vargs):
+    def post(self, *vargs) -> bool:
         if not self._running:
-            util.clear_queue(self._queue)
             return False
         message = msgabc.Message.from_vargs(*vargs)
         try:
@@ -69,13 +65,13 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
     def start(self) -> asyncio.Task:
         return self._mailer.start()
 
-    def register(self, subscriber: msgabc.Subscriber):
+    def register(self, subscriber: msgabc.Subscriber) -> msgabc.Mailer:
         mailer = TaskMailer(subscriber)
-        task = mailer.start()
+        mailer.start()
         self._subscriber.add(mailer)
-        return task
+        return mailer
 
-    def post(self, *vargs):
+    def post(self, *vargs) -> bool:
         return self._mailer.post(*vargs)
 
     async def stop(self):

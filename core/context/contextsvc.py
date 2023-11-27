@@ -58,7 +58,7 @@ class Context(msgabc.MulticastMailer):
     def is_trace(self) -> bool:
         return self.config('trace')
 
-    def register(self, subscriber: msgabc.Subscriber) -> asyncio.Task:
+    def register(self, subscriber: msgabc.Subscriber) -> msgabc.Mailer:
         return self._mailer.register(subscriber)
 
     def post(self, *vargs) -> bool:

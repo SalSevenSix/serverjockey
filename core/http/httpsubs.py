@@ -67,7 +67,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         self._subscriptions_path = resource.path() + '/' + name
         return name
 
-    def lookup(self, identity: str) -> _Subscriber:
+    def lookup(self, identity: str) -> _Subscriber | None:
         return util.get(identity, self._subscriptions)
 
     def handle(self, message):
@@ -76,9 +76,8 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
             identity = str(uuid.uuid4())
             path = self._subscriptions_path + '/' + identity
             logging.debug('Http subscription created at ' + path)
-            selector = message.data()
-            subscriber = _Subscriber(self._mailer, identity, selector)
-            self._subscriptions.update({identity: subscriber})
+            subscriber = _Subscriber(self._mailer, identity, message.data())
+            self._subscriptions[identity] = subscriber
             self._mailer.register(subscriber)
             self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, path, message)
         if name is HttpSubscriptionService.UNSUBSCRIBE:
@@ -87,8 +86,8 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
             identity = str(message.data()).split('/')[-1]
             subscriber = self.lookup(identity)
             if subscriber:
-                self._subscriptions.pop(identity)
-                subscriber.cleanup()
+                del self._subscriptions[identity]
+                subscriber.close()
         return None
 
     def subscriptions_handler(self, name: str) -> _SubscriptionsHandler:
@@ -105,17 +104,16 @@ class _Subscriber(msgabc.AbcSubscriber):
                                    selector.msg_filter, selector.completed_filter))
         self._mailer = mailer
         self._identity = identity
-        self._transformer = selector.transformer
-        self._aggregator = selector.aggregator
-        self._collect_filter = selector.msg_filter
-        self._completed_filter = selector.completed_filter
+        self._transformer, self._aggregator = selector.transformer, selector.aggregator
+        self._collect_filter, self._completed_filter = selector.msg_filter, selector.completed_filter
         self._purge_overflow = selector.aggregator is not None
-        self._poll_timeout = 60.0
-        self._inactivity_timeout = 120.0
+        self._poll_timeout, self._inactivity_timeout = 60.0, 120.0
         self._queue = asyncio.Queue(maxsize=1000)
-        self._time_last_activity = time.time()
+        self._running, self._time_last_activity = True, time.time()
 
     def handle(self, message):
+        if not self._running:
+            return True
         if _InactivityCheck.FILTER.accepts(message):
             now = message.created()
             last = self._time_last_activity
@@ -136,7 +134,8 @@ class _Subscriber(msgabc.AbcSubscriber):
             HttpSubscriptionService.unsubscribe(self._mailer, self, self._identity)
             return True
 
-    def cleanup(self):
+    def close(self):
+        self._running = False
         util.clear_queue(self._queue)
 
     async def get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
