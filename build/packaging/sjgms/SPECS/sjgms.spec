@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Wed Oct 24 2023 Bowden Salis <bsalis76@gmail.com> - 0.5.0
-- Feature release v0.5.0
+* Thu Nov 30 2023 Bowden Salis <bsalis76@gmail.com> - 0.5.0
+- Activity reporting feature release
 * Wed Oct 23 2023 Bowden Salis <bsalis76@gmail.com> - 0.4.0
 - Feature release v0.4.0
 * Mon Aug 14 2023 Bowden Salis <bsalis76@gmail.com> - 0.3.0

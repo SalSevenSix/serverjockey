@@ -30,4 +30,6 @@
   {:else}
     <slot name="placeholder" />
   {/if}
+{:else}
+  <slot name="loading" />
 {/if}
