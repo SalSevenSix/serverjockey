@@ -50,10 +50,10 @@ class SystemService:
         return resource
 
     async def initialise(self):
-        if self._context.is_trace():
-            msglog.HandlerPublisher.log(self._context, self, 'LOG UNAVAVAILABLE IN TRACE MODE')
-        else:
-            logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
+        # if self._context.is_trace():
+        #    msglog.HandlerPublisher.log(self._context, self, 'LOG UNAVAVAILABLE IN TRACE MODE')
+        # else:  TODO seems this is unsafe in rare circumstances where non-event loop threads are logging
+        #    logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
         self._context.register(self._pidfile)
         igd.initialise(self._context, self)
         self._sysstoresvc.initialise()
