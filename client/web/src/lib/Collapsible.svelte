@@ -13,12 +13,12 @@
 
 <hr />
 <div class="columns is-mobile mb-0">
-  <div class="column">
+  <div class="column is-three-quarters">
     <h2 class="title is-5">
       {#if icon}<i class="fa {icon} fa-lg"></i>{/if}{title}
     </h2>
   </div>
-  <div class="column">
+  <div class="column is-one-quarter">
     <div class="buttons is-right">
       <button name="toggler" class="button is-dark" on:click={toggle} title={visible ? 'HIDE' : 'SHOW'}>
         <i class="fa {visible ? 'fa-caret-down' : 'fa-caret-left'} fa-2x"></i>

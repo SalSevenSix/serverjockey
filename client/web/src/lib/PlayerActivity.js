@@ -167,7 +167,7 @@ export function extractActivity(queryResults) {
 }
 
 export function compactPlayers(players, limit=10) {
-  if (limit > players.length) return players;
+  if (limit >= players.length) return players;
   let result = [];
   let counter = limit - 1;
   let others = null;

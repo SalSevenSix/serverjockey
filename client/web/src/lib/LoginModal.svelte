@@ -57,7 +57,7 @@
   <div class="modal-content">
     <div class="box">
       <div class="field">
-        <label for="loginModalToken" class="label">Enter Login Token</label>
+        <label for="loginModalToken" class="label">Login Token</label>
         <div class="control">
           <!-- svelte-ignore a11y-autofocus -->
           <input id="loginModalToken" class="input" type="text" on:keypress={kpLogin} bind:value={token} autofocus>

@@ -33,7 +33,7 @@
 <div class="content">
   <p><span class="step-title"></span>
     In the <span class="has-text-weight-bold">Instances</span> list on the same page you should find
-    the new instance your created. View it now using the open folder button.
+    the new instance you created. View it now using the open folder button.
   </p>
   <figure class="image max-600 is-bordered">
     <img src="/assets/setup/gg_view_instance.png" alt="Go to new instance" loading="lazy" />

@@ -15,8 +15,7 @@ echo "Preparing build directory"
 find $TARGET_DIR -type d -exec chmod 755 {} +
 find $TARGET_DIR -type f -exec chmod 644 {} +
 find $TARGET_DIR/usr/local/bin -type f -exec chmod 755 {} +
-chmod 755 $TARGET_DIR/DEBIAN/preinst
-chmod 755 $TARGET_DIR/DEBIAN/postinst
+chmod 755 $TARGET_DIR/DEBIAN/prerm $TARGET_DIR/DEBIAN/postrm $TARGET_DIR/DEBIAN/preinst $TARGET_DIR/DEBIAN/postinst
 chown -R root $TARGET_DIR
 chgrp -R root $TARGET_DIR
 

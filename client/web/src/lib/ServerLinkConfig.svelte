@@ -54,7 +54,7 @@
            title="Login token for the discord bot">
       Discord Bot Token</label>
     <div class="control">
-      <input id="serverLinkConfigBotToken" class="input" type="text"
+      <input id="serverLinkConfigBotToken" class="input" type="password"
              disabled={processing} bind:value={formData.BOT_TOKEN}>
     </div>
   </div>

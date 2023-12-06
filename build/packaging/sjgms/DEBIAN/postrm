@@ -1,0 +1,6 @@
+#!/bin/bash
+
+[ -f /etc/systemd/system/serverjockey.service ] || exit 0
+rm /etc/systemd/system/serverjockey.service > /dev/null 2>&1
+systemctl daemon-reload
+exit 0

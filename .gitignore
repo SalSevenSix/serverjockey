@@ -1,7 +1,7 @@
 # My junk
 TODO.*
 *.ok
-scratch.*
+scratch/
 
 # Web deployment root
 /web/
