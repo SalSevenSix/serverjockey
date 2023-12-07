@@ -16,7 +16,7 @@
   }
 
   function login() {
-    if (!token) return notifyError('No token entered');
+    if (!token) return;
     fetch('/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -72,7 +72,7 @@
       </div>
       <div class="field">
         <div class="control">
-          <button name="login" title="Login" class="button is-primary is-fullwidth" on:click={login}>
+          <button name="login" title="Login" class="button is-primary is-fullwidth" disabled={!token} on:click={login}>
             <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
         </div>
       </div>
