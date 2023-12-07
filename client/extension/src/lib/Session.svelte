@@ -13,6 +13,7 @@
 
   function connect(cUrl, cToken) {
     $connection = null;
+    while (cUrl.endsWith('/')) { cUrl = cUrl.substring(0, cUrl.length - 1); }
     return fetch(cUrl + '/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': cToken } })
       .then(function(response) {
         if (!response.ok) { throw new Error('Status: ' + response.status); }
