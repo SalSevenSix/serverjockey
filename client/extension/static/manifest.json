@@ -7,6 +7,10 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [{
+    "matches": ["https://steamcommunity.com/*"],
+    "js": ["content.js"]
+  }],
   "action": {
     "default_title": "Click to open panel"
   },

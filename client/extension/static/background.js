@@ -1,4 +1,4 @@
-const STEAM_WORKSHOP = 'https://steamcommunity.com/sharedfiles/filedetails/?id=';
+const STEAM_WORKSHOP = 'https://steamcommunity.com/';
 
 // Allows users to open the side panel by clicking on the action toolbar icon
 chrome.sidePanel
