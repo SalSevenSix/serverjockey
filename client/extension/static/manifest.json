@@ -1,9 +1,9 @@
 {
-  "name": "ServerJockey Extension",
-  "description": "A browser extension for the ServerJockey game server management system.",
+  "name": "ServerJockey",
+  "description": "Browser extension for ServerJockey game server management system.",
   "version": "0.6.0",
   "manifest_version": 3,
-  "permissions": ["tabs", "activeTab", "sidePanel"],
+  "permissions": ["tabs", "sidePanel"],
   "background": {
     "service_worker": "background.js"
   },

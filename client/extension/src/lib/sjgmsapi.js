@@ -16,11 +16,11 @@ export function newGetRequest() {
   };
 }
 
-export function newPostRequest() {
+export function newPostRequest(ct = 'application/json') {
   return {
     method: 'post',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': ct,
       'X-Secret': get(connection).token
     }
   };
