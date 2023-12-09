@@ -6,9 +6,9 @@
 <h2>Workshop ID</h2>
 <p>
   {#if data.available.workshop}
-    <button class="action" on:click={function() { data.addWorkshop(); }}>Add</button>
+    <button class="process" on:click={function() { data.addWorkshop(); }}>Add</button>&nbsp;
   {:else}
-    <button class="action" on:click={function() { data.removeWorkshop(); }}>Remove</button>
+    <button class="process" on:click={function() { data.removeWorkshop(); }}>Remove</button>&nbsp;
   {/if}
-  &nbsp;&nbsp; {data.dom.workshop}
+  {data.dom.workshop}
 </p>

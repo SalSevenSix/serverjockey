@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { connection, logError } from '$lib/sjgmsapi';
   import Login from '$lib/Login.svelte';
+  import Logout from '$lib/Logout.svelte';
 
   const urlKey = 'sjgmsExtensionUrl';
   const tokenKey = 'sjgmsExtensionToken';
@@ -63,9 +64,9 @@
   <p>loading ...</p>
 {:else}
   {#if $connection}
-    <div class="block"><button class="process" on:click={disconnect}>Disconnect</button></div>
+    <Logout {disconnect} />
     <slot />
   {:else}
-    <Login url={url} token={token} connect={connect} />
+    <Login {url} {token} {connect} />
   {/if}
 {/if}

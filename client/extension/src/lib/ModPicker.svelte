@@ -73,7 +73,7 @@
     {/if}
     <p>
       <br />
-      <button class="process" on:click={postIni}>SAVE</button>
+      <button class="process" on:click={postIni}>Save</button>
     </p>
   {:else}
     <p>...</p>

@@ -7,8 +7,10 @@
 <ul>
   {#each data.available.mods as mod}
     <li>
-      <button class="action" on:click={function() { data.addModBottom(mod); }}>W</button>
-      <button class="action" on:click={function() { data.addModTop(mod); }}>V</button>
+      <button class="action arrow-down-to-line" title="Add to bottom"
+              on:click={function() { data.addModBottom(mod); }}></button>
+      <button class="action arrow-down" title="Add to top"
+              on:click={function() { data.addModTop(mod); }}></button>
       {mod}
     </li>
   {/each}
@@ -22,9 +24,9 @@
   {#each data.selected.mods as mod}
     {#if data.dom.mods.includes(mod)}
       <li>
-        <button class="action" on:click={function() { data.removeMod(mod); }}>X</button>
-        <button class="action" on:click={function() { data.bumpModUp(mod); }}>^</button>
-        <button class="action" on:click={function() { data.bumpModDown(mod); }}>v</button>
+        <button class="action cross" title="Remove" on:click={function() { data.removeMod(mod); }}></button>
+        <button class="action chevron-up" title="Move up" on:click={function() { data.bumpModUp(mod); }}></button>
+        <button class="action chevron-down" title="Move down" on:click={function() { data.bumpModDown(mod); }}></button>
         {mod}
       </li>
     {:else}

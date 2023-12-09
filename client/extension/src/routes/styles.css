@@ -19,8 +19,8 @@ h2 {
   color: #EBEBEB;
 }
 
-div.block {
-  margin: 5px;
+input, select {
+  font-size: 16px;
 }
 
 button {
@@ -28,11 +28,37 @@ button {
 }
 
 button.process {
+  width: 100px;
   color: red;
 }
 
 button.action {
-  color: blue;
+  width: 22px;
+  height: 22px;
+}
+
+button.action.arrow-down {
+  background: url("/images/arrow-down.svg") center no-repeat;
+}
+
+button.action.arrow-down-to-line {
+  background: url("/images/arrow-down-to-line.svg") center no-repeat;
+}
+
+button.action.chevron-up {
+  background: url("/images/chevron-up.svg") center no-repeat;
+}
+
+button.action.chevron-down {
+  background: url("/images/chevron-down.svg") center no-repeat;
+}
+
+button.action.cross {
+  background: url("/images/cross.svg") center no-repeat;
+}
+
+li {
+  white-space: nowrap;
 }
 
 .text-error {
