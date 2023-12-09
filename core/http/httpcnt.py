@@ -26,7 +26,10 @@ ALLOW = 'Allow'
 ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
 ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
-WEBDEV_ORIGIN = 'http://localhost:5173'
+ACCESS_CONTROL_MAX_AGE = 'Access-Control-Max-Age'
+ORIGIN_ALL = '*'
+ORIGIN_EXT_PREFIX = 'chrome-extension://'
+ORIGIN_WEBDEV = 'http://localhost:5173'
 
 
 def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):

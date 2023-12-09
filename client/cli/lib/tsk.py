@@ -87,7 +87,6 @@ class TaskProcessor:
 
     def _adduser(self, argument: str):
         self._checkroot('adduser:<name>,<port>')
-        # natives.install()
         user, port = TaskProcessor._extract_user_and_port(argument)
         if user == 'serverjockey':
             raise Exception('User name not allowed')

@@ -1,7 +1,7 @@
 <script>
   import { onMount, setContext } from 'svelte';
   import { writable } from 'svelte/store';
-  import { baseurl, newGetRequest } from '$lib/sjgmsapi';
+  import { baseurl, newGetRequest, logError } from '$lib/sjgmsapi';
 
   const instance = writable(null);
   setContext('instance', instance);
@@ -34,19 +34,15 @@
         instances = json;
         if (identities.length === 1) { identity = identities[0]; }
       })
-      .catch(function(error) {
-        console.log(error);
-      })
-      .finally(function() {
-        loading = false;
-      });
+      .catch(logError)
+      .finally(function() { loading = false; });
   });
 </script>
 
 
 <div>
-  <label for="selectInstance">Choose Instance</label><br />
-  <select id="selectInstance" {disabled} bind:value={identity}>
+  <h2>Choose Instance</h2>
+  <select bind:value={identity}>
     {#each identities as option}
       <option>{option}</option>
     {/each}

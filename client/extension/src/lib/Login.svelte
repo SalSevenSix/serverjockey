@@ -20,5 +20,5 @@
   <input id="serverJockeyUrl" class="input" type="text" bind:value={url}><br />
   <label for="serverJockeyToken">Token</label><br />
   <input id="serverJockeyToken" class="input" type="text" bind:value={token}><br />
-  <button name="login" title="Login" disabled={cannotConnect} on:click={click}>Connect</button>
+  <button  class="process" disabled={cannotConnect} on:click={click}>Connect</button>
 </div>

@@ -1,4 +1,8 @@
 
+export const devDom = 'Workshop ID: 9999999999< ' +
+                      'Mod ID: Alpha< Mod ID: Beta Xyz< Mod ID: Gamma< ' +
+                      'Map Folder: Green< Map Folder: Blue Abc';
+
 function cleanDom(dom) {
   let result = dom.replaceAll('<span class="searchedForText">', '');
   result = result.replaceAll('</span>', '');
@@ -29,8 +33,8 @@ function iniExtract(ini, cutlen, regex) {
   return toUnique(result);
 }
 
-export function processResults(dom, ini) {
-  const self = { raw: { dom: dom, ini: ini } };
+export function processResults(dom, ini, updated) {
+  const self = { updated: updated, raw: { dom: dom, ini: ini } };
   self.dom = {
     workshop: domExtract(dom, 13, /Workshop ID:(.*?)</g, true),
     mods: domExtract(dom, 8, /Mod ID:(.*?)</g),
@@ -54,6 +58,7 @@ export function processResults(dom, ini) {
   self.addWorkshop = function() {
     self.selected.workshops = [...self.selected.workshops, self.dom.workshop];
     self.available.workshop = false;
+    self.updated();
   };
   self.removeWorkshop = function() {
     self.selected.workshops = self.selected.workshops.filter(function(value) {
@@ -68,18 +73,22 @@ export function processResults(dom, ini) {
     });
     self.available.maps = [...self.dom.maps];
     self.available.workshop = true;
+    self.updated();
   };
   self.addModTop = function(mod) {
     self.selected.mods = [mod, ...self.selected.mods];
     self.available.mods = self.available.mods.filter(function(value) { return mod != value; });
+    self.updated();
   };
   self.addModBottom = function(mod) {
     self.selected.mods = [...self.selected.mods, mod];
     self.available.mods = self.available.mods.filter(function(value) { return mod != value; });
+    self.updated();
   };
   self.removeMod = function(mod) {
     self.available.mods = [...self.available.mods, mod];
     self.selected.mods = self.selected.mods.filter(function(value) { return mod != value; });
+    self.updated();
   };
   self.bumpModUp = function(mod) {
     let index = self.selected.mods.indexOf(mod);
@@ -87,6 +96,7 @@ export function processResults(dom, ini) {
     self.selected.mods.splice(index, 1);
     self.selected.mods.splice(index - 1, 0, mod);
     self.selected.mods = [...self.selected.mods];
+    self.updated();
   };
   self.bumpModDown = function(mod) {
     let index = self.selected.mods.indexOf(mod);
@@ -94,18 +104,22 @@ export function processResults(dom, ini) {
     self.selected.mods.splice(index, 1);
     self.selected.mods.splice(index + 1, 0, mod);
     self.selected.mods = [...self.selected.mods];
+    self.updated();
   };
   self.addMapTop = function(map) {
     self.selected.maps = [map, ...self.selected.maps];
     self.available.maps = self.available.maps.filter(function(value) { return map != value; });
+    self.updated();
   };
   self.addMapBottom = function(map) {
     self.selected.maps = [...self.selected.maps, map];
     self.available.maps = self.available.maps.filter(function(value) { return map != value; });
+    self.updated();
   };
   self.removeMap = function(map) {
     self.available.maps = [...self.available.maps, map];
     self.selected.maps = self.selected.maps.filter(function(value) { return map != value; });
+    self.updated();
   };
   self.bumpMapUp = function(map) {
     let index = self.selected.maps.indexOf(map);
@@ -113,6 +127,7 @@ export function processResults(dom, ini) {
     self.selected.maps.splice(index, 1);
     self.selected.maps.splice(index - 1, 0, map);
     self.selected.maps = [...self.selected.maps];
+    self.updated();
   };
   self.bumpMapDown = function(map) {
     let index = self.selected.maps.indexOf(map);
@@ -120,6 +135,7 @@ export function processResults(dom, ini) {
     self.selected.maps.splice(index, 1);
     self.selected.maps.splice(index + 1, 0, map);
     self.selected.maps = [...self.selected.maps];
+    self.updated();
   };
   self.generateIni = function() {
     let result = [];

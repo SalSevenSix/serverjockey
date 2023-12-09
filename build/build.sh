@@ -17,7 +17,8 @@ TARGET_DIR="$DIST_DIR/sjgms"
 LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages"
 LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
-rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" "$TARGET_DIR" > /dev/null 2>&1
+rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" > /dev/null 2>&1
+rm -rf "$TARGET_DIR" > /dev/null 2>&1
 
 cd $DIST_DIR || exit 1
 if [ "$BRANCH" = "local" ]; then
@@ -81,17 +82,17 @@ cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
 mkdir -p $TARGET_DIR/usr/local/bin || exit 1
 [ -d "$TARGET_DIR/usr/local/bin" ] || exit 1
 
-echo "Copying CLI and ServerLink into build directory"
+echo "Copying clients into build directory"
 cp -r "$SERVERJOCKEY_DIR/client/cli" "$SERVERJOCKEY_CMD_DIR" || exit 1
-[ -d "$SERVERJOCKEY_CMD_DIR" ] || exit 1
 cp -r "$SERVERJOCKEY_DIR/client/discord" "$SERVERLINK_DIR" || exit 1
-[ -d "$SERVERLINK_DIR" ] || exit 1
 cp -r "$SERVERJOCKEY_DIR/build/hax" "$HAX_DIR" || exit 1
-[ -d "$HAX_DIR" ] || exit 1
 
 echo "Building web client"
 $SERVERJOCKEY_DIR/client/web/build.sh ci || exit 1
 [ -d "$SERVERJOCKEY_DIR/web" ] || exit 1
+
+echo "Building extension client"
+$SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
 
 echo "Downloading ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
@@ -118,11 +119,6 @@ rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/nul
 find . -name "__pycache__" -type d | while read file; do
   rm -rf $file
 done
-
-# TODO Depricated, delete sometime
-#echo "Rename modules with native libraries"
-#mv greenlet-3.0.0.dist-info ___greenlet-3.0.0.dist-info || exit 1
-#mv greenlet ___greenlet || exit 1
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1

@@ -131,10 +131,7 @@ class _RequestHandler:
         headers = httpcnt.HeadersTool(self._request)
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_CACHE)
-        if self._context.is_debug():
-            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
-        elif httpcnt.WEBDEV_ORIGIN == headers.get(httpcnt.ORIGIN):
-            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.WEBDEV_ORIGIN)
+        self._add_allow_origin(response, headers)
         if body == self._context.config('secret'):
             response.set_cookie('secret', body, max_age=86400, httponly=True, samesite='Lax')
             body = httpabc.ResponseBody.NO_CONTENT
@@ -170,21 +167,6 @@ class _RequestHandler:
         response.body = body
         return response
 
-    def _build_response_options(self) -> web.Response:
-        response = web.Response()
-        methods = httpabc.Method.GET.value + ',' if self._resource.allows(httpabc.Method.GET) else ''
-        methods += httpabc.Method.POST.value + ',' if self._resource.allows(httpabc.Method.POST) else ''
-        methods += httpabc.Method.OPTIONS.value
-        response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
-        response.headers.add(httpcnt.ALLOW, methods)
-        if self._context.is_debug():
-            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, '*')
-        elif httpcnt.WEBDEV_ORIGIN == httpcnt.HeadersTool(self._request).get(httpcnt.ORIGIN):
-            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.WEBDEV_ORIGIN)
-        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_METHODS, methods)
-        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS, httpcnt.CONTENT_TYPE + ',' + httpcnt.X_SECRET)
-        return response
-
     def _build_error_method_not_allowed(self) -> err.HTTPMethodNotAllowed:
         allowed = [str(httpabc.Method.OPTIONS.value)]
         if self._resource.allows(httpabc.Method.GET):
@@ -192,6 +174,27 @@ class _RequestHandler:
         if self._resource.allows(httpabc.Method.POST):
             allowed.append(str(httpabc.Method.POST.value))
         return err.HTTPMethodNotAllowed(str(self._method), allowed)
+
+    def _build_response_options(self) -> web.Response:
+        methods = httpabc.Method.GET.value + ',' if self._resource.allows(httpabc.Method.GET) else ''
+        methods += httpabc.Method.POST.value + ',' if self._resource.allows(httpabc.Method.POST) else ''
+        methods += httpabc.Method.OPTIONS.value
+        response = web.Response()
+        response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
+        response.headers.add(httpcnt.ALLOW, methods)
+        self._add_allow_origin(response, httpcnt.HeadersTool(self._request))
+        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_METHODS, methods)
+        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS, httpcnt.CONTENT_TYPE + ',' + httpcnt.X_SECRET)
+        response.headers.add(httpcnt.ACCESS_CONTROL_MAX_AGE, '600')  # 10 minutes
+        return response
+
+    def _add_allow_origin(self, response, headers):
+        if self._context.is_debug():
+            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.ORIGIN_ALL)
+            return
+        origin = headers.get(httpcnt.ORIGIN)
+        if origin == httpcnt.ORIGIN_WEBDEV or origin.startswith(httpcnt.ORIGIN_EXT_PREFIX):
+            response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, origin)
 
 
 class _MultipartFormByteStream(httpabc.ByteStream):
