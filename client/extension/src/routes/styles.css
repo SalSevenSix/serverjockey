@@ -1,4 +1,3 @@
-
 html {
   background-color: rgb(27, 40, 56);
 }
@@ -9,27 +8,69 @@ body {
   color: #ACB2B8;
 }
 
+a {
+  color: #EBEBEB;
+}
+
 h1 {
   font-size: 20px;
-  /* color: #EBEBEB; */
+  color: #EBEBEB;
 }
 
 h2 {
   font-size: 17px;
-  /* color: #EBEBEB; */
+  color: #EBEBEB;
 }
 
 input, select {
+  height: 28px;
   font-size: 16px;
+  color: #EBEBEB;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid black;
+}
+
+select {
+  min-width: 100px;
 }
 
 button {
+  font-size: 14px;
   cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid #172030;
+  font-weight: bold;
+  color: white;
+  background: #5AA9D6;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  color: #ACB2B8;
+  background: #444444;
+}
+
+button:not(:disabled):hover {
+  background: #66C0F4;
 }
 
 button.process {
   width: 100px;
-  color: red;
+  height: 28px;
+}
+
+button.process.hero {
+  background: linear-gradient(to bottom, #A4D007 5%, #536904 95%);
+}
+
+button.process.hero:disabled {
+  cursor: not-allowed;
+  color: #ACB2B8;
+  background: #444444;
+}
+
+button.process.hero:not(:disabled):hover {
+  background: #B6D908;
 }
 
 button.action {
@@ -57,8 +98,15 @@ button.action.cross {
   background: url("/images/cross.svg") center no-repeat;
 }
 
+ul, ol {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 0px 6px 26px;
+  min-height: 14px;
+}
+
 li {
   white-space: nowrap;
+  margin: 2px 0px;
 }
 
 .text-error {

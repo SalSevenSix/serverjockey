@@ -33,6 +33,30 @@ function iniExtract(ini, cutlen, regex) {
   return toUnique(result);
 }
 
+function bumpItemUp(items, item) {
+  const index = items.indexOf(item);
+  if (index === 0) {
+    items = items.filter(function(value) { return item != value; });
+    items = [...items, item];
+  } else {
+    items.splice(index, 1);
+    items.splice(index - 1, 0, item);
+  }
+  return items;
+}
+
+function bumpItemDown(items, item) {
+  const index = items.indexOf(item);
+  if (index === items.length - 1) {
+    items = items.filter(function(value) { return item != value; });
+    items = [item, ...items];
+  } else {
+    items.splice(index, 1);
+    items.splice(index + 1, 0, item);
+  }
+  return items;
+}
+
 export function processResults(dom, ini, updated) {
   const self = { raw: { dom: dom, ini: ini } };
   self.dom = {
@@ -82,17 +106,11 @@ export function processResults(dom, ini, updated) {
       updated();
     },
     bumpUp: function(item) {
-      let index = self.mods.selected.indexOf(item);
-      if (index === 0) return;
-      self.mods.selected.splice(index, 1);
-      self.mods.selected.splice(index - 1, 0, item);
+      self.mods.selected = bumpItemUp(self.mods.selected, item);
       updated();
     },
     bumpDown: function(item) {
-      let index = self.mods.selected.indexOf(item);
-      if (index === self.mods.selected.length - 1) return;
-      self.mods.selected.splice(index, 1);
-      self.mods.selected.splice(index + 1, 0, item);
+      self.mods.selected = bumpItemDown(self.mods.selected, item);
       updated();
     }
   };
@@ -115,17 +133,11 @@ export function processResults(dom, ini, updated) {
       updated();
     },
     bumpUp: function(item) {
-      let index = self.maps.selected.indexOf(item);
-      if (index === 0) return;
-      self.maps.selected.splice(index, 1);
-      self.maps.selected.splice(index - 1, 0, item);
+      self.maps.selected = bumpItemUp(self.maps.selected, item);
       updated();
     },
     bumpDown: function(item) {
-      let index = self.maps.selected.indexOf(item);
-      if (index === self.maps.selected.length - 1) return;
-      self.maps.selected.splice(index, 1);
-      self.maps.selected.splice(index + 1, 0, item);
+      self.maps.selected = bumpItemDown(self.maps.selected, item);
       updated();
     }
   };

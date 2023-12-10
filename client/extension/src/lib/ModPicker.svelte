@@ -12,7 +12,7 @@
   let data = null;
 
   function updated() {
-    data = data;  // Ugly but svelte not tracking internal changes
+    data = data;  // Ugly but svelte is not tracking internal changes
     cannotSave = false;
   }
 
@@ -75,7 +75,7 @@
     {/if}
     <p>
       <br />
-      <button class="process" disabled={cannotSave} on:click={saveIni}>Save</button>
+      <button class="process hero" disabled={cannotSave} on:click={saveIni}>Save</button>
     </p>
   {:else}
     <p>...</p>

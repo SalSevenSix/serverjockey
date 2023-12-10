@@ -10,9 +10,9 @@
   {#each items.available as item}
     <li>
       <button class="action arrow-down-to-line" title="Add to bottom"
-              on:click={function() { items.addBottom(item); }}></button>
+              on:click={function() { items.addBottom(item); }}></button>&nbsp;
       <button class="action arrow-down" title="Add to top"
-              on:click={function() { items.addTop(item); }}></button>
+              on:click={function() { items.addTop(item); }}></button>&nbsp;
       {item}
     </li>
   {/each}
@@ -32,7 +32,7 @@
         {item}
       </li>
     {:else}
-      <li>&nbsp;&nbsp; {item}</li>
+      <li>&nbsp;{item}</li>
     {/if}
   {/each}
 </ol>

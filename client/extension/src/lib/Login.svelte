@@ -16,9 +16,11 @@
 
 <div>
   <p>Connect to your ServerJockey system...</p>
-  <label for="serverJockeyUrl">URL</label><br />
-  <input id="serverJockeyUrl" class="input" type="text" bind:value={url}><br />
-  <label for="serverJockeyToken">Token</label><br />
-  <input id="serverJockeyToken" class="input" type="text" bind:value={token}><br />
-  <button  class="process" disabled={cannotConnect} on:click={click}>Connect</button>
+  <h2>URL</h2>
+  <input class="input" type="text" bind:value={url}>
+  <h2>Token</h2>
+  <input class="input" type="text" bind:value={token}>
+  <p>
+    <button class="process hero" disabled={cannotConnect} on:click={click}>Connect</button>
+  </p>
 </div>
