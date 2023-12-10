@@ -1,14 +1,15 @@
 <script>
-  export let data;
+  export let workshop;
+  export let items;
 </script>
 
 
-<h2>Workshop ID</h2>
+<h2>Workshop Item</h2>
 <p>
-  {#if data.available.workshop}
-    <button class="process" on:click={function() { data.addWorkshop(); }}>Add</button>&nbsp;
+  {#if items.available}
+    <button class="process" on:click={function() { items.add(); }}>Add</button>&nbsp;
   {:else}
-    <button class="process" on:click={function() { data.removeWorkshop(); }}>Remove</button>&nbsp;
+    <button class="process" on:click={function() { items.remove(); }}>Remove</button>&nbsp;
   {/if}
-  {data.dom.workshop}
+  {workshop}
 </p>

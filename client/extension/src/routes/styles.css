@@ -11,12 +11,12 @@ body {
 
 h1 {
   font-size: 20px;
-  color: #EBEBEB;
+  /* color: #EBEBEB; */
 }
 
 h2 {
   font-size: 17px;
-  color: #EBEBEB;
+  /* color: #EBEBEB; */
 }
 
 input, select {
@@ -67,5 +67,6 @@ li {
 }
 
 .text-warning {
+  font-style: italic;
   color: yellow;
 }

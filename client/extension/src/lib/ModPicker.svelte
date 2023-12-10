@@ -4,23 +4,25 @@
   import { newGetRequest, newPostRequest, logError } from '$lib/sjgmsapi';
   import { devDom, isModPage, processResults } from '$lib/ModPicker';
   import ModPickerWorkshop from '$lib/ModPickerWorkshop.svelte';
-  import ModPickerMods from '$lib/ModPickerMods.svelte';
-  import ModPickerMaps from '$lib/ModPickerMaps.svelte';
+  import ModPickerItem from '$lib/ModPickerItem.svelte';
 
   const instance = getContext('instance');
 
+  let cannotSave = true;
   let data = null;
 
   function updated() {
     data = data;  // Ugly but svelte not tracking internal changes
+    cannotSave = false;
   }
 
-  function postIni() {
+  function saveIni() {
     let request = newPostRequest('text/plain');
     request.body = data.generateIni();
     fetch($instance.url + '/config/ini', request)
       .then(function(response) {
         if (!response.ok) { throw new Error('Status: ' + response.status); }
+        cannotSave = true;
       })
       .catch(logError);
   }
@@ -64,16 +66,16 @@
 
 <div>
   {#if data}
-    <ModPickerWorkshop {data} />
-    {#if !data.available.workshop}
-      <ModPickerMods {data} />
+    <ModPickerWorkshop workshop={data.dom.workshop} items={data.workshop} />
+    {#if !data.workshop.available}
+      <ModPickerItem itemName="Mods" items={data.mods} source={data.dom.mods} />
       {#if data.dom.maps.length > 0}
-        <ModPickerMaps {data} />
+        <ModPickerItem itemName="Maps" items={data.maps} source={data.dom.maps} />
       {/if}
     {/if}
     <p>
       <br />
-      <button class="process" on:click={postIni}>Save</button>
+      <button class="process" disabled={cannotSave} on:click={saveIni}>Save</button>
     </p>
   {:else}
     <p>...</p>

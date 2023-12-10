@@ -193,6 +193,8 @@ class _RequestHandler:
             response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.ORIGIN_ALL)
             return
         origin = headers.get(httpcnt.ORIGIN)
+        if not origin:
+            return
         if origin == httpcnt.ORIGIN_WEBDEV or origin.startswith(httpcnt.ORIGIN_EXT_PREFIX):
             response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, origin)
 
