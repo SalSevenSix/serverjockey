@@ -1,5 +1,5 @@
 html {
-  background-color: rgb(27, 40, 56);
+  background-color: #1B2838;
 }
 
 body {
@@ -22,8 +22,17 @@ h2 {
   color: #EBEBEB;
 }
 
+div.divider {
+  margin: 22px 8px 0px 8px;
+}
+
+div.divider hr {
+  margin: 0px;
+  border: 1px solid #666666;
+}
+
 input, select {
-  height: 28px;
+  height: 30px;
   font-size: 16px;
   color: #EBEBEB;
   background: rgba(0, 0, 0, 0.2);
@@ -31,7 +40,7 @@ input, select {
 }
 
 select {
-  min-width: 100px;
+  min-width: 200px;
 }
 
 button {
@@ -41,7 +50,7 @@ button {
   border: 2px solid #172030;
   font-weight: bold;
   color: white;
-  background: #5AA9D6;
+  background: #417B9C;
 }
 
 button:disabled {
@@ -51,7 +60,7 @@ button:disabled {
 }
 
 button:not(:disabled):hover {
-  background: #66C0F4;
+  background: #5AA9D6;
 }
 
 button.process {
@@ -60,7 +69,7 @@ button.process {
 }
 
 button.process.hero {
-  background: linear-gradient(to bottom, #A4D007 5%, #536904 95%);
+  background: #5C7E10;
 }
 
 button.process.hero:disabled {
@@ -76,6 +85,11 @@ button.process.hero:not(:disabled):hover {
 button.action {
   width: 22px;
   height: 22px;
+  border: 1px solid #666666;
+}
+
+button.action:hover {
+  border: 1px solid white;
 }
 
 button.action.arrow-down {
@@ -100,13 +114,19 @@ button.action.cross {
 
 ul, ol {
   background: rgba(0, 0, 0, 0.2);
+  margin: 2px 0px;
   padding: 6px 0px 6px 26px;
-  min-height: 14px;
+  min-height: 16px;
 }
 
 li {
   white-space: nowrap;
   margin: 2px 0px;
+}
+
+li span {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .text-error {
@@ -116,5 +136,5 @@ li {
 
 .text-warning {
   font-style: italic;
-  color: yellow;
+  color: #DDDD22;
 }

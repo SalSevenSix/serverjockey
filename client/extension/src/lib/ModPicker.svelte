@@ -73,11 +73,17 @@
         <ModPickerItem itemName="Maps" items={data.maps} source={data.dom.maps} />
       {/if}
     {/if}
-    <p>
-      <br />
+    <div class="save-button">
       <button class="process hero" disabled={cannotSave} on:click={saveIni}>Save</button>
-    </p>
+    </div>
   {:else}
-    <p>...</p>
+    <p>&nbsp; ...</p>
   {/if}
 </div>
+
+
+<style>
+  .save-button {
+    margin: 24px 0px 100px 0px;
+  }
+</style>

@@ -61,7 +61,7 @@
 
 
 {#if checking}
-  <p>loading ...</p>
+  <p>&nbsp; loading ...</p>
 {:else}
   {#if $connection}
     <Logout {disconnect} />

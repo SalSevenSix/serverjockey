@@ -4,6 +4,8 @@
 </script>
 
 
+<div class="divider"><hr /></div>
+
 <h2>Workshop Item</h2>
 <p>
   {#if items.available}

@@ -5,6 +5,8 @@
 </script>
 
 
+<div class="divider"><hr /></div>
+
 <h2>Available {itemName}</h2>
 <ul>
   {#each items.available as item}
@@ -13,7 +15,7 @@
               on:click={function() { items.addBottom(item); }}></button>&nbsp;
       <button class="action arrow-down" title="Add to top"
               on:click={function() { items.addTop(item); }}></button>&nbsp;
-      {item}
+      <span>{item}</span>
     </li>
   {/each}
 </ul>
@@ -29,7 +31,7 @@
         <button class="action cross" title="Remove" on:click={function() { items.remove(item); }}></button>
         <button class="action chevron-up" title="Move up" on:click={function() { items.bumpUp(item); }}></button>
         <button class="action chevron-down" title="Move down" on:click={function() { items.bumpDown(item); }}></button>
-        {item}
+        <span>{item}</span>
       </li>
     {:else}
       <li>&nbsp;{item}</li>
