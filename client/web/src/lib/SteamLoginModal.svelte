@@ -109,7 +109,7 @@
 
 
 <div class="modal" class:is-active={isOpen}>
-  <div class="modal-background" on:click={closeModal} on:keypress={function() {}}></div>
+  <div class="modal-background" role="button" tabindex="0" on:click={closeModal} on:keypress={function() {}}></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Login to Steam</p>

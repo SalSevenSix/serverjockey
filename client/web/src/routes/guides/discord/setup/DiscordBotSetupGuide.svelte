@@ -1,5 +1,5 @@
 <script>
-  import { scrollto } from 'svelte-scrollto-element';
+  import { scrollto } from 'svelte-scrollto-next';
   import BackToTop from '$lib/BackToTop.svelte';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';

@@ -11,7 +11,7 @@
   <div id="notifications" class="section">
     <div class="container">
       {#each $notifications as notification, index}
-        <div id={notification.id} class="notification {notification.level}"
+        <div id={notification.id} role="button" tabindex="0" class="notification {notification.level}"
              on:click={deleteMessage} on:keypress={function() {}}>
           <i class="delete is-large mt-1 mr-1"></i>
           {#if notification.level === 'is-success'}<i class="fa fa-circle-check fa-lg"></i>{/if}
