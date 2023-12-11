@@ -34,7 +34,7 @@
         <span>{item}</span>
       </li>
     {:else}
-      <li>&nbsp;{item}</li>
+      <li>{item}</li>
     {/if}
   {/each}
 </ol>

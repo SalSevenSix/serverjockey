@@ -77,7 +77,7 @@
       <button class="process hero" disabled={cannotSave} on:click={saveIni}>Save</button>
     </div>
   {:else}
-    <p>&nbsp; ...</p>
+    <p><br />&nbsp; ...</p>
   {/if}
 </div>
 
