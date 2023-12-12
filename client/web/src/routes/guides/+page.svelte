@@ -38,7 +38,7 @@
   </div>
   <div class="column is-four-fifths content">
     <p>
-      This guide will show you how to setup a Discord bot. You can use the bot on Discord
+      This guide will show you how to setup the Discord bot. You can use the bot on Discord
       to manage your servers as an alternative to this webapp. Most features are supported,
       with a few extra unique features as well.
     </p>
@@ -57,6 +57,18 @@
       This guide will show you how to use the Discord bot to create, configure and start
       a Project Zomboid server as an example. The same process can be used on other supported
       game servers too. Please make sure the bot is setup and working first!
+    </p>
+  </div>
+</div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href="/guides/extension">Browser Extension</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      ServerJockey has a |Browser Extension|
+      for Chrome that can be used to help manage mods for Project Zomboid servers.
+      It allows you to browse the Steam Workshop to add and remove mods on mod pages.
     </p>
   </div>
 </div>
