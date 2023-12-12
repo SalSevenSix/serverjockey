@@ -7,7 +7,7 @@
 <div class="divider"><hr /></div>
 
 <h2>Workshop Item</h2>
-<p>
+<p class="white-space-nowrap">
   {#if items.available}
     <button class="process" on:click={function() { items.add(); }}>Add</button>&nbsp;
   {:else}

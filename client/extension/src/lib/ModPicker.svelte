@@ -11,6 +11,8 @@
   let cannotSave = true;
   let data = null;
 
+  $: if ($instance) { fetchDom(); }
+
   function updated() {
     data = data;  // Ugly but svelte is not tracking internal changes
     cannotSave = false;
@@ -34,29 +36,37 @@
         return response.text();
       })
       .then(function(ini) {
+        cannotSave = true;
         data = processResults(dom, ini, updated);
       })
       .catch(logError);
   }
 
   function fetchDom() {
+    data = null;
     if (dev) {
       fetchIni(devDom);
-    } else {
-      chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(function(tabs) {
-        if (tabs && tabs.length > 0) {
-          chrome.tabs.sendMessage(tabs[0].id, { name: 'send-dom' }).then(function(dom) {
-            if (isModPage(dom)) { fetchIni(dom); }
-          });
-        }
-      });
+      return;
     }
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(function(tabs) {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.sendMessage(tabs[0].id, { name: 'send-dom' }).then(function(dom) {
+          if (isModPage(dom)) { fetchIni(dom); }
+        });
+      }
+    });
   }
 
   if (!dev) {
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
       if (!tabInfo.active) return;
       if (changeInfo.status === 'complete') { fetchDom(); } else { data = null; }
+    });
+    chrome.tabs.onActivated.addListener(function(activeInfo) {
+      chrome.tabs.get(activeInfo.tabId).then(function(tab) {
+        if (!tab.url) return;
+        fetchDom();
+      });
     });
   }
 

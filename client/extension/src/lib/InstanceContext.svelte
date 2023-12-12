@@ -3,6 +3,8 @@
   import { writable } from 'svelte/store';
   import { baseurl, newGetRequest, logError } from '$lib/sjgmsapi';
 
+  const identityKey = 'sjgmsExtensionSelectedIdentity';
+  const noStorage = typeof(Storage) === 'undefined';
   const instance = writable(null);
   setContext('instance', instance);
 
@@ -12,9 +14,12 @@
   let identity = null;
 
   $: disabled = loading || !instances;
+
   $: updateInstance(identity); function updateInstance(selected) {
     if (!selected) return;
     $instance = { identity: selected, module: instances[selected].module, url: instances[selected].url };
+    if (noStorage) return;
+    localStorage.setItem(identityKey, selected);
   }
 
   onMount(function() {
@@ -24,15 +29,22 @@
         return response.json();
       })
       .then(function(json) {
-        let fetched = [];
-        Object.keys(json).forEach(function(key) {
-          if (json[key].module === 'projectzomboid') {
-            fetched.push(key);
+        instances = json;
+        identities = [];
+        Object.keys(instances).forEach(function(key) {
+          if (instances[key].module === 'projectzomboid') {
+            identities.push(key);
           }
         });
-        identities = fetched;
-        instances = json;
         if (identities.length === 1) { identity = identities[0]; }
+        if (noStorage) return;
+        let storedIdentity = localStorage.getItem(identityKey);
+        if (!storedIdentity) return;
+        if (identities.length > 1 && identities.includes(storedIdentity)) {
+          identity = storedIdentity;
+        } else {
+          localStorage.removeItem(identityKey);
+        }
       })
       .catch(logError)
       .finally(function() { loading = false; });
@@ -42,11 +54,15 @@
 
 <div>
   <h2>Choose Instance</h2>
-  <select bind:value={identity}>
-    {#each identities as option}
-      <option>{option}</option>
-    {/each}
-  </select>
+  {#if identities.length > 0}
+    <select bind:value={identity}>
+      {#each identities as option}
+        <option>{option}</option>
+      {/each}
+    </select>
+  {:else}
+    <p class="text-warning">&nbsp; no projectzomboid instances found</p>
+  {/if}
 </div>
 
 {#if !loading && $instance}
