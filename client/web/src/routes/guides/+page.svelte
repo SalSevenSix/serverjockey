@@ -44,7 +44,7 @@
     </p>
     <p>
       The instructions are detailed. If you are unfamiliar with Discord, the guide also includes instructions
-      on where to register a Discord account and how to start a new Discord server (if needed).
+      on where to register a Discord account and how to start a new Discord server if needed.
     </p>
   </div>
 </div>
@@ -67,9 +67,8 @@
   <div class="column is-four-fifths content">
     <p>
       ServerJockey has a |Browser Extension|
-      for <a href="https://www.google.com/chrome" target="_blank">Chrome <i class="fa fa-up-right-from-square"></i></a>
-      that can be used to help manage mods for Project Zomboid servers.
-      It allows you to browse the Steam Workshop to add and remove mods on mod pages.
+      for Chrome that can be used to help manage mods for Project Zomboid servers.
+      It allows you to browse the Steam Workshop to add and remove mods on your server using the mod pages.
     </p>
   </div>
 </div>

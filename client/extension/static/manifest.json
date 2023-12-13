@@ -1,6 +1,6 @@
 {
   "name": "ServerJockey",
-  "description": "Browser extension for ServerJockey game server management system.",
+  "description": "Browser extension for the ServerJockey game server management system.",
   "version": "0.6.0",
   "manifest_version": 3,
   "permissions": ["tabs", "sidePanel"],

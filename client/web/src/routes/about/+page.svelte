@@ -36,7 +36,7 @@
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
           <figure class="image">
-            <img src="/assets/brands/KoFi_button_black.png"
+            <img src="/assets/brands/KoFi_SupportMe_dark.png"
                  alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
           </figure>
         </a>

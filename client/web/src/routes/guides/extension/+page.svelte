@@ -13,7 +13,8 @@
     <h2 class="title is-3 mt-2">Browser Extension</h2>
     <p>
       ServerJockey has a |Browser Extension|
-      for Chrome that can be used to help manage mods for Project Zomboid servers.
+      for <a href="https://www.google.com/chrome" target="_blank">Chrome <i class="fa fa-up-right-from-square"></i></a>
+      that can be used to help manage mods for Project Zomboid servers.
       Ths guide will will show you how to install and use this extension.
     </p>
   </div>
@@ -22,7 +23,7 @@
 <div class="content">
   <hr />
   <p><span class="step-title"></span>
-    Download extension
+    First step is to |Download extension|
   </p>
 </div>
 
