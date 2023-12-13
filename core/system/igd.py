@@ -5,14 +5,17 @@ import upnpy
 # ALLOW util.* msg.* context.* http.* system.svrabc
 from core.util import util, funcutil, sysutil
 from core.msg import msgabc, msgftr
+from core.context import contextsvc
 
 TCP, UDP = 'TCP', 'UDP'
 _VALID_PROTOCALS = TCP, UDP
 
 
-def initialise(mailer: msgabc.MulticastMailer, source: typing.Any):
-    mailer.register(IgdService())
-    mailer.post(source, IgdService.DISCOVER)
+def initialise(context: contextsvc.Context, source: typing.Any):
+    if context.config('noupnp'):
+        return
+    context.register(IgdService())
+    context.post(source, IgdService.DISCOVER)
 
 
 def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):

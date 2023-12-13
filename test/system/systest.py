@@ -28,7 +28,7 @@ class TestContext:
             stime=None, secret='token', showtoken=False,
             scheme=_SCHEME, sslcert=None, sslkey=None,
             env=os.environ.copy(), python=sys.executable,
-            logfile=None, dbfile=None, clientfile=None,
+            logfile=None, dbfile=None, clientfile=None, noupnp=True,
             host=None, port=None)
 
     async def initialise(self):

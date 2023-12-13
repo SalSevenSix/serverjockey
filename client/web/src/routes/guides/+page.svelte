@@ -67,7 +67,8 @@
   <div class="column is-four-fifths content">
     <p>
       ServerJockey has a |Browser Extension|
-      for Chrome that can be used to help manage mods for Project Zomboid servers.
+      for <a href="https://www.google.com/chrome" target="_blank">Chrome <i class="fa fa-up-right-from-square"></i></a>
+      that can be used to help manage mods for Project Zomboid servers.
       It allows you to browse the Steam Workshop to add and remove mods on mod pages.
     </p>
   </div>

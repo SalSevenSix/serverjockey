@@ -56,23 +56,24 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Filename for database file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
-    args = [] if args is None or len(args) < 2 else args[1:]
-    args = p.parse_args(args)
-    if args.version:
+    p.add_argument('--noupnp', action='store_true',
+                   help='Do not enable UPnP services')
+    config = p.parse_args([] if args is None or len(args) < 2 else args[1:])
+    if config.version:
         print(sysutil.system_version())
         return None
-    home = util.full_path(os.getcwd(), args.home)
-    tmpdir = util.full_path(home, args.tmpdir)
-    clientfile = util.full_path(home, args.clientfile)
-    dbfile = util.full_path(home, args.dbfile)
-    logfile = util.full_path(home, args.logfile)
+    home = util.full_path(os.getcwd(), config.home)
+    tmpdir = util.full_path(home, config.tmpdir)
+    clientfile = util.full_path(home, config.clientfile)
+    dbfile = util.full_path(home, config.dbfile)
+    logfile = util.full_path(home, config.logfile)
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
-        debug=args.debug, trace=args.trace, home=home, tmpdir=tmpdir,
-        stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=args.showtoken,
-        scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(),
-        python=sys.executable, clientfile=clientfile, dbfile=dbfile, logfile=logfile,
-        host=None if args.host == '0.0.0.0' else args.host, port=args.port)
+        debug=config.debug, trace=config.trace, home=home, tmpdir=tmpdir,
+        stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=config.showtoken,
+        scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(), python=sys.executable,
+        clientfile=clientfile, dbfile=dbfile, logfile=logfile, noupnp=config.noupnp,
+        host=None if config.host == '0.0.0.0' else config.host, port=config.port)
 
 
 def _setup_logging(context: contextsvc.Context):
