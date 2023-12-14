@@ -171,11 +171,13 @@ exports.whitelist = function($) {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
         let pwd = Math.random().toString(16).substr(2, 8);
-        let name = user.tag.replaceAll(' ', '_').replaceAll('#', '');
-        logger.info('Whitelist add: ' + data[0] + ' ' + name);
-        if ($.httptool.doPost('/whitelist/add', { player: name, password: pwd })) {
-          user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd));
-        }
+        let name = user.tag.replaceAll('#', '');
+        logger.info('Whitelist add-id: ' + data[0] + ' ' + name);
+        $.httptool.doPost('/whitelist/add', { player: name, password: pwd }, function() {
+          user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
+            .then(function() { $.message.react('✅'); })
+            .catch(function(error) { $.httptool.error(error, $.message); });
+        });
       })
       .catch(function(error) {
         $.httptool.error(error, $.message);
@@ -183,8 +185,8 @@ exports.whitelist = function($) {
   } else if (cmd === 'remove-id') {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
-        let name = user.tag.replaceAll(' ', '_').replaceAll('#', '');
-        logger.info('Whitelist remove: ' + data[0] + ' ' + name);
+        let name = user.tag.replaceAll('#', '');
+        logger.info('Whitelist remove-id: ' + data[0] + ' ' + name);
         $.httptool.doPost('/whitelist/remove', { player: name });
       })
       .catch(function(error) {
