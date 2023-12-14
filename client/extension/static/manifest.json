@@ -12,15 +12,7 @@
     "js": ["content.js"]
   }],
   "action": {
-    "default_title": "Click to open panel"
-  },
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Ctrl+B",
-        "mac": "Command+B"
-      }
-    }
+    "default_title": "Open side panel"
   },
   "icons": {
     "16": "images/icon-16.png",
