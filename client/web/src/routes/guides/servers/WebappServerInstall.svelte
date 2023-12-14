@@ -13,7 +13,7 @@
     If opened in a new tab, you will need to enter the login token again.
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/setup/gg_goto_instances.png" alt="Go to instances page" />
+    <img src="/assets/guides/games/goto_instances.png" alt="Go to instances page" />
   </figure>
 </div>
 
@@ -26,7 +26,7 @@
     Click the <span class="has-text-weight-bold">Create</span> button to create the new instance.
   </p>
   <figure class="image max-400 is-bordered">
-    <img src="/assets/setup/gg_new_instance.png" alt="Create a new instance" loading="lazy" />
+    <img src="/assets/guides/games/new_instance.png" alt="Create a new instance" loading="lazy" />
   </figure>
 </div>
 
@@ -36,7 +36,7 @@
     the new instance you created. View it now using the open folder button.
   </p>
   <figure class="image max-600 is-bordered">
-    <img src="/assets/setup/gg_view_instance.png" alt="Go to new instance" loading="lazy" />
+    <img src="/assets/guides/games/view_instance.png" alt="Go to new instance" loading="lazy" />
   </figure>
 </div>
 
@@ -49,7 +49,7 @@
     Now click the <span class="has-text-weight-bold">Install Runtime</span> button.
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/setup/gg_install_start.png" alt="Start install runtime" loading="lazy" />
+    <img src="/assets/guides/games/install_start.png" alt="Start install runtime" loading="lazy" />
   </figure>
   <p>
     Scroll back up to find the <span class="has-text-weight-bold">Console Log</span>.
@@ -57,6 +57,6 @@
     Once completed successfully, you will be able to start the game server.
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/setup/gg_install_log.png" alt="View install logging" loading="lazy" />
+    <img src="/assets/guides/games/install_log.png" alt="View install logging" loading="lazy" />
   </figure>
 </div>

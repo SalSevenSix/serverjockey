@@ -6,7 +6,7 @@
     Make sure changes are saved before closing the section, otherwise the changes will be lost!
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/setup/gg_configuration.png" alt="View and edit config" loading="lazy" />
+    <img src="/assets/guides/games/configuration.png" alt="View and edit config" loading="lazy" />
   </figure>
 </div>
 
@@ -34,12 +34,12 @@
   <div class="columns">
     <div class="column">
       <figure class="image max-400 is-bordered">
-        <img src="/assets/setup/gg_set_auto.png" alt="Set auto setting" loading="lazy" />
+        <img src="/assets/guides/games/set_auto.png" alt="Set auto setting" loading="lazy" />
       </figure>
     </div>
     <div class="column">
       <figure class="image max-400 is-bordered">
-        <img src="/assets/setup/gg_server_start.png" alt="Start server" loading="lazy" />
+        <img src="/assets/guides/games/server_start.png" alt="Start server" loading="lazy" />
       </figure>
     </div>
   </div>

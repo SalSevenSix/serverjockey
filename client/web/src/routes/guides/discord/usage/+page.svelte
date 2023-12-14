@@ -40,7 +40,7 @@
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/38_create_instance_success.png" alt="Create Instances Success" />
+    <img src="/assets/guides/discord/38_create_instance_success.png" alt="Create Instances Success" />
   </figure>
 </div>
 
@@ -51,7 +51,7 @@
   </p>
   <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/39_help_pz.png" alt="Help PZ" loading="lazy" />
+    <img src="/assets/guides/discord/39_help_pz.png" alt="Help PZ" loading="lazy" />
   </figure>
 </div>
 
@@ -65,10 +65,10 @@
   </p>
   <CodeBlock>!deployment install-runtime</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" loading="lazy" />
+    <img src="/assets/guides/discord/40_deploy_runtime_hourglass.png" alt="Deploy Runtime Hourglass" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/40_deploy_runtime_success.png" alt="Deploy Runtime Success" loading="lazy" />
+    <img src="/assets/guides/discord/40_deploy_runtime_success.png" alt="Deploy Runtime Success" loading="lazy" />
   </figure>
 </div>
 
@@ -79,10 +79,10 @@
   </p>
   <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/41_server_start_hourglass.png" alt="Start Server Hourglass" loading="lazy" />
+    <img src="/assets/guides/discord/41_server_start_hourglass.png" alt="Start Server Hourglass" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/41_server_start_success.png" alt="Start Server Success" loading="lazy" />
+    <img src="/assets/guides/discord/41_server_start_success.png" alt="Start Server Success" loading="lazy" />
   </figure>
 </div>
 
@@ -93,7 +93,7 @@
   </p>
   <CodeBlock>!server</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/42_server_status_up.png" alt="Server Status Up" loading="lazy" />
+    <img src="/assets/guides/discord/42_server_status_up.png" alt="Server Status Up" loading="lazy" />
   </figure>
 </div>
 
@@ -105,7 +105,7 @@
   </p>
   <CodeBlock>!server stop</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/43_server_stop.png" alt="Server Stop" loading="lazy" />
+    <img src="/assets/guides/discord/43_server_stop.png" alt="Server Stop" loading="lazy" />
   </figure>
 </div>
 
@@ -117,7 +117,7 @@
   </p>
   <CodeBlock>!getconfig ini</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/44_getconfig_ini.png" alt="Get Config INI" loading="lazy" />
+    <img src="/assets/guides/discord/44_getconfig_ini.png" alt="Get Config INI" loading="lazy" />
   </figure>
 </div>
 
@@ -138,7 +138,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
   </p>
   <CodeBlock>!setconfig ini</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/46_setconfig_ini.png" alt="Set Config INI" loading="lazy" />
+    <img src="/assets/guides/discord/46_setconfig_ini.png" alt="Set Config INI" loading="lazy" />
   </figure>
 </div>
 
@@ -149,7 +149,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
   </p>
   <CodeBlock>!deployment wipe-world-save</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/47_wipe_map.png" alt="Wipe Map" loading="lazy" />
+    <img src="/assets/guides/discord/47_wipe_map.png" alt="Wipe Map" loading="lazy" />
   </figure>
 </div>
 
@@ -161,13 +161,13 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
   </p>
   <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/48_login_server_details.png" alt="Login Server Details" loading="lazy" />
+    <img src="/assets/guides/discord/48_login_server_details.png" alt="Login Server Details" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/48_login_welcome_message.png" alt="Login Welcome Message" loading="lazy" />
+    <img src="/assets/guides/discord/48_login_welcome_message.png" alt="Login Welcome Message" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/48_login_event.png" alt="Login Event" loading="lazy" />
+    <img src="/assets/guides/discord/48_login_event.png" alt="Login Event" loading="lazy" />
   </figure>
 </div>
 
@@ -181,13 +181,13 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
   <CodeBlock>!world broadcast Hello Everyone</CodeBlock>
   <CodeBlock>!player Demo give-item Base Axe 2</CodeBlock>
   <figure class="image max-800">
-    <img src="/assets/setup/49_console_commands.png" alt="Console Commands" loading="lazy" />
+    <img src="/assets/guides/discord/49_console_commands.png" alt="Console Commands" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/49_world_broadcast.jpg" alt="World Broadcast" loading="lazy" />
+    <img src="/assets/guides/discord/49_world_broadcast.jpg" alt="World Broadcast" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src="/assets/setup/49_give_item.png" alt="Give Item" loading="lazy" />
+    <img src="/assets/guides/discord/49_give_item.png" alt="Give Item" loading="lazy" />
   </figure>
 </div>
 

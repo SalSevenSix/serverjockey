@@ -31,7 +31,7 @@
     To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
   </p>
   <figure class="image max-800">
-    <img src="/assets/setup/vb_main.png" alt="VirtualBox Settings" />
+    <img src="/assets/guides/virtualbox/main.png" alt="VirtualBox Settings" />
   </figure>
   <h3 class="title is-4">Memory Allocation</h3>
   <p>
@@ -42,7 +42,7 @@
     you are running with 2Gb spare.
   </p>
   <figure class="image max-800">
-    <img src="/assets/setup/vb_sysmem.png" alt="VirtualBox Memory" loading="lazy" />
+    <img src="/assets/guides/virtualbox/sysmem.png" alt="VirtualBox Memory" loading="lazy" />
   </figure>
   <h3 class="title is-4">Processor Allocation</h3>
   <p>
@@ -50,7 +50,7 @@
     You can specify a number of cores as well as an execution cap.
   </p>
   <figure class="image max-800">
-    <img src="/assets/setup/vb_syscpu.png" alt="VirtualBox Processor" loading="lazy" />
+    <img src="/assets/guides/virtualbox/syscpu.png" alt="VirtualBox Processor" loading="lazy" />
   </figure>
 </div>
 
