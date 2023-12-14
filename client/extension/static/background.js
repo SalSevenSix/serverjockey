@@ -1,4 +1,4 @@
-const STEAM_WORKSHOP = 'https://steamcommunity.com/';
+const BASEURL_STEAM_COMMUNITY = 'https://steamcommunity.com/';
 
 function iconPaths(enabled) {
   return { path: {
@@ -9,7 +9,8 @@ function iconPaths(enabled) {
 }
 
 function handleUpdate(tabId, url) {
-  if (url.startsWith(STEAM_WORKSHOP)) {
+  if (!url) return;
+  if (url.startsWith(BASEURL_STEAM_COMMUNITY)) {
     chrome.sidePanel.setOptions({ tabId, path: 'index.html', enabled: true });
     chrome.action.setIcon(iconPaths(true));
   } else {
@@ -23,11 +24,11 @@ chrome.sidePanel
   .catch(function(error) { console.error(error); });
 
 chrome.tabs.onUpdated.addListener(function(tabId, info, tab) {
-  if (tab.url) { handleUpdate(tabId, tab.url); }
+  handleUpdate(tabId, tab.url);
 });
 
 chrome.tabs.onActivated.addListener(function(activeInfo) {
   chrome.tabs.get(activeInfo.tabId).then(function(tab) {
-    if (tab.url) { handleUpdate(activeInfo.tabId, tab.url); }
+    handleUpdate(activeInfo.tabId, tab.url);
   });
 });

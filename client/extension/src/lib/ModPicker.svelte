@@ -50,7 +50,7 @@
     }
     chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(function(tabs) {
       if (tabs && tabs.length > 0) {
-        chrome.tabs.sendMessage(tabs[0].id, { name: 'send-dom' }).then(function(dom) {
+        chrome.tabs.sendMessage(tabs[0].id, { name: 'serverjockey-send-dom' }).then(function(dom) {
           if (isModPage(dom)) { fetchIni(dom); }
         });
       }

@@ -15,7 +15,7 @@
               on:click={function() { items.addBottom(item); }}></button>&nbsp;
       <button class="action arrow-down" title="Add to top"
               on:click={function() { items.addTop(item); }}></button>&nbsp;
-      <span>{item}</span>
+      {item}
     </li>
   {/each}
 </ul>
@@ -31,7 +31,7 @@
         <button class="action cross" title="Remove" on:click={function() { items.remove(item); }}></button>
         <button class="action chevron-up" title="Move up" on:click={function() { items.bumpUp(item); }}></button>
         <button class="action chevron-down" title="Move down" on:click={function() { items.bumpDown(item); }}></button>
-        <span>{item}</span>
+        {item}
       </li>
     {:else}
       <li>{item}</li>
