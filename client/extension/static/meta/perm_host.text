@@ -1,0 +1,3 @@
+Host permission is required to fetch the page data (DOM) using the content script. The DOM is used to collect text from Steam Community (https://steamcommunity.com). The script is restricted to certain Steam Community pages only.
+
+Details about what information is collected and how it is used can be found in the Privacy Policy.

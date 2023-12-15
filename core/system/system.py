@@ -241,7 +241,7 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
                 return httpabc.ResponseBody.BAD_REQUEST
             data['auto'] = auto
         result = await self._system.instance_update(resource.name(), data)
-        return result if httpabc.ResponseBody.NO_CONTENT else httpabc.ResponseBody.NOT_FOUND
+        return result if result else httpabc.ResponseBody.NOT_FOUND
 
 
 class _SystemInfoHandler(httpabc.GetHandler):

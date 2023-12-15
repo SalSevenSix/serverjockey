@@ -1,0 +1,3 @@
+Tabs permission is required to fetch the page data (DOM) from the active tab via messaging to the content script. The DOM is used to collect text from certain Steam Community pages (https://steamcommunity.com).
+
+Details about what information is collected and how it is used can be found in the Privacy Policy.
