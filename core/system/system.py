@@ -2,7 +2,7 @@ import logging
 import asyncio
 import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
-from core.util import util, dtutil, io, sysutil, signals, objconv, aggtrf, funcutil
+from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
@@ -27,8 +27,7 @@ class SystemService:
         self._instances = self._resource.child('instances')
 
     def _build_resources(self) -> httprsc.WebResource:
-        logfile = self._context.config('logfile')
-        subs = httpsubs.HttpSubscriptionService(self._context)
+        subs, logfile = httpsubs.HttpSubscriptionService(self._context), self._context.config('logfile')
         resource = httprsc.WebResource()
         self._sysstoresvc.resources(resource)
         r = httprsc.ResourceBuilder(resource)
@@ -36,11 +35,8 @@ class SystemService:
         r.put('modules', httpext.StaticHandler(self._modules.names()))
         r.psh('system')
         r.put('info', _SystemInfoHandler())
+        r.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
         r.put('shutdown', _ShutdownHandler(self))
-        r.psh('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
-        r.put('tail', httpext.RollingLogHandler(self._context, msglog.HandlerPublisher.LOG_FILTER))
-        r.put('subscribe', subs.handler(msglog.HandlerPublisher.LOG_FILTER, aggtrf.StrJoin('\n')))
-        r.pop()
         r.pop()
         r.psh('instances', _InstancesHandler(self, self._modules))
         r.put('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer()))
@@ -50,10 +46,6 @@ class SystemService:
         return resource
 
     async def initialise(self):
-        # if self._context.is_trace():
-        #    msglog.HandlerPublisher.log(self._context, self, 'LOG UNAVAVAILABLE IN TRACE MODE')
-        # else:  TODO seems this is unsafe in rare circumstances where non-event loop threads are logging
-        #    logging.getLogger().addHandler(msglog.HandlerPublisher(self._context))
         self._context.register(self._pidfile)
         igd.initialise(self._context, self)
         self._sysstoresvc.initialise()

@@ -3,7 +3,7 @@ import time
 import typing
 import aiofiles
 # ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
-from core.util import util, dtutil, io, funcutil, logutil
+from core.util import util, dtutil, io, funcutil
 from core.msg import msgabc, msgftr, msgtrf
 
 CRITICAL = 'MessageLogging.CRITICAL'
@@ -48,23 +48,6 @@ class LoggingPublisher:
 
     def fatal(self, msg, *args, **kwargs):
         self.critical(msg, *args, **kwargs)
-
-
-class HandlerPublisher(logging.Handler):
-    LOG = 'HandlerPublisher.Log'
-    LOG_FILTER = msgftr.NameIs(LOG)
-
-    @staticmethod
-    def log(mailer: msgabc.Mailer, source: typing.Any, message: str):
-        mailer.post(source, HandlerPublisher.LOG, message)
-
-    def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(logutil.get_level())
-        self.setFormatter(logutil.get_formatter())
-        self._mailer = mailer
-
-    def emit(self, record: logging.LogRecord):
-        HandlerPublisher.log(self._mailer, self, self.format(record))
 
 
 class LogfileSubscriber(msgabc.AbcSubscriber):

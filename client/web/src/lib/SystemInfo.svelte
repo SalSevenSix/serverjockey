@@ -25,7 +25,6 @@
           if (looping) { info = json; }
         })
         .catch(function(error) {
-          looping = false;
           notifyError('Failed to load System Info.');
         });
       if (looping) { await sleep(32000); }

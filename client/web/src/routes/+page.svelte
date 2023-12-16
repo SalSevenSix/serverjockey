@@ -6,7 +6,7 @@
   import InstanceActivity from '$lib/InstanceActivity.svelte';
   import PlayerActivity from '$lib/PlayerActivity.svelte';
   import StoreActions from '$lib/StoreActions.svelte';
-  // import SystemLog from '$lib/SystemLog.svelte';
+  import SystemControls from '$lib/SystemControls.svelte';
 </script>
 
 
@@ -23,4 +23,4 @@
     <StoreActions />
   </Collapsible>
 </CheckStore>
-<!-- SystemLog / -->
+<SystemControls />
