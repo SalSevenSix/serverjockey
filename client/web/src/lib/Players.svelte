@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { humanDuration } from '$lib/util';
+  import { humanDuration, chunkArray } from '$lib/util';
   import { notifyError } from '$lib/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
@@ -12,9 +12,10 @@
 
   let players = [];
   let loading = true;
+  let columns = hasSteamId ? 2 : 3;
   let columnCount = 2 + (hasSteamId ? 1 : 0);
 
-  let uptimeClock = setInterval(function() {
+  const uptimeClock = setInterval(function() {
     let currentPlayers = players;
     let updatedPlayers = [];
     currentPlayers.forEach(function(player) {
@@ -71,35 +72,54 @@
 </script>
 
 
-<div class="block">
-  <table class="table">
-    <thead>
-      <tr>
+{#if players.length === 0}
+  <div class="block">
+    <table class="table">
+      <thead><tr>
         {#if hasSteamId}<th>Steam ID</th>{/if}
-        <th>Player</th>
-        <th>Online</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#if players.length === 0}
-        <tr><td colspan={columnCount}>
+        <th>Player</th><th>Online</th>
+      </tr></thead>
+      <tbody><tr>
+        <td colspan={columnCount}>
           {#if loading}
             <SpinnerIcon /> Loading...
           {:else}
             <i class="fa fa-diamond fa-lg mr-1"></i> Zero players online
           {/if}
-        </td></tr>
-      {:else}
-        {#each players as player}
-          <tr>
-            {#if hasSteamId}
-              <td>{player.steamid ? player.steamid : 'CONNECTED'}</td>
+        </td>
+      </tr></tbody>
+    </table>
+  </div>
+{:else}
+  <div class="columns">
+    {#each chunkArray(players, 20, columns) as playerColumn, index}
+      <div class="column is-one-third">
+        {#if playerColumn.length > 0}
+          <table class="table">
+            {#if index === 0}
+              <thead><tr>
+                {#if hasSteamId}<th>Steam ID</th>{/if}
+                <th>Player</th><th>Online</th>
+              </tr></thead>
             {/if}
-            <td>{player.name}</td>
-            <td>{player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
-          </tr>
-        {/each}
-      {/if}
-    </tbody>
-  </table>
-</div>
+            <tbody>
+              {#if index > 0}
+                <tr><td colspan={columnCount}>&nbsp;</td></tr>
+              {/if}
+              {#each playerColumn as player}
+                <tr>
+                  {#if hasSteamId}
+                    <td>{player.steamid ? player.steamid : 'CONNECTED'}</td>
+                  {/if}
+                  <td class="word-break-all">{player.name}</td>
+                  <td class="white-space-nowrap">
+                    {player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        {/if}
+      </div>
+    {/each}
+  </div>
+{/if}

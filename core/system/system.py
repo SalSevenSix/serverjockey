@@ -77,7 +77,7 @@ class SystemService:
             shutdowns.append(svrsvc.ServerService.shutdown(subcontext, self))
             destroys.append(self._context.destroy_subcontext(subcontext))
         await asyncio.gather(*shutdowns)
-        await asyncio.sleep(1.0)  # TODO need to find a real solution
+        await asyncio.sleep(0.1)  # TODO need to find a real solution sometime
         await asyncio.gather(*destroys)
 
     def instances_info(self, baseurl: str) -> dict:
@@ -262,7 +262,7 @@ class _PidFileSubscriber(msgabc.AbcSubscriber):
         if not self._last:
             await funcutil.silently_call(io.write_file(self._pidfile, self._pid))
             self._last = now
-        elif now - self._last > 600.0:  # 10 minutes
+        elif now - self._last > 300.0:  # 5 minutes
             await funcutil.silently_call(io.touch_file(self._pidfile))
             self._last = now
         return None

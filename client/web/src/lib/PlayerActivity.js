@@ -186,31 +186,6 @@ export function compactPlayers(players, limit=10) {
   return result;
 }
 
-export function chunkPlayers(players) {
-  let [rows, columns, current] = [[], [], []];
-  compactPlayers(players, 48).forEach(function(player) {
-    current.push(player);
-    if (current.length == 8) {
-      columns.push(current);
-      current = [];
-      if (columns.length == 3) {
-        rows.push(columns);
-        columns = [];
-      }
-    }
-  });
-  if (current.length > 0) {
-    columns.push(current);
-  }
-  if (columns.length > 0) {
-    while (columns.length < 3) {
-      columns.push([]);
-    }
-    rows.push(columns);
-  }
-  return rows;
-}
-
 async function queryFetch(url, errorMessage) {
   return await fetch(url, newGetRequest())
     .then(function(response) {

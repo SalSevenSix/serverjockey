@@ -54,6 +54,17 @@ export function shortISODateTimeString(millis, utc=false) {
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
 }
 
+export function chunkArray(arr, rows=20, columns=3) {
+  if (arr.length > rows * columns) {
+    rows = Math.ceil(arr.length / columns);
+  }
+  const result = [];
+  for (let i = 0; i < columns; i++) {
+    result.push(arr.slice(i * rows, i * rows + rows));
+  }
+  return result;
+}
+
 export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;

@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { queryEvents, queryLastEvent, extractActivity, compactPlayers, chunkPlayers } from '$lib/PlayerActivity';
-  import { floatToPercent, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util';
+  import { queryEvents, queryLastEvent, extractActivity, compactPlayers } from '$lib/PlayerActivity';
+  import { floatToPercent, chunkArray, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
@@ -116,21 +116,21 @@
         <div class="block chart-container-days mb-3">
           <div><ChartCanvas data={chartDataDays(activity.results[instance])} /></div>
         </div>
-        {#each chunkPlayers(activity.results[instance].players) as entryRows}
-          <div class="columns">
-            {#each entryRows as entryColumns}
-              <div class="column is-one-third mt-0 mb-0 pt-0 pb-0"><table class="table is-narrow is-thinner"><tbody>
+        <div class="columns">
+          {#each chunkArray(compactPlayers(activity.results[instance].players, 48), 16) as entryColumn}
+            <div class="column is-one-third mt-0 mb-0 pt-0 pb-0">
+              <table class="table is-narrow is-thinner"><tbody>
                 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-                {#each entryColumns as entry}
+                {#each entryColumn as entry}
                   <tr title="{entry.sessions} sessions">
                     <td class="word-break-all">{entry.player}</td>
                     <td class="online-column">{humanDuration(entry.uptime, 2)}</td>
                   </tr>
                 {/each}
-              </tbody><table></div>
-            {/each}
-          </div>
-        {/each}
+              </tbody></table>
+            </div>
+          {/each}
+        </div>
         <div class="block pb-2"></div>
       {/each}
     {:else}
