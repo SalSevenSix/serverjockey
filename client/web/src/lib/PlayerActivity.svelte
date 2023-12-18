@@ -113,18 +113,18 @@
             <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
           </div>
         </div>
-        <div class="block chart-container-days mb-3">
+        <div class="block chart-container-days">
           <div><ChartCanvas data={chartDataDays(activity.results[instance])} /></div>
         </div>
-        <div class="columns">
-          {#each chunkArray(compactPlayers(activity.results[instance].players, 48), 16) as entryColumn}
+        <div class="columns mt-1">
+          {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn}
             <div class="column is-one-third mt-0 mb-0 pt-0 pb-0">
-              <table class="table is-narrow is-thinner"><tbody>
-                <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+              <table class="table is-narrow"><tbody>
+                <tr><td></td><td></td></tr>
                 {#each entryColumn as entry}
                   <tr title="{entry.sessions} sessions">
                     <td class="word-break-all">{entry.player}</td>
-                    <td class="online-column">{humanDuration(entry.uptime, 2)}</td>
+                    <td class="white-space-nowrap tiny-width">{humanDuration(entry.uptime, 2)}</td>
                   </tr>
                 {/each}
               </tbody></table>
@@ -167,8 +167,7 @@
     margin: 0px auto 8px auto;
   }
 
-  .online-column {
-    white-space: nowrap;
-    width: 10%;
+  .tiny-width {
+    min-width: 10%;
   }
 </style>

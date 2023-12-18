@@ -22,6 +22,7 @@ READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILT
 
 def _default_config():
     return {
+        'players': 'MrGoober,StabMasterArson,YouMadNow',
         'start_speed_modifier': 1,
         'crash_on_start_seconds': 0.0,
         'ingametime_interval_seconds': 80.0
@@ -82,7 +83,6 @@ class Server(svrabc.Server):
         r.psh('logs', httpext.FileSystemHandler(self._log_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._log_dir, 'path'), 'r')
         r.pop()
-        # r.psh('players', _PlayersHandler(self._context))
         r.psh('players', playerstore.PlayersHandler(self._context))
         r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
         r.pop()

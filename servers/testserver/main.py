@@ -40,9 +40,10 @@ class CrashAfterDelay:
 def parse_config() -> dict:
     p('Launch args...')
     config = {
-        'start_speed_modifier': int(sys.argv[1]),
-        'crash_on_start_seconds': float(sys.argv[2]),
-        'ingametime_interval_seconds': float(sys.argv[3])
+        'players': sys.argv[1],
+        'start_speed_modifier': int(sys.argv[2]),
+        'crash_on_start_seconds': float(sys.argv[3]),
+        'ingametime_interval_seconds': float(sys.argv[4])
     }
     p(json.dumps(config))
     return config
@@ -60,7 +61,7 @@ def main() -> int:
     p('server is listening on port: 27001')
     p('Server Steam ID 90138653263221765')
     p('### *** SERVER STARTED ***')
-    players = ['MrGoober', 'StabMasterArson', 'YouMadNow']
+    players = config['players'].split(',')
     for player in players:
         time.sleep(0.2 * start_speed_modifier)
         p('### Player {} has joined the server'.format(player))
@@ -99,13 +100,13 @@ def main() -> int:
         elif line == 'quit':
             p('### shutting down')
             p('### messaging players')
-            time.sleep(1)
+            time.sleep(0.3)
             if len(players) > 0:
                 p('### Player {} has left the server'.format(players.pop()))
             time.sleep(0.5)
             if len(players) > 0:
                 p('### Player {} has left the server'.format(players.pop()))
-            time.sleep(0.5)
+            time.sleep(0.2)
             p('### goodbye')
             return 0
         elif line == 'crash':

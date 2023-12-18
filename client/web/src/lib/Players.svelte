@@ -10,10 +10,11 @@
 
   export let hasSteamId = false;
 
-  let players = [];
   let loading = true;
-  let columns = hasSteamId ? 2 : 3;
   let columnCount = 2 + (hasSteamId ? 1 : 0);
+  let players = [];
+
+  $: chunks = chunkArray(players, 15, hasSteamId ? 2 : 3);
 
   const uptimeClock = setInterval(function() {
     let currentPlayers = players;
@@ -91,35 +92,44 @@
     </table>
   </div>
 {:else}
-  <div class="columns">
-    {#each chunkArray(players, 20, columns) as playerColumn, index}
-      <div class="column is-one-third">
-        {#if playerColumn.length > 0}
-          <table class="table">
-            {#if index === 0}
-              <thead><tr>
-                {#if hasSteamId}<th>Steam ID</th>{/if}
-                <th>Player</th><th>Online</th>
-              </tr></thead>
+  <div class="columns mt-1">
+    {#each chunks as column, index}
+      <div class="column {chunks.length > 2 ? 'is-one-third' : 'is-one-half'} mt-0 mb-0 pt-0 pb-0">
+        <table class="table">
+          {#if index === 0}
+            <thead><tr class="table-header">
+              {#if hasSteamId}<th>Steam ID</th>{/if}
+              <th>Player</th><th>Online</th>
+            </tr></thead>
+          {/if}
+          <tbody>
+            {#if index > 0}
+              <tr class="table-header"><td colspan={columnCount}></td></tr>
             {/if}
-            <tbody>
-              {#if index > 0}
-                <tr><td colspan={columnCount}>&nbsp;</td></tr>
-              {/if}
-              {#each playerColumn as player}
-                <tr>
-                  {#if hasSteamId}
-                    <td>{player.steamid ? player.steamid : 'CONNECTED'}</td>
-                  {/if}
-                  <td class="word-break-all">{player.name}</td>
-                  <td class="white-space-nowrap">
-                    {player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        {/if}
+            {#each column as player}
+              <tr>
+                {#if hasSteamId}
+                  <td class="white-space-nowrap tiny-width">{player.steamid ? player.steamid : 'CONNECTED'}</td>
+                {/if}
+                <td class="word-break-all">{player.name}</td>
+                <td class="white-space-nowrap tiny-width">
+                  {player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
       </div>
     {/each}
   </div>
 {/if}
+
+
+<style>
+  .table-header {
+    height: 34px;
+  }
+
+  .tiny-width {
+    min-width: 10%;
+  }
+</style>
