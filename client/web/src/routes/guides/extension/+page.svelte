@@ -15,7 +15,7 @@
       ServerJockey has a browser extension for
       <a href="https://www.google.com/chrome" target="_blank">Chrome <i class="fa fa-up-right-from-square"></i></a>
       that can be used to manage mods for Project Zomboid servers.
-      Ths guide will show you how to install and use this extension.
+      This guide will show you how to install and use this extension.
     </p>
   </div>
 </div>
@@ -24,10 +24,14 @@
   <hr />
   <p><span class="step-title"></span>
     First step is to
-    <a href="https://chromewebstore.google.com/" target="_blank">download and install the extension
-      <i class="fa fa-up-right-from-square"></i></a> from the web store using the Chrome browser.
+    <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
+      download and install the extension <i class="fa fa-up-right-from-square"></i></a> from the web store using
+    the Chrome browser. First click the <span class="has-text-weight-bold">Add to Chrome</span> button on the page
+    then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
   </p>
-  <!-- todo Chrome web store screenshot -->
+  <figure class="image max-844">
+    <img src="/assets/guides/extension/extension_page.jpg" alt="Extension page" />
+  </figure>
 </div>
 
 <div class="content">
