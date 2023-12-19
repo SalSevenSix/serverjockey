@@ -117,16 +117,30 @@ class DataEquals(msgabc.Filter):
         return self._data == message.data()
 
 
+class DataStrStartsWith(msgabc.Filter):
+
+    def __init__(self, value: str, invert: bool = False):
+        self._value, self._invert = value, invert
+
+    def accepts(self, message):
+        data = message.data()
+        if not isinstance(data, str):
+            return False
+        return self._value.startswith(data) if self._invert else data.startswith(self._value)
+
+
 class DataStrContains(msgabc.Filter):
 
-    def __init__(self, value, ignore_case: bool = False):
-        self._value = str(value)
+    def __init__(self, value: str, ignore_case: bool = False):
+        self._value = value.lower() if ignore_case else value
         self._ignore_case = ignore_case
 
     def accepts(self, message):
-        data = str(message.data())
+        data = message.data()
+        if not isinstance(data, str):
+            return False
         if self._ignore_case:
-            return data.lower().find(self._value.lower()) != -1
+            data = data.lower()
         return data.find(self._value) != -1
 
 

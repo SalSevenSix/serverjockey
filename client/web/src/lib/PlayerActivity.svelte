@@ -123,8 +123,8 @@
                 <tr><td></td><td></td></tr>
                 {#each entryColumn as entry}
                   <tr title="{entry.sessions} sessions">
-                    <td class="word-break-all">{entry.player}</td>
-                    <td class="white-space-nowrap tiny-width">{humanDuration(entry.uptime, 2)}</td>
+                    <td class="word-break-all player-column">{entry.player}</td>
+                    <td class="white-space-nowrap online-column">{humanDuration(entry.uptime, 2)}</td>
                   </tr>
                 {/each}
               </tbody></table>
@@ -167,7 +167,11 @@
     margin: 0px auto 8px auto;
   }
 
-  .tiny-width {
-    min-width: 10%;
+  .player-column {
+    min-width: 130px;
+  }
+
+  .online-column {
+    min-width: 90px;
   }
 </style>

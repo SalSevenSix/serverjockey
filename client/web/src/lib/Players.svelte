@@ -109,10 +109,10 @@
             {#each column as player}
               <tr>
                 {#if hasSteamId}
-                  <td class="white-space-nowrap tiny-width">{player.steamid ? player.steamid : 'CONNECTED'}</td>
+                  <td class="white-space-nowrap">{player.steamid ? player.steamid : 'CONNECTED'}</td>
                 {/if}
-                <td class="word-break-all">{player.name}</td>
-                <td class="white-space-nowrap tiny-width">
+                <td class="word-break-all player-column">{player.name}</td>
+                <td class="white-space-nowrap online-column">
                   {player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
               </tr>
             {/each}
@@ -129,7 +129,11 @@
     height: 34px;
   }
 
-  .tiny-width {
-    min-width: 10%;
+  .player-column {
+    min-width: 137px;
+  }
+
+  .online-column {
+    min-width: 87px;
   }
 </style>

@@ -86,8 +86,8 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Mods in the <span class="has-text-weight-bold">Selected Mods</span>
-    can be re-ordered using the chevron buttons, and be removed with the cross button.
+    Mods in the <span class="has-text-weight-bold">Selected Mods</span> list
+    can be re-ordered using the chevron buttons, or be removed with the cross button.
     Remember to click the <span class="has-text-weight-bold">Save</span>
     button to save the changes to the INI file of the selected instance.
     Note that the server will need to be restarted for these changes to take effect.

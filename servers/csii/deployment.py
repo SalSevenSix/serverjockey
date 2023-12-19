@@ -67,9 +67,10 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+        roll_filter = msgftr.Or(svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
+            httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._logs_dir, invert=True)))
         self._mailer.register(msglog.LogfileSubscriber(
-            self._logs_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER,
-            svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
+            self._logs_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER, roll_filter, msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)

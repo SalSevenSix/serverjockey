@@ -62,28 +62,26 @@ class HttpService:
     async def _handle(self, request: webabc.Request) -> web.Response:
         if self._resources is None:
             raise err.HTTPServiceUnavailable
-        handler = _RequestHandler(self._context, self._security, self._statics, self._resources, request)
+        method = httpabc.Method.resolve(request.method)
+        resource = self._resources.lookup(request.path)
+        if resource is None:
+            if method is httpabc.Method.GET:
+                return await self._statics.handle(request)
+            raise err.HTTPNotFound
+        handler = _RequestHandler(self._context, self._security, method, request, resource)
         return await handler.handle()
 
 
 class _RequestHandler:
 
-    def __init__(self, context: contextsvc.Context, security: httpcnt.SecurityService, statics: httpstatics.Statics,
-                 resources: httpabc.Resource, request: webabc.Request):
-        self._context = context
-        self._security = security
-        self._statics = statics
-        self._request = request
-        self._method = httpabc.Method.resolve(request.method)
-        self._resource = resources.lookup(request.path)
+    def __init__(self, context: contextsvc.Context, security: httpcnt.SecurityService,
+                 method: httpabc.Method, request: webabc.Request, resource: httpabc.Resource):
+        self._context, self._security = context, security
+        self._method, self._request = method, request
+        self._headers = httpcnt.HeadersTool(request)
+        self._resource = resource
 
     async def handle(self) -> web.Response:
-        # Static response
-        if self._resource is None:
-            if self._method is httpabc.Method.GET:
-                return await self._statics.handle(self._request)
-            raise err.HTTPNotFound
-
         # Check method allowed
         if self._method is not httpabc.Method.OPTIONS and not self._resource.allows(self._method):
             raise self._build_error_method_not_allowed()
@@ -103,16 +101,15 @@ class _RequestHandler:
         # POST
         if not secure:
             raise err.HTTPUnauthorized
-        headers = httpcnt.HeadersTool(self._request)
         request_body, content_type = b'{}', httpcnt.CONTENT_TYPE_APPLICATION_JSON
         if self._request.can_read_body:
-            content_type = headers.get_content_type()
+            content_type = self._headers.get_content_type()
             if content_type is None or content_type.mime_type() not in _ACCEPTED_MIME_TYPES:
                 raise err.HTTPUnsupportedMediaType
             if content_type.mime_type() == httpcnt.MIME_MULTIPART_FORM_DATA:
                 request_body = _MultipartFormByteStream(self._request.content, self._request.headers)
             elif content_type.mime_type() == httpcnt.MIME_APPLICATION_BIN:
-                request_body = _RequestByteStream(self._request.content, headers.get_content_length())
+                request_body = _RequestByteStream(self._request.content, self._headers.get_content_length())
             else:
                 request_body = await self._request.content.read()
         if content_type.mime_type() in _TEXT_MIME_TYPES:
@@ -128,10 +125,9 @@ class _RequestHandler:
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:
             raise body
-        headers = httpcnt.HeadersTool(self._request)
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_CACHE)
-        self._add_allow_origin(response, headers)
+        self._add_allow_origin(response)
         if body == self._context.config('secret'):
             response.set_cookie('secret', body, max_age=86400, httponly=True, samesite='Lax')
             body = httpabc.ResponseBody.NO_CONTENT
@@ -148,7 +144,7 @@ class _RequestHandler:
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = objconv.obj_to_json(body)
             body = body.encode(httpcnt.UTF8)
-        if isinstance(body, bytes) and len(body) > 512 and headers.accepts_encoding(httpcnt.GZIP):
+        if isinstance(body, bytes) and len(body) > 512 and self._headers.accepts_encoding(httpcnt.GZIP):
             body = await pack.gzip_compress(body)
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
         if isinstance(body, httpabc.ByteStream):
@@ -182,17 +178,17 @@ class _RequestHandler:
         response = web.Response()
         response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
         response.headers.add(httpcnt.ALLOW, methods)
-        self._add_allow_origin(response, httpcnt.HeadersTool(self._request))
+        self._add_allow_origin(response)
         response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_METHODS, methods)
         response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS, httpcnt.CONTENT_TYPE + ',' + httpcnt.X_SECRET)
         response.headers.add(httpcnt.ACCESS_CONTROL_MAX_AGE, '600')  # 10 minutes
         return response
 
-    def _add_allow_origin(self, response, headers):
+    def _add_allow_origin(self, response):
         if self._context.is_debug():
             response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, httpcnt.ORIGIN_ALL)
             return
-        origin = headers.get(httpcnt.ORIGIN)
+        origin = self._headers.get(httpcnt.ORIGIN)
         if not origin:
             return
         if origin == httpcnt.ORIGIN_WEBDEV or origin.startswith(httpcnt.ORIGIN_EXT_PREFIX):
