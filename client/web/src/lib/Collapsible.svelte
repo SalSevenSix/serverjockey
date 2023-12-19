@@ -1,4 +1,7 @@
 <script>
+  import { slide } from 'svelte/transition';
+  import { circInOut } from 'svelte/easing';
+
   export let open = false;
   export let icon = null;
   export let title;
@@ -26,8 +29,11 @@
     </div>
   </div>
 </div>
+
 {#if visible}
-  <slot />
+  <div transition:slide={{ duration: 150, easing: circInOut }}>
+    <slot />
+  </div>
 {/if}
 
 

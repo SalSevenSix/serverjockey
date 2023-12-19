@@ -124,7 +124,10 @@ class _RequestHandler:
 
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:
-            raise body
+            # noinspection PyCallingNonCallable
+            response = body()
+            self._add_allow_origin(response)
+            raise response
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_CACHE)
         self._add_allow_origin(response)
