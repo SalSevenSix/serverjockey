@@ -45,7 +45,7 @@ class Deployment:
         self._mailer = context
         self._user_home_dir = context.env('HOME')
         self._python, self._wrapper = context.config('python'), None
-        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
+        self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
@@ -64,9 +64,9 @@ class Deployment:
             self.build_world))
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         roll_filter = msgftr.Or(svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
             httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._logs_dir, invert=True)))
         self._mailer.register(msglog.LogfileSubscriber(
@@ -94,7 +94,7 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
+            self._backups_dir, 'path', tempdir=self._tempdir,
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
         r.pop()

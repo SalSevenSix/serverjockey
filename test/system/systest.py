@@ -21,10 +21,10 @@ class TestContext:
             shutil.rmtree(home)
         template = util.right_chop_and_strip(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
         shutil.copytree(template, home)
-        tmpdir = home + '/.tmp'
-        os.makedirs(tmpdir)
+        tempdir = home + '/.tmp'
+        os.makedirs(tempdir)
         self._context = contextsvc.Context(
-            debug=True, trace=False, home=home, tmpdir=tmpdir,
+            debug=True, trace=False, home=home, tempdir=tempdir,
             stime=None, secret='token', showtoken=False,
             scheme=_SCHEME, sslcert=None, sslkey=None,
             env=os.environ.copy(), python=sys.executable,

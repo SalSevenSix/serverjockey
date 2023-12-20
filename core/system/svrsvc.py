@@ -41,11 +41,9 @@ class ServerService(msgabc.AbcSubscriber):
         super().__init__(msgftr.NameIn((
             ServerService.START, ServerService.RESTART, ServerService.STOP,
             ServerService.DELETE, ServerService.SHUTDOWN)))
-        self._context = context
-        self._server = server
+        self._context, self._server = context, server
         self._queue = asyncio.Queue(maxsize=1)
-        self._running = False
-        self._task = None
+        self._running, self._task = False, None
         context.register(ServerStatus(context))
         context.register(self)
 
@@ -76,8 +74,7 @@ class ServerService(msgabc.AbcSubscriber):
                 try:
                     await self._server.run()
                 except Exception as e:
-                    ServerStatus.notify_state(self._context, self, 'EXCEPTION')
-                    ServerStatus.notify_details(self._context, self, {'error': repr(e)})
+                    ServerStatus.notify_status(self._context, self, 'EXCEPTION', {'error': str(e)})
                     logging.warning('EXCEPTION instance ' + identity + ' [' + repr(e) + ']')
                 finally:
                     self._running = False
@@ -165,8 +162,7 @@ class ServerStatus(msgabc.AbcSubscriber):
     UPDATED_FILTER = msgftr.NameIs(UPDATED)
     REQUEST, RESPONSE = 'ServerStatus.Request', 'ServerStatus.Response'
     NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'
-    NOTIFY_STATE = 'ServerStatus.NotifyState'
-    NOTIFY_DETAILS = 'ServerStatus.NotifyDetails'
+    NOTIFY_STATUS = 'ServerStatus.NotifyStatus'
     RUNNING_FALSE_FILTER = msgftr.And(msgftr.NameIs(NOTIFY_RUNNING), msgftr.DataEquals(False))
 
     @staticmethod
@@ -180,16 +176,27 @@ class ServerStatus(msgabc.AbcSubscriber):
         mailer.post(source, ServerStatus.NOTIFY_RUNNING, running)
 
     @staticmethod
-    def notify_state(mailer: msgabc.Mailer, source: typing.Any, state: str):
-        mailer.post(source, ServerStatus.NOTIFY_STATE, state)
+    def notify_status(
+            mailer: msgabc.Mailer, source: typing.Any,
+            state: str | None, details: typing.Optional[typing.Dict[str, typing.Any]]):
+        status = {}
+        if state:
+            status['state'] = state
+        if details:
+            status['details'] = details
+        mailer.post(source, ServerStatus.NOTIFY_STATUS, status)
 
     @staticmethod
-    def notify_details(mailer: msgabc.Mailer, source: typing.Any, data: typing.Dict[str, typing.Any]):
-        mailer.post(source, ServerStatus.NOTIFY_DETAILS, data)
+    def notify_state(mailer: msgabc.Mailer, source: typing.Any, state: str):
+        ServerStatus.notify_status(mailer, source, state, None)
+
+    @staticmethod
+    def notify_details(mailer: msgabc.Mailer, source: typing.Any, details: typing.Dict[str, typing.Any]):
+        ServerStatus.notify_status(mailer, source, None, details)
 
     def __init__(self, context: contextsvc.Context):
-        super().__init__(msgftr.NameIn((ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING,
-                                        ServerStatus.NOTIFY_STATE, ServerStatus.NOTIFY_DETAILS)))
+        super().__init__(msgftr.NameIn((
+            ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING, ServerStatus.NOTIFY_STATUS)))
         self._context = context
         self._status = _Status(context)
 
@@ -201,10 +208,8 @@ class ServerStatus(msgabc.AbcSubscriber):
         data, updated = message.data(), False
         if action is ServerStatus.NOTIFY_RUNNING:
             updated = self._status.nofify_running(data)
-        elif action is ServerStatus.NOTIFY_STATE:
-            updated = self._status.nofify_state(data)
-        elif action is ServerStatus.NOTIFY_DETAILS:
-            updated = self._status.nofify_details(data)
+        elif action is ServerStatus.NOTIFY_STATUS:
+            updated = self._status.nofify_status(data)
         if updated:
             self._context.post(self, ServerStatus.UPDATED, self._status.asdict())
         return None
@@ -229,16 +234,24 @@ class _Status:
             self._startmillis = 0
         return True
 
-    def nofify_state(self, state) -> bool:
-        if self._state == state:
+    def nofify_status(self, status) -> bool:
+        if not isinstance(status, dict):
+            return False
+        state, details = util.get('state', status), util.get('details', status)
+        state_updated = self._nofify_state(state)
+        details_updated = self._nofify_details(details)
+        return state_updated or details_updated
+
+    def _nofify_state(self, state) -> bool:
+        if state is None or state == self._state:
             return False
         self._state = state
         if state == _Status.READY:
             self._details = {}
         return True
 
-    def nofify_details(self, details) -> bool:
-        if not isinstance(details, dict):
+    def _nofify_details(self, details) -> bool:
+        if details is None or not isinstance(details, dict):
             return False
         self._details.update(details)
         return True

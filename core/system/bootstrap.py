@@ -48,7 +48,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Port for http service, default is 6164')
     p.add_argument('--home', type=str, default='.',
                    help='Home directory to use for server instances, default is current working directory')
-    p.add_argument('--tmpdir', type=str, default='.tmp',
+    p.add_argument('--tempdir', type=str, default='.tmp',
                    help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
@@ -63,13 +63,13 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
         print(sysutil.system_version())
         return None
     home = util.full_path(os.getcwd(), config.home)
-    tmpdir = util.full_path(home, config.tmpdir)
+    tempdir = util.full_path(home, config.tempdir)
     clientfile = util.full_path(home, config.clientfile)
     dbfile = util.full_path(home, config.dbfile)
     logfile = util.full_path(home, config.logfile)
     scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
-        debug=config.debug, trace=config.trace, home=home, tmpdir=tmpdir,
+        debug=config.debug, trace=config.trace, home=home, tempdir=tempdir,
         stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=config.showtoken,
         scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(), python=sys.executable,
         clientfile=clientfile, dbfile=dbfile, logfile=logfile, noupnp=config.noupnp,
@@ -111,7 +111,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
             print('TOKEN : ' + self._context.config('secret'))
         if self._context.is_trace():
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
-        await io.create_directories(self._context.config('tmpdir'))
+        await io.create_directories(self._context.config('tempdir'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
         await steamutil.check_steam(self._context.env('HOME'))

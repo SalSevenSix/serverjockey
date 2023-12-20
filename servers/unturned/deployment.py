@@ -24,7 +24,7 @@ class Deployment:
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
         self._python, self._wrapper = context.config('python'), None
-        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
+        self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._runtime_metafile = self._runtime_dir + '/steamapps/appmanifest_1110390.acf'
@@ -51,9 +51,9 @@ class Deployment:
             self.build_world))
         self._mailer.register(jobh.JobProcess(self._mailer))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
 
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)
@@ -80,7 +80,7 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
+            self._backups_dir, 'path', tempdir=self._tempdir,
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 

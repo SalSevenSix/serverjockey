@@ -6,7 +6,8 @@ from core.proc import proch, jobh, prcext
 from core.common import rconsvc, playerstore
 
 _SPAM_ERRORS = (
-    'src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(3579): Assertion Failed: usecElapsed >= 0',
+    'src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(3579): '
+    + 'Assertion Failed: usecElapsed >= 0',
     'sv: Lag comp - full interp info doesn\'t match target time, using target time instead.'
 )
 

@@ -171,10 +171,10 @@ class Archiver(msgabc.AbcSubscriber):
     START, COMPLETE, EXCEPTION = 'Archiver.Start', 'Archiver.Complete', 'Archiver.Exception'
     FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn((COMPLETE, EXCEPTION))
 
-    def __init__(self, mailer: msgabc.Mailer, tmp_dir: str = '/tmp'):
+    def __init__(self, mailer: msgabc.Mailer, tempdir: str = '/tmp'):
         super().__init__(msgftr.NameIs(Archiver.REQUEST))
         self._mailer = mailer
-        self._tmp_dir = tmp_dir
+        self._tempdir = tempdir
 
     async def handle(self, message):
         source, data = message.source(), message.data()
@@ -195,7 +195,7 @@ class Archiver(msgabc.AbcSubscriber):
             raise Exception('No backups_dir')
         prune_hours = int(util.get('prunehours', data, 0))
         logger = msglog.LoggingPublisher(self._mailer, source)
-        return await pack.archive_directory(source_dir, backups_dir, prune_hours, self._tmp_dir, logger)
+        return await pack.archive_directory(source_dir, backups_dir, prune_hours, self._tempdir, logger)
 
 
 class Unpacker(msgabc.AbcSubscriber):
@@ -203,10 +203,10 @@ class Unpacker(msgabc.AbcSubscriber):
     START, COMPLETE, EXCEPTION = 'Unpacker.Start', 'Unpacker.Complete', 'Unpacker.Exception'
     FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn((COMPLETE, EXCEPTION))
 
-    def __init__(self, mailer: msgabc.Mailer, tmp_dir: str = '/tmp'):
+    def __init__(self, mailer: msgabc.Mailer, tempdir: str = '/tmp'):
         super().__init__(msgftr.NameIs(Unpacker.REQUEST))
         self._mailer = mailer
-        self._tmp_dir = tmp_dir
+        self._tempdir = tempdir
 
     async def handle(self, message):
         source, data = message.source(), message.data()
@@ -232,7 +232,7 @@ class Unpacker(msgabc.AbcSubscriber):
         unpack_dir = root_dir if util.get('to_root', data) else root_dir + '/' + filename.split('/')[-1].split('-')[0]
         wipe = util.get('wipe', data, True)
         logger = msglog.LoggingPublisher(self._mailer, source)
-        await pack.unpack_directory(archive, unpack_dir, wipe, self._tmp_dir, logger)
+        await pack.unpack_directory(archive, unpack_dir, wipe, self._tempdir, logger)
         return unpack_dir
 
 

@@ -128,11 +128,11 @@ class WipeHandler(httpabc.PostHandler):
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True,
-                 tmp_dir: str = '/tmp', ls_filter: typing.Callable = None,
+                 tempdir: str = '/tmp', ls_filter: typing.Callable = None,
                  read_tracker: io.BytesTracker = io.NullBytesTracker(),
                  write_tracker: io.BytesTracker = io.NullBytesTracker()):
         self._path, self._tail, self._protected = path, tail, protected
-        self._tmp_dir, self._ls_filter = tmp_dir, ls_filter
+        self._tempdir, self._ls_filter = tempdir, ls_filter
         self._read_tracker, self._write_tracker = read_tracker, write_tracker
 
     async def handle_get(self, resource, data):
@@ -169,7 +169,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
             await io.write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
         if isinstance(body, httpabc.ByteStream):
-            await io.stream_write_file(path, body, tmp_dir=self._tmp_dir, tracker=self._write_tracker)
+            await io.stream_write_file(path, body, tempdir=self._tempdir, tracker=self._write_tracker)
             return httpabc.ResponseBody.NO_CONTENT
         return httpabc.ResponseBody.BAD_REQUEST
 

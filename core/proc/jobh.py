@@ -104,7 +104,7 @@ class JobProcess(msgabc.AbcSubscriber):
 class _CommandHelper:
 
     def __init__(self, context: contextsvc.Context, message: msgabc.Message):
-        self._python, self._tmp_dir = context.config('python'), context.config('tmpdir')
+        self._python, self._tempdir = context.config('python'), context.config('tempdir')
         self._source, self._command = message.source(), message.data()
         self._work_dir, self._pty = None, False
         if isinstance(self._command, dict):
@@ -116,7 +116,7 @@ class _CommandHelper:
             raise Exception('Invalid job request')
         if not self._pty:
             return
-        self._work_dir = self._tmp_dir + '/' + idutil.generate_id()
+        self._work_dir = self._tempdir + '/' + idutil.generate_id()
         await io.create_directory(self._work_dir)
         command = [self._python, await wrapper.write_wrapper(self._work_dir)]
         if isinstance(self._command, str):

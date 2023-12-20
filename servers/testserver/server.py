@@ -38,7 +38,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._python = context.config('python')
-        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
+        self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._config_file = self._home_dir + '/config.json'
         self._backups_dir = self._home_dir + '/backups'
         self._log_dir = self._home_dir + '/logs'
@@ -60,9 +60,9 @@ class Server(svrabc.Server):
         self._context.register(_ServerDetailsSubscriber(self._context))
         self._context.register(_PlayerEventSubscriber(self._context))
         self._context.register(msgext.SyncWrapper(
-            self._context, msgext.Archiver(self._context, self._tmp_dir), msgext.SyncReply.AT_START))
+            self._context, msgext.Archiver(self._context, self._tempdir), msgext.SyncReply.AT_START))
         self._context.register(msgext.SyncWrapper(
-            self._context, msgext.Unpacker(self._context, self._tmp_dir), msgext.SyncReply.AT_START))
+            self._context, msgext.Unpacker(self._context, self._tempdir), msgext.SyncReply.AT_START))
         self._context.register(msglog.LogfileSubscriber(
             self._log_dir + '/%Y%m%d-%H%M%S.log', proch.ServerProcess.FILTER_STDOUT_LINE,
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
@@ -102,7 +102,7 @@ class Server(svrabc.Server):
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
+            self._backups_dir, 'path', tempdir=self._tempdir,
             read_tracker=msglog.IntervalTracker(self._context, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._context)), 'm')
         r.pop()

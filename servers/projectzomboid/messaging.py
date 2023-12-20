@@ -103,17 +103,15 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            steamid = str(message.data())
-            steamid = util.left_chop_and_strip(steamid, 'steam-id=')
+            steamid = util.left_chop_and_strip(message.data(), 'steam-id=')
             steamid = util.right_chop_and_strip(steamid, 'access=')
-            name = str(message.data())
-            name = util.left_chop_and_strip(name, 'username="')
+            steamid = util.right_chop_and_strip(steamid, '(owner=')
+            name = util.left_chop_and_strip(message.data(), 'username="')
             name = util.right_chop_and_strip(name, '" connection-type=')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
             return None
         if _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
-            line = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT)
-            parts = line.split(' ')
+            parts = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT).split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
             return None
@@ -192,7 +190,7 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
                     'servermsg "Mod updated. Server restart in 1 minute. Please find a safe place and logout."')
                 self._mailer.post(self, _RestartSubscriber.WAIT)
                 return None
-            await asyncio.sleep(1)
+            await asyncio.sleep(1.0)
             self._mailer.post(self, _RestartSubscriber.WAIT)
         return None
 

@@ -25,7 +25,7 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._home_dir, self._tmp_dir = context.config('home'), context.config('tmpdir')
+        self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._settings_def_file = self._runtime_dir + '/serverconfig.xml'
@@ -50,9 +50,9 @@ class Deployment:
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
             self.build_world))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tmp_dir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         roll_filter = msgftr.Or(svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
             httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._log_dir, invert=True)))
         self._mailer.register(msglog.LogfileSubscriber(
@@ -83,7 +83,7 @@ class Deployment:
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
         r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tmp_dir=self._tmp_dir,
+            self._backups_dir, 'path', tempdir=self._tempdir,
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
@@ -119,6 +119,7 @@ class Deployment:
         }
         xml = await io.read_file(self._settings_file)
         original = minidom.parseString(xml).firstChild
+        # noinspection PyUnresolvedReferences
         live = minidom.Element(original.tagName)
         doc = minidom.Document()
         doc.appendChild(live)
