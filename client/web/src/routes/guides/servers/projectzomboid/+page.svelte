@@ -29,6 +29,7 @@
     <li><a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a></li>
     <li><a href="#memoryAllocation" use:scrollto={'#memoryAllocation'}>Memory Allocation</a></li>
     <li><a href="#adminCharacter" use:scrollto={'#adminCharacter'}>Admin Character</a></li>
+    <li><a href="#modUpdateRestarts" use:scrollto={'#modUpdateRestarts'}>Restarts for Mod updates</a></li>
     <li><a href="#integrationMods" use:scrollto={'#integrationMods'}>Integration Mods</a></li>
     <li><a href="#cacheLockingMapFiles" use:scrollto={'#cacheLockingMapFiles'}>Cache Locking Map Files</a></li>
     <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
@@ -88,11 +89,24 @@ UPnP=false
   </p>
 </div>
 
+<div class="content pt-4" id="modUpdateRestarts">
+  <h4 class="title is-5">Restarts for Mod updates</h4>
+  <p>
+    ServerJockey will automatically restart a Project Zomboid server if any of the mods used have been updated
+    on the Steam Workshop. By default, the mods are checked every 15 minutes. This interval can be changed in
+    the <span class="has-text-weight-bold">Launch Options</span> configuration.
+    Use 0 minutes to disable automatic restarts.
+  </p>
+  <pre class="pre is-thinner"
+>&quot;_comment_mod_check_minutes&quot;: &quot;Check interval for updated mods in minutes. Use 0 to disable checks.&quot;,
+&quot;mod_check_minutes&quot;: 15</pre>
+</div>
+
 <div class="content pt-4" id="integrationMods">
   <h4 class="title is-5">Integration Mods</h4>
   <p>
     Project Zomboid mods are available to integrate with ServerJockey.
-    They provide additional features. Using these mods is optional.
+    They provide additional features. Using these mods are optional.
   </p>
   <table class="table is-thinner">
     <thead>
@@ -110,19 +124,11 @@ UPnP=false
         <td>PIT</td>
         <td>Adds the in-game date &amp; time to the server status in both the webapp and discord.</td>
       </tr>
-      <tr>
-        <td class="white-space-nowrap">
-          <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2820127528" target="_blank">
-            2820127528 <i class="fa fa-up-right-from-square"></i></a></td>
-        <td>ModzCheck</td>
-        <td>Enables automatic server restart when a Workshop mod has been updated.
-            Players are given restart warning at 5 minutes and 1 minute before restart.</td>
-      </tr>
     </tbody>
   </table>
 </div>
 
-<div class="content" id="cacheLockingMapFiles">
+<div class="content pt-4" id="cacheLockingMapFiles">
   <h4 class="title is-5">Cache Locking Map Files</h4>
   <p>
     ServerJockey has an experimental feature to boost performance on high player count servers.

@@ -5,12 +5,15 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
 from core.common import steam, interceptors, cachelock
+from servers.projectzomboid import modcheck as mck
 
 _WORLD = 'servertest'
 
 
 def _default_cmdargs():
     return {
+        '_comment_mod_check_minutes': 'Check interval for updated mods in minutes. Use 0 to disable checks.',
+        'mod_check_minutes': 15,
         '_comment_cache_map_files': 'Force map files to be cached in memory while server is running (EXPERIMENTAL)',
         'cache_map_files': False
     }
@@ -93,6 +96,7 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('cache_map_files', cmdargs, False):
             cachelock.set_path(self._mailer, self, self._save_dir)
+        mck.set_check_interval(self._mailer, self, util.get('mod_check_minutes', cmdargs, 0))
         return proch.ServerProcess(self._mailer, executable).append_arg('-cachedir=' + self._world_dir)
 
     async def build_world(self):

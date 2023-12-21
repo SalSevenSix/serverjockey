@@ -1,4 +1,3 @@
-import asyncio
 # ALLOW core.*
 from core.util import util, dtutil
 from core.msg import msgabc, msglog, msgftr, msgext
@@ -8,6 +7,11 @@ from core.proc import proch, jobh, prcext
 from core.common import cachelock, playerstore
 
 _CHAT_KEY_STRING = 'New message \'ChatMessage{chat=General'
+_MAINTENANCE_STATE_FILTER = msgftr.Or(
+    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_STATE_FILTER = msgftr.Or(
+    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('*** SERVER STARTED ***'))
@@ -24,23 +28,17 @@ CONSOLE_LOG_FILTER = msgftr.Or(
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
-MAINTENANCE_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 
 
 def initialise(context: contextsvc.Context):
     context.register(prcext.ServerStateSubscriber(context))
-    context.register(svrext.MaintenanceStateSubscriber(context, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
+    context.register(svrext.MaintenanceStateSubscriber(context, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
     context.register(playerstore.PlayersSubscriber(context))
     context.register(_ServerDetailsSubscriber(context))
     context.register(_PlayerEventSubscriber(context))
     context.register(_PlayerChatSubscriber(context))
-    context.register(_RestartSubscriber(context))
-    context.register(_ModUpdatedSubscriber(context))
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
@@ -134,64 +132,6 @@ class _PlayerChatSubscriber(msgabc.AbcSubscriber):
         text = util.left_chop_and_strip(message.data(), ', text=')
         text = util.right_chop_and_strip(text, '}\' was sent members of chat')
         playerstore.PlayersSubscriber.event_chat(self._mailer, self, name[1:-1], text[1:-1])
-        return None
-
-
-class _ModUpdatedSubscriber(msgabc.AbcSubscriber):
-
-    def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.And(
-            CONSOLE_OUTPUT_FILTER,
-            msgftr.DataStrContains('[ModzCheck] Mod update required')))
-        self._mailer = mailer
-
-    def handle(self, message):
-        self._mailer.post(self, SERVER_RESTART_REQUIRED)
-        return None
-
-
-class _RestartSubscriber(msgabc.AbcSubscriber):
-    WAIT = '_RestartSubscriber.Wait'
-    WAIT_FILTER = msgftr.NameIs(WAIT)
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.Or(
-            SERVER_RESTART_REQUIRED_FILTER,
-            _RestartSubscriber.WAIT_FILTER,
-            proch.ServerProcess.FILTER_STATES_DOWN,
-            msgftr.IsStop()))
-        self._mailer = mailer
-        self._initiated, self._second_message = 0, False
-
-    async def handle(self, message):
-        if message is msgabc.STOP:
-            self._initiated, self._second_message = 0, False
-            return True
-        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
-            self._initiated, self._second_message = 0, False
-            return None
-        if self._initiated == 0 and SERVER_RESTART_REQUIRED_FILTER.accepts(message):
-            self._initiated, self._second_message = dtutil.now_millis(), False
-            await proch.PipeInLineService.request(
-                self._mailer, self,
-                'servermsg "Mod updated. Server restart in 5 minutes. Please find a safe place and logout."')
-            self._mailer.post(self, _RestartSubscriber.WAIT)
-            return None
-        if self._initiated > 0 and _RestartSubscriber.WAIT_FILTER.accepts(message):
-            waited = dtutil.now_millis() - self._initiated
-            if waited > 300000:  # 5 minutes
-                self._initiated, self._second_message = 0, False
-                svrsvc.ServerService.signal_restart(self._mailer, self)
-                return None
-            if not self._second_message and waited > 240000:  # 4 minutes
-                self._second_message = True
-                await proch.PipeInLineService.request(
-                    self._mailer, self,
-                    'servermsg "Mod updated. Server restart in 1 minute. Please find a safe place and logout."')
-                self._mailer.post(self, _RestartSubscriber.WAIT)
-                return None
-            await asyncio.sleep(1.0)
-            self._mailer.post(self, _RestartSubscriber.WAIT)
         return None
 
 

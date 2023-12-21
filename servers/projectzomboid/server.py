@@ -5,7 +5,7 @@ from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
 from core.common import interceptors, playerstore
-from servers.projectzomboid import deployment as dep, console as con, messaging as msg
+from servers.projectzomboid import deployment as dep, console as con, messaging as msg, modcheck as mck
 
 
 class Server(svrabc.Server):
@@ -19,6 +19,7 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         msg.initialise(self._context)
+        mck.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
