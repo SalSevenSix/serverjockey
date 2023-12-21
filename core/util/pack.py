@@ -117,7 +117,7 @@ class _ProgressLogger:
 
     def start(self):
         self._running = True
-        self._task = tasks.task_start(self._run(), 'pack.ProgressLogger.run()')
+        self._task = tasks.task_start(self._run(), self)
 
     @staticmethod
     async def _load_lines() -> tuple:

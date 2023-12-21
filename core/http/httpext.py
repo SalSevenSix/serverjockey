@@ -196,7 +196,7 @@ class _FileByteStream(httpabc.ByteStream):
     async def read(self, length: int = -1) -> bytes:
         if self._task is None:
             self._length = length
-            self._task = tasks.task_start(self._run(), name=self._name)
+            self._task = tasks.task_start(self._run(), 'FileByteStream(' + self._name + ')')
         try:
             return await asyncio.wait_for(self._queue.get(), 20.0)
         except asyncio.TimeoutError:

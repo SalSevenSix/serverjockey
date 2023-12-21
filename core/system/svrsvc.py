@@ -3,7 +3,7 @@ import logging
 import asyncio
 import typing
 # ALLOW util.* msg.* context.* http.* system.svrabc
-from core.util import tasks, util, dtutil, objconv
+from core.util import tasks, util, dtutil
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc
 from core.system import svrabc
@@ -48,7 +48,7 @@ class ServerService(msgabc.AbcSubscriber):
         context.register(self)
 
     def start(self) -> asyncio.Task:
-        self._task = tasks.task_start(self.run(), name=objconv.obj_to_str(self))
+        self._task = tasks.task_start(self.run(), self)
         return self._task
 
     async def run(self):

@@ -39,7 +39,7 @@ class _CheckModsNeedUpdate(msgabc.AbcSubscriber):
         self._mailer, self._seconds = mailer, 0.0
         self._checker = _CheckModsNeedUpdateTask(mailer, self._seconds)
 
-    async def handle(self, message):
+    def handle(self, message):
         if _CHECK_MINUTES_FILTER.accepts(message):
             minutes = message.data()
             self._seconds = minutes * 60.0 if minutes > 0 else 0.0
@@ -67,7 +67,7 @@ class _CheckModsNeedUpdateTask:
         if self._running or self._seconds == 0.0:
             return
         self._running = True
-        self._task = tasks.task_start(self._run(), 'CheckModsNeedUpdateTask')
+        self._task = tasks.task_start(self._run(), self)
 
     def stop(self):
         if not self._running:

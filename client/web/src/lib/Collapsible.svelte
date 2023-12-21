@@ -1,6 +1,6 @@
 <script>
   import { slide } from 'svelte/transition';
-  import { circInOut } from 'svelte/easing';
+  import { quadInOut } from 'svelte/easing';
 
   export let open = false;
   export let icon = null;
@@ -31,7 +31,7 @@
 </div>
 
 {#if visible}
-  <div transition:slide={{ duration: 150, easing: circInOut }}>
+  <div transition:slide={{ duration: 100, easing: quadInOut }}>
     <slot />
   </div>
 {/if}

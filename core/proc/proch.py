@@ -194,7 +194,7 @@ class ServerProcess:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
             if self._started_catcher:
-                tasks.task_fork(self._wait_for_started(), '_wait_for_started PID {}'.format(pid))
+                tasks.task_fork(self._wait_for_started(), 'wait_for_started({})'.format(pid))
             else:
                 self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
             rc = await self._process.wait()

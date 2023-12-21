@@ -31,12 +31,18 @@ class _Tasker:
             logging.debug('tsk> REMAINING ' + repr(task))
 
 
-def task_start(coro: typing.Coroutine, name: str) -> asyncio.Task:
-    return _Tasker.instance().task_start(coro, name)
+def _str_name(name: typing.Any) -> str:
+    if isinstance(name, str):
+        return name
+    return type(name).__name__ + '[' + str(id(name)) + ']'
 
 
-def task_fork(coro: typing.Coroutine, name: str) -> asyncio.Task:
-    task = asyncio.create_task(coro, name=name)
+def task_start(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
+    return _Tasker.instance().task_start(coro, _str_name(name))
+
+
+def task_fork(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
+    task = asyncio.create_task(coro, name=_str_name(name))
     logging.debug('tsk> FORK       : {}'.format(task))
     return task
 

@@ -4,7 +4,7 @@ import re
 import asyncio
 from asyncio import subprocess
 # ALLOW util.* msg.* context.* http.* system.* proc.*
-from core.util import aggtrf, util, io, tasks, objconv
+from core.util import aggtrf, util, io, tasks
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpext, httpsubs
@@ -138,7 +138,7 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
             return None
         if jobh.JobProcess.FILTER_STARTED.accepts(message):
             self._process = message.data()
-            self._task = tasks.task_start(self._monitor(), objconv.obj_to_str(self))
+            self._task = tasks.task_start(self._monitor(), self)
             return None
         if jobh.JobProcess.FILTER_DONE.accepts(message):
             self._queue.put_nowait(False)
