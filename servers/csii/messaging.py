@@ -5,11 +5,8 @@ from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
 from core.common import rconsvc, playerstore
 
-_SPAM_ERRORS = (
-    'src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(3579): '
-    + 'Assertion Failed: usecElapsed >= 0',
-    'sv: Lag comp - full interp info doesn\'t match target time, using target time instead.'
-)
+_SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(.*):' \
+        r' Assertion Failed: usecElapsed >= 0$'
 
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -17,7 +14,7 @@ SERVER_STARTED_FILTER = msgftr.And(
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(
         proch.ServerProcess.FILTER_ALL_LINES,
-        msgftr.Not(msgftr.DataIn(_SPAM_ERRORS))),
+        msgftr.Not(msgftr.DataMatches(_SPAM))),
     rconsvc.RconService.FILTER_OUTPUT,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
