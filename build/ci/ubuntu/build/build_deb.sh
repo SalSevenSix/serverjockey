@@ -2,6 +2,7 @@
 
 [ "$(whoami)" = "root" ] || exit 1
 BRANCH="develop"
+REPO_URL="https://raw.githubusercontent.com/SalSevenSix/serverjockey"
 WEB_DIR="/var/www/html"
 [ -d "$WEB_DIR" ] || exit 1
 cd "$(dirname $0)" || exit 1
@@ -28,7 +29,7 @@ chown $BUILD_USER $COMMIT_FILE || exit 1
 chgrp $BUILD_USER $COMMIT_FILE || exit 1
 
 echo "CI Preparing"
-[ -f "build.sh" ] || wget -O build.sh https://raw.githubusercontent.com/SalSevenSix/serverjockey/$BRANCH/build/build.sh
+[ -f "build.sh" ] || wget -O build.sh $REPO_URL/$BRANCH/build/build.sh
 [ -f "build.sh" ] || exit 1
 chmod 755 build.sh || exit 1
 chown $BUILD_USER build.sh || exit 1
@@ -61,6 +62,18 @@ echo "CI Upgrade"
 systemctl stop serverjockey > /dev/null 2>&1
 apt -y remove sjgms > /dev/null 2>&1
 apt -y install ./$TARGET_FILE
+
+echo "CI Docker"
+cd $BUILD_DIR || exit 1
+rm -rf docker > /dev/null 2>&1
+mkdir docker || exit 1
+cd docker || exit 1
+ln -s "$WEB_DIR/$TARGET_FILE" "sjgms.deb" || exit 1
+wget -O Dockerfile $REPO_URL/$BRANCH/build/docker/Dockerfile || exit 1
+wget -O entrypoint.sh $REPO_URL/$BRANCH/build/docker/entrypoint.sh || exit 1
+wget -O build.sh $REPO_URL/$BRANCH/build/docker/build.sh || exit 1
+chmod 755 build.sh || exit 1
+./build.sh $BRANCH || exit 1
 
 echo "CI Done"
 exit 0
