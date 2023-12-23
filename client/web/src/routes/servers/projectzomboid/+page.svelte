@@ -152,7 +152,7 @@
         <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <InstallRuntime qualifierName="Beta (optional)" />
+        <InstallRuntime qualifierName="Beta" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
       <Collapsible icon="fa-file-zipper" title="Autobackups">

@@ -11,7 +11,7 @@
   const objectUrls = new ObjectUrls();
   const logLines = new RollingLog();
 
-  export let qualifierName = null;
+  export let qualifierName;
 
   let qualifier = '';
   let endInstallMessage = 'Install Runtime completed. Please check console log output for details.';
@@ -100,35 +100,38 @@
 </script>
 
 
-<div class="content">
-  <p>
-    Please be patient with the Install Runtime process, it may take a while. Check the console log to confirm success.
-  </p>
-</div>
-
-<div class="block">
-  {#if qualifierName}
-    <div class="field">
-      <label for="installRuntimeQualifier" class="label"
-             title="Set to appropriate version/beta/tag to install desired non-stable version">
-        {qualifierName}</label>
-      <div class="control pr-6">
-        <input id="installRuntimeQualifier" class="input" type="text"
-               disabled={cannotProcess} bind:value={qualifier}>
-      </div>
+<div class="content pb-1">
+  <h3 class="title is-5 mb-3">Runtime</h3>
+  <p>Please be patient with the Install process, it may take a while. Check the console log to confirm success.</p>
+  <div class="field has-addons">
+    <div class="control">
+      <button name="install-runtime" class="button is-warning" title="Install game server"
+              disabled={cannotProcess} on:click={installRuntime}>
+        <i class="fa fa-gear fa-lg"></i>&nbsp; Install</button>
     </div>
-  {/if}
+    <div class="control">
+      <input class="input" type="text" placeholder="{qualifierName} (optional)"
+             title="Optionally specify a {qualifierName.toLowerCase()} to install"
+             disabled={cannotProcess} bind:value={qualifier}>
+    </div>
+  </div>
   <div class="field">
     <div class="control buttons">
-      <button name="wipe-runtime" title="Delete Runtime" class="button is-danger"
+      <button name="wipe-runtime" class="button is-danger"
+              title="Delete installed game server"
               disabled={cannotProcess} on:click={wipeRuntime}>
-        <i class="fa fa-trash-can fa-lg"></i>&nbsp;&nbsp;Delete Runtime</button>
-      <button name="install-runtime" title="Install Runtime" class="button is-warning"
-              disabled={cannotProcess} on:click={installRuntime}>
-        <i class="fa fa-gear fa-lg"></i>&nbsp;&nbsp;Install Runtime</button>
-      <button name="runtime-meta" title="Runtime Runtime" class="button is-primary"
+        <i class="fa fa-trash-can fa-lg"></i>&nbsp; Delete</button>
+      <button name="runtime-meta" class="button is-primary"
+              title="View information about the currently installed game server"
               on:click={runtimeMeta}>
-        <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;Runtime Meta</button>
+        <i class="fa fa-circle-info fa-lg"></i>&nbsp; Meta</button>
     </div>
   </div>
 </div>
+
+
+<style>
+  .button {
+    width: 130px;
+  }
+</style>

@@ -43,10 +43,9 @@
 <div class="content">
   <p><span class="step-title"></span>
     Welcome to the control panel for your new instance! An instance is just a container for a game server.
-    You can now install the actual server using this page.
-    Scroll down and find the <span class="has-text-weight-bold">Deployment</span> section.
-    Expand it using the black button on the right.
-    Now click the <span class="has-text-weight-bold">Install Runtime</span> button.
+    You can now install the actual server using this page. Scroll down and find the
+    <span class="has-text-weight-bold">Deployment</span> section. Expand it using the black button on the right.
+    Now click the <span class="has-text-weight-bold">Install</span> button.
   </p>
   <figure class="image max-1024 is-bordered">
     <img src="/assets/guides/games/install_start.png" alt="Start install runtime" loading="lazy" />

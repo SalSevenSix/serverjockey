@@ -55,7 +55,7 @@
         <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <InstallRuntime qualifierName="Beta (optional)" />
+        <InstallRuntime qualifierName="Version" />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions hasWorld={false} />

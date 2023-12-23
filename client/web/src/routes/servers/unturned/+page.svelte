@@ -71,7 +71,7 @@
         <LogFiles />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <InstallRuntime qualifierName="Beta (optional)" />
+        <InstallRuntime qualifierName="Beta" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">

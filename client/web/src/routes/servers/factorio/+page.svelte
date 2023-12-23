@@ -100,7 +100,7 @@
         <LogFiles />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <InstallRuntime qualifierName="Version (optional)" />
+        <InstallRuntime qualifierName="Version" />
         <DeploymentActions actions={deploymentActions} />
       </Collapsible>
       <Collapsible icon="fa-file-zipper" title="Autosaves">

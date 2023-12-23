@@ -30,11 +30,12 @@
 </script>
 
 
-<div class="block">
+<div class="content">
+  <h3 class="title is-5 mb-3">World</h3>
   <table class="table"><tbody>
     {#each actions as action}
       <tr>
-        <td>
+        <td class="button-column">
           <button title={action.name} class="button is-danger is-fullwidth"
                   name={action.key} disabled={cannotAction} on:click={doAction}>
             <i class="fa {action.icon ? action.icon : 'fa-burst'} fa-lg"></i>&nbsp; {action.name}</button>
@@ -44,3 +45,10 @@
     {/each}
   </tbody></table>
 </div>
+
+
+<style>
+  .button-column {
+    width: 20%;
+  }
+</style>
