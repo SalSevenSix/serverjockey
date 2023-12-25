@@ -68,7 +68,7 @@ cd $BUILD_DIR || exit 1
 rm -rf docker > /dev/null 2>&1
 mkdir docker || exit 1
 cd docker || exit 1
-ln -s "$WEB_DIR/$TARGET_FILE" "sjgms.deb" || exit 1
+cp $WEB_DIR/$TARGET_FILE sjgms.deb || exit 1
 wget -O Dockerfile $REPO_URL/$BRANCH/build/docker/Dockerfile || exit 1
 wget -O entrypoint.sh $REPO_URL/$BRANCH/build/docker/entrypoint.sh || exit 1
 wget -O build.sh $REPO_URL/$BRANCH/build/docker/build.sh || exit 1

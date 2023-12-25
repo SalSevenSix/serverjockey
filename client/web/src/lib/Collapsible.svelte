@@ -23,7 +23,7 @@
   </div>
   <div class="column is-one-quarter">
     <div class="buttons is-right">
-      <button name="toggler" class="button is-dark" on:click={toggle} title={visible ? 'HIDE' : 'SHOW'}>
+      <button class="button is-dark" on:click={toggle} title={visible ? 'HIDE' : 'SHOW'}>
         <i class="fa {visible ? 'fa-caret-down' : 'fa-caret-left'} fa-2x"></i>
       </button>
     </div>

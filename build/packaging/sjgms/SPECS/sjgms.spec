@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Fri Dec 01 2023 Bowden Salis <bsalis76@gmail.com> - 0.6.0
-- Feature release v0.6.0
+* Tue Dec 26 2023 Bowden Salis <bsalis76@gmail.com> - 0.6.0
+- * Chrome Browser extension feature release
 * Thu Nov 30 2023 Bowden Salis <bsalis76@gmail.com> - 0.5.0
 - Activity reporting feature release
 * Wed Oct 23 2023 Bowden Salis <bsalis76@gmail.com> - 0.4.0
