@@ -6,7 +6,7 @@ import socket
 # ALLOW util.*
 from core.util import io, funcutil, shellutil, tasks
 
-_VERSION, _BUILDSTAMP = '0.6.0', '{timestamp}'
+_VERSION, _BUILDSTAMP = '0.7.0', '{timestamp}'
 _VERSION_LABEL = _VERSION + ' (' + _BUILDSTAMP + ')'
 _VERSION_DICT = {'version': _VERSION, 'buildstamp': _BUILDSTAMP}
 

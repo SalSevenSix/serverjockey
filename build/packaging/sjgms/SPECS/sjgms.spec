@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.6.0
+Version:        0.7.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -53,8 +53,10 @@ exit 0
 
 
 %changelog
+* Wed Dec 27 2023 Bowden Salis <bsalis76@gmail.com> - 0.7.0
+- Feature release v0.7.0
 * Tue Dec 26 2023 Bowden Salis <bsalis76@gmail.com> - 0.6.0
-- * Chrome Browser extension feature release
+- Chrome Browser extension feature release
 * Thu Nov 30 2023 Bowden Salis <bsalis76@gmail.com> - 0.5.0
 - Activity reporting feature release
 * Wed Oct 23 2023 Bowden Salis <bsalis76@gmail.com> - 0.4.0
