@@ -3,7 +3,7 @@ import asyncio
 import typing
 import aiofiles
 # ALLOW util.* msg.* context.* http.*
-from core.util import util, io, tasks, aggtrf, objconv
+from core.util import util, io, tasks, aggtrf, objconv, pack
 from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
 from core.http import httpabc, httpcnt, httpsubs
 
@@ -142,7 +142,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
         if await io.file_exists(path):
             content_type = httpcnt.ContentTypeImpl.lookup(path)
             size = await io.file_size(path)
-            if content_type.is_text_type() and size < 1048576:
+            if content_type.is_text_type() and size < 1048576:  # 1Mb
                 return await io.read_file(path)
             return _FileByteStream(path, self._read_tracker)
         if await io.directory_exists(path):
@@ -168,7 +168,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
         if isinstance(body, str):
             await io.write_file(path, body)
             return httpabc.ResponseBody.NO_CONTENT
-        if isinstance(body, httpabc.ByteStream):
+        if isinstance(body, io.Readable):
             await io.stream_write_file(path, body, tempdir=self._tempdir, tracker=self._write_tracker)
             return httpabc.ResponseBody.NO_CONTENT
         return httpabc.ResponseBody.BAD_REQUEST
@@ -177,12 +177,11 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 class _FileByteStream(httpabc.ByteStream):
 
     def __init__(self, filename: str, tracker: io.BytesTracker = io.NullBytesTracker()):
+        self._filename, self._tracker = filename, tracker
         self._name = filename.split('/')[-1]
-        self._filename = filename
         self._content_type = httpcnt.ContentTypeImpl.lookup(filename)
         self._queue = asyncio.Queue(maxsize=2)
-        self._tracker = tracker
-        self._task, self._length = None, -1
+        self._task, self._length, self._gzip = None, -1, False
 
     def name(self) -> str:
         return self._name
@@ -190,8 +189,14 @@ class _FileByteStream(httpabc.ByteStream):
     def content_type(self) -> httpabc.ContentType:
         return self._content_type
 
-    async def content_length(self) -> int:
+    async def content_length(self) -> int | None:
+        if self._gzip:
+            return None
         return await io.file_size(self._filename)
+
+    def enable_gzip(self) -> bool:
+        self._gzip = self._content_type.is_text_type()
+        return self._gzip
 
     async def read(self, length: int = -1) -> bytes:
         if self._task is None:
@@ -210,8 +215,10 @@ class _FileByteStream(httpabc.ByteStream):
             async with aiofiles.open(self._filename, mode='rb') as file:
                 while pumping:
                     chunk = await file.read(self._length)
-                    await asyncio.wait_for(self._queue.put(chunk), 60.0)
                     pumping = not io.end_of_stream(chunk)
+                    if pumping and self._gzip:
+                        chunk = await pack.gzip_compress(chunk)
+                    await asyncio.wait_for(self._queue.put(chunk), 60.0)
                     if pumping:
                         self._tracker.processed(chunk)
         except Exception as e:

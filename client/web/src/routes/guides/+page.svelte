@@ -1,4 +1,5 @@
 <script>
+  import { browserName } from '$lib/util';
   import GuideBooks from '$lib/GuideBooks.svelte';
 
   const games = [
@@ -67,10 +68,17 @@
   <div class="column is-four-fifths content">
     <p>
       ServerJockey has a
-      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
-        browser extension <i class="fa fa-up-right-from-square"></i></a> for Chrome that can be used to manage mods
-      for Project Zomboid servers. It allows you to browse the Steam Workshop to add and remove mods
-      using the workshop pages.
+      {#if browserName === 'Chrome'}
+        <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
+           target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Google Chrome
+      {:else if browserName === 'Edge'}
+        <a href="https://todo"
+           target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Microsoft Edge
+      {:else}
+        browser extension for Google Chrome and Microsoft Edge
+      {/if}
+      that can be used to manage mods for Project Zomboid servers.
+      It allows you to browse the Steam Workshop to add and remove mods using the workshop pages.
     </p>
   </div>
 </div>

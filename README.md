@@ -4,13 +4,13 @@ ServerJockey is a game server management system. It is designed to be an easy
 to use self-hosting option for multiplayer servers. Allowing you to create
 and remotely manage your servers. A webapp and Discord bot are used as clients.
 
-If your like using this system, please consider supporting me on Ko-fi.
+* Join the [Discord](https://discord.gg/TEuurWAhHn)
+* Instructional guides and dev updates on [YouTube](https://www.youtube.com/@BSALIS76)
+* Source code on [GitHub](https://github.com/SalSevenSix/serverjockey)
+
+If your like using this system, please consider supporting it on Ko-fi.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D4E4ZYZ)
-
-
-## Source Repository
-[ServerJockey](https://github.com/SalSevenSix/serverjockey) project on GitHub
 
 
 ## DEB Package Install
@@ -71,8 +71,9 @@ can be imported into VirtualBox. Use this option on Windows systems.
 * [Download the VM image](https://4sas.short.gy/zombox-latest)
 * Install [VirtualBox](https://www.virtualbox.org/) if not installed.
 * Import the VM image file into VirtualBox.
-* Adjust the CPU and memory settings for the VM as desired.
 * Start the VM. Webapp URL and login token will be displayed in the console.
+* *If there are any network issues*. Check `Settings > Network` and make sure
+a valid physical network adaptor is attached using Bridged mode.
 
 
 ## Docker Image

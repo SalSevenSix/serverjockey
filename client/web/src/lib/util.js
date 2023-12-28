@@ -2,6 +2,20 @@
 const textExtensions = ['txt', 'text', 'log'];
 const stampExtRegex = /^[0-9_-]+$/;
 
+export const browserName = getBrowserName();
+
+
+function getBrowserName() {
+  const ua = window.navigator.userAgent;
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('SamsungBrowser')) return 'SamsungBrowser';
+  if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+  if (ua.includes('Edge') || ua.includes('Edg')) return 'Edge';
+  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Safari')) return 'Safari';
+  return null;
+}
+
 export function guessTextFile(filename) {
     let parts = filename.split('.');
     if (parts.length < 2) return false;

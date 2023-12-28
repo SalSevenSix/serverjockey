@@ -59,7 +59,6 @@ rm -rf "$BUILD_DIR/dist" > /dev/null 2>&1
 find . -type f -name "sjgms-${BRANCH}-*.deb" -mtime +7 -delete
 
 echo "CI Upgrade"
-systemctl stop serverjockey > /dev/null 2>&1
 apt -y remove sjgms > /dev/null 2>&1
 apt -y install ./$TARGET_FILE
 

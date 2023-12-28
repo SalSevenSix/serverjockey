@@ -83,7 +83,6 @@ class _Cacher:
     async def _fetch_text(url: str) -> str | None:
         connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
         timeout = aiohttp.ClientTimeout(total=4.0)
-        # noinspection PyBroadException
         try:
             async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
                 async with session.get(url) as response:

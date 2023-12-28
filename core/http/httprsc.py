@@ -3,7 +3,7 @@ import logging
 import typing
 from yarl import URL
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt
-from core.util import util, objconv
+from core.util import util, objconv, io
 from core.http import httpabc, httpcnt
 
 ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL)
@@ -146,7 +146,7 @@ class WebResource(httpabc.Resource):
         return await httpabc.GetHandler.call(self._handler, self, data)
 
     async def handle_post(
-            self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, httpabc.ByteStream]) -> httpabc.ABC_RESPONSE:
+            self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, io.Readable]) -> httpabc.ABC_RESPONSE:
         data = PathProcessor(self).extract_args_url(url)
         if isinstance(body, dict):
             data.update(body)

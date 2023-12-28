@@ -107,9 +107,9 @@ class _RequestHandler:
             if content_type is None or content_type.mime_type() not in _ACCEPTED_MIME_TYPES:
                 raise err.HTTPUnsupportedMediaType
             if content_type.mime_type() == httpcnt.MIME_MULTIPART_FORM_DATA:
-                request_body = _MultipartFormByteStream(self._request.content, self._request.headers)
+                request_body = _ReadableMultipartForm(self._request)
             elif content_type.mime_type() == httpcnt.MIME_APPLICATION_BIN:
-                request_body = _RequestByteStream(self._request.content, self._headers.get_content_length())
+                request_body = _ReadableRequest(self._request)
             else:
                 request_body = await self._request.content.read()
         if content_type.mime_type() in _TEXT_MIME_TYPES:
@@ -147,12 +147,15 @@ class _RequestHandler:
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = objconv.obj_to_json(body)
             body = body.encode(httpcnt.UTF8)
-        if isinstance(body, bytes) and len(body) > 512 and self._headers.accepts_encoding(httpcnt.GZIP):
+        allow_gzip = self._headers.accepts_encoding(httpcnt.GZIP)
+        if allow_gzip and isinstance(body, bytes) and len(body) > 512:
             body = await pack.gzip_compress(body)
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
         if isinstance(body, httpabc.ByteStream):
             response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
             response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
+            if allow_gzip and body.enable_gzip():
+                response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             content_length = await body.content_length()
             if content_length is None:
                 response.enable_chunked_encoding(io.DEFAULT_CHUNK_SIZE)
@@ -198,20 +201,11 @@ class _RequestHandler:
             response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_ORIGIN, origin)
 
 
-class _MultipartFormByteStream(httpabc.ByteStream):
+class _ReadableMultipartForm(io.Readable):
 
-    def __init__(self, stream: streams.StreamReader, headers):
-        self._reader = aiohttp.MultipartReader(headers, stream)
+    def __init__(self, request: webabc.Request):
+        self._reader = aiohttp.MultipartReader(request.headers, request.content)
         self._part = None
-
-    def name(self) -> str:
-        raise NotImplemented()
-
-    def content_type(self) -> httpabc.ContentType:
-        return httpcnt.CONTENT_TYPE_APPLICATION_BIN
-
-    async def content_length(self) -> int:
-        return -1
 
     async def read(self, length: int = -1) -> bytes:
         if not self._part:
@@ -223,20 +217,10 @@ class _MultipartFormByteStream(httpabc.ByteStream):
         return chunk
 
 
-class _RequestByteStream(httpabc.ByteStream):
+class _ReadableRequest(io.Readable):
 
-    def __init__(self, stream: streams.StreamReader, content_length: int):
-        self._stream = stream
-        self._content_length = content_length
-
-    def name(self) -> str:
-        raise NotImplemented()
-
-    def content_type(self) -> httpabc.ContentType:
-        return httpcnt.CONTENT_TYPE_APPLICATION_BIN
-
-    async def content_length(self) -> int:
-        return self._content_length
+    def __init__(self, request: webabc.Request):
+        self._stream = request.content
 
     async def read(self, length: int = -1) -> bytes:
         return await self._stream.read(length)

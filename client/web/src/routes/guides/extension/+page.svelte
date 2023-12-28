@@ -1,4 +1,5 @@
 <script>
+  import { browserName } from '$lib/util';
   import BackToTop from '$lib/BackToTop.svelte';
 </script>
 
@@ -13,7 +14,10 @@
     <h2 class="title is-3 mt-2">Browser Extension</h2>
     <p>
       ServerJockey has a browser extension for
-      <a href="https://www.google.com/chrome" target="_blank">Chrome <i class="fa fa-up-right-from-square"></i></a>
+      <a href="https://www.google.com/chrome" target="_blank">Google Chrome
+        <i class="fa fa-up-right-from-square"></i></a> and
+      <a href="https://www.microsoft.com/en-us/edge" target="_blank">Microsoft Edge
+        <i class="fa fa-up-right-from-square"></i></a>
       that can be used to manage mods for Project Zomboid servers.
       This guide will show you how to install and use this extension.
     </p>
@@ -22,16 +26,48 @@
 
 <div class="content">
   <hr />
-  <p><span class="step-title"></span>
-    First step is to
-    <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
-      download and install the extension <i class="fa fa-up-right-from-square"></i></a> from the web store using
-    the Chrome browser. First click the <span class="has-text-weight-bold">Add to Chrome</span> button on the page
-    then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
-  </p>
-  <figure class="image max-844">
-    <img src="/assets/guides/extension/extension_page.jpg" alt="Extension page" />
-  </figure>
+  {#if browserName === 'Chrome'}
+    <p><span class="step-title"></span>
+      First step is to
+      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
+        download and install the extension <i class="fa fa-up-right-from-square"></i></a> from the Chrome web store.
+      First click the <span class="has-text-weight-bold">Add to Chrome</span> button on the page
+      then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+    </p>
+    <figure class="image max-844">
+      <img src="/assets/guides/extension/chrome_extension_page.jpg" alt="Chrome extension page" />
+    </figure>
+  {:else if browserName === 'Edge'}
+    todo
+  {:else}
+    <p class="pb-3"><span class="step-title"></span>
+      First step is to download and install either
+      <a href="https://www.google.com/chrome" target="_blank">
+        Chrome browser <i class="fa fa-up-right-from-square"></i></a> or
+      <a href="https://www.microsoft.com/en-us/edge/download" target="_blank">
+        Edge browser <i class="fa fa-up-right-from-square"></i></a>
+      then return to this guide using that browser. Then download and install the
+      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
+        Chrome extension <i class="fa fa-up-right-from-square"></i></a> or
+      <a href="https://todo" target="_blank">
+        Edge extension <i class="fa fa-up-right-from-square"></i></a> accordingly.
+    </p>
+    <div class="columns">
+      <div class="column is-one-fifth"></div>
+      <div class="column is-one-fifth content">
+        <a href="https://www.google.com/chrome" title="Download Chrome" target="_blank">
+          <i class="fa-brands fa-chrome fa-6x theme-black-white"></i></a>
+      </div>
+      <div class="column is-one-fifth content">
+        <i class="fa fa-cloud-arrow-down fa-5x theme-black-white"></i>
+      </div>
+      <div class="column is-one-fifth content">
+        <a href="https://www.microsoft.com/en-us/edge/download" title="Download Edge" target="_blank">
+          <i class="fa-brands fa-edge fa-6x theme-black-white"></i></a>
+      </div>
+      <div class="column is-one-fifth"></div>
+    </div>
+  {/if}
 </div>
 
 <div class="content">

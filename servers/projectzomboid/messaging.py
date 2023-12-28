@@ -69,7 +69,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
             return None
         if SERVER_RESTART_REQUIRED_FILTER.accepts(message):
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': dtutil.now_millis()})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': dtutil.to_millis(message.created())})
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)

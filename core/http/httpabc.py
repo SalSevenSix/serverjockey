@@ -84,7 +84,11 @@ class ByteStream(io.Readable, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    async def content_length(self) -> typing.Optional[int]:
+    async def content_length(self) -> int | None:
+        pass
+
+    @abc.abstractmethod
+    def enable_gzip(self) -> bool:
         pass
 
 
