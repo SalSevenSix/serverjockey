@@ -141,6 +141,10 @@ async def file_size(file: str) -> int:
     return stats.st_size
 
 
+async def file_mtime(file: str) -> float:
+    return await aioos.path.getmtime(file)
+
+
 async def directory_list(path: str, baseurl: str = None) -> typing.List[typing.Dict[str, typing.Union[str, float]]]:
     if not path.endswith('/'):
         path += '/'
@@ -158,7 +162,7 @@ async def directory_list(path: str, baseurl: str = None) -> typing.List[typing.D
         elif await aioos.path.isdir(file):
             exists, ftype = True, 'directory'
         if exists:
-            mtime = await aioos.path.getmtime(file)
+            mtime = await file_mtime(file)
             updated = dtutil.format_time_standard(mtime)
         entry = {'type': ftype, 'name': name, 'updated': updated, 'mtime': mtime}
         if size > -1:

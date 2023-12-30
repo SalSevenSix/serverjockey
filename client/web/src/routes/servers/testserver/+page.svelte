@@ -10,7 +10,7 @@
   import ConfigFile from '$lib/ConfigFile.svelte';
   import LogFiles from '$lib/LogFiles.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
-  import InstallRuntime from '$lib/InstallRuntime.svelte';
+  import RuntimeControls from '$lib/RuntimeControls.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CheckStore from '$lib/CheckStore.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
@@ -55,7 +55,7 @@
         <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <InstallRuntime qualifierName="Version" />
+        <RuntimeControls qualifierName="Version" />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions hasWorld={false} />

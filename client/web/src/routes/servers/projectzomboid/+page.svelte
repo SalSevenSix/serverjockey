@@ -9,8 +9,8 @@
   import InstanceLog from '$lib/InstanceLog.svelte';
   import LogFiles from '$lib/LogFiles.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
-  import InstallRuntime from '$lib/InstallRuntime.svelte';
-  import DeploymentActions from '$lib/DeploymentActions.svelte';
+  import RuntimeControls from '$lib/RuntimeControls.svelte';
+  import WorldControls from '$lib/WorldControls.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
   import Autobackups from './Autobackups.svelte';
@@ -19,7 +19,7 @@
   import PlayerActivity from '$lib/PlayerActivity.svelte';
   import ChatActivityGadget from '$lib/ChatActivityGadget.svelte';
 
-  const deploymentActions = [
+  const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
       'desc': 'Reset the game world save only. This is the map and player characters.' },
     { 'key': 'wipe-world-playerdb', 'name': 'Reset Player DB',
@@ -152,8 +152,8 @@
         <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <InstallRuntime qualifierName="Beta" />
-        <DeploymentActions actions={deploymentActions} />
+        <RuntimeControls qualifierName="Beta" />
+        <WorldControls actions={worldActions} />
       </Collapsible>
       <Collapsible icon="fa-file-zipper" title="Autobackups">
         <Autobackups />

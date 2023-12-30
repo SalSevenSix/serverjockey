@@ -3,7 +3,7 @@ import asyncio
 import typing
 import aiofiles
 # ALLOW util.* msg.* context.* http.*
-from core.util import util, io, tasks, aggtrf, objconv, pack
+from core.util import util, io, tasks, aggtrf, objconv, pack, dtutil
 from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
 from core.http import httpabc, httpcnt, httpsubs
 
@@ -123,6 +123,23 @@ class WipeHandler(httpabc.PostHandler):
         await io.delete_any(self._path)
         self._mailer.post(self, WipeHandler.WIPED, self._path)
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class FileMtimeHandler(httpabc.GetHandler):
+
+    def __init__(self, path: str):
+        self._path = path
+
+    async def handle_get(self, resource, data):
+        result = None
+        if await io.file_exists(self._path):
+            result = dtutil.to_millis(await io.file_mtime(self._path))
+        elif await io.directory_exists(self._path):
+            for file in [o['name'] for o in await io.directory_list(self._path) if o['type'] == 'file']:
+                mtime = dtutil.to_millis(await io.file_mtime(self._path + '/' + file))
+                if result is None or mtime > result:
+                    result = mtime
+        return {'timestamp': result}
 
 
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):

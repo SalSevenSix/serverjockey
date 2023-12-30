@@ -1,17 +1,24 @@
 <script>
-  import { getContext } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { confirmModal } from '$lib/modals';
+  import { shortISODateTimeString } from '$lib/util';
+  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/notifications';
-  import { newPostRequest } from '$lib/sjgmsapi';
+  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
+  const eventDown = getContext('eventDown');
+  const eventStarted = getContext('eventStarted');
+  const eventEndMaint = getContext('eventEndMaint');
 
   export let actions = [];
 
-  let processing = false;
+  let processing = true;
+  let lastActivity = null;
 
   $: cannotAction = processing || $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+  $: if ($eventDown || $eventStarted || $eventEndMaint) { loadWorldMeta(); }
 
   function doAction() {
     let actionKey = this.name;
@@ -24,14 +31,39 @@
           notifyInfo(actionTitle + ' completed.');
         })
         .catch(function(error) { notifyError(actionTitle + ' failed.'); })
-        .finally(function() { processing = false; });
+        .finally(loadWorldMeta);
     });
   }
+
+  function loadWorldMeta() {
+    processing = true;
+    fetch(instance.url('/deployment/world-meta'), newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) { lastActivity = json.timestamp ? shortISODateTimeString(json.timestamp) : 'None'; })
+      .catch(function(error) { notifyError('Failed to load World meta.'); })
+      .finally(function() { processing = false; });
+  }
+
+  onMount(loadWorldMeta);
 </script>
 
 
 <div class="content">
   <h3 class="title is-5 mb-3">World</h3>
+  <p><span class="has-text-weight-bold">Last Activity:</span>&nbsp;
+    {#if processing && !lastActivity}
+      <SpinnerIcon /> loading...
+    {:else if lastActivity === 'None'}
+      <span class="is-italic">not found, world may not exist</span>
+    {:else if lastActivity}
+      {lastActivity}
+    {:else}
+      <span class="is-italic">unavailable</span>
+    {/if}
+  </p>
   <table class="table"><tbody>
     {#each actions as action}
       <tr>

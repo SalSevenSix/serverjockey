@@ -29,6 +29,7 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._autobackups_dir = self._world_dir + '/backups'
         self._player_dir = self._world_dir + '/db'
+        self._log_file = self._world_dir + '/server-console.txt'
         self._logs_dir = self._world_dir + '/Logs'
         self._config_dir = self._world_dir + '/Server'
         self._save_dir = self._world_dir + '/Saves'
@@ -56,6 +57,7 @@ class Deployment:
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_380870.acf'))
         r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
+        r.put('world-meta', httpext.FileMtimeHandler(self._log_file))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-playerdb', httpext.WipeHandler(self._mailer, self._player_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
@@ -66,7 +68,7 @@ class Deployment:
         r.put('restore-autobackup', httpext.UnpackerHandler(
             self._mailer, self._autobackups_dir, self._world_dir, to_root=True, wipe=False), 'r')
         r.pop()
-        r.put('log', httpext.FileSystemHandler(self._world_dir + '/server-console.txt'))
+        r.put('log', httpext.FileSystemHandler(self._log_file))
         r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'), 'r')
         r.pop()
