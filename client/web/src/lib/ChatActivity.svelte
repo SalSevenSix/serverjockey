@@ -114,7 +114,8 @@
 
 <style>
   .chat-log-container {
-    max-height: 380px;
+    height: 360px;
+    resize: vertical;
     overflow: auto;
   }
 
