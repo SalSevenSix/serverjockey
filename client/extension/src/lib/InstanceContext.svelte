@@ -60,7 +60,7 @@
         <option>{option}</option>
       {/each}
     </select>
-  {:else}
+  {:else if !loading}
     <p class="text-warning">&nbsp; no projectzomboid instances found</p>
   {/if}
 </div>

@@ -8,38 +8,44 @@
 
   const instance = getContext('instance');
 
-  let cannotSave = true;
+  let processing = true;
+  let dataSynced = false;
   let data = null;
 
+  $: cannotSave = !data || processing || dataSynced;
   $: if ($instance) { fetchDom(); }
 
   function updated() {
     data = data;  // Ugly but svelte is not tracking internal changes
-    cannotSave = false;
+    dataSynced = false;
   }
 
   function saveIni() {
+    processing = true;
     let request = newPostRequest('text/plain');
     request.body = data.generateIni();
     fetch($instance.url + '/config/ini', request)
       .then(function(response) {
         if (!response.ok) { throw new Error('Status: ' + response.status); }
-        cannotSave = true;
+        dataSynced = true;
       })
-      .catch(logError);
+      .catch(logError)
+      .finally(function() { processing = false; });
   }
 
   function fetchIni(dom) {
+    processing = true;
     fetch($instance.url + '/config/ini', newGetRequest())
       .then(function(response) {
         if (!response.ok) { throw new Error('Status: ' + response.status); }
         return response.text();
       })
       .then(function(ini) {
-        cannotSave = true;
         data = processResults(dom, ini, updated);
+        dataSynced = true;
       })
-      .catch(logError);
+      .catch(logError)
+      .finally(function() { processing = false; });
   }
 
   function fetchDom() {
@@ -84,7 +90,7 @@
       {/if}
     {/if}
     <div class="save-button">
-      <button class="process hero" disabled={cannotSave} on:click={saveIni}>Save</button>
+      <button class="process hero" disabled={cannotSave} on:click={saveIni}>{processing ? '...' : 'Save'}</button>
     </div>
   {:else}
     <p><br />&nbsp; ...</p>
