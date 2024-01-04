@@ -1,6 +1,7 @@
 <script>
   import { onMount, getContext } from 'svelte';
   import { dev } from '$app/environment';
+  import { fly } from 'svelte/transition';
   import { newGetRequest, newPostRequest, logError } from '$lib/sjgmsapi';
   import { devDom, isModPage, processResults } from '$lib/ModPicker';
   import ModPickerWorkshop from '$lib/ModPickerWorkshop.svelte';
@@ -80,22 +81,26 @@
 </script>
 
 
-<div>
-  {#if data}
+{#if data}
+  <div in:fly={{ duration: 300, x: -200 }}>
     <ModPickerWorkshop workshop={data.dom.workshop} items={data.workshop} />
     {#if !data.workshop.available}
-      <ModPickerItem itemName="Mods" items={data.mods} source={data.dom.mods} />
-      {#if data.dom.maps.length > 0}
-        <ModPickerItem itemName="Maps" items={data.maps} source={data.dom.maps} />
-      {/if}
+      <div in:fly={{ duration: 300, x: -200 }}>
+        <ModPickerItem itemName="Mods" items={data.mods} source={data.dom.mods} />
+        {#if data.dom.maps.length > 0}
+          <ModPickerItem itemName="Maps" items={data.maps} source={data.dom.maps} />
+        {/if}
+      </div>
     {/if}
     <div class="save-button">
       <button class="process hero" disabled={cannotSave} on:click={saveIni}>{processing ? '...' : 'Save'}</button>
     </div>
-  {:else}
+  </div>
+{:else}
+  <div>
     <p><br />&nbsp; ...</p>
-  {/if}
-</div>
+  </div>
+{/if}
 
 
 <style>

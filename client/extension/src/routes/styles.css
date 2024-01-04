@@ -81,8 +81,12 @@ button:not(:disabled):hover {
 }
 
 button.process {
-  width: 100px;
+  min-width: 100px;
   height: 28px;
+}
+
+button.process.is-wide {
+  min-width: 200px;
 }
 
 button.process.hero {
