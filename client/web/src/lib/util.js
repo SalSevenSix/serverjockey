@@ -35,6 +35,13 @@ export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }
 
+export function generateIds(prefixes) {
+  const randomId = generateId();
+  return prefixes.map(function(prefix) {
+    return prefix + randomId;
+  });
+}
+
 export function isBoolean(value) {
    return (value === false || value === true);
 }
