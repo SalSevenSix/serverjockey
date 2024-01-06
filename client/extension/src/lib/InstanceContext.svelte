@@ -1,10 +1,9 @@
 <script>
   import { onMount, setContext } from 'svelte';
   import { writable } from 'svelte/store';
-  import { baseurl, newGetRequest, logError } from '$lib/sjgmsapi';
+  import { baseurl, newGetRequest, logError, noStorage } from '$lib/sjgmsapi';
 
   const identityKey = 'sjgmsExtensionSelectedIdentity';
-  const noStorage = typeof(Storage) === 'undefined';
   const instance = writable(null);
   setContext('instance', instance);
 

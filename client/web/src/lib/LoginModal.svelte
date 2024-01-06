@@ -19,7 +19,7 @@
 
   function login() {
     if (cannotLogin) return;
-    fetch('/login', { method: 'post', credentials: 'same-origin', headers: { 'X-Secret': token } })
+    fetch('/login', { method: 'post', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);

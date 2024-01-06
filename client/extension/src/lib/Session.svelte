@@ -1,12 +1,11 @@
 <script>
   import { onMount } from 'svelte';
-  import { connection, logError } from '$lib/sjgmsapi';
+  import { connection, logError, noStorage } from '$lib/sjgmsapi';
   import Login from '$lib/Login.svelte';
   import Logout from '$lib/Logout.svelte';
 
   const urlKey = 'sjgmsExtensionUrl';
   const tokenKey = 'sjgmsExtensionToken';
-  const noStorage = typeof(Storage) === 'undefined';
 
   let checking = true;
   let url = '';

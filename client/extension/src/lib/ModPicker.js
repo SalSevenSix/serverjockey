@@ -1,13 +1,11 @@
+import { baseurl, logError, newGetRequest, noStorage } from '$lib/sjgmsapi';
 
-export const devDom = 'Workshop ID: 9999999999< ' +
+const workshopCacheKey = 'sjgmsExtensionWorkshopCache';
+
+export const devDom = '<div class="workshopItemTitle">Dummy Mod</div> ' +
+                      'Workshop ID: 9999999999< ' +
                       'Mod ID: Alpha< Mod ID: Beta Xyz< Mod ID: Gamma< ' +
                       'Map Folder: Green< Map Folder: Blue Abc';
-
-function cleanDom(dom) {
-  let result = dom.replaceAll('<span class="searchedForText">', '');
-  result = result.replaceAll('</span>', '');
-  return result
-}
 
 function toUnique(arr, reverse=false) {
   let result = [...arr];
@@ -18,7 +16,7 @@ function toUnique(arr, reverse=false) {
 }
 
 function domExtract(dom, cutlen, regex, single=false) {
-  let result = cleanDom(dom).match(regex);
+  let result = dom.match(regex);
   if (!result) return single ? null : [];
   result = result.map(function(value) { return value.substring(cutlen, value.length - 1); });
   return single ? result[result.length - 1] : toUnique(result, true);
@@ -31,6 +29,27 @@ function iniExtract(ini, cutlen, regex) {
   result = result.split(';');
   result = result.filter(function(value) { return value.trim(); });
   return toUnique(result);
+}
+
+function jsonExtract(data) {
+  const [mods, maps] = [[], []];
+  const lines = data.description.split('\n');
+  lines.reverse();
+  let checking = true;
+  lines.forEach(function(line) {
+    if (checking && line) {
+      if (line.startsWith('Map Folder:')) {
+        maps.push(line.substring(12));
+      } else if (line.startsWith('Mod ID:')) {
+        mods.push(line.substring(8));
+      } else if (line.startsWith('Workshop ID:')) {
+        checking = false;
+      }
+    }
+  });
+  maps.reverse();
+  mods.reverse();
+  return { workshop: data.publishedfileid, name: data.title, mods: mods, maps: maps };
 }
 
 function bumpItemUp(items, item) {
@@ -57,13 +76,95 @@ function bumpItemDown(items, item) {
   return items;
 }
 
+
+const workshopCache = {
+  data: null,
+  cache: function() {
+    if (workshopCache.data) return workshopCache.data;
+    workshopCache.data = {};
+    if (noStorage) return workshopCache.data;
+    const stored = localStorage.getItem(workshopCacheKey);
+    if (stored) { workshopCache.data = JSON.parse(stored); }
+    return workshopCache.data;
+  },
+  save: function() {
+    if (noStorage) return;
+    localStorage.setItem(workshopCacheKey, JSON.stringify(workshopCache.data));
+  },
+  add: function(workshop, name, mods, maps) {
+    const item = { name: name, mods: mods };
+    if (maps.length > 0) { item.maps = maps; }
+    workshopCache.cache()[workshop] = item;
+  },
+  get: function(workshop) {
+    const item = workshopCache.cache()[workshop];
+    if (!item) return null;
+    if (!item.maps) { item.maps = []; }
+    return item;
+  },
+  name: function(workshop) {
+    const item = workshopCache.get(workshop);
+    return item ? item.name : '';
+  },
+  uncached: function(workshops, limit=10) {
+    const result = [];
+    if (workshops.length === 0 || limit < 1) return result;
+    for (let i = 0; i < workshops.length; i++) {
+      const item = workshopCache.get(workshops[i]);
+      if (!item) { result.push(workshops[i]); }
+      if (result.length >= limit) return result;
+    }
+    return result;
+  }
+};
+
+async function fetchWorkshops(workshops) {
+  const uncached = workshopCache.uncached(workshops);
+  if (uncached.length === 0) return false;
+  return await fetch(baseurl('/steamapi/published-file-details?ids=' + uncached.join(',')), newGetRequest())
+    .then(function(response) {
+      if (!response.ok) { throw new Error('Status: ' + response.status); }
+      return response.json();
+    })
+    .then(function(json) {
+      if (!json.response || !json.response.publishedfiledetails) return false;
+      json.response.publishedfiledetails.forEach(function(data) {
+        const extracted = jsonExtract(data);
+        workshopCache.add(extracted.workshop, extracted.name, extracted.mods, extracted.maps);
+      });
+      workshopCache.save();
+      return true;
+    })
+    .catch(function(error) {
+      logError(error);
+      return false;
+    });
+}
+
+
+export function isModPage(dom) {
+  if (!dom) return false;
+  const expected = [
+    'steamcommunity.com/app/108600">Project Zomboid',
+    'steamcommunity.com/app/108600/workshop/">Workshop',
+    'Workshop ID:', 'Mod ID:'];
+  const actual = expected.filter(function(value) { return dom.includes(value); });
+  return expected.length === actual.length;
+}
+
+
 export function processResults(dom, ini, updated) {
   const self = { raw: { dom: dom, ini: ini } };
+  let cleanDom = dom.replaceAll('<span class="searchedForText">', '').replaceAll('</span>', '');
   self.dom = {
-    workshop: domExtract(dom, 13, /Workshop ID:(.*?)</g, true),
-    mods: domExtract(dom, 8, /Mod ID:(.*?)</g),
-    maps: domExtract(dom, 12, /Map Folder:(.*?)</g)
+    workshop: domExtract(cleanDom, 13, /Workshop ID:(.*?)</g, true),
+    name: domExtract(cleanDom, 26, /class="workshopItemTitle">(.*?)</g, true),
+    mods: domExtract(cleanDom, 8, /Mod ID:(.*?)</g),
+    maps: domExtract(cleanDom, 12, /Map Folder:(.*?)</g)
   };
+  cleanDom = null;  // free memory
+  workshopCache.add(self.dom.workshop, self.dom.name, self.dom.mods, self.dom.maps);
+  workshopCache.save();
   self.ini = {
     workshops: iniExtract(ini, 14, /^WorkshopItems=.*$/gm),
     mods: iniExtract(ini, 5, /^Mods=.*$/gm),
@@ -85,6 +186,15 @@ export function processResults(dom, ini, updated) {
       self.workshop.selected = self.workshop.selected.filter(function(value) { return value != self.dom.workshop; });
       self.workshop.available = true;
       updated();
+    },
+    api: {
+      filebaseurl: 'https://steamcommunity.com/sharedfiles/filedetails/?id=',
+      name: workshopCache.name,
+      fetch: async function() {
+        let result = await fetchWorkshops(self.workshop.selected);
+        updated();
+        return result;
+      }
     }
   };
   self.mods = {
@@ -157,14 +267,4 @@ export function processResults(dom, ini, updated) {
     return result.join('\n');
   };
   return self;
-}
-
-export function isModPage(dom) {
-  if (!dom) return false;
-  const expected = [
-    'steamcommunity.com/app/108600">Project Zomboid',
-    'steamcommunity.com/app/108600/workshop/">Workshop',
-    'Workshop ID:', 'Mod ID:'];
-  const actual = expected.filter(function(value) { return dom.includes(value); });
-  return expected.length === actual.length;
 }

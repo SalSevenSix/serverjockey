@@ -2,21 +2,31 @@
   import { dev } from '$app/environment';
   import { slide } from 'svelte/transition';
 
-  const workshopFileBaseurl = 'https://steamcommunity.com/sharedfiles/filedetails/?id='
-
   export let workshop;
   export let items;
 
+  let processing = false;
   let selectedVisible = false;
 
   $: togglerText = selectedVisible ? 'hide selected items' : 'show selected items';
+  $: if (selectedVisible) { onSelectedVisible(); }
+
+  async function onSelectedVisible() {
+    if (processing) return;
+    processing = true;
+    let running = true;
+    while (running && selectedVisible) {
+      running = await items.api.fetch();
+    }
+    processing = false;
+  }
 
   function toggleSelectedVisible() {
     selectedVisible = !selectedVisible;
   }
 
   function gotoWorkshopPage(item) {
-    chrome.tabs.update({ active: true, url: workshopFileBaseurl + item });
+    chrome.tabs.update({ active: true, url: items.api.filebaseurl + item });
   }
 </script>
 
@@ -35,15 +45,16 @@
 
 <button class="process is-wide" on:click={toggleSelectedVisible}>{togglerText}</button>
 {#if selectedVisible}
-  <div transition:slide={{ duration: 150 }}>
+  <div transition:slide={{ duration: 200 }}>
     <ul>
       {#each items.selected as item}
         <li>
           {#if dev}
-            <a href={workshopFileBaseurl + item} target="_blank">{item}</a>
+            <a href={items.api.filebaseurl + item} target="_blank">{item}</a>&nbsp;
           {:else}
-            <a href={'#'} on:click|preventDefault={function() { gotoWorkshopPage(item); }}>{item}</a>
+            <a href={'#'} on:click|preventDefault={function() { gotoWorkshopPage(item); }}>{item}</a>&nbsp;
           {/if}
+          {items.api.name(item)}
         </li>
       {/each}
     </ul>

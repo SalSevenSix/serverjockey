@@ -2,7 +2,7 @@ from __future__ import annotations
 import typing
 import re
 import time
-from aiohttp import abc as webabc
+import aiohttp
 # ALLOW util.* msg.* context.* http.httpabc
 from core.util import util
 from core.http import httpabc
@@ -100,7 +100,7 @@ class SecurityService:
         self._secret = secret
         self._failures = {}
 
-    def check(self, request: webabc.Request) -> bool:
+    def check(self, request: aiohttp.abc.Request) -> bool:
         remote, now = request.remote, time.time()
         last_failure = util.get(remote, self._failures)
         if last_failure:
@@ -130,8 +130,8 @@ class SecurityService:
 
 class HeadersTool:
 
-    def __init__(self, request: webabc.Request):
-        self._headers = request.headers
+    def __init__(self, payload: aiohttp.abc.Request | aiohttp.ClientResponse):
+        self._headers = payload.headers
 
     def get(self, key: str) -> str:
         return self._headers.getone(key) if key in self._headers else None

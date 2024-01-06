@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
 
+export const noStorage = typeof(Storage) === 'undefined';
 export const connection = writable();
 export const errorText = writable();
 
