@@ -83,8 +83,15 @@ const workshopCache = {
     if (workshopCache.data) return workshopCache.data;
     workshopCache.data = {};
     if (noStorage) return workshopCache.data;
-    const stored = localStorage.getItem(workshopCacheKey);
-    if (stored) { workshopCache.data = JSON.parse(stored); }
+    let stored = localStorage.getItem(workshopCacheKey);
+    if (!stored) return workshopCache.data;
+    stored = JSON.parse(stored);
+    const now = Date.now();
+    Object.keys(stored).forEach(function(workshop) {
+      if (now - stored[workshop].updated < 172800000) {  // 48 hours
+        workshopCache.data[workshop] = stored[workshop];
+      }
+    });
     return workshopCache.data;
   },
   save: function() {
@@ -92,7 +99,7 @@ const workshopCache = {
     localStorage.setItem(workshopCacheKey, JSON.stringify(workshopCache.data));
   },
   add: function(workshop, name, mods, maps) {
-    const item = { name: name, mods: mods };
+    const item = { updated: Date.now(), name: name, mods: mods };
     if (maps.length > 0) { item.maps = maps; }
     workshopCache.cache()[workshop] = item;
   },
@@ -178,13 +185,23 @@ export function processResults(dom, ini, updated) {
       self.workshop.available = false;
       updated();
     },
-    remove: function() {
-      self.mods.selected = self.mods.selected.filter(function(value) { return !self.dom.mods.includes(value); });
-      self.mods.available = [...self.dom.mods];
-      self.maps.selected = self.maps.selected.filter(function(value) { return !self.dom.maps.includes(value); });
-      self.maps.available = [...self.dom.maps];
-      self.workshop.selected = self.workshop.selected.filter(function(value) { return value != self.dom.workshop; });
-      self.workshop.available = true;
+    remove: function(workshop=null) {
+      if (!workshop) { workshop = self.dom.workshop; }
+      let mods = self.dom.mods;
+      let maps = self.dom.maps;
+      if (workshop == self.dom.workshop) {
+        self.mods.available = [...mods];
+        self.maps.available = [...maps];
+        self.workshop.available = true;
+      } else {
+        const cached = workshopCache.get(workshop);
+        if (!cached) return;
+        mods = cached.mods;
+        maps = cached.maps;
+      }
+      self.mods.selected = self.mods.selected.filter(function(value) { return !mods.includes(value); });
+      self.maps.selected = self.maps.selected.filter(function(value) { return !maps.includes(value); });
+      self.workshop.selected = self.workshop.selected.filter(function(value) { return value != workshop; });
       updated();
     },
     api: {
@@ -192,7 +209,7 @@ export function processResults(dom, ini, updated) {
       name: workshopCache.name,
       fetch: async function() {
         let result = await fetchWorkshops(self.workshop.selected);
-        updated();
+        updated(false);
         return result;
       }
     }

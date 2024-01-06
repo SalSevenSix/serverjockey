@@ -12,9 +12,9 @@
   {#each items.available as item}
     <li>
       <button class="action arrow-down-to-line" title="Add to bottom"
-              on:click={function() { items.addBottom(item); }}></button>&nbsp;
+              on:click={function() { items.addBottom(item); }}>&nbsp;</button>&nbsp;
       <button class="action arrow-down" title="Add to top"
-              on:click={function() { items.addTop(item); }}></button>&nbsp;
+              on:click={function() { items.addTop(item); }}>&nbsp;</button>&nbsp;
       {item}
     </li>
   {/each}
@@ -28,9 +28,12 @@
   {#each items.selected as item}
     {#if source.includes(item)}
       <li>
-        <button class="action cross" title="Remove" on:click={function() { items.remove(item); }}></button>
-        <button class="action chevron-up" title="Move up" on:click={function() { items.bumpUp(item); }}></button>
-        <button class="action chevron-down" title="Move down" on:click={function() { items.bumpDown(item); }}></button>
+        <button class="action cross" title="Remove"
+                on:click={function() { items.remove(item); }}>&nbsp;</button>
+        <button class="action chevron-up" title="Move up"
+                on:click={function() { items.bumpUp(item); }}>&nbsp;</button>
+        <button class="action chevron-down" title="Move down"
+                on:click={function() { items.bumpDown(item); }}>&nbsp;</button>
         {item}
       </li>
     {:else}

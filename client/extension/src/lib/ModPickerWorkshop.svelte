@@ -14,9 +14,8 @@
   async function onSelectedVisible() {
     if (processing) return;
     processing = true;
-    let running = true;
-    while (running && selectedVisible) {
-      running = await items.api.fetch();
+    while (processing && selectedVisible) {
+      processing = await items.api.fetch();
     }
     processing = false;
   }
@@ -46,7 +45,7 @@
 <button class="process is-wide" on:click={toggleSelectedVisible}>{togglerText}</button>
 {#if selectedVisible}
   <div transition:slide={{ duration: 200 }}>
-    <ul>
+    <ol>
       {#each items.selected as item}
         <li>
           {#if dev}
@@ -54,9 +53,13 @@
           {:else}
             <a href={'#'} on:click|preventDefault={function() { gotoWorkshopPage(item); }}>{item}</a>&nbsp;
           {/if}
+          {#if items.api.name(item)}
+            <button class="action cross" title="Remove"
+                    on:click={function() { items.remove(item); }}>&nbsp;</button>
+          {/if}
           {items.api.name(item)}
         </li>
       {/each}
-    </ul>
+    </ol>
   </div>
 {/if}
