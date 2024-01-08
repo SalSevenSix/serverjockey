@@ -72,7 +72,7 @@
         <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
            target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Google Chrome
       {:else if browserName === 'Edge'}
-        <a href="https://todo"
+        <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
            target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Microsoft Edge
       {:else}
         browser extension for Google Chrome and Microsoft Edge

@@ -14,10 +14,14 @@
     <h2 class="title is-3 mt-2">Browser Extension</h2>
     <p>
       ServerJockey has a browser extension for
-      <a href="https://www.google.com/chrome" target="_blank">Google Chrome
-        <i class="fa fa-up-right-from-square"></i></a> and
-      <a href="https://www.microsoft.com/en-us/edge" target="_blank">Microsoft Edge
-        <i class="fa fa-up-right-from-square"></i></a>
+      {#if browserName === 'Chrome' || browserName === 'Edge'}
+        <a href="https://www.google.com/chrome" target="_blank">Google Chrome
+          <i class="fa fa-up-right-from-square"></i></a> and
+        <a href="https://www.microsoft.com/en-us/edge" target="_blank">Microsoft Edge
+          <i class="fa fa-up-right-from-square"></i></a>
+      {:else}
+        Google Chrome and Microsoft Edge
+      {/if}
       that can be used to manage mods for Project Zomboid servers.
       This guide will show you how to install and use this extension.
     </p>
@@ -29,16 +33,27 @@
   {#if browserName === 'Chrome'}
     <p><span class="step-title"></span>
       First step is to
-      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
-        download and install the extension <i class="fa fa-up-right-from-square"></i></a> from the Chrome web store.
-      First click the <span class="has-text-weight-bold">Add to Chrome</span> button on the page
-      then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
+         target="_blank">download and install the extension <i class="fa fa-up-right-from-square"></i></a>
+      from the Chrome web store.
+      First click the <span class="has-text-weight-bold">Add to Chrome</span> button on the page then the
+      <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
     </p>
     <figure class="image max-844">
       <img src="/assets/guides/extension/chrome_extension_page.jpg" alt="Chrome extension page" />
     </figure>
   {:else if browserName === 'Edge'}
-    todo
+    <p><span class="step-title"></span>
+      First step is to
+      <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
+         target="_blank">download and install the extension <i class="fa fa-up-right-from-square"></i></a>
+      from the Edge website.
+      First click the <span class="has-text-weight-bold">Get</span> button on the page then the
+      <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+    </p>
+    <figure class="image max-844">
+      <img src="/assets/guides/extension/edge_extension_page.png" alt="Edge extension page" />
+    </figure>
   {:else}
     <p class="pb-3"><span class="step-title"></span>
       First step is to download and install either
@@ -47,12 +62,12 @@
       <a href="https://www.microsoft.com/en-us/edge/download" target="_blank">
         Edge browser <i class="fa fa-up-right-from-square"></i></a>
       then return to this guide using that browser. Then download and install the
-      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj" target="_blank">
-        Chrome extension <i class="fa fa-up-right-from-square"></i></a> or
-      <a href="https://todo" target="_blank">
-        Edge extension <i class="fa fa-up-right-from-square"></i></a> accordingly.
+      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
+         target="_blank">Chrome extension <i class="fa fa-up-right-from-square"></i></a> or
+      <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
+         target="_blank">Edge extension <i class="fa fa-up-right-from-square"></i></a> accordingly.
     </p>
-    <div class="columns">
+    <div class="columns is-gapless is-tablet">
       <div class="column is-one-fifth"></div>
       <div class="column is-one-fifth content">
         <a href="https://www.google.com/chrome" title="Download Chrome" target="_blank">
@@ -73,11 +88,16 @@
 <div class="content">
   <p><span class="step-title"></span>
     After the extension is installed, you can optionally pin the extension to the menu bar for ease of access.
-    To do this, open the extensions popup using the jigsaw button then click the pin button for
-    the ServerJockey extension. The rest of the guide assumes the extension is pinned.
+    To do this, open the extensions popup using the jigsaw button then click the
+    <span class="has-text-weight-bold">{browserName === 'Edge' ? 'Show in toolbar' : 'Pin'}</span>
+    button for the ServerJockey extension. The rest of the guide assumes the extension is pinned.
   </p>
-  <figure class="image max-600">
-    <img src="/assets/guides/extension/pin_extension.png" alt="Pin Extension" />
+  <figure class="image max-500">
+    {#if browserName === 'Edge'}
+      <img src="/assets/guides/extension/edge_pin_extension.png" alt="Pin Edge extension" />
+    {:else}
+      <img src="/assets/guides/extension/chrome_pin_extension.png" alt="Pin Chrome extension" />
+    {/if}
   </figure>
 </div>
 

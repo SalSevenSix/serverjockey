@@ -54,6 +54,10 @@ figure.max-600 img {
   max-width: 600px;
 }
 
+figure.max-500 img {
+  max-width: 500px;
+}
+
 figure.max-400 img, figure.max-400 svg {
   max-width: 400px;
 }

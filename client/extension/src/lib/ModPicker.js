@@ -33,7 +33,7 @@ function iniExtract(ini, cutlen, regex) {
 
 function jsonExtract(data) {
   const [mods, maps] = [[], []];
-  const lines = data.description.split('\n');
+  const lines = data.description.replaceAll('\r', '\n').split('\n');
   lines.reverse();
   let checking = true;
   lines.forEach(function(line) {
@@ -106,8 +106,8 @@ const workshopCache = {
   get: function(workshop) {
     const item = workshopCache.cache()[workshop];
     if (!item) return null;
-    if (!item.maps) { item.maps = []; }
-    return item;
+    const maps = item.mods ? item.mods : [];
+    return { updated: item.updated, name: item.name, mods: item.mods, maps: maps };
   },
   name: function(workshop) {
     const item = workshopCache.get(workshop);
@@ -134,10 +134,12 @@ async function fetchWorkshops(workshops) {
       return response.json();
     })
     .then(function(json) {
-      if (!json.response || !json.response.publishedfiledetails) return false;
+      if (!json.response || json.response.result != 1 || !json.response.publishedfiledetails) return false;
       json.response.publishedfiledetails.forEach(function(data) {
-        const extracted = jsonExtract(data);
-        workshopCache.add(extracted.workshop, extracted.name, extracted.mods, extracted.maps);
+        if (data.result === 1) {
+          const extracted = jsonExtract(data);
+          workshopCache.add(extracted.workshop, extracted.name, extracted.mods, extracted.maps);
+        }
       });
       workshopCache.save();
       return true;
