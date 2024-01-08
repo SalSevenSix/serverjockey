@@ -5,7 +5,6 @@
   import { notifyError } from '$lib/notifications';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
 
-  const instance = getContext('instance');
   const query = getContext('query');
   const objectUrls = new ObjectUrls();
 
@@ -17,7 +16,7 @@
 
   async function queryChats(criteria) {
     processing = true;
-    let atrange = criteria.atrange();
+    const [instance, atrange] = [criteria.instance(), criteria.atrange()];
     let url = '/store/player/chat?instance=' + instance.identity();
     url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
     return await fetch(url, newGetRequest())
@@ -53,15 +52,17 @@
              atrange: data.criteria.atto - data.criteria.atfrom }, results: chats };
   }
 
-  query.execute = function() {
+  function execute() {
     queryChats(query.criteria).then(function(data) {
       results = data;
       activity = extractActivity(data);
     });
   }
 
+  query.onExecute(execute);
+
   onMount(function() {
-    tick().then(query.execute);
+    tick().then(execute);
   });
 
   onDestroy(function() {

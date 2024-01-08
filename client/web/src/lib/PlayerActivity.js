@@ -5,9 +5,6 @@ import { notifyError } from '$lib/notifications';
 
 function extractInstances(queryResults) {
   let result = [];
-  queryResults.lastevent.records.forEach(function(record) {
-    if (!result.includes(record[1])) { result.push(record[1]); }
-  });
   queryResults.events.records.forEach(function(record) {
     if (!result.includes(record[1])) { result.push(record[1]); }
   });
@@ -20,7 +17,9 @@ function toLastEventMap(instances, data) {
     result[instance] = {};
   });
   data.records.forEach(function(record) {
-    result[record[1]][record[2]] = record[3];
+    if (result.hasOwnProperty(record[1])) {
+      result[record[1]][record[2]] = record[3];
+    }
   });
   return result;
 }
@@ -196,14 +195,14 @@ async function queryFetch(url, errorMessage) {
     .catch(function(error) { notifyError(errorMessage); });
 }
 
-export async function queryEvents(criteria) {
-  let url = '/store/player/event?atfrom=' + criteria.atfrom + '&atto=' + criteria.atto;
-  if (criteria.instance) { url += '&instance=' + criteria.instance; }
+export async function queryEvents(instance, atfrom, atto) {
+  let url = '/store/player/event?atfrom=' + atfrom + '&atto=' + atto;
+  if (instance) { url += '&instance=' + instance; }
   return await queryFetch(url, 'Failed to query player events.');
 }
 
-export async function queryLastEvent(criteria) {
-  let url = '/store/player/event?atgroup=max&atto=' + criteria.atfrom;
-  if (criteria.instance) { url += '&instance=' + criteria.instance; }
+export async function queryLastEvent(instance, atfrom) {
+  let url = '/store/player/event?atgroup=max&atto=' + atfrom;
+  if (instance) { url += '&instance=' + instance; }
   return await queryFetch(url, 'Failed to query last player event.');
 }

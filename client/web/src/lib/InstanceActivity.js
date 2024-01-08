@@ -87,22 +87,22 @@ async function queryFetch(url, errorMessage) {
     .catch(function(error) { notifyError(errorMessage); });
 }
 
-export async function queryInstance(criteria) {
+export async function queryInstance(instance) {
   let url = '/store/instance';
-  if (criteria.instance) { url += '?instance=' + criteria.instance; }
+  if (instance) { url += '?instance=' + instance; }
   return await queryFetch(url, 'Failed to query instance.');
 }
 
-export async function queryEvents(criteria) {
+export async function queryEvents(instance, atfrom, atto) {
   let url = '/store/instance/event?events=STARTED,STOPPED,EXCEPTION';
-  url += '&atfrom=' + criteria.atfrom + '&atto=' + criteria.atto;
-  if (criteria.instance) { url += '&instance=' + criteria.instance; }
+  url += '&atfrom=' + atfrom + '&atto=' + atto;
+  if (instance) { url += '&instance=' + instance; }
   return await queryFetch(url, 'Failed to query instance events.');
 }
 
-export async function queryLastEvent(criteria) {
+export async function queryLastEvent(instance, atfrom) {
   let url = '/store/instance/event?events=STARTED,STOPPED,EXCEPTION';
-  url += '&atgroup=max&atto=' + criteria.atfrom;
-  if (criteria.instance) { url += '&instance=' + criteria.instance; }
+  url += '&atgroup=max&atto=' + atfrom;
+  if (instance) { url += '&instance=' + instance; }
   return await queryFetch(url, 'Failed to query last instance event.');
 }

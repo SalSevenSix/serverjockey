@@ -13,10 +13,7 @@
   import WorldControls from '$lib/WorldControls.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
-  import CheckStore from '$lib/CheckStore.svelte';
-  import InstanceActivity from '$lib/InstanceActivity.svelte';
-  import PlayerActivity from '$lib/PlayerActivity.svelte';
-  import ChatActivityGadget from '$lib/ChatActivityGadget.svelte';
+  import StoreInstance from '$lib/StoreInstance.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -77,15 +74,7 @@
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
       </Collapsible>
-      <CheckStore>
-        <Collapsible icon="fa-chart-pie" title="Activity">
-          <InstanceActivity />
-          <PlayerActivity />
-        </Collapsible>
-        <Collapsible icon="fa-comments" title="Chat Log">
-          <ChatActivityGadget />
-        </Collapsible>
-      </CheckStore>
+      <StoreInstance />
     </div>
   </div>
 </ServerStatusStore>

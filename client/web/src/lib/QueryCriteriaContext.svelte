@@ -2,6 +2,8 @@
   import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
 
+  const executes = new Set();
+
   function newBlockerStore() {
     const { subscribe, set } = writable(false);
     const blocks = [];
@@ -25,7 +27,14 @@
   const query = {
     criteria: {},
     blocker: newBlockerStore(),
-    execute: function() {}
+    onExecute: function(callable) {
+      executes.add(callable);
+    },
+    execute: function() {
+      for (let callable of executes.values()) {
+        callable();
+      }
+    }
   };
 
   setContext('query', query);

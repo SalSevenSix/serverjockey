@@ -1,15 +1,18 @@
 <script>
-  import { onMount, onDestroy, getContext } from 'svelte';
+  import { onMount, onDestroy, getContext, tick } from 'svelte';
   import { queryEvents, queryLastEvent, extractActivity, compactPlayers } from '$lib/PlayerActivity';
   import { floatToPercent, chunkArray, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util';
   import SpinnerIcon from '$lib/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/ChartCanvas.svelte';
 
-  const instance = getContext('instance');
+  const query = getContext('query');
   const objectUrls = new ObjectUrls();
 
+  let processing = true;
   let results = null;
   let activity = null;
+
+  $: query.blocker.notify('PlayerActivityProcessing', processing);
 
   function chartDataPlayers(instance) {
     let players = compactPlayers(instance.players, 7);
@@ -45,20 +48,20 @@
   }
 
   function queryActivity(criteria) {
-    activity = null;
-    results = {};
-    Promise.all([queryLastEvent(criteria), queryEvents(criteria)]).then(function(data) {
-      [results.lastevent, results.events] = data;
-      activity = extractActivity(results);
-    });
+    [processing, activity, results] = [true, null, {}];
+    const [instance, atrange] = [query.criteria.instance().identity(), query.criteria.atrange()];
+    Promise.all([queryLastEvent(instance, atrange.atfrom), queryEvents(instance, atrange.atfrom, atrange.atto)])
+      .then(function(data) {
+        [results.lastevent, results.events] = data;
+        activity = extractActivity(results);
+      })
+      .finally(function() { processing = false; });
   }
 
+  query.onExecute(queryActivity);
+
   onMount(function() {
-    let criteria = { instance: null };
-    if (instance) { criteria.instance = instance.identity(); }
-    criteria.atto = Date.now();
-    criteria.atfrom = criteria.atto - 2592000000;  // 30 days
-    queryActivity(criteria);
+    tick().then(queryActivity);
   });
 
   onDestroy(function() {

@@ -12,10 +12,7 @@
   import CommandBuilder from '$lib/CommandBuilder.svelte';
   import RuntimeControls from '$lib/RuntimeControls.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
-  import CheckStore from '$lib/CheckStore.svelte';
-  import InstanceActivity from '$lib/InstanceActivity.svelte';
-  import PlayerActivity from '$lib/PlayerActivity.svelte';
-  import ChatActivityGadget from '$lib/ChatActivityGadget.svelte';
+  import StoreInstance from '$lib/StoreInstance.svelte';
 
   const consoleCommands = {
     'console': {
@@ -60,15 +57,7 @@
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions hasWorld={false} />
       </Collapsible>
-      <CheckStore>
-        <Collapsible icon="fa-chart-pie" title="Activity">
-          <InstanceActivity />
-          <PlayerActivity />
-        </Collapsible>
-        <Collapsible icon="fa-comments" title="Chat Log">
-          <ChatActivityGadget />
-        </Collapsible>
-      </CheckStore>
+      <StoreInstance />
     </div>
   </div>
 </ServerStatusStore>

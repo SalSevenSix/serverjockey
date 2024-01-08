@@ -12,6 +12,7 @@
     '86400000': '24 hours', '604800000': '7 days', '1209600000': '14 days',
     '2592000000': '30 days', '5184000000': '60 days', '7776000000': '90 days' };
 
+  export let headless = false;
   export let defaultFromMillis = '2592000000';
 
   let [atfrom, atfromValid, atfromMillis] = [null, false, defaultFromMillis];
@@ -83,51 +84,53 @@
 </script>
 
 
-<div class="columns is-gapless">
-  <div class="column">
-    <div class="columns">
-      <div class="column is-7">
-        <div class="field">
-          <label for={atfromId} class="label" title="Begin date and time for search range">Date From</label>
-          <DateInput id={atfromId} timePrecision="second" placeholder=" ---" min={minDate}
-                     bind:disabled={hasAtfromMillis} bind:valid={atfromValid} bind:value={atfrom} />
+{#if !headless}
+  <div class="columns is-gapless">
+    <div class="column">
+      <div class="columns">
+        <div class="column is-7">
+          <div class="field">
+            <label for={atfromId} class="label" title="Begin date and time for search range">Date From</label>
+            <DateInput id={atfromId} timePrecision="second" placeholder=" ---" min={minDate}
+                       bind:disabled={hasAtfromMillis} bind:valid={atfromValid} bind:value={atfrom} />
+          </div>
+        </div>
+        <div class="column is-5">
+          <div class="field">
+            <label for={atfromMillisId} class="label" title="use preset range previous to Date To">or previous</label>
+            <div class="control select">
+              <select id={atfromMillisId} bind:value={atfromMillis}>
+                {#each Object.keys(atfromOptions) as key}
+                  <option value={key}>{atfromOptions[key]}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="column is-5">
-        <div class="field">
-          <label for={atfromMillisId} class="label" title="use preset range previous to Date To">or previous</label>
-          <div class="control select">
-            <select id={atfromMillisId} bind:value={atfromMillis}>
-              {#each Object.keys(atfromOptions) as key}
-                <option value={key}>{atfromOptions[key]}</option>
-              {/each}
-            </select>
+    </div>
+    <div class="column">
+      <div class="columns">
+        <div class="column is-7">
+          <div class="field">
+            <label for={attoId} class="label" title="End date and time for search range">Date To</label>
+            <DateInput id={attoId} timePrecision="second" placeholder=" ---" min={minDate}
+                       bind:disabled={hasAttoPreset} bind:valid={attoValid} bind:value={atto} />
+          </div>
+        </div>
+        <div class="column is-5">
+          <div class="field">
+            <label for={attoPresetId} class="label" title="use preset date and time">or preset</label>
+            <div class="control select">
+              <select id={attoPresetId} bind:value={attoPreset}>
+                {#each attoOptions as option}
+                  <option>{option}</option>
+                {/each}
+              </select>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="column">
-    <div class="columns">
-      <div class="column is-7">
-        <div class="field">
-          <label for={attoId} class="label" title="End date and time for search range">Date To</label>
-          <DateInput id={attoId} timePrecision="second" placeholder=" ---" min={minDate}
-                     bind:disabled={hasAttoPreset} bind:valid={attoValid} bind:value={atto} />
-        </div>
-      </div>
-      <div class="column is-5">
-        <div class="field">
-          <label for={attoPresetId} class="label" title="use preset date and time">or preset</label>
-          <div class="control select">
-            <select id={attoPresetId} bind:value={attoPreset}>
-              {#each attoOptions as option}
-                <option>{option}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+{/if}
