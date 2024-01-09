@@ -15,7 +15,7 @@
   $: query.blocker.notify('InstanceActivityProcessing', processing);
 
   function chartData(instance) {
-    let upTime = Math.round(instance.available * 1000.0) / 10.0;
+    const upTime = Math.round(instance.available * 1000.0) / 10.0;
     return {
       type: 'pie',
       data: {

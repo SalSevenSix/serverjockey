@@ -15,36 +15,36 @@
   $: query.blocker.notify('PlayerActivityProcessing', processing);
 
   function chartDataPlayers(instance) {
-    let players = compactPlayers(instance.players, 7);
-    let labels = players.map(function(player) {
+    const players = compactPlayers(instance.players, 7);
+    const labels = players.map(function(player) {
       return player.player.substring(0, 13);
     });
-    let data = players.map(function(player) {
+    const data = players.map(function(player) {
       return Math.round(player.uptimepct * 1000.0) / 10.0;
     });
     return {
       type: 'pie',
       data: { labels: labels, datasets: [{ label: ' % ', data: data }] },
       options: { plugins: { legend: { position: 'right' }}}
-    }
+    };
   }
 
-  function chartDataDays(instance) {
-    let labels = instance.days.map(function(day) {
-      return shortISODateTimeString(day.atto).substring(5, 10);
+  function chartDataIntervals(instance) {
+    const labels = instance.intervals.map(function(interval) {
+      return shortISODateTimeString(interval.atto).substring(5, 10);
     });
-    let playerHours = instance.days.map(function(day) {
-      return day.uptime / 3600000;
+    const playerHours = instance.intervals.map(function(interval) {
+      return interval.uptime / 3600000;
     });
-    let sessions = instance.days.map(function(day) {
-      return day.sessions;
+    const sessions = instance.intervals.map(function(interval) {
+      return interval.sessions;
     });
     return {
       type: 'line',
       data: { labels: labels,
               datasets: [{ label: 'player hours', data: playerHours },
                          { label: 'sessions', data: sessions }]}
-    }
+    };
   }
 
   function queryActivity(criteria) {
@@ -116,8 +116,8 @@
             <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
           </div>
         </div>
-        <div class="block chart-container-days">
-          <div><ChartCanvas data={chartDataDays(activity.results[instance])} /></div>
+        <div class="block chart-container-intervals">
+          <div><ChartCanvas data={chartDataIntervals(activity.results[instance])} /></div>
         </div>
         <div class="columns mt-1">
           {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn}
@@ -160,11 +160,11 @@
     margin: -70px auto -60px auto;
   }
 
-  .chart-container-days {
+  .chart-container-intervals {
     overflow-x: auto;
   }
 
-  .chart-container-days div {
+  .chart-container-intervals div {
     max-width: 860px;
     min-width: 700px;
     margin: 0px auto 8px auto;

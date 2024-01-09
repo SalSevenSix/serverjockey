@@ -5,6 +5,9 @@ import { notifyError } from '$lib/notifications';
 
 function extractInstances(queryResults) {
   let result = [];
+  queryResults.lastevent.records.forEach(function(record) {
+    if (!result.includes(record[1])) { result.push(record[1]); }
+  });
   queryResults.events.records.forEach(function(record) {
     if (!result.includes(record[1])) { result.push(record[1]); }
   });
@@ -17,9 +20,7 @@ function toLastEventMap(instances, data) {
     result[instance] = {};
   });
   data.records.forEach(function(record) {
-    if (result.hasOwnProperty(record[1])) {
-      result[record[1]][record[2]] = record[3];
-    }
+    result[record[1]][record[2]] = record[3];
   });
   return result;
 }
@@ -42,34 +43,34 @@ function newOnlineTracker() {
   return self;
 }
 
-function newDailyTracker(log, atfrom, atto) {
-  let dayMillis = 24 * 60 * 60 * 1000;
-  let self = { days: [] };
-  let current = atfrom;
+function newIntervalTracker(log, atfrom, atto) {
+  let intervalMillis = 24 * 60 * 60 * 1000;  // day
+  let self = { intervals: [] };
+  let current = atfrom;  // TODO need to do this in reverse
   while (current < atto) {
-    let day = { sessions: 0, uptime: 0, atfrom: current, atto: current + dayMillis };
-    // log.append(shortISODateTimeString(day.atfrom) + '   ' + shortISODateTimeString(day.atto));
-    self.days.push(day);
-    current += dayMillis;
+    let interval = { sessions: 0, uptime: 0, atfrom: current, atto: current + intervalMillis };
+    // log.append(shortISODateTimeString(interval.atfrom) + '   ' + shortISODateTimeString(interval.atto));
+    self.intervals.push(interval);
+    current += intervalMillis;
   }
   self.session = function(login, logout) {
-    self.days.forEach(function(day) {
-      if (login >= day.atfrom && logout <= day.atto) {
-        // log.append(shortISODateTimeString(day.atfrom) + ' >< ' + humanDuration(logout - login));
-        day.uptime += logout - login;
-        day.sessions += 1;
-      } else if (logout >= day.atfrom && logout <= day.atto && login < day.atfrom) {
-        // log.append(shortISODateTimeString(day.atfrom) + ' << ' + humanDuration(logout - day.atfrom));
-        day.uptime += logout - day.atfrom;
-        day.sessions += 1;
-      } else if (login >= day.atfrom && login <= day.atto && logout > day.atto) {
-        // log.append(shortISODateTimeString(day.atfrom) + ' >> ' + humanDuration(day.atto - login));
-        day.uptime += day.atto - login;
-        day.sessions += 1;
-      } else if (login < day.atfrom && logout > day.atto) {
-        // log.append(shortISODateTimeString(day.atfrom) + ' <> ' + humanDuration(dayMillis));
-        day.uptime += dayMillis;
-        day.sessions += 1;
+    self.intervals.forEach(function(interval) {
+      if (login >= interval.atfrom && logout <= interval.atto) {
+        // log.append(shortISODateTimeString(interval.atfrom) + ' >< ' + humanDuration(logout - login));
+        interval.uptime += logout - login;
+        interval.sessions += 1;
+      } else if (logout >= interval.atfrom && logout <= interval.atto && login < interval.atfrom) {
+        // log.append(shortISODateTimeString(interval.atfrom) + ' << ' + humanDuration(logout - interval.atfrom));
+        interval.uptime += logout - interval.atfrom;
+        interval.sessions += 1;
+      } else if (login >= interval.atfrom && login <= interval.atto && logout > interval.atto) {
+        // log.append(shortISODateTimeString(interval.atfrom) + ' >> ' + humanDuration(interval.atto - login));
+        interval.uptime += interval.atto - login;
+        interval.sessions += 1;
+      } else if (login < interval.atfrom && logout > interval.atto) {
+        // log.append(shortISODateTimeString(interval.atfrom) + ' <> ' + humanDuration(intervalMillis));
+        interval.uptime += intervalMillis;
+        interval.sessions += 1;
       }
     });
   };
@@ -81,13 +82,13 @@ export function extractActivity(queryResults) {
   let data = queryResults.events;
   let instances = extractInstances(queryResults);
   let lastEventMap = toLastEventMap(instances, queryResults.lastevent);
-  let dailyTrackers = {};
+  let intervalTrackers = {};
   let onlineTrackers = {};
   let entries = {};
   let entry = null;
   instances.forEach(function(instance) {  // Initialise entries
     entries[instance] = {};
-    dailyTrackers[instance] = newDailyTracker(log, data.criteria.atfrom, data.criteria.atto);
+    intervalTrackers[instance] = newIntervalTracker(log, data.criteria.atfrom, data.criteria.atto);
     onlineTrackers[instance] = newOnlineTracker();
     Object.keys(lastEventMap[instance]).forEach(function(player) {
       if (lastEventMap[instance][player] === 'LOGIN') {
@@ -117,7 +118,7 @@ export function extractActivity(queryResults) {
         /* log.append(shortISODateTimeString(entry.at) + '  ' + shortISODateTimeString(at) + ' '
                  + humanDuration(at - entry.at) + '   - ' + player); */
         entry.uptime += at - entry.at;
-        dailyTrackers[instance].session(entry.at, at);
+        intervalTrackers[instance].session(entry.at, at);
         onlineTrackers[instance].logout();
       }
       entry.at = at;
@@ -133,7 +134,7 @@ export function extractActivity(queryResults) {
                  + humanDuration(data.criteria.atto - entry.at)
                  + '  = ' + player); */
         entry.uptime += data.criteria.atto - entry.at;
-        dailyTrackers[instance].session(entry.at, data.criteria.atto);
+        intervalTrackers[instance].session(entry.at, data.criteria.atto);
       }
     });
   });
@@ -155,11 +156,12 @@ export function extractActivity(queryResults) {
     });
     let summary = { instance: instance, total: total, unique: players.length };
     summary.online = { min: onlineTrackers[instance].min, max: onlineTrackers[instance].max };
-    let days = [];
-    dailyTrackers[instance].days.forEach(function(day) {
-      days.push({ atfrom: day.atfrom, atto: day.atto, sessions: day.sessions, uptime: day.uptime });
+    let intervals = intervalTrackers[instance].intervals.map(function(interval) {
+      return { atfrom: interval.atfrom, atto: interval.atto, sessions: interval.sessions, uptime: interval.uptime };
     });
-    results[instance] = { summary: summary, players: players, days: days };
+    if (total.sessions > 0) {
+      results[instance] = { summary: summary, players: players, intervals: intervals };
+    }
   });
   return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
            atrange: data.criteria.atto - data.criteria.atfrom, log: log.toText() }, results: results };
