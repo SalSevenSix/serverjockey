@@ -15,6 +15,7 @@
   export let headless = false;
   export let defaultFromMillis = '2592000000';
 
+  let updating = false;
   let [atfrom, atfromValid, atfromMillis] = [null, false, defaultFromMillis];
   let [atto, attoValid, attoPreset] = [null, false, attoOptions[1]];
 
@@ -41,6 +42,7 @@
   }
 
   function focusElement(elementId) {
+    if (updating) return;
     tick().then(function() { document.getElementById(elementId).focus(); });
   }
 
@@ -75,6 +77,13 @@
     if (atfrom) { millis.atfrom = Math.trunc(atfrom.getTime() / 1000) * 1000; }
     if (hasAtfromMillis) { millis.atfrom = millis.atto - parseInt(atfromMillis); }
     return millis;
+  }
+
+  query.callups.setRange = function(from, to) {
+    updating = true;
+    [attoPreset, atfromMillis] = [attoOptions[0], '0'];
+    [atto, atfrom] = [to, from];
+    tick().then(function() { updating = false; });
   }
 
   query.criteria.atrange = function() {

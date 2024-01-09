@@ -30,9 +30,11 @@
   }
 
   function chartDataIntervals(instance) {
-    const labels = instance.intervals.data.map(function(interval) {
-      const dt = shortISODateTimeString(interval.atfrom);
-      return instance.intervals.hours > 1 ? dt.substring(5, 10) : dt.substring(11, 16);
+    const labels = {};
+    instance.intervals.data.forEach(function(interval) {
+      const dts = shortISODateTimeString(interval.atfrom);
+      const label = instance.intervals.hours > 1 ? dts.substring(5, 10) : dts.substring(11, 16);
+      labels[label] = interval.atfrom;
     });
     const playerHours = instance.intervals.data.map(function(interval) {
       return interval.uptime / 3600000;
@@ -42,9 +44,23 @@
     });
     return {
       type: 'line',
-      data: { labels: labels,
-              datasets: [{ label: 'player hours', data: playerHours },
-                         { label: 'sessions', data: sessions }]}
+      data: {
+        labels: Object.keys(labels),
+        datasets: [{ label: 'player hours', data: playerHours }, { label: 'sessions', data: sessions }]
+      },
+      options: {
+        onClick: function(e, a) {
+          const label = e.chart.data.labels[a[0].index];
+          const atfrom = new Date(labels[label]);
+          const [year, month, day] = [atfrom.getFullYear(), atfrom.getMonth(), atfrom.getDate()];
+          if (label.includes('-')) {
+            query.callups.setRange(new Date(year, month, day), new Date(year, month, day + 1));
+          } else {
+            query.callups.setRange(new Date(year, month, day - 15), new Date(year, month, day + 15));
+          }
+          tick().then(query.execute);
+        }
+      }
     };
   }
 
