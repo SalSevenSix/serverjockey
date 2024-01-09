@@ -65,10 +65,11 @@
   }
 
   function queryActivity(criteria) {
-    [processing, activity, results] = [true, null, {}];
+    processing = true;
     const [instance, atrange] = [query.criteria.instance().identity(), query.criteria.atrange()];
     Promise.all([queryLastEvent(instance, atrange.atfrom), queryEvents(instance, atrange.atfrom, atrange.atto)])
       .then(function(data) {
+        results = {};
         [results.lastevent, results.events] = data;
         activity = extractActivity(results);
       })
@@ -87,87 +88,87 @@
 </script>
 
 
-{#if activity}
-  <div class="block">
-    <div class="columns">
-      <div class="column is-2 mb-0 pb-0">
-        <p class="has-text-weight-bold">Players</p>
-      </div>
-      <div class="column is-10">
-        <p>
-          <a href={'#'} on:click|preventDefault={function() { objectUrls.openObject(results); }}>
-            results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
-          <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
-          <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
-          <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
-        </p>
-      </div>
+{#if processing}
+  <div class="content">
+    <p><SpinnerIcon /> Loading Player Activity...</p>
+  </div>
+{:else if activity}
+  <div class="columns">
+    <div class="column is-2">
+      <p class="has-text-weight-bold">Players</p>
     </div>
-    {#if Object.keys(activity.results).length > 0}
-      {#each Object.keys(activity.results) as instance}
-        <div class="columns">
-          <div class="column mt-0 pt-0">
-            <table class="table is-thinner"><tbody>
-              <tr><td></td><td></td><tr>
-              <tr><td class="has-text-weight-bold"
-                      title="Instance for reported player activity">Instance</td>
-                  <td>{activity.results[instance].summary.instance}</td></tr>
-              <tr><td class="has-text-weight-bold"
-                      title="Number of unique players identified">Players</td>
-                  <td>{activity.results[instance].summary.unique}</td></tr>
-              <tr><td class="has-text-weight-bold"
-                      title="Maximum recorded concurrent players">Players Max</td>
-                  <td>{activity.results[instance].summary.online.max}</td></tr>
-              <tr><td class="has-text-weight-bold"
-                      title="Minimum recorded concurrent players">Players Min</td>
-                  <td>{activity.results[instance].summary.online.min}</td></tr>
-              <tr><td class="has-text-weight-bold"
-                      title="Sum of time played by all players">Total Time</td>
-                  <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
-              <tr><td class="has-text-weight-bold"
-                      title="Sum of player sessions (logins)">Total Sessions</td>
-                  <td>{activity.results[instance].summary.total.sessions}</td></tr>
+    <div class="column is-10">
+      <p>
+        <a href={'#'} on:click|preventDefault={function() { objectUrls.openObject(results); }}>
+          results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
+        <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
+        <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
+        <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
+      </p>
+    </div>
+  </div>
+{/if}
+
+{#if activity}
+  {#if Object.keys(activity.results).length === 0}
+    <div class="content pb-4">
+      <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No player activity found</p>
+    </div>
+  {:else}
+    {#each Object.keys(activity.results) as instance}
+      <div class="columns">
+        <div class="column mt-0 pt-0">
+          <table class="table is-thinner"><tbody>
+            <tr><td></td><td></td><tr>
+            <tr><td class="has-text-weight-bold"
+                    title="Instance for reported player activity">Instance</td>
+                <td>{activity.results[instance].summary.instance}</td></tr>
+            <tr><td class="has-text-weight-bold"
+                    title="Number of unique players identified">Players</td>
+                <td>{activity.results[instance].summary.unique}</td></tr>
+            <tr><td class="has-text-weight-bold"
+                    title="Maximum recorded concurrent players">Players Max</td>
+                <td>{activity.results[instance].summary.online.max}</td></tr>
+            <tr><td class="has-text-weight-bold"
+                    title="Minimum recorded concurrent players">Players Min</td>
+                <td>{activity.results[instance].summary.online.min}</td></tr>
+            <tr><td class="has-text-weight-bold"
+                    title="Sum of time played by all players">Total Time</td>
+                <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
+            <tr><td class="has-text-weight-bold"
+                    title="Sum of player sessions (logins)">Total Sessions</td>
+                <td>{activity.results[instance].summary.total.sessions}</td></tr>
+          </tbody></table>
+        </div>
+        <div class="column chart-container-players">
+          {#if !processing}
+            <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
+          {/if}
+        </div>
+      </div>
+      <div class="block chart-container-intervals">
+        {#if !processing}
+          <div><ChartCanvas data={chartDataIntervals(activity.results[instance])} /></div>
+        {/if}
+      </div>
+      <div class="columns mt-1">
+        {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn}
+          <div class="column is-one-third mt-0 mb-0 pt-0 pb-0">
+            <table class="table is-narrow"><tbody>
+              <tr><td></td><td></td></tr>
+              {#each entryColumn as entry}
+                <tr title="{entry.sessions} sessions">
+                  <td class="word-break-all player-column">{entry.player}</td>
+                  <td class="white-space-nowrap online-column">{humanDuration(entry.uptime, 2)}</td>
+                </tr>
+              {/each}
             </tbody></table>
           </div>
-          <div class="column chart-container-players">
-            <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
-          </div>
-        </div>
-        <div class="block chart-container-intervals">
-          <div><ChartCanvas data={chartDataIntervals(activity.results[instance])} /></div>
-        </div>
-        <div class="columns mt-1">
-          {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn}
-            <div class="column is-one-third mt-0 mb-0 pt-0 pb-0">
-              <table class="table is-narrow"><tbody>
-                <tr><td></td><td></td></tr>
-                {#each entryColumn as entry}
-                  <tr title="{entry.sessions} sessions">
-                    <td class="word-break-all player-column">{entry.player}</td>
-                    <td class="white-space-nowrap online-column">{humanDuration(entry.uptime, 2)}</td>
-                  </tr>
-                {/each}
-              </tbody></table>
-            </div>
-          {/each}
-        </div>
-        <div class="block pb-2"></div>
-      {/each}
-    {:else}
-      <div class="content pb-4">
-        <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No player activity found</p>
+        {/each}
       </div>
-    {/if}
-  </div>
-  {#if activity.meta.log}
-    <div class="content">
-      <pre class="pre">{activity.meta.log}</pre>
-    </div>
+      <div class="block pb-2"></div>
+    {/each}
   {/if}
-{:else}
-  <div class="content">
-    <p><SpinnerIcon /> Loading Player Activity...<br /><br /></p>
-  </div>
 {/if}
 
 
