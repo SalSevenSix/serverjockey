@@ -59,7 +59,7 @@
     });
   }
 
-  query.onExecute(execute);
+  query.onExecute('ChatActivity', execute);
 
   onMount(function() {
     tick().then(execute);

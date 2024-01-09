@@ -30,13 +30,14 @@
   }
 
   function chartDataIntervals(instance) {
-    const labels = instance.intervals.map(function(interval) {
-      return shortISODateTimeString(interval.atto).substring(5, 10);
+    const labels = instance.intervals.data.map(function(interval) {
+      const dt = shortISODateTimeString(interval.atfrom);
+      return instance.intervals.hours > 1 ? dt.substring(5, 10) : dt.substring(11, 16);
     });
-    const playerHours = instance.intervals.map(function(interval) {
+    const playerHours = instance.intervals.data.map(function(interval) {
       return interval.uptime / 3600000;
     });
-    const sessions = instance.intervals.map(function(interval) {
+    const sessions = instance.intervals.data.map(function(interval) {
       return interval.sessions;
     });
     return {
@@ -58,7 +59,7 @@
       .finally(function() { processing = false; });
   }
 
-  query.onExecute(queryActivity);
+  query.onExecute('PlayerActivity', queryActivity);
 
   onMount(function() {
     tick().then(queryActivity);

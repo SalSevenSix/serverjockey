@@ -2,6 +2,8 @@ import { RollingLog, humanDuration, shortISODateTimeString } from '$lib/util';
 import { newGetRequest } from '$lib/sjgmsapi';
 import { notifyError } from '$lib/notifications';
 
+const hourMillis = 60 * 60 * 1000;
+const dayMillis = 24 * hourMillis;
 
 function extractInstances(queryResults) {
   let result = [];
@@ -44,15 +46,14 @@ function newOnlineTracker() {
 }
 
 function newIntervalTracker(log, atfrom, atto) {
-  let intervalMillis = 24 * 60 * 60 * 1000;  // day
-  let self = { intervals: [] };
-  let current = atfrom;  // TODO need to do this in reverse
-  while (current < atto) {
-    let interval = { sessions: 0, uptime: 0, atfrom: current, atto: current + intervalMillis };
-    // log.append(shortISODateTimeString(interval.atfrom) + '   ' + shortISODateTimeString(interval.atto));
-    self.intervals.push(interval);
-    current += intervalMillis;
+  const intervalMillis = atto - atfrom > dayMillis ? dayMillis : hourMillis;
+  const self = { hours: Math.trunc(intervalMillis / hourMillis), intervals: [] };
+  let current = atto;
+  while (current > atfrom) {
+    self.intervals.push({ sessions: 0, uptime: 0, atfrom: current - intervalMillis, atto: current });
+    current -= intervalMillis;
   }
+  self.intervals.reverse();
   self.session = function(login, logout) {
     self.intervals.forEach(function(interval) {
       if (login >= interval.atfrom && logout <= interval.atto) {
@@ -156,7 +157,8 @@ export function extractActivity(queryResults) {
     });
     let summary = { instance: instance, total: total, unique: players.length };
     summary.online = { min: onlineTrackers[instance].min, max: onlineTrackers[instance].max };
-    let intervals = intervalTrackers[instance].intervals.map(function(interval) {
+    let intervals = { hours: intervalTrackers[instance].hours };
+    intervals.data = intervalTrackers[instance].intervals.map(function(interval) {
       return { atfrom: interval.atfrom, atto: interval.atto, sessions: interval.sessions, uptime: interval.uptime };
     });
     if (total.sessions > 0) {

@@ -57,9 +57,9 @@
   function attoPresetToMillis(selected) {
     let dt = new Date();
     if (selected == attoOptions[2]) {
-      dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDay(), dt.getHours());
+      dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours());
     } else if (selected == attoOptions[3]) {
-      dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDay());
+      dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
     } else if (selected == attoOptions[4]) {
       dt = new Date(dt.getFullYear(), dt.getMonth());
     } else if (selected == attoOptions[5]) {
@@ -70,9 +70,9 @@
 
   function resolveRange() {
     const millis = { atfrom: null, atto: null };
-    if (atto) { millis.atto = atto.getTime(); }
+    if (atto) { millis.atto = Math.trunc(atto.getTime() / 1000) * 1000; }
     if (hasAttoPreset) { millis.atto = attoPresetToMillis(attoPreset); }
-    if (atfrom) { millis.atfrom = atfrom.getTime(); }
+    if (atfrom) { millis.atfrom = Math.trunc(atfrom.getTime() / 1000) * 1000; }
     if (hasAtfromMillis) { millis.atfrom = millis.atto - parseInt(atfromMillis); }
     return millis;
   }

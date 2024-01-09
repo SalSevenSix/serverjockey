@@ -2,7 +2,7 @@
   import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
 
-  const executes = new Set();
+  const executes = {};
 
   function newBlockerStore() {
     const { subscribe, set } = writable(false);
@@ -27,13 +27,13 @@
   const query = {
     criteria: {},
     blocker: newBlockerStore(),
-    onExecute: function(callable) {
-      executes.add(callable);
+    onExecute: function(key, callable) {
+      executes[key] = callable;
     },
     execute: function() {
-      for (let callable of executes.values()) {
+      Object.values(executes).forEach(function(callable) {
         callable();
-      }
+      });
     }
   };
 

@@ -43,7 +43,7 @@
       .finally(function() { processing = false; });
   }
 
-  query.onExecute(queryActivity);
+  query.onExecute('InstanceActivity', queryActivity);
 
   onMount(function() {
     tick().then(queryActivity);
