@@ -6,19 +6,14 @@ cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
-NODE_OUT_DIR=~/.nexe/$(node --version | cut -c2-)/out/Release
 SERVERJOCKEY="serverjockey"
-SERVERLINK="serverlink"
 SERVERJOCKEY_DIR="$DIST_DIR/$SERVERJOCKEY"
-SERVERLINK_DIR="$DIST_DIR/discord"
-SERVERJOCKEY_CMD_DIR="$DIST_DIR/cli"
-HAX_DIR="$DIST_DIR/hax"
 TARGET_DIR="$DIST_DIR/sjgms"
+TARGET_BIN_DIR="$TARGET_DIR/usr/local/bin"
 LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages"
 LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
-rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" > /dev/null 2>&1
-rm -rf "$TARGET_DIR" > /dev/null 2>&1
+rm -rf "$SERVERJOCKEY_DIR" "$TARGET_DIR" > /dev/null 2>&1
 
 cd $DIST_DIR || exit 1
 if [ "$BRANCH" = "local" ]; then
@@ -76,30 +71,26 @@ echo "Applying build timestamp"
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/index.js || exit 1
 
-echo "Copying target directory into build directory"
+echo "Prepare build directory"
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
-[ -d "$TARGET_DIR" ] || exit 1
-mkdir -p $TARGET_DIR/usr/local/bin || exit 1
-[ -d "$TARGET_DIR/usr/local/bin" ] || exit 1
+mkdir -p $TARGET_BIN_DIR || exit 1
 
-echo "Copying clients into build directory"
-cp -r "$SERVERJOCKEY_DIR/client/cli" "$SERVERJOCKEY_CMD_DIR" || exit 1
-cp -r "$SERVERJOCKEY_DIR/client/discord" "$SERVERLINK_DIR" || exit 1
-cp -r "$SERVERJOCKEY_DIR/build/hax" "$HAX_DIR" || exit 1
+echo "Building cli client"
+$SERVERJOCKEY_DIR/client/cli/build.sh $TARGET_BIN_DIR/${SERVERJOCKEY}_cmd.pyz || exit 1
+
+echo "Building discord client"
+$SERVERJOCKEY_DIR/client/discord/build.sh ci $TARGET_BIN_DIR/serverlink || exit 1
 
 echo "Building web client"
 $SERVERJOCKEY_DIR/client/web/build.sh ci || exit 1
-[ -d "$SERVERJOCKEY_DIR/web" ] || exit 1
 
 echo "Building extension client"
 $SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
 
-echo "Downloading ServerJockey dependencies"
+echo "Download and merge ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
 python3.10 -m pipenv sync || exit 1
 [ -d ".venv" ] || exit 1
-
-echo "Merging ServerJockey dependencies"
 if [ -d "$LIB32_DIR" ]; then
   rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* > /dev/null 2>&1
   rm -rf $LIB32_DIR/setuptools* $LIB32_DIR/pkg_resources* > /dev/null 2>&1
@@ -117,40 +108,15 @@ python3.10 -m unittest discover -t . -s test -p "*.py" || exit 1
 echo "Removing ServerJockey junk"
 rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1
 find . -name "__pycache__" -type d | while read file; do
-  rm -rf $file
+  rm -rf $file > /dev/null 2>&1
 done
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
-python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.__main__:main" -c -o "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz" || exit 1
-[ -f "$TARGET_DIR/usr/local/bin/$SERVERJOCKEY.pyz" ] || exit 1
+python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/$SERVERJOCKEY.pyz" || exit 1
 
-echo "Building ServerJockey CLI zipapp"
-python3.10 -m zipapp "cli" -p "/usr/bin/env python3.10" -m "serverjockey_cmd:main" -c -o "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz" || exit 1
-[ -f "$TARGET_DIR/usr/local/bin/${SERVERJOCKEY}_cmd.pyz" ] || exit 1
-
-echo "Downloading ServerLink dependencies"
-cd $SERVERLINK_DIR || exit 1
-npm ci || exit 1
-[ -d "$SERVERLINK_DIR/node_modules" ] || exit 1
-cp "$HAX_DIR/index.js" "$SERVERLINK_DIR/node_modules/@discordjs/rest/dist/index.js"
-
-echo "Building ServerLink nexe"
-nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10) || exit 1
-[ -d "$NODE_OUT_DIR" ] || exit 1
-if [ ! -f "$NODE_OUT_DIR/node_unstripped" ]; then
-  echo "Stripping node executable and rebuilding ServerLink"
-  rm "$TARGET_DIR/usr/local/bin/$SERVERLINK" > /dev/null 2>&1
-  cp "$NODE_OUT_DIR/node" "$NODE_OUT_DIR/node_unstripped" || exit 1
-  strip "$NODE_OUT_DIR/node" || exit 1
-  nexe index.js --output "$TARGET_DIR/usr/local/bin/$SERVERLINK" --build --python=$(which python3.10) || exit 1
-fi
-[ -f "$TARGET_DIR/usr/local/bin/$SERVERLINK" ] || exit 1
-
-echo "Cleanup"
-rm -rf "$SERVERJOCKEY_DIR" "$SERVERJOCKEY_CMD_DIR" "$SERVERLINK_DIR" "$HAX_DIR" > /dev/null 2>&1
-
-echo "Stamping"
+echo "Finishing"
+rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
 echo $TIMESTAMP > "$TARGET_DIR/build.ok"
 
 echo "Done"

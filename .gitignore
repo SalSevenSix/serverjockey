@@ -3,6 +3,10 @@ TODO.*
 *.ok
 scratch/
 
+# client build dirs
+/client/cli/build/
+/client/discord/build/
+
 # Web deployment root
 /web/
 
