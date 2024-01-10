@@ -30,28 +30,27 @@
   }
 
   function chartDataIntervals(instance) {
-    const labels = {};
+    const data = { labels: {}, sessions: [], played: [], max: [] };
     instance.intervals.data.forEach(function(interval) {
       const dts = shortISODateTimeString(interval.atfrom);
       const label = instance.intervals.hours > 1 ? dts.substring(5, 10) : dts.substring(11, 16);
-      labels[label] = interval.atfrom;
-    });
-    const playerHours = instance.intervals.data.map(function(interval) {
-      return interval.uptime / 3600000;
-    });
-    const sessions = instance.intervals.data.map(function(interval) {
-      return interval.sessions;
+      data.labels[label] = interval.atfrom;
+      data.sessions.push(interval.sessions);
+      data.played.push(interval.uptime / 3600000);
+      data.max.push(interval.max);
     });
     return {
       type: 'line',
       data: {
-        labels: Object.keys(labels),
-        datasets: [{ label: 'player hours', data: playerHours }, { label: 'sessions', data: sessions }]
+        labels: Object.keys(data.labels),
+        datasets: [{ label: 'player hours', data: data.played },
+                   { label: 'concurrent', data: data.max },
+                   { label: 'sessions', data: data.sessions }]
       },
       options: {
         onClick: function(e, a) {
           const label = e.chart.data.labels[a[0].index];
-          const atfrom = new Date(labels[label]);
+          const atfrom = new Date(data.labels[label]);
           const [year, month, day] = [atfrom.getFullYear(), atfrom.getMonth(), atfrom.getDate()];
           if (label.includes('-')) {
             query.callups.setRange(new Date(year, month, day), new Date(year, month, day + 1));

@@ -1,4 +1,4 @@
-import { RollingLog, humanDuration, shortISODateTimeString } from '$lib/util';
+import { humanDuration, shortISODateTimeString } from '$lib/util';
 import { newGetRequest } from '$lib/sjgmsapi';
 import { notifyError } from '$lib/notifications';
 
@@ -45,41 +45,72 @@ function newOnlineTracker() {
   return self;
 }
 
-function newIntervalTracker(log, atfrom, atto) {
+function newIntervalTracker(atfrom, atto) {
+  const self = {};
+  const data = [];
   const intervalMillis = atto - atfrom > dayMillis ? dayMillis : hourMillis;
-  const self = { hours: Math.trunc(intervalMillis / hourMillis), intervals: [] };
   let current = atto;
   while (current > atfrom) {
-    self.intervals.push({ sessions: 0, uptime: 0, atfrom: current - intervalMillis, atto: current });
+    data.push({
+      atfrom: current - intervalMillis, atto: current,
+      records: [], tracker: newOnlineTracker(),
+      sessions: 0, uptime: 0 });
     current -= intervalMillis;
   }
-  self.intervals.reverse();
+  data.reverse();
   self.session = function(login, logout) {
-    self.intervals.forEach(function(interval) {
+    data.forEach(function(interval) {
       if (login >= interval.atfrom && logout <= interval.atto) {
-        // log.append(shortISODateTimeString(interval.atfrom) + ' >< ' + humanDuration(logout - login));
+        interval.records.push({ at: login, login: true });
+        interval.records.push({ at: logout, login: false });
         interval.uptime += logout - login;
         interval.sessions += 1;
       } else if (logout >= interval.atfrom && logout <= interval.atto && login < interval.atfrom) {
-        // log.append(shortISODateTimeString(interval.atfrom) + ' << ' + humanDuration(logout - interval.atfrom));
+        interval.records.push({ at: interval.atfrom, login: true });
+        interval.records.push({ at: logout, login: false });
         interval.uptime += logout - interval.atfrom;
         interval.sessions += 1;
       } else if (login >= interval.atfrom && login <= interval.atto && logout > interval.atto) {
-        // log.append(shortISODateTimeString(interval.atfrom) + ' >> ' + humanDuration(interval.atto - login));
+        interval.records.push({ at: login, login: true });
         interval.uptime += interval.atto - login;
         interval.sessions += 1;
       } else if (login < interval.atfrom && logout > interval.atto) {
-        // log.append(shortISODateTimeString(interval.atfrom) + ' <> ' + humanDuration(intervalMillis));
+        interval.records.push({ at: interval.atfrom, login: true });
         interval.uptime += intervalMillis;
         interval.sessions += 1;
       }
     });
   };
+  self.results = function() {
+    data.forEach(function(interval) {
+      interval.records.sort(function(left, right) {
+        return left.at - right.at;
+      });
+      interval.records.forEach(function(record) {
+        if (record.login) {
+          if (record.at === interval.atfrom) {
+            interval.tracker.bump();
+          } else {
+            interval.tracker.login();
+          }
+        } else {
+          interval.tracker.logout();
+        }
+      });
+    });
+    return {
+      hours: Math.trunc(intervalMillis / hourMillis),
+      data: data.map(function(interval) {
+        return { atfrom: interval.atfrom, atto: interval.atto,
+                 sessions: interval.sessions, uptime: interval.uptime,
+                 min: interval.tracker.min, max: interval.tracker.max };
+      })
+    };
+  };
   return self;
 }
 
 export function extractActivity(queryResults) {
-  let log = new RollingLog(1000);
   let data = queryResults.events;
   let instances = extractInstances(queryResults);
   let lastEventMap = toLastEventMap(instances, queryResults.lastevent);
@@ -89,7 +120,7 @@ export function extractActivity(queryResults) {
   let entry = null;
   instances.forEach(function(instance) {  // Initialise entries
     entries[instance] = {};
-    intervalTrackers[instance] = newIntervalTracker(log, data.criteria.atfrom, data.criteria.atto);
+    intervalTrackers[instance] = newIntervalTracker(data.criteria.atfrom, data.criteria.atto);
     onlineTrackers[instance] = newOnlineTracker();
     Object.keys(lastEventMap[instance]).forEach(function(player) {
       if (lastEventMap[instance][player] === 'LOGIN') {
@@ -116,8 +147,6 @@ export function extractActivity(queryResults) {
         entry.sessions += 1;
         onlineTrackers[instance].login();
       } else if (entry.event === 'LOGIN') {
-        /* log.append(shortISODateTimeString(entry.at) + '  ' + shortISODateTimeString(at) + ' '
-                 + humanDuration(at - entry.at) + '   - ' + player); */
         entry.uptime += at - entry.at;
         intervalTrackers[instance].session(entry.at, at);
         onlineTrackers[instance].logout();
@@ -130,10 +159,6 @@ export function extractActivity(queryResults) {
     Object.keys(entries[instance]).forEach(function(player) {
       entry = entries[instance][player];
       if (entry.event === 'LOGIN') {
-        /* log.append(shortISODateTimeString(entry.at) + '  '
-                 + shortISODateTimeString(data.criteria.atto) + ' '
-                 + humanDuration(data.criteria.atto - entry.at)
-                 + '  = ' + player); */
         entry.uptime += data.criteria.atto - entry.at;
         intervalTrackers[instance].session(entry.at, data.criteria.atto);
       }
@@ -141,32 +166,29 @@ export function extractActivity(queryResults) {
   });
   let results = {};
   instances.forEach(function(instance) {  // Generate report result object
-    let total = { sessions: 0, uptime: 0 };
-    let players = [];
+    const total = { sessions: 0, uptime: 0 };
+    const players = [];
     Object.keys(entries[instance]).forEach(function(player) {
       entry = entries[instance][player];
       total.sessions += entry.sessions;
       total.uptime += entry.uptime;
       players.push({ player: player, sessions: entry.sessions, uptime: entry.uptime });
     });
-    players.forEach(function(player) {
-      player.uptimepct = player.uptime / total.uptime;
-    });
-    players.sort(function(left, right) {
-      return right.uptime - left.uptime;
-    });
-    let summary = { instance: instance, total: total, unique: players.length };
-    summary.online = { min: onlineTrackers[instance].min, max: onlineTrackers[instance].max };
-    let intervals = { hours: intervalTrackers[instance].hours };
-    intervals.data = intervalTrackers[instance].intervals.map(function(interval) {
-      return { atfrom: interval.atfrom, atto: interval.atto, sessions: interval.sessions, uptime: interval.uptime };
-    });
     if (total.sessions > 0) {
+      players.forEach(function(player) {
+        player.uptimepct = player.uptime / total.uptime;
+      });
+      players.sort(function(left, right) {
+        return right.uptime - left.uptime;
+      });
+      const summary = { instance: instance, total: total, unique: players.length };
+      summary.online = { min: onlineTrackers[instance].min, max: onlineTrackers[instance].max };
+      const intervals = intervalTrackers[instance].results();
       results[instance] = { summary: summary, players: players, intervals: intervals };
     }
   });
   return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-           atrange: data.criteria.atto - data.criteria.atfrom, log: log.toText() }, results: results };
+           atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
 }
 
 export function compactPlayers(players, limit=10) {
