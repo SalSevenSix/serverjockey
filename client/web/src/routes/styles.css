@@ -115,6 +115,10 @@ table.is-thinner {
   white-space: nowrap;
 }
 
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
 .theme-black-white {
   fill: black;
   color: black;

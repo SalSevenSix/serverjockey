@@ -159,7 +159,7 @@
             <button name="root" title="ROOT" class="button mr-2 mb-1" on:click={loadRoot}>
               &nbsp;<i class="fa fa-angles-up fa-lg"></i>&nbsp;</button>
             <button name="up" title="UP" class="button" on:click={upDirectory}>
-              <i class="fa fa-turn-down fa-lg"></i>&nbsp;&nbsp;&nbsp;{urlToPath(pwdUrl)}</button>
+              <i class="fa fa-turn-down fa-lg rotate-180"></i>&nbsp;&nbsp;&nbsp;{urlToPath(pwdUrl)}</button>
           </td>
         </tr>
       {/if}
@@ -231,9 +231,5 @@
 <style>
   .fileico {
     width: 0.6em;
-  }
-
-  .fa-turn-down {
-    transform: rotate(180deg);
   }
 </style>

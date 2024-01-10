@@ -14,10 +14,20 @@
 
   $: query.blocker.notify('ChatActivityProcessing', processing);
 
-  async function queryChats(criteria) {
-    processing = true;
-    const [instance, atrange] = [criteria.instance(), criteria.atrange()];
-    let url = '/store/player/chat?instance=' + instance.identity();
+  async function querySessions(instance, atrange) {
+    let url = '/store/player/event?instance=' + instance;
+    url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto + '&verbose';
+    return await fetch(url, newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) { return json; })
+      .catch(function(error) { notifyError('Failed to query player events.'); });
+  }
+
+  async function queryChats(instance, atrange) {
+    let url = '/store/player/chat?instance=' + instance;
     url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
     return await fetch(url, newGetRequest())
       .then(function(response) {
@@ -25,44 +35,82 @@
         return response.json();
       })
       .then(function(json) { return json; })
-      .catch(function(error) { notifyError('Failed to query chat logs.'); })
-      .finally(function() { processing = false; });
+      .catch(function(error) { notifyError('Failed to query chat logs.'); });
   }
 
-  function extractActivity(data) {
-    let last = { at: '', player: '' };
+  function mergeResults(data) {
+    const result = [];
+    if (data.chat) {
+      data.chat.records.forEach(function(record) {
+        result.push({ at: record[0], player: record[1], text: record[2] });
+      });
+    }
+    if (data.session) {
+      data.session.records.forEach(function(record) {
+        result.push({ at: record[0], player: record[2], steamid: record[4], event: record[3] });
+      });
+    }
+    result.sort(function(left, right) {
+      return left.at - right.at;
+    });
+    return result;
+  }
+
+  function extractResults(data) {
+    const last = { at: '', player: '' };
+    const result = [];
     let clazz = null;
-    let chats = [];
-    data.records.forEach(function(record) {
-      let [at, player, text] = record;
-      let atString = shortISODateTimeString(at);
+    data.forEach(function(item) {
+      let atString = shortISODateTimeString(item.at);
       let atSection = atString.substring(0, 13);
       if (last.at != atSection) {
-        chats.push({ clazz: 'row-hdr', ats: atString, at: atSection + 'h', player: null, text: null });
+        result.push({ clazz: 'row-hdr', ats: atString, at: atSection + 'h' });
         last.at = atSection;
         clazz = null;
       }
-      if (!clazz || last.player != player) {
+      if (!clazz || last.player != item.player) {
         clazz = clazz === 'row-nrm' ? 'row-alt' : 'row-nrm';
       }
-      last.player = player;
-      chats.push({ clazz: clazz, ats: atString, at: atString.substring(14), player: player, text: text });
+      last.player = item.player;
+      const entry = { clazz: clazz, ats: atString, at: atString.substring(14), player: item.player };
+      if (item.event) {
+        entry.event = item.event;
+        entry.text = item.steamid;
+      } else {
+        entry.text = item.text;
+      }
+      result.push(entry);
     });
-    return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-             atrange: data.criteria.atto - data.criteria.atfrom }, results: chats };
+    return result;
   }
 
-  function execute() {
-    queryChats(query.criteria).then(function(data) {
-      results = data;
-      activity = extractActivity(data);
-    });
+  function extractMeta(data) {
+    return { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
+             atrange: data.criteria.atto - data.criteria.atfrom };
   }
 
-  query.onExecute('ChatActivity', execute);
+  function queryActivity() {
+    processing = true;
+    const instance = query.criteria.instance().identity();
+    const atrange = query.criteria.atrange();
+    const chatType = query.criteria.chat().type;
+    const queries = [null, null];
+    if (chatType === 'both' || chatType === 'session') { queries[0] = querySessions(instance, atrange); }
+    if (chatType === 'both' || chatType === 'chat') { queries[1] = queryChats(instance, atrange); }
+    Promise.all(queries)
+      .then(function(data) {
+        results = {};
+        [results.session, results.chat] = data;
+        activity = { meta: extractMeta(results.chat ? results.chat : results.session),
+                     results: extractResults(mergeResults(results)) };
+      })
+      .finally(function() { processing = false; });
+  }
+
+  query.onExecute('ChatActivity', queryActivity);
 
   onMount(function() {
-    tick().then(execute);
+    tick().then(queryActivity);
   });
 
   onDestroy(function() {
@@ -100,7 +148,20 @@
             {#if entry.player}
               <td class="white-space-nowrap" title={entry.ats}>{entry.at}</td>
               <td>{entry.player}</td>
-              <td>{entry.text}</td>
+              {#if entry.event}
+                <td>
+                  <span class="white-space-nowrap">
+                    {#if entry.event === 'LOGIN'}
+                      <i class="fa fa-right-to-bracket"></i>&nbsp; LOGIN
+                    {:else}
+                      <i class="fa fa-right-to-bracket rotate-180"></i>&nbsp; LOGOUT
+                    {/if}
+                  </span>
+                  {#if entry.text}&nbsp;({entry.text}){/if}
+                </td>
+              {:else}
+                <td>{entry.text}</td>
+              {/if}
             {:else}
               <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
               <td></td>

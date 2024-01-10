@@ -182,11 +182,14 @@ class SelectPlayerEvent(storeabc.Transaction):
         self._data = data
 
     def execute(self, session: Session) -> typing.Any:
-        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'atgroup'), True)
-        instance, at_from, at_to, at_group = util.unpack_dict(criteria)
-        statement = select(storeabc.PlayerEvent.at, storeabc.Instance.name,
-                           storeabc.Player.name, storeabc.PlayerEvent.name)
-        statement = statement.join(storeabc.Instance.players).join(storeabc.Player.events)
+        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'atgroup', 'verbose'), True)
+        instance, at_from, at_to, at_group, verbose = util.unpack_dict(criteria)
+        columns = ['at', 'instance', 'player', 'event']
+        entities = [storeabc.PlayerEvent.at, storeabc.Instance.name, storeabc.Player.name, storeabc.PlayerEvent.name]
+        if verbose is not None:
+            columns.append('steamid')
+            entities.append(storeabc.Player.steamid)
+        statement = select(*entities).join(storeabc.Instance.players).join(storeabc.Player.events)
         if instance:
             statement = statement.where(storeabc.Instance.id == _get_instance_id(session, instance))
         if at_from:
@@ -209,7 +212,7 @@ class SelectPlayerEvent(storeabc.Transaction):
                 func.max(storeabc.PlayerEvent.at) if at_group == 'max' else func.min(storeabc.PlayerEvent.at))
         statement = statement.order_by(storeabc.PlayerEvent.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
-        return _execute_query(session, statement, criteria, 'at', 'instance', 'player', 'event')
+        return _execute_query(session, statement, criteria, *columns)
 
 
 class SelectPlayerChat(storeabc.Transaction):
