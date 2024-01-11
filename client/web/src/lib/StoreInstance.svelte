@@ -4,6 +4,7 @@
   import QueryCriteriaContext from '$lib/QueryCriteriaContext.svelte';
   import QueryChooseInstance from '$lib/QueryChooseInstance.svelte';
   import QueryDateRange from '$lib/QueryDateRange.svelte';
+  import QuerySearchText from '$lib/QuerySearchText.svelte';
   import QueryChatTypes from '$lib/QueryChatTypes.svelte';
   import QueryExecute from '$lib/QueryExecute.svelte';
   import InstanceActivity from '$lib/InstanceActivity.svelte';
@@ -26,7 +27,15 @@
     <QueryCriteriaContext>
       <QueryChooseInstance />
       <QueryDateRange defaultFromMillis="21600000" />
-      <QueryChatTypes />
+      <div class="columns">
+        <div class="column">
+          <QuerySearchText name="Search for Player" title="Search for a Player by name"
+                           placeholder="literal or regexp using '/'" />
+        </div>
+        <div class="column">
+          <QueryChatTypes />
+        </div>
+      </div>
       <QueryExecute />
       <ChatActivity />
     </QueryCriteriaContext>

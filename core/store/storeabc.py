@@ -64,7 +64,7 @@ class Player(Base):
     at = Column(Float)
     instance_id: Mapped[Integer] = mapped_column(ForeignKey('instance.id'), index=True)
     instance: Mapped[Instance] = relationship(back_populates='players')
-    name = Column(Text)
+    name = Column(Text, index=True)
     steamid = Column(Text, nullable=True)
     events: Mapped[typing.List[PlayerEvent]] = relationship(back_populates='player', cascade='all,delete')
     chats: Mapped[typing.List[PlayerChat]] = relationship(back_populates='player', cascade='all,delete')

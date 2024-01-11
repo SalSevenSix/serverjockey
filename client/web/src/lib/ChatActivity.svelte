@@ -14,9 +14,11 @@
 
   $: query.blocker.notify('ChatActivityProcessing', processing);
 
-  async function querySessions(instance, atrange) {
+  async function querySessions(instance, atrange, player) {
     let url = '/store/player/event?instance=' + instance;
-    url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto + '&verbose';
+    url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
+    if (player) { url += '&player=' + player; }
+    url += '&verbose';
     return await fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -26,9 +28,10 @@
       .catch(function(error) { notifyError('Failed to query player events.'); });
   }
 
-  async function queryChats(instance, atrange) {
+  async function queryChats(instance, atrange, player) {
     let url = '/store/player/chat?instance=' + instance;
     url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
+    if (player) { url += '&player=' + player; }
     return await fetch(url, newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -93,10 +96,11 @@
     processing = true;
     const instance = query.criteria.instance().identity();
     const atrange = query.criteria.atrange();
+    const player = query.criteria.search().text;
     const chatType = query.criteria.chat().type;
     const queries = [null, null];
-    if (chatType === 'both' || chatType === 'session') { queries[0] = querySessions(instance, atrange); }
-    if (chatType === 'both' || chatType === 'chat') { queries[1] = queryChats(instance, atrange); }
+    if (chatType === 'both' || chatType === 'session') { queries[0] = querySessions(instance, atrange, player); }
+    if (chatType === 'both' || chatType === 'chat') { queries[1] = queryChats(instance, atrange, player); }
     Promise.all(queries)
       .then(function(data) {
         results = {};

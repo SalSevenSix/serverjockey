@@ -3,7 +3,7 @@
 
   const query = getContext('query');
 
-  let type = 'both';
+  let type = 'chat';
 
   query.criteria.chat = function() {
     return { type: type };
@@ -11,19 +11,16 @@
 </script>
 
 
-<div class="content">
-  <p class="has-text-weight-bold">Include</p>
+<div class="block">
+  <p class="has-text-weight-bold mb-1" title="Choose what results to include">Include</p>
   <div class="field">
     <div class="control">
-      <label class="radio m-1 p-2">
-        <input type="radio" name="chat" value="chat" bind:group={type}>&nbsp; Chat
-      </label>
-      <label class="radio m-1 p-2">
-        <input type="radio" name="session" value="session" bind:group={type}>&nbsp; Session
-      </label>
-      <label class="radio m-1 p-2">
-        <input type="radio" name="both" value="both" bind:group={type}>&nbsp; Both
-      </label>
+      <label class="radio m-1 p-2" title="Player chat messages">
+        <input type="radio" value="chat" bind:group={type}>&nbsp; Chat</label>
+      <label class="radio m-1 p-2" title="Player sessions (Login/Logout events)">
+        <input type="radio" value="session" bind:group={type}>&nbsp; Session</label>
+      <label class="radio m-1 p-2" title="Both Chat and Session">
+        <input type="radio" value="both" bind:group={type}>&nbsp; Both</label>
     </div>
   </div>
 </div>
@@ -36,6 +33,6 @@
     border-style: solid;
     border-color: #DBDBDB;
     border-radius: 5px;
-    width: 110px;
+    width: 100px;
   }
 </style>

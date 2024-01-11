@@ -57,7 +57,7 @@
           } else {
             query.callups.setRange(new Date(year, month, day - 15), new Date(year, month, day + 15));
           }
-          tick().then(query.execute);
+          query.execute();
         }
       }
     };

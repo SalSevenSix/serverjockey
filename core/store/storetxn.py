@@ -1,5 +1,6 @@
 import typing
 import time
+import re
 from sqlalchemy import Executable, func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
@@ -9,8 +10,28 @@ from core.store import storeabc
 
 # Note that all this is blocking IO
 
-_CACHE_INSTANCE_ID = {}
-_CACHE_PLAYER_ID = {}
+_CACHE_INSTANCE_ID, _CACHE_PLAYER_ID = {}, {}
+_NOT_FLAG_REGEX = re.compile(r'[^gmixsuUAJD]')
+
+
+def _to_regex(value: str) -> tuple:
+    if not value:
+        return None, None
+    value = value.strip()
+    if len(value) < 3 or value[0] != '/':
+        return None, None
+    index = value.rfind('/')
+    if index <= 0 or value[index - 1] == '\\':
+        return None, None
+    flags = value[index + 1:]
+    if flags and _NOT_FLAG_REGEX.search(flags):
+        return None, None
+    value = value[1:index]
+    try:
+        re.compile(value)
+    except re.error:
+        return None, None
+    return value, flags if flags else None
 
 
 def _load_instance(session: Session, identity: str) -> storeabc.Instance | None:
@@ -182,8 +203,8 @@ class SelectPlayerEvent(storeabc.Transaction):
         self._data = data
 
     def execute(self, session: Session) -> typing.Any:
-        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'atgroup', 'verbose'), True)
-        instance, at_from, at_to, at_group, verbose = util.unpack_dict(criteria)
+        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'atgroup', 'player', 'verbose'), True)
+        instance, at_from, at_to, at_group, player, verbose = util.unpack_dict(criteria)
         columns = ['at', 'instance', 'player', 'event']
         entities = [storeabc.PlayerEvent.at, storeabc.Instance.name, storeabc.Player.name, storeabc.PlayerEvent.name]
         if verbose is not None:
@@ -204,6 +225,12 @@ class SelectPlayerEvent(storeabc.Transaction):
                 statement = statement.where(storeabc.PlayerEvent.at < dtutil.to_seconds(at_to))
             else:
                 statement = statement.where(storeabc.PlayerEvent.at <= dtutil.to_seconds(at_to))
+        if player:
+            regex, flags = _to_regex(player)
+            if regex:
+                statement = statement.where(storeabc.Player.name.regexp_match(regex, flags))
+            else:
+                statement = statement.where(storeabc.Player.name == util.script_escape(player))
         if at_group:
             if at_group not in ('min', 'max'):
                 raise Exception('Invalid atgroup')
@@ -221,8 +248,8 @@ class SelectPlayerChat(storeabc.Transaction):
         self._data = data
 
     def execute(self, session: Session) -> typing.Any:
-        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto'), True)
-        instance, at_from, at_to = util.unpack_dict(criteria)
+        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'player'), True)
+        instance, at_from, at_to, player = util.unpack_dict(criteria)
         statement = select(storeabc.PlayerChat.at, storeabc.Player.name, storeabc.PlayerChat.text)
         statement = statement.join(storeabc.Player.chats)
         statement = statement.where(storeabc.Player.instance_id == _get_instance_id(session, instance))
@@ -232,6 +259,12 @@ class SelectPlayerChat(storeabc.Transaction):
         if at_to:
             at_to = int(at_to)
             statement = statement.where(storeabc.PlayerChat.at <= dtutil.to_seconds(at_to))
+        if player:
+            regex, flags = _to_regex(player)
+            if regex:
+                statement = statement.where(storeabc.Player.name.regexp_match(regex, flags))
+            else:
+                statement = statement.where(storeabc.Player.name == util.script_escape(player))
         statement = statement.order_by(storeabc.PlayerChat.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
         return _execute_query(session, statement, criteria, 'at', 'player', 'text')

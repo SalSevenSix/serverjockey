@@ -1,6 +1,6 @@
 <script>
-  import { setContext } from 'svelte';
-  import { writable } from 'svelte/store';
+  import { setContext, tick } from 'svelte';
+  import { writable, get } from 'svelte/store';
 
   const executes = {};
 
@@ -32,8 +32,11 @@
       executes[key] = callable;
     },
     execute: function() {
-      Object.values(executes).forEach(function(callable) {
-        callable();
+      tick().then(function() {
+        if (get(query.blocker)) return;
+        Object.values(executes).forEach(function(callable) {
+          callable();
+        });
       });
     }
   };
