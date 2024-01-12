@@ -2,11 +2,11 @@
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import CheckStore from '$lib/system/CheckStore.svelte';
   import StoreActions from '$lib/system/StoreActions.svelte';
-  import QueryCriteriaContext from '$lib/QueryCriteriaContext.svelte';
-  import QueryChooseInstance from '$lib/QueryChooseInstance.svelte';
-  import QueryDateRange from '$lib/QueryDateRange.svelte';
-  import InstanceActivity from '$lib/InstanceActivity.svelte';
-  import PlayerActivity from '$lib/PlayerActivity.svelte';
+  import QueryCriteriaContext from '$lib/activity/QueryCriteriaContext.svelte';
+  import QueryChooseInstance from '$lib/activity/QueryChooseInstance.svelte';
+  import QueryDateRange from '$lib/activity/QueryDateRange.svelte';
+  import InstanceActivity from '$lib/activity/InstanceActivity.svelte';
+  import PlayerActivity from '$lib/activity/PlayerActivity.svelte';
 </script>
 
 

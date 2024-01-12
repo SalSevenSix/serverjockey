@@ -5,7 +5,7 @@
   import { SubscriptionHelper, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
-  import SteamLoginModal from '$lib/SteamLoginModal.svelte';
+  import SteamLoginModal from '$lib/instance/SteamLoginModal.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');

@@ -1,15 +1,15 @@
 <script>
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import CheckStore from '$lib/system/CheckStore.svelte';
-  import QueryCriteriaContext from '$lib/QueryCriteriaContext.svelte';
-  import QueryChooseInstance from '$lib/QueryChooseInstance.svelte';
-  import QueryDateRange from '$lib/QueryDateRange.svelte';
-  import QuerySearchText from '$lib/QuerySearchText.svelte';
-  import QueryChatTypes from '$lib/QueryChatTypes.svelte';
-  import QueryExecute from '$lib/QueryExecute.svelte';
-  import InstanceActivity from '$lib/InstanceActivity.svelte';
-  import PlayerActivity from '$lib/PlayerActivity.svelte';
-  import ChatActivity from '$lib/ChatActivity.svelte';
+  import QueryCriteriaContext from '$lib/activity/QueryCriteriaContext.svelte';
+  import QueryChooseInstance from '$lib/activity/QueryChooseInstance.svelte';
+  import QueryDateRange from '$lib/activity/QueryDateRange.svelte';
+  import QuerySearchText from '$lib/activity/QuerySearchText.svelte';
+  import QueryChatTypes from '$lib/activity/QueryChatTypes.svelte';
+  import QueryExecute from '$lib/activity/QueryExecute.svelte';
+  import InstanceActivity from '$lib/activity/InstanceActivity.svelte';
+  import PlayerActivity from '$lib/activity/PlayerActivity.svelte';
+  import ChatActivity from '$lib/activity/ChatActivity.svelte';
 </script>
 
 

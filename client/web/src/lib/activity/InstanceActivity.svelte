@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
-  import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/InstanceActivity';
+  import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/activity/InstanceActivity';
   import { floatToPercent, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util/util';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/widget/ChartCanvas.svelte';

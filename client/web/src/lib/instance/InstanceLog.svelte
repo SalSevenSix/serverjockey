@@ -1,6 +1,6 @@
 <script>
   import { getContext } from 'svelte';
-  import ConsoleLog from '$lib/ConsoleLog.svelte';
+  import ConsoleLog from '$lib/widget/ConsoleLog.svelte';
 
   const instance = getContext('instance');
 

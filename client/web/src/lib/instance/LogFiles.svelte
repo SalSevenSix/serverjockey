@@ -1,5 +1,5 @@
 <script>
-  import FileSystem from '$lib/FileSystem.svelte';
+  import FileSystem from '$lib/instance/FileSystem.svelte';
 
   export let rootPath = '/logs';
   export let allowDelete = 0;

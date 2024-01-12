@@ -2,11 +2,11 @@
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import CheckServerLink from '$lib/svrlink/CheckServerLink.svelte';
   import ServerLinkConfig from '$lib/svrlink/ServerLinkConfig.svelte';
-  import ServerStatusStore from '$lib/ServerStatusStore.svelte';
-  import ServerControls from '$lib/ServerControls.svelte';
-  import ServerConfig from '$lib/ServerConfig.svelte';
-  import ServerStatus from '$lib/ServerStatus.svelte';
-  import InstanceLog from '$lib/InstanceLog.svelte';
+  import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
+  import ServerControls from '$lib/instance/ServerControls.svelte';
+  import ServerConfig from '$lib/instance/ServerConfig.svelte';
+  import ServerStatus from '$lib/instance/ServerStatus.svelte';
+  import InstanceLog from '$lib/instance/InstanceLog.svelte';
 </script>
 
 

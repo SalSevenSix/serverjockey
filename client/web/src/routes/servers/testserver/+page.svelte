@@ -1,18 +1,18 @@
 <script>
   import Collapsible from '$lib/widget/Collapsible.svelte';
-  import ServerStatusStore from '$lib/ServerStatusStore.svelte';
-  import InstanceHeader from '$lib/InstanceHeader.svelte';
-  import ServerStatus from '$lib/ServerStatus.svelte';
-  import ServerConfig from '$lib/ServerConfig.svelte';
-  import ServerControls from '$lib/ServerControls.svelte';
-  import Players from '$lib/Players.svelte';
-  import InstanceLog from '$lib/InstanceLog.svelte';
-  import ConfigFile from '$lib/ConfigFile.svelte';
-  import LogFiles from '$lib/LogFiles.svelte';
-  import CommandBuilder from '$lib/CommandBuilder.svelte';
-  import RuntimeControls from '$lib/RuntimeControls.svelte';
-  import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
-  import StoreInstance from '$lib/StoreInstance.svelte';
+  import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
+  import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
+  import ServerStatus from '$lib/instance/ServerStatus.svelte';
+  import ServerConfig from '$lib/instance/ServerConfig.svelte';
+  import ServerControls from '$lib/instance/ServerControls.svelte';
+  import Players from '$lib/instance/Players.svelte';
+  import InstanceLog from '$lib/instance/InstanceLog.svelte';
+  import ConfigFile from '$lib/instance/ConfigFile.svelte';
+  import LogFiles from '$lib/instance/LogFiles.svelte';
+  import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
+  import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
+  import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
+  import StoreInstance from '$lib/instance/StoreInstance.svelte';
 
   const consoleCommands = {
     'console': {

@@ -3,8 +3,8 @@
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
   import { newPostRequest, rawPostRequest } from '$lib/util/sjgmsapi';
-  import FileSystem from '$lib/FileSystem.svelte';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
+  import FileSystem from '$lib/instance/FileSystem.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
