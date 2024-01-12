@@ -1,7 +1,7 @@
 <script>
-  import { confirmModal } from '$lib/modals';
-  import { notifyInfo, notifyError } from '$lib/notifications';
-  import { newPostRequest } from '$lib/sjgmsapi';
+  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
+  import { confirmModal } from '$lib/modal/modals';
 
   let processing = false;
 

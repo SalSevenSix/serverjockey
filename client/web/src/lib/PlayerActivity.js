@@ -1,6 +1,6 @@
-import { humanDuration, shortISODateTimeString } from '$lib/util';
-import { newGetRequest } from '$lib/sjgmsapi';
-import { notifyError } from '$lib/notifications';
+import { humanDuration, shortISODateTimeString } from '$lib/util/util';
+import { newGetRequest } from '$lib/util/sjgmsapi';
+import { notifyError } from '$lib/util/notifications';
 
 const hourMillis = 60 * 60 * 1000;
 const dayMillis = 24 * hourMillis;

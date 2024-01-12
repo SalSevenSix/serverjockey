@@ -1,5 +1,5 @@
 <script>
-  import RubiksCube from '$lib/RubiksCube.svelte';
+  import RubiksCube from '$lib/widget/RubiksCube.svelte';
 </script>
 
 

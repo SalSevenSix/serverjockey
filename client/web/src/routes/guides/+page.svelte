@@ -1,6 +1,6 @@
 <script>
-  import { browserName } from '$lib/util';
-  import GuideBooks from '$lib/GuideBooks.svelte';
+  import { browserName } from '$lib/util/util';
+  import GuideBooks from '$lib/widget/GuideBooks.svelte';
 
   const games = [
     { module: 'projectzomboid', serverName: 'Project Zomboid' },

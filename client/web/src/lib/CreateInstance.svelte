@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
 
   let modules = [];
   let serverForm = {};

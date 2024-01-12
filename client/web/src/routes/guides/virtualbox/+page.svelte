@@ -1,5 +1,5 @@
 <script>
-  import BackToTop from '$lib/BackToTop.svelte';
+  import BackToTop from '$lib/widget/BackToTop.svelte';
 </script>
 
 

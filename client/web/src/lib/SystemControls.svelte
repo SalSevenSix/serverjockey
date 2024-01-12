@@ -1,5 +1,5 @@
 <script>
-  import Collapsible from '$lib/Collapsible.svelte';
+  import Collapsible from '$lib/widget/Collapsible.svelte';
 </script>
 
 

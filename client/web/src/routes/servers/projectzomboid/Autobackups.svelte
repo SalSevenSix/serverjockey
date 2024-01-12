@@ -1,7 +1,7 @@
 <script>
   import { getContext } from 'svelte';
-  import { confirmModal } from '$lib/modals';
-  import { newPostRequest } from '$lib/sjgmsapi';
+  import { confirmModal } from '$lib/modal/modals';
+  import { newPostRequest } from '$lib/util/sjgmsapi';
   import FileSystem from '$lib/FileSystem.svelte';
 
   const instance = getContext('instance');

@@ -1,6 +1,6 @@
 <script>
-  import { browserName } from '$lib/util';
-  import BackToTop from '$lib/BackToTop.svelte';
+  import { browserName } from '$lib/util/util';
+  import BackToTop from '$lib/widget/BackToTop.svelte';
 </script>
 
 

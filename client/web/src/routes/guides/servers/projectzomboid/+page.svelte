@@ -1,7 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
-  import BackToTop from '$lib/BackToTop.svelte';
-  import CodeBlock from '$lib/CodeBlock.svelte';
+  import BackToTop from '$lib/widget/BackToTop.svelte';
+  import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';

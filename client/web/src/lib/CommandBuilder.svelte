@@ -1,8 +1,8 @@
 <script>
   import { getContext } from 'svelte';
-  import { notifyInfo, notifyError } from '$lib/notifications';
-  import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util';
-  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
+  import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util/util';
+  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');

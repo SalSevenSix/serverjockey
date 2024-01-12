@@ -1,10 +1,10 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { confirmDangerModal } from '$lib/modals';
+  import { notifyError } from '$lib/util/notifications';
+  import { confirmDangerModal } from '$lib/modal/modals';
   import { goto } from '$app/navigation';
-  import { newGetRequest, newPostRequest, buildUnstanceUrl, SubscriptionHelper } from '$lib/sjgmsapi';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import { newGetRequest, newPostRequest, buildUnstanceUrl, SubscriptionHelper } from '$lib/util/sjgmsapi';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const subs = new SubscriptionHelper();
 

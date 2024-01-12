@@ -1,11 +1,11 @@
 <script>
+  import Collapsible from '$lib/widget/Collapsible.svelte';
   import CheckServerLink from '$lib/CheckServerLink.svelte';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerLinkConfig from '$lib/ServerLinkConfig.svelte';
-  import Collapsible from '$lib/Collapsible.svelte';
   import InstanceLog from '$lib/InstanceLog.svelte';
 </script>
 

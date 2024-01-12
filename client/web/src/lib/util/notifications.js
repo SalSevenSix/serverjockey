@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { generateId, sleep } from '$lib/util';
+import { generateId, sleep } from '$lib/util/util';
 
 export const notifications = writable([]);
 

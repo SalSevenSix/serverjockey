@@ -1,9 +1,11 @@
 <script>
   import { onDestroy, getContext } from 'svelte';
-  import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
-  import { confirmModal, steamLoginModal } from '$lib/modals';
-  import { RollingLog, ObjectUrls } from '$lib/util';
-  import { SubscriptionHelper, newGetRequest, newPostRequest } from '$lib/sjgmsapi';
+  import { openModal } from 'svelte-modals';
+  import { RollingLog, ObjectUrls } from '$lib/util/util';
+  import { SubscriptionHelper, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
+  import { confirmModal } from '$lib/modal/modals';
+  import SteamLoginModal from '$lib/SteamLoginModal.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
@@ -51,6 +53,10 @@
       doInstallRuntime);
   }
 
+  function openSteamLoginModal() {
+    openModal(SteamLoginModal, { instance: instance, onSuccess: doInstallRuntime });
+  }
+
   function doInstallRuntime() {
     cannotProcess = true;
     let request = newPostRequest();
@@ -73,7 +79,7 @@
           .finally(function() {
             if (logLines.toText().includes('password:')) {
               logLines.reset();
-              steamLoginModal(instance, doInstallRuntime);
+              openSteamLoginModal();
             } else {
               notifyInfo(endInstallMessage);
             }
@@ -82,7 +88,7 @@
           notifyInfo('Install Runtime completed.');
           cannotProcess = false;
         } else {
-          steamLoginModal(instance, doInstallRuntime);
+          openSteamLoginModal();
           cannotProcess = false;
         }
       })

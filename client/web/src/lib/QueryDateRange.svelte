@@ -1,7 +1,7 @@
 <script>
   import { getContext, tick } from 'svelte';
   import { DateInput } from 'date-picker-svelte'  // https://date-picker-svelte.kasper.space/docs
-  import { generateIds } from '$lib/util';
+  import { generateIds } from '$lib/util/util';
 
   const query = getContext('query');
   const minDate = new Date(946684800000);  // 2000-01-01 00:00:00

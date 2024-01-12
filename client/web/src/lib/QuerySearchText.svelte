@@ -1,6 +1,6 @@
 <script>
   import { getContext } from 'svelte';
-  import { generateId } from '$lib/util';
+  import { generateId } from '$lib/util/util';
 
   const query = getContext('query');
   const inputId = 'querySearchText' + generateId();

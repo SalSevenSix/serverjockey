@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
-import { sleep } from '$lib/util';
-import { notifyError } from '$lib/notifications';
+import { sleep } from '$lib/util/util';
+import { notifyError } from '$lib/util/notifications';
 
 export const securityToken = writable();
 

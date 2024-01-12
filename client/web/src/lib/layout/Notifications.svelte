@@ -1,5 +1,5 @@
 <script>
-  import { notifications, removeNotification } from '$lib/notifications';
+  import { notifications, removeNotification } from '$lib/util/notifications';
 
   function deleteMessage() {
     removeNotification(this.id);

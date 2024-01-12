@@ -1,8 +1,8 @@
 <script>
   import { onMount, getContext } from 'svelte';
-  import { notifyInfo, notifyError } from '$lib/notifications';
-  import { textAreaModal } from '$lib/modals';
-  import { newPostRequest, newGetRequest } from '$lib/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
+  import { textAreaModal } from '$lib/modal/modals';
+  import { newPostRequest, newGetRequest } from '$lib/util/sjgmsapi';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');

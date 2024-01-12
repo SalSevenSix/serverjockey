@@ -1,7 +1,7 @@
 <script>
   import { onDestroy, getContext } from 'svelte';
-  import { capitalize, humanDuration } from '$lib/util';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import { capitalize, humanDuration } from '$lib/util/util';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const serverStatus = getContext('serverStatus');
   const commonKeys = ['version', 'ip', 'port'];

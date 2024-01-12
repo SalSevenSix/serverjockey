@@ -1,7 +1,7 @@
 <script>
+  import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/InstanceHeader.svelte';
-  import Collapsible from '$lib/Collapsible.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
@@ -13,8 +13,8 @@
   import WorldControls from '$lib/WorldControls.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/CommandBuilder.svelte';
-  import Autosaves from './Autosaves.svelte';
   import StoreInstance from '$lib/StoreInstance.svelte';
+  import Autosaves from './Autosaves.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',

@@ -2,7 +2,7 @@
   import CheckServerLink from '$lib/CheckServerLink.svelte';
   import DiscordBotSetupGuide from './DiscordBotSetupGuide.svelte';
   import DiscordBotPlaceholder from './DiscordBotPlaceholder.svelte';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 </script>
 
 

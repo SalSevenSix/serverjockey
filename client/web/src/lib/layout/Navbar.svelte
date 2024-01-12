@@ -1,6 +1,6 @@
 <script>
-  import RubiksCube from '$lib/RubiksCube.svelte';
-  import ThemeToggler from '$lib/ThemeToggler.svelte';
+  import RubiksCube from '$lib/widget/RubiksCube.svelte';
+  import ThemeToggler from '$lib/layout/ThemeToggler.svelte';
 
   let menuOpen = false;
 

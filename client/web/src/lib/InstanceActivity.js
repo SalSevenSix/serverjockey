@@ -1,5 +1,5 @@
-import { newGetRequest } from '$lib/sjgmsapi';
-import { notifyError } from '$lib/notifications';
+import { newGetRequest } from '$lib/util/sjgmsapi';
+import { notifyError } from '$lib/util/notifications';
 
 
 function toInstanceCreatedMap(data) {

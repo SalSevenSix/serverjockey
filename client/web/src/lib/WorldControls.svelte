@@ -1,10 +1,10 @@
 <script>
   import { onMount, getContext } from 'svelte';
-  import { confirmModal } from '$lib/modals';
-  import { shortISODateTimeString } from '$lib/util';
-  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
-  import { notifyInfo, notifyError } from '$lib/notifications';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import { confirmModal } from '$lib/modal/modals';
+  import { shortISODateTimeString } from '$lib/util/util';
+  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');

@@ -1,19 +1,19 @@
 <script>
+  import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/InstanceHeader.svelte';
-  import Collapsible from '$lib/Collapsible.svelte';
   import ServerStatus from '$lib/ServerStatus.svelte';
   import ServerConfig from '$lib/ServerConfig.svelte';
   import ServerControls from '$lib/ServerControls.svelte';
   import Players from '$lib/Players.svelte';
   import InstanceLog from '$lib/InstanceLog.svelte';
   import LogFiles from '$lib/LogFiles.svelte';
-  import Iframe from '$lib/Iframe.svelte';
   import ConfigFile from '$lib/ConfigFile.svelte';
   import RuntimeControls from '$lib/RuntimeControls.svelte';
   import WorldControls from '$lib/WorldControls.svelte';
   import BackupRestoreActions from '$lib/BackupRestoreActions.svelte';
   import StoreInstance from '$lib/StoreInstance.svelte';
+  import Iframe from './Iframe.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',

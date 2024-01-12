@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { newGetRequest } from '$lib/sjgmsapi';
+  import { newGetRequest } from '$lib/util/sjgmsapi';
 
   let loaded = false;
   let hasServerLink = false;

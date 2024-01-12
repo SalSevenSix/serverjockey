@@ -1,9 +1,9 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { humanDuration, chunkArray } from '$lib/util';
-  import { notifyError } from '$lib/notifications';
-  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import { humanDuration, chunkArray } from '$lib/util/util';
+  import { notifyError } from '$lib/util/notifications';
+  import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
   const subs = new SubscriptionHelper();

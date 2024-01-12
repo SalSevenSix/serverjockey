@@ -1,10 +1,10 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { sleep, humanFileSize, humanDuration } from '$lib/util';
-  import { newGetRequest } from '$lib/sjgmsapi';
-  import RubiksCube from '$lib/RubiksCube.svelte';
-  import SpinnerOverlay from '$lib/SpinnerOverlay.svelte';
+  import { notifyError } from '$lib/util/notifications';
+  import { sleep, humanFileSize, humanDuration } from '$lib/util/util';
+  import { newGetRequest } from '$lib/util/sjgmsapi';
+  import RubiksCube from '$lib/widget/RubiksCube.svelte';
+  import SpinnerOverlay from '$lib/widget/SpinnerOverlay.svelte';
 
   let looping = true;
   let info = null;

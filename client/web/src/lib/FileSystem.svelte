@@ -1,10 +1,10 @@
 <script>
   import { onMount, getContext } from 'svelte';
-  import { confirmModal } from '$lib/modals';
-  import { notifyInfo, notifyWarning, notifyError } from '$lib/notifications';
-  import { isString, guessTextFile, humanFileSize } from '$lib/util';
-  import { newGetRequest, newPostRequest } from '$lib/sjgmsapi';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import { confirmModal } from '$lib/modal/modals';
+  import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
+  import { isString, guessTextFile, humanFileSize } from '$lib/util/util';
+  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');

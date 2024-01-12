@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import { closeModal } from 'svelte-modals';
-  import { notifyError } from '$lib/notifications';
-  import { securityToken } from '$lib/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import { securityToken } from '$lib/util/sjgmsapi';
 
   const storageKey = 'sjgmsSecurityToken';
 

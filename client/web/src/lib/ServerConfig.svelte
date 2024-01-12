@@ -1,7 +1,7 @@
 <script>
   import { getContext } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { newPostRequest } from '$lib/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import { newPostRequest } from '$lib/util/sjgmsapi';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');

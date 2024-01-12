@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy, tick } from 'svelte';
-  import { notifyError } from '$lib/notifications';
-  import { RollingLog } from '$lib/util';
-  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import { RollingLog } from '$lib/util/util';
+  import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
 
   const subs = new SubscriptionHelper();
   const logLines = new RollingLog();

@@ -1,9 +1,9 @@
 <script>
   import { onDestroy, tick, getContext } from 'svelte';
-  import { notifyError } from '$lib/notifications';
   import { closeModal } from 'svelte-modals';
-  import { sleep, RollingLog } from '$lib/util';
-  import { SubscriptionHelper, newPostRequest } from '$lib/sjgmsapi';
+  import { sleep, RollingLog } from '$lib/util/util';
+  import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
 
   const subs = new SubscriptionHelper();
   const logLines = new RollingLog();

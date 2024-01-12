@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy, tick, setContext } from 'svelte';
   import { writable } from 'svelte/store';
-  import { notifyError } from '$lib/notifications';
-  import { SubscriptionHelper, newGetRequest } from '$lib/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
 
   const subs = new SubscriptionHelper();
 

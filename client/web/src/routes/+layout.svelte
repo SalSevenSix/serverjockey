@@ -3,21 +3,20 @@
   import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
   import '@fortawesome/fontawesome-free/css/solid.min.css';
   import '@fortawesome/fontawesome-free/css/brands.min.css';
-  import './styles.css';
-  import './dark.css';
+  import '$lib/layout/styles.css';
+  import '$lib/layout/dark.css';
 
   import { onMount } from 'svelte';
-  import { Modals } from 'svelte-modals';
-  import { loginModal } from '$lib/modals';
-  import { securityToken } from '$lib/sjgmsapi';
-
-  import Navbar from '$lib/Navbar.svelte';
-  import Notifications from '$lib/Notifications.svelte';
-  import Footer from '$lib/Footer.svelte';
+  import { openModal, Modals } from 'svelte-modals';
+  import { securityToken } from '$lib/util/sjgmsapi';
+  import Notifications from '$lib/layout/Notifications.svelte';
+  import LoginModal from '$lib/layout/LoginModal.svelte';
+  import Navbar from '$lib/layout/Navbar.svelte';
+  import Footer from '$lib/layout/Footer.svelte';
 
   onMount(function() {
     if ($securityToken) return;
-    loginModal();
+    openModal(LoginModal);
   });
 </script>
 

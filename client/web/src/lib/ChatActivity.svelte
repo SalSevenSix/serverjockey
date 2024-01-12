@@ -1,9 +1,9 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
-  import { shortISODateTimeString, humanDuration, ObjectUrls } from '$lib/util';
-  import { newGetRequest } from '$lib/sjgmsapi';
-  import { notifyError } from '$lib/notifications';
-  import SpinnerIcon from '$lib/SpinnerIcon.svelte';
+  import { shortISODateTimeString, humanDuration, ObjectUrls } from '$lib/util/util';
+  import { newGetRequest } from '$lib/util/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const query = getContext('query');
   const objectUrls = new ObjectUrls();
