@@ -187,6 +187,5 @@
 
   .chat-log-container div {
     min-width: 400px;
-    margin-right: auto;
   }
 </style>

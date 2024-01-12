@@ -1,8 +1,8 @@
 <script>
-  import CheckServerLink from '$lib/CheckServerLink.svelte';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
+  import CheckServerLink from '$lib/svrlink/CheckServerLink.svelte';
   import DiscordBotSetupGuide from './DiscordBotSetupGuide.svelte';
   import DiscordBotPlaceholder from './DiscordBotPlaceholder.svelte';
-  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 </script>
 
 

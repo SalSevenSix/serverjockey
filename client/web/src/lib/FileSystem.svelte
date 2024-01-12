@@ -11,6 +11,7 @@
   const eventDown = getContext('eventDown');
   const eventStarted = getContext('eventStarted');
   const eventEndMaint = getContext('eventEndMaint');
+  const [softLimit, hardLimit] = [50, 300];
 
   export let rootPath;
   export let allowDelete = 0;  // 0=Never 1=!RunOrMaint 2=!Maint 3=Always
@@ -31,6 +32,7 @@
   $: isMaint = $serverStatus.state === 'MAINTENANCE';
   $: cannotAction = $serverStatus.running || isMaint;
   $: cannotDelete = (allowDelete === 1 && cannotAction) || (allowDelete === 2 && isMaint);
+  $: containerClass = paths.length > softLimit ? 'block oversize-container mr-6' : 'block';
 
   $: if (!cannotAction && notifyText) {
     notifyInfo(notifyText);
@@ -68,8 +70,8 @@
       })
       .then(function(json) {
         json.sort(sorter ? sorter : defaultSorter);
-        if (json.length > 60) { notifyWarning('Only 60 of ' + json.length + ' entries shown'); }
-        paths = json.slice(0, 60);
+        if (json.length > hardLimit) { notifyWarning('Only ' + hardLimit + ' of ' + json.length + ' entries shown'); }
+        paths = json.slice(0, hardLimit);
         pwdUrl = url;
       })
       .catch(function(error) {
@@ -141,7 +143,7 @@
 </script>
 
 
-<div class="block">
+<div class={containerClass}><div>
   <table class="table">
     <thead>
       <tr>
@@ -225,10 +227,20 @@
       {/if}
     </tbody>
   </table>
-</div>
+</div></div>
 
 
 <style>
+  .oversize-container {
+    max-height: 480px;
+    resize: vertical;
+    overflow: auto;
+  }
+
+  .oversize-container div {
+    min-width: 380px;
+  }
+
   .fileico {
     width: 0.6em;
   }

@@ -1,8 +1,8 @@
 <script>
-  import SystemInfo from '$lib/SystemInfo.svelte';
-  import ServerLink from '$lib/ServerLink.svelte';
-  import StoreOverview from '$lib/StoreOverview.svelte';
-  import SystemControls from '$lib/SystemControls.svelte';
+  import SystemInfo from '$lib/system/SystemInfo.svelte';
+  import SystemControls from '$lib/system/SystemControls.svelte';
+  import StoreOverview from '$lib/system/StoreOverview.svelte';
+  import ServerLink from '$lib/svrlink/ServerLink.svelte';
 </script>
 
 

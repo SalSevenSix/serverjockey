@@ -1,6 +1,6 @@
 <script>
-  import InstanceList from '$lib/InstanceList.svelte';
-  import CreateInstance from '$lib/CreateInstance.svelte';
+  import InstanceList from '$lib/instances/InstanceList.svelte';
+  import CreateInstance from '$lib/instances/CreateInstance.svelte';
 </script>
 
 
