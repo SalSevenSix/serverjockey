@@ -35,10 +35,16 @@
       })
       .then(function(json) {
         Object.keys(json).forEach(function(key) {
-          instances = [...instances, { identity: key, module: json[key].module, url: json[key].url }];
+          instances = [...instances, { identity: key, running: json[key].running,
+                                       module: json[key].module, url: json[key].url }];
         });
         subs.start('/instances/subscribe', function(data) {
-          if (data.event === 'created') {
+          if (data.event === 'running') {
+            instances = instances.map(function(value) {
+              if (value.identity != data.instance) return value;
+              return { identity: value.identity, running: data.running, module: value.module, url: value.url };
+            });
+          } else if (data.event === 'created') {
             data.instance.url = '/instances/' + data.instance.identity;
             instances = [...instances, data.instance];
           } else if (data.event === 'deleted') {
@@ -67,11 +73,7 @@
   <h2 class="title is-5">Instances</h2>
   <table class="table">
     <thead>
-      <tr>
-        <th>Name</th>
-        <th>Module</th>
-        <th></th>
-      </tr>
+      <tr><th>Name</th><th>Module</th><th></th></tr>
     </thead>
     <tbody>
       {#if instances.length === 0}
@@ -85,7 +87,10 @@
       {:else}
         {#each instances as instance, index}
           <tr>
-            <td class="word-break-all">{instance.identity}</td>
+            <td class="word-break-all">
+              <i class="fa {instance.running ? 'fa-play play' : 'fa-stop stop'} fa-xl"></i>
+              {instance.identity}
+            </td>
             <td>{instance.module}</td>
             <td>
               <button title="View" class="button is-primary mb-1" disabled={deleting}
@@ -104,6 +109,16 @@
 
 
 <style>
+  .play {
+    width: 1em;
+    color: #48C78E;
+  }
+
+  .stop {
+    width: 1em;
+    /* color: #F14668; */
+  }
+
   .fa-folder-open {
     width: 1.5em;
   }

@@ -3,7 +3,7 @@ import asyncio
 import re
 # ALLOW util.* msg.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
-from core.msg import msgabc, msgftr, msglog
+from core.msg import msgabc, msgftr, msglog, msgext
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
 from core.system import svrmodules, svrsvc, sysstore, steamapi, igd
@@ -15,6 +15,7 @@ class SystemService:
     SERVER_INITIALISED = 'SystemService.ServerInitialised'
     SERVER_DELETED = 'SystemService.ServerDestroyed'
     SERVER_FILTER = msgftr.NameIn((SERVER_INITIALISED, SERVER_DELETED))
+    _INSTANCE_EVENT_FILTER = msgftr.Or(SERVER_FILTER, svrsvc.ServerStatus.UPDATED_FILTER)
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -40,7 +41,7 @@ class SystemService:
         r.put('shutdown', _ShutdownHandler(self))
         r.pop()
         r.psh('instances', _InstancesHandler(self, self._modules))
-        r.put('subscribe', subs.handler(SystemService.SERVER_FILTER, _InstanceEventTransformer()))
+        r.put('subscribe', subs.handler(SystemService._INSTANCE_EVENT_FILTER, _InstanceEventTransformer()))
         r.pop()
         r.psh(subs.resource(resource, 'subscriptions'))
         r.put('{identity}', subs.subscriptions_handler('identity'))
@@ -81,12 +82,16 @@ class SystemService:
         await asyncio.sleep(0.25)  # TODO need to find a real solution sometime
         await asyncio.gather(*destroys)
 
-    def instances_info(self, baseurl: str) -> dict:
+    async def instances_info(self, baseurl: str) -> dict:
         result = {}
         for child in self._instances.children():
             subcontext = self._get_subcontext(child.name(), False)
             if subcontext and child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
-                result[child.name()] = {'module': subcontext.config('module'), 'url': baseurl + child.path()}
+                status = await svrsvc.ServerStatus.get_status(subcontext, self)
+                result[child.name()] = {
+                    'running': status['running'],
+                    'module': subcontext.config('module'),
+                    'url': baseurl + child.path()}
         return result
 
     def instance_info(self, identity: str) -> dict | None:
@@ -133,6 +138,7 @@ class SystemService:
         subcontext.start()
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
+        subcontext.register(msgext.RelaySubscriber(self._context, svrsvc.ServerStatus.UPDATED_FILTER))
         self._sysstoresvc.initialise_instance(subcontext)
         server = await self._modules.create_server(subcontext)
         await server.initialise()
@@ -200,8 +206,8 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
     def __init__(self, system: SystemService, modules: svrmodules.Modules):
         self._system, self._modules, = system, modules
 
-    def handle_get(self, resource, data):
-        return self._system.instances_info(util.get('baseurl', data, ''))
+    async def handle_get(self, resource, data):
+        return await self._system.instances_info(util.get('baseurl', data, ''))
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
@@ -286,5 +292,10 @@ class _ShutdownHandler(httpabc.PostHandler):
 class _InstanceEventTransformer(msgabc.Transformer):
 
     def transform(self, message):
-        event = 'created' if message.name() is SystemService.SERVER_INITIALISED else 'deleted'
-        return {'event': event, 'instance': objconv.obj_to_dict(message.data())}
+        if svrsvc.ServerStatus.UPDATED_FILTER.accepts(message):
+            status = message.data()
+            return {'event': 'running', 'instance': status['instance'], 'running': status['running']}
+        if SystemService.SERVER_FILTER.accepts(message):
+            event = 'created' if message.name() is SystemService.SERVER_INITIALISED else 'deleted'
+            return {'event': event, 'instance': objconv.obj_to_dict(message.data())}
+        return None

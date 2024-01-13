@@ -28,7 +28,7 @@
   }
 
   $: uptime = $serverStatus.uptime ? $serverStatus.uptime : 0;
-  let uptimeClock = setInterval(function() { uptime += 10000; }, 10000);
+  const uptimeClock = setInterval(function() { uptime += 10000; }, 10000);
 
   onDestroy(function() {
     clearInterval(uptimeClock);

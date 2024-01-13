@@ -14,9 +14,7 @@ class SynchronousMessenger:
                  timeout: typing.Optional[float] = None,
                  catcher: typing.Optional[msgabc.Catcher] = None):
         assert not (timeout and catcher)
-        self._mailer = mailer
-        self._timeout = timeout
-        self._catcher = catcher
+        self._mailer, self._timeout, self._catcher = mailer, timeout, catcher
 
     async def request(self, *vargs) -> typing.Union[None, msgabc.Message, typing.Collection[msgabc.Message]]:
         message = msgabc.Message.from_vargs(*vargs)

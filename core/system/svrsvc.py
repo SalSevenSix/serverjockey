@@ -33,8 +33,7 @@ class ServerService(msgabc.AbcSubscriber):
 
     @staticmethod
     async def shutdown(mailer: msgabc.MulticastMailer, source: typing.Any) -> asyncio.Task:
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, ServerService.SHUTDOWN)
+        response = await msgext.SynchronousMessenger(mailer).request(source, ServerService.SHUTDOWN)
         return response.data()
 
     def __init__(self, context: contextsvc.Context, server: svrabc.Server):
@@ -167,8 +166,7 @@ class ServerStatus(msgabc.AbcSubscriber):
 
     @staticmethod
     async def get_status(mailer: msgabc.MulticastMailer, source: typing.Any):
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, ServerStatus.REQUEST)
+        response = await msgext.SynchronousMessenger(mailer).request(source, ServerStatus.REQUEST)
         return response.data()
 
     @staticmethod
@@ -207,9 +205,9 @@ class ServerStatus(msgabc.AbcSubscriber):
             return None
         data, updated = message.data(), False
         if action is ServerStatus.NOTIFY_RUNNING:
-            updated = self._status.nofify_running(data)
+            updated = self._status.notify_running(data)
         elif action is ServerStatus.NOTIFY_STATUS:
-            updated = self._status.nofify_status(data)
+            updated = self._status.notify_status(data)
         if updated:
             self._context.post(self, ServerStatus.UPDATED, self._status.asdict())
         return None
@@ -223,7 +221,7 @@ class _Status:
         self._running, self._state = False, _Status.READY
         self._details, self._startmillis = {}, 0
 
-    def nofify_running(self, running) -> bool:
+    def notify_running(self, running) -> bool:
         if self._running == running:
             return False
         self._running = running
@@ -234,15 +232,15 @@ class _Status:
             self._startmillis = 0
         return True
 
-    def nofify_status(self, status) -> bool:
+    def notify_status(self, status) -> bool:
         if not isinstance(status, dict):
             return False
         state, details = util.get('state', status), util.get('details', status)
-        state_updated = self._nofify_state(state)
-        details_updated = self._nofify_details(details)
+        state_updated = self._notify_state(state)
+        details_updated = self._notify_details(details)
         return state_updated or details_updated
 
-    def _nofify_state(self, state) -> bool:
+    def _notify_state(self, state) -> bool:
         if state is None or state == self._state:
             return False
         self._state = state
@@ -250,14 +248,15 @@ class _Status:
             self._details = {}
         return True
 
-    def _nofify_details(self, details) -> bool:
+    def _notify_details(self, details) -> bool:
         if details is None or not isinstance(details, dict):
             return False
         self._details.update(details)
         return True
 
     def asdict(self) -> typing.Dict[str, typing.Any]:
-        status = {'running': self._running, 'state': self._state, 'details': self._details.copy()}
+        status = {'instance': self._context.config('identity'), 'running': self._running,
+                  'state': self._state, 'details': self._details.copy()}
         auto = self._context.config('auto')
         status['auto'] = auto if auto else 0
         if self._startmillis > 0:

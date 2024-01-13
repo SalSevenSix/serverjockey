@@ -214,8 +214,7 @@ class CommandProcessor:
             self._connection.post(self._instance_path('/server/' + argument))
             return True
         result = self._connection.get(self._instance_path('/server'))
-        result = 'instance: ' + self._instance + '\n' + util.repr_dict(result)
-        for line in result.strip().split('\n'):
+        for line in util.repr_dict(result).strip().split('\n'):
             logging.info(self._out + line)
         return True
 
@@ -255,6 +254,7 @@ class CommandProcessor:
         for identity in identities:
             self._instance = identity
             result = self._connection.get(self._instance_path('/server'))
+            del result['instance']
             for line in util.repr_dict(result, identity).strip().split('\n'):
                 logging.info(self._out + line)
         self._instance = original

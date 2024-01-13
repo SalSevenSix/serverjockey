@@ -10,8 +10,9 @@ scratch/
 # Web deployment root
 /web/
 
-# PyCharm IDE
+# IDEs
 .idea/
+.vscode/
 
 # Nodejs
 node_modules/
