@@ -28,7 +28,7 @@ async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
     mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.get_public_ip()))
+    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.public_ip()))
     mailer.register(_PlayerEventSubscriber(mailer))
 
 

@@ -3,107 +3,9 @@ import shutil
 import asyncio
 import aiohttp
 import socket
+import time
 # ALLOW util.*
 from core.util import io, funcutil, shellutil, tasks
-
-_VERSION, _BUILDSTAMP = '0.7.0', '{timestamp}'
-_VERSION_LABEL = _VERSION + ' (' + _BUILDSTAMP + ')'
-_VERSION_DICT = {'version': _VERSION, 'buildstamp': _BUILDSTAMP}
-
-
-def system_version() -> str:
-    return _VERSION_LABEL
-
-
-def system_version_dict() -> dict:
-    return _VERSION_DICT
-
-
-class _Cacher:
-    __instance = None
-
-    @staticmethod
-    def instance():
-        if not _Cacher.__instance:
-            _Cacher.__instance = _Cacher()
-        return _Cacher.__instance
-
-    def __init__(self):
-        self._data = {'os_name': {}, 'local_ip': {}, 'public_ip': {}}
-        self._data['os_name']['task']: asyncio.Task | None = tasks.task_fork(self._get_os_name(), 'get_os_name()')
-        self._data['local_ip']['task']: asyncio.Task | None = tasks.task_fork(self._get_local_ip(), 'get_local_ip()')
-        self._data['public_ip']['task']: asyncio.Task | None = tasks.task_fork(self._get_public_ip(), 'get_public_ip()')
-
-    async def get(self, item: str) -> str:
-        data = self._data[item]
-        if data['task']:
-            await data['task']
-        return data['value']
-
-    async def _get_os_name(self):
-        file = '/etc/os-release'
-        self._data['os_name']['value'] = 'UNKNOWN'
-        # noinspection PyBroadException
-        try:
-            if await io.file_exists(file):
-                data = await io.read_file(file)
-                for line in data.split('\n'):
-                    if line.startswith('PRETTY_NAME="'):
-                        self._data['os_name']['value'] = line[13:-1]
-                        return
-        except Exception as e:
-            logging.error('_get_os_name() failed %s', repr(e))
-        finally:
-            self._data['os_name']['task'] = None
-
-    async def _get_local_ip(self):
-        self._data['local_ip']['value'] = 'localhost'
-        # noinspection PyBroadException
-        try:
-            result = await shellutil.run_executable('hostname', '-I')
-            self._data['local_ip']['value'] = result.strip().split()[0]
-        except Exception as e:
-            logging.error('_get_local_ip() failed %s', repr(e))
-        finally:
-            self._data['local_ip']['task'] = None
-
-    async def _get_public_ip(self):
-        self._data['public_ip']['value'] = 'UNAVAILABLE'
-        try:
-            for url in ('https://api.ipify.org', 'https://ipv4.seeip.org', 'https://ipinfo.io/ip'):
-                result = await _Cacher._fetch_text(url)
-                if result:
-                    self._data['public_ip']['value'] = result
-                    logging.debug('Public IP sourced from ' + url)
-                    return
-        finally:
-            self._data['public_ip']['task'] = None
-
-    @staticmethod
-    async def _fetch_text(url: str) -> str | None:
-        connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
-        timeout = aiohttp.ClientTimeout(total=4.0)
-        try:
-            async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
-                async with session.get(url) as response:
-                    assert response.status == 200
-                    result = await response.text()
-                    return result.strip()
-        except Exception as e:
-            logging.warning('Failed to get public ip from %s because %s', url, repr(e))
-        return None
-
-
-async def get_os_name() -> str:
-    return await _Cacher.instance().get('os_name')
-
-
-async def get_local_ip() -> str:
-    return await _Cacher.instance().get('local_ip')
-
-
-async def get_public_ip() -> str:
-    return await _Cacher.instance().get('public_ip')
 
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
@@ -119,37 +21,165 @@ def _grep_last_line(startswith: str, text: str | None) -> str | None:
     return result
 
 
-async def _virtual_memory() -> tuple:
-    result = await shellutil.run_executable('free', '-b')
-    result = _grep_last_line('Mem:', result)
-    if not result:
-        return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    result = result.strip().split(' ')
-    result.pop(0)
-    result = [int(i) for i in result if i]
-    return (result[0], result[5], round(float(result[1] / result[0] * 100), 1),
-            result[1], result[2], -1, -1, -1, result[4], -1, -1)
+async def _fetch_text(url: str) -> str | None:
+    connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
+    timeout = aiohttp.ClientTimeout(total=4.0)
+    try:
+        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+            async with session.get(url) as response:
+                assert response.status == 200
+                result = await response.text()
+                return result.strip()
+    except Exception as e:
+        logging.warning('Failed to get public ip from %s because %s', url, repr(e))
+    return None
 
 
-async def _cpu_percent() -> float:
-    result = await shellutil.run_executable('top', '-b', '-n', '2')
-    result = _grep_last_line('%Cpu(s)', result)
-    if not result:
-        return 0.0
-    result = result.strip().split(' ')
-    result = [i for i in result if i]
-    result = result[result.index('id,') - 1]
-    if result == 'ni,100.0':
-        return 0.0
-    return round(100.0 - float(result), 1)
+class _OsName:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> str:
+        file = '/etc/os-release'
+        try:
+            if await io.file_exists(file):
+                data = await io.read_file(file)
+                for line in data.split('\n'):
+                    if line.startswith('PRETTY_NAME="'):
+                        return line[13:-1]
+        except Exception as e:
+            logging.error('_get_os_name() failed %s', repr(e))
+        return 'UNKNOWN'
+
+
+class _LocalIp:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> str:
+        try:
+            result = await shellutil.run_executable('hostname', '-I')
+            return result.strip().split()[0]
+        except Exception as e:
+            logging.error('_get_local_ip() failed %s', repr(e))
+        return 'localhost'
+
+
+class _PublicIp:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> str:
+        for url in ('https://api.ipify.org', 'https://ipv4.seeip.org', 'https://ipinfo.io/ip'):
+            result = await _fetch_text(url)
+            if result:
+                logging.debug('Public IP sourced from ' + url)
+                return result
+        return 'UNAVAILABLE'
+
+
+class _DiskUsage:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> tuple:
+        return await _disk_usage('/')
+
+
+class _VirtualMemory:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> tuple:
+        result = await shellutil.run_executable('free', '-b')
+        result = _grep_last_line('Mem:', result)
+        if not result:
+            return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+        result = result.strip().split(' ')
+        result.pop(0)
+        result = [int(i) for i in result if i]
+        return (result[0], result[5], round(float(result[1] / result[0] * 100), 1),
+                result[1], result[2], -1, -1, -1, result[4], -1, -1)
+
+
+class _CpuPercent:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> float:
+        result = await shellutil.run_executable('top', '-b', '-n', '2')
+        result = _grep_last_line('%Cpu(s)', result)
+        if not result:
+            return 0.0
+        result = result.strip().split(' ')
+        result = [i for i in result if i]
+        result = result[result.index('id,') - 1]
+        if result == 'ni,100.0':
+            return 0.0
+        return round(100.0 - float(result), 1)
+
+
+class _Cacher:
+
+    def __init__(self, delegate, max_seconds: float):
+        self._delegate, self._max_seconds = delegate, max_seconds
+        self._task, self._value, self._updated = None, None, 0.0
+
+    async def get(self):
+        if self._task:
+            await self._task
+            return self._value
+        if time.time() - self._updated > self._max_seconds:
+            self._task = tasks.task_start(self._run(), self._delegate)
+            await self._task
+        return self._value
+
+    async def _run(self):
+        try:
+            self._value = await self._delegate.get()
+            self._updated = time.time()
+        finally:
+            tasks.task_end(self._task)
+            self._task = None
+
+
+_VERSION, _BUILDSTAMP = '0.7.0', '{timestamp}'
+_VERSION_LABEL = _VERSION + ' (' + _BUILDSTAMP + ')'
+_VERSION_DICT = {'version': _VERSION, 'buildstamp': _BUILDSTAMP}
+_OS_NAME = _Cacher(_OsName(), 31536000.0)
+_LOCAL_IP = _Cacher(_LocalIp(), 31536000.0)
+_PUBLIC_IP = _Cacher(_PublicIp(), 31536000.0)
+_DISK_USAGE = _Cacher(_DiskUsage(), 120.0)
+_VIRTUAL_MEMORY = _Cacher(_VirtualMemory(), 60.0)
+_CPU_PERCENT = _Cacher(_CpuPercent(), 30.0)
+
+
+def system_version() -> str:
+    return _VERSION_LABEL
+
+
+def system_version_dict() -> dict:
+    return _VERSION_DICT
+
+
+async def os_name() -> str:
+    return await _OS_NAME.get()
+
+
+async def local_ip() -> str:
+    return await _LOCAL_IP.get()
+
+
+async def public_ip() -> str:
+    return await _PUBLIC_IP.get()
+
+
+async def disk_usage() -> tuple:
+    return await _DISK_USAGE.get()
+
+
+async def virtual_memory() -> tuple:
+    return await _VIRTUAL_MEMORY.get()
+
+
+async def cpu_percent() -> float:
+    return await _CPU_PERCENT.get()
 
 
 async def system_info() -> dict:
-    os_name, cpu, memory, disk, local_ip, public_ip = await asyncio.gather(
-        get_os_name(), _cpu_percent(), _virtual_memory(), _disk_usage('/'), get_local_ip(), get_public_ip())
+    os, local, public, disk, memory, cpu = await asyncio.gather(
+        os_name(), local_ip(), public_ip(), disk_usage(), virtual_memory(), cpu_percent())
     return {
         'version': system_version(),
-        'os': os_name,
+        'os': os,
         'cpu': {
             'percent': cpu
         },
@@ -167,7 +197,7 @@ async def system_info() -> dict:
             'percent': round((disk[1] / disk[0]) * 100, 1)
         },
         'net': {
-            'local': local_ip,
-            'public': public_ip
+            'local': local,
+            'public': public
         }
     }

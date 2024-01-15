@@ -1,6 +1,7 @@
 import logging
 import typing
 import argparse
+import asyncio
 import sys
 import os
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
@@ -103,14 +104,20 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         self._context = context
         self._syssvc = None
 
-    async def initialise(self) -> httpabc.Resource:
-        self._context.start()
+    async def _log_system_info(self):
+        os_name, local_ip, public_ip = await asyncio.gather(sysutil.os_name(), sysutil.local_ip(), sysutil.public_ip())
+        logging.info('OS Name: ' + os_name)
+        logging.info('Local IPv4: ' + local_ip)
+        logging.info('Public IPv4: ' + public_ip)
         if self._context.is_debug() or self._context.config('showtoken'):
-            local_ip = await sysutil.get_local_ip()
             print('URL   : ' + contextext.RootUrl(self._context).build(local_ip))
             print('TOKEN : ' + self._context.config('secret'))
+
+    async def initialise(self) -> httpabc.Resource:
+        self._context.start()
         if self._context.is_trace():
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
+        tasks.task_fork(self._log_system_info(), 'log_system_info()')
         await io.create_directories(self._context.config('tempdir'))
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()

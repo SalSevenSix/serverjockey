@@ -56,7 +56,7 @@ class IgdService(msgabc.AbcSubscriber):
         if not self._service:
             return False
         if action is IgdService.ADD_PORT_MAPPING:
-            local_ip = await sysutil.get_local_ip()
+            local_ip = await sysutil.local_ip()
             port, protocal = util.get('port', data), util.get('protocal', data)
             description = util.get('description', data)
             await asyncio.wait_for(_add_port_mapping(self._service, local_ip, port, protocal, description), 4.0)

@@ -2,7 +2,7 @@ import logging
 import re
 import ssl
 import aiohttp
-from aiohttp import web, streams, abc as webabc, web_exceptions as err
+from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
 from core.util import pack, io, objconv
 from core.context import contextsvc
