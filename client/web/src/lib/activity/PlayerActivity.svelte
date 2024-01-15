@@ -17,7 +17,7 @@
   function chartDataPlayers(instance) {
     const players = compactPlayers(instance.players, 7);
     const labels = players.map(function(player) {
-      return player.player.substring(0, 13);
+      return player.player.padEnd(26);
     });
     const data = players.map(function(player) {
       return Math.round(player.uptimepct * 1000.0) / 10.0;
@@ -25,7 +25,7 @@
     return {
       type: 'pie',
       data: { labels: labels, datasets: [{ label: ' % ', data: data }] },
-      options: { plugins: { legend: { position: 'right' }}}
+      options: { plugins: { legend: { position: 'right', maxWidth: 135 }}}
     };
   }
 
@@ -118,23 +118,23 @@
       <div class="columns">
         <div class="column mt-0 pt-0">
           <table class="table is-thinner"><tbody>
-            <tr><td></td><td></td><tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column"></td><td></td><tr>
+            <tr><td class="label-column has-text-weight-bold"
                     title="Instance for reported player activity">Instance</td>
                 <td>{activity.results[instance].summary.instance}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Number of unique players identified">Players</td>
                 <td>{activity.results[instance].summary.unique}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Maximum recorded concurrent players">Players Max</td>
                 <td>{activity.results[instance].summary.online.max}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Minimum recorded concurrent players">Players Min</td>
                 <td>{activity.results[instance].summary.online.min}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Sum of time played by all players">Total Time</td>
                 <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Sum of player sessions (logins)">Total Sessions</td>
                 <td>{activity.results[instance].summary.total.sessions}</td></tr>
           </tbody></table>
@@ -185,6 +185,11 @@
     max-width: 860px;
     min-width: 700px;
     margin: 0px auto 8px auto;
+  }
+
+  .label-column {
+    width: 40%;
+    min-width: 90px;
   }
 
   .player-column {

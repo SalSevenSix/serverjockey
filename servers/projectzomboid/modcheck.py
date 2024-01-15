@@ -24,7 +24,7 @@ def initialise(mailer: msgabc.MulticastMailer):
 
 def set_check_interval(mailer: msgabc.Mailer, source, minutes: int):
     assert isinstance(minutes, int) and minutes >= 0
-    return mailer.post(source, _CHECK_MINUTES, minutes)
+    mailer.post(source, _CHECK_MINUTES, minutes)
 
 
 class _CheckModsNeedUpdate(msgabc.AbcSubscriber):

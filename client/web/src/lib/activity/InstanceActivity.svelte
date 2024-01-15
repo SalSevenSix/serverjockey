@@ -19,14 +19,14 @@
     return {
       type: 'pie',
       data: {
-        labels: ['UP', 'DOWN'],
+        labels: ['UP'.padEnd(26), 'DOWN'.padEnd(26)],
         datasets: [{
           label: ' % ',
           backgroundColor: ['#48C78E', '#F14668'],
           data: [upTime, 100.0 - upTime]
         }],
       },
-      options: { plugins: { legend: { position: 'right' }}}
+      options: { plugins: { legend: { position: 'right', maxWidth: 135 }}}
     };
   }
 
@@ -89,23 +89,23 @@
       <div class="columns">
         <div class="column mt-0 pt-0">
           <table class="table is-thinner"><tbody>
-            <tr><td></td><td></td><tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column"></td><td></td><tr>
+            <tr><td class="label-column has-text-weight-bold"
                     title="Name of the instance">Name</td>
               <td>{entry.instance}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Date and time the instance was created">Created</td>
               <td>{shortISODateTimeString(entry.created)}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Reporting period, starting at 'created' or 'from' date, whichever is latest">Range</td>
               <td>{humanDuration(entry.range)}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Total uptime of the instance">Uptime</td>
               <td>{humanDuration(entry.uptime)}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Uptime as percentage of range (reporting period)">Available</td>
               <td>{floatToPercent(entry.available)}</td></tr>
-            <tr><td class="has-text-weight-bold"
+            <tr><td class="label-column has-text-weight-bold"
                     title="Number of times the instance was running">Sessions</td>
               <td>{entry.sessions}</td></tr>
           </tbody></table>
@@ -123,7 +123,12 @@
 
 <style>
   .chart {
-    max-width: 280px;
-    margin: -50px auto -55px auto;
+    max-width: 330px;
+    margin: -70px auto -60px auto;
+  }
+
+  .label-column {
+    width: 40%;
+    min-width: 90px;
   }
 </style>

@@ -79,7 +79,7 @@
     </label>
     <slot />
     <div class="control pr-6">
-      <textarea id={configFileTextId} class="textarea is-family-monospace is-size-7"
+      <textarea id={configFileTextId} class="textarea is-family-monospace is-size-7" spellcheck="false"
                 disabled={cannotEdit} bind:value={configText}></textarea>
     </div>
   </div>
