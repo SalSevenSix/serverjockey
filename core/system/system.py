@@ -38,7 +38,7 @@ class SystemService:
         r.psh('system')
         r.put('info', _SystemInfoHandler())
         r.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
-        r.put('shutdown', _ShutdownHandler(self))
+        r.put('shutdown', _ShutdownHandler())
         r.pop()
         r.psh('instances', _InstancesHandler(self, self._modules))
         r.put('subscribe', subs.handler(SystemService._INSTANCE_EVENT_FILTER, _InstanceEventTransformer()))
@@ -280,9 +280,6 @@ class _PidFileSubscriber(msgabc.AbcSubscriber):
 
 
 class _ShutdownHandler(httpabc.PostHandler):
-
-    def __init__(self, system: SystemService):
-        self._system = system
 
     def handle_post(self, resource, data):
         signals.interrupt_self()

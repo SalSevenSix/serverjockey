@@ -158,7 +158,8 @@ export function isModPage(dom) {
     'steamcommunity.com/app/108600/workshop/">Workshop',
     'Workshop ID:', 'Mod ID:'];
   const actual = expected.filter(function(value) { return dom.includes(value); });
-  return expected.length === actual.length;
+  if (expected.length != actual.length) return false;
+  return !dom.includes('<div id="mainContentsCollection">');
 }
 
 

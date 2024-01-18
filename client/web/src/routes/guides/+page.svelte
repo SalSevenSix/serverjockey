@@ -35,7 +35,9 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord/setup">Discord Bot Setup</a>
+    <a href="/guides/discord/setup">
+      <i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+      Discord Bot Setup</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -51,7 +53,9 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord/usage">Discord Bot Usage</a>
+    <a href="/guides/discord/usage">
+      <i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+      Discord Bot Usage</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -63,7 +67,9 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/extension">Browser Extension</a>
+    <a href="/guides/extension">
+      <i class="fa-brands {browserName === 'Edge' ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
+      Browser Extension</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -84,7 +90,9 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/virtualbox">VirtualBox</a>
+    <a href="/guides/virtualbox">
+      <i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
+      VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
