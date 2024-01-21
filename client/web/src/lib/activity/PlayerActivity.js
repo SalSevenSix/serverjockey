@@ -111,12 +111,14 @@ function newIntervalTracker(atfrom, atto) {
 }
 
 export function extractActivity(queryResults) {
-  let data = queryResults.events;
-  let instances = extractInstances(queryResults);
-  let lastEventMap = toLastEventMap(instances, queryResults.lastevent);
-  let intervalTrackers = {};
-  let onlineTrackers = {};
-  let entries = {};
+  const now = Date.now();
+  const data = queryResults.events;
+  const uptimeAtto = data.criteria.atto > now ? now : data.criteria.atto;
+  const instances = extractInstances(queryResults);
+  const lastEventMap = toLastEventMap(instances, queryResults.lastevent);
+  const intervalTrackers = {};
+  const onlineTrackers = {};
+  const entries = {};
   let entry = null;
   instances.forEach(function(instance) {  // Initialise entries
     entries[instance] = {};
@@ -159,8 +161,8 @@ export function extractActivity(queryResults) {
     Object.keys(entries[instance]).forEach(function(player) {
       entry = entries[instance][player];
       if (entry.event === 'LOGIN') {
-        entry.uptime += data.criteria.atto - entry.at;
-        intervalTrackers[instance].session(entry.at, data.criteria.atto);
+        entry.uptime += uptimeAtto - entry.at;
+        intervalTrackers[instance].session(entry.at, uptimeAtto);
       }
     });
   });

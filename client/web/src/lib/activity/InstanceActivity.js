@@ -22,11 +22,13 @@ function toLastEventMap(instances, data) {
 }
 
 export function extractActivity(queryResults) {
-  let data = queryResults.events;
-  let createdMap = toInstanceCreatedMap(queryResults.instances);
-  let instances = Object.keys(createdMap);
-  let lastEventMap = toLastEventMap(instances, queryResults.lastevent);
-  let entries = {};
+  const now = Date.now();
+  const data = queryResults.events;
+  const uptimeAtto = data.criteria.atto > now ? now : data.criteria.atto;
+  const createdMap = toInstanceCreatedMap(queryResults.instances);
+  const instances = Object.keys(createdMap);
+  const lastEventMap = toLastEventMap(instances, queryResults.lastevent);
+  const entries = {};
   let entry = null;
   instances.forEach(function(instance) {  // Initialise entries for all instances
     entry = { at: 0, event: null, sessions: 0, uptime: 0 };
@@ -59,9 +61,9 @@ export function extractActivity(queryResults) {
   instances.forEach(function(instance) {  // Close off entries for running servers
     entry = entries[instance];
     if (!entry.event && lastEventMap[instance] === 'STARTED') {
-      entry.uptime += data.criteria.atto - entry.from;
+      entry.uptime += uptimeAtto - entry.from;
     } else if (entry.event === 'STARTED') {
-      entry.uptime += data.criteria.atto - entry.at;
+      entry.uptime += uptimeAtto - entry.at;
     }
   });
   let results = [];
