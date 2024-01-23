@@ -16,8 +16,8 @@ quit        login {player}
 crash       logout {player}
 '''
 
-MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+_MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
 def _default_config():
@@ -39,22 +39,22 @@ class Server(svrabc.Server):
         self._context = context
         self._python = context.config('python')
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
-        self._config_file = self._home_dir + '/config.json'
         self._backups_dir = self._home_dir + '/backups'
-        self._log_dir = self._home_dir + '/logs'
-        self._runtime_dir = self._home_dir + '/runtime'
+        self._runtime_dir, self._world_dir = self._home_dir + '/runtime', self._home_dir + '/world'
         self._executable = self._runtime_dir + '/' + _MAIN_PY
         self._runtime_metafile = self._runtime_dir + '/readme.text'
+        self._log_dir, self._config_file = self._world_dir + '/logs', self._world_dir + '/config.json'
         self._pipeinsvc = proch.PipeInLineService(context)
         self._stopper = prcext.ServerProcessStopper(context, 10.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        if not await io.file_exists(self._config_file):
-            await io.write_file(self._config_file, objconv.obj_to_json(_default_config(), pretty=True))
-        await io.create_directory(self._backups_dir, self._log_dir)
+        await self.build_world()
+        self._context.register(msgext.CallableSubscriber(
+            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE),
+            self.build_world))
         self._context.register(svrext.MaintenanceStateSubscriber(
-            self._context, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
+            self._context, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
         self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(playerstore.PlayersSubscriber(self._context))
         self._context.register(_ServerDetailsSubscriber(self._context))
@@ -97,7 +97,12 @@ class Server(svrabc.Server):
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
         r.put('install-runtime', _InstallRuntimeHandler(self), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._context, self._runtime_dir), 'r')
+        r.put('world-meta', httpext.FileMtimeHandler(self._log_dir))
+        r.put('wipe-world-all', httpext.WipeHandler(self._context, self._world_dir), 'r')
+        r.put('wipe-world-config', httpext.WipeHandler(self._context, self._config_file), 'r')
+        r.put('wipe-world-logs', httpext.WipeHandler(self._context, self._log_dir), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._context, self._backups_dir, self._runtime_dir), 'r')
+        r.put('backup-world', httpext.ArchiveHandler(self._context, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._context, self._backups_dir, self._home_dir), 'r')
         r.pop()
         r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
@@ -125,12 +130,16 @@ class Server(svrabc.Server):
         await self._stopper.stop()
 
     async def install_runtime(self, beta: str | None):
-        main_py = await pkg.pkg_load('servers.testserver', _MAIN_PY)
         await io.delete_directory(self._runtime_dir)
         await io.create_directory(self._runtime_dir)
+        main_py = await pkg.pkg_load('servers.testserver', _MAIN_PY)
         await io.write_file(self._executable, main_py)
         await io.write_file(self._runtime_metafile, 'build : ' + str(dtutil.now_millis()) + '\nbeta  : ' + beta)
-        return None
+
+    async def build_world(self):
+        await io.create_directory(self._backups_dir, self._world_dir, self._log_dir)
+        if not await io.file_exists(self._config_file):
+            await io.write_file(self._config_file, objconv.obj_to_json(_default_config(), pretty=True))
 
 
 class _InstallRuntimeHandler(httpabc.PostHandler):

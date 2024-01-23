@@ -11,8 +11,17 @@
   import LogFiles from '$lib/instance/LogFiles.svelte';
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
+  import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
+
+  const worldActions = [
+    { 'key': 'wipe-world-config', 'name': 'Reset Config',
+      'desc': 'Reset the configuration only.' },
+    { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
+      'desc': 'Delete the log files only.' },
+    { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
+      'desc': 'Reset all of the above.' }];
 
   const consoleCommands = {
     'console': {
@@ -53,9 +62,10 @@
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Version" />
+        <WorldControls actions={worldActions} />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
-        <BackupRestoreActions hasWorld={false} />
+        <BackupRestoreActions />
       </Collapsible>
       <StoreInstance />
     </div>
