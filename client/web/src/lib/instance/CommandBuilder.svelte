@@ -1,5 +1,6 @@
 <script>
   import { getContext } from 'svelte';
+  import anchorme from 'anchorme/dist/browser/anchorme.min.js';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
@@ -27,14 +28,14 @@
 
   function loadDisplay(index) {
     args[index] = 'loading...\n\n\n';
-    let name = commands[command][action][index].name;
+    const name = commands[command][action][index].name;
     fetch(instance.url('/' + command + '/' + name), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
       })
       .then(function(text) {
-        args[index] = text;
+        args[index] = anchorme({ input: text, options: { attributes: { target: '_blank' }}});
       })
       .catch(function(error) {
         args[index] = ':(';
@@ -110,7 +111,7 @@
         {#if arg.input === 'display'}
           {loadDisplay(commands[command][action].indexOf(arg))}
           <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
-          <pre class="pre is-size-7">{args[commands[command][action].indexOf(arg)]}</pre>
+          <pre class="pre is-size-7">{@html args[commands[command][action].indexOf(arg)]}</pre>
         {/if}
         {#if arg.input === 'text' || arg.input === 'text>'}
           <div class="field">
