@@ -44,28 +44,36 @@
     <table class="table is-thinner">
       {#if info}
         <tbody>
-          <tr><td class="field-column has-text-weight-bold">Version</td><td>{info.version}</td></tr>
-          <tr><td class="field-column has-text-weight-bold">OS</td>
-              <td><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
-          <tr><td class="field-column has-text-weight-bold">CPU</td><td>{info.cpu.percent}%</td></tr>
-          <tr><td class="field-column has-text-weight-bold">Memory</td><td></td></tr>
-          <tr><td class="field-column">Total</td><td>{humanFileSize(info.memory.total)}</td></tr>
-          <tr><td class="field-column">Used</td><td>{humanFileSize(info.memory.used)}</td></tr>
-          <tr><td class="field-column">Available</td><td>{humanFileSize(info.memory.available)}</td></tr>
-          <tr><td class="field-column">Free</td><td>{humanFileSize(info.memory.free)}</td></tr>
-          <tr><td class="field-column">Usage</td><td>{info.memory.percent}%</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="ServerJockey version">
+            Version</td><td>{info.version}</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="ServerJockey uptime">
+            Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="Operating system name">
+            OS</td><td><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="Disk usage">
+            Disk</td><td>{info.disk.percent}%</td></tr>
+          <tr><td class="field-column" title="Total disk size">
+            Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
+          <tr><td class="field-column" title="Used disk space">
+            Used</td><td>{humanFileSize(info.disk.used)}</td></tr>
+          <tr><td class="field-column" title="Available disk space">
+            Available</td><td>{humanFileSize(info.disk.free)}</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="Public (internet) IPv4 address">
+            IPv4</td><td>{info.net.public}</td></tr>
+          <tr><td class="field-column" title="Local (LAN) IPv4 address">
+            Local</td><td>{info.net.local}</td></tr>
         </tbody>
       {:else}
         <tbody>
           <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
+          <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">OS</td><td>...</td></tr>
-          <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
-          <tr><td class="has-text-weight-bold">Memory</td><td>...</td></tr>
+          <tr><td class="has-text-weight-bold">Disk</td><td>...</td></tr>
           <tr><td>Total</td><td>...</td></tr>
           <tr><td>Used</td><td>...</td></tr>
           <tr><td>Available</td><td>...</td></tr>
-          <tr><td>Free</td><td>...</td></tr>
-          <tr><td>Usage</td><td>...</td></tr>
+          <tr><td class="has-text-weight-bold">IPv4</td><td>...</td></tr>
+          <tr><td>Local</td><td>...</td></tr>
         </tbody>
       {/if}
     </table>
@@ -75,27 +83,33 @@
     <table class="table is-thinner">
       {#if info}
         <tbody>
-          <tr><td class="field-column has-text-weight-bold">Uptime</td><td>{humanDuration(info.uptime)}</td></tr>
-          <tr><td class="field-column has-text-weight-bold">Disk</td><td></td></tr>
-          <tr><td class="field-column">Total</td><td>{humanFileSize(info.disk.total)}</td></tr>
-          <tr><td class="field-column">Used</td><td>{humanFileSize(info.disk.used)}</td></tr>
-          <tr><td class="field-column">Available</td><td>{humanFileSize(info.disk.free)}</td></tr>
-          <tr><td class="field-column">Usage</td><td>{info.disk.percent}%</td></tr>
-          <tr><td class="field-column has-text-weight-bold">IPv4</td><td></td></tr>
-          <tr><td class="field-column">Local</td><td>{info.net.local}</td></tr>
-          <tr><td class="field-column">Public</td><td>{info.net.public}</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="CPU usage">
+            CPU</td><td>{info.cpu.percent}%</td></tr>
+          <tr><td class="field-column" title="CPU model name">
+            Model</td><td>{info.cpu.modelname}</td></tr>
+          <tr><td class="field-column" title="CPU Architecture | Cores | Threads">
+            A | C | T</td><td>{info.cpu.arch} | {info.cpu.cpus} | {info.cpu.threads}</td></tr>
+          <tr><td class="field-column has-text-weight-bold" title="Memory usage">
+            Memory</td><td>{info.memory.percent}%</td></tr>
+          <tr><td class="field-column" title="Total memory size">
+            Total</td><td>{humanFileSize(info.memory.total)}</td></tr>
+          <tr><td class="field-column" title="Used memory space">
+            Used</td><td>{humanFileSize(info.memory.used)}</td></tr>
+          <tr><td class="field-column" title="Available memory space (excludes cache use)">
+            Available</td><td>{humanFileSize(info.memory.available)}</td></tr>
+          <tr><td class="field-column" title="Free memory space (includes cache use)">
+            Free</td><td>{humanFileSize(info.memory.free)}</td></tr>
         </tbody>
       {:else}
         <tbody>
-          <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
-          <tr><td class="has-text-weight-bold">Disk</td><td>...</td></tr>
+          <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
+          <tr><td>Model</td><td>...</td></tr>
+          <tr><td>A|C|T</td><td>...</td></tr>
+          <tr><td class="has-text-weight-bold">Memory</td><td>...</td></tr>
           <tr><td>Total</td><td>...</td></tr>
           <tr><td>Used</td><td>...</td></tr>
           <tr><td>Available</td><td>...</td></tr>
-          <tr><td>Usage</td><td>...</td></tr>
-          <tr><td class="has-text-weight-bold">IPv4</td><td>...</td></tr>
-          <tr><td>Local</td><td>...</td></tr>
-          <tr><td>Public</td><td>...</td></tr>
+          <tr><td>Free</td><td>...</td></tr>
         </tbody>
       {/if}
     </table>

@@ -105,7 +105,9 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         self._syssvc = None
 
     async def _log_system_info(self):
-        os_name, local_ip, public_ip = await asyncio.gather(sysutil.os_name(), sysutil.local_ip(), sysutil.public_ip())
+        cpu_info, os_name, local_ip, public_ip = await asyncio.gather(
+            sysutil.cpu_info(), sysutil.os_name(), sysutil.local_ip(), sysutil.public_ip())
+        logging.info('CPU: ' + cpu_info['arch'] + ' | ' + cpu_info['vendor'] + ' | ' + cpu_info['modelname'])
         logging.info('OS Name: ' + os_name)
         logging.info('Local IPv4: ' + local_ip)
         logging.info('Public IPv4: ' + public_ip)

@@ -107,6 +107,28 @@ class _CpuPercent:
         return round(100.0 - float(result), 1)
 
 
+class _CpuInfo:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> dict:
+        output = await shellutil.run_executable('lscpu')
+        output = [o.strip() for o in output.split('\n')]
+        result = {'vendor': '???', 'modelname': '???', 'model': '???', 'arch': '???', 'cpus': -1, 'threads': -1}
+        for line in output:
+            if line.startswith('Vendor ID:'):
+                result['vendor'] = line[10:].strip()
+            elif line.startswith('Model name:'):
+                result['modelname'] = line[11:].strip()
+            elif line.startswith('Model:'):
+                result['model'] = line[6:].strip()
+            elif line.startswith('Architecture:'):
+                result['arch'] = line[13:].strip()
+            elif line.startswith('CPU(s):'):
+                result['cpus'] = int(line[7:].strip())
+            elif line.startswith('Thread(s) per core:'):
+                result['threads'] = int(line[19:].strip()) * result['cpus']
+        return result
+
+
 class _Cacher:
 
     def __init__(self, delegate, max_seconds: float):
@@ -140,6 +162,7 @@ _PUBLIC_IP = _Cacher(_PublicIp(), 31536000.0)
 _DISK_USAGE = _Cacher(_DiskUsage(), 120.0)
 _VIRTUAL_MEMORY = _Cacher(_VirtualMemory(), 60.0)
 _CPU_PERCENT = _Cacher(_CpuPercent(), 30.0)
+_CPU_INFO = _Cacher(_CpuInfo(), 31536000.0)
 
 
 def system_version() -> str:
@@ -174,15 +197,18 @@ async def cpu_percent() -> float:
     return await _CPU_PERCENT.get()
 
 
+async def cpu_info() -> dict:
+    return await _CPU_INFO.get()
+
+
 async def system_info() -> dict:
-    os, local, public, disk, memory, cpu = await asyncio.gather(
-        os_name(), local_ip(), public_ip(), disk_usage(), virtual_memory(), cpu_percent())
+    cpu, cpupct, os, disk, memory, local, public = await asyncio.gather(
+        cpu_info(), cpu_percent(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
+    cpu['percent'] = cpupct
     return {
         'version': system_version(),
         'os': os,
-        'cpu': {
-            'percent': cpu
-        },
+        'cpu': cpu,
         'memory': {
             'total': memory[0],
             'used': memory[3],
