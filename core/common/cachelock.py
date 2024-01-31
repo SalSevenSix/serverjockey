@@ -48,7 +48,7 @@ class CachLockService(msgabc.AbcSubscriber):
             if self._cachelock:
                 self._cachelock.stop()
             self._cachelock = None
-            return None
+            return True if message is msgabc.STOP else None
         if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             if self._cachelock and not await self._cachelock.start():
                 self._cachelock = None

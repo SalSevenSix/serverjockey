@@ -22,7 +22,7 @@ class StoreService(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         if message is msgabc.STOP:
-            _sync_close_session(self._session)  # Intentional blocking IO
+            _sync_close_session(self._session)  # TODO probably don't need to block now with graceful shutdown fixed
             return True
         name = message.name()
         if name is storeabc.TRANSACTION:

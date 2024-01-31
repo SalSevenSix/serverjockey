@@ -63,7 +63,7 @@ class IgdService(msgabc.AbcSubscriber):
             return None
         if action is IgdService.DELETE_PORT_MAPPING:
             sync, port, protocal = util.get('sync', data, False), util.get('port', data), util.get('protocal', data)
-            if sync:  # Allowing sync option because aiohttp aggressively kills tasks upon shutdown
+            if sync:  # TODO probably don't need to block now with graceful shutdown fixed
                 _sync_delete_port_mapping(self._service, port, protocal)
             else:
                 await asyncio.wait_for(_delete_port_mapping(self._service, port, protocal), 4.0)

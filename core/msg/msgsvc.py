@@ -14,7 +14,7 @@ class TaskMailer(msgabc.Mailer):
         self._running, self._task = False, None
 
     def start(self) -> asyncio.Task:
-        self._task = tasks.task_start(self._run(), self)
+        self._task = tasks.task_start(self._run(), self._subscriber)
         self._running = True
         return self._task
 
@@ -32,11 +32,17 @@ class TaskMailer(msgabc.Mailer):
             logging.warning('Posting exception. raised: %s', repr(e))
         return self._running
 
+    async def join_queue(self) -> int:
+        if not self._running:
+            return 0
+        qsize = self._queue.qsize()
+        await self._queue.join()
+        return qsize
+
     async def stop(self):
         if not self._running:
             return
-        # Not calling queue.join() because STOP will end the tasks.
-        # Any message after STOP should stay in queue and be ignored.
+        await self.join_queue()
         self.post(msgabc.STOP)
         await self._task
 
@@ -74,11 +80,19 @@ class TaskMulticastMailer(msgabc.MulticastMailer):
     def post(self, *vargs) -> bool:
         return self._mailer.post(*vargs)
 
+    async def _join_queue(self) -> int:
+        qsize = await self._mailer.join_queue()
+        for mailer in self._subscriber.mailers():
+            qsize += await mailer.join_queue()
+        return qsize
+
     async def stop(self):
-        expired = self._subscriber.mailers()
+        while await self._join_queue() > 0:
+            logging.debug('TaskMulticastMailer required additional queue join')
+        for mailer in self._subscriber.mailers():
+            await mailer.stop()  # Calling these first to await task...
+        # ... because stopping this mailer only sends the STOP message
         await self._mailer.stop()
-        for mailer in expired:
-            await mailer.stop()  # This may post STOP again, but they will just be ignored
 
 
 class _MulticastSubscriber(msgabc.AbcSubscriber):

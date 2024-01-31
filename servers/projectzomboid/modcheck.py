@@ -126,12 +126,9 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
         self._initiated, self._second_message = 0, False
 
     async def handle(self, message):
-        if message is msgabc.STOP:
+        if message is msgabc.STOP or proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._initiated, self._second_message = 0, False
-            return True
-        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
-            self._initiated, self._second_message = 0, False
-            return None
+            return True if message is msgabc.STOP else None
         if self._initiated == 0 and msg.SERVER_RESTART_REQUIRED_FILTER.accepts(message):
             self._initiated, self._second_message = dtutil.now_millis(), False
             await proch.PipeInLineService.request(
