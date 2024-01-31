@@ -1,5 +1,6 @@
 <script>
   import { fly, fade } from 'svelte/transition';
+  import { sleep } from '$lib/util/util';
   import { notifications, removeNotification } from '$lib/util/notifications';
 
   const [baseMillis, incMillis, baseFly, incFly] = [200, 50, -120, 67];
@@ -7,13 +8,26 @@
                   'is-warning': 'fa-triangle-exclamation',
                   'is-danger':  'fa-circle-minus' };
 
+  let hidden = true;
+  $: setHidden($notifications.length); function setHidden(nlen) {
+    if (!hidden && nlen === 0) {
+      sleep(baseMillis).then(function() {
+        if ($notifications.length === 0) {
+          hidden = true;
+        }
+      });
+    } else if (nlen > 0) {
+      hidden = false;
+    }
+  }
+
   function deleteMessage() {
     removeNotification(this.id);
   }
 </script>
 
 
-<div id="notifications" class="section" class:is-hidden={$notifications.length === 0}>
+<div id="notifications" class="section" class:is-hidden={hidden}>
   <div class="container">
     {#each $notifications as notification, index}
       <div id={notification.id} class="notification {notification.level}"

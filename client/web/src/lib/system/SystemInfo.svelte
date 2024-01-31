@@ -104,7 +104,7 @@
         <tbody>
           <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
           <tr><td>Model</td><td>...</td></tr>
-          <tr><td>A|C|T</td><td>...</td></tr>
+          <tr><td>A | C | T</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">Memory</td><td>...</td></tr>
           <tr><td>Total</td><td>...</td></tr>
           <tr><td>Used</td><td>...</td></tr>

@@ -100,5 +100,5 @@ the script until all dependencies are satisfied, then the system will start.
 BRANCH="master"
 wget https://github.com/SalSevenSix/serverjockey/archive/refs/heads/$BRANCH.zip
 unzip -q $BRANCH.zip && mv serverjockey-$BRANCH serverjockey
-./serverjockey/serverjockey.sh --showtoken
+./serverjockey/serverjockey.sh --dbfile --showtoken
 ```
