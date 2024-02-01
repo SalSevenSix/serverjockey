@@ -89,7 +89,7 @@
   </div>
 </div>
 <div class="columns">
-  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
     <a href="/guides/virtualbox">
       <i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
       VirtualBox</a>
@@ -111,7 +111,7 @@
     <div class="column is-one-quarter-desktop is-one-third-tablet">
       <a href="/guides/servers/{game.module}" title="{game.serverName} guide">
         <div class="card">
-          <header class="card-header card-header-title">{game.serverName}</header>
+          <header class="card-header card-header-title notranslate">{game.serverName}</header>
           <div class="card-image">
             <figure class="image">
               <img src="/assets/games/{game.module}-tile.jpg" alt="{game.serverName} icon" />

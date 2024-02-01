@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { closeModal } from 'svelte-modals';
+  import { noStorage } from '$lib/util/util';
   import { notifyError } from '$lib/util/notifications';
   import { securityToken } from '$lib/util/sjgmsapi';
 
@@ -23,7 +24,7 @@
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);
-        if (typeof(Storage) !== 'undefined') {
+        if (!noStorage) {
           sessionStorage.setItem(storageKey, token);
           if (remember) {
             localStorage.setItem(storageKey, token);
@@ -39,7 +40,7 @@
   }
 
   onMount(function() {
-    if (typeof(Storage) === 'undefined') return;
+    if (noStorage) return;
     let storedToken = localStorage.getItem(storageKey);
     if (storedToken) {
       token = storedToken;

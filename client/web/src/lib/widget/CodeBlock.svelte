@@ -1,4 +1,6 @@
 <script>
+  export let nocopy = false;
+
   let codeElement;
 
   function copyToClipboard() {
@@ -8,12 +10,16 @@
 </script>
 
 
-<div class="position-relative">
-  <pre class="pre is-thinner" bind:this={codeElement}><slot /></pre>
-  <button title="Copy" class="button is-dark" on:click={copyToClipboard}>
-    <i class="fa fa-copy fa-xl"></i>
-  </button>
-</div>
+{#if nocopy}
+  <pre class="pre is-thinner notranslate"><slot /></pre>
+{:else}
+  <div class="position-relative">
+    <pre class="pre is-thinner notranslate" bind:this={codeElement}><slot /></pre>
+    <button title="Copy" class="button is-dark" on:click={copyToClipboard}>
+      <i class="fa fa-copy fa-xl"></i>
+    </button>
+  </div>
+{/if}
 
 
 <style>

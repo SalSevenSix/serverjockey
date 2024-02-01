@@ -59,7 +59,7 @@
     {:else if lastActivity === 'None'}
       <span class="is-italic">not found, world may not exist</span>
     {:else if lastActivity}
-      {lastActivity}
+      <span class="notranslate">{lastActivity}</span>
     {:else}
       <span class="is-italic">unavailable</span>
     {/if}

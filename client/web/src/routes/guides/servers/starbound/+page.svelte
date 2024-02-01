@@ -11,7 +11,8 @@
 
 <WebappTitle module="starbound" serverName="Starbound">
   <p>
-    <a href="https://playstarbound.com" target="_blank">Starbound <i class="fa fa-up-right-from-square"></i></a>
+    <a class="notranslate" href="https://playstarbound.com" target="_blank">
+      Starbound <i class="fa fa-up-right-from-square"></i></a>
     is an action-adventure game with fighting, mining and crafting in a procedurally generated 2D world.
     It has RPG elements and a focus on exploration and player guided storytelling.
   </p>

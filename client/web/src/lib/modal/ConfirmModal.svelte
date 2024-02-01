@@ -31,7 +31,7 @@
           <label for="confirmModalName" class="label" title="Enter name to confirm action">Confirm Name</label>
           <div class="control">
             <!-- svelte-ignore a11y-autofocus -->
-            <input id="confirmModalName" class="input" type="text"
+            <input id="confirmModalName" class="input notranslate" type="text"
                    placeholder={confirmName} bind:value={enteredName} autofocus>
           </div>
         </div>

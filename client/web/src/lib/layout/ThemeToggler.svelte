@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { noStorage } from '$lib/util/util';
 
   export let clazz = '';
   export let onAfterToggle = function() {};
@@ -23,14 +24,14 @@
     if (themeLink.blur) { themeLink.blur(); }
     theme = theme === 'light' ? 'dark' : 'light';
     setTheme(theme);
-    if (typeof(Storage) !== 'undefined') {
+    if (!noStorage) {
       localStorage.setItem('sjgmsTheme', theme);
     }
     onAfterToggle();
   }
 
   onMount(function() {
-    if (typeof(Storage) !== 'undefined') {
+    if (!noStorage) {
       let storedTheme = localStorage.getItem('sjgmsTheme');
       theme = storedTheme ? storedTheme : 'light';
     }

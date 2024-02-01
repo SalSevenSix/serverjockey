@@ -73,7 +73,7 @@
           results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
         <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
         <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
-        <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
+        <span class="white-space-nowrap notranslate">({humanDuration(activity.meta.atrange)})</span>
       </p>
     </div>
   </div>
@@ -92,22 +92,22 @@
             <tr><td class="label-column"></td><td></td><tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Name of the instance">Name</td>
-              <td>{entry.instance}</td></tr>
+              <td class="notranslate">{entry.instance}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Date and time the instance was created">Created</td>
-              <td>{shortISODateTimeString(entry.created)}</td></tr>
+              <td class="notranslate">{shortISODateTimeString(entry.created)}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Reporting period, starting at 'created' or 'from' date, whichever is latest">Range</td>
-              <td>{humanDuration(entry.range)}</td></tr>
+              <td class="notranslate">{humanDuration(entry.range)}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Total uptime of the instance">Uptime</td>
-              <td>{humanDuration(entry.uptime)}</td></tr>
+              <td class="notranslate">{humanDuration(entry.uptime)}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Uptime as percentage of range (reporting period)">Available</td>
-              <td>{floatToPercent(entry.available)}</td></tr>
+              <td class="notranslate">{floatToPercent(entry.available)}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Number of times the instance was running">Sessions</td>
-              <td>{entry.sessions}</td></tr>
+              <td class="notranslate">{entry.sessions}</td></tr>
           </tbody></table>
         </div>
         <div class="column">

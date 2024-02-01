@@ -6,7 +6,12 @@ html {
 
 body {
   background-color: #FFFDF8;
+  top: 0px !important;
   counter-reset: section;
+}
+
+body div:first-of-type .skiptranslate {
+  top: -50px !important;
 }
 
 hr {

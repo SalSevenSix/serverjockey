@@ -26,7 +26,9 @@
     </thead>
     <tbody class="is-family-monospace">
     {#each portsList as portData}
-      <tr><td>{portData.purpose}</td><td>{portData.port}</td><td>{portData.protocal}</td></tr>
+      <tr><td>{portData.purpose}</td>
+      <td class="notranslate">{portData.port}</td>
+      <td class="notranslate">{portData.protocal}</td></tr>
     {/each}
     </tbody>
   </table>
@@ -34,5 +36,5 @@
     If using manual port forwarding you should also disable UPnP in the
     <span class="has-text-weight-bold">{configName}</span> configuration.
   </p>
-  <pre class="pre is-thinner"><slot /></pre>
+  <pre class="pre is-thinner notranslate"><slot /></pre>
 </div>

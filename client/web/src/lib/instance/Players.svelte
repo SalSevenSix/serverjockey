@@ -111,8 +111,8 @@
                 {#if hasSteamId}
                   <td class="white-space-nowrap">{player.steamid ? player.steamid : 'CONNECTED'}</td>
                 {/if}
-                <td class="word-break-all player-column">{player.name}</td>
-                <td class="white-space-nowrap online-column">
+                <td class="word-break-all player-column notranslate">{player.name}</td>
+                <td class="white-space-nowrap online-column notranslate">
                   {player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
               </tr>
             {/each}

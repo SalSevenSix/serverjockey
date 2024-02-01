@@ -3,7 +3,7 @@ const textExtensions = ['txt', 'text', 'log'];
 const stampExtRegex = /^[0-9_-]+$/;
 
 export const browserName = getBrowserName();
-
+export const noStorage = typeof(Storage) === 'undefined';
 
 function getBrowserName() {
   const ua = window.navigator.userAgent;

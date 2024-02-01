@@ -11,7 +11,7 @@
 
 
 <CheckServerLink let:hasToken={hasToken}>
-  <Collapsible icon="fa-robot" title="ServerLink" open={!hasToken}>
+  <Collapsible icon="fa-robot" title="ServerLink" notranslate open={!hasToken}>
     <ServerStatusStore identity="serverlink">
       <div class="columns">
         <div class="column">

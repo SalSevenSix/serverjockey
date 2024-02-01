@@ -15,7 +15,8 @@
 
 <WebappTitle module="sevendaystodie" serverName="7 Days to Die">
   <p>
-    <a href="https://7daystodie.com" target="_blank">7 Days to Die <i class="fa fa-up-right-from-square"></i></a>
+    <a class="notranslate" href="https://7daystodie.com" target="_blank">
+      7 Days to Die <i class="fa fa-up-right-from-square"></i></a>
     is zombie apocalypse survival horror game set in a 3D open world. It features combat, looting, mining, crafting,
     base building &amp; defence, exploration, and RPG elements.
   </p>

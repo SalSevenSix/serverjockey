@@ -102,7 +102,7 @@
           results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
         <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
         <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
-        <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
+        <span class="white-space-nowrap notranslate">({humanDuration(activity.meta.atrange)})</span>
       </p>
     </div>
   </div>
@@ -121,22 +121,22 @@
             <tr><td class="label-column"></td><td></td><tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Instance for reported player activity">Instance</td>
-                <td>{activity.results[instance].summary.instance}</td></tr>
+                <td class="notranslate">{activity.results[instance].summary.instance}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Number of unique players identified">Players</td>
-                <td>{activity.results[instance].summary.unique}</td></tr>
+                <td class="notranslate">{activity.results[instance].summary.unique}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Maximum recorded concurrent players">Players Max</td>
-                <td>{activity.results[instance].summary.online.max}</td></tr>
+                <td class="notranslate">{activity.results[instance].summary.online.max}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Minimum recorded concurrent players">Players Min</td>
-                <td>{activity.results[instance].summary.online.min}</td></tr>
+                <td class="notranslate">{activity.results[instance].summary.online.min}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Sum of time played by all players">Total Time</td>
-                <td>{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
+                <td class="notranslate">{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Sum of player sessions (logins)">Total Sessions</td>
-                <td>{activity.results[instance].summary.total.sessions}</td></tr>
+                <td class="notranslate">{activity.results[instance].summary.total.sessions}</td></tr>
           </tbody></table>
         </div>
         <div class="column chart-container-players">
@@ -157,8 +157,8 @@
               <tr><td></td><td></td></tr>
               {#each entryColumn as entry}
                 <tr title="{entry.sessions} sessions">
-                  <td class="word-break-all player-column">{entry.player}</td>
-                  <td class="white-space-nowrap online-column">{humanDuration(entry.uptime, 2)}</td>
+                  <td class="word-break-all player-column notranslate">{entry.player}</td>
+                  <td class="white-space-nowrap online-column notranslate">{humanDuration(entry.uptime, 2)}</td>
                 </tr>
               {/each}
             </tbody></table>

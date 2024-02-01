@@ -83,7 +83,7 @@
   <div class="field">
     <div class="control">
       {#each Object.keys(commands) as commandOption}
-        <label class="radio m-1 p-2">
+        <label class="radio m-1 p-2 notranslate">
           <input type="radio" bind:group={command} name="command" value={commandOption}>
           {capitalizeKebabCase(commandOption)}
         </label>
@@ -97,7 +97,7 @@
     <div class="field">
       <div class="control">
         {#each Object.keys(commands[command]) as actionOption}
-          <label class="radio m-1 p-2">
+          <label class="radio m-1 p-2 notranslate">
             <input type="radio" bind:group={action} name="action" value={actionOption}>
             {capitalizeKebabCase(actionOption)}
           </label>
@@ -111,7 +111,7 @@
         {#if arg.input === 'display'}
           {loadDisplay(commands[command][action].indexOf(arg))}
           <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
-          <pre class="pre is-size-7">{@html args[commands[command][action].indexOf(arg)]}</pre>
+          <pre class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
         {/if}
         {#if arg.input === 'text' || arg.input === 'text>'}
           <div class="field">
@@ -134,7 +134,7 @@
           <div class="field">
             <div class="control">
               {#each arg.options as option}
-                <label class="radio m-1 p-2">
+                <label class="radio m-1 p-2 notranslate">
                   <input type="radio" name={arg.name} value={option}
                          bind:group={args[commands[command][action].indexOf(arg)]}>
                   {capitalizeKebabCase(option)}

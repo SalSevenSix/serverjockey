@@ -87,11 +87,11 @@
       {:else}
         {#each instances as instance, index}
           <tr>
-            <td class="word-break-all">
+            <td class="word-break-all notranslate">
               <i class="fa {instance.running ? 'fa-play play' : 'fa-stop stop'} fa-xl"></i>
               {instance.identity}
             </td>
-            <td class="word-break-all">{instance.module}</td>
+            <td class="word-break-all notranslate">{instance.module}</td>
             <td class="word-break-all">
               <button title="View" class="button is-primary mb-1" disabled={deleting}
                       on:click={function() { viewInstance(instance); }}>

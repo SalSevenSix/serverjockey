@@ -4,6 +4,7 @@
 
   export let open = false;
   export let icon = null;
+  export let notranslate = false;
   export let title;
 
   let visible = open;
@@ -17,7 +18,7 @@
 <hr />
 <div class="columns is-mobile mb-0">
   <div class="column is-three-quarters">
-    <h2 class="title is-5">
+    <h2 class="title is-5" class:notranslate={notranslate}>
       {#if icon}<i class="fa {icon} fa-lg"></i>{/if}{title}
     </h2>
   </div>

@@ -11,7 +11,7 @@
     </figure>
   </div>
   <div class="column is-three-quarters content">
-    <h2 class="title is-3 mt-2">{serverName}</h2>
+    <h2 class="title is-3 mt-2 notranslate">{serverName}</h2>
     <slot />
   </div>
 </div>

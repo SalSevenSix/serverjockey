@@ -191,19 +191,19 @@
               </td>
             {/if}
             {#if columnsMeta.date}
-              <td>{path.updated}</td>
+              <td class="notranslate">{path.updated}</td>
             {/if}
             {#if columnsMeta.name && path.type === 'directory'}
-              <td class="word-break-all" colspan={columnsMeta.size ? 2 : 1}>
+              <td class="word-break-all notranslate" colspan={columnsMeta.size ? 2 : 1}>
                 <a href={'#'} on:click|preventDefault={function() { load(path.url); }}>{path.name}</a>
               </td>
             {/if}
             {#if columnsMeta.name && path.type === 'file'}
-              <td class="word-break-all">
+              <td class="word-break-all notranslate">
                 <a href={path.url} target={guessTextFile(path.name) ? '_blank' : '_self'}>{path.name}</a>
               </td>
               {#if columnsMeta.size}
-                <td>{humanFileSize(path.size)}</td>
+                <td class="notranslate">{humanFileSize(path.size)}</td>
               {/if}
             {/if}
             {#if hasActions}

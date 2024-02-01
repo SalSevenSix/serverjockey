@@ -12,7 +12,8 @@
 
 <WebappTitle module="projectzomboid" serverName="Project Zomboid">
   <p>
-    <a href="https://projectzomboid.com" target="_blank">Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
+    <a class="notranslate" href="https://projectzomboid.com" target="_blank">
+      Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
     is a zombie apocalypse survival horror game set in an open world using an isometric view with 3D elements.
     Gameplay involves combat, crafting, base building and RPG elements with a focus on realism.
     Survival is challenging, requiring the player to continually monitor both the surounding situation
@@ -63,7 +64,7 @@ UPnP=false
     As a general rule, the memory required is 2Gb + 500Mb per player. Whatever value is set,
     the machine that the server is running on should have 2Gb more of free memory.
   </p>
-  <pre class="pre is-thinner">"vmArgs": [
+  <CodeBlock nocopy>"vmArgs": [
     "-Djava.awt.headless=true",
     "-Xmx8g",
     "-Dzomboid.steam=1",
@@ -72,14 +73,14 @@ UPnP=false
     "-Djava.security.egd=file:/dev/urandom",
     "-XX:+UseZGC",
     "-XX:-OmitStackTraceInFastThrow"
-]</pre>
+]</CodeBlock>
 </div>
 
 <div class="content pt-4" id="adminCharacter">
   <h4 class="title is-5">Admin Character</h4>
   <p>
     When a Project Zomboid server starts it will generate a new map if one does not exist.
-    It will also create an Admin user called <span class="is-family-monospace">admin</span>.
+    It will also create an Admin user called <span class="is-family-monospace notranslate">admin</span>.
     You can login to the game world with this user to play as the admin character.
     The password is the same as the Webapp login token. It will not change when the token changes.
   </p>
@@ -97,9 +98,8 @@ UPnP=false
     the <span class="has-text-weight-bold">Launch Options</span> configuration.
     Use 0 minutes to disable automatic restarts.
   </p>
-  <pre class="pre is-thinner"
->&quot;_comment_mod_check_minutes&quot;: &quot;Check interval for updated mods in minutes. Use 0 to disable checks.&quot;,
-&quot;mod_check_minutes&quot;: 15</pre>
+  <CodeBlock nocopy>&quot;_comment_mod_check_minutes&quot;: &quot;Check interval for updated mods in minutes. Use 0 to disable checks.&quot;,
+&quot;mod_check_minutes&quot;: 15</CodeBlock>
 </div>
 
 <div class="content pt-4" id="integrationMods">
@@ -118,10 +118,10 @@ UPnP=false
     </thead>
     <tbody>
       <tr>
-        <td class="white-space-nowrap">
+        <td class="white-space-nowrap notranslate">
           <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2740018049" target="_blank">
             2740018049 <i class="fa fa-up-right-from-square"></i></a></td>
-        <td>PIT</td>
+        <td class="notranslate">PIT</td>
         <td>Adds the in-game date &amp; time to the server status in both the webapp and discord.</td>
       </tr>
     </tbody>
@@ -170,9 +170,8 @@ UPnP=false
     <span class="has-text-weight-bold">Launch Options</span> configuration.
     Please ensure enough free memory is available when cache locking the map files.
   </p>
-  <pre class="pre is-thinner"
->&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
-&quot;cache_map_files&quot;: true</pre>
+  <CodeBlock nocopy>&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
+&quot;cache_map_files&quot;: true</CodeBlock>
 </div>
 
 <div class="content pt-4" id="dockerPtero">
@@ -186,8 +185,8 @@ UPnP=false
     The workaround is simply to disable all of the automatic map backups in the
     <span class="has-text-weight-bold">INI Settings</span>.
   </p>
-  <pre class="pre is-thinner">BackupsOnStart=false
-BackupsOnVersionChange=false</pre>
+  <CodeBlock nocopy>BackupsOnStart=false
+BackupsOnVersionChange=false</CodeBlock>
   <p>
     Also delete any map backups that the server made.
     Use the <span class="has-text-weight-bold">Autobackups</span> section in the webapp to do this.

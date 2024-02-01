@@ -10,9 +10,11 @@
 
 <WebappTitle module="csii" serverName="Counter Strike 2">
   <p>
-    <a href="https://www.counter-strike.net" target="_blank">Counter Strike 2
-    <i class="fa fa-up-right-from-square"></i></a> is a popular competitive PvP FPS built on the Source 2 engine.
-    This guide will show you how to install, configure and run a Counter Strike 2 server using this Webapp.
+    <a class="notranslate" href="https://www.counter-strike.net" target="_blank">
+      Counter Strike 2<i class="fa fa-up-right-from-square"></i></a>
+    is a popular competitive PvP FPS built on the Source 2 engine.
+    This guide will show you how to install, configure and run
+    a Counter Strike 2 server using this Webapp.
   </p>
   <p>
     Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>

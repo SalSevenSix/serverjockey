@@ -134,7 +134,7 @@
         results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
       <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
       <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
-      <span class="white-space-nowrap">({humanDuration(activity.meta.atrange)})</span>
+      <span class="white-space-nowrap notranslate">({humanDuration(activity.meta.atrange)})</span>
     </p>
   </div>
 {/if}
@@ -150,8 +150,8 @@
         {#each activity.results as entry}
           <tr class={entry.clazz}>
             {#if entry.player}
-              <td class="white-space-nowrap" title={entry.ats}>{entry.at}</td>
-              <td>{entry.player}</td>
+              <td class="white-space-nowrap notranslate" title={entry.ats}>{entry.at}</td>
+              <td class="notranslate">{entry.player}</td>
               {#if entry.event}
                 <td>
                   <span class="white-space-nowrap">
@@ -164,10 +164,10 @@
                   {#if entry.text}&nbsp;({entry.text}){/if}
                 </td>
               {:else}
-                <td>{entry.text}</td>
+                <td class="notranslate">{entry.text}</td>
               {/if}
             {:else}
-              <td class="white-space-nowrap has-text-weight-bold" colspan="2">{entry.at}</td>
+              <td class="white-space-nowrap has-text-weight-bold notranslate" colspan="2">{entry.at}</td>
               <td></td>
             {/if}
           </tr>

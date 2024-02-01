@@ -100,8 +100,10 @@
         <div class="column is-7">
           <div class="field">
             <label for={atfromId} class="label" title="Begin date and time for search range">Date From</label>
-            <DateInput id={atfromId} timePrecision="second" placeholder=" ---" min={minDate}
-                       bind:disabled={hasAtfromMillis} bind:valid={atfromValid} bind:value={atfrom} />
+            <div class="notranslate">
+              <DateInput id={atfromId} timePrecision="second" placeholder=" ---" min={minDate}
+                         bind:disabled={hasAtfromMillis} bind:valid={atfromValid} bind:value={atfrom} />
+            </div>
           </div>
         </div>
         <div class="column is-5">
@@ -123,8 +125,10 @@
         <div class="column is-7">
           <div class="field">
             <label for={attoId} class="label" title="End date and time for search range">Date To</label>
-            <DateInput id={attoId} timePrecision="second" placeholder=" ---" min={minDate}
-                       bind:disabled={hasAttoPreset} bind:valid={attoValid} bind:value={atto} />
+            <div class="notranslate">
+              <DateInput id={attoId} timePrecision="second" placeholder=" ---" min={minDate}
+                         bind:disabled={hasAttoPreset} bind:valid={attoValid} bind:value={atto} />
+            </div>
           </div>
         </div>
         <div class="column is-5">

@@ -42,7 +42,9 @@
       <tr><td class="has-text-weight-bold">State</td><td>
         {#if $serverStatus.state}
           <i class="fa {statusIconClass} fa-lg"></i>&nbsp; {$serverStatus.state}
-          {#if $serverStatus.state === 'STARTED'}({humanDuration(uptime)}){/if}
+          {#if $serverStatus.state === 'STARTED'}
+            <span class="notranslate">({humanDuration(uptime)})</span>
+          {/if}
         {:else}
           <SpinnerIcon /> ...
         {/if}

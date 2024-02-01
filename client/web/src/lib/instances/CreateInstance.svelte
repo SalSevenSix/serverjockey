@@ -50,7 +50,7 @@
       <span class="select is-fullwidth">
         <select id="createInstanceModule" disabled={processing} bind:value={serverForm.module}>
           {#each modules as module}
-            <option>{module}</option>
+            <option class="notranslate">{module}</option>
           {/each}
         </select>
       </span>
