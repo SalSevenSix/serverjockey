@@ -70,7 +70,7 @@
 
 <style>
   .disable-button {
-    width: 27px;
-    height: 27px;
+    width: 26px;
+    height: 26px;
   }
 </style>

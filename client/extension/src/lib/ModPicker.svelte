@@ -18,7 +18,7 @@
 
   function updated(dirty=true) {
     data = data;  // Ugly but svelte is not tracking internal changes
-    dataSynced = !dirty;
+    if (dirty) { dataSynced = false; }
   }
 
   function saveIni() {

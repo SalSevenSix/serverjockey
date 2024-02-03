@@ -202,6 +202,7 @@ async def cpu_info() -> dict:
 
 
 async def system_info() -> dict:
+    # noinspection PyTypeChecker
     cpu, cpupct, os, disk, memory, local, public = await asyncio.gather(
         cpu_info(), cpu_percent(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
     cpu['percent'] = cpupct
