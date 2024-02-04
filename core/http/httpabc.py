@@ -87,10 +87,6 @@ class ByteStream(io.Readable, metaclass=abc.ABCMeta):
     async def content_length(self) -> int | None:
         pass
 
-    @abc.abstractmethod
-    def enable_gzip(self) -> bool:
-        pass
-
 
 ABC_DATA_GET = typing.Dict[str, typing.Union[str, int, float, bool]]
 ABC_DATA_POST = typing.Dict[str, typing.Union[ABC_DATA_GET, str, int, float, bool, tuple, list, ByteStream]]

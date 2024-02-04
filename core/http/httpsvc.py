@@ -154,8 +154,6 @@ class _RequestHandler:
         if isinstance(body, httpabc.ByteStream):
             response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
             response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
-            if allow_gzip and body.enable_gzip():
-                response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             content_length = await body.content_length()
             if content_length is None:
                 response.enable_chunked_encoding(io.DEFAULT_CHUNK_SIZE)
