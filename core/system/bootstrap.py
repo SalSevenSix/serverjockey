@@ -33,7 +33,7 @@ def _ssl_config(home: str) -> tuple:
     return 'http', None, None
 
 
-def _create_context(args: typing.Collection) -> contextsvc.Context | None:
+def _argument_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description='Start ServerJockey game server management system.')
     p.add_argument('--version', action='store_true',
                    help='Show version then exit')
@@ -59,7 +59,11 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
     p.add_argument('--noupnp', action='store_true',
                    help='Do not enable UPnP services')
-    config = p.parse_args([] if args is None or len(args) < 2 else args[1:])
+    return p
+
+
+def _create_context(args: typing.Collection) -> contextsvc.Context | None:
+    config = _argument_parser().parse_args([] if args is None or len(args) < 2 else args[1:])
     if config.version:
         print(sysutil.system_version())
         return None
@@ -104,6 +108,28 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         self._context = context
         self._syssvc = None
 
+    async def initialise(self) -> httpabc.Resource:
+        self._context.start()
+        if self._context.is_trace():
+            self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
+        tasks.task_fork(self._log_system_info(), 'log_system_info()')
+        await self._create_tempdir()
+        self._syssvc = system.SystemService(self._context)
+        await self._syssvc.initialise()
+        await steamutil.check_steam(self._context.env('HOME'))
+        return self._syssvc.resources()
+
+    async def shutdown(self):
+        await funcutil.silently_cleanup(self._syssvc)
+        await funcutil.silently_cleanup(self._context)
+        tasks.dump()
+
+    async def _create_tempdir(self):
+        tempdir = self._context.config('tempdir')
+        if tempdir.startswith(self._context.config('home')):
+            await io.delete_any(tempdir)
+        await io.create_directories(tempdir)
+
     async def _log_system_info(self):
         cpu_info, os_name, local_ip, public_ip = await asyncio.gather(
             sysutil.cpu_info(), sysutil.os_name(), sysutil.local_ip(), sysutil.public_ip())
@@ -114,22 +140,6 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         if self._context.is_debug() or self._context.config('showtoken'):
             print('URL   : ' + contextext.RootUrl(self._context).build(local_ip))
             print('TOKEN : ' + self._context.config('secret'))
-
-    async def initialise(self) -> httpabc.Resource:
-        self._context.start()
-        if self._context.is_trace():
-            self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
-        tasks.task_fork(self._log_system_info(), 'log_system_info()')
-        await io.create_directories(self._context.config('tempdir'))
-        self._syssvc = system.SystemService(self._context)
-        await self._syssvc.initialise()
-        await steamutil.check_steam(self._context.env('HOME'))
-        return self._syssvc.resources()
-
-    async def shutdown(self):
-        await funcutil.silently_cleanup(self._syssvc)
-        await funcutil.silently_cleanup(self._context)
-        tasks.dump()
 
 
 def main(args: typing.Optional[typing.Collection] = None) -> int:

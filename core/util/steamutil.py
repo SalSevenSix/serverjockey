@@ -25,7 +25,7 @@ async def check_steam(home_dir: str):
         return
     if await io.directory_exists(home_dir + '/Steam'):
         return
-    tasks.task_fork(_install_steam(), 'check_steam()')
+    tasks.task_fork(_install_steam(), 'install_steam()')
 
 
 async def _install_steam():

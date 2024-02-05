@@ -53,14 +53,14 @@
 
 
 <div class="buttons" class:is-hidden={translating || !canTranslate()}>
-  <button class="button is-dark is-small" title="Translate using Google Translate" on:click={enableTranslation}>
+  <button class="button is-dark is-small" title="Enable Google Translate" on:click={enableTranslation}>
     &nbsp;<i class="fa fa-language fa-xl"></i>&nbsp;&nbsp;&nbsp;Translate&nbsp;</button>
 </div>
 
 <div class:is-hidden={!translating}>
   <div class="block is-flex is-flex-direction-row is-flex-wrap-nowrap">
     <div class="buttons mr-1">
-      <button class="button is-danger disable-button" title="Disable translations (page will be reloaded)"
+      <button class="button is-dark disable-button" title="Disable translation (page will be reloaded)"
               on:click={disableTranslation}><i class="fa fa-circle-xmark"></i></button>
     </div>
     <div id="google_translate_element"></div>
@@ -70,7 +70,7 @@
 
 <style>
   .disable-button {
-    width: 26px;
+    width: 34px;
     height: 26px;
   }
 </style>
