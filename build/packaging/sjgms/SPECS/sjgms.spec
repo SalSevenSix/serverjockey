@@ -53,6 +53,8 @@ exit 0
 
 
 %changelog
+* Web Feb 07 2024 Bowden Salis <bsalis76@gmail.com> - 0.8.0
+- Feature release v0.8.0
 * Tue Feb 06 2024 Bowden Salis <bsalis76@gmail.com> - 0.7.0
 - Improvement release for Activity reporting and extension also added translations
 * Tue Dec 26 2023 Bowden Salis <bsalis76@gmail.com> - 0.6.0
