@@ -5,11 +5,15 @@ from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
 from core.common import playerstore
 
+_SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp (.*) : usecElapsed >= 0$'
+
 SERVER_STARTED_FILTER = msgftr.And(
     proch.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataEquals('Loading level: 100%'))
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_ALL_LINES,
+    msgftr.And(
+        proch.ServerProcess.FILTER_ALL_LINES,
+        msgftr.Not(msgftr.DataMatches(_SPAM))),
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
 MAINTENANCE_STATE_FILTER = msgftr.Or(
