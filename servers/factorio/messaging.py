@@ -76,17 +76,19 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    CHAT, JOIN, LEAVE = '[CHAT]', '[JOIN]', '[LEAVE]'
+    CHAT, JOIN, LEAVE, KICK = '[CHAT]', '[JOIN]', '[LEAVE]', '[KICK]'
     CHAT_FILTER = msgftr.DataStrContains(CHAT)
     JOIN_FILTER = msgftr.DataStrContains(JOIN)
     LEAVE_FILTER = msgftr.DataStrContains(LEAVE)
+    KICK_FILTER = msgftr.DataStrContains(KICK)
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
-                      _PlayerEventSubscriber.LEAVE_FILTER)))
+                      _PlayerEventSubscriber.LEAVE_FILTER,
+                      _PlayerEventSubscriber.KICK_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -106,6 +108,11 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
             value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LEAVE)
             value = util.right_chop_and_strip(value, 'left the game')
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            return None
+        if _PlayerEventSubscriber.KICK_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.KICK)
+            value = util.right_chop_and_strip(value, 'was kicked by')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         return None

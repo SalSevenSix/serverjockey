@@ -54,8 +54,4 @@
     margin: 0.2rem 1rem 0.2rem 1rem;
     cursor: pointer;
   }
-
-  .notification:last-of-type {
-    z-index: 110;
-  }
 </style>

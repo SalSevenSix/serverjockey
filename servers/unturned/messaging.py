@@ -53,20 +53,23 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 # \x1b[37mConnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
 # \x1b[37mDisconnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
+# Successfully kicked Apollo!
 # [World] Apollo [Apollo]: "Hello World"
 # Say Hello Everyone   <-- command
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    CHAT, NAME, CHARACTER = '[World]', 'Name:', 'Character:'
+    CHAT, NAME, CHARACTER, KICK = '[World]', 'Name:', 'Character:', 'Successfully kicked'
     CHAT_FILTER = msgftr.DataStrContains(CHAT)
     LOGIN_FILTER = msgftr.DataMatches('.*Connecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
     LOGOUT_FILTER = msgftr.DataMatches('.*Disconnecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
+    KICK_FILTER = msgftr.DataStrStartsWith(KICK)
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             proch.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.LOGIN_FILTER,
-                      _PlayerEventSubscriber.LOGOUT_FILTER)))
+                      _PlayerEventSubscriber.LOGOUT_FILTER,
+                      _PlayerEventSubscriber.KICK_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -76,6 +79,10 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.right_chop_and_strip(name, ']')
             text = util.left_chop_and_strip(value, ']: "')[:-1]
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
+            return None
+        if _PlayerEventSubscriber.KICK_FILTER.accepts(message):
+            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.KICK)
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value[:-1])
             return None
         value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.NAME)
         value = util.right_chop_and_strip(value, _PlayerEventSubscriber.CHARACTER)
