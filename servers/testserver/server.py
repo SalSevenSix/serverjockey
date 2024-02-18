@@ -6,7 +6,7 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
-from core.common import interceptors, playerstore
+from core.common import interceptors, playerstore, spstopper
 
 _MAIN_PY = 'main.py'
 _COMMANDS = cmdutil.CommandLines({'send': '{line}'})
@@ -45,7 +45,7 @@ class Server(svrabc.Server):
         self._runtime_metafile = self._runtime_dir + '/readme.text'
         self._log_dir, self._config_file = self._world_dir + '/logs', self._world_dir + '/config.json'
         self._pipeinsvc = proch.PipeInLineService(context)
-        self._stopper = prcext.ServerProcessStopper(context, 10.0, 'quit')
+        self._stopper = spstopper.ServerProcessStopper(context, 10.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):

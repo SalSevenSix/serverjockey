@@ -5,6 +5,7 @@ from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
+from core.common import spstopper
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 _SERVER_STARTED_FILTER = msgftr.And(
@@ -33,7 +34,7 @@ class Server(svrabc.Server):
         self._log_file = util.full_path(home, 'serverlink.log') if logutil.is_logging_to_file() else None
         self._clientfile = contextext.ClientFile(context, util.full_path(home, 'serverjockey-client.json'))
         self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
-        self._stopper = prcext.ServerProcessStopper(context, 10.0)
+        self._stopper = spstopper.ServerProcessStopper(context, 10.0)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):

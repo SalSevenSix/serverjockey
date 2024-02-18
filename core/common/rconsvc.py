@@ -39,9 +39,10 @@ class RconService(msgabc.AbcSubscriber):
     def set_config(mailer: msgabc.Mailer, source: typing.Any, port: int, password: str):
         mailer.post(source, RconService.CONFIG, {'port': port, 'password': password})
 
-    def __init__(self, mailer: msgabc.Mailer, out_prefix: str = ''):
+    def __init__(self, mailer: msgabc.Mailer, out_prefix: str = '', enforce_id: bool = True):
         super().__init__(msgftr.NameIn((RconService.CONFIG, RconService.REQUEST)))
-        self._mailer, self._out_prefix = mailer, out_prefix
+        self._mailer = mailer
+        self._out_prefix, self._enforce_id = out_prefix, enforce_id
         self._port, self._password = None, None
 
     async def handle(self, message):
@@ -56,7 +57,8 @@ class RconService(msgabc.AbcSubscriber):
             if not cmdline:
                 raise Exception('No rcon cmdline provided.')
             cmd = shlex.split(cmdline, posix=False)
-            coro = rcon(cmd[0], *cmd[1:], host='localhost', port=self._port, passwd=self._password)
+            coro = rcon(cmd[0], *cmd[1:], host='localhost', port=self._port,
+                        passwd=self._password, enforce_id=self._enforce_id)
             result = await asyncio.wait_for(coro, 6.0)
             if result:
                 for line in result.strip().split('\n'):

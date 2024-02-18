@@ -51,8 +51,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-# \x1b[37mConnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
-# \x1b[37mDisconnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
+# Connecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
+# Disconnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
 # Successfully kicked Apollo!
 # [World] Apollo [Apollo]: "Hello World"
 # Say Hello Everyone   <-- command

@@ -3,8 +3,7 @@ from core.util import aggtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
-from core.proc import prcext
-from core.common import playerstore, interceptors
+from core.common import playerstore, interceptors, spstopper
 from servers.starbound import deployment as dep, messaging as msg, console as con
 
 
@@ -12,7 +11,7 @@ class Server(svrabc.Server):
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._stopper = prcext.ServerProcessStopper(context, 20.0, use_interrupt=True)
+        self._stopper = spstopper.ServerProcessStopper(context, 20.0, use_interrupt=True)
         self._deployment = dep.Deployment(context)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 

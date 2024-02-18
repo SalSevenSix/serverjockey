@@ -4,7 +4,7 @@ from core.util import util, pkg
 from core.context import contextsvc
 from core.system import svrabc
 
-_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii')
+_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii', 'palworld')
 
 
 class Modules:

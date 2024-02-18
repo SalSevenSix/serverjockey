@@ -3,8 +3,8 @@ from core.util import aggtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
 from core.system import svrabc, svrsvc, svrext
-from core.proc import proch, prcext
-from core.common import interceptors, playerstore
+from core.proc import proch
+from core.common import interceptors, playerstore, spstopper
 from servers.projectzomboid import deployment as dep, console as con, messaging as msg, modcheck as mck
 
 
@@ -13,7 +13,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
-        self._stopper = prcext.ServerProcessStopper(context, 20.0, 'quit')
+        self._stopper = spstopper.ServerProcessStopper(context, 20.0, 'quit')
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
         self._deployment = dep.Deployment(context)
 
