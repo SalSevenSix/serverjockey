@@ -7,6 +7,15 @@
   import ServerControls from '$lib/instance/ServerControls.svelte';
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
+  import ConfigFile from '$lib/instance/ConfigFile.svelte';
+  import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
+  import WorldControls from '$lib/instance/WorldControls.svelte';
+
+  const worldActions = [
+    { 'key': 'wipe-world-save', 'name': 'Reset Save',
+      'desc': 'Reset the game world save only.' },
+    { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
+      'desc': 'Reset config, logs and game world save.' }];
 
   const consoleCommands = {
     'console': {
@@ -35,6 +44,14 @@
       <InstanceLog />
       <Collapsible icon="fa-keyboard" title="Console Commands">
         <CommandBuilder commands={consoleCommands} />
+      </Collapsible>
+      <Collapsible icon="fa-file-code" title="Configuration">
+        <ConfigFile name="Launch Options" path="/config/cmdargs" />
+        <ConfigFile name="Settings" path="/config/settings" />
+      </Collapsible>
+      <Collapsible icon="fa-gears" title="Deployment">
+        <RuntimeControls qualifierName="Beta" />
+        <WorldControls actions={worldActions} />
       </Collapsible>
     </div>
   </div>
