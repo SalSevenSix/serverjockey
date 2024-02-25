@@ -4,6 +4,7 @@
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
+  import WebappAdditionalInformation from '../WebappAdditionalInformation.svelte';
   import WebappPortForward from '../WebappPortForward.svelte';
 </script>
 
@@ -23,15 +24,9 @@
     section at the end for information on ports.
   </p>
 </WebappTitle>
-
 <WebappServerInstall module="factorio" />
 <WebappConfigRun />
-
-<div class="content" id="additionalInformation">
-  <hr />
-  <h3 class="title is-4">Additional Information</h3>
-</div>
-
+<WebappAdditionalInformation />
 <WebappPortForward serverName="Factorio" configName="Command Line Args"
                    portsList={[{ purpose: 'Server', port: 34197, protocal: 'UDP' }]}>
 &quot;_comment_server-upnp&quot;: &quot;Try to automatically redirect server port on home network using UPnP.&quot;,

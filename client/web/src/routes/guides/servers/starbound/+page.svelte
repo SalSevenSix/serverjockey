@@ -5,6 +5,7 @@
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
   import WebappGenerateConfig from '../WebappGenerateConfig.svelte';
+  import WebappAdditionalInformation from '../WebappAdditionalInformation.svelte';
   import WebappPortForward from '../WebappPortForward.svelte';
 </script>
 
@@ -28,16 +29,10 @@
     <li><a href="#mods" use:scrollto={'#mods'}>Mods</a></li>
   </ul>
 </WebappTitle>
-
 <WebappServerInstall module="starbound" />
 <WebappGenerateConfig />
 <WebappConfigRun />
-
-<div class="content" id="additionalInformation">
-  <hr />
-  <h3 class="title is-4">Additional Information</h3>
-</div>
-
+<WebappAdditionalInformation />
 <WebappPortForward serverName="Starbound" configName="Launch Options"
                    portsList={[{ purpose: 'Server', port: 21025, protocal: 'TCP' }]}>
 &quot;_comment_server_upnp&quot;: &quot;Try to automatically redirect server ports on home network using UPnP&quot;,

@@ -6,6 +6,7 @@
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
   import WebappGenerateConfig from '../WebappGenerateConfig.svelte';
+  import WebappAdditionalInformation from '../WebappAdditionalInformation.svelte';
   import WebappPortForward from '../WebappPortForward.svelte';
 </script>
 
@@ -36,16 +37,10 @@
     <li><a href="#dockerPtero" use:scrollto={'#dockerPtero'}>Docker/Pterodactyl Issue</a></li>
   </ul>
 </WebappTitle>
-
 <WebappServerInstall module="projectzomboid" />
 <WebappGenerateConfig />
 <WebappConfigRun />
-
-<div class="content" id="additionalInformation">
-  <hr />
-  <h3 class="title is-4">Additional Information</h3>
-</div>
-
+<WebappAdditionalInformation />
 <WebappPortForward serverName="Project Zomboid" configName="INI Settings" upnpService="the server"
   portsList={[{ purpose: 'Steam', port: 16261, protocal: 'UDP' }, { purpose: 'Direct', port: 16262, protocal: 'UDP' }]}>
 # Attempt to configure a UPnP-enabled internet gateway to automatically setup port forwarding rules.

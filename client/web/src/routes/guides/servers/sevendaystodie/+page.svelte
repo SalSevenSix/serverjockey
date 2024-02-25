@@ -4,6 +4,7 @@
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
+  import WebappAdditionalInformation from '../WebappAdditionalInformation.svelte';
   import WebappPortForward from '../WebappPortForward.svelte';
 
   const portsList = [{ purpose: 'Main', port: '26900', protocal: 'TCP and UDP' },
@@ -28,15 +29,9 @@
     section at the end for information on ports.
   </p>
 </WebappTitle>
-
 <WebappServerInstall module="sevendaystodie" />
 <WebappConfigRun />
-
-<div class="content" id="additionalInformation">
-  <hr />
-  <h3 class="title is-4">Additional Information</h3>
-</div>
-
+<WebappAdditionalInformation />
 <WebappPortForward serverName="7 Days to Die" configName="Launch Options" portsList={portsList}>
 &quot;_comment_server_upnp&quot;: &quot;Try to automatically redirect server ports on home network using UPnP&quot;,
 &quot;server_upnp&quot;: false,
