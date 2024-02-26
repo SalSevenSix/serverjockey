@@ -10,6 +10,7 @@
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
+  import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -52,6 +53,9 @@
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Beta" />
         <WorldControls actions={worldActions} />
+      </Collapsible>
+      <Collapsible icon="fa-box-archive" title="Backups">
+        <BackupRestoreActions />
       </Collapsible>
     </div>
   </div>

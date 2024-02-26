@@ -16,6 +16,11 @@ def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
     r.put('send', rconsvc.RconHandler(mailer), 's')
 
 
-HELP_TEXT = '''PALWORLD CONSOLE HELP
-todo
+HELP_TEXT = '''PALWORLD CONSOLE COMMANDS
+Info          Show server information
+ShowPlayers   Show information on all connected players
+Save          Save the world data
+Broadcast {Message}   Send message to all player in the server
+KickPlayer {SteamID}  Kick player by SteamID from the server
+BanPlayer {SteamID}   Ban player by SteamID from the server
 '''

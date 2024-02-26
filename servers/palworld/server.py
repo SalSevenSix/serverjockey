@@ -13,7 +13,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
-        self._stopper = spstopper.ServerProcessStopper(context, 10.0, 'DoExit', use_rcon=True)
+        self._stopper = spstopper.ServerProcessStopper(context, 12.0, 'DoExit', use_rcon=True)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
         self._deployment = dep.Deployment(context)
 
@@ -40,7 +40,7 @@ class Server(svrabc.Server):
 
     async def run(self):
         server_process = await self._deployment.new_server_process()
-        server_process.use_pipeinsvc(self._pipeinsvc).wait_for_started(msg.SERVER_STARTED_FILTER, 15.0)
+        server_process.use_pipeinsvc(self._pipeinsvc).wait_for_started(msg.SERVER_STARTED_FILTER, 20.0)
         await server_process.run()
 
     async def stop(self):

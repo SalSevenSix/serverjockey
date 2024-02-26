@@ -2,12 +2,12 @@
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.system import svrext
 from core.proc import proch, jobh, prcext
-from core.common import rconsvc, playerstore
+from core.common import rconsvc
 
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDERR_LINE,
-    msgftr.DataEquals('[S_API FAIL] Tried to access Steam interface SteamNetworkingUtils004 before SteamAPI_Init succeeded.'))
+    proch.ServerProcess.FILTER_STDERR_LINE, msgftr.DataEquals(
+        '[S_API FAIL] Tried to access Steam interface SteamNetworkingUtils004 before SteamAPI_Init succeeded.'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     proch.ServerProcess.FILTER_ALL_LINES,
     rconsvc.RconService.FILTER_OUTPUT,
@@ -22,4 +22,3 @@ _READY_STATE_FILTER = msgftr.Or(
 async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
-    mailer.register(playerstore.PlayersSubscriber(mailer))

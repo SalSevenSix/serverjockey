@@ -128,6 +128,8 @@ class _RequestHandler:
             response = body()
             self._add_allow_origin(response)
             raise response
+        if isinstance(body, Exception):
+            raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_CACHE)
         self._add_allow_origin(response)

@@ -68,13 +68,13 @@ def human_file_size(value: int | None):
     return f'{value:.1f} YiB'
 
 
-def get(key: typing.Any, dictionary: dict, default: typing.Any = None):
+def get(key: typing.Any, dictionary: dict, default: typing.Any = None) -> typing.Any:
     if key and dictionary and key in dictionary:
         return dictionary[key]
     return default
 
 
-def filter_dict(dictionary: dict, keys: typing.Collection, none_fill: bool = False):
+def filter_dict(dictionary: dict, keys: typing.Collection, none_fill: bool = False) -> dict:
     result = {}
     for key in keys:
         if key in dictionary:
@@ -89,6 +89,14 @@ def unpack_dict(dictionary: dict, keys: typing.Collection | None = None) -> tupl
     for key in keys if keys else dictionary.keys():
         result.append(get(key, dictionary))
     return tuple(result)
+
+
+def delete_dict(dictionary: dict, keys: typing.Collection) -> dict:
+    result = {}
+    for key, value in dictionary.items():
+        if key not in keys:
+            result[key] = value
+    return result
 
 
 def left_chop_and_strip(value: str, keyword: str) -> str:
