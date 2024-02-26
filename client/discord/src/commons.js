@@ -6,11 +6,10 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-exports.startupEventLogging = function(context, channels, instance, url) {
-  let helper = new subs.Helper(context);
+exports.startServerEventLogging = function(context, channels, instance, url) {
   let lastState = 'READY';
   let restartRequired = false;
-  helper.daemon(url + '/server/subscribe', function(json) {
+  new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // ignore no state
     if (json.state === 'START') return true;  // ignore transient state
     if (!restartRequired && json.details.restart) {
@@ -24,7 +23,11 @@ exports.startupEventLogging = function(context, channels, instance, url) {
     if (channels.server) { channels.server.send('`' + instance + '` 📡 ' + json.state); }
     return true;
   });
-  helper.daemon(url + '/players/subscribe', function(json) {
+}
+
+exports.startAllEventLogging = function(context, channels, instance, url) {
+  exports.startServerEventLogging(context, channels, instance, url);
+  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     if (json.event === 'chat') {
       if (channels.chat) { channels.chat.send('`' + instance + '` 💬 ' + json.player.name + ': ' + json.text); }
       return true;

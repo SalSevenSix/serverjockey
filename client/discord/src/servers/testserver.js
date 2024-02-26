@@ -21,7 +21,7 @@ const helpText = {
 };
 
 
-exports.startup = commons.startupEventLogging;
+exports.startup = commons.startAllEventLogging;
 exports.help = function($) { commons.sendHelp($, helpText); }
 exports.server = commons.server;
 exports.auto = commons.auto;
