@@ -8,7 +8,8 @@
     { module: 'sevendaystodie', serverName: '7 Days to Die' },
     { module: 'starbound', serverName: 'Starbound' },
     { module: 'unturned', serverName: 'Unturned' },
-    { module: 'csii', serverName: 'Counter Strike 2' }];
+    { module: 'csii', serverName: 'Counter Strike 2' },
+    { module: 'palworld', serverName: 'Palworld' }];
 </script>
 
 
