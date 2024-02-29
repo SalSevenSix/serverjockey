@@ -19,6 +19,6 @@ _READY_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
+def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))

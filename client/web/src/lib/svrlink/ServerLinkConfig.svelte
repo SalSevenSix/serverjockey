@@ -12,6 +12,7 @@
   let processing = true;
 
   $: cannotSave = processing || JSON.stringify(loadedData) === JSON.stringify(formData);
+  $: showHints = !noHints && !processing && !loadedData.BOT_TOKEN;
 
   function save() {
     processing = true;
@@ -44,7 +45,7 @@
 
 
 <div class="block">
-  {#if !noHints && !loadedData.BOT_TOKEN}
+  {#if showHints}
     <div class="content">
       <p>For help setting up the ServerLink discord bot, please see <a href="/guides/discord/setup">the guide</a>.</p>
     </div>

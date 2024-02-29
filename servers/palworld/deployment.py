@@ -8,6 +8,8 @@ from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh
 from core.common import steam, interceptors, portmapper, rconsvc
 
+# https://tech.palworldgame.com/settings-and-operation/arguments
+
 
 def _default_cmdargs():
     return {
