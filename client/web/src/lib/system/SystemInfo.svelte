@@ -95,10 +95,10 @@
             Total</td><td class="notranslate">{humanFileSize(info.memory.total)}</td></tr>
           <tr><td class="field-column" title="Used memory space">
             Used</td><td class="notranslate">{humanFileSize(info.memory.used)}</td></tr>
-          <tr><td class="field-column" title="Available memory space (excludes cache use)">
+          <tr><td class="field-column" title="Available memory space">
             Available</td><td class="notranslate">{humanFileSize(info.memory.available)}</td></tr>
-          <tr><td class="field-column" title="Free memory space (includes cache use)">
-            Free</td><td class="notranslate">{humanFileSize(info.memory.free)}</td></tr>
+          <tr><td class="field-column" title="Total swap size">
+            Swap</td><td class="notranslate">{humanFileSize(info.memory.swap)}</td></tr>
         </tbody>
       {:else}
         <tbody>
@@ -109,7 +109,7 @@
           <tr><td>Total</td><td>...</td></tr>
           <tr><td>Used</td><td>...</td></tr>
           <tr><td>Available</td><td>...</td></tr>
-          <tr><td>Free</td><td>...</td></tr>
+          <tr><td>Swap</td><td>...</td></tr>
         </tbody>
       {/if}
     </table>

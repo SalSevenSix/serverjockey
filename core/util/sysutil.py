@@ -80,16 +80,23 @@ class _DiskUsage:
 
 class _VirtualMemory:
     # noinspection PyMethodMayBeStatic
-    async def get(self) -> tuple:
-        result = await shellutil.run_executable('free', '-b')
-        result = _grep_last_line('Mem:', result)
-        if not result:
-            return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-        result = result.strip().split(' ')
-        result.pop(0)
-        result = [int(i) for i in result if i]
-        return (result[0], result[5], round(float(result[1] / result[0] * 100), 1),
-                result[1], result[2], -1, -1, -1, result[4], -1, -1)
+    async def get(self) -> dict:
+        result = {'total': -1, 'used': -1, 'available': -1, 'free': -1, 'percent': -1, 'swap': -1}
+        data = await shellutil.run_executable('free', '-b')
+        line = _grep_last_line('Mem:', data)
+        if line:
+            line = line.strip().split(' ')
+            line = [int(i) for i in line[1:] if i]
+            result.update({
+                'total': line[0], 'used': line[1], 'available': line[5], 'free': line[2],
+                'percent': round(float(line[1] / line[0] * 100), 1)
+            })
+        line = _grep_last_line('Swap:', data)
+        if line:
+            line = line.strip().split(' ')
+            line = [int(i) for i in line[1:] if i]
+            result['swap'] = line[0]
+        return result
 
 
 class _CpuPercent:
@@ -189,7 +196,7 @@ async def disk_usage() -> tuple:
     return await _DISK_USAGE.get()
 
 
-async def virtual_memory() -> tuple:
+async def virtual_memory() -> dict:
     return await _VIRTUAL_MEMORY.get()
 
 
@@ -210,13 +217,7 @@ async def system_info() -> dict:
         'version': system_version(),
         'os': os,
         'cpu': cpu,
-        'memory': {
-            'total': memory[0],
-            'used': memory[3],
-            'available': memory[1],
-            'free': memory[4],
-            'percent': memory[2]
-        },
+        'memory': memory,
         'disk': {
             'total': disk[0],
             'used': disk[1],

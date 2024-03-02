@@ -10,6 +10,7 @@ const helpText = {
     'server stop        : Save world and stop server',
     'auto {mode}        : Set auto mode, valid values 0,1,2,3',
     'log                : Get last 100 lines from the log',
+    'players            : Show players currently online',
     'send {line}        : Send command to server console',
     'getconfig cmdargs  : Get launch options as attachment',
     'getconfig settings : Get settings as attachment',
@@ -33,3 +34,9 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.send = commons.send;
+
+exports.players = function($) {
+  $.httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
+    $.message.channel.send('```\n' + text + '\n```');
+  });
+}
