@@ -5,7 +5,7 @@ import re
 from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.context import contextsvc, contextext
-from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs
+from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs, httpssl
 from core.system import svrmodules, svrsvc, sysstore, steamapi, igd
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
@@ -35,6 +35,7 @@ class SystemService:
         r = httprsc.ResourceBuilder(resource)
         r.put('login', httpext.LoginHandler(self._context.config('secret')))
         r.put('modules', httpext.StaticHandler(self._modules.names()))
+        r.put('ssl', httpssl.SslHandler(self._context))
         r.psh('system')
         r.put('info', _SystemInfoHandler())
         r.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))

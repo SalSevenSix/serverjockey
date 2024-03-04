@@ -8,7 +8,7 @@ import os
 from core.util import util, idutil, funcutil, sysutil, steamutil, logutil, io, tasks
 from core.msg import msglog
 from core.context import contextsvc, contextext
-from core.http import httpabc, httpsvc
+from core.http import httpabc, httpsvc, httpssl
 from core.system import system
 
 
@@ -24,13 +24,6 @@ class _NoTraceFilter(logging.Filter):
 def _stime(home: str) -> float | None:
     pidfile = home + '/.pid'
     return os.stat(pidfile).st_atime if os.path.isfile(pidfile) else None
-
-
-def _ssl_config(home: str) -> tuple:
-    sslcert, sslkey = home + '/serverjockey.crt', home + '/serverjockey.key'
-    if os.path.isfile(sslcert) and os.path.isfile(sslkey):
-        return 'https', sslcert, sslkey
-    return 'http', None, None
 
 
 def _argument_parser() -> argparse.ArgumentParser:
@@ -72,11 +65,10 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     clientfile = util.full_path(home, config.clientfile)
     dbfile = util.full_path(home, config.dbfile)
     logfile = util.full_path(home, config.logfile)
-    scheme, sslcert, sslkey = _ssl_config(home)
     return contextsvc.Context(
         debug=config.debug, trace=config.trace, home=home, tempdir=tempdir,
         stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=config.showtoken,
-        scheme=scheme, sslcert=sslcert, sslkey=sslkey, env=os.environ.copy(), python=sys.executable,
+        scheme=httpssl.sync_get_scheme(home), env=os.environ.copy(), python=sys.executable,
         clientfile=clientfile, dbfile=dbfile, logfile=logfile, noupnp=config.noupnp,
         host=None if config.host == '0.0.0.0' else config.host, port=config.port)
 

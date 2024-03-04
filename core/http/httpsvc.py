@@ -1,12 +1,11 @@
 import logging
 import re
-import ssl
 import aiohttp
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
 from core.util import pack, io, objconv
 from core.context import contextsvc
-from core.http import httpabc, httpcnt, httpstatics
+from core.http import httpabc, httpcnt, httpstatics, httpssl
 
 _ACCEPTED_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
@@ -37,17 +36,10 @@ class HttpService:
     def run(self):
         access_logger = logging.getLogger('aiohttp.access')
         access_logger.addFilter(_AccessLogFilter(self._context.is_trace()))
-        ssl_context = None
-        if self._context.config('scheme') == 'https':
-            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-            ssl_context.load_cert_chain(self._context.config('sslcert'), self._context.config('sslkey'))
+        ssl_context = httpssl.SslTool(self._context).ssl_context()
         web.run_app(
-            self._app,
-            host=self._context.config('host'),
-            port=self._context.config('port'),
-            access_log=access_logger,
-            ssl_context=ssl_context,
-            shutdown_timeout=100.0)
+            self._app, host=self._context.config('host'), port=self._context.config('port'),
+            access_log=access_logger, ssl_context=ssl_context, shutdown_timeout=100.0)
 
     # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
