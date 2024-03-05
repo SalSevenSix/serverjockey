@@ -43,10 +43,12 @@ class SslTool:
             script += ' -subj "/CN=serverjockey"'
             await shellutil.run_script(script)
             if not await _files_exist(sslcert, sslkey):
-                raise Exception('generate_ssl_files() failed to create cert and key files')
+                raise Exception('SslTool.enable() failed to create cert and key files')
             await self.disable()
             await io.move_path(sslcert, self._sslcert)
             await io.move_path(sslkey, self._sslkey)
+            await io.chmod(self._sslcert, 0o600)
+            await io.chmod(self._sslkey, 0o600)
         finally:
             await io.delete_directory(working_dir)
 

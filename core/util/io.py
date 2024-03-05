@@ -58,6 +58,7 @@ def _auto_chmod(path: str):
 
 touch_file = funcutil.to_async(_touch_file)
 auto_chmod = funcutil.to_async(_auto_chmod)
+chmod = funcutil.to_async(os.chmod)
 
 
 def end_of_stream(chunk: bytes | None):

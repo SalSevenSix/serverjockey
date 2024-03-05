@@ -7,6 +7,7 @@ export default defineConfig({
     proxy: {
       '/login': 'http://localhost:6164',
       '/modules': 'http://localhost:6164',
+      '/ssl': 'http://localhost:6164',
       '/system': 'http://localhost:6164',
       '/instances': 'http://localhost:6164',
       '/store': 'http://localhost:6164',
