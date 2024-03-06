@@ -31,7 +31,7 @@
                   disabled={processing} on:click={actionResetActivity}>
             <i class="fa fa-explosion fa-lg"></i>&nbsp; Reset Activity</button>
         </td>
-        <td>Delete all recorded Instance, Player and Chat activity from storage</td>
+        <td>Delete all recorded Instance, Player and Chat activity from storage.</td>
       </tr>
     </tbody>
   </table>

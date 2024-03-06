@@ -14,7 +14,7 @@
 
 
 <div class="modal" class:is-active={isOpen}>
-  <div class="modal-background" role="button" tabindex="0" on:click={closeModal} on:keypress={function() {}}></div>
+  <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
       <div class="field">

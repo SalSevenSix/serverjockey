@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
+  import { confirmModal } from '$lib/modal/modals';
   import Collapsible from '$lib/widget/Collapsible.svelte';
 
   let httpsInfo = null;
@@ -12,18 +13,20 @@
   $: httpsIcon = httpsInfo && httpsInfo.enabled ? 'fa-square-xmark' : 'fa-shield';
 
   function toggleHttps() {
-    processing = true;
     const change = httpsInfo.enabled ? 'disable' : 'enable';
-    const request = newPostRequest();
-    request.body = JSON.stringify({ enabled: !httpsInfo.enabled });
-    fetch('/ssl', request)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        httpsInfo.enabled = !httpsInfo.enabled;
-        notifyInfo('Successfully ' + change + 'd HTTPS.');
-      })
-      .catch(function(error) { notifyError('Failed to ' + change + ' HTTPS.'); })
-      .finally(function() { processing = false; });
+    confirmModal('Are you sure you want to ' + change + ' HTTPS ?', function() {
+      processing = true;
+      const request = newPostRequest();
+      request.body = JSON.stringify({ enabled: !httpsInfo.enabled });
+      fetch('/ssl', request)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Status: ' + response.status);
+          httpsInfo.enabled = !httpsInfo.enabled;
+          notifyInfo('Successfully ' + change + 'd HTTPS.');
+        })
+        .catch(function(error) { notifyError('Failed to ' + change + ' HTTPS.'); })
+        .finally(function() { processing = false; });
+    });
   }
 
   onMount(function() {
@@ -56,7 +59,7 @@
       </div>
       <div class="column is-three-quarters">
         Change takes effect after system restart. Note that when enabled, a self-signed certificate will be used.
-        Browsers will issue security warnings because the certificate owner is not verified by a 3rd party.
+        Browsers will issue security warnings because certificate ownership is not verified by a 3rd party.
         However all data sent between browser and server will be encrypted and private.
       </div>
     </div>
