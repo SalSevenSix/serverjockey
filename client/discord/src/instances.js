@@ -28,7 +28,7 @@ exports.Service = class Service {
     let self = this;
     let context = this.#context;
     let baseurl = context.config.SERVER_URL;
-    let instances = await fetch(baseurl + '/instances')
+    let instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
