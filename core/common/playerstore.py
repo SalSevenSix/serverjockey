@@ -3,7 +3,7 @@ import typing
 # ALLOW util.* msg.* context.* http.* system.* proc.*
 from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext, msgtrf
-from core.http import httpabc
+from core.http import httpabc, httpcnt
 from core.system import svrsvc
 
 _EVENT = 'PlayersSubscriber.Event'
@@ -17,6 +17,8 @@ class PlayersHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         return await PlayersSubscriber.get(self._mailer, self)
 
 
@@ -48,8 +50,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any,
                   canonical: typing.Optional[typing.Collection[Player]] = None):
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, PlayersSubscriber.GET, canonical)
+        response = await msgext.SynchronousMessenger(mailer).request(source, PlayersSubscriber.GET, canonical)
         return response.data()
 
     def handle(self, message):

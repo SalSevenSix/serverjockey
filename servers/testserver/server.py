@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from core.util import util, dtutil, objconv, io, cmdutil, aggtrf, pkg
 from core.msg import msgabc, msgext, msgftr, msglog, msgtrf
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpsubs, httpext
+from core.http import httpabc, httprsc, httpsubs, httpext, httpcnt
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
 from core.common import interceptors, playerstore, spstopper
@@ -158,6 +158,8 @@ class _PlayersHandler(httpabc.GetHandler):
         self._context = context
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         response = await proch.PipeInLineService.request(
             self._context, self, 'players', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,

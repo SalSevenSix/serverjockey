@@ -265,8 +265,7 @@ class RollingLogSubscriber(msgabc.Subscriber):
 
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any, identity: str) -> typing.Any:
-        messenger = SynchronousMessenger(mailer)
-        response = await messenger.request(source, RollingLogSubscriber.REQUEST, identity)
+        response = await SynchronousMessenger(mailer).request(source, RollingLogSubscriber.REQUEST, identity)
         return response.data()
 
     def identity(self) -> str:

@@ -108,6 +108,8 @@ class RollingLogHandler(httpabc.GetHandler):
         mailer.register(self._subscriber)
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         return await msgext.RollingLogSubscriber.get(self._mailer, self, self._subscriber.identity())
 
 
@@ -131,6 +133,8 @@ class FileMtimeHandler(httpabc.GetHandler):
         self._path = path
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         result = None
         if await io.file_exists(self._path):
             result = dtutil.to_millis(await io.file_mtime(self._path))

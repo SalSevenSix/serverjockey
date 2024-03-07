@@ -1,7 +1,7 @@
 # ALLOW util.* msg.* context.* http.* system.* EXCEPT system.bootstrap
 from core.util import util, funcutil
 from core.msg import msgabc, msgftr
-from core.http import httpabc, httpsubs
+from core.http import httpabc, httpsubs, httpcnt
 from core.system import svrsvc
 
 
@@ -11,6 +11,8 @@ class ServerStatusHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         return await svrsvc.ServerStatus.get_status(self._mailer, self)
 
 

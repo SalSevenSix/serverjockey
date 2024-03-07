@@ -3,7 +3,7 @@ from collections.abc import Iterable
 # ALLOW core.* projectzomboid.messaging projectzomboid.playerstore
 from core.util import cmdutil, util
 from core.msg import msgabc, msgext, msgftr
-from core.http import httpabc, httprsc
+from core.http import httpabc, httprsc, httpcnt
 from core.proc import proch, prcext
 from core.common import interceptors, playerstore
 
@@ -68,6 +68,8 @@ class _PlayersHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         response = await proch.PipeInLineService.request(
             self._mailer, self, 'players', msgext.MultiCatcher(
                 catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
@@ -89,6 +91,8 @@ class _OptionsHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         options = await _OptionLoader(self._mailer, self).all()
         return [o.asdict() for o in options]
 

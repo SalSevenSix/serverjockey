@@ -63,8 +63,7 @@ class PipeInLineService(msgabc.Subscriber):
             cmdline: str,
             catcher: typing.Optional[msgabc.Catcher] = None,
             force: bool = False) -> typing.Any:
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(
+        response = await msgext.SynchronousMessenger(mailer).request(
             source, PipeInLineService.REQUEST,
             _PipeInLineCommand(cmdline, catcher, force))
         return response.data()

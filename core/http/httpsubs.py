@@ -205,8 +205,7 @@ class _Subscriber(msgabc.AbcSubscriber):
 class _SubscriptionsHandler(httpabc.GetHandler):
 
     def __init__(self, service: HttpSubscriptionService, name: str):
-        self._service = service
-        self._name = name
+        self._service, self._name = service, name
 
     async def handle_get(self, resource, data):
         identity = util.get(self._name, data)

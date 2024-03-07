@@ -207,6 +207,8 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._system, self._modules, = system, modules
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         return await self._system.instances_info(util.get('baseurl', data, ''))
 
     async def handle_post(self, resource, data):
@@ -226,6 +228,8 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._system = system
 
     def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         result = self._system.instance_info(resource.name())
         return result if result else httpabc.ResponseBody.NOT_FOUND
 
@@ -249,6 +253,8 @@ class _SystemInfoHandler(httpabc.GetHandler):
         self._startmillis = dtutil.now_millis()
 
     async def handle_get(self, resource, data):
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
         info = await sysutil.system_info()
         info['startmillis'] = self._startmillis
         info['uptime'] = dtutil.now_millis() - self._startmillis

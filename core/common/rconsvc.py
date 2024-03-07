@@ -31,8 +31,7 @@ class RconService(msgabc.AbcSubscriber):
 
     @staticmethod
     async def request(mailer: msgabc.MulticastMailer, source: typing.Any, cmdline: str) -> typing.Any:
-        messenger = msgext.SynchronousMessenger(mailer)
-        response = await messenger.request(source, RconService.REQUEST, cmdline)
+        response = await msgext.SynchronousMessenger(mailer).request(source, RconService.REQUEST, cmdline)
         return response.data()
 
     @staticmethod
