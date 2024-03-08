@@ -23,8 +23,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
 class ConsoleCommandHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, commands: cmdutil.CommandLines):
-        self._mailer = mailer
-        self._commands = commands
+        self._mailer, self._commands = mailer, commands
 
     async def handle_post(self, resource, data):
         cmdline = self._commands.get(data)

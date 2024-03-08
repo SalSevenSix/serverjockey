@@ -20,8 +20,7 @@ _TEXT_MIME_TYPES = (
 class HttpService:
 
     def __init__(self, context: contextsvc.Context, callbacks: httpabc.HttpServiceCallbacks):
-        self._context = context
-        self._callbacks = callbacks
+        self._context, self._callbacks = context, callbacks
         self._security = httpcnt.SecurityService(context.config('secret'))
         self._statics = httpstatics.Statics(context)
         self._resources = None
@@ -60,8 +59,7 @@ class HttpService:
             if method is httpabc.Method.GET:
                 return await self._statics.handle(request)
             raise err.HTTPNotFound
-        handler = _RequestHandler(self._context, self._security, method, request, resource)
-        return await handler.handle()
+        return await _RequestHandler(self._context, self._security, method, request, resource).handle()
 
 
 class _RequestHandler:

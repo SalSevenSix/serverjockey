@@ -73,7 +73,6 @@ exports.MessageHttpTool = class MessageHttpTool {
         return response.json();
       })
       .then(function(data) {
-        if (data != null && data.hasOwnProperty('error')) throw new Error(data.error);
         if (dataHandler == null) {
           message.react('✅');
         } else {

@@ -2,7 +2,6 @@ from __future__ import annotations
 import typing
 # ALLOW util.*
 from core.util import util
-# TODO is there a better way to do this?
 
 
 class CommandLine:
@@ -54,11 +53,8 @@ class CommandLine:
 class CommandLines:
 
     def __init__(self, commands: dict, command_key: str = 'command'):
-        self._commands = commands
-        self._command_key = command_key
+        self._commands, self._command_key = commands, command_key
 
-    def get(self, args: dict, command_key: typing.Optional[str] = None) -> CommandLine:
-        if command_key is None:
-            command_key = self._command_key
-        command = util.get(util.get(command_key, args), self._commands)
-        return None if not command else CommandLine(command, args)
+    def get(self, args: dict) -> CommandLine | None:
+        command = util.get(util.get(self._command_key, args), self._commands)
+        return CommandLine(command, args) if command else None

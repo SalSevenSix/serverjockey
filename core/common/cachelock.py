@@ -102,6 +102,5 @@ class _CacheLock:
         # noinspection PyBroadException
         try:
             self._process.terminate()
-            # TODO should wait for task to complete, kill process if needed
         except Exception as e:
             logging.warning('Error killing vmtouch ' + repr(e))

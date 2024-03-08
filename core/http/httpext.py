@@ -23,15 +23,12 @@ class MessengerHandler(httpabc.PostHandler):
                  mailer: msgabc.MulticastMailer, name: str,
                  data: typing.Optional[httpabc.ABC_DATA_GET] = None,
                  selector: typing.Optional[httpsubs.Selector] = None):
-        self._mailer = mailer
-        self._name = name
-        self._data = data
-        self._selector = selector
+        self._mailer, self._name = mailer, name
+        self._data, self._selector = data, selector
 
     async def handle_post(self, resource, data):
         messenger = msgext.SynchronousMessenger(self._mailer)
         subscription_path, source = None, objconv.obj_to_str(messenger)
-        data['resource'] = resource.name()  # TODO I don't think this is ever used
         if self._data:
             data = {**self._data, **data}
         if self._selector:
@@ -45,7 +42,7 @@ class MessengerHandler(httpabc.PostHandler):
         if isinstance(result, Exception):
             if subscription_path:
                 httpsubs.HttpSubscriptionService.unsubscribe(self._mailer, source, subscription_path)
-            return {'error': str(result)}  # TODO probably should just throw error
+            raise result
         if subscription_path:
             return {'url': util.get('baseurl', data, '') + subscription_path}
         if result is False:
