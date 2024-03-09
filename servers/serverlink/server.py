@@ -28,8 +28,7 @@ class Server(svrabc.Server):
     LOG_FILTER = proch.ServerProcess.FILTER_ALL_LINES
 
     def __init__(self, context: contextsvc.Context):
-        home = context.config('home')
-        self._context = context
+        self._context, home = context, context.config('home')
         self._config = util.full_path(home, 'serverlink.json')
         self._log_file = util.full_path(home, 'serverlink.log') if logutil.is_logging_to_file() else None
         self._clientfile = contextext.ClientFile(context, util.full_path(home, 'serverjockey-client.json'))
@@ -38,9 +37,7 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        if await io.file_exists(self._config):
-            await self._migrate_config()
-        else:
+        if not await io.file_exists(self._config):
             await io.write_file(self._config, objconv.obj_to_json(_default_config()))
         await self._server_process_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
@@ -75,32 +72,25 @@ class Server(svrabc.Server):
     async def stop(self):
         await self._stopper.stop()
 
-    async def _migrate_config(self):
-        # Migration from 0.1.0 to 0.2.0
-        update_needed = False
-        config = objconv.json_to_dict(await io.read_file(self._config))
-        if 'PLAYER_ROLE' not in config:
-            update_needed = True
-            config['PLAYER_ROLE'] = 'everyone'
-        if 'EVENT_CHANNELS' not in config:
-            update_needed = True
-            cid = config.pop('EVENTS_CHANNEL_ID') if 'EVENTS_CHANNEL_ID' in config else None
-            config['EVENT_CHANNELS'] = {'server': cid, 'login': cid, 'chat': cid}
-        if update_needed:
-            await io.write_file(self._config, objconv.obj_to_json(config))
-
 
 class _ServerProcessFactory:
 
     def __init__(self, context: contextsvc.Context, config: str, clientfile: str):
-        self._context = context
-        self._config = config
-        self._clientfile = clientfile
-        self._executable, self._script = None, None
+        self._context, self._config, self._clientfile = context, config, clientfile
+        self._env, self._executable, self._script = None, None, None
+        if context.config('scheme') == 'https':
+            self._env = context.env()
+            self._env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 
     async def initialise(self):
         env_path = self._context.env('PATH')
-        self._executable = await io.find_in_env_path(env_path, 'node')
+        self._executable = self._context.env('HOME') + '/.bun/bin/bun'
+        if not await io.file_exists(self._executable):
+            self._executable = None
+        if not self._executable:
+            self._executable = await io.find_in_env_path(env_path, 'bun')
+        if not self._executable:
+            self._executable = await io.find_in_env_path(env_path, 'node')
         script = self._context.config('home') + '/index.js'
         if self._executable and await io.file_exists(script):
             self._script = script
@@ -115,6 +105,7 @@ class _ServerProcessFactory:
 
     def build(self) -> proch.ServerProcess:
         server_process = proch.ServerProcess(self._context, self._executable)
+        server_process.use_env(self._env)
         server_process.wait_for_started(_SERVER_STARTED_FILTER, 30.0)
         if self._script:
             server_process.append_arg(self._script)

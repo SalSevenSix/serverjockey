@@ -63,7 +63,6 @@ class SystemService:
             config_file = self._home_dir + '/' + identity + '/instance.json'
             if await io.file_exists(config_file):
                 configuration = objconv.json_to_dict(await io.read_file(config_file))
-                await _AutoStartsSubscriber.migrate(config_file, configuration)
                 configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
                 subcontext = await self._initialise_instance(configuration)
                 if subcontext.config('auto'):
@@ -160,18 +159,6 @@ class SystemService:
 
 class _AutoStartsSubscriber(msgabc.AbcSubscriber):
     AUTOS = 'AutoStartsSubscriber.Autos'
-
-    @staticmethod
-    async def migrate(config_file: str, configuration: dict):
-        auto = util.get('auto', configuration)
-        if not auto or not isinstance(auto, str):
-            return
-        configuration['auto'] = 0
-        if auto == 'start':
-            configuration['auto'] = 1
-        if auto == 'daemon':
-            configuration['auto'] = 3
-        await io.write_file(config_file, objconv.obj_to_json(configuration))
 
     def __init__(self):
         super().__init__(msgftr.Or(

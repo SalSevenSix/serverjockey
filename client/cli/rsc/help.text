@@ -62,4 +62,5 @@ commands:
   exit-pl-gt:<#>    | Exit processing if players greater than <#>
   exit-pl-lt:<#>    | Exit processing if players less or equal to <#>
   delete            | Delete the current instance
+  https:<enabled>   | HTTPS enable https:true or disable https:false
   shutdown          | Shutdown the ServerJockey system

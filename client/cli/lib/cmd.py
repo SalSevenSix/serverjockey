@@ -305,6 +305,19 @@ class CommandProcessor:
         self._connection.drain(result)
         return True
 
+    def _https(self, argument: str | None) -> bool:
+        argument = argument.lower() if argument else ''
+        enabled = None
+        if argument == 'true':
+            enabled = True
+        elif argument == 'false':
+            enabled = False
+        if enabled is None:
+            logging.error('Invalid argument, use https:true or https:false')
+            return False
+        self._connection.post('/ssl', {'enabled': enabled})
+        return True
+
     def _shutdown(self) -> bool:
         self._connection.post('/system/shutdown')
         return False

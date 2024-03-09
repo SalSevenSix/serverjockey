@@ -9,17 +9,20 @@ function initialise() {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.');
     process.exit(1);
   }
+  logger.info('*** START ServerLink Bot ***');
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
   config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);
-  logger.info('*** START ServerLink Bot ***');
+  const tls_key = 'NODE_TLS_REJECT_UNAUTHORIZED';
+  if (process.env[tls_key] != 0 && config.SERVER_URL.startsWith('https')) {
+    process.env[tls_key] = 0;
+  }
   logger.info('Version: 0.8.0 ({timestamp})');
-  logger.info('Nodejs: ' + process.version);
+  logger.info('Executable: ' + process.argv[0]);
+  logger.info('JS Runtime: ' + process.version);
   logger.info('discord.js: ' + require('discord.js/package.json').version);
+  logger.info(tls_key + ': ' + process.env[tls_key]);
   logger.info('Initialised with config...');
   logger.raw(JSON.stringify(config, null, 2).split('\n').slice(1, -1).join('\n'));
-  if (config.SERVER_URL.startsWith('https')) {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-  }
   return config;
 }
 
