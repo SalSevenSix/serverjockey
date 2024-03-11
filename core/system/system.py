@@ -6,7 +6,7 @@ from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs, httpssl
-from core.system import svrmodules, svrsvc, sysstore, steamapi, igd
+from core.system import svrmodules, svrsvc, sysstore, mprof, steamapi, igd
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 
@@ -24,6 +24,7 @@ class SystemService:
         self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
         self._modules = svrmodules.Modules(context)
         self._sysstoresvc = sysstore.SystemStoreService(context)
+        self._memprofsvc = mprof.MemoryProfilingService(context)
         self._resource = self._build_resources()
         self._instances = self._resource.child('instances')
 
@@ -31,6 +32,7 @@ class SystemService:
         subs, logfile = httpsubs.HttpSubscriptionService(self._context), self._context.config('logfile')
         resource = httprsc.WebResource()
         self._sysstoresvc.resources(resource)
+        self._memprofsvc.resources(resource)
         steamapi.resources(resource)
         r = httprsc.ResourceBuilder(resource)
         r.put('login', httpext.LoginHandler(self._context.config('secret')))

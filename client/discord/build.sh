@@ -5,9 +5,8 @@ TARGET_FILE="${2}"
 JS_RUNTIME="node"
 if ~/.bun/bin/bun --version >/dev/null 2>&1; then
   JS_RUNTIME=~/.bun/bin/bun
-fi
-if [ "$JS_RUNTIME" = "node" ]; then
-  bun --version >/dev/null 2>&1 && JS_RUNTIME="bun"
+elif bun --version >/dev/null 2>&1; then
+  JS_RUNTIME="bun"
 fi
 
 cd "$(dirname $0)" || exit 1
