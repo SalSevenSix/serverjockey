@@ -99,7 +99,7 @@ class Deployment:
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
         r.put('install-runtime', _InstallRuntimeHandler(self, self._mailer), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.FileMtimeHandler(self._save_dir))
+        r.put('world-meta', httpext.MtimeHandler().check(self._map_file).dir(self._save_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._map_file), 'r')

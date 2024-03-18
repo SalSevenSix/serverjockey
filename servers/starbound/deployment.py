@@ -27,6 +27,7 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
+        self._save_dir = self._world_dir + '/universe'
         self._log_file = self._world_dir + '/starbound_server.log'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
         self._config_file = self._world_dir + '/starbound_server.config'
@@ -59,9 +60,9 @@ class Deployment:
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_211820.acf'))
         r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 211820, anon=False), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.FileMtimeHandler(self._log_file))
+        r.put('world-meta', httpext.MtimeHandler().check(self._save_dir).file(self._log_file))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
-        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._world_dir + '/universe'), 'r')
+        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
         r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
         r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
         r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')

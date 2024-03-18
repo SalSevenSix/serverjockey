@@ -34,7 +34,7 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._config_dir = self._world_dir + '/config'
         self._save_dir = self._world_dir + '/save'
-        self._log_dir = self._save_dir + '/logs'
+        self._log_dir = self._world_dir + '/logs'
         self._cmdargs_file = self._config_dir + '/cmdargs.json'
         self._settings_file = self._config_dir + '/serverconfig.xml'
         self._live_file = self._config_dir + '/serverconfig-live.xml'
@@ -74,7 +74,7 @@ class Deployment:
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
         r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.FileMtimeHandler(self._log_dir))
+        r.put('world-meta', httpext.MtimeHandler().check(self._save_dir).dir(self._log_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 import asyncio
 import typing
@@ -124,23 +125,54 @@ class WipeHandler(httpabc.PostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
-class FileMtimeHandler(httpabc.GetHandler):
+class MtimeHandler(httpabc.GetHandler):
 
-    def __init__(self, path: str):
-        self._path = path
+    def __init__(self):
+        self._items = []
+
+    def check(self, path: str) -> MtimeHandler:
+        self._items.append({'type': 0, 'path': path})
+        return self
+
+    def file(self, path: str) -> MtimeHandler:
+        self._items.append({'type': 1, 'path': path})
+        return self
+
+    def dir(self, path: str) -> MtimeHandler:
+        self._items.append({'type': 2, 'path': path})
+        return self
 
     async def handle_get(self, resource, data):
         if not httpcnt.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
+        result = await self._find_mtime()
+        return {'timestamp': dtutil.to_millis(result) if result else None}
+
+    async def _find_mtime(self) -> float | None:
         result = None
-        if await io.file_exists(self._path):
-            result = dtutil.to_millis(await io.file_mtime(self._path))
-        elif await io.directory_exists(self._path):
-            for file in [o['name'] for o in await io.directory_list(self._path) if o['type'] == 'file']:
-                mtime = dtutil.to_millis(await io.file_mtime(self._path + '/' + file))
-                if result is None or mtime > result:
-                    result = mtime
-        return {'timestamp': result}
+        for item in self._items:
+            mtime, itype, ipath = None, item['type'], item['path']
+            if itype == 0:  # check
+                if not await io.directory_exists(ipath) and not await io.file_exists(ipath):
+                    return None
+            elif itype == 1:  # file
+                if await io.file_exists(ipath):
+                    mtime = await io.file_mtime(ipath)
+            elif itype == 2:  # dir
+                mtime = await MtimeHandler._dir_mtime(ipath)
+            if result is None or (mtime and mtime > result):
+                result = mtime
+        return result
+
+    @staticmethod
+    async def _dir_mtime(path: str) -> float | None:
+        if not await io.directory_exists(path):
+            return None
+        result = None
+        for entry in [e for e in await io.directory_list(path) if e['type'] == 'file']:
+            if result is None or entry['mtime'] > result:
+                result = entry['mtime']
+        return result
 
 
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):

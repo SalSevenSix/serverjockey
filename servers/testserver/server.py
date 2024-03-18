@@ -97,7 +97,7 @@ class Server(svrabc.Server):
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
         r.put('install-runtime', _InstallRuntimeHandler(self), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._context, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.FileMtimeHandler(self._log_dir))
+        r.put('world-meta', httpext.MtimeHandler().dir(self._log_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._context, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._context, self._config_file), 'r')
         r.put('wipe-world-logs', httpext.WipeHandler(self._context, self._log_dir), 'r')
