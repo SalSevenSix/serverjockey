@@ -1,7 +1,6 @@
 # My junk
 TODO.*
 *.ok
-*.lockb
 scratch/
 
 # client build dirs
