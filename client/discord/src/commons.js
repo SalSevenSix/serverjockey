@@ -7,48 +7,52 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 
 exports.startServerEventLogging = function(context, channels, instance, url) {
+  if (!channels.server) return;
   let lastState = 'READY';
   let restartRequired = false;
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // ignore no state
     if (json.state === 'START') return true;  // ignore transient state
     if (!restartRequired && json.details.restart) {
-      if (channels.server) { channels.server.send('`' + instance + '` 🔄 restart required'); }
+      channels.server.send('`' + instance + '` 🔄 restart required');
       restartRequired = true;
       return true;
     }
     if (json.state === lastState) return true;  // ignore duplicates
     if (json.state === 'STARTED') { restartRequired = false; }
     lastState = json.state;
-    if (channels.server) { channels.server.send('`' + instance + '` 📡 ' + json.state); }
+    channels.server.send('`' + instance + '` 📡 ' + json.state);
     return true;
   });
 }
 
 exports.startAllEventLogging = function(context, channels, instance, url) {
   exports.startServerEventLogging(context, channels, instance, url);
+  if (!channels.login && !channels.chat) return;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     if (json.event === 'chat') {
-      if (channels.chat) { channels.chat.send('`' + instance + '` 💬 ' + json.player.name + ': ' + json.text); }
+      if (!channels.chat) return true;
+      channels.chat.send('`' + instance + '` 💬 ' + json.player.name + ': ' + json.text);
       return true;
     }
-    let action = null;
-    if (json.event === 'login') { action = ' 🟢 '; }
-    if (json.event === 'logout') { action = ' 🔴 '; }
-    if (!action) return true;
-    let result = '`' + instance + '`' + action + json.player.name;
+    if (!channels.login) return true;
+    let result = null;
+    if (json.event === 'login') { result = ' 🟢 '; }
+    if (json.event === 'logout') { result = ' 🔴 '; }
+    if (!result) return true;
+    result = '`' + instance + '`' + result + json.player.name;
     if (json.player.steamid) {
       result += ' [' + json.player.steamid + ']';
     }
-    if (channels.login) { channels.login.send(result); }
+    channels.login.send(result);
     return true;
   });
 }
 
 exports.sendHelp = function($, helpText) {
-  let channel = $.message.channel;
+  const channel = $.message.channel;
   if ($.data.length === 0) {
-    let cmd = $.context.config.CMD_PREFIX;
+    const cmd = $.context.config.CMD_PREFIX;
     let header = '```\n' + helpText.title + '\n' + cmd;
     let index = 1;
     while (helpText.hasOwnProperty('help' + index)) {
@@ -58,7 +62,7 @@ exports.sendHelp = function($, helpText) {
     }
     return;
   }
-  let query = $.data.join('').replaceAll('-', '');
+  const query = $.data.join('').replaceAll('-', '');
   if (!helpText.hasOwnProperty(query)) {
     channel.send('No more help available.');
     return;
@@ -81,7 +85,7 @@ exports.server = function($) {
       result += body.state;
       if (body.uptime) { result += ' (' + util.humanDuration(body.uptime) + ')'; }
       result += '\n';
-      let dtl = body.details;
+      const dtl = body.details;
       if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
       if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
       if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
@@ -91,7 +95,7 @@ exports.server = function($) {
     });
     return;
   }
-  let cmd = $.data[0].toLowerCase();
+  const cmd = $.data[0].toLowerCase();
   if (!['start', 'restart', 'stop'].includes(cmd)) {
     $.message.react('⛔');
     return;
@@ -134,7 +138,7 @@ exports.auto = function($) {
     $.httptool.doPost('', { auto: $.data[0] });
     return;
   }
-  let desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
+  const desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
   $.httptool.doGet('/server', function(body) {
     let result = '```\n' + $.instance;
     result += ' auto mode: ' + body.auto;
@@ -149,8 +153,8 @@ exports.log = function($) {
       $.message.channel.send('```\nNo log lines found\n```');
       return;
     }
-    let fname = 'log-' + $.message.id + '.text';
-    let fpath = '/tmp/' + fname;
+    const fname = 'log-' + $.message.id + '.text';
+    const fpath = '/tmp/' + fname;
     fs.writeFile(fpath, body, function(error) {
       if (error) return logger.error(error);
       $.message.channel.send({ files: [{ attachment: fpath, name: fname }] })
@@ -165,8 +169,8 @@ exports.getconfig = function($) {
     return;
   }
   $.httptool.doGet('/config/' + $.data[0], function(body) {
-    let fname = $.data[0] + '-' + $.message.id + '.text';
-    let fpath = '/tmp/' + fname;
+    const fname = $.data[0] + '-' + $.message.id + '.text';
+    const fpath = '/tmp/' + fname;
     fs.writeFile(fpath, body, function(error) {
       if (error) return logger.error(error);
       $.message.channel.send({ files: [{ attachment: fpath, name: fname }] })
@@ -176,7 +180,7 @@ exports.getconfig = function($) {
 }
 
 exports.setconfig = function($) {
-  let attachment = $.message.attachments.first();
+  const attachment = $.message.attachments.first();
   if ($.data.length === 0 || !attachment) {
     $.message.react('❓');
     return;

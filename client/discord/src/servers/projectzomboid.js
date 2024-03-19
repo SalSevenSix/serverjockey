@@ -106,12 +106,12 @@ exports.deployment = commons.deployment;
 exports.players = commons.players;
 
 exports.world = function($) {
-  let data = [...$.data];
+  const data = [...$.data];
   if (data.length === 0) {
     $.message.react('❓');
     return;
   }
-  let cmd = data.shift();
+  const cmd = data.shift();
   let body = null;
   if (data.length > 0 && cmd === 'broadcast') {
     body = { message: data.join(' ') };
@@ -120,13 +120,13 @@ exports.world = function($) {
 }
 
 exports.player = function($) {
-  let data = [...$.data];
+  const data = [...$.data];
   if (data.length < 2) {
     $.message.react('❓');
     return;
   }
-  let name = util.urlSafeB64encode(data.shift());
-  let cmd = data.shift();
+  const name = util.urlSafeB64encode(data.shift());
+  const cmd = data.shift();
   let body = null;
   if (data.length > 0) {
     if (cmd === 'set-access-level') {
@@ -150,14 +150,14 @@ exports.player = function($) {
 }
 
 exports.whitelist = function($) {
-  let data = [...$.data];
+  const data = [...$.data];
   if (data.length < 2) {
     $.message.react('❓');
     return;
   }
-  let cmd = data.shift();
+  const cmd = data.shift();
   if (data[0].length > 3 && data[0].startsWith('<@') && data[0].endsWith('>')) {
-    data[0] = data[0].slice(2).slice(0, -1);
+    data[0] = data[0].slice(2, -1);
   }
   if (cmd === 'add-name') {
     if (data.length < 2) {
@@ -170,8 +170,8 @@ exports.whitelist = function($) {
   } else if (cmd === 'add-id') {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
-        let pwd = Math.random().toString(16).substr(2, 8);
-        let name = user.tag.replaceAll('#', '');
+        const name = user.tag.replaceAll('#', '');
+        const pwd = Math.random().toString(16).substr(2, 8);
         logger.info('Whitelist add-id: ' + data[0] + ' ' + name);
         $.httptool.doPost('/whitelist/add', { player: name, password: pwd }, function() {
           user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
@@ -185,7 +185,7 @@ exports.whitelist = function($) {
   } else if (cmd === 'remove-id') {
     $.context.client.users.fetch(data[0], true, true)
       .then(function(user) {
-        let name = user.tag.replaceAll('#', '');
+        const name = user.tag.replaceAll('#', '');
         logger.info('Whitelist remove-id: ' + data[0] + ' ' + name);
         $.httptool.doPost('/whitelist/remove', { player: name });
       })
@@ -198,12 +198,12 @@ exports.whitelist = function($) {
 }
 
 exports.banlist = function($) {
-  let data = [...$.data];
+  const data = [...$.data];
   if (data.length < 2) {
     $.message.react('❓');
     return;
   }
-  let cmd = data.shift() + '-id';
-  let body = { steamid: data.shift() };
+  const cmd = data.shift() + '-id';
+  const body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);
 }

@@ -16,8 +16,8 @@ exports.getFirstKey = function(value) {
 }
 
 exports.commandLineToList = function(line) {
-  let regexp = /[^\s"]+|"([^"]*)"/gi;
-  let result = [];
+  const regexp = /[^\s"]+|"([^"]*)"/gi;
+  const result = [];
   let match = null;
   do {
     match = regexp.exec(line);
@@ -73,8 +73,8 @@ exports.humanFileSize = function(bytes, si=false, dp=1) {
 }
 
 exports.urlSafeB64encode = function(value) {
-  let data = unescape(encodeURIComponent(value));
-  return btoa(data).replaceAll('+', '-').replaceAll('/', '_');
+  const data = btoa(unescape(encodeURIComponent(value)));
+  return data.replaceAll('+', '-').replaceAll('/', '_');
 }
 
 exports.newGetRequest = function(secret) {
@@ -97,7 +97,7 @@ exports.newPostRequest = function(ct, secret) {
 }
 
 exports.listifyRoles = function(line) {
-  let roles = [];
+  const roles = [];
   if (!line || !line.trim()) return roles;
   line.split('@').forEach(function(role) {
     role = role.trim();

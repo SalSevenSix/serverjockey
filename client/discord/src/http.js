@@ -27,14 +27,14 @@ exports.MessageHttpTool = class MessageHttpTool {
   }
 
   doGet(path, dataHandler) {
-    let self = this;
-    let context = this.#context;
-    let message = this.#message;
+    const self = this;
+    const context = this.#context;
+    const message = this.#message;
     if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
     fetch(this.#baseurl + path, util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
-        let ct = response.headers.get('Content-Type');
+        const ct = response.headers.get('Content-Type');
         if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
@@ -52,9 +52,9 @@ exports.MessageHttpTool = class MessageHttpTool {
   }
 
   doPost(path, body = null, dataHandler = null, allowRoles = null) {
-    let self = this;
-    let context = this.#context;
-    let message = this.#message;
+    const self = this;
+    const context = this.#context;
+    const message = this.#message;
     if (allowRoles && !util.checkHasRole(message, allowRoles)) return;
     if (!allowRoles && !util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
     let request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
@@ -68,7 +68,7 @@ exports.MessageHttpTool = class MessageHttpTool {
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         if (response.status === 204) return null;
-        let ct = response.headers.get('Content-Type');
+        const ct = response.headers.get('Content-Type');
         if (ct.startsWith('text/plain')) return response.text();
         return response.json();
       })
@@ -91,30 +91,31 @@ exports.MessageHttpTool = class MessageHttpTool {
   }
 
   doPostToFile(path, body = null) {
-    let context = this.#context;
-    let message = this.#message;
+    const context = this.#context;
+    const message = this.#message;
     this.doPost(path, body, function(json) {
       if (json == null || !json.hasOwnProperty('url')) {
         message.react('✅');
         return;
       }
       message.react('⌛');
-      let fname = message.id + '.text';
-      let fpath = '/tmp/' + fname;
-      let fstream = fs.createWriteStream(fpath);
+      const fname = message.id + '.text';
+      const fpath = '/tmp/' + fname;
+      const fstream = fs.createWriteStream(fpath);
       fstream.on('error', logger.error);
       new subs.Helper(context).poll(json.url, function(data) {
         fstream.write(data);
         fstream.write('\n');
         return true;
-      }).then(function() {
-          fstream.end();
-          message.reactions.removeAll()
-            .then(function() { message.react('✅'); })
-            .catch(logger.error);
-          message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-            .finally(function() { fs.unlink(fpath, logger.error); });
-        });
+      })
+      .then(function() {
+        fstream.end();
+        message.reactions.removeAll()
+          .then(function() { message.react('✅'); })
+          .catch(logger.error);
+        message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+          .finally(function() { fs.unlink(fpath, logger.error); });
+      });
     });
   }
 

@@ -12,7 +12,7 @@ exports.Helper = class Helper {
   }
 
   async daemon(subscribeUrl, dataHandler) {
-    let context = this.#context;
+    const context = this.#context;
     let url = null;
     let counter = 0;
     while (context.running && url == null) {
@@ -47,7 +47,7 @@ exports.Helper = class Helper {
   }
 
   async poll(url, dataHandler) {
-    let signal = this.#context.signal;
+    const signal = this.#context.signal;
     let polling = (url != null);
     while (this.#context.running && polling) {
       polling = await fetch(url, { signal })
@@ -55,7 +55,7 @@ exports.Helper = class Helper {
           if (response.status === 404) return false;
           if (!response.ok) throw new Error('Status: ' + response.status);
           if (response.status === 204) return true;
-          let ct = response.headers.get('Content-Type');
+          const ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })

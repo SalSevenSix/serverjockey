@@ -30,22 +30,22 @@ function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
   const configChannels = context.config.EVENT_CHANNELS;
-  let channelIds = new Set();
+  const channelIds = new Set();
   if (configChannels.server) { channelIds.add(configChannels.server); }
   if (configChannels.login) { channelIds.add(configChannels.login); }
   if (configChannels.chat) { channelIds.add(configChannels.chat); }
-  let promises = [];
+  const promises = [];
   for (let channelId of channelIds.values()) {
     promises.push(context.client.channels.fetch(channelId)
       .then(function(channel) { return channel; })
       .catch(logger.error));
   }
   Promise.all(promises).then(function(channels) {
-    let channelsMap = {};
+    const channelsMap = {};
     for (let index in channels) {
       if (channels[index]) { channelsMap[channels[index].id] = channels[index]; }
     }
-    let startupArgs = { server: null, login: null, chat: null };
+    const startupArgs = { server: null, login: null, chat: null };
     if (configChannels.server && channelsMap.hasOwnProperty(configChannels.server)) {
       startupArgs.server = channelsMap[configChannels.server];
       logger.info('Publishing server events to ' + startupArgs.server.name + ' (' + startupArgs.server.id + ')');
@@ -68,24 +68,24 @@ function handleMessage(message) {
   if (!message.content.startsWith(context.config.CMD_PREFIX)) return;
   if (!message.member || !message.member.user) return;  // broken message
   logger.info(message.member.user.tag + ' ' + message.content);
-  let data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
+  const data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
   if (data.length === 0) {
     message.react('❓');
     return;
   }
   let command = data.shift().toLowerCase();
   let instance = context.instancesService.currentInstance();
-  let parts = command.split('.');
+  const parts = command.split('.');
   if (parts.length > 1) {
-    instance = parts[0];
     command = parts[1];
+    instance = parts[0];
   }
   if (command === 'startup') {
     message.react('❓');
     return;
   }
-  let args = { context: context, instance: instance, message: message, data: data };
-  let instanceData = context.instancesService.getData(instance);
+  const args = { context: context, instance: instance, message: message, data: data };
+  const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && instanceData.server.hasOwnProperty(command)) {
     if (command === 'help' && data.length === 0) {
       system.help(args);
