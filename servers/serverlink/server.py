@@ -32,14 +32,14 @@ class Server(svrabc.Server):
         self._config = util.full_path(home, 'serverlink.json')
         self._log_file = util.full_path(home, 'serverlink.log') if logutil.is_logging_to_file() else None
         self._clientfile = contextext.ClientFile(context, util.full_path(home, 'serverjockey-client.json'))
-        self._server_process_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
+        self._server_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._stopper = spstopper.ServerProcessStopper(context, 10.0)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
         if not await io.file_exists(self._config):
             await io.write_file(self._config, objconv.obj_to_json(_default_config()))
-        await self._server_process_factory.initialise()
+        await self._server_factory.initialise()
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream():
             self._context.register(msglog.PrintSubscriber(Server.LOG_FILTER, transformer=msgtrf.GetData()))
@@ -65,7 +65,7 @@ class Server(svrabc.Server):
     async def run(self):
         await self._clientfile.write()
         try:
-            await self._server_process_factory.build().run()
+            await self._server_factory.build().run()
         finally:
             await self._clientfile.delete()
 
@@ -104,11 +104,11 @@ class _ServerProcessFactory:
         raise Exception('Unable to find a ServerLink executable.')
 
     def build(self) -> proch.ServerProcess:
-        server_process = proch.ServerProcess(self._context, self._executable)
-        server_process.use_env(self._env)
-        server_process.wait_for_started(_SERVER_STARTED_FILTER, 30.0)
+        server = proch.ServerProcess(self._context, self._executable)
+        server.use_env(self._env)
+        server.wait_for_started(_SERVER_STARTED_FILTER, 30.0)
         if self._script:
-            server_process.append_arg(self._script)
-        server_process.append_arg(self._config)
-        server_process.append_arg(self._clientfile)
-        return server_process
+            server.append_arg(self._script)
+        server.append_arg(self._config)
+        server.append_arg(self._clientfile)
+        return server
