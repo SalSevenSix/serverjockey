@@ -17,7 +17,7 @@
   }
 
   function deleteInstance(selected) {
-    let message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
+    const message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
     confirmDangerModal(message, selected.identity, function() {
       deleting = true;
       fetch(selected.url + '/server/delete', newPostRequest())

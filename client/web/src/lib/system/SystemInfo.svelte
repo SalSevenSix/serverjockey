@@ -10,7 +10,7 @@
   let info = null;
 
   function osIcon(osPrettyName) {
-    let parts = osPrettyName.split(' ');
+    const parts = osPrettyName.split(' ');
     return 'fa-' + parts[0].toLowerCase();
   }
 

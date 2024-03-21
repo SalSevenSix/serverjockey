@@ -21,8 +21,8 @@
   $: if ($eventDown || $eventStarted || $eventEndMaint) { loadWorldMeta(); }
 
   function doAction() {
-    let actionKey = this.name;
-    let actionTitle = this.title;
+    const actionKey = this.name;
+    const actionTitle = this.title;
     confirmModal('Are you sure you want to ' + actionTitle + ' ?\nThis action cannot be undone.', function() {
       processing = true;
       fetch(instance.url('/deployment/' + actionKey), newPostRequest())

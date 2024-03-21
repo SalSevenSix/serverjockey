@@ -9,6 +9,7 @@
                   'is-danger':  'fa-circle-minus' };
 
   let hidden = true;
+
   $: setHidden($notifications.length); function setHidden(nlen) {
     if (!hidden && nlen === 0) {
       sleep(fadeMillis).then(function() {

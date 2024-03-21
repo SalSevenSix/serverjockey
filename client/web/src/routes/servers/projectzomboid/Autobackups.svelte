@@ -9,7 +9,7 @@
   function restoreAutobackup(path, callbacks) {
     confirmModal('Restore?\n' + path + '\nCurrent save will be overwritten.', function() {
       callbacks.start();
-      let request = newPostRequest();
+      const request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
       fetch(instance.url('/deployment/restore-autobackup'), request)
         .then(function(response) {

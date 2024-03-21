@@ -1,12 +1,11 @@
 import { humanDuration, shortISODateTimeString } from '$lib/util/util';
-import { newGetRequest } from '$lib/util/sjgmsapi';
-import { notifyError } from '$lib/util/notifications';
+import { queryFetch } from '$lib/activity/common';
 
 const hourMillis = 60 * 60 * 1000;
 const dayMillis = 24 * hourMillis;
 
 function extractInstances(queryResults) {
-  let result = [];
+  const result = [];
   queryResults.lastevent.records.forEach(function(record) {
     if (!result.includes(record[1])) { result.push(record[1]); }
   });
@@ -17,7 +16,7 @@ function extractInstances(queryResults) {
 }
 
 function toLastEventMap(instances, data) {
-  let result = {};
+  const result = {};
   instances.forEach(function(instance) {
     result[instance] = {};
   });
@@ -28,7 +27,7 @@ function toLastEventMap(instances, data) {
 }
 
 function newOnlineTracker() {
-  let self = { current: 0, min: 0, max: 0 };
+  const self = { current: 0, min: 0, max: 0 };
   self.bump = function() {
     self.current += 1;
     self.min = self.current;
@@ -133,7 +132,7 @@ export function extractActivity(queryResults) {
     });
   });
   data.records.forEach(function(record) {  // Process event records to calculate uptime and session count
-    let [at, instance, player, event] = record;
+    const [at, instance, player, event] = record;
     if (entries[instance].hasOwnProperty(player)) {
       entry = entries[instance][player];
     } else {
@@ -166,7 +165,7 @@ export function extractActivity(queryResults) {
       }
     });
   });
-  let results = {};
+  const results = {};
   instances.forEach(function(instance) {  // Generate report result object
     const total = { sessions: 0, uptime: 0 };
     const players = [];
@@ -195,7 +194,7 @@ export function extractActivity(queryResults) {
 
 export function compactPlayers(players, limit=10) {
   if (limit >= players.length) return players;
-  let result = [];
+  const result = [];
   let counter = limit - 1;
   let others = null;
   players.forEach(function(player) {
@@ -211,16 +210,6 @@ export function compactPlayers(players, limit=10) {
   });
   if (others) { result.push(others); }
   return result;
-}
-
-async function queryFetch(url, errorMessage) {
-  return await fetch(url, newGetRequest())
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) { return json; })
-    .catch(function(error) { notifyError(errorMessage); });
 }
 
 export async function queryEvents(instance, atfrom, atto) {

@@ -18,29 +18,28 @@
     selectedOption = currentOption;
   }
 
-  $: if ($serverStatus.auto > -1) {
-    if (selectedOption === null) {
+  $: serverStatusUpdated($serverStatus.auto); function serverStatusUpdated(auto) {
+    if (selectedOption === null && auto > -1) {
       currentOption = autoOptions[$serverStatus.auto];
       selectedOption = currentOption;
     }
   }
 
-  $: if (selectedOption) {
-    if (currentOption != selectedOption) {
-      let originalOption = currentOption;
-      currentOption = selectedOption;  // lock it in now to block another trigger
-      let request = newPostRequest();
-      request.body = JSON.stringify({ auto: autoOptions.indexOf(selectedOption) });
-      fetch(instance.url(), request)
-        .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
-        })
-        .catch(function(error) {
-          currentOption = originalOption;  // safe rollback
-          selectedOption = originalOption;
-          notifyError('Failed to update Auto mode.');
-        });
-    }
+  $: selectedOptionUpdated(selectedOption); function selectedOptionUpdated(dummy) {
+    if (!selectedOption || currentOption === selectedOption) return;
+    const originalOption = currentOption;
+    currentOption = selectedOption;  // lock it in now to block another trigger
+    const request = newPostRequest();
+    request.body = JSON.stringify({ auto: autoOptions.indexOf(selectedOption) });
+    fetch(instance.url(), request)
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+      })
+      .catch(function(error) {
+        currentOption = originalOption;  // safe rollback
+        selectedOption = originalOption;
+        notifyError('Failed to update Auto mode.');
+      });
   }
 </script>
 

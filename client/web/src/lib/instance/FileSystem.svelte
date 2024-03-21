@@ -53,7 +53,7 @@
   }
 
   function defaultSorter(a, b) {
-    let typeCompare = b.type.localeCompare(a.type);
+    const typeCompare = b.type.localeCompare(a.type);
     if (typeCompare != 0) return typeCompare;
     return b.mtime - a.mtime;
   }
@@ -98,7 +98,7 @@
   }
 
   function upDirectory() {
-    let parts = pwdUrl.split('/');
+    const parts = pwdUrl.split('/');
     parts.pop();
     load(parts.join('/'));
   }

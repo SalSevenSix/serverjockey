@@ -40,7 +40,7 @@
   function restoreBackup(path, callbacks) {
     confirmModal('Restore?\n' + path + '\nExisting files will be overwritten.', function() {
       cannotBackup = callbacks.start();
-      let request = newPostRequest();
+      const request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
       fetch(instance.url('/deployment/restore-backup'), request)
         .then(function(response) {
@@ -55,7 +55,7 @@
 
   function uploadFile() {
     if (noFileSelected) return;
-    let filename = uploadFiles[0].name;
+    const filename = uploadFiles[0].name;
     if (!(filename === filename.replaceAll(' ', '')
         && filename === filename.toLowerCase()
         && (filename.startsWith('runtime-') || filename.startsWith('world-'))
@@ -63,7 +63,7 @@
       return notifyError(fnHelp);
     }
     uploading = true;
-    let request = rawPostRequest();
+    const request = rawPostRequest();
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
     fetch(instance.url('/backups/' + filename), request)  // Blocks until complete

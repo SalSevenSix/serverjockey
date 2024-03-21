@@ -43,7 +43,7 @@
     }
     stage = 1;
     heartbeat();
-    let request = newPostRequest();
+    const request = newPostRequest();
     request.body = JSON.stringify({ login: steamLogin });
     fetch(instance.url('/steamcmd/login'), request)
       .then(function(response) {
@@ -78,7 +78,7 @@
       notifyError('Password not provided');
       return;
     }
-    let request = newPostRequest();
+    const request = newPostRequest();
     request.body = JSON.stringify({ value: steamPassword });
     fetch(instance.url('/steamcmd/input'), request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
@@ -94,7 +94,7 @@
       notifyError('Code not provided');
       return;
     }
-    let request = newPostRequest();
+    const request = newPostRequest();
     request.body = JSON.stringify({ value: steamCode });
     fetch(instance.url('/steamcmd/input'), request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })

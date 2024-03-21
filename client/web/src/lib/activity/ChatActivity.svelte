@@ -3,6 +3,7 @@
   import { shortISODateTimeString, humanDuration, ObjectUrls } from '$lib/util/util';
   import { newGetRequest } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
+  import { queryFetch } from '$lib/activity/common';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const query = getContext('query');
@@ -19,26 +20,14 @@
     url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
     if (player) { url += '&player=' + player; }
     url += '&verbose';
-    return await fetch(url, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) { return json; })
-      .catch(function(error) { notifyError('Failed to query player events.'); });
+    return await queryFetch(url, 'Failed to query player events.');
   }
 
   async function queryChats(instance, atrange, player) {
     let url = '/store/player/chat?instance=' + instance;
     url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
     if (player) { url += '&player=' + player; }
-    return await fetch(url, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) { return json; })
-      .catch(function(error) { notifyError('Failed to query chat logs.'); });
+    return await queryFetch(url, 'Failed to query chat logs.');
   }
 
   function mergeResults(data) {
@@ -64,8 +53,8 @@
     const result = [];
     let clazz = null;
     data.forEach(function(item) {
-      let atString = shortISODateTimeString(item.at);
-      let atSection = atString.substring(0, 13);
+      const atString = shortISODateTimeString(item.at);
+      const atSection = atString.substring(0, 13);
       if (last.at != atSection) {
         result.push({ clazz: 'row-hdr', ats: atString, at: atSection + 'h' });
         last.at = atSection;

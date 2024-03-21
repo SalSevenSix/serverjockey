@@ -1,4 +1,3 @@
-
 <div class="block is-flex is-flex-direction-row is-justify-content-right is-flex-wrap-nowrap mr-3">
   <div class="block i-icon-container"><p class="has-text-right">
     <a href="https://discord.gg/TEuurWAhHn" target="_blank">

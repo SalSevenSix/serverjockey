@@ -17,8 +17,8 @@
   $: chunks = chunkArray(players, 15, hasSteamId ? 2 : 3);
 
   const uptimeClock = setInterval(function() {
-    let currentPlayers = players;
-    let updatedPlayers = [];
+    const currentPlayers = players;
+    const updatedPlayers = [];
     currentPlayers.forEach(function(player) {
       if (player.hasOwnProperty('uptime')) {
         player.uptime += 10000;
@@ -35,15 +35,15 @@
       players = [];
       return true;
     }
-    let loginEvent = (data.event === 'login');
+    const loginEvent = (data.event === 'login');
     if (loginEvent || data.event === 'logout') {
-      let result = players.filter(function(value) {
+      const updatedPlayers = players.filter(function(value) {
         return value.name != data.player.name;
       });
       if (loginEvent) {
-        result.push(data.player);
+        updatedPlayers.push(data.player);
       }
-      players = result;
+      players = updatedPlayers;
     }
     return true;
   }

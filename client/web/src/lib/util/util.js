@@ -17,11 +17,11 @@ function getBrowserName() {
 }
 
 export function guessTextFile(filename) {
-    let parts = filename.split('.');
+    const parts = filename.split('.');
     if (parts.length < 2) return false;
-    let extension = parts[parts.length - 1].toLowerCase();
+    const extension = parts[parts.length - 1].toLowerCase();
     if (textExtensions.includes(extension)) return true;
-    let prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
+    const prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
     if (!prextion) return false;
     if (textExtensions.includes(prextion)) {
       if (stampExtRegex.test(extension)) return true;
@@ -65,7 +65,7 @@ export function capitalize(value) {
 }
 
 export function floatToPercent(value, rounding=1, suffix='%') {
-  let result = (value * 100.0).toFixed(rounding);
+  const result = (value * 100.0).toFixed(rounding);
   return suffix ? result + suffix : result;
 }
 
@@ -124,8 +124,8 @@ export function humanFileSize(bytes, si=false, dp=1) {
 }
 
 export function urlSafeB64encode(value) {
-  let data = unescape(encodeURIComponent(value));
-  return btoa(data).replaceAll('+', '-').replaceAll('/', '_');
+  const data = btoa(unescape(encodeURIComponent(value)));
+  return data.replaceAll('+', '-').replaceAll('/', '_');
 }
 
 
@@ -149,7 +149,7 @@ export class RollingLog {
   }
 
   append(text) {
-    let newLines = text.split('\n');
+    const newLines = text.split('\n');
     if (newLines.length > this.#limit) {
       this.#lines = newLines.slice(0 - this.#limit);
       return this;
@@ -172,13 +172,13 @@ export class ObjectUrls {
   #urls = [];
 
   openBlob(blob) {
-    let url = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
     this.#urls.push(url);
     window.open(url).focus();
   }
 
   openObject(data) {
-    let blob = new Blob([JSON.stringify(data)], { type : 'text/plain;charset=utf-8' });
+    const blob = new Blob([JSON.stringify(data)], { type : 'text/plain;charset=utf-8' });
     this.openBlob(blob);
   }
 

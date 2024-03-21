@@ -51,8 +51,8 @@
   function send() {
     if (cannotSend) return;
     sending = true;
+    const body = {};
     let path = '/' + command;
-    let body = {};
     commands[command][action].forEach(function(value, index) {
       if (!value.type) {
         // pass
@@ -65,7 +65,7 @@
       }
     });
     path += '/' + action;
-    let request = newPostRequest();
+    const request = newPostRequest();
     request.body = JSON.stringify(body);
     fetch(instance.url(path), request)
       .then(function(response) {

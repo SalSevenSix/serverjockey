@@ -9,7 +9,7 @@
   function restoreAutosave(path, callbacks) {
     confirmModal('Restore?\n' + path + '\nCurrent map will be overwritten.', function() {
       callbacks.start();
-      let request = newPostRequest();
+      const request = newPostRequest();
       request.body = JSON.stringify({ filename: path });
       fetch(instance.url('/deployment/restore-autosave'), request)
         .then(function(response) {

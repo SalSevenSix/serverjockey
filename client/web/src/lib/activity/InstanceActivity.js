@@ -1,9 +1,8 @@
-import { newGetRequest } from '$lib/util/sjgmsapi';
-import { notifyError } from '$lib/util/notifications';
+import { queryFetch } from '$lib/activity/common';
 
 
 function toInstanceCreatedMap(data) {
-  let result = {};
+  const result = {};
   data.records.forEach(function(record) {
     result[record[1]] = record[0];
   });
@@ -11,7 +10,7 @@ function toInstanceCreatedMap(data) {
 }
 
 function toLastEventMap(instances, data) {
-  let result = {};
+  const result = {};
   instances.forEach(function(instance) {
     result[instance] = null;
   });
@@ -36,7 +35,7 @@ export function extractActivity(queryResults) {
     entries[instance] = entry;
   });
   data.records.forEach(function(record) {  // Process event records to calculate uptime and session count
-    let [at, instance, event] = record;
+    const [at, instance, event] = record;
     entry = entries[instance];
     if (!entry.event) {  // First event for instance
       entry.at = at;
@@ -66,10 +65,10 @@ export function extractActivity(queryResults) {
       entry.uptime += uptimeAtto - entry.at;
     }
   });
-  let results = [];
+  const results = [];
   instances.forEach(function(instance) {  // Generate report result object
     entry = entries[instance];
-    let instanceResult = { instance: instance, created: createdMap[instance], sessions: entry.sessions };
+    const instanceResult = { instance: instance, created: createdMap[instance], sessions: entry.sessions };
     instanceResult.uptime = entry.uptime;
     instanceResult.range = data.criteria.atto - entry.from;
     instanceResult.available = instanceResult.uptime / instanceResult.range;
@@ -77,16 +76,6 @@ export function extractActivity(queryResults) {
   });
   return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
            atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
-}
-
-async function queryFetch(url, errorMessage) {
-  return await fetch(url, newGetRequest())
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) { return json; })
-    .catch(function(error) { notifyError(errorMessage); });
 }
 
 export async function queryInstance(instance) {

@@ -16,7 +16,7 @@
   function create() {
     if (cannotCreate) return;
     processing = true;
-    let request = newPostRequest();
+    const request = newPostRequest();
     request.body = JSON.stringify(serverForm);
     fetch('/instances', request)
       .then(function(response) {

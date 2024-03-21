@@ -16,7 +16,7 @@
 
   function save() {
     processing = true;
-    let request = newPostRequest('text/plain');
+    const request = newPostRequest('text/plain');
     request.body = JSON.stringify(formData);
     fetch(instance.url('/config'), request)
       .then(function(response) {

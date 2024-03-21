@@ -11,7 +11,7 @@
   let triggering = false;
 
   function getInstanceModule() {
-    let parts = window.location.pathname.split('/');
+    const parts = window.location.pathname.split('/');
     return parts[parts.length - 1];
   }
 

@@ -6,8 +6,8 @@
   let processing = false;
 
   function actionResetActivity() {
-    let actionName = this.name;
-    let actionTitle = this.title;
+    const actionName = this.name;
+    const actionTitle = this.title;
     confirmModal('Are you sure you want to ' + actionTitle + ' ?\nThis action cannot be undone.', function() {
       processing = true;
       fetch('/store/' + actionName, newPostRequest())

@@ -13,11 +13,11 @@
   export let path;
 
   let configFileTextId = 'configFileText' + name.replaceAll(' ', '');
-  let updating = true;
+  let processing = true;
   let originalText = '';
   let configText = '';
 
-  $: cannotAction = updating || $serverStatus.state === 'MAINTENANCE';
+  $: cannotAction = processing || $serverStatus.state === 'MAINTENANCE';
   $: cannotEdit = cannotAction;
   $: cannotClear = cannotAction || !configText;
   $: cannotReload = cannotAction;
@@ -28,7 +28,7 @@
   }
 
   function reload() {
-    updating = true;
+    processing = true;
     fetch(instance.url(path), newGetRequest())
       .then(function(response) {
         if (response.status === 404) return '';
@@ -40,7 +40,7 @@
         configText = text;
       })
       .catch(function(error) { notifyError('Failed to load ' + name); })
-      .finally(function() { updating = false; });
+      .finally(function() { processing = false; });
   }
 
   function editor() {
@@ -55,8 +55,8 @@
   }
 
   function save() {
-    updating = true;
-    let request = newPostRequest('text/plain');
+    processing = true;
+    const request = newPostRequest('text/plain');
     request.body = configText;
     fetch(instance.url(path), request)
       .then(function(response) {
@@ -65,7 +65,7 @@
         notifyInfo(name + ' saved.');
       })
       .catch(function(error) { notifyError('Failed to update ' + name); })
-      .finally(function() { updating = false; });
+      .finally(function() { processing = false; });
   }
 
   onMount(reload);

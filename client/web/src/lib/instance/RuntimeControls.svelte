@@ -59,9 +59,9 @@
 
   function doInstallRuntime() {
     cannotProcess = true;
-    let request = newPostRequest();
-    let body = { wipe: false, validate: true };
+    const body = { wipe: false, validate: true };
     if (qualifier) { body.beta = qualifier; }
+    const request = newPostRequest();
     request.body = JSON.stringify(body);
     fetch(instance.url('/deployment/install-runtime'), request)
       .then(function(response) {

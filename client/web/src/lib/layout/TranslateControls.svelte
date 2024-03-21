@@ -3,6 +3,8 @@
   import { sleep, noStorage } from '$lib/util/util';
 
   const storageKey = 'sjgmsTranslating';
+  let oldLocation = window.location.href;
+  let translating = false;
 
   function canTranslate() {
     if (typeof(google) === 'undefined') return false;
@@ -28,16 +30,15 @@
     window.location.reload();
   }
 
-  let translating = false;
-  let oldLocation = window.location.href;
-
   const locationPoller = setInterval(function() {
     if (oldLocation === window.location.href) return;
-    let thisLocation = window.location.href;
+    const thisLocation = window.location.href;
     oldLocation = thisLocation;
     if (!translating) return;
     sleep(1500).then(function() {
-      if (thisLocation === window.location.href) { document.body.classList.add('force-refresh'); }
+      if (thisLocation === window.location.href) {
+        document.body.classList.add('force-refresh');
+      }
     });
   }, 1000);
 

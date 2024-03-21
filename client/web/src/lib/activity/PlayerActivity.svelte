@@ -63,7 +63,7 @@
     };
   }
 
-  function queryActivity(criteria) {
+  function queryActivity() {
     processing = true;
     const [instance, atrange] = [query.criteria.instance().identity(), query.criteria.atrange()];
     Promise.all([queryLastEvent(instance, atrange.atfrom), queryEvents(instance, atrange.atfrom, atrange.atto)])
