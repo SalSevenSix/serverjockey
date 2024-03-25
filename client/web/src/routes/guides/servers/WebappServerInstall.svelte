@@ -19,10 +19,9 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Find the <span class="has-text-weight-bold">New Instance</span> form on the Instances page.
-    Select <span class="has-text-weight-bold">{module}</span> from the Module dropdown.
-    Now give the instance a Name. The name must be lower case letters and numbers, no spaces or
-    special characters except dashes and underscores.
+    Find the <span class="has-text-weight-bold">New Instance</span> form.
+    Select <span class="has-text-weight-bold">{module}</span> from the Module dropdown, then give the instance a Name.
+    The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
     Click the <span class="has-text-weight-bold">Create</span> button to create the new instance.
   </p>
   <figure class="image max-400 is-bordered">
@@ -32,8 +31,8 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    In the <span class="has-text-weight-bold">Instances</span> list on the same page you should find
-    the new instance you created. View it now using the open folder button.
+    In the <span class="has-text-weight-bold">Instances</span> list you should see the new instance created.
+    Click the open folder button to view it.
   </p>
   <figure class="image max-600 is-bordered">
     <img src="/assets/guides/games/view_instance.png" alt="Go to new instance" loading="lazy" />
@@ -42,16 +41,16 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Welcome to the control panel for your new instance! An instance is just a container for a game server.
-    You can now install the actual server using this page. Scroll down and find the
-    <span class="has-text-weight-bold">Deployment</span> section. Expand it using the black button on the right.
+    Welcome to the control panel for your new instance! An instance is a container for a game server. You can now
+    install the actual server here. Scroll down to the <span class="has-text-weight-bold">Deployment</span>
+    section then expand it using the black button on the right.
     Now click the <span class="has-text-weight-bold">Install</span> button.
   </p>
   <figure class="image max-1024 is-bordered">
     <img src="/assets/guides/games/install_start.png" alt="Start install runtime" loading="lazy" />
   </figure>
   <p>
-    Scroll back up to find the <span class="has-text-weight-bold">Console Log</span>.
+    Scroll back up to the <span class="has-text-weight-bold">Console Log</span>.
     You can track the progress of the install process and see the end result in the log.
     Once completed successfully, you will be able to start the game server.
   </p>

@@ -17,10 +17,9 @@
   <p>
     <a class="notranslate" href="https://www.pocketpair.jp/palworld" target="_blank">
       Palworld <i class="fa fa-up-right-from-square"></i></a>
-    is a monster-catching, survival and crafting game, but incorporates a variety of mechanics
-    from other genres in order to provide a completely new experience for everyone.
-    Fight, farm, build and work alongside mysterious creatures called &quot;Pals&quot; in this completely
-    new multiplayer, open world survival and crafting game.
+    is a monster-catching, survival and crafting game, but incorporates a variety of mechanics from other genres in
+    order to provide a new experience for everyone. Fight, farm, build and work alongside mysterious creatures called
+    &quot;Pals&quot; in a multiplayer open world survival and crafting game.
   </p>
   <p>
     This guide will show you how to install, configure and run a Palworld server using this Webapp.

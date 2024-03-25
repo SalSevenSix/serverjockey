@@ -26,17 +26,12 @@
 
 <div class="content" id="setupWithBotOne">
   <hr />
-  <h3 class="title is-4">Server setup using the Discord bot</h3>
-</div>
-
-<div class="content">
   <p><span class="step-title"></span>
     First step is to create an instance for the server.
-    For this guide the instance is called <span class="has-text-weight-bold">myserver</span>.
+    For the guide the instance is called <span class="has-text-weight-bold">myserver</span>.
     The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
     The second value is <span class="has-text-weight-bold">projectzomboid</span>.
-    This is the module, which is a supported game server. In this case, Project Zomboid.
-    So this instance will be for a Project Zomboid server.
+    This is the module, which is a supported game server. So this instance will be for a Project Zomboid server.
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
@@ -46,8 +41,7 @@
 
 <div class="content" id="setupWithBotTwo">
   <p><span class="step-title"></span>
-    With an instance created, you can now view all of the commands
-    for that type (module) of instance using the help command.
+    With an instance created, you can now view all of the commands available for the instance using the help command.
   </p>
   <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
@@ -58,10 +52,9 @@
 <div class="content">
   <p><span class="step-title"></span>
     Although the instance has been created, the Project Zomboid server itself is not installed yet.
-    The stable version can now be downloaded and installed with the command shown below. The bot reacts
-    with an hourglass emoji initially as the process happens. Once complete, the hourglass will be replaced
-    with a green tick. Also the log output from SteamCMD will be attached. You can check this to ensure
-    the server was installed without issue.
+    The stable version can now be downloaded and installed with the command shown below. The bot initally reacts
+    with an hourglass emoji for the process, then replaces it with a green tick when complete. Also the log output
+    from SteamCMD will be attached. Check the log to ensure the server was installed without issue.
   </p>
   <CodeBlock>!deployment install-runtime</CodeBlock>
   <figure class="image max-800">
@@ -74,8 +67,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    With the server installed, it can now be started with the following command. Same as the server install,
-    an hourglass emoji is shown then replaced with a green tick when the server has fully started.
+    With the server installed, it can now be started with the following command.
   </p>
   <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
@@ -99,9 +91,9 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Before we continue to login and play, the server configuration needs attention. After starting the
-    Project Zomboid server for the first time, the configuration files are created with default values.
-    So stop the server with the following command.
+    Before you login and play, the server configuration needs attention.
+    After starting the Project Zomboid server for the first time, the configuration files
+    are created with default values. Stop the server with the following command.
   </p>
   <CodeBlock>!server stop</CodeBlock>
   <figure class="image max-800">
@@ -112,7 +104,6 @@
 <div class="content">
   <p><span class="step-title"></span>
     The server INI file can be downloaded as an attachment with the following command.
-    See the server command list for other configuration files that can be downloaded.
     Save this file to disk somewhere to edit it.
   </p>
   <CodeBlock>!getconfig ini</CodeBlock>
@@ -123,8 +114,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    For the purpose of this guide. I only updated a the public server name
-    and welcome message in the downloaded INI file.
+    For the purpose of the guide, I only updated the public server name and welcome message in the downloaded INI file.
   </p>
   <CodeBlock>PublicName=ZomBox demo server
 ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
@@ -132,9 +122,8 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
 
 <div class="content">
   <p><span class="step-title"></span>
-    After making changes to the downloaded INI file. You can now upload it back to the server.
+    After making changes to the downloaded INI file, you can now upload it back to the server.
     Attach the INI file in Discord to upload it with the following command.
-    Once again, the bot will react with a green tick emoji to show that the command was successful.
   </p>
   <CodeBlock>!setconfig ini</CodeBlock>
   <figure class="image max-800">
@@ -144,7 +133,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
 
 <div class="content">
   <p><span class="step-title"></span>
-    The server configuration has now been updated. However the server created a game world (map files)
+    The server configuration has now been updated. However the server created a game world save (map files)
     using the default configuration. You can delete the world with the following command.
   </p>
   <CodeBlock>!deployment wipe-world-save</CodeBlock>
@@ -155,9 +144,9 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now start the server again. For this guide I used the local network IP to login to the Project Zomboid server.
-    After logging in I am greeted with the new Welcome Message I configured earlier. Also, if you have the
-    Player Event Channel ID set in the discord bot configuration, you should see a login event message in that channel.
+    Now start the server again. For the guide I used the local network IP to login. After logging in I am greeted
+    with the new Welcome Message I configured earlier. Also, if you have the Player Event Channel ID set in the
+    discord bot configuration, you should see a login event message in that channel.
   </p>
   <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
@@ -174,8 +163,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
 <div class="content">
   <p><span class="step-title"></span>
     Now try some server console commands. Two examples are shown below.
-    You can broadcast a message to all players on the server.
-    Items can also be spawned in a players inventory.
+    You can broadcast a message to all players on the server. Items can also be spawned in a players inventory.
     Use the help command for the full list of server console commands.
   </p>
   <CodeBlock>!world broadcast Hello Everyone</CodeBlock>

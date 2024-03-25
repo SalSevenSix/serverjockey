@@ -16,9 +16,7 @@
     <a class="notranslate" href="https://projectzomboid.com" target="_blank">
       Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
     is a zombie apocalypse survival horror game set in an open world using an isometric view with 3D elements.
-    Gameplay involves combat, crafting, base building and RPG elements with a focus on realism.
-    Survival is challenging, requiring the player to continually monitor both the surounding situation
-    and the physical and mental state of thier character.
+    Gameplay involves combat, exploration, crafting, base building and RPG elements with a focus on realism.
   </p>
   <p>
     This guide will show you how to install, configure and run a Project Zomboid server using this Webapp.

@@ -1,6 +1,9 @@
 <script>
   import { browserName } from '$lib/util/util';
   import BackToTop from '$lib/widget/BackToTop.svelte';
+
+  const isChrome = browserName === 'Chrome';
+  const isEdge = browserName === 'Edge';
 </script>
 
 
@@ -14,7 +17,7 @@
     <h2 class="title is-3 mt-2">Browser Extension</h2>
     <p>
       ServerJockey has a browser extension for
-      {#if browserName === 'Chrome' || browserName === 'Edge'}
+      {#if isChrome || isEdge}
         <a href="https://www.google.com/chrome" target="_blank">Google Chrome
           <i class="fa fa-up-right-from-square"></i></a> and
         <a href="https://www.microsoft.com/en-us/edge" target="_blank">Microsoft Edge
@@ -30,7 +33,7 @@
 
 <div class="content">
   <hr />
-  {#if browserName === 'Chrome'}
+  {#if isChrome}
     <p><span class="step-title"></span>
       First step is to
       <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
@@ -42,7 +45,7 @@
     <figure class="image max-844">
       <img src="/assets/guides/extension/chrome_extension_page.jpg" alt="Chrome extension page" />
     </figure>
-  {:else if browserName === 'Edge'}
+  {:else if isEdge}
     <p><span class="step-title"></span>
       First step is to
       <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
@@ -89,11 +92,11 @@
   <p><span class="step-title"></span>
     After the extension is installed, you can optionally pin the extension to the menu bar for ease of access.
     To do this, open the extensions popup using the jigsaw button then click the
-    <span class="has-text-weight-bold">{browserName === 'Edge' ? 'Show in toolbar' : 'Pin'}</span>
+    <span class="has-text-weight-bold">{isEdge ? 'Show in toolbar' : 'Pin'}</span>
     button for the ServerJockey extension. The rest of the guide assumes the extension is pinned.
   </p>
   <figure class="image max-500">
-    {#if browserName === 'Edge'}
+    {#if isEdge}
       <img src="/assets/guides/extension/edge_pin_extension.png" alt="Pin Edge extension" />
     {:else}
       <img src="/assets/guides/extension/chrome_pin_extension.png" alt="Pin Chrome extension" />
@@ -145,7 +148,7 @@
     Mods in the <span class="has-text-weight-bold">Selected Mods</span> list
     can be re-ordered using the chevron buttons, or be removed with the cross button.
     Remember to click the <span class="has-text-weight-bold">Save</span>
-    button to save the changes to the INI file of the selected instance.
+    button to commit changes to the INI file of the selected instance.
     Note that the server will need to be restarted for these changes to take effect.
   </p>
   <figure class="image max-844">
@@ -158,9 +161,9 @@
     Map mods are also supported. Another section will be shown with
     <span class="has-text-weight-bold">Available Maps</span> and
     <span class="has-text-weight-bold">Selected Maps</span>.
-    These lists function the same as the mod lists. Note that the base
-    &nbsp;<span class="is-family-monospace">Muldraugh, KY</span>&nbsp;
-    map should always be at the bottom.
+    These lists function the same as the mod lists. Note that the base map
+    &nbsp;<span class="is-family-monospace notranslate">Muldraugh, KY</span>&nbsp;
+    should always be at the bottom.
   </p>
   <figure class="image max-844">
     <img src="/assets/guides/extension/mod_chinatown_available.jpg" alt="Map mod" loading="lazy" />

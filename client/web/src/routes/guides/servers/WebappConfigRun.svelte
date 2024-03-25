@@ -1,8 +1,7 @@
 <div class="content">
   <p><span class="step-title"></span>
-    With the game server now fully installed, you can now view and edit the configuration files.
-    Find the <span class="has-text-weight-bold">Configuration</span> section and expand it
-    using the black button on the right. Edit and save the configuration as desired.
+    With the game server now fully installed, you can now view and edit the configuration files. Expand the
+    <span class="has-text-weight-bold">Configuration</span> section. Edit and save the configuration as desired.
     Make sure changes are saved before closing the section, otherwise the changes will be lost!
   </p>
   <figure class="image max-1024 is-bordered">
@@ -14,7 +13,6 @@
   <p><span class="step-title"></span>
     With installation and configuration complete, your game server is ready to use.
     You can optionally set the <span class="has-text-weight-bold">Auto</span> behaviour.
-    Choose from four options...
   </p>
   <table class="table is-thinner">
     <tbody>
@@ -29,7 +27,7 @@
     </tbody>
   </table>
   <p>
-    When happy with the setup. Use the Start, Stop and Restart buttons to control your server.
+    When ready, use the Start, Stop and Restart buttons to control your server.
   </p>
   <div class="columns">
     <div class="column">

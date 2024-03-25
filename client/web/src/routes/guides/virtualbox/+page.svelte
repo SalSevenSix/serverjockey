@@ -13,7 +13,7 @@
       <a class="notranslate" href="https://www.virtualbox.org" target="_blank">
         VirtualBox <i class="fa fa-up-right-from-square"></i></a>
       is a free virtualization system for enterprise and personal use. It allows you to run a virtual machine on
-      a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine).
+      a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine image).
       The appliance is running Ubuntu Server with ServerJockey pre-installed and ready to use.
     </p>
     <p>

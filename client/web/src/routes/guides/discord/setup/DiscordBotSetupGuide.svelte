@@ -21,7 +21,6 @@
     <p>
       The Discord bot, also called <span class="has-text-weight-bold">ServerLink</span>,
       allows you to manage your servers as an alternative to the webapp.
-      Most features are supported, with a few extra unique features as well.
       In order to use the bot you will need to register it on Discord. Just like a user account,
       the bot needs to be registered too. No coding is required, that is all in ServerJockey.
     </p>
@@ -53,8 +52,8 @@
 
 <div class="content" id="newDiscordServer">
   <p><span class="step-title"></span>
-    Add a new Discord server by clicking the <span class="is-family-monospace is-size-5">+</span> button
-    on the left panel.
+    Add a new Discord server by clicking the <span class="is-family-monospace is-size-5">+</span>
+    button on the left panel.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/02_add_server_button.png" alt="Add a Server" loading="lazy" />
@@ -81,7 +80,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Give your new Discord server a name. Can be anything that Discord allows.
+    Give your new Discord server a name.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/05_name_server.png" alt="Name the Server" loading="lazy" />
@@ -90,8 +89,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    You should now have a new Discord server. It should look like the screenshot below.
-    For the guide, I called the server ZomBoxGuide.
+    You should now have a new Discord server. For the guide, I called the server ZomBoxGuide.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/06_fresh_server.png" alt="Fresh Discord Server" loading="lazy" />
@@ -100,13 +98,8 @@
 
 <div class="content" id="createBot">
   <p><span class="step-title"></span>
-    Now that a new or existing Discord server is ready. It is time to create a Discord bot.
-    Don&#39;t worry! No coding is required, that is all in ServerJockey. This is the bot setup on Discord.
-    Similar to how users register an account to login, bots also need to be registered to login.
-  </p>
-  <p>
-    To begin the setup process.
-    Open the <a href="https://discord.com/developers" target="_blank">
+    With a Discord server ready to use, it&#39;s now time to setup the Discord bot.
+    To begin, open the <a href="https://discord.com/developers" target="_blank">
     Discord Developer Portal <i class="fa fa-up-right-from-square"></i></a>
     then click the <span class="has-text-weight-bold">New Application</span> button.
   </p>
@@ -117,8 +110,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Give your application a name. It can be anything that Discord allows.
-    For the guide, I called it <span class="has-text-weight-bold">zombox-demo</span>.
+    Give your application a name. For the guide, I called it <span class="has-text-weight-bold">zombox-demo</span>.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/08_name_application.png" alt="Name New App" loading="lazy" />
@@ -138,7 +130,6 @@
   <p><span class="step-title"></span>
     In <span class="has-text-weight-bold">SETTINGS</span> on the left panel,
     select the <span class="has-text-weight-bold">Bot</span> section.
-    It should look like the screenshot below.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/12_fresh_bot.png" alt="Fresh Bot" loading="lazy" />
@@ -165,9 +156,9 @@
   <p><span class="step-title"></span>
     With the new bot created, it&#39;s time to invite the bot to your Discord server.
     In the <span class="has-text-weight-bold">SETTINGS</span> on the left panel,
-    select the <span class="has-text-weight-bold">OAuth2</span> section.
-    Then select the <span class="has-text-weight-bold">URL Generator</span> under that.
-    Now on the right panel, in <span class="has-text-weight-bold">SCOPES</span>,
+    select the <span class="has-text-weight-bold">OAuth2</span> section, then
+    select the <span class="has-text-weight-bold">URL Generator</span> under that.
+    Now on the right panel in <span class="has-text-weight-bold">SCOPES</span>,
     check the <span class="has-text-weight-bold">bot</span> checkbox.
   </p>
   <figure class="image max-1024">
@@ -177,8 +168,8 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Scroll down to <span class="has-text-weight-bold">BOT PERMISSIONS</span>.
-    Then check all the checkboxes as shown in the screenshot below.
+    Scroll down to <span class="has-text-weight-bold">BOT PERMISSIONS</span>,
+    then check all the checkboxes as shown in the screenshot below.
     Now click the <span class="has-text-weight-bold">Copy</span> button
     to copy the generated invite URL.
   </p>
@@ -198,8 +189,8 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Choose your Discord server from the <span class="has-text-weight-bold">ADD TO SERVER</span> dropdown list.
-    Then click the <span class="has-text-weight-bold">Continue</span> button.
+    Choose your Discord server from the <span class="has-text-weight-bold">ADD TO SERVER</span> dropdown list,
+    then click the <span class="has-text-weight-bold">Continue</span> button.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/17_bot_invite_choose_server.png" alt="Choose Server for Bot" loading="lazy" />
@@ -228,7 +219,7 @@
   <p><span class="step-title"></span>
     Now go to the Discord server browser tab. You should now see the bot as a member on the right panel.
     It will be offline, that is expected. If you do not see the member panel on the right,
-    hit the people button. It&#39;s just to the left of Search.
+    click the people button. It&#39;s just to the left of Search.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/20_bot_invite_fresh.png" alt="Bot Invited" loading="lazy" />
@@ -237,7 +228,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Before starting up the bot, it is recommended that you enable the developer features in Discord.
+    Before starting the bot, it&#39;s recommended that you enable the developer features in Discord.
     This will allow you to see the channel IDs. If already enabled or you don&#39;t want to do this then
     skip to the <a href="#getBotToken" use:scrollto={'#getBotToken'}>bot login token</a> step.
   </p>
@@ -332,8 +323,8 @@
 <div class="content">
   <p><span class="step-title"></span>
     Go to the Discord server browser tab again. You should now see the bot online on the right panel.
-    Congratulations making it this far! Note that the Discord bot config and controls can be found on the
-    home page of this webapp. No need to come back here to make config changes or stop &amp; start the bot.
+    Congratulations making it this far! Note that the Discord bot configuration and controls can be found
+    on the home page of this webapp. No need to come back here to make changes or stop &amp; start the bot.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/29_bot_logged_in.png" alt="Bot Logged In" loading="lazy" />
@@ -342,7 +333,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now it&#39;s time to try out the bot. The bot will work from any channel it has access to.
+    Now try out the bot, it will work from any channel it has access to.
     First try the help command as shown below. The bot should reply with available commands.
   </p>
   <CodeBlock>!help</CodeBlock>
@@ -396,7 +387,7 @@
 <div class="content">
   <p><span class="step-title"></span>
     Enter a role name of <span class="has-text-weight-bold">pzadmin</span> as specified
-    in the <span class="has-text-weight-bold">Admin Roles</span> in the bot config.
+    in the <span class="has-text-weight-bold">Admin Roles</span> in the bot configuration.
     Now <span class="has-text-weight-bold">Save Changes</span>
     then select the <span class="has-text-weight-bold">Manage Members</span> tab.
   </p>
@@ -416,10 +407,8 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Add yourself and any other members on your Discord server that you want access to manage
-    your game servers. Then click <span class="has-text-weight-bold">Add</span> button.
-    Optionally you can select the <span class="has-text-weight-bold">Permissions</span> tab
-    and make changes as you want. When done click the <span class="has-text-weight-bold">ESC</span>
+    Add yourself and any other members on your Discord server that you want to grant access to manage servers.
+    Click <span class="has-text-weight-bold">Add</span> button then the <span class="has-text-weight-bold">ESC</span>
     button at the top right to close Settings.
   </p>
   <figure class="image max-1024">
@@ -430,19 +419,17 @@
 <div class="content">
   <p><span class="step-title"></span>
     Now try creating an instance again.
-    For this guide the instance is called <span class="has-text-weight-bold">myserver</span>.
+    For the guide the instance is called <span class="has-text-weight-bold">myserver</span>.
     The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
     The second value is <span class="has-text-weight-bold">projectzomboid</span>.
-    This is the module, which is a supported game server. In this case, Project Zomboid.
-    So this instance will be for a Project Zomboid server.
+    This is the module, which is a supported game server. So this instance will be for a Project Zomboid server.
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
     <img src="/assets/guides/discord/38_create_instance_success.png" alt="Create Instances Success" loading="lazy" />
   </figure>
   <p>
-    After creation, you can try the instances command again to see the new instance.
-    The arrow will mark the current selected instance.
+    After creation, you can try the instances command again. The arrow will mark the current selected instance.
   </p>
   <CodeBlock>!instances</CodeBlock>
   <figure class="image max-800">

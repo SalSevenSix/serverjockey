@@ -42,13 +42,9 @@
   </div>
   <div class="column is-four-fifths content">
     <p>
-      This guide will show you how to setup the Discord bot. You can use the bot on Discord
-      to manage your servers as an alternative to this webapp. Most features are supported,
-      with a few extra unique features as well.
-    </p>
-    <p>
-      The instructions are detailed. If you are unfamiliar with Discord, the guide also includes instructions
-      on where to register a Discord account and how to start a new Discord server if needed.
+      This guide will show you how to setup the Discord bot which can be used to manage your servers as an
+      alternative to this webapp. The instructions are detailed. If you are unfamiliar with Discord, the guide
+      includes instructions on how to register a new Discord account and create a new Discord server if needed.
     </p>
   </div>
 </div>
@@ -62,7 +58,7 @@
     <p>
       This guide will show you how to use the Discord bot to create, configure and start
       a Project Zomboid server as an example. The same process can be used on other supported
-      game servers too. Please make sure the bot is setup and working first!
+      game servers too. Please ensure the bot is setup and working first!
     </p>
   </div>
 </div>
@@ -85,7 +81,7 @@
         browser extension for Google Chrome and Microsoft Edge
       {/if}
       that can be used to manage mods for Project Zomboid servers.
-      It allows you to browse the Steam Workshop to add and remove mods using the workshop pages.
+      It allows you to add and remove mods using Steam Workshop pages.
     </p>
   </div>
 </div>
