@@ -11,11 +11,8 @@ from core.http import httpabc, httpcnt, httpsubs
 
 class LoginHandler(httpabc.PostHandler):
 
-    def __init__(self, secret: str):
-        self._secret = secret
-
     def handle_post(self, resource, data):
-        return self._secret
+        return httpcnt.LoginResponse()
 
 
 class MessengerHandler(httpabc.PostHandler):

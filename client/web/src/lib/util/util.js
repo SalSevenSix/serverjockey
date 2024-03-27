@@ -1,9 +1,5 @@
-
-const textExtensions = ['txt', 'text', 'log'];
-const stampExtRegex = /^[0-9_-]+$/;
-
-export const browserName = getBrowserName();
 export const noStorage = typeof(Storage) === 'undefined';
+export const browserName = getBrowserName();
 
 function getBrowserName() {
   const ua = window.navigator.userAgent;
@@ -16,6 +12,9 @@ function getBrowserName() {
   return null;
 }
 
+const textExtensions = ['txt', 'text', 'log'];
+const stampExtRegex = /^[0-9_-]+$/;
+
 export function guessTextFile(filename) {
     const parts = filename.split('.');
     if (parts.length < 2) return false;
@@ -23,11 +22,10 @@ export function guessTextFile(filename) {
     if (textExtensions.includes(extension)) return true;
     const prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
     if (!prextion) return false;
-    if (textExtensions.includes(prextion)) {
-      if (stampExtRegex.test(extension)) return true;
-      if (extension.startsWith('prev')) return true;
-      if (extension.startsWith('back')) return true;
-    }
+    if (!textExtensions.includes(prextion)) return false;
+    if (stampExtRegex.test(extension)) return true;
+    if (extension.startsWith('prev')) return true;
+    if (extension.startsWith('back')) return true;
     return false;
 }
 

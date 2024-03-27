@@ -17,9 +17,10 @@ class Statics:
         resource = await self._loader.load(request.path)
         if resource is None:
             raise err.HTTPNotFound
-        response = web.Response()
-        response.headers.add(httpcnt.CONTENT_TYPE, resource.content_type().content_type())
-        response.headers.add(httpcnt.CACHE_CONTROL, 'max-age=2592000')  # 30 days
+        response, content_type = web.Response(), resource.content_type()
+        response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
+        cache_control = 'private, max-age=3600' if content_type.is_text_type() else 'public, max-age=2592000'
+        response.headers.add(httpcnt.CACHE_CONTROL, cache_control)
         if httpcnt.HeadersTool(request).accepts_encoding(httpcnt.GZIP) and await resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
             body = resource.compressed()

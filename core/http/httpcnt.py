@@ -20,7 +20,7 @@ CONTENT_ENCODING = 'Content-Encoding'
 GZIP = 'gzip'
 CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'
-CACHE_CONTROL_NO_CACHE = 'no-cache'
+CACHE_CONTROL_NO_STORE = 'no-store'
 ACCEPT_ENCODING = 'Accept-Encoding'
 ALLOW = 'Allow'
 ACCESS_CONTROL_ALLOW_METHODS = 'Access-Control-Allow-Methods'
@@ -41,6 +41,12 @@ def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):
 
 def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
     return util.get(_SECURE, data, False) is True
+
+
+class LoginResponse:
+
+    def __init__(self):
+        pass
 
 
 class ContentTypeImpl(httpabc.ContentType):
@@ -99,6 +105,9 @@ class SecurityService:
     def __init__(self, secret: str):
         self._secret = secret
         self._failures = {}
+
+    def secret(self) -> str:
+        return self._secret
 
     def check(self, request: aiohttp.abc.Request) -> bool:
         remote, now = request.remote, time.time()

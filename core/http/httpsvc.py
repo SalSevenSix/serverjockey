@@ -121,10 +121,10 @@ class _RequestHandler:
         if isinstance(body, Exception):
             raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
-        response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_CACHE)
+        response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_STORE)
         self._add_allow_origin(response)
-        if body == self._context.config('secret'):
-            response.set_cookie('secret', body, max_age=86400, httponly=True, samesite='Lax')
+        if isinstance(body, httpcnt.LoginResponse):
+            response.set_cookie('secret', self._security.secret(), max_age=86400, httponly=True, samesite='Lax')
             body = httpabc.ResponseBody.NO_CONTENT
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)

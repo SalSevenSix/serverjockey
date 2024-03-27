@@ -35,7 +35,7 @@ class SystemService:
         self._memprofsvc.resources(resource)
         steamapi.resources(resource)
         r = httprsc.ResourceBuilder(resource)
-        r.put('login', httpext.LoginHandler(self._context.config('secret')))
+        r.put('login', httpext.LoginHandler())
         r.put('modules', httpext.StaticHandler(self._modules.names()))
         r.put('ssl', httpssl.SslHandler(self._context))
         r.psh('system')
