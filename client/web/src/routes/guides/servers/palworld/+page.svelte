@@ -33,6 +33,7 @@
 <WebappConfigRun />
 <WebappAdditionalInformation />
 <WebappPortForward serverName="Palworld" configName="Launch Options" portsList={portsList}>
+&quot;_comment_server_upnp&quot;: &quot;Try to automatically redirect server port on home network using UPnP.&quot;,
 &quot;server_upnp&quot;: false,
 &quot;_comment_query_upnp&quot;: &quot;Try to automatically redirect query port on home network using UPnP.&quot;,
 &quot;query_upnp&quot;: false,
