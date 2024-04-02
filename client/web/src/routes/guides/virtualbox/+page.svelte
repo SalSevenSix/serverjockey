@@ -1,5 +1,7 @@
 <script>
+  import { scrollto } from 'svelte-scrollto-next';
   import BackToTop from '$lib/widget/BackToTop.svelte';
+  import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
 
 
@@ -12,47 +14,102 @@
     <p>
       <a class="notranslate" href="https://www.virtualbox.org" target="_blank">
         VirtualBox <i class="fa fa-up-right-from-square"></i></a>
-      is a free virtualization system for enterprise and personal use. It allows you to run a virtual machine on
-      a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine image).
-      The appliance is running Ubuntu Server with ServerJockey pre-installed and ready to use.
+      is a free virtualization system for enterprise and personal use. It allows you to run a virtual machine
+      on a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine image).
+      The appliance is running Ubuntu Server OS with ServerJockey pre-installed and ready to use.
     </p>
     <p>
-      This guide provides some basic information on setting memory and processor allocations.
+      This guide provides information on how to configure, use and care for the appliance.
       For comprehensive information about VirtualBox, consult the
       <a href="https://www.virtualbox.org/manual/UserManual.html" target="_blank">
         online manual <i class="fa fa-up-right-from-square"></i></a>.
     </p>
+    <ul>
+      <li><a href="#vbsettings" use:scrollto={'#vbsettings'}>Memory and Processor Settings</a>
+      <li><a href="#sshutdown" use:scrollto={'#sshutdown'}>Safe Shutdown</a>
+      <li><a href="#howtologin" use:scrollto={'#howtologin'}>Login to OS</a>
+      <li><a href="#changepwd" use:scrollto={'#changepwd'}>Change Password</a>
+      <li><a href="#updateos" use:scrollto={'#updateos'}>Update OS</a>
+      <li><a href="#usessh" use:scrollto={'#usessh'}>Remote access using SSH</a>
+    </ul>
   </div>
 </div>
 
 <div class="content">
-  <h3 class="title is-4">Settings</h3>
+  <h3 id="vbsettings" class="title is-4">Memory and Processor Settings</h3>
   <p>
-    You can configure how much of your real machine Memory and Processor the virtual machine is allowed to use.
+    You can configure how much of your real machine Memory and Processor the appliance is allowed to use.
     To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
   </p>
   <figure class="image max-800">
     <img src="/assets/guides/virtualbox/main.png" alt="VirtualBox Settings" />
   </figure>
-  <h3 class="title is-4">Memory Allocation</h3>
   <p>
-    Select the <span class="has-text-weight-bold">System</span> section on the left panel,
-    then the <span class="has-text-weight-bold">Motherboard</span> tab.
-    The ServerJockey appliance has 10Gb of memory allocated. You can change this value as needed.
-    It should less than how much free memory your real machine has, but enough to support the game server
-    you are running with 2Gb spare.
+    Select the <span class="has-text-weight-bold">System</span> section on the left panel, then the
+    <span class="has-text-weight-bold">Motherboard</span> tab. The ServerJockey appliance has 10Gb of memory allocated.
+    You can change this value as needed. It should less than how much free memory your real machine has,
+    but enough to support the game server you are running with 2Gb spare.
   </p>
   <figure class="image max-800">
     <img src="/assets/guides/virtualbox/sysmem.png" alt="VirtualBox Memory" loading="lazy" />
   </figure>
-  <h3 class="title is-4">Processor Allocation</h3>
   <p>
-    On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much processor is allocated.
-    You can specify a number of cores as well as an execution cap.
+    On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much
+    processor is allocated. You can specify a number of cores as well as an execution cap.
+    Click <span class="has-text-weight-bold">OK</span> to save changes.
   </p>
   <figure class="image max-800">
     <img src="/assets/guides/virtualbox/syscpu.png" alt="VirtualBox Processor" loading="lazy" />
   </figure>
+
+  <h3 id="sshutdown" class="title is-4">Safe Shutdown</h3>
+  <p>
+    To safely shutdown the appliance use the <span class="has-text-weight-bold">ACPI Shutdown</span>
+    option under <span class="has-text-weight-bold">Machine</span> in the menu.
+  </p>
+  <figure class="image max-400">
+    <img src="/assets/guides/virtualbox/shutdown.png" alt="Safe Shutdown" loading="lazy" />
+  </figure>
+
+  <h3 id="howtologin" class="title is-4">Login to OS</h3>
+  <p>
+    The appliance is running Ubuntu Server OS. You can login to the command line console if needed.
+    Hit the <span class="has-text-weight-bold">Enter</span> key to show the login prompt.
+    Login with user <span class="is-family-monospace">zombox</span> and password
+    <span class="is-family-monospace">zombox</span>.
+    Remote access is disabled so this default password is acceptable for initial use.
+  </p>
+  <figure class="image max-800">
+    <img src="/assets/guides/virtualbox/login.png" alt="Console Login prompt" loading="lazy" />
+  </figure>
+
+  <h3 id="changepwd" class="title is-4">Change Password</h3>
+  <p>
+    It&#39;s recommended you change the default password, <span class="is-italic">especially</span>
+    when enabling remote access. Use the following command to change the password.
+  </p>
+  <CodeBlock>passwd</CodeBlock>
+  <figure class="image max-400">
+    <img src="/assets/guides/virtualbox/changepwd.png" alt="Change Password" loading="lazy" />
+  </figure>
+
+  <h3 id="updateos" class="title is-4">Update OS</h3>
+  <p>
+    It&#39;s recommended you periodically update the Ubuntu Server OS and restart the appliance.
+    Use the following commands to do this.
+  </p>
+  <CodeBlock>sudo apt update</CodeBlock>
+  <CodeBlock>sudo apt upgrade</CodeBlock>
+  <CodeBlock>sudo reboot</CodeBlock>
+
+  <h3 id="usessh" class="title is-4 pt-2">Remote access using SSH</h3>
+  <p>
+    By default remote access using SSH is disabled for security reasons. If you wish to login remotely
+    you can turn on SSH with the command shown below. If you want to login remotely from a Windows machine,
+    <a href="https://putty.org" target="_blank">PuTTY <i class="fa fa-up-right-from-square"></i></a>
+    is a popular SSH client.
+  </p>
+  <CodeBlock>sudo systemctl start ssh</CodeBlock>
 </div>
 
 <BackToTop />
