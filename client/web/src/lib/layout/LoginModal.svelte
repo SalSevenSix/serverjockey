@@ -35,7 +35,7 @@
         closeModal();
       })
       .catch(function(error) {
-        notifyError('Wrong. Please wait 5 seconds before trying again.');
+        notifyError('Wrong. Please wait 5 seconds before trying again. Note that token is reset every system restart.');
       });
   }
 

@@ -94,7 +94,7 @@
   <div class="column is-four-fifths content">
     <p>
       ServerJockey is available pre-installed as a VirtualBox Appliance. If you are using this option,
-      this guide provides information on how to configure important VirtualBox settings.
+      this guide provides information on how to configure, use and care for the appliance.
     </p>
   </div>
 </div>

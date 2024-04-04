@@ -32,7 +32,7 @@
 
   onMount(function() {
     if (!noStorage) {
-      let storedTheme = localStorage.getItem('sjgmsTheme');
+      const storedTheme = localStorage.getItem('sjgmsTheme');
       theme = storedTheme ? storedTheme : 'light';
     }
     setTheme(theme);

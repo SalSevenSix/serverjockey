@@ -19,7 +19,7 @@
     if (!noStorage) { localStorage.setItem(storageKey, 'true'); }
     new google.translate.TranslateElement({
       pageLanguage: 'en',
-      includedLanguages: 'en,es,fr,it,de,ru,af,pl,pt,sv,fi,no,da,nl,el,ja,ko,zh-CN,vi,th,ar,iw',
+      includedLanguages: 'es,fr,it,de,ru,af,pl,pt,sv,fi,no,da,nl,el,ja,ko,zh-CN,vi,th,ar,iw',
       layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
       'google_translate_element');
   }
