@@ -1,13 +1,18 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { generateId, sleep } from '$lib/util/util';
 
 export const notifications = writable([]);
 
 
 function notify(level, message) {
+  const now = Date.now();
+  if (get(notifications).reduce(function(result, value) {
+    if (result) return true;
+    return message === value['message'] && now - value['at'] < 500;
+  }, false)) return;
   const identity = generateId();
   notifications.update(function(current) {
-    return [{ 'id': identity, 'level': level, 'message': message }, ...current];
+    return [{ 'id': identity, 'at': now, 'level': level, 'message': message }, ...current];
   });
   sleep(8000).then(function() {
     removeNotification(identity);

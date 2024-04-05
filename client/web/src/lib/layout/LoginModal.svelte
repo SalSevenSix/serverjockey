@@ -5,6 +5,13 @@
   import { notifyError } from '$lib/util/notifications';
   import { securityToken } from '$lib/util/sjgmsapi';
 
+  class LoginFailed extends Error {
+    constructor() {
+      super('Wrong. Please wait 5 seconds before trying again. Note that token is reset every system restart.');
+      this.name = 'LoginFailed';
+    }
+  }
+
   const storageKey = 'sjgmsSecurityToken';
 
   export let isOpen;
@@ -22,6 +29,7 @@
     if (cannotLogin) return;
     fetch('/login', { method: 'post', headers: { 'X-Secret': token } })
       .then(function(response) {
+        if (response.status === 401) throw new LoginFailed();
         if (!response.ok) throw new Error('Status: ' + response.status);
         securityToken.set(token);
         if (!noStorage) {
@@ -35,7 +43,7 @@
         closeModal();
       })
       .catch(function(error) {
-        notifyError('Wrong. Please wait 5 seconds before trying again. Note that token is reset every system restart.');
+        notifyError(error.name === 'LoginFailed' ? error.message : 'Login error. Please check connection and server.');
       });
   }
 

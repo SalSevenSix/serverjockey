@@ -2,6 +2,9 @@
   import { browserName } from '$lib/util/util';
   import GuideBooks from '$lib/widget/GuideBooks.svelte';
 
+  const isChrome = browserName === 'Chrome';
+  const isEdge = browserName === 'Edge';
+
   const games = [
     { module: 'projectzomboid', serverName: 'Project Zomboid' },
     { module: 'factorio', serverName: 'Factorio' },
@@ -65,16 +68,16 @@
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/extension">
-      <i class="fa-brands {browserName === 'Edge' ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
+      <i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
       Browser Extension</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
       ServerJockey has a
-      {#if browserName === 'Chrome'}
+      {#if isChrome}
         <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
            target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Google Chrome
-      {:else if browserName === 'Edge'}
+      {:else if isEdge}
         <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
            target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Microsoft Edge
       {:else}
