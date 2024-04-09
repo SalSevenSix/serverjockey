@@ -71,6 +71,10 @@ figure.max-300 img, figure.max-300 svg {
   max-width: 300px;
 }
 
+figure.max-200 img, figure.max-200 svg {
+  max-width: 200px;
+}
+
 .step-title {
   font-weight: bold;
   font-size: 1.2em;
@@ -147,8 +151,4 @@ table.is-thinner {
 
 svg.rubiks, svg.navbar-rubiks {
   color: #FFFDF8;
-}
-
-svg.guidebooks {
-  fill: black;
 }

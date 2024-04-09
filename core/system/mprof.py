@@ -28,6 +28,7 @@ class _ClassTrackerHandler(httpabc.GetHandler):
         self._classtracker = classtracker.ClassTracker(self._text)
         self._classtracker.track_class(msgabc.Message)
         self._classtracker.track_class(msgsvc.TaskMailer)
+        self._classtracker.track_class(msgext.SingleCatcher)
         self._classtracker.track_class(msgext.MultiCatcher)
 
     def handle_get(self, resource, data):

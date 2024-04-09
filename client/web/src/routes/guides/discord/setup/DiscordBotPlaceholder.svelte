@@ -1,4 +1,3 @@
-
 <div class="columns">
   <div class="column is-one-quarter content">
     <p class="has-text-centered">

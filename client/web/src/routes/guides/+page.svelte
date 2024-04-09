@@ -5,6 +5,7 @@
   const isChrome = browserName === 'Chrome';
   const isEdge = browserName === 'Edge';
 
+  // TODO pull this data from server
   const games = [
     { module: 'projectzomboid', serverName: 'Project Zomboid' },
     { module: 'factorio', serverName: 'Factorio' },
@@ -40,8 +41,7 @@
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/discord/setup">
-      <i class="fa-brands fa-discord fa-lg theme-black-white"></i>
-      Discord Bot Setup</a>
+      <i class="fa-brands fa-discord fa-lg theme-black-white"></i> Discord Bot Setup</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -54,8 +54,7 @@
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/discord/usage">
-      <i class="fa-brands fa-discord fa-lg theme-black-white"></i>
-      Discord Bot Usage</a>
+      <i class="fa-brands fa-discord fa-lg theme-black-white"></i> Discord Bot Usage</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -68,8 +67,7 @@
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href="/guides/extension">
-      <i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
-      Browser Extension</a>
+      <i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i> Browser Extension</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -91,13 +89,24 @@
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
     <a href="/guides/virtualbox">
-      <i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
-      VirtualBox</a>
+      <i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp; VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
       ServerJockey is available pre-installed as a VirtualBox Appliance. If you are using this option,
       this guide provides information on how to configure, use and care for the appliance.
+    </p>
+  </div>
+</div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href="/guides/cli">
+      <i class="fa fa-terminal fa-lg theme-black-white"></i>&nbsp; Command Line Interface</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      ServerJockey has a Command Line Interface (CLI), which is useful for automating server management.
+      This guide will show how to control servers and perform administrative tasks using the CLI.
     </p>
   </div>
 </div>

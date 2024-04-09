@@ -102,6 +102,12 @@ class CommandProcessor:
             logging.info(self._out + line)
         return True
 
+    def _world_meta(self) -> bool:
+        result = self._connection.get(self._instance_path('/deployment/world-meta'))
+        for line in util.repr_dict(result).strip().split('\n'):
+            logging.info(self._out + line)
+        return True
+
     def _install_runtime(self, argument: str | None) -> bool:
         body = {'wipe': False, 'validate': True}
         if argument:
@@ -210,7 +216,7 @@ class CommandProcessor:
         return True
 
     def _server(self, argument: str | None) -> bool:
-        if argument:
+        if argument and argument != 'status':
             self._connection.post(self._instance_path('/server/' + argument))
             return True
         result = self._connection.get(self._instance_path('/server'))

@@ -10,7 +10,10 @@ _GET, _POST = 'GET', 'POST'
 class HttpConnection:
 
     def __init__(self, config: dict):
-        url, self._out, self._headers = config['url'], config['out'], {'X-Secret': config['token']}
+        self._headers_get = {'X-Secret': config['token']}
+        self._headers_post = self._headers_get.copy()
+        self._headers_post.update({'Content-Type': 'application/json', 'Connection': 'close'})
+        url, self._out = config['url'], config['out']
         if url.startswith('https'):
             # noinspection PyProtectedMember
             self._connection = client.HTTPSConnection(url[8:], context=ssl._create_unverified_context())
@@ -18,7 +21,7 @@ class HttpConnection:
             self._connection = client.HTTPConnection(url[7:])
 
     def get(self, path: str) -> str | list | dict | None:
-        self._connection.request(_GET, path, headers=self._headers)
+        self._connection.request(_GET, path, headers=self._headers_get)
         response = self._connection.getresponse()
         try:
             if response.status == 204:
@@ -33,10 +36,8 @@ class HttpConnection:
             response.close()
 
     def post(self, path: str, body: dict = None) -> str | dict | None:
-        headers = self._headers.copy()
-        headers.update({'Content-Type': 'application/json'})
         payload = json.dumps(body) if body else None
-        self._connection.request(_POST, path, headers=headers, body=payload)
+        self._connection.request(_POST, path, headers=self._headers_post, body=payload)
         response = self._connection.getresponse()
         try:
             if response.status == 204:
@@ -53,7 +54,7 @@ class HttpConnection:
     def drain(self, url_dict: dict):
         path = '/' + '/'.join(url_dict['url'].split('/')[3:])
         while True:
-            self._connection.request(_GET, path, headers=self._headers)
+            self._connection.request(_GET, path, headers=self._headers_get)
             response = self._connection.getresponse()
             try:
                 if response.status == 200:

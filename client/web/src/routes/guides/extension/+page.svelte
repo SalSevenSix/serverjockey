@@ -10,7 +10,7 @@
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
     <figure class="image mt-1 max-300">
-      <img src="/assets/brands/browser_extension.svg" alt="Browser Extension logo" />
+      <img src="/assets/guides/extension/browser_extension.svg" alt="Browser Extension logo" />
     </figure>
   </div>
   <div class="column is-three-quarters content">

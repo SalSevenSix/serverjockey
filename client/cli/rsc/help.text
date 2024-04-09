@@ -31,6 +31,7 @@ commands:
                               | <version> is optional
   runtime-meta      | Show meta information about the installed runtime
                     | Error will be shown if no runtime is installed
+  world-meta        | Show meta information about the world (game save)
   server            | Show the server status
   server:start      | Start the server
   server:restart    | Stop then immediately start the server
@@ -48,7 +49,7 @@ commands:
   wipe-runtime      | Delete the currently installed game server
   wipe-world-all    | Delete all game world data
   wipe-world-save   | Delete only game save, keep config and logs
-                    | This command may not be supported on all modules
+                    | Not all modules support this command
   log-tail:<lines>  | Get last 100 lines from log file,
                     | or <lines> if provided, up to 100
   log-tail-f        | Get last 10 lines from log then follow additional lines

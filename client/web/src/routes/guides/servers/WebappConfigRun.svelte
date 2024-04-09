@@ -1,6 +1,6 @@
 <div class="content">
   <p><span class="step-title"></span>
-    With the game server now fully installed, you can now view and edit the configuration files. Expand the
+    With the game server fully installed now, you can view and edit the configuration files. Expand the
     <span class="has-text-weight-bold">Configuration</span> section. Edit and save the configuration as desired.
     Make sure changes are saved before closing the section, otherwise the changes will be lost!
   </p>
