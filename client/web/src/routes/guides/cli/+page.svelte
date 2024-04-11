@@ -50,7 +50,7 @@
   <p>
     Commands are operations that interact with a running ServerJockey service to manage game servers.
     A list of Commands can be run using the <span class="is-family-monospace notranslate">-c</span> option.
-    The example below will switch to the <span class="is-family-monospace notranslate">myserver</span> instance,
+    The example below will select the <span class="is-family-monospace notranslate">myserver</span> instance,
     then start the server.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -c use:myserver server:start</CodeBlock>
@@ -62,8 +62,8 @@
     <span class="is-family-monospace notranslate">cron</span>. The process has following commands...
   </p>
   <ol>
-    <li>Switch to the instance called <span class="is-family-monospace notranslate">myserver</span>
-    <li>Don&#39;t process any more commands and exit if the server is not running
+    <li>Select the instance called <span class="is-family-monospace notranslate">myserver</span>
+    <li>If the server is not running, then stop process commands and exit
     <li>Broadcast a 5 minute warning message to all players, then wait 4 minutes
     <li>Broadcast a 1 minute warning message to all players, then wait 1 minute
     <li>Stop the server then wait 10 seconds for that to happen
@@ -78,6 +78,5 @@
   backup-world:168 \
   server:start</CodeBlock>
 </div>
-
 
 <BackToTop />

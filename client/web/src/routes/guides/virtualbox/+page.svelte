@@ -30,7 +30,8 @@
       <li><a href="#howtologin" use:scrollto={'#howtologin'}>Login to OS</a>
       <li><a href="#changepwd" use:scrollto={'#changepwd'}>Change Password</a>
       <li><a href="#updateos" use:scrollto={'#updateos'}>Update OS</a>
-      <li><a href="#usessh" use:scrollto={'#usessh'}>Remote access using SSH</a>
+      <li><a href="#enablessh" use:scrollto={'#enablessh'}>Remote access using SSH</a>
+      <li><a href="#enablesamba" use:scrollto={'#enablesamba'}>Remote access using File Sharing</a>
     </ul>
   </div>
 </div>
@@ -102,7 +103,7 @@
   <CodeBlock>sudo apt upgrade</CodeBlock>
   <CodeBlock>sudo reboot</CodeBlock>
 
-  <h3 id="usessh" class="title is-4 pt-2">Remote access using SSH</h3>
+  <h3 id="enablessh" class="title is-4 pt-2">Remote access using SSH</h3>
   <p>
     By default remote access using SSH is disabled for security reasons. If you wish to login remotely
     you can turn on SSH with the command shown below. If you want to login remotely from a Windows machine,
@@ -110,6 +111,31 @@
     is a popular SSH client.
   </p>
   <CodeBlock>sudo systemctl start ssh</CodeBlock>
+  <p>
+    Enable the SSH service to automatically start SSH when the appliance starts.
+  </p>
+  <CodeBlock>sudo systemctl enable ssh</CodeBlock>
+
+  <h3 id="enablesamba" class="title is-4 pt-2">Remote access using File Sharing</h3>
+  <p>
+    By default File Sharing is disabled for security reasons. If you wish to remotely access the filesystem
+    with sharing, you can turn on Samba with the command shown below.
+  </p>
+  <CodeBlock>sudo systemctl start smbd</CodeBlock>
+  <p>
+    Enable the Samba service to automatically start Samba when the appliance starts.
+  </p>
+  <CodeBlock>sudo systemctl enable smbd</CodeBlock>
+  <p>
+    On Windows, you can find the appliance in the Network section of Windows File Explorer, but don&#39;t expect
+    windows to discover it. Instead, enter the <span class="has-text-weight-bold">Local IP</span> of the appliance
+    starting with two backslashes in the address bar then hit <span class="has-text-weight-bold">Enter</span>.
+    A folder called <span class="has-text-weight-bold">zombox</span> should be visible to browse and mount as a drive.
+    <br /><span class="has-text-weight-bold">e.g.</span>&nbsp; <span class="is-family-monospace">\\192.168.1.6</span>
+  </p>
+  <figure class="image max-800">
+    <img src="/assets/guides/virtualbox/samba.png" alt="Samba sharing" loading="lazy" />
+  </figure>
 </div>
 
 <BackToTop />

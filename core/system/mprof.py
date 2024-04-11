@@ -1,5 +1,5 @@
 import io
-from pympler import classtracker
+from pympler import muppy, classtracker
 from core.msg import msgabc, msgsvc, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc
@@ -18,7 +18,22 @@ class MemoryProfilingService:
             return
         r = httprsc.ResourceBuilder(resource)
         r.psh('mprof')
-        r.put('classes', _ClassTrackerHandler())
+        r.put('all', _AllObjectsHandler())
+        # r.put('classes', _ClassTrackerHandler())
+
+
+class _AllObjectsHandler(httpabc.GetHandler):
+
+    def __init__(self):
+        pass
+
+    def handle_get(self, resource, data):
+        all_objects = muppy.get_objects()
+        result = ['TOTAL: ' + str(len(all_objects))]
+        for obj in all_objects:
+            if isinstance(obj, msgext.MultiCatcher):
+                result.append(str(obj))
+        return '\n'.join(result) + '\n'
 
 
 class _ClassTrackerHandler(httpabc.GetHandler):
@@ -28,7 +43,6 @@ class _ClassTrackerHandler(httpabc.GetHandler):
         self._classtracker = classtracker.ClassTracker(self._text)
         self._classtracker.track_class(msgabc.Message)
         self._classtracker.track_class(msgsvc.TaskMailer)
-        self._classtracker.track_class(msgext.SingleCatcher)
         self._classtracker.track_class(msgext.MultiCatcher)
 
     def handle_get(self, resource, data):
