@@ -48,6 +48,11 @@ class CommandProcessor:
                 raise Exception('_instance_path() was unable to find instance to use.')
         return '/instances/' + self._instance + command_path
 
+    def _mprof(self) -> bool:
+        for line in self._connection.get('/mprof').split('\n'):
+            logging.info(self._out + line)
+        return True
+
     def _modules(self) -> bool:
         for module in self._connection.get('/modules'):
             logging.info(self._out + module)

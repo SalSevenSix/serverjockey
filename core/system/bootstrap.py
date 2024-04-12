@@ -34,8 +34,6 @@ def _argument_parser() -> argparse.ArgumentParser:
                    help='Debug mode')
     p.add_argument('--trace', action='store_true',
                    help='Debug mode with detailed logging')
-    p.add_argument('--mprof', action='store_true',
-                   help='Enable memory profiling features')
     p.add_argument('--showtoken', action='store_true',
                    help='Print the login token to stdout')
     p.add_argument('--host', type=str,
@@ -68,7 +66,7 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     dbfile = util.full_path(home, config.dbfile)
     logfile = util.full_path(home, config.logfile)
     return contextsvc.Context(
-        debug=config.debug, trace=config.trace, mprof=config.mprof, home=home, tempdir=tempdir,
+        debug=config.debug, trace=config.trace, home=home, tempdir=tempdir,
         stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=config.showtoken,
         scheme=httpssl.sync_get_scheme(home), env=os.environ.copy(), python=sys.executable,
         clientfile=clientfile, dbfile=dbfile, logfile=logfile, noupnp=config.noupnp,

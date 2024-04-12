@@ -41,7 +41,7 @@
     Tasks are system admin operations that usually require root privilages
     (i.e. <span class="is-family-monospace notranslate">sudo</span>).
     Tasks are run using the <span class="is-family-monospace notranslate">-t</span> option.
-    The example below will upgrade the ServerJockey system with the latest version.
+    The example below will upgrade the ServerJockey system to the latest version.
   </p>
   <CodeBlock>sudo serverjockey_cmd.pyz -t upgrade</CodeBlock>
 </div>

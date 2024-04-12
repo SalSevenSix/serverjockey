@@ -1,56 +1,77 @@
-import io
-from pympler import muppy, classtracker
-from core.msg import msgabc, msgsvc, msgext
-from core.context import contextsvc
-from core.http import httpabc, httprsc
+import collections
+from pympler import muppy
+from core.http import httpabc, httpcnt
 
 # https://github.com/pympler/pympler
 # https://pympler.readthedocs.io/en/latest/
 
-
-class MemoryProfilingService:
-
-    def __init__(self, context: contextsvc.Context):
-        self._context = context
-
-    def resources(self, resource: httprsc.WebResource):
-        if not self._context.config('mprof'):
-            return
-        r = httprsc.ResourceBuilder(resource)
-        r.psh('mprof')
-        r.put('all', _AllObjectsHandler())
-        # r.put('classes', _ClassTrackerHandler())
+_BASIC_TYPES = ('int', 'float', 'str', 'dict', 'list')
 
 
-class _AllObjectsHandler(httpabc.GetHandler):
+class MemoryProfilingHandler(httpabc.GetHandler):
 
     def __init__(self):
-        pass
+        self._captures = collections.deque()
 
     def handle_get(self, resource, data):
-        all_objects = muppy.get_objects()
-        result = ['TOTAL: ' + str(len(all_objects))]
-        for obj in all_objects:
-            if isinstance(obj, msgext.MultiCatcher):
-                result.append(str(obj))
-        return '\n'.join(result) + '\n'
+        if not httpcnt.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        while len(self._captures) >= 26:
+            self._captures.pop()
+        result, entries, all_objects = [], [], muppy.get_objects()
+        capture = {'TOTAL': len(all_objects)}
+        for obj in filter(_filter_objects, all_objects):
+            classname = obj.__class__.__name__
+            if classname in capture:
+                capture[classname] += 1
+            else:
+                capture[classname] = 1
+        self._captures.appendleft(capture)
+        for classname in self._unique_classnames():
+            entry, pc, count = {'classname': None, 'count': 0, 'deltas': []}, 0, 0
+            for capture in self._captures:
+                pc, count = count, capture[classname] if classname in capture else 0
+                if entry['classname']:
+                    entry['deltas'].append(pc - count)
+                else:
+                    entry['classname'], entry['count'] = classname, count
+            entries.append(entry)
+        entries.sort(key=_sort_entries, reverse=True)
+        for entry in filter(_filter_entries, entries):
+            classname, count, deltas = entry['classname'], entry['count'], entry['deltas']
+            line, dsum = '', 0
+            for delta in deltas:
+                line += ',' + str(delta).rjust(4)
+                dsum += delta
+            result.append(classname.ljust(32) + ',' + str(count).rjust(7) + ',' + str(dsum).rjust(4) + line)
+        return 'CLASS'.ljust(32) + ',  COUNT,   ~,' \
+            + '  01,  02,  03,  04,  05,  06,  07,  08,  09,  10,' \
+            + '  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,' \
+            + '  21,  22,  23,  24,  25\n' + '\n'.join(result) + '\n'
+
+    def _unique_classnames(self) -> tuple:
+        result = set()
+        for capture in self._captures:
+            result.update(capture.keys())
+        return tuple(result)
 
 
-class _ClassTrackerHandler(httpabc.GetHandler):
+def _sort_entries(entry) -> int:
+    return entry['count']
 
-    def __init__(self):
-        self._text = io.StringIO()
-        self._classtracker = classtracker.ClassTracker(self._text)
-        self._classtracker.track_class(msgabc.Message)
-        self._classtracker.track_class(msgsvc.TaskMailer)
-        self._classtracker.track_class(msgext.MultiCatcher)
 
-    def handle_get(self, resource, data):
-        try:
-            self._classtracker.create_snapshot(compute_total=True)
-            self._classtracker.stats.print_summary()
-            return self._text.getvalue()
-        finally:
-            self._classtracker.snapshots = []
-            self._text.seek(0)
-            self._text.truncate(0)
+def _filter_objects(obj) -> bool:
+    if obj.__class__.__name__ in _BASIC_TYPES:
+        return True
+    modulename = obj.__class__.__module__
+    return modulename.startswith('core.') or modulename.startswith('servers.')
+
+
+def _filter_entries(entry) -> bool:
+    classname, deltas = entry['classname'], entry['deltas']
+    if classname == 'TOTAL' or len(deltas) == 0:
+        return True
+    for delta in deltas:
+        if delta != 0:
+            return True
+    return False
