@@ -62,7 +62,7 @@
   <div class="block is-flex is-flex-direction-row is-flex-wrap-nowrap">
     <div class="buttons mr-1">
       <button class="button is-dark disable-button" title="Disable translation (page will be reloaded)"
-              on:click={disableTranslation}><i class="fa fa-circle-xmark"></i></button>
+              on:click={disableTranslation}><i class="fa fa-xmark fa-lg"></i></button>
     </div>
     <div id="google_translate_element"></div>
   </div>

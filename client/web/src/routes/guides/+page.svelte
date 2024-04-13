@@ -40,8 +40,8 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord/setup">
-      <i class="fa-brands fa-discord fa-lg theme-black-white"></i> Discord Bot Setup</a>
+    <a href="/guides/discord/setup"><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+      Discord Bot Setup</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -53,8 +53,8 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord/usage">
-      <i class="fa-brands fa-discord fa-lg theme-black-white"></i> Discord Bot Usage</a>
+    <a href="/guides/discord/usage"><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+      Discord Bot Usage</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -66,8 +66,8 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/extension">
-      <i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i> Browser Extension</a>
+    <a href="/guides/extension"><i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
+      Browser Extension</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -88,8 +88,8 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
-    <a href="/guides/virtualbox">
-      <i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp; VirtualBox</a>
+    <a href="/guides/virtualbox"><i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
+      VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
@@ -100,8 +100,8 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/cli">
-      <i class="fa fa-terminal fa-lg theme-black-white"></i>&nbsp; Command Line Interface</a>
+    <a href="/guides/cli"><i class="fa fa-terminal fa-lg theme-black-white"></i>&nbsp;
+      Command Line Interface</a>
   </div>
   <div class="column is-four-fifths content">
     <p>

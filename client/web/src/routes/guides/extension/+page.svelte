@@ -110,8 +110,8 @@
       <i class="fa fa-up-right-from-square"></i></a> with features only available on Project Zomboid Workshop mod pages.
     To begin, navigate to a mod page on the workshop, then open the extension panel with the pinned button.
     When opening the extension panel for the first time, you will need to connect the extension to your
-    ServerJockey system. Enter the URL for the ServerJockey webapp and the login token,
-    then click <span class="has-text-weight-bold">Connect</span>.
+    ServerJockey system. Enter the URL for the ServerJockey webapp and the login token, then click
+    <span class="has-text-weight-bold notranslate">Connect</span>.
   </p>
   <figure class="image max-844">
     <img src="/assets/guides/extension/mod_britas_login.jpg" alt="Connect to ServerJockey" loading="lazy" />
@@ -123,8 +123,8 @@
     If needed, select the Project Zomboid instance using the dropdown.
     Note that the extension requires the instance to have a valid INI file.
     When on a Project Zomboid workshop mod page, you should see an
-    <span class="has-text-weight-bold">Add</span> button.
-    Click the button to add the workshop item.
+    <span class="has-text-weight-bold notranslate">Add</span>
+    button. Click the button to add the workshop item.
   </p>
   <figure class="image max-844">
     <img src="/assets/guides/extension/mod_britas_add.jpg" alt="Add the workshop item" loading="lazy" />
@@ -133,10 +133,12 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    After adding a workshop item, you will be given options to add, order and remove mods within the workshop item.
-    Mods will be shown under <span class="has-text-weight-bold">Available Mods</span>.
-    Click a down arrow button to add the mod to the bottom (first button) or top (second button)
-    of the <span class="has-text-weight-bold">Selected Mods</span> list.
+    After adding a workshop item, you will be given options to add,
+    order and remove mods within the workshop item. Mods will be shown under
+    <span class="has-text-weight-bold notranslate">Available Mods</span>.
+    Click a down arrow button to add the mod to the bottom (first button) or top (second button) of the
+    <span class="has-text-weight-bold notranslate">Selected Mods</span>
+    list.
   </p>
   <figure class="image max-844">
     <img src="/assets/guides/extension/mod_britas_available.jpg" alt="Available mods" loading="lazy" />
@@ -145,9 +147,10 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Mods in the <span class="has-text-weight-bold">Selected Mods</span> list
-    can be re-ordered using the chevron buttons, or be removed with the cross button.
-    Remember to click the <span class="has-text-weight-bold">Save</span>
+    Mods in the
+    <span class="has-text-weight-bold notranslate">Selected Mods</span>
+    list can be re-ordered using the chevron buttons, or be removed with the cross button. Remember to click the
+    <span class="has-text-weight-bold notranslate">Save</span>
     button to commit changes to the INI file of the selected instance.
     Note that the server will need to be restarted for these changes to take effect.
   </p>
@@ -159,8 +162,9 @@
 <div class="content">
   <p><span class="step-title"></span>
     Map mods are also supported. Another section will be shown with
-    <span class="has-text-weight-bold">Available Maps</span> and
-    <span class="has-text-weight-bold">Selected Maps</span>.
+    <span class="has-text-weight-bold notranslate">Available Maps</span>
+    and
+    <span class="has-text-weight-bold notranslate">Selected Maps</span>.
     These lists function the same as the mod lists. Note that the base map
     &nbsp;<span class="is-family-monospace notranslate">Muldraugh, KY</span>&nbsp;
     should always be at the bottom.

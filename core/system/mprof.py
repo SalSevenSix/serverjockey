@@ -5,7 +5,7 @@ from core.http import httpabc, httpcnt
 # https://github.com/pympler/pympler
 # https://pympler.readthedocs.io/en/latest/
 
-_BASIC_TYPES = ('int', 'float', 'str', 'dict', 'list')
+_BASIC_TYPES = ('int', 'float', 'str', 'dict', 'list', 'bytes')
 
 
 class MemoryProfilingHandler(httpabc.GetHandler):

@@ -29,19 +29,21 @@
   <hr />
   <h3 id="clishowhelp" class="title is-4">Show Help</h3>
   <p>
-    The CLI help text can be shown with the <span class="is-family-monospace notranslate">-h</span> option.
-    There are two kinds of operations that can be performed. <span class="has-text-weight-bold">Tasks</span>
-    and <span class="has-text-weight-bold">Commands</span> which are explained below.
+    The CLI help text can be shown with the
+    <span class="is-family-monospace notranslate">-h</span>
+    option. There are two kinds of operations that can be performed.
+    <span class="has-text-weight-bold">Tasks</span> and <span class="has-text-weight-bold">Commands</span>
+    which are explained below.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -h</CodeBlock>
 </div>
 <div class="content pt-2">
   <h3 id="clitasks" class="title is-4">Tasks</h3>
   <p>
-    Tasks are system admin operations that usually require root privilages
-    (i.e. <span class="is-family-monospace notranslate">sudo</span>).
-    Tasks are run using the <span class="is-family-monospace notranslate">-t</span> option.
-    The example below will upgrade the ServerJockey system to the latest version.
+    Tasks are system admin operations that usually require root privilages (i.e.
+    <span class="is-family-monospace notranslate">sudo</span>). Tasks are run using the
+    <span class="is-family-monospace notranslate">-t</span>
+    option. The example below will upgrade the ServerJockey system to the latest version.
   </p>
   <CodeBlock>sudo serverjockey_cmd.pyz -t upgrade</CodeBlock>
 </div>
@@ -49,9 +51,11 @@
   <h3 id="clicommands" class="title is-4">Commands</h3>
   <p>
     Commands are operations that interact with a running ServerJockey service to manage game servers.
-    A list of Commands can be run using the <span class="is-family-monospace notranslate">-c</span> option.
-    The example below will select the <span class="is-family-monospace notranslate">myserver</span> instance,
-    then start the server.
+    A list of Commands can be run using the
+    <span class="is-family-monospace notranslate">-c</span>
+    option. The example below will select the
+    <span class="is-family-monospace notranslate">myserver</span>
+    instance, then start the server.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -c use:myserver server:start</CodeBlock>
 </div>
@@ -59,11 +63,12 @@
   <h3 id="clibackup" class="title is-4">Backup Example</h3>
   <p>
     The example below is a backup process for a Project Zomboid server. It can be run on a schedule using
-    <span class="is-family-monospace notranslate">cron</span>. The process has following commands...
+    <span class="is-family-monospace notranslate">cron</span>.
+    The process does the following...
   </p>
   <ol>
-    <li>Select the instance called <span class="is-family-monospace notranslate">myserver</span>
-    <li>If the server is not running, then stop process commands and exit
+    <li>Select the instance called  <span class="is-family-monospace notranslate">myserver</span>
+    <li>If the server is not running, then stop processing commands and exit
     <li>Broadcast a 5 minute warning message to all players, then wait 4 minutes
     <li>Broadcast a 1 minute warning message to all players, then wait 1 minute
     <li>Stop the server then wait 10 seconds for that to happen
