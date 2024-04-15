@@ -1,4 +1,16 @@
 "use strict";
+
+/*
+ * This modified discord.js v14.11.0 file fixes an ESM import issue with file attachments.
+ * Such imports are not supported when bundling into an executable file with NEXE.
+ * Note that this issue is not a problem when bundling with BUN.
+ * Links...
+ * - https://github.com/discordjs/discord.js/issues/9508
+ * - https://github.com/nexe/nexe/issues/1046
+ * - https://github.com/vercel/pkg/issues/1291
+ * - https://github.com/nexe/nexe/issues/815
+ */
+
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;

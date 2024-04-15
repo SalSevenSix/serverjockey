@@ -11,6 +11,7 @@
   const eventDown = getContext('eventDown');
   const eventStarted = getContext('eventStarted');
   const eventEndMaint = getContext('eventEndMaint');
+  const noWorld = 'world save does not exist';
 
   export let actions = [];
 
@@ -42,7 +43,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .then(function(json) { lastActivity = json.timestamp ? shortISODateTimeString(json.timestamp) : 'None'; })
+      .then(function(json) { lastActivity = json.timestamp ? shortISODateTimeString(json.timestamp) : noWorld; })
       .catch(function(error) { notifyError('Failed to load World meta.'); })
       .finally(function() { processing = false; });
   }
@@ -56,8 +57,8 @@
   <p><span class="has-text-weight-bold">Last Activity:</span>&nbsp;
     {#if processing && !lastActivity}
       <SpinnerIcon /> loading...
-    {:else if lastActivity === 'None'}
-      <span class="is-italic">not found, world may not exist</span>
+    {:else if lastActivity === noWorld}
+      <span class="is-italic">{noWorld}</span>
     {:else if lastActivity}
       <span class="notranslate">{lastActivity}</span>
     {:else}

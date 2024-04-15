@@ -74,7 +74,7 @@ class Deployment:
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
         r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.MtimeHandler().check(self._save_dir).dir(self._log_dir))
+        r.put('world-meta', httpext.MtimeHandler().check(self._save_dir + '/Saves').dir(self._log_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
         r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')

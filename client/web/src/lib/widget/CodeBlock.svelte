@@ -1,16 +1,18 @@
 <script>
   export let nocopy = false;
 
+  const navigatorClipboard = navigator.clipboard;
+
   let codeElement;
 
   function copyToClipboard() {
-    if (!codeElement) return;
-    navigator.clipboard.writeText(codeElement.textContent);
+    if (!navigatorClipboard || !codeElement) return;
+    navigatorClipboard.writeText(codeElement.textContent);
   }
 </script>
 
 
-{#if nocopy}
+{#if nocopy || !navigatorClipboard}
   <pre class="pre is-thinner notranslate"><slot /></pre>
 {:else}
   <div class="position-relative">
