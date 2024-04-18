@@ -1,5 +1,6 @@
 #!/bin/bash
 
+[ $(python3 --version | grep "Python 3\.10\." | wc -l) -eq 0 ] && exit 1
 BRANCH="${1-local}"
 TIMESTAMP=$(date '+%Y%m%d%H%M')
 cd "$(dirname $0)" || exit 1
@@ -89,7 +90,7 @@ $SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
 
 echo "Download and merge ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
-python3.10 -m pipenv sync || exit 1
+python3 -m pipenv sync || exit 1
 [ -d ".venv" ] || exit 1
 if [ -d "$LIB32_DIR" ]; then
   rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* > /dev/null 2>&1
@@ -103,7 +104,7 @@ if [ -d "$LIB64_DIR" ]; then
 fi
 
 echo "Running tests"
-python3.10 -m unittest discover -t . -s test -p "*.py" || exit 1
+python3 -m unittest discover -t . -s test -p "*.py" || exit 1
 
 echo "Removing ServerJockey junk"
 rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1
@@ -113,7 +114,7 @@ done
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
-python3.10 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3.10" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/$SERVERJOCKEY.pyz" || exit 1
+python3 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/$SERVERJOCKEY.pyz" || exit 1
 
 echo "Finishing"
 rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1

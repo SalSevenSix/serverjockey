@@ -37,9 +37,7 @@ class WrapReader(Readable):
         return await self._delegate.read(length)
 
 
-_listdir = funcutil.to_async(os.listdir)
 _is_symlink = funcutil.to_async(os.path.islink)
-_create_symlink = funcutil.to_async(os.symlink)
 _move = funcutil.to_async(shutil.move)
 _rmtree = funcutil.to_async(shutil.rmtree)
 
@@ -99,7 +97,7 @@ async def create_directories(path: str):
 
 async def create_symlink(symlink_path: str, target_path: str):
     await delete_any(symlink_path)
-    await _create_symlink(target_path, symlink_path)
+    await aioos.symlink(target_path, symlink_path)
 
 
 async def rename_path(source: str, target: str):
@@ -150,7 +148,7 @@ async def directory_list(path: str, baseurl: str = None) -> typing.List[typing.D
     if not path.endswith('/'):
         path += '/'
     result = []
-    for name in await _listdir(path):
+    for name in await aioos.listdir(path):
         exists, file, ftype, size, updated, mtime = False, path + name, 'unknown', -1, '', -1.0
         if await _is_symlink(file):
             ftype = 'link'

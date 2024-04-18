@@ -19,7 +19,7 @@ find cli -name "__pycache__" -type d | while read file; do
   rm -rf $file > /dev/null 2>&1
 done
 
-python3.10 -m zipapp "cli" -p "/usr/bin/env python3.10" -m "$CMD_NAME:main" -c -o $FILE_NAME || exit 1
+python3 -m zipapp "cli" -p "/usr/bin/env python3" -m "$CMD_NAME:main" -c -o $FILE_NAME || exit 1
 
 cd $SOURCE_DIR || exit 1
 mkdir build || exit 1

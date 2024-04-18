@@ -3,7 +3,7 @@ Version: 0.9.0
 Section: custom
 Priority: optional
 Architecture: amd64
-Recommends: python3.10
+Recommends: python3
 Maintainer: Bowden Salis <bsalis76@gmail.com>
 Description: ServerJockey Game Management System
  Server management system for game servers.

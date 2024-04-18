@@ -24,7 +24,7 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
 fi
 
 if [ "$JS_RUNTIME" = "node" ]; then
-  PYTHON_EXE=$(which python3.10)
+  PYTHON_EXE=$(which python3)
   NODE_OUT_DIR=~/.nexe/$(node --version | cut -c2-)/out/Release
   nexe index.js --output build/serverlink --build --python=$PYTHON_EXE || exit 1
   [ -d $NODE_OUT_DIR ] || exit 1
