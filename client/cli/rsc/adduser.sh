@@ -11,7 +11,7 @@ SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
 id -u $SJGMS_USER > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   rm -rf $HOME_DIR > /dev/null 2>&1
-  adduser --system $SJGMS_USER || exit 1
+  adduser --system --home $HOME_DIR --disabled-login --disabled-password $SJGMS_USER || exit 1
   mkdir -p $SERVERLINK_DIR
   echo '{ "module": "serverlink", "hidden": true }' > $SERVERLINK_DIR/instance.json
   find $HOME_DIR -type d -exec chmod 755 {} +

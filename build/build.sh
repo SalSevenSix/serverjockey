@@ -93,13 +93,13 @@ cd $SERVERJOCKEY_DIR || exit 1
 python3 -m pipenv sync || exit 1
 [ -d ".venv" ] || exit 1
 if [ -d "$LIB32_DIR" ]; then
-  rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* > /dev/null 2>&1
-  rm -rf $LIB32_DIR/setuptools* $LIB32_DIR/pkg_resources* > /dev/null 2>&1
+  rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* $LIB32_DIR/greenlet* > /dev/null 2>&1
+  rm -rf $LIB32_DIR/setuptools* $LIB32_DIR/pkg_resources* $LIB32_DIR/_distutils_hack > /dev/null 2>&1
   cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 if [ -d "$LIB64_DIR" ]; then
-  rm -rf $LIB64_DIR/pip* $LIB64_DIR/test* $LIB64_DIR/wheel* > /dev/null 2>&1
-  rm -rf $LIB64_DIR/setuptools* $LIB64_DIR/pkg_resources* > /dev/null 2>&1
+  rm -rf $LIB64_DIR/pip* $LIB64_DIR/test* $LIB64_DIR/wheel* $LIB64_DIR/greenlet* > /dev/null 2>&1
+  rm -rf $LIB64_DIR/setuptools* $LIB64_DIR/pkg_resources* $LIB64_DIR/_distutils_hack > /dev/null 2>&1
   cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
 
