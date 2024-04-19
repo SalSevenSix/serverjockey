@@ -1,8 +1,9 @@
 # ServerJockey
 
-ServerJockey is a game server management system. It is designed to be an easy
-to use self-hosting option for multiplayer servers. Allowing you to create
-and remotely manage your servers. A webapp and Discord bot are used as clients.
+ServerJockey is a game server management system for Project Zomboid
+and other supported games. It is designed to be an easy to use self-hosting
+option for multiplayer servers. It allows you to create and remotely
+manage your servers using a webapp and Discord bot.
 
 * Join the [Discord](https://discord.gg/TEuurWAhHn)
 * Instructional guides and dev updates on [YouTube](https://www.youtube.com/@BSALIS76)
@@ -14,7 +15,8 @@ If your like using this system, please consider supporting it on Ko-fi.
 
 
 ## DEB Package Install
-Arch x86_64 only. Requires Python 3.10 installed. Tested and works on **Ubuntu 22.04**
+Arch x86_64/amd64 only. Requires Python 3.10 or 3.11 or 3.12 installed.
+Tested and works on **Ubuntu 22 LTS** (recommended) and Ubuntu 24 LTS.
 
 * Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed
 ```bash
@@ -100,5 +102,5 @@ the script until all dependencies are satisfied, then the system will start.
 BRANCH="master"
 wget https://github.com/SalSevenSix/serverjockey/archive/refs/heads/$BRANCH.zip
 unzip -q $BRANCH.zip && mv serverjockey-$BRANCH serverjockey
-./serverjockey/serverjockey.sh --dbfile --showtoken
+./serverjockey/serverjockey.sh --showtoken
 ```

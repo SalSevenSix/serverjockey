@@ -46,10 +46,10 @@ def _argument_parser() -> argparse.ArgumentParser:
                    help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
                    help='Filename for client file, relative to "home" unless starts with "/" or "."')
-    p.add_argument('--dbfile', type=str, nargs='?', const='serverjockey.db',
-                   help='Filename for database file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
+    p.add_argument('--nostore', action='store_true',
+                   help='Do not use database to store activity')
     p.add_argument('--noupnp', action='store_true',
                    help='Do not enable UPnP services')
     return p
@@ -63,8 +63,8 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
     home = util.full_path(os.getcwd(), config.home)
     tempdir = util.full_path(home, config.tempdir)
     clientfile = util.full_path(home, config.clientfile)
-    dbfile = util.full_path(home, config.dbfile)
     logfile = util.full_path(home, config.logfile)
+    dbfile = None if config.nostore else util.full_path(home, 'serverjockey.db')
     return contextsvc.Context(
         debug=config.debug, trace=config.trace, home=home, tempdir=tempdir,
         stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=config.showtoken,
