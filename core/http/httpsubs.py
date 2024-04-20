@@ -102,8 +102,7 @@ class _Subscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.Mailer, identity: str, selector: Selector):
         super().__init__(msgftr.Or(_InactivityCheck.FILTER, msgftr.IsStop(),
                                    selector.msg_filter, selector.completed_filter))
-        self._mailer = mailer
-        self._identity = identity
+        self._mailer, self._identity = mailer, identity
         self._transformer, self._aggregator = selector.transformer, selector.aggregator
         self._collect_filter, self._completed_filter = selector.msg_filter, selector.completed_filter
         self._purge_overflow = selector.aggregator is not None
@@ -115,8 +114,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         if not self._running:
             return True
         if _InactivityCheck.FILTER.accepts(message):
-            now = message.created()
-            last = self._time_last_activity
+            now, last = message.created(), self._time_last_activity
             if last < 0.0 or ((now - last) < self._inactivity_timeout):
                 return None
             logging.debug('Http subscription inactive, unsubscribing ' + self._identity)
@@ -223,8 +221,7 @@ class _SubscriptionsHandler(httpabc.GetHandler):
 class _SubscribeHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, selector: Selector):
-        self._mailer = mailer
-        self._selector = selector
+        self._mailer, self._selector = mailer, selector
 
     async def handle_post(self, resource, data):
         path = await HttpSubscriptionService.subscribe(self._mailer, self, self._selector)

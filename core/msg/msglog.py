@@ -24,8 +24,7 @@ class LoggingPublisher:
     }
 
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
-        self._mailer = mailer
-        self._source = source
+        self._mailer, self._source = mailer, source
 
     # noinspection PyUnusedLocal
     def log(self, level, msg, *args, **kwargs):
@@ -114,10 +113,8 @@ class PercentTracker(io.BytesTracker):
 
     def __init__(self, mailer: msgabc.Mailer, expected: int, notifications: int = 10,
                  prefix: str = 'progress', msg_name: str = INFO):
-        self._mailer = mailer
-        self._msg_name = msg_name
-        self._expected = expected
-        self._prefix = prefix
+        self._mailer, self._expected = mailer, expected
+        self._prefix, self._msg_name = prefix, msg_name
         self._increment = int(expected / notifications)
         self._bytes, self._next_target = _Bytes(), self._increment
 
@@ -140,11 +137,8 @@ class IntervalTracker(io.BytesTracker):
 
     def __init__(self, mailer: msgabc.Mailer, interval: float = 1.0, msg_name: str = INFO,
                  initial_message: str = 'RECEIVING data...', prefix: str = 'received'):
-        self._mailer = mailer
-        self._msg_name = msg_name
-        self._initial_message = initial_message
-        self._interval = interval
-        self._prefix = prefix
+        self._mailer, self._interval, self._msg_name = mailer, interval, msg_name
+        self._initial_message, self._prefix = initial_message, prefix
         self._bytes, self._last_time = _Bytes(), 0
 
     def processed(self, chunk: bytes | None):
@@ -170,8 +164,7 @@ class IntervalTracker(io.BytesTracker):
 class _Bytes:
 
     def __init__(self):
-        self._start_time = 0
-        self._total = 0
+        self._start_time, self._total = 0, 0
 
     def add(self, chunk: bytes) -> int:
         if not self._start_time:

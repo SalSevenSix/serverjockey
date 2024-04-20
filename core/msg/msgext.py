@@ -115,8 +115,7 @@ class Publisher:
     START, END = 'Publisher.Start', 'Publisher.End'
 
     def __init__(self, mailer: msgabc.Mailer, producer: msgabc.Producer):
-        self._mailer = mailer
-        self._producer = producer
+        self._mailer, self._producer = mailer, producer
         self._task = tasks.task_start(self._run(), producer)
         self._mailer.post(self, Publisher.START, producer)
 
@@ -150,9 +149,7 @@ class SyncWrapper(msgabc.AbcSubscriber):
                  delegate: msgabc.Subscriber,
                  reply: SyncReply = SyncReply.NEVER):
         super().__init__(delegate)
-        self._mailer = mailer
-        self._delegate = delegate
-        self._reply = reply
+        self._mailer, self._delegate, self._reply = mailer, delegate, reply
 
     async def handle(self, message):
         source = message.source()
@@ -171,8 +168,7 @@ class Archiver(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, tempdir: str = '/tmp'):
         super().__init__(msgftr.NameIs(Archiver.REQUEST))
-        self._mailer = mailer
-        self._tempdir = tempdir
+        self._mailer, self._tempdir = mailer, tempdir
 
     async def handle(self, message):
         source, data = message.source(), message.data()
@@ -203,8 +199,7 @@ class Unpacker(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, tempdir: str = '/tmp'):
         super().__init__(msgftr.NameIs(Unpacker.REQUEST))
-        self._mailer = mailer
-        self._tempdir = tempdir
+        self._mailer, self._tempdir = mailer, tempdir
 
     async def handle(self, message):
         source, data = message.source(), message.data()
@@ -252,10 +247,8 @@ class RollingLogSubscriber(msgabc.Subscriber):
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  transformer: msgabc.Transformer = msgtrf.Noop(),
                  aggregator: aggtrf.Aggregator = aggtrf.Noop()):
-        self._mailer = mailer
-        self._size = size
-        self._transformer = transformer
-        self._aggregator = aggregator
+        self._mailer, self._size = mailer, size
+        self._transformer, self._aggregator = transformer, aggregator
         self._identity = idutil.generate_id()
         self._request_filter = msgftr.And(
             msgftr.NameIs(RollingLogSubscriber.REQUEST),

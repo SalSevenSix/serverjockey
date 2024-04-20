@@ -22,7 +22,7 @@ async def link_steamclient_to_sdk(home_dir: str):
     steamclient_file = steamcmd_dir + '/linux64/steamclient.so'
     if not await io.file_exists(steamclient_file):
         return
-    await io.create_directory(sdk_dir)
+    await io.create_directories(sdk_dir)
     await io.create_symlink(steamclient_link, steamclient_file)
 
 
