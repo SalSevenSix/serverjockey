@@ -71,7 +71,6 @@ class _CacheLock:
     async def start(self) -> bool:
         if self._process:
             return True
-        # noinspection PyBroadException
         try:
             self._process = await asyncio.create_subprocess_exec(self._executable, '-tlq', self._path)
             self._task = tasks.task_start(self._run(), 'CacheLock(' + self._path + ')')
@@ -83,7 +82,6 @@ class _CacheLock:
         return False
 
     async def _run(self):
-        # noinspection PyBroadException
         try:
             self._mailer.post(self, NOTIFICATION, '[CacheLock] STARTED ' + self._path)
             rc = await self._process.wait()
@@ -99,7 +97,6 @@ class _CacheLock:
     def stop(self):
         if not self._process or self._process.returncode is not None:
             return
-        # noinspection PyBroadException
         try:
             self._process.terminate()
         except Exception as e:

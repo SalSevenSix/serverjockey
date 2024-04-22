@@ -12,7 +12,9 @@
 
   function getInstanceModule() {
     const parts = window.location.pathname.split('/');
-    return parts[parts.length - 1];
+    let result = '';
+    while (parts.length > 0 && !result) { result = parts.pop(); }
+    return result;
   }
 
   function getInstanceIdentity() {

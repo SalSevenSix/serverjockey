@@ -22,7 +22,6 @@ class PipeOutLineProducer(msgabc.Producer):
         await funcutil.silently_cleanup(self._publisher)
 
     async def next_message(self):
-        # noinspection PyBroadException
         try:
             line = await self._pipe.readline()
             if io.end_of_stream(line):

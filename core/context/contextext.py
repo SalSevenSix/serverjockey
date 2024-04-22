@@ -37,6 +37,5 @@ class ClientFile:
         await io.write_file(self._clientfile, data)
         self._context.post(self, ClientFile.WRITTEN, self._clientfile)
 
-    # noinspection PyBroadException
     async def delete(self):
         await funcutil.silently_call(io.delete_file(self._clientfile))

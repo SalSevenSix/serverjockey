@@ -16,7 +16,7 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
   echo "installing dependencies"
   if [ "$JS_RUNTIME" = "node" ]; then
     npm $INSTALL_COMMAND || exit 1
-    cp hax/index.js node_modules/@discordjs/rest/dist/index.js || exit 1
+    # cp hax/index.js node_modules/@discordjs/rest/dist/index.js || exit 1
   else  # bun
     [ "$INSTALL_COMMAND" = "ci" ] && INSTALL_COMMAND="install --frozen-lockfile"
     $JS_RUNTIME $INSTALL_COMMAND || exit 1

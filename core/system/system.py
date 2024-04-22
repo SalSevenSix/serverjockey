@@ -119,11 +119,15 @@ class SystemService:
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
             raise Exception('Unable to create instance. Directory already exists.')
-        logging.debug('CREATING instance ' + identity)
-        await io.create_directory(home_dir)
-        await io.write_file(home_dir + '/instance.json', objconv.obj_to_json(configuration))
-        configuration.update({'identity': identity, 'home': home_dir})
-        return await self._initialise_instance(configuration)
+        # noinspection PyBroadException
+        try:
+            logging.debug('CREATING instance ' + identity)
+            await io.create_directory(home_dir)
+            await io.write_file(home_dir + '/instance.json', objconv.obj_to_json(configuration))
+            configuration.update({'identity': identity, 'home': home_dir})
+            return await self._initialise_instance(configuration)
+        except Exception:
+            await io.delete_directory(home_dir)
 
     async def delete_instance(self, subcontext: contextsvc.Context):
         identity, home_dir = subcontext.config('identity'), subcontext.config('home')
