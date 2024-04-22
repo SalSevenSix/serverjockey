@@ -22,8 +22,7 @@ class JobPipeInLineService(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer, pipe: streams.StreamWriter):
         super().__init__(msgftr.NameIn((JobPipeInLineService.REQUEST, JobPipeInLineService.CLOSE)))
-        self._mailer = mailer
-        self._pipe = pipe
+        self._mailer, self._pipe = mailer, pipe
         mailer.register(self)
 
     async def close(self):

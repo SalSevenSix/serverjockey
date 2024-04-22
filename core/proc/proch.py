@@ -12,16 +12,13 @@ from core.proc import prcenc, prcprd
 class _PipeInLineCommand:
 
     def __init__(self, cmdline: str, catcher: typing.Optional[msgabc.Catcher] = None, force: bool = False):
-        self.cmdline = cmdline
-        self.catcher = catcher
-        self.force = force
+        self.cmdline, self.catcher, self.force = cmdline, catcher, force
 
 
 class _PipeInLineHandler(msgabc.Handler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, pipe: streams.StreamWriter):
-        self._mailer = mailer
-        self._pipe = pipe
+        self._mailer, self._pipe = mailer, pipe
 
     async def close(self):
         await funcutil.silently_cleanup(self._pipe)

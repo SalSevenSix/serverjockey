@@ -11,10 +11,8 @@ class PipeOutLineProducer(msgabc.Producer):
 
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str,
                  pipe: streams.StreamReader, decoder: prcenc.LineDecoder = prcenc.DefaultLineDecoder()):
-        self._source = source
-        self._name = name
-        self._pipe = pipe
-        self._decoder = decoder
+        self._source, self._name = source, name
+        self._pipe, self._decoder = pipe, decoder
         self._publisher = msgext.Publisher(mailer, self)
 
     async def close(self):

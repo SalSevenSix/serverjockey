@@ -74,9 +74,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 class Player:
 
     def __init__(self, name: str, steamid: str | None = None, startmillis: int = -1):
-        self._name = name
-        self._steamid = steamid
-        self._startmillis = startmillis
+        self._name, self._steamid, self._startmillis = name, steamid, startmillis
 
     def name(self) -> str:
         return self._name

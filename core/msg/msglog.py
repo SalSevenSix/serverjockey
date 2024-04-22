@@ -57,8 +57,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
         super().__init__(msgftr.Or(msg_filter, roll_filter, msgftr.IsStop()))
         self._filename, self._file = filename, None
-        self._roll_filter = roll_filter
-        self._transformer = transformer
+        self._roll_filter, self._transformer = roll_filter, transformer
 
     async def handle(self, message):
         if message is msgabc.STOP:

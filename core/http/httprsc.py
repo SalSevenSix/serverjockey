@@ -86,11 +86,9 @@ class WebResource(httpabc.Resource):
     def __init__(self, name: str = '',
                  kind: httpabc.ResourceKind = httpabc.ResourceKind.PATH,
                  handler: typing.Optional[httpabc.ABC_HANDLER] = None):
+        self._name, self._kind, self._handler = name, kind, handler
         self._parent: typing.Optional[httpabc.Resource] = None
         self._children: typing.List[httpabc.Resource] = []
-        self._name = name
-        self._kind = kind
-        self._handler = handler
 
     def append(self, resource: httpabc.Resource) -> httpabc.Resource:
         if self.kind() is httpabc.ResourceKind.ARG_TAIL:

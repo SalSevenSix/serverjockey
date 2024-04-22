@@ -18,11 +18,9 @@ class RootUrl:
 
 
 class ClientFile:
-    WRITTEN = 'ClientFile.Written'
 
     def __init__(self, context: contextsvc.Context, clientfile: str):
-        self._context = context
-        self._clientfile = clientfile
+        self._context, self._clientfile = context, clientfile
 
     def path(self):
         return self._clientfile
@@ -35,7 +33,6 @@ class ClientFile:
             'SERVER_TOKEN': self._context.config('secret')
         })
         await io.write_file(self._clientfile, data)
-        self._context.post(self, ClientFile.WRITTEN, self._clientfile)
 
     async def delete(self):
         await funcutil.silently_call(io.delete_file(self._clientfile))

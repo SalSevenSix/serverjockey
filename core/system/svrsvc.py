@@ -133,8 +133,7 @@ class _RunController:
     def __init__(self, looping: bool, call_run: bool, daemon: bool):
         self._looping = looping
         self._call_run = looping and call_run
-        self._daemon = daemon
-        self._daemon_attempts = 3
+        self._daemon, self._daemon_attempts = daemon, 3
 
     def check_uptime(self, uptime: int):
         if not self._daemon:

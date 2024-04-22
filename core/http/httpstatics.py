@@ -73,8 +73,7 @@ class _Loader:
 class _Resource:
 
     def __init__(self, content_type: httpabc.ContentType, data: typing.Any):
-        self._content_type = content_type
-        self._data = data
+        self._content_type, self._data = content_type, data
         self._compressed = None
 
     def content_type(self) -> httpabc.ContentType:

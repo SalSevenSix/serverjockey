@@ -4,11 +4,11 @@ from core.util import io
 
 async def write_wrapper(path: str):
     filename = path + '/wrapper.py'
-    await io.write_file(filename, wrapper_code())
+    await io.write_file(filename, _wrapper_code())
     return filename
 
 
-def wrapper_code() -> str:
+def _wrapper_code() -> str:
     # https://docs.python.org/3/library/pty.html
     return '''import sys
 import os

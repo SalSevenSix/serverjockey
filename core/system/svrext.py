@@ -41,9 +41,7 @@ class CheckServerStateInterceptor(httpabc.InterceptorHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, delegate: httpabc.ABC_HANDLER,
                  running: bool = None, states: tuple = None):
-        self._mailer = mailer
-        self._delegate = delegate
-        self._running = running
+        self._mailer, self._delegate, self._running = mailer, delegate, running
         self._states = states if states else ()
 
     def allows(self, method: httpabc.Method) -> bool:
@@ -68,8 +66,7 @@ class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.Mailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):
         super().__init__(msgftr.Or(maintenance_filter, ready_filter))
         self._mailer = mailer
-        self._maintenance_filter = maintenance_filter
-        self._ready_filter = ready_filter
+        self._maintenance_filter, self._ready_filter = maintenance_filter, ready_filter
 
     def handle(self, message):
         if self._maintenance_filter.accepts(message):
