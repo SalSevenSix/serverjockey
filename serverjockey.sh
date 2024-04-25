@@ -8,7 +8,7 @@ find_steamcmd() {
 
 check_steamcmd() {
   echo
-  echo "  checking for SteamCMD."
+  echo "  checking for SteamCMD, this may take some time."
   find_steamcmd
   if [ $? -ne 0 ]; then
     echo "ERROR SteamCMD not found."

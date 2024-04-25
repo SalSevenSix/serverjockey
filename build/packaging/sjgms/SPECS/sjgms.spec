@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Tue Apr 16 2024 Bowden Salis <bsalis76@gmail.com> - 0.9.0
-- Feature release v0.9.0
+* Mon Apr 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.9.0
+- Technical release, library upgrades and Ubuntu 24 support
 * Mon Apr 15 2024 Bowden Salis <bsalis76@gmail.com> - 0.8.0
 - Added support for Palworld
 * Tue Feb 06 2024 Bowden Salis <bsalis76@gmail.com> - 0.7.0

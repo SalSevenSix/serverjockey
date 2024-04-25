@@ -161,20 +161,28 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
 class _SteamConfig:
 
     def __init__(self, home_dir: str):
-        self._path = home_dir + '/Steam/config/config.vdf'
+        self._home_dir = home_dir
+
+    async def _config_path(self) -> str:
+        for path in ('/.local/share/Steam/config/config.vdf', '/Steam/config/config.vdf'):
+            result = self._home_dir + path
+            if await io.file_exists(result):
+                return result
+        raise Exception('Steam config file not found.')
 
     async def _load(self) -> tuple:
         try:
-            root = vdf.loads(await io.read_file(self._path))
+            config_path = await self._config_path()
+            root = vdf.loads(await io.read_file(config_path))
             valve = root['InstallConfigStore']['Software']['Valve']
             steamer = util.get('Steam', valve, util.get('steam', valve))
-            return root, steamer
+            return config_path, root, steamer
         except Exception as e:
-            logging.warning('Problem loading or parsing ' + self._path + ' ' + repr(e))
-        return None, None
+            logging.warning('Problem loading or parsing Steam config: ' + repr(e))
+        return None, None, None
 
     async def get_login(self) -> str | None:
-        root, steamer = await self._load()
+        config_path, root, steamer = await self._load()
         if not steamer:
             return None
         if 'Accounts' in steamer:
@@ -183,14 +191,14 @@ class _SteamConfig:
         return None
 
     async def clear_cache(self):
-        root, steamer = await self._load()
+        config_path, root, steamer = await self._load()
         if not steamer:
             return
         if 'Accounts' in steamer:
             del steamer['Accounts']
         if 'ConnectCache' in steamer:
             del steamer['ConnectCache']
-        await io.write_file(self._path, vdf.dumps(root))
+        await io.write_file(config_path, vdf.dumps(root))
 
 
 def _terminate_process(process: subprocess.Process | None):

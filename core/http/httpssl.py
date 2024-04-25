@@ -3,7 +3,7 @@ import ssl
 # ALLOW util.* msg.* context.* http.*
 from core.context import contextsvc
 from core.http import httpabc, httpcnt
-from core.util import util, io, shellutil, idutil
+from core.util import util, io, funcutil, shellutil, idutil
 
 _HTTP, _HTTPS = 'http', 'https'
 _CERT_FILE, _KEY_FILE = '/serverjockey.crt', '/serverjockey.key'
@@ -50,7 +50,7 @@ class SslTool:
             await io.chmod(self._sslcert, 0o600)
             await io.chmod(self._sslkey, 0o600)
         finally:
-            await io.delete_directory(working_dir)
+            await funcutil.silently_call(io.delete_directory(working_dir))
 
     async def disable(self):
         await io.delete_file(self._sslcert)
