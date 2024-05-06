@@ -1,5 +1,5 @@
 <script>
-  import { onDestroy, tick, getContext } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import { closeModal } from 'svelte-modals';
   import { sleep, RollingLog } from '$lib/util/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
