@@ -97,8 +97,8 @@
             Used</td><td class="notranslate">{humanFileSize(info.memory.used)}</td></tr>
           <tr><td class="field-column" title="Available memory space">
             Available</td><td class="notranslate">{humanFileSize(info.memory.available)}</td></tr>
-          <tr><td class="field-column" title="Total swap size">
-            Swap</td><td class="notranslate">{humanFileSize(info.memory.swap)}</td></tr>
+          <tr><td class="field-column" title="Swap usage">
+            Swap</td><td class="notranslate">{info.memory.swap ? info.memory.swap.percent + '%' : 'n/a'}</td></tr>
         </tbody>
       {:else}
         <tbody>

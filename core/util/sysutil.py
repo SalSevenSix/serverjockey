@@ -74,28 +74,36 @@ class _PublicIp:
 
 class _DiskUsage:
     # noinspection PyMethodMayBeStatic
-    async def get(self) -> tuple:
-        return await _disk_usage('/')
+    async def get(self) -> dict:
+        result = await _disk_usage('/')
+        return {
+            'total': result[0], 'used': result[1], 'free': result[2],
+            'percent': round((result[1] / result[0]) * 100.0, 1)
+        }
 
 
 class _VirtualMemory:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
-        result = {'total': -1, 'used': -1, 'available': -1, 'free': -1, 'percent': -1, 'swap': -1}
+        result = {'total': -1, 'used': -1, 'available': -1, 'free': -1, 'percent': -1, 'swap': None}
         data = await shellutil.run_executable('free', '-b')
         line = _grep_last_line('Mem:', data)
         if line:
             line = line.strip().split(' ')
             line = [int(i) for i in line[1:] if i]
             result.update({
-                'total': line[0], 'used': line[1], 'available': line[5], 'free': line[2],
-                'percent': round(float(line[1] / line[0] * 100), 1)
+                'total': line[0], 'used': line[1], 'free': line[2], 'available': line[5],
+                'percent': round((line[1] / line[0]) * 100.0, 1)
             })
         line = _grep_last_line('Swap:', data)
         if line:
             line = line.strip().split(' ')
             line = [int(i) for i in line[1:] if i]
-            result['swap'] = line[0]
+            if line[0] > 0:
+                result['swap'] = {
+                    'total': line[0], 'used': line[1], 'free': line[2],
+                    'percent': round((line[1] / line[0]) * 100.0, 1)
+                }
         return result
 
 
@@ -192,7 +200,7 @@ async def public_ip() -> str:
     return await _PUBLIC_IP.get()
 
 
-async def disk_usage() -> tuple:
+async def disk_usage() -> dict:
     return await _DISK_USAGE.get()
 
 
@@ -214,18 +222,7 @@ async def system_info() -> dict:
         cpu_info(), cpu_percent(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
     cpu['percent'] = cpupct
     return {
-        'version': system_version(),
-        'os': os,
-        'cpu': cpu,
-        'memory': memory,
-        'disk': {
-            'total': disk[0],
-            'used': disk[1],
-            'free': disk[2],
-            'percent': round((disk[1] / disk[0]) * 100, 1)
-        },
-        'net': {
-            'local': local,
-            'public': public
-        }
+        'version': system_version(), 'os': os,
+        'cpu': cpu, 'memory': memory, 'disk': disk,
+        'net': {'local': local, 'public': public}
     }
