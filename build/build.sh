@@ -1,10 +1,13 @@
 #!/bin/bash
 
+echo "Initialising build process"
 [ $(python3 --version | grep "Python 3\.10\." | wc -l) -eq 0 ] && exit 1
-BRANCH="${1-local}"
-TIMESTAMP=$(date '+%Y%m%d%H%M')
+which wget > /dev/null || exit 1
+which unzip > /dev/null || exit 1
 cd "$(dirname $0)" || exit 1
+BRANCH="${1-local}"
 BUILD_DIR="$(pwd)"
+TIMESTAMP=$(date '+%Y%m%d%H%M')
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
 SERVERJOCKEY="serverjockey"
@@ -43,23 +46,17 @@ fi
 
 cd $DIST_DIR || exit 1
 if [ ! -d "../../.git" ]; then
+  echo "Updating build scripts"
+  if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
+    cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
+    echo "Build script updated. Please run again."
+    exit 1
+  fi
   if which apt > /dev/null; then
-    echo "Updating DEB scripts"
-    if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
-      cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
-      echo "Build script updated. Please run again."
-      exit 1
-    fi
     cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh"
     chmod 755 $BUILD_DIR/deb.sh || exit 1
   fi
   if which yum > /dev/null; then
-    echo "Updating RPM scripts"
-    if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
-      cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
-      echo "Build script updated. Please run again."
-      exit 1
-    fi
     cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
     chmod 755 $BUILD_DIR/rpm.sh || exit 1
   fi
@@ -120,5 +117,5 @@ echo "Finishing"
 rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
 echo $TIMESTAMP > "$TARGET_DIR/build.ok"
 
-echo "Done"
+echo "Done build process"
 exit 0

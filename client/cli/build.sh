@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Initialising cli build"
 cd "$(dirname $0)" || exit 1
 SOURCE_DIR="$(pwd)"
 TARGET_FILE="${1}"
@@ -31,4 +32,5 @@ if [ ! -z $TARGET_FILE ]; then
   cp build/$FILE_NAME $TARGET_FILE || exit 1
 fi
 
+echo "Done cli build"
 exit 0

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Initialising RPM packaging"
 cd "$(dirname $0)/dist" || exit 1
 DIST_DIR="$(pwd)"
 RPMBUILD_DIR="$HOME/rpmbuild"
@@ -47,5 +48,5 @@ mv $RPM_FILE $DIST_DIR
 echo "Cleanup"
 rm -rf $TARGET_DIR $TAR_DIR > /dev/null 2>&1
 
-echo "Done"
+echo "Done RPM packaging"
 exit 0

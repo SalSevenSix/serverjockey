@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Initialising DEB packaging"
 [ "$(whoami)" = "root" ] || exit 1
 cd "$(dirname $0)/dist" || exit 1
 TARGET_DIR="sjgms"
@@ -30,5 +31,5 @@ mv "$DEB_FILE" "sjgms-${VERSION}.${OSVER}.x86_64.deb"
 echo "Cleanup"
 rm -rf $TARGET_DIR > /dev/null 2>&1
 
-echo "Done"
+echo "Done DEB packaging"
 exit 0
