@@ -164,7 +164,6 @@ class GetHandler(metaclass=abc.ABCMeta):
     @staticmethod
     async def call(handler: GetHandler, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
         if inspect.iscoroutinefunction(handler.handle_get):
-            # noinspection PyUnresolvedReferences
             return await handler.handle_get(resource, data)
         return handler.handle_get(resource, data)
 
@@ -178,7 +177,6 @@ class PostHandler(metaclass=abc.ABCMeta):
     @staticmethod
     async def call(handler: PostHandler, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
         if inspect.iscoroutinefunction(handler.handle_post):
-            # noinspection PyUnresolvedReferences
             return await handler.handle_post(resource, data)
         return handler.handle_post(resource, data)
 

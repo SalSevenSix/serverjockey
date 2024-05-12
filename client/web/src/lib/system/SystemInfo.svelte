@@ -4,6 +4,7 @@
   import { sleep, humanFileSize, humanDuration } from '$lib/util/util';
   import { newGetRequest } from '$lib/util/sjgmsapi';
   import RubiksCube from '$lib/widget/RubiksCube.svelte';
+  import HealthSymbol from '$lib/widget/HealthSymbol.svelte';
   import SpinnerOverlay from '$lib/widget/SpinnerOverlay.svelte';
 
   let looping = true;
@@ -51,7 +52,8 @@
           <tr><td class="field-column has-text-weight-bold" title="Operating system name">
             OS</td><td class="notranslate"><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
           <tr><td class="field-column has-text-weight-bold" title="Disk usage">
-            Disk</td><td class="notranslate">{info.disk.percent}%</td></tr>
+            Disk</td><td class="notranslate"><HealthSymbol red={90.0} amber={75.0} value={info.disk.percent} />
+            {info.disk.percent}%</td></tr>
           <tr><td class="field-column" title="Total disk size">
             Total</td><td class="notranslate">{humanFileSize(info.disk.total)}</td></tr>
           <tr><td class="field-column" title="Used disk space">
@@ -84,13 +86,15 @@
       {#if info}
         <tbody>
           <tr><td class="field-column has-text-weight-bold" title="CPU usage">
-            CPU</td><td class="notranslate">{info.cpu.percent}%</td></tr>
+            CPU</td><td class="notranslate"><HealthSymbol red={80.0} amber={50.0} value={info.cpu.percent} />
+            {info.cpu.percent}%</td></tr>
           <tr><td class="field-column" title="CPU model name">
             Model</td><td class="notranslate">{info.cpu.modelname}</td></tr>
           <tr><td class="field-column notranslate" title="CPU Architecture | Cores | Threads">
             A | C | T</td><td class="notranslate">{info.cpu.arch} | {info.cpu.cpus} | {info.cpu.threads}</td></tr>
           <tr><td class="field-column has-text-weight-bold" title="Memory usage">
-            Memory</td><td class="notranslate">{info.memory.percent}%</td></tr>
+            Memory</td><td class="notranslate"><HealthSymbol red={90.0} amber={75.0} value={info.memory.percent} />
+            {info.memory.percent}%</td></tr>
           <tr><td class="field-column" title="Total memory size">
             Total</td><td class="notranslate">{humanFileSize(info.memory.total)}</td></tr>
           <tr><td class="field-column" title="Used memory space">
@@ -98,7 +102,9 @@
           <tr><td class="field-column" title="Available memory space">
             Available</td><td class="notranslate">{humanFileSize(info.memory.available)}</td></tr>
           <tr><td class="field-column" title="Swap usage">
-            Swap</td><td class="notranslate">{info.memory.swap ? info.memory.swap.percent + '%' : 'n/a'}</td></tr>
+            Swap</td><td class="notranslate">{#if info.memory.swap}
+            <HealthSymbol red={80.0} amber={50.0} value={info.memory.swap.percent} />
+            {info.memory.swap.percent}%{:else}n/a{/if}</td></tr>
         </tbody>
       {:else}
         <tbody>

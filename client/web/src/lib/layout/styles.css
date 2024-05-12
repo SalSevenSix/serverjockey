@@ -38,6 +38,18 @@ a[target="_blank"] {
 
 /* Utilities */
 
+.status-color-green {
+  color: #48C78E;
+}
+
+.status-color-amber {
+  color: #FFE08A;
+}
+
+.status-color-red {
+  color: #F14668;
+}
+
 .position-relative {
   position: relative;
 }

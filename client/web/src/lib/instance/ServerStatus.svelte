@@ -10,10 +10,10 @@
 
   $: statusIconClass = getStatusIconClass($serverStatus.running, $serverStatus.state);
   function getStatusIconClass(running, state) {
-    if (state === 'MAINTENANCE') return 'fa-toggle-on ss-maintenance';
+    if (state === 'MAINTENANCE') return 'fa-toggle-on status-color-red';
     if (!running || !state) return 'fa-toggle-off';
-    if (state === 'STARTED') return 'fa-toggle-on ss-started';
-    return 'fa-toggle-on ss-working';
+    if (state === 'STARTED') return 'fa-toggle-on status-color-green';
+    return 'fa-toggle-on status-color-amber';
   }
 
   $: version = ($serverStatus.details && $serverStatus.details.version) ? $serverStatus.details.version : '';
@@ -63,18 +63,3 @@
     </tbody>
   </table>
 </div>
-
-
-<style>
-  .ss-started {
-    color: #48C78E;
-  }
-
-  .ss-working {
-    color: #FFE08A;
-  }
-
-  .ss-maintenance {
-    color: #F14668;
-  }
-</style>
