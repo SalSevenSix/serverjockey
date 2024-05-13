@@ -11,6 +11,7 @@ _SECURE = '_SECURE'
 X_SECRET = 'X-Secret'
 RESOURCES_READY = 'RESOURCES_READY'
 
+HTTP, HTTPS = 'http', 'https'
 HOST = 'Host'
 ORIGIN = 'Origin'
 CONTENT_TYPE = 'Content-Type'
@@ -30,6 +31,7 @@ ACCESS_CONTROL_MAX_AGE = 'Access-Control-Max-Age'
 ORIGIN_ALL = '*'
 ORIGIN_EXT_PREFIX = 'chrome-extension://'
 ORIGIN_WEBDEV = 'http://localhost:5173'
+X_FORWARDED_PROTO = 'X-Forwarded-Proto'
 
 
 def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):

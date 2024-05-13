@@ -1,12 +1,14 @@
 import logging
 import re
 import aiohttp
+from yarl import URL
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
 from core.util import pack, io, objconv
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics, httpssl
 
+_HTTP_PROTOCALS = (httpcnt.HTTP, httpcnt.HTTPS)
 _ACCEPTED_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
     httpcnt.MIME_APPLICATION_JSON,
@@ -81,9 +83,9 @@ class _RequestHandler:
             return self._build_response_options()
 
         # GET
-        secure = self._security.check(self._request)
+        request_url, secure = self._request_url(), self._security.check(self._request)
         if self._method is httpabc.Method.GET:
-            response_body = await self._resource.handle_get(self._request.url, secure)
+            response_body = await self._resource.handle_get(request_url, secure)
             if response_body is None:
                 raise err.HTTPNotFound
             return await self._build_response(response_body)
@@ -109,8 +111,14 @@ class _RequestHandler:
                 request_body = objconv.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
-        response_body = await self._resource.handle_post(self._request.url, request_body)
+        response_body = await self._resource.handle_post(request_url, request_body)
         return await self._build_response(response_body)
+
+    def _request_url(self) -> URL:
+        url, proto = self._request.url, self._headers.get(httpcnt.X_FORWARDED_PROTO)
+        if proto and proto in _HTTP_PROTOCALS:
+            url = url.with_scheme(proto)
+        return url
 
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:

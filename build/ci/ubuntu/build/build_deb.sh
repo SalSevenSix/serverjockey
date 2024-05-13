@@ -9,7 +9,7 @@ cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
 DIST_DIR="$BUILD_DIR/dist"
 BUILD_USER="$(pwd | tr '/' ' ' | awk '{print $2}')"
-WEB_DIR="/var/www/html"
+WEB_DIR="/var/www/html/downloads"
 [ -d "$WEB_DIR" ] || exit 1
 BRANCH="develop"
 REPO_URL="https://raw.githubusercontent.com/SalSevenSix/serverjockey/$BRANCH"
