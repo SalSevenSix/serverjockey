@@ -102,41 +102,69 @@ class ContentTypeImpl(httpabc.ContentType):
 
 
 class SecurityService:
-    _TIMOUT = 5.0
+    COUNT, TIMOUT = 3, 5.0
 
     def __init__(self, secret: str):
         self._secret = secret
-        self._failures = {}
+        self._failures = _SecurityFailures()
 
     def secret(self) -> str:
         return self._secret
 
     def check(self, request: aiohttp.abc.Request) -> bool:
-        remote, now = request.remote, time.time()
-        last_failure = util.get(remote, self._failures)
-        if last_failure:
-            if (now - last_failure) < SecurityService._TIMOUT:
-                self._failures[remote] = now
+        now, remote = time.time(), request.remote
+        count, last = self._failures.get(remote)
+        if count >= SecurityService.COUNT:
+            if (now - last) < SecurityService.TIMOUT:
+                self._failures.set(remote, now)
                 raise httpabc.ResponseBody.UNAUTHORISED
-            del self._failures[remote]
+            self._failures.remove(remote)
+        secret = SecurityService._get_secret(request)
+        if secret is None:
+            return False  # No token provided, which is acceptable for public requests
+        if secret == self._secret:
+            return True  # Correct token provided
+        # Incorrect token...
+        self._failures.add(remote, now)
+        raise httpabc.ResponseBody.UNAUTHORISED
+
+    @staticmethod
+    def _get_secret(request) -> str | None:
         secret = HeadersTool(request).get(X_SECRET)
         if secret is None:
             secret = request.cookies.get('secret')
-        if secret is None:
-            return False
-        if secret == self._secret:
-            return True
-        self._clean_failures(now)
-        self._failures[remote] = now
-        raise httpabc.ResponseBody.UNAUTHORISED
+        return secret
 
-    def _clean_failures(self, now: float):
-        delete_keys = []
-        for key, value in self._failures.items():
-            if (now - value) >= SecurityService._TIMOUT:
-                delete_keys.append(key)
-        for key in delete_keys:
-            del self._failures[key]
+
+class _SecurityFailures:
+
+    def __init__(self):
+        self._failures = {}
+
+    def get(self, remote) -> tuple:
+        failure = util.get(remote, self._failures)
+        return failure if failure else (0, None)
+
+    def set(self, remote, now: float):
+        count = self.get(remote)[0]
+        self._failures[remote] = (count, now)
+
+    def add(self, remote, now: float):
+        self._clear(now)
+        count = self.get(remote)[0]
+        self._failures[remote] = (count + 1, now)
+
+    def remove(self, remote):
+        if remote in self._failures:
+            del self._failures[remote]
+
+    def _clear(self, now: float):
+        remotes = []
+        for remote, failure in self._failures.items():
+            if (now - failure[1]) >= SecurityService.TIMOUT:
+                remotes.append(remote)
+        for remote in remotes:
+            self.remove(remote)
 
 
 class HeadersTool:
