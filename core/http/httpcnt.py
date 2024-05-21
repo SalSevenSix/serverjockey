@@ -3,7 +3,7 @@ import typing
 import re
 import time
 import aiohttp
-# ALLOW util.* msg.* context.* http.httpabc
+# ALLOW const.* util.* msg.* context.* http.httpabc
 from core.util import util
 from core.http import httpabc
 
@@ -11,7 +11,6 @@ _SECURE = '_SECURE'
 X_SECRET = 'X-Secret'
 RESOURCES_READY = 'RESOURCES_READY'
 
-HTTP, HTTPS = 'http', 'https'
 HOST = 'Host'
 ORIGIN = 'Origin'
 CONTENT_TYPE = 'Content-Type'

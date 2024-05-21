@@ -1,5 +1,5 @@
 import abc
-# ALLOW util.* msg.* context.* http.* store.*
+# ALLOW const.* util.* msg.* context.* http.* store.*
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
 from core.context import contextsvc

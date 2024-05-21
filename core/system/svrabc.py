@@ -1,5 +1,5 @@
 import abc
-# ALLOW util.* msg.* context.* http.*
+# ALLOW const.* util.* msg.* context.* http.*
 from core.context import contextsvc
 from core.http import httpabc
 

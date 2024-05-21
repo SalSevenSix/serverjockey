@@ -1,6 +1,6 @@
 import json
 import typing
-# ALLOW util.*
+# ALLOW const.* util.*
 
 
 def to_bool(value: typing.Any) -> bool:

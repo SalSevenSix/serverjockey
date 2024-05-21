@@ -1,5 +1,5 @@
 import re
-# ALLOW util.* msg.msgabc
+# ALLOW const.* util.* msg.msgabc
 from core.msg import msgabc
 
 

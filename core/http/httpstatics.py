@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
-# ALLOW util.* msg.* context.* http.httpabc http.httpcnt
+# ALLOW const.* util.* msg.* context.* http.httpabc http.httpcnt
 from core.util import util, pack, pkg
 from core.context import contextsvc
 from core.http import httpabc, httpcnt

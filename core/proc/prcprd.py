@@ -1,7 +1,7 @@
 import logging
 import typing
 from asyncio import streams
-# ALLOW util.* msg.* context.* proc.prcenc
+# ALLOW const.* util.* msg.* context.* proc.prcenc
 from core.util import funcutil, io
 from core.msg import msgabc, msgext
 from core.proc import prcenc

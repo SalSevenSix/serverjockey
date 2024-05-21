@@ -1,5 +1,5 @@
 import time
-# ALLOW NONE
+# ALLOW const.*
 
 
 def to_seconds(millis: int) -> float:

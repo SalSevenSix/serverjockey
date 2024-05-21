@@ -3,7 +3,7 @@ import logging
 import typing
 import asyncio
 from functools import partial, wraps
-# ALLOW util.util
+# ALLOW const.* util.util
 
 
 def to_async(func):

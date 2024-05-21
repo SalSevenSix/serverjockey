@@ -3,7 +3,7 @@ import logging
 import asyncio
 import typing
 import aiofiles
-# ALLOW util.* msg.* context.* http.*
+# ALLOW const.* util.* msg.* context.* http.*
 from core.util import util, io, tasks, aggtrf, objconv, dtutil
 from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
 from core.http import httpabc, httpcnt, httpsubs

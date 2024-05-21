@@ -4,7 +4,7 @@ import re
 from sqlalchemy import Executable, func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
-# ALLOW util.* store.storeabc
+# ALLOW const.* util.* store.storeabc
 from core.util import util, dtutil
 from core.store import storeabc
 

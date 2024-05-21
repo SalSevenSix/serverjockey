@@ -1,7 +1,7 @@
 import typing
 import asyncio
 from asyncio import subprocess
-# ALLOW util.* msg.* context.* http.* system.* proc.*
+# ALLOW const.* util.* msg.* context.* http.* system.* proc.*
 from core.util import signals
 from core.msg import msgabc, msgext
 from core.proc import proch

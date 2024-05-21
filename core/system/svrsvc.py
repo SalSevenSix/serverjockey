@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 import asyncio
 import typing
-# ALLOW util.* msg.* context.* http.* system.svrabc
+# ALLOW const.* util.* msg.* context.* http.* system.svrabc
 from core.util import tasks, util, dtutil
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc

@@ -6,7 +6,7 @@ import asyncio
 import time
 import random
 import itertools
-# ALLOW util.*
+# ALLOW const.* util.*
 from core.util import dtutil, idutil, funcutil, io, logutil, tasks, pkg
 
 _make_archive = funcutil.to_async(shutil.make_archive)

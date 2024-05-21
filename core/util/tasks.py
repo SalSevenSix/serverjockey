@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import typing
-# ALLOW util.*
+# ALLOW const.* util.*
 
 
 class _Tasker:

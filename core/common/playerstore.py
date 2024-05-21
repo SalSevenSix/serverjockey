@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing
-# ALLOW util.* msg.* context.* http.* system.* proc.*
+# ALLOW const.* util.* msg.* context.* http.* system.* proc.*
 from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext, msgtrf
 from core.http import httpabc, httpcnt

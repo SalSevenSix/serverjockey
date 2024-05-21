@@ -4,7 +4,7 @@ import logging
 import time
 import uuid
 import typing
-# ALLOW util.* msg.* context.* http.httpabc
+# ALLOW const.* util.* msg.* context.* http.httpabc
 from core.util import aggtrf, util
 from core.msg import msgabc, msgext, msgftr, msgtrf
 from core.http import httpabc

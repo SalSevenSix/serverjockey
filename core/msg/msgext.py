@@ -3,7 +3,7 @@ import enum
 import logging
 import collections
 import typing
-# ALLOW util.* msg.*
+# ALLOW const.* util.* msg.*
 from core.util import idutil, aggtrf, tasks, util, io, pack, funcutil
 from core.msg import msgabc, msgftr, msgtrf, msglog
 

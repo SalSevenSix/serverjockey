@@ -1,5 +1,5 @@
 import logging
-# ALLOW util.util
+# ALLOW const.* util.util
 from core.util import shellutil, io, tasks
 
 

@@ -1,4 +1,4 @@
-# ALLOW util.* msg.msgabc
+# ALLOW const.* util.* msg.msgabc
 from core.util import objconv
 from core.msg import msgabc
 

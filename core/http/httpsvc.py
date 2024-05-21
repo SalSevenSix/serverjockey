@@ -3,12 +3,13 @@ import re
 import aiohttp
 from yarl import URL
 from aiohttp import web, abc as webabc, web_exceptions as err
-# ALLOW util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
+# ALLOW const.* util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
+from core.const import wc
 from core.util import pack, io, objconv
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics, httpssl
 
-_HTTP_PROTOCALS = (httpcnt.HTTP, httpcnt.HTTPS)
+_HTTP_PROTOCALS = (wc.HTTP, wc.HTTPS)
 _ACCEPTED_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
     httpcnt.MIME_APPLICATION_JSON,

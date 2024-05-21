@@ -1,7 +1,7 @@
 import logging
 import asyncio
 import typing
-# ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
+# ALLOW const.* util.* msg.msgabc msg.msgftr msg.msgtrf
 from core.util import tasks
 from core.msg import msgabc, msgftr
 

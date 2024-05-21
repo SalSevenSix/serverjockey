@@ -1,8 +1,8 @@
-# ALLOW util.* msg.* context.*
+# ALLOW const.* util.* msg.* context.*
 from core.util import io
 
 
-async def write_wrapper(path: str):
+async def write_wrapper(path: str) -> str:
     filename = path + '/wrapper.py'
     await io.write_file(filename, _wrapper_code())
     return filename

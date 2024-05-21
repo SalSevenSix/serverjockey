@@ -3,7 +3,7 @@ import vdf
 import re
 import asyncio
 from asyncio import subprocess
-# ALLOW util.* msg.* context.* http.* system.* proc.*
+# ALLOW const.* util.* msg.* context.* http.* system.* proc.*
 from core.util import aggtrf, util, io, tasks
 from core.msg import msgabc, msgftr
 from core.context import contextsvc

@@ -1,7 +1,8 @@
 import typing
 import asyncio
 import base64
-# ALLOW NONE
+# ALLOW const.*
+from core.const import wc
 
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
@@ -42,11 +43,11 @@ def urlsafe_b64decode(value: str) -> str:
     return str(value, 'utf-8')
 
 
-def build_url(scheme: str = 'http', host: str | None = 'localhost', port: int | None = 80, path: str = '') -> str:
+def build_url(scheme: str = wc.HTTP, host: str | None = 'localhost', port: int | None = 80, path: str = '') -> str:
     parts = [scheme, '://']
     if host:
         parts.append(host)
-        if port and port != 80:
+        if port and not (scheme == wc.HTTP and port == 80) and not (scheme == wc.HTTPS and port == 443):
             parts.append(':')
             parts.append(str(port))
     if path:
@@ -56,7 +57,7 @@ def build_url(scheme: str = 'http', host: str | None = 'localhost', port: int | 
     return ''.join(parts)
 
 
-def human_file_size(value: int | None):
+def human_file_size(value: int | None) -> str:
     if value is None:
         return ''
     if value < 1024:
@@ -128,7 +129,7 @@ def split_lines(text: str, lines_limit: int = 0, line_char_limit: int = 0, total
     return tuple(lines)
 
 
-def full_path(base: str | None, path: str | None):
+def full_path(base: str | None, path: str | None) -> str | None:
     if not path:
         return None
     if path[0] == '/':

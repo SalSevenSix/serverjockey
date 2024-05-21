@@ -3,7 +3,7 @@ import typing
 import abc
 from sqlalchemy import Column, ForeignKey, Integer, Float, Text
 from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column, relationship
-# ALLOW util.* msg.* context.*
+# ALLOW const.* util.* msg.* context.*
 from core.msg import msgabc, msgext
 
 TRANSACTION = 'storeabc.TRANSACTION'

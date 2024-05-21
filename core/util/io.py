@@ -5,7 +5,7 @@ import shutil
 import pathlib
 import aiofiles
 from aiofiles import os as aioos
-# ALLOW util.*
+# ALLOW const.* util.*
 from core.util import dtutil, idutil, funcutil
 
 DEFAULT_CHUNK_SIZE = 65536  # 64Kb

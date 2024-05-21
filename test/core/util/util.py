@@ -31,9 +31,16 @@ class TestCoreUtilUtil(unittest.TestCase):
         self.assertEqual('http://foo.bar/', util.build_url(host='foo.bar', path='/'))
         self.assertEqual('http://foo.bar/aaa/bbb', util.build_url(host='foo.bar', path='aaa/bbb'))
         self.assertEqual('http://foo.bar/aaa/bbb', util.build_url(host='foo.bar', path='/aaa/bbb'))
-        self.assertEqual('http://foo.bar/aaa/bbb', util.build_url(host='foo.bar', port=80, path='/aaa/bbb'))
         self.assertEqual('http://foo.bar:6164/aaa/bbb', util.build_url(host='foo.bar', port=6164, path='/aaa/bbb'))
         self.assertEqual('http://foo.bar/a?x=y&a=b', util.build_url(host='foo.bar', path='/a?x=y&a=b'))
+        self.assertEqual('http://foo.bar/aaa/bbb',
+                         util.build_url(scheme='http', host='foo.bar', port=80, path='/aaa/bbb'))
+        self.assertEqual('https://foo.bar:80/aaa/bbb',
+                         util.build_url(scheme='https', host='foo.bar', port=80, path='/aaa/bbb'))
+        self.assertEqual('https://foo.bar/aaa/bbb',
+                         util.build_url(scheme='https', host='foo.bar', port=443, path='/aaa/bbb'))
+        self.assertEqual('http://foo.bar:443/aaa/bbb',
+                         util.build_url(scheme='http', host='foo.bar', port=443, path='/aaa/bbb'))
         self.assertEqual('https://foo.bar:6164/aaa/bbb',
                          util.build_url(scheme='https', host='foo.bar', port=6164, path='/aaa/bbb'))
 

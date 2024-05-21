@@ -1,5 +1,5 @@
 import random
-# ALLOW util.dtutil
+# ALLOW const.* util.dtutil
 from core.util import dtutil
 
 _BASE62_CHARS = 'Il1O0ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'

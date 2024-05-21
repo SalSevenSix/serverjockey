@@ -1,5 +1,6 @@
 import collections
 from pympler import muppy
+# ALLOW const.* util.* http.*
 from core.http import httpabc, httpcnt
 
 # https://github.com/pympler/pympler
