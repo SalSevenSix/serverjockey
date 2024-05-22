@@ -104,18 +104,20 @@ def delete_dict(dictionary: dict, keys: typing.Collection) -> dict:
     return result
 
 
-def left_chop_and_strip(value: str, keyword: str) -> str:
+def lchop(value: str, keyword: str, strip: bool = True) -> str:
     index = value.find(keyword)
     if index == -1:
         return value
-    return value[index + len(keyword):].strip()
+    value = value[index + len(keyword):]
+    return value.strip() if strip else value
 
 
-def right_chop_and_strip(value: str, keyword: str) -> str:
+def rchop(value: str, keyword: str, strip: bool = True) -> str:
     index = value.find(keyword)
     if index == -1:
         return value
-    return value[:index].strip()
+    value = value[:index]
+    return value.strip() if strip else value
 
 
 def split_lines(text: str, lines_limit: int = 0, line_char_limit: int = 0, total_char_limit: int = 0) -> tuple | None:

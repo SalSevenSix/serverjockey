@@ -44,8 +44,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
-            value = util.right_chop_and_strip(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
+            value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         return None
@@ -74,18 +74,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
-            name = util.left_chop_and_strip(value, '[')
-            name = util.right_chop_and_strip(name, ']')
-            text = util.left_chop_and_strip(value, ']: "')[:-1]
+            value = util.lchop(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.lchop(value, '[')
+            name = util.rchop(name, ']')
+            text = util.lchop(value, ']: "')[:-1]
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.KICK_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.KICK)
+            value = util.lchop(message.data(), _PlayerEventSubscriber.KICK)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value[:-1])
             return None
-        value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.NAME)
-        value = util.right_chop_and_strip(value, _PlayerEventSubscriber.CHARACTER)
+        value = util.lchop(message.data(), _PlayerEventSubscriber.NAME)
+        value = util.rchop(value, _PlayerEventSubscriber.CHARACTER)
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
         else:

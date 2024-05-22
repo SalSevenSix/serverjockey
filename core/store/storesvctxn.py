@@ -5,6 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 # ALLOW const.* util.* msg*.* context.* store.storeabc
+from core.const import gc
 from core.util import sysutil, objconv
 from core.context import contextsvc
 from core.store import storeabc
@@ -35,8 +36,8 @@ class IntegrityChecks(storeabc.Transaction):
 
     def execute(self, session: Session) -> typing.Any:
         stime, corrections = self._context.config('stime'), 0
-        emap = {'START': 'EXCEPTION', 'STARTING': 'EXCEPTION', 'STARTED': 'EXCEPTION',
-                'STOPPING': 'STOPPED', 'MAINTENANCE': 'READY'}
+        emap = {gc.START: gc.EXCEPTION, gc.STARTING: gc.EXCEPTION, gc.STARTED: gc.EXCEPTION,
+                gc.STOPPING: gc.STOPPED, gc.MAINTENANCE: gc.READY}
         details = objconv.obj_to_json({'error': 'Event inserted by startup integrity check'})
         statement = select(storeabc.InstanceEvent)
         statement = statement.group_by(storeabc.InstanceEvent.instance_id)

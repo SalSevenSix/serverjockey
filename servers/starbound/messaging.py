@@ -47,9 +47,9 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
-            value = util.right_chop_and_strip(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
-            value = util.right_chop_and_strip(value, '(')
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
+            value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
+            value = util.rchop(value, '(')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
@@ -82,13 +82,13 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
-            name = util.right_chop_and_strip(value, '>')
-            text = util.left_chop_and_strip(value, '>')
+            value = util.lchop(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.rchop(value, '>')
+            text = util.lchop(value, '>')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
-        value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)[1:]
-        value = util.right_chop_and_strip(value, "' ")
+        value = util.lchop(message.data(), _PlayerEventSubscriber.PREFIX)[1:]
+        value = util.rchop(value, "' ")
         if _PlayerEventSubscriber.CONNECT_FILTER.accepts(message):
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None

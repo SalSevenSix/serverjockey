@@ -3,6 +3,7 @@ import logging
 import asyncio
 import typing
 # ALLOW const.* util.* msg*.* context.* http.* system.svrabc
+from core.const import gc
 from core.util import tasks, util, dtutil
 from core.msg import msgabc, msgext, msgftr
 from core.msgc import mc
@@ -68,19 +69,19 @@ class ServerService(msgabc.AbcSubscriber):
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
-                logging.debug('STARTING instance ' + identity)
+                logging.debug(gc.STARTING + ' instance ' + identity)
                 ServerStatus.notify_running(self._context, self, self._running)
                 start = dtutil.now_millis()
                 try:
                     await self._server.run()
                 except Exception as e:
-                    ServerStatus.notify_status(self._context, self, 'EXCEPTION', {'error': str(e)})
-                    logging.warning('EXCEPTION instance ' + identity + ' [' + repr(e) + ']')
+                    ServerStatus.notify_status(self._context, self, gc.EXCEPTION, {'error': str(e)})
+                    logging.warning(gc.EXCEPTION + ' instance ' + identity + ' [' + repr(e) + ']')
                 finally:
                     self._running = False
                     controller.check_uptime(dtutil.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
-                    logging.debug('STOPPED instance ' + identity)
+                    logging.debug(gc.STOPPED + ' instance ' + identity)
 
     async def handle(self, message):
         action = message.name()
@@ -212,11 +213,10 @@ class ServerStatus(msgabc.AbcSubscriber):
 
 
 class _Status:
-    READY = 'READY'
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._running, self._state = False, _Status.READY
+        self._running, self._state = False, gc.READY
         self._details, self._startmillis = {}, 0
 
     def notify_running(self, running) -> bool:
@@ -233,16 +233,15 @@ class _Status:
     def notify_status(self, status) -> bool:
         if not isinstance(status, dict):
             return False
-        state, details = util.get('state', status), util.get('details', status)
-        state_updated = self._notify_state(state)
-        details_updated = self._notify_details(details)
+        state_updated = self._notify_state(util.get('state', status))
+        details_updated = self._notify_details(util.get('details', status))
         return state_updated or details_updated
 
     def _notify_state(self, state) -> bool:
         if state is None or state == self._state:
             return False
         self._state = state
-        if state == _Status.READY:
+        if state == gc.READY:
             self._details = {}
         return True
 

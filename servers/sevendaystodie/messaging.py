@@ -49,20 +49,20 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
-            value = util.right_chop_and_strip(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
+            value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.IP_PREFIX)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.IP_PREFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': value})
             return None
         if _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'cport': value})
             return None
         return None
@@ -87,19 +87,19 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), "to 'Global'):")
-            name = util.right_chop_and_strip(value, ':')[1:-1]
-            text = util.left_chop_and_strip(value, ':')
+            value = util.lchop(message.data(), "to 'Global'):")
+            name = util.rchop(value, ':')[1:-1]
+            text = util.lchop(value, ':')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
-            value = util.right_chop_and_strip(value, _PlayerEventSubscriber.JOIN_SUFFIX)
+            value = util.lchop(message.data(), _PlayerEventSubscriber.PREFIX)
+            value = util.rchop(value, _PlayerEventSubscriber.JOIN_SUFFIX)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PREFIX)
-            value = util.right_chop_and_strip(value, _PlayerEventSubscriber.LEAVE_SUFFIX)
+            value = util.lchop(message.data(), _PlayerEventSubscriber.PREFIX)
+            value = util.rchop(value, _PlayerEventSubscriber.LEAVE_SUFFIX)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         return None

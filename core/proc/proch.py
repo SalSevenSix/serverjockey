@@ -4,6 +4,7 @@ import typing
 import asyncio
 from asyncio import streams
 # ALLOW const.* util.* msg*.* context.* proc.prcenc proc.prcprd
+from core.const import gc
 from core.util import signals, cmdutil, funcutil, tasks
 from core.msg import msgabc, msgext, msgftr
 from core.proc import prcenc, prcprd
@@ -116,12 +117,12 @@ class ServerProcess:
     FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
 
-    STATE_START = 'ServerProcess.Start'
-    STATE_STARTING = 'ServerProcess.Starting'
-    STATE_STARTED = 'ServerProcess.Started'
-    STATE_STOPPING = 'ServerProcess.Stopping'
-    STATE_STOPPED = 'ServerProcess.Stopped'
-    STATE_EXCEPTION = 'ServerProcess.Exception'
+    STATE_START = 'ServerProcess.' + gc.START
+    STATE_STARTING = 'ServerProcess.' + gc.STARTING
+    STATE_STARTED = 'ServerProcess.' + gc.STARTED
+    STATE_STOPPING = 'ServerProcess.' + gc.STOPPING
+    STATE_STOPPED = 'ServerProcess.' + gc.STOPPED
+    STATE_EXCEPTION = 'ServerProcess.' + gc.EXCEPTION
 
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)

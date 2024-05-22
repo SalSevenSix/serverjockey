@@ -193,19 +193,19 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.IP)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': value})
             return None
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.INGAMETIME)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
             return None
         return None
@@ -227,18 +227,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            name = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
-            name = util.right_chop_and_strip(name, ':')
-            text = util.left_chop_and_strip(message.data(), ':')
+            name = util.lchop(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.rchop(name, ':')
+            text = util.lchop(message.data(), ':')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PLAYER)
-            value = util.right_chop_and_strip(value, _PlayerEventSubscriber.JOIN)
+            value = util.lchop(message.data(), _PlayerEventSubscriber.PLAYER)
+            value = util.rchop(value, _PlayerEventSubscriber.JOIN)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.PLAYER)
-            value = util.right_chop_and_strip(value, _PlayerEventSubscriber.LEAVE)
+            value = util.lchop(message.data(), _PlayerEventSubscriber.PLAYER)
+            value = util.rchop(value, _PlayerEventSubscriber.LEAVE)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         return None

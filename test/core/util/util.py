@@ -44,15 +44,15 @@ class TestCoreUtilUtil(unittest.TestCase):
         self.assertEqual('https://foo.bar:6164/aaa/bbb',
                          util.build_url(scheme='https', host='foo.bar', port=6164, path='/aaa/bbb'))
 
-    def test_left_chop_and_strip(self):
-        self.assertEqual('', util.left_chop_and_strip('', ''))
-        self.assertEqual('hey yo }) the end bit',
-                         util.left_chop_and_strip('Hello world ({ hey yo }) the end bit', '({'))
+    def test_lchop(self):
+        self.assertEqual('', util.lchop('', ''))
+        self.assertEqual('hey yo }) the end bit', util.lchop('Hello world ({ hey yo }) the end bit ', '({'))
+        self.assertEqual(' hey yo }) the end bit ', util.lchop('Hello world ({ hey yo }) the end bit ', '({', False))
 
-    def test_right_chop_and_strip(self):
-        self.assertEqual('', util.right_chop_and_strip('', ''))
-        self.assertEqual('Hello world ({ hey yo',
-                         util.right_chop_and_strip('Hello world ({ hey yo }) the end bit', '})'))
+    def test_rchop(self):
+        self.assertEqual('', util.rchop('', ''))
+        self.assertEqual('Hello world ({ hey yo', util.rchop(' Hello world ({ hey yo }) the end bit', '})'))
+        self.assertEqual(' Hello world ({ hey yo ', util.rchop(' Hello world ({ hey yo }) the end bit', '})', False))
 
     def test_human_file_size(self):
         self.assertEqual('', util.human_file_size(None))

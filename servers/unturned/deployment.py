@@ -119,6 +119,6 @@ class Deployment:
             commands = await io.read_file(self._commands_file)
             for line in commands.split('\n'):
                 if line and line.lower().startswith(port_key):
-                    port = int(util.left_chop_and_strip(line.lower(), port_key))
+                    port = int(util.lchop(line.lower(), port_key))
         portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Unturned query')
         portmapper.map_port(self._mailer, self, port + 1, portmapper.UDP, 'Unturned server')

@@ -54,16 +54,16 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.MAP_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), '(')[:-1]
+            value = util.lchop(message.data(), '(')[:-1]
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'map': value})
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'server version')
-            value = util.right_chop_and_strip(value, ',')
+            value = util.lchop(message.data(), 'server version')
+            value = util.rchop(value, ',')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'port')
+            value = util.lchop(message.data(), 'port')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': self._public_ip, 'port': value})
             return None
         return None
@@ -94,19 +94,19 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
             if message.data().startswith('[All Chat][Console (0)]: @'):
                 return None
-            name = util.left_chop_and_strip(message.data(), '[All Chat][')
-            name = util.right_chop_and_strip(name, '(')
-            text = util.left_chop_and_strip(message.data(), ')]:')
+            name = util.lchop(message.data(), '[All Chat][')
+            name = util.rchop(name, '(')
+            text = util.lchop(message.data(), ')]:')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), ' "')
-            value = util.right_chop_and_strip(value, '" connected')
+            value = util.lchop(message.data(), ' "')
+            value = util.rchop(value, '" connected')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'Dropped client \'')
-            value = util.right_chop_and_strip(value, '\' from server')
+            value = util.lchop(message.data(), 'Dropped client \'')
+            value = util.rchop(value, '\' from server')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         return None

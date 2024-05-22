@@ -52,21 +52,21 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), 'Factorio')
-            value = util.right_chop_and_strip(value, '(build')
+            value = util.lchop(message.data(), 'Factorio')
+            value = util.rchop(value, '(build')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), '({')
-            value = util.right_chop_and_strip(value, '})')
+            value = util.lchop(message.data(), '({')
+            value = util.rchop(value, '})')
             value = value.split(':')
             if value[0] == '0.0.0.0':
                 value[0] = self._local_ip
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value[0], 'port': value[1]})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), '({')
-            value = util.right_chop_and_strip(value, '})')
+            value = util.lchop(message.data(), '({')
+            value = util.rchop(value, '})')
             value = value.split(':')
             if value[0] == '0.0.0.0':
                 value[0] = self._local_ip
@@ -93,26 +93,26 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.CHAT)
-            name = util.right_chop_and_strip(value, ':')
-            text = util.left_chop_and_strip(value, ':')
+            value = util.lchop(message.data(), _PlayerEventSubscriber.CHAT)
+            name = util.rchop(value, ':')
+            text = util.lchop(value, ':')
             if name == '<server>' and text.startswith('@'):
                 return None  # Ignore chat messages from /console/say command
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.JOIN)
-            value = util.right_chop_and_strip(value, 'joined the game')
+            value = util.lchop(message.data(), _PlayerEventSubscriber.JOIN)
+            value = util.rchop(value, 'joined the game')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LEAVE)
-            value = util.right_chop_and_strip(value, 'left the game')
+            value = util.lchop(message.data(), _PlayerEventSubscriber.LEAVE)
+            value = util.rchop(value, 'left the game')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         if _PlayerEventSubscriber.KICK_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.KICK)
-            value = util.right_chop_and_strip(value, 'was kicked by')
+            value = util.lchop(message.data(), _PlayerEventSubscriber.KICK)
+            value = util.rchop(value, 'was kicked by')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
             return None
         return None

@@ -14,7 +14,7 @@ class ServerStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         name, data = message.name(), message.data()
-        state = util.left_chop_and_strip(name, '.').upper()
+        state = util.lchop(name, '.').upper()
         details = {'error': str(data)} if name is proch.ServerProcess.STATE_EXCEPTION else None
         svrsvc.ServerStatus.notify_status(self._mailer, self, state, details)
         return None

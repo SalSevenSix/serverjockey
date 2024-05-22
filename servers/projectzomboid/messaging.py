@@ -65,24 +65,24 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.INGAMETIME)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
             return None
         if SERVER_RESTART_REQUIRED_FILTER.accepts(message):
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': dtutil.to_millis(message.created())})
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.VERSION)
-            value = util.right_chop_and_strip(value, 'demo=')
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
+            value = util.rchop(value, 'demo=')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.IP)
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.left_chop_and_strip(message.data(), _ServerDetailsSubscriber.PORT)
-            value = util.right_chop_and_strip(value, 'port for connections')
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
+            value = util.rchop(value, 'port for connections')
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': int(value)})
             return None
         return None
@@ -101,15 +101,15 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            steamid = util.left_chop_and_strip(message.data(), 'steam-id=')
-            steamid = util.right_chop_and_strip(steamid, 'access=')
-            steamid = util.right_chop_and_strip(steamid, '(owner=')
-            name = util.left_chop_and_strip(message.data(), 'username="')
-            name = util.right_chop_and_strip(name, '" connection-type=')
+            steamid = util.lchop(message.data(), 'steam-id=')
+            steamid = util.rchop(steamid, 'access=')
+            steamid = util.rchop(steamid, '(owner=')
+            name = util.lchop(message.data(), 'username="')
+            name = util.rchop(name, '" connection-type=')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
             return None
         if _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
-            parts = util.left_chop_and_strip(message.data(), _PlayerEventSubscriber.LOGOUT).split(' ')
+            parts = util.lchop(message.data(), _PlayerEventSubscriber.LOGOUT).split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
             return None
@@ -127,10 +127,10 @@ class _PlayerChatSubscriber(msgabc.AbcSubscriber):
         self._mailer = mailer
 
     def handle(self, message):
-        name = util.left_chop_and_strip(message.data(), 'author=')
-        name = util.right_chop_and_strip(name, ', text=')
-        text = util.left_chop_and_strip(message.data(), ', text=')
-        text = util.right_chop_and_strip(text, '}\' was sent members of chat')
+        name = util.lchop(message.data(), 'author=')
+        name = util.rchop(name, ', text=')
+        text = util.lchop(message.data(), ', text=')
+        text = util.rchop(text, '}\' was sent members of chat')
         playerstore.PlayersSubscriber.event_chat(self._mailer, self, name[1:-1], text[1:-1])
         return None
 

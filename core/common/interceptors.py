@@ -1,10 +1,11 @@
 # ALLOW const.* util.* msg*.* context.* http.* system.* proc.*
+from core.const import gc
 from core.msg import msgabc
 from core.http import httpabc
 from core.system import svrext
 
-_STATES_NOT_STARTED = ('START', 'STARTING', 'STOPPING')
-_STATES_MAINTENANCE = (svrext.MaintenanceStateSubscriber.MAINTENANCE,)
+_STATES_NOT_STARTED = (gc.START, gc.STARTING, gc.STOPPING)
+_STATES_MAINTENANCE = (gc.MAINTENANCE,)
 
 
 def block_not_started(mailer: msgabc.MulticastMailer) -> httpabc.InterceptorBuilder:

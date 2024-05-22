@@ -19,7 +19,7 @@ class TestContext:
         home, cwd = '/tmp/sjgmstest', os.getcwd()
         if os.path.isdir(home):
             shutil.rmtree(home)
-        template = util.right_chop_and_strip(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
+        template = util.rchop(cwd, _SJ_DIR) + _SJ_DIR + '/test/instances'
         shutil.copytree(template, home)
         tempdir = home + '/.tmp'
         os.makedirs(tempdir)

@@ -1,5 +1,6 @@
 import abc
 # ALLOW const.* util.* msg*.* context.* http.* store.*
+from core.const import gc
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
 from core.msgc import mc
@@ -64,7 +65,7 @@ class _InstanceRouting(msgabc.AbcSubscriber):
     def __init__(self, subcontext: contextsvc.Context):
         super().__init__(msgftr.Or(mc.ServerStatus.UPDATED_FILTER, mc.PlayerStore.EVENT_FILTER))
         self._identity, self._mailer = subcontext.config('identity'), subcontext.root()
-        self._last_state, self._player_names = 'READY', set()
+        self._last_state, self._player_names = gc.READY, set()
 
     async def handle(self, message):
         source, data = message.source(), message.data()

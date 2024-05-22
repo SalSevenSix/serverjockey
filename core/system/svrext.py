@@ -1,4 +1,5 @@
 # ALLOW const.* util.* msg*.* context.* http.* system.* EXCEPT system.bootstrap
+from core.const import gc
 from core.util import util, funcutil
 from core.msg import msgabc, msgftr
 from core.msgc import mc
@@ -62,7 +63,6 @@ class CheckServerStateInterceptor(httpabc.InterceptorHandler):
 
 
 class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
-    READY, MAINTENANCE = 'READY', 'MAINTENANCE'
 
     def __init__(self, mailer: msgabc.Mailer, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter):
         super().__init__(msgftr.Or(maintenance_filter, ready_filter))
@@ -71,9 +71,9 @@ class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if self._maintenance_filter.accepts(message):
-            svrsvc.ServerStatus.notify_state(self._mailer, self, MaintenanceStateSubscriber.MAINTENANCE)
+            svrsvc.ServerStatus.notify_state(self._mailer, self, gc.MAINTENANCE)
             return None
         if self._ready_filter.accepts(message):
-            svrsvc.ServerStatus.notify_state(self._mailer, self, MaintenanceStateSubscriber.READY)
+            svrsvc.ServerStatus.notify_state(self._mailer, self, gc.READY)
             return None
         return None
