@@ -3,8 +3,8 @@ import re
 import aiohttp
 from yarl import URL
 from aiohttp import web, abc as webabc, web_exceptions as err
-# ALLOW const.* util.* msg.* context.* http.httpabc http.httpcnt http.httpstatics
-from core.const import wc
+# ALLOW const.* util.* msg*.* context.* http.httpabc http.httpcnt http.httpstatics
+from core.const import gc, wc
 from core.util import pack, io, objconv
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics, httpssl
@@ -106,7 +106,7 @@ class _RequestHandler:
             else:
                 request_body = await self._request.content.read()
         if content_type.mime_type() in _TEXT_MIME_TYPES:
-            encoding = content_type.encoding() if content_type.encoding() else httpcnt.UTF8
+            encoding = content_type.encoding() if content_type.encoding() else gc.UTF_8
             request_body = request_body.decode(encoding).strip()
             if content_type.mime_type() == httpcnt.MIME_APPLICATION_JSON:
                 request_body = objconv.json_to_dict(request_body)
@@ -143,11 +143,11 @@ class _RequestHandler:
         content_type = httpcnt.CONTENT_TYPE_APPLICATION_BIN
         if isinstance(body, str):
             content_type = httpcnt.CONTENT_TYPE_TEXT_PLAIN_UTF8
-            body = body.encode(httpcnt.UTF8)
+            body = body.encode(gc.UTF_8)
         if isinstance(body, (dict, tuple, list)):
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = objconv.obj_to_json(body)
-            body = body.encode(httpcnt.UTF8)
+            body = body.encode(gc.UTF_8)
         allow_gzip = self._headers.accepts_encoding(httpcnt.GZIP)
         if allow_gzip and isinstance(body, bytes) and len(body) > 512:
             body = await pack.gzip_compress(body)

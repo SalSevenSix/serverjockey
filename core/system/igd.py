@@ -2,7 +2,7 @@ import logging
 import typing
 import asyncio
 import upnpy
-# ALLOW const.* util.* msg.* context.* http.* system.svrabc
+# ALLOW const.* util.* msg*.* context.* http.* system.svrabc
 from core.util import util, funcutil, sysutil
 from core.msg import msgabc, msgftr
 from core.context import contextsvc

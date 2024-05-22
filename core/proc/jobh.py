@@ -1,7 +1,7 @@
 import typing
 import asyncio
 from asyncio import subprocess, streams
-# ALLOW const.* util.* msg.* context.* proc.prcenc proc.prcprd
+# ALLOW const.* util.* msg*.* context.* proc.prcenc proc.prcprd
 from core.util import util, idutil, funcutil, io
 from core.msg import msgabc, msgext, msgftr
 from core.context import contextsvc

@@ -1,13 +1,11 @@
 import abc
-# ALLOW const.* util.* msg.* context.* http.* store.*
+# ALLOW const.* util.* msg*.* context.* http.* store.*
 from core.util import util, objconv
 from core.msg import msgabc, msgftr
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httprsc, httpext
 from core.store import storeabc, storetxn, storesvc
-# TODO dependencies below should not be used
-from core.system import system, svrsvc
-from core.common import playerstore
 
 
 class SystemStoreService:
@@ -45,16 +43,16 @@ class SystemStoreService:
 class _SystemRouting(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(system.SystemService.SERVER_FILTER)
+        super().__init__(mc.SystemService.SERVER_FILTER)
         self._mailer = mailer
 
     async def handle(self, message):
         source, name, subcontext = message.source(), message.name(), message.data()
         identity, module = subcontext.config('identity'), subcontext.config('module')
-        if name is system.SystemService.SERVER_INITIALISED:
+        if name is mc.SystemService.SERVER_INITIALISED:
             storeabc.execute(self._mailer, source, storetxn.InsertInstance(identity, module))
             return None
-        if name is system.SystemService.SERVER_DELETED:
+        if name is mc.SystemService.SERVER_DELETED:
             storeabc.execute(self._mailer, source, storetxn.DeleteInstance(identity))
             return None
         return None
@@ -64,13 +62,13 @@ class _InstanceRouting(msgabc.AbcSubscriber):
     _LOGIN, _LOGOUT, _CLEAR, _CHAT = 'LOGIN', 'LOGOUT', 'CLEAR', 'CHAT'
 
     def __init__(self, subcontext: contextsvc.Context):
-        super().__init__(msgftr.Or(svrsvc.ServerStatus.UPDATED_FILTER, playerstore.EVENT_FILTER))
+        super().__init__(msgftr.Or(mc.ServerStatus.UPDATED_FILTER, mc.PlayerStore.EVENT_FILTER))
         self._identity, self._mailer = subcontext.config('identity'), subcontext.root()
         self._last_state, self._player_names = 'READY', set()
 
     async def handle(self, message):
         source, data = message.source(), message.data()
-        if svrsvc.ServerStatus.UPDATED_FILTER.accepts(message):
+        if mc.ServerStatus.UPDATED_FILTER.accepts(message):
             state = util.get('state', data)
             if state == self._last_state:
                 return None
@@ -78,7 +76,7 @@ class _InstanceRouting(msgabc.AbcSubscriber):
             details = objconv.obj_to_json(util.get('details', data))
             storeabc.execute(self._mailer, source, storetxn.InsertInstanceEvent(self._identity, state, details))
             return None
-        if playerstore.EVENT_FILTER.accepts(message):
+        if mc.PlayerStore.EVENT_FILTER.accepts(message):
             event = data.asdict()
             event_name = event['event'].upper()
             if event_name == _InstanceRouting._CLEAR:

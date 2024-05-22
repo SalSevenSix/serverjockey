@@ -1,9 +1,10 @@
 import logging
 import asyncio
 import re
-# ALLOW const.* util.* msg.* context.* http.* system.svrabc system.svrsvc
+# ALLOW const.* util.* msg*.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs, httpssl
 from core.system import svrmodules, svrsvc, sysstore, mprof, steamapi, igd
@@ -12,10 +13,7 @@ _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 
 
 class SystemService:
-    SERVER_INITIALISED = 'SystemService.ServerInitialised'
-    SERVER_DELETED = 'SystemService.ServerDestroyed'
-    SERVER_FILTER = msgftr.NameIn((SERVER_INITIALISED, SERVER_DELETED))
-    _INSTANCE_EVENT_FILTER = msgftr.Or(SERVER_FILTER, svrsvc.ServerStatus.UPDATED_FILTER)
+    _INSTANCE_EVENT_FILTER = msgftr.Or(mc.SystemService.SERVER_FILTER, mc.ServerStatus.UPDATED_FILTER)
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -134,7 +132,7 @@ class SystemService:
         self._instances.remove(identity)
         await self._context.destroy_subcontext(subcontext)
         await io.delete_directory(home_dir)
-        self._context.post(self, SystemService.SERVER_DELETED, subcontext)
+        self._context.post(self, mc.SystemService.SERVER_DELETED, subcontext)
         logging.debug('DELETED instance ' + identity)
 
     async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
@@ -142,7 +140,7 @@ class SystemService:
         subcontext.start()
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
-        subcontext.register(msgext.RelaySubscriber(self._context, svrsvc.ServerStatus.UPDATED_FILTER))
+        subcontext.register(msgext.RelaySubscriber(self._context, mc.ServerStatus.UPDATED_FILTER))
         self._sysstoresvc.initialise_instance(subcontext)
         server = await self._modules.create_server(subcontext)
         await server.initialise()
@@ -150,7 +148,7 @@ class SystemService:
         self._instances.append(resource)
         server.resources(resource)
         svrsvc.ServerService(subcontext, server).start()
-        self._context.post(self, SystemService.SERVER_INITIALISED, subcontext)
+        self._context.post(self, mc.SystemService.SERVER_INITIALISED, subcontext)
         return subcontext
 
     def _get_subcontext(self, identity: str, include_hidden: bool) -> contextsvc.Context | None:
@@ -287,10 +285,10 @@ class _ShutdownHandler(httpabc.PostHandler):
 class _InstanceEventTransformer(msgabc.Transformer):
 
     def transform(self, message):
-        if svrsvc.ServerStatus.UPDATED_FILTER.accepts(message):
+        if mc.ServerStatus.UPDATED_FILTER.accepts(message):
             status = message.data()
             return {'event': 'running', 'instance': status['instance'], 'running': status['running']}
-        if SystemService.SERVER_FILTER.accepts(message):
-            event = 'created' if message.name() is SystemService.SERVER_INITIALISED else 'deleted'
+        if mc.SystemService.SERVER_FILTER.accepts(message):
+            event = 'created' if message.name() is mc.SystemService.SERVER_INITIALISED else 'deleted'
             return {'event': event, 'instance': objconv.obj_to_dict(message.data())}
         return None

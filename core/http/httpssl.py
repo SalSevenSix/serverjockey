@@ -1,6 +1,6 @@
 import os
 import ssl
-# ALLOW const.* util.* msg.* context.* http.*
+# ALLOW const.* util.* msg*.* context.* http.*
 from core.const import wc
 from core.context import contextsvc
 from core.http import httpabc, httpcnt

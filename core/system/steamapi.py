@@ -1,5 +1,5 @@
 import aiohttp
-# ALLOW const.* util.* msg.* context.* http.*
+# ALLOW const.* util.* http.*
 from core.util import util
 from core.http import httpabc, httpcnt, httprsc
 

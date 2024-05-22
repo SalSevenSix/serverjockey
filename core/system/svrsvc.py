@@ -2,9 +2,10 @@ from __future__ import annotations
 import logging
 import asyncio
 import typing
-# ALLOW const.* util.* msg.* context.* http.* system.svrabc
+# ALLOW const.* util.* msg*.* context.* http.* system.svrabc
 from core.util import tasks, util, dtutil
 from core.msg import msgabc, msgext, msgftr
+from core.msgc import mc
 from core.context import contextsvc
 from core.system import svrabc
 
@@ -156,8 +157,6 @@ class _RunController:
 
 
 class ServerStatus(msgabc.AbcSubscriber):
-    UPDATED = 'ServerStatus.Updated'
-    UPDATED_FILTER = msgftr.NameIs(UPDATED)
     REQUEST, RESPONSE = 'ServerStatus.Request', 'ServerStatus.Response'
     NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'
     NOTIFY_STATUS = 'ServerStatus.NotifyStatus'
@@ -208,7 +207,7 @@ class ServerStatus(msgabc.AbcSubscriber):
         elif action is ServerStatus.NOTIFY_STATUS:
             updated = self._status.notify_status(data)
         if updated:
-            self._context.post(self, ServerStatus.UPDATED, self._status.asdict())
+            self._context.post(self, mc.ServerStatus.UPDATED, self._status.asdict())
         return None
 
 

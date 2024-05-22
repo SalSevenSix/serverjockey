@@ -3,7 +3,7 @@ import logging
 import typing
 import asyncio
 from asyncio import streams
-# ALLOW const.* util.* msg.* context.* proc.prcenc proc.prcprd
+# ALLOW const.* util.* msg*.* context.* proc.prcenc proc.prcprd
 from core.util import signals, cmdutil, funcutil, tasks
 from core.msg import msgabc, msgext, msgftr
 from core.proc import prcenc, prcprd

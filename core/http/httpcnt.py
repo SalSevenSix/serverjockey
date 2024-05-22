@@ -3,7 +3,8 @@ import typing
 import re
 import time
 import aiohttp
-# ALLOW const.* util.* msg.* context.* http.httpabc
+# ALLOW const.* util.* msg*.* context.* http.httpabc
+from core.const import gc
 from core.util import util
 from core.http import httpabc
 
@@ -14,7 +15,6 @@ RESOURCES_READY = 'RESOURCES_READY'
 HOST = 'Host'
 ORIGIN = 'Origin'
 CONTENT_TYPE = 'Content-Type'
-UTF8 = 'UTF-8'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
 GZIP = 'gzip'
@@ -204,7 +204,7 @@ _TEXT_TYPES = (
 )
 
 _CHARSET = 'charset='
-CONTENT_TYPE_TEXT_PLAIN_UTF8 = ContentTypeImpl(MIME_TEXT_PLAIN + '; ' + _CHARSET + UTF8)
+CONTENT_TYPE_TEXT_PLAIN_UTF8 = ContentTypeImpl(MIME_TEXT_PLAIN + '; ' + _CHARSET + gc.UTF_8.upper())
 CONTENT_TYPE_TEXT_PLAIN = ContentTypeImpl(MIME_TEXT_PLAIN)
 CONTENT_TYPE_APPLICATION_JSON = ContentTypeImpl(MIME_APPLICATION_JSON)
 CONTENT_TYPE_APPLICATION_BIN = ContentTypeImpl(MIME_APPLICATION_BIN)

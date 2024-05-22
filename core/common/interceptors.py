@@ -1,4 +1,4 @@
-# ALLOW const.* util.* msg.* context.* http.* system.* proc.*
+# ALLOW const.* util.* msg*.* context.* http.* system.* proc.*
 from core.msg import msgabc
 from core.http import httpabc
 from core.system import svrext

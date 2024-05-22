@@ -22,7 +22,7 @@ def callable_dict(obj: typing.Any, names: typing.Collection[str]) -> typing.Dict
         if hasattr(obj, name):
             attribute = getattr(obj, name)
             if callable(attribute):
-                result.update({name: attribute})
+                result[name] = attribute
     return result
 
 

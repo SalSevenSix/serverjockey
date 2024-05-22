@@ -1,8 +1,9 @@
 # ALLOW core.* palworld.*
 from core.util import aggtrf
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
-from core.system import svrabc, svrsvc, svrext
+from core.system import svrabc, svrext
 from core.proc import proch
 from core.common import interceptors, spstopper
 from servers.palworld import deployment as dep, messaging as msg, console as con
@@ -28,7 +29,7 @@ class Server(svrabc.Server):
         r = httprsc.ResourceBuilder(resource)
         r.reg('m', interceptors.block_maintenance_only(self._context))
         r.psh('server', svrext.ServerStatusHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
         r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
         r.pop()
         r.psh('log')

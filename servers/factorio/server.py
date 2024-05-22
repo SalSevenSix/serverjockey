@@ -1,8 +1,9 @@
 # ALLOW core.* factorio.*
 from core.util import aggtrf
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
-from core.system import svrabc, svrsvc, svrext
+from core.system import svrabc, svrext
 from core.proc import proch
 from core.common import playerstore, interceptors, spstopper
 from servers.factorio import deployment as dep, messaging as msg, console as con
@@ -28,11 +29,11 @@ class Server(svrabc.Server):
         r = httprsc.ResourceBuilder(resource)
         r.reg('m', interceptors.block_maintenance_only(self._context))
         r.psh('server', svrext.ServerStatusHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
         r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
         r.pop()
         r.psh('players', playerstore.PlayersHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
+        r.put('subscribe', self._httpsubs.handler(mc.PlayerStore.EVENT_FILTER, mc.PlayerStore.EVENT_TRF))
         r.pop()
         r.psh('log')
         r.put('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER))

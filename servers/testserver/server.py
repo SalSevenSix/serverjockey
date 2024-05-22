@@ -2,6 +2,7 @@ from collections.abc import Iterable
 # ALLOW core.*
 from core.util import util, dtutil, objconv, io, cmdutil, aggtrf, pkg
 from core.msg import msgabc, msgext, msgftr, msglog, msgtrf
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext, httpcnt
 from core.system import svrabc, svrsvc, svrext
@@ -73,7 +74,7 @@ class Server(svrabc.Server):
         r.reg('m', interceptors.block_maintenance_only(self._context))
         r.reg('s', interceptors.block_not_started(self._context))
         r.psh('server', svrext.ServerStatusHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
         r.put('{command}', svrext.ServerCommandHandler(self._context))
         r.pop()
         r.psh('log')
@@ -84,7 +85,7 @@ class Server(svrabc.Server):
         r.put('*{path}', httpext.FileSystemHandler(self._log_dir, 'path'), 'r')
         r.pop()
         r.psh('players', playerstore.PlayersHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(playerstore.EVENT_FILTER, playerstore.EVENT_TRF))
+        r.put('subscribe', self._httpsubs.handler(mc.PlayerStore.EVENT_FILTER, mc.PlayerStore.EVENT_TRF))
         r.pop()
         r.psh('console')
         r.put('help', httpext.StaticHandler(_COMMANDS_HELP_TEXT))

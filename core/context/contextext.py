@@ -1,4 +1,4 @@
-# ALLOW const.* util.* msg.* contextsvc.*
+# ALLOW const.* util.* msg*.* contextsvc.*
 from core.util import util, io, objconv, funcutil
 from core.context import contextsvc
 

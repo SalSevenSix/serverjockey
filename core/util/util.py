@@ -2,7 +2,7 @@ import typing
 import asyncio
 import base64
 # ALLOW const.*
-from core.const import wc
+from core.const import gc, wc
 
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
@@ -33,21 +33,25 @@ def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
 
 
 def urlsafe_b64encode(value: str) -> str:
-    value = value.encode('utf-8')
+    value = value.encode(gc.UTF_8)
     value = base64.urlsafe_b64encode(value)
-    return str(value, 'utf-8')
+    return str(value, gc.UTF_8)
 
 
 def urlsafe_b64decode(value: str) -> str:
     value = base64.urlsafe_b64decode(value)
-    return str(value, 'utf-8')
+    return str(value, gc.UTF_8)
 
 
-def build_url(scheme: str = wc.HTTP, host: str | None = 'localhost', port: int | None = 80, path: str = '') -> str:
+def build_url(scheme: str = wc.HTTP,
+              host: str | None = 'localhost',
+              port: int | None = wc.HTTP_PORT,
+              path: str = '') -> str:
     parts = [scheme, '://']
     if host:
         parts.append(host)
-        if port and not (scheme == wc.HTTP and port == 80) and not (scheme == wc.HTTPS and port == 443):
+        if (port and not (scheme == wc.HTTP and port == wc.HTTP_PORT)
+                and not (scheme == wc.HTTPS and port == wc.HTTPS_PORT)):
             parts.append(':')
             parts.append(str(port))
     if path:

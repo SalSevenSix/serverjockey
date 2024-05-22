@@ -1,6 +1,7 @@
-# ALLOW const.* util.* msg.* context.* http.* system.* EXCEPT system.bootstrap
+# ALLOW const.* util.* msg*.* context.* http.* system.* EXCEPT system.bootstrap
 from core.util import util, funcutil
 from core.msg import msgabc, msgftr
+from core.msgc import mc
 from core.http import httpabc, httpsubs, httpcnt
 from core.system import svrsvc
 
@@ -30,7 +31,7 @@ class ServerCommandHandler(httpabc.PostHandler):
         respond, response = util.get('respond', data, False), {}
         if respond:
             subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
-                self._mailer, self, httpsubs.Selector(svrsvc.ServerStatus.UPDATED_FILTER))
+                self._mailer, self, httpsubs.Selector(mc.ServerStatus.UPDATED_FILTER))
             response['url'] = util.get('baseurl', data, '') + subscription_path
             response['current'] = await svrsvc.ServerStatus.get_status(self._mailer, self)
         ServerCommandHandler.COMMANDS[command](self._mailer, self)

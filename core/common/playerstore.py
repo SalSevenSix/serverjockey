@@ -1,14 +1,11 @@
 from __future__ import annotations
 import typing
-# ALLOW const.* util.* msg.* context.* http.* system.* proc.*
+# ALLOW const.* util.* msg*.* context.* http.* system.* proc.*
 from core.util import dtutil
-from core.msg import msgabc, msgftr, msgext, msgtrf
+from core.msg import msgabc, msgftr, msgext
+from core.msgc import mc
 from core.http import httpabc, httpcnt
 from core.system import svrsvc
-
-_EVENT = 'PlayersSubscriber.Event'
-EVENT_FILTER = msgftr.NameIs(_EVENT)
-EVENT_TRF = msgtrf.DataAsDict()
 
 
 class PlayersHandler(httpabc.GetHandler):
@@ -29,7 +26,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
-            EVENT_FILTER,
+            mc.PlayerStore.EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER))
         self._mailer = mailer
@@ -37,15 +34,15 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 
     @staticmethod
     def event_login(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):
-        mailer.post(source, _EVENT, _EventLogin(name, steamid))
+        mailer.post(source, mc.PlayerStore.EVENT, _EventLogin(name, steamid))
 
     @staticmethod
     def event_logout(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):
-        mailer.post(source, _EVENT, _EventLogout(name, steamid))
+        mailer.post(source, mc.PlayerStore.EVENT, _EventLogout(name, steamid))
 
     @staticmethod
     def event_chat(mailer: msgabc.Mailer, source: typing.Any, name: str, text: str):
-        mailer.post(source, _EVENT, _EventChat(name, text))
+        mailer.post(source, mc.PlayerStore.EVENT, _EventChat(name, text))
 
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any,
@@ -54,7 +51,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         return response.data()
 
     def handle(self, message):
-        if EVENT_FILTER.accepts(message):
+        if mc.PlayerStore.EVENT_FILTER.accepts(message):
             event = message.data()
             if isinstance(event, (_EventLogin, _EventLogout)):
                 self._players.login_or_logout(event)
@@ -62,7 +59,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
                 self._players.clear()
             return None
         if svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
-            self._mailer.post(self, _EVENT, _EventClear())
+            self._mailer.post(self, mc.PlayerStore.EVENT, _EventClear())
             return None
         if PlayersSubscriber.GET_FILTER.accepts(message):
             data = self._players.get(message.data())

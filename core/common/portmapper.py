@@ -1,5 +1,5 @@
 import typing
-# ALLOW const.* util.* msg.* context.* http.* system.* proc.*
+# ALLOW const.* util.* msg*.* context.* http.* system.* proc.*
 from core.util import util
 from core.msg import msgabc, msgftr
 from core.context import contextsvc

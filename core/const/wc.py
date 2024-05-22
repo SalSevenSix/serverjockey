@@ -1,3 +1,4 @@
 # ALLOW NONE
 
 HTTP, HTTPS = 'http', 'https'
+HTTP_PORT, HTTPS_PORT = 80, 443

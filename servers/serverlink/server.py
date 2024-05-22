@@ -1,9 +1,11 @@
 # ALLOW core.* serverlink.*
+from core.const import wc
 from core.util import util, logutil, io, aggtrf, objconv
 from core.msg import msgtrf, msgftr, msglog
+from core.msgc import mc
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
-from core.system import svrabc, svrsvc, svrext
+from core.system import svrabc, svrext
 from core.proc import proch, prcext
 from core.common import spstopper
 
@@ -51,7 +53,7 @@ class Server(svrabc.Server):
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)
         r.psh('server', svrext.ServerStatusHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(svrsvc.ServerStatus.UPDATED_FILTER))
+        r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
         r.put('{command}', svrext.ServerCommandHandler(self._context))
         r.pop()
         r.put('config', httpext.FileSystemHandler(self._config))
@@ -78,7 +80,7 @@ class _ServerProcessFactory:
     def __init__(self, context: contextsvc.Context, config: str, clientfile: str):
         self._context, self._config, self._clientfile = context, config, clientfile
         self._env, self._executable, self._script = None, None, None
-        if context.config('scheme') == 'https':
+        if context.config('scheme') == wc.HTTPS:
             self._env = context.env()
             self._env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 
