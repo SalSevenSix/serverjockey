@@ -8,7 +8,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
-    <figure class="image ml-2 mr-2 max-200"><TerminalCube /></figure>
+    <figure class="image max-200"><TerminalCube /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Command Line Interface</h2>
@@ -36,9 +36,8 @@
     which are explained below.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -h</CodeBlock>
-</div>
-<div class="content pt-2">
-  <h3 id="clitasks" class="title is-4">Tasks</h3>
+
+  <h3 id="clitasks" class="title is-4 pt-2">Tasks</h3>
   <p>
     Tasks are system admin operations that usually require root privilages (i.e.
     <span class="is-family-monospace notranslate">sudo</span>). Tasks are run using the
@@ -46,9 +45,8 @@
     option. The example below will upgrade the ServerJockey system to the latest version.
   </p>
   <CodeBlock>sudo serverjockey_cmd.pyz -t upgrade</CodeBlock>
-</div>
-<div class="content pt-2">
-  <h3 id="clicommands" class="title is-4">Commands</h3>
+
+  <h3 id="clicommands" class="title is-4 pt-2">Commands</h3>
   <p>
     Commands are operations that interact with a running ServerJockey service to manage game servers.
     A list of Commands can be run using the
@@ -58,9 +56,8 @@
     instance, then start the server.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -c use:myserver server:start</CodeBlock>
-</div>
-<div class="content pt-2">
-  <h3 id="clibackup" class="title is-4">Backup Example</h3>
+
+  <h3 id="clibackup" class="title is-4 pt-2">Backup Example</h3>
   <p>
     The example below is a backup process for a Project Zomboid server. It can be run on a schedule using
     <span class="is-family-monospace notranslate">cron</span>.

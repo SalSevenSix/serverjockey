@@ -56,9 +56,8 @@ class CheckServerStateInterceptor(httpabc.InterceptorHandler):
         status = await svrsvc.ServerStatus.get_status(self._mailer, self)
         if self._running is not None and self._running == status['running']:
             return httpabc.ResponseBody.CONFLICT
-        for state in self._states:
-            if state == status['state']:
-                return httpabc.ResponseBody.CONFLICT
+        if status['state'] in self._states:
+            return httpabc.ResponseBody.CONFLICT
         return await httpabc.PostHandler.call(self._delegate, resource, data)
 
 

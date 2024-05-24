@@ -88,7 +88,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
-    <a href="/guides/virtualbox"><i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
+    <a href="/guides/virtualbox"><i class="fa fa-computer fa-lg theme-black-white"></i>
       VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
@@ -100,13 +100,25 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/cli"><i class="fa fa-terminal fa-lg theme-black-white"></i>&nbsp;
+    <a href="/guides/cli"><i class="fa fa-terminal fa-lg theme-black-white"></i>
       Command Line Interface</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
       ServerJockey has a Command Line Interface (CLI), which is useful for automating server management.
       This guide will show how to control servers and perform administrative tasks using the CLI.
+    </p>
+  </div>
+</div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href="/guides/nginx"><i class="fa fa-server fa-lg theme-black-white"></i>
+      Hosting behind Nginx</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      Nginx is a popular web server with a powerful reverse proxy feature.
+      This guide will show how to combine Nginx and ServerJockey to create a more professional hosting setup.
     </p>
   </div>
 </div>
@@ -134,6 +146,10 @@
 
 
 <style>
+  .fa, .fa-brands {
+    width: 26px;
+  }
+
   .card {
     background-color: #F5F5F5;
     color: #485fC7;
