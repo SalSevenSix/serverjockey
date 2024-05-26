@@ -3,6 +3,7 @@
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { textAreaModal } from '$lib/modal/modals';
   import { newPostRequest, newGetRequest } from '$lib/util/sjgmsapi';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
@@ -75,7 +76,7 @@
 <div class="block">
   <div class="field">
     <label for={configFileTextId} class="label">
-      <a href={instance.url(path)} target="_blank">{name} &nbsp;<i class="fa fa-up-right-from-square"></i></a>
+      <ExtLink href={instance.url(path)}>{name}&nbsp;</ExtLink>
     </label>
     <slot />
     <div class="control pr-6">

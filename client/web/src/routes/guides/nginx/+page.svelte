@@ -1,6 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import BackToTop from '$lib/widget/BackToTop.svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import NginxIcon from '$lib/widget/NginxIcon.svelte';
 </script>
@@ -13,11 +14,11 @@
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Hosting behind Nginx</h2>
     <p>
-      ServerJockey can be hosted behind <a href="https://nginx.org/" target="_blank">Nginx
-      <i class="fa fa-up-right-from-square"></i></a> using its reverse proxy feature.
-      This guide will show how to create this setup. It will feature using a domain name,
-      HTTPS with a properly signed SSL certificate, HTTP2 support, IPv6 support, and more.
-      Prequisites are a user with root privilages (i.e.
+      ServerJockey can be hosted behind
+      <ExtLink href="https://nginx.org" notranslate>Nginx</ExtLink>
+      using its reverse proxy feature. This guide will show how to create this setup.
+      It will feature using a domain name, HTTPS with a properly signed SSL certificate,
+      HTTP2 support, IPv6 support, and more. Prequisites are a user with root privilages (i.e.
       <span class="is-family-monospace notranslate">sudo</span>)
       and terminal access to the machine with familiarity using it.
     </p>
@@ -38,7 +39,7 @@
     You can obtain a domain name from a domain name registry such as <span class="has-text-weight-bold">GoDaddy</span>
     and many others. However you will need to pay a recurring fee to use the domain name.
     Alternatively you can use a dynamic DNS service such as
-    <a href="https://www.duckdns.org/" target="_blank">Duck DNS <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://www.duckdns.org" notranslate>Duck DNS</ExtLink>
     which is free to use. This guide uses the domain name
     <span class="is-family-monospace has-text-weight-bold notranslate">example.duckdns.org</span>
     as a placeholder, <span class="is-italic">please make sure you use your own domain name instead!</span>
@@ -84,23 +85,24 @@
     Domain name registries often provide a certificate generation service. If that&#39;s not an option then...
   </p>
   <p>
-    <a href="https://letsencrypt.org/" target="_blank">Let&#39;s Encrypt <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://letsencrypt.org" notranslate>Let&#39;s Encrypt</ExtLink>
     is nonprofit certificate authority that provides SSL certificates for free.
-    <a href="https://certbot.eff.org/" target="_blank">Certbot <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://certbot.eff.org" notranslate>Certbot</ExtLink>
     is a command line tool you can use to generate SSL certificates using Let&#39;s Encrypt.
     Check the Certbot website for install options for your machine.
-    If <span class="is-family-monospace notranslate">snap</span> is available, it&#39;s recommended you install that
-    version with the following command.
+    If <span class="is-family-monospace notranslate">snap</span> is available,
+    it&#39;s recommended you install that version with the following command.
   </p>
   <CodeBlock>sudo snap install --classic certbot</CodeBlock>
   <p>
-    Now make sure that Nginx is running with the welcome page accessible over the internet using your domain name.
-    Then generate the certificate files with the command shown below. The process will prompt for an email address
-    and to accept terms &amp; conditions to setup an account. Work through the prompts to complete the process.
+    Make sure Nginx is running with the welcome page accessible over the internet using your domain name.
+    Now generate the certificate files with the command shown below using your domain name.
+    The process will prompt for an email address and to accept terms &amp; conditions to setup an account.
+    Work through the prompts to complete the process.
   </p>
   <CodeBlock>sudo certbot certonly --nginx -d example.duckdns.org</CodeBlock>
   <p>
-    If the process was successful, you should find an SSL configuration file for Nginx at location below.
+    If the process was successful, you should find an SSL configuration file for Nginx at the location below.
   </p>
   <CodeBlock>/etc/letsencrypt/options-ssl-nginx.conf</CodeBlock>
   <p>

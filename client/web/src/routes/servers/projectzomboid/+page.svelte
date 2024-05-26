@@ -1,4 +1,5 @@
 <script>
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -127,8 +128,9 @@
         <div class="content">
           <p>
             For help understanding Project Zomboid configuration files. Please see the
-            <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605" target="_blank">
-            excellent guide on Steam <i class="fa fa-up-right-from-square"></i></a> by Aiteron.<br />
+            <ExtLink href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605"
+                     wrap>excellent guide on Steam</ExtLink>
+            by Aiteron.<br />
             Default configuration files are not generated until after first server start.
           </p>
         </div>

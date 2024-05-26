@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import Clyde from '$lib/widget/Clyde.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
@@ -39,11 +40,11 @@
 <div class="content" id="newDiscordAccount">
   <hr />
   <p><span class="step-title"></span>
-    First step is to <a href="https://discord.com/login" target="_blank">
-    login to Discord <i class="fa fa-up-right-from-square"></i></a> in your browser.
-    If you don&#39;t have an account then <a href="https://discord.com/register" target="_blank">
-    register <i class="fa fa-up-right-from-square"></i></a> a new one.
-    Below is screenshot of a fresh account for the guide.
+    First step is to
+    <ExtLink href="https://discord.com/login" wrap>login to Discord</ExtLink>
+    in your browser. If you don&#39;t have an account then
+    <ExtLink href="https://discord.com/register">register</ExtLink>
+    a new one. Below is screenshot of a fresh account for the guide.
   </p>
   <figure class="image max-1024">
     <img src="/assets/guides/discord/01_new_account.png" alt="New Discord Account" />
@@ -98,9 +99,8 @@
 
 <div class="content" id="createBot">
   <p><span class="step-title"></span>
-    With a Discord server ready to use, it&#39;s now time to setup the Discord bot.
-    To begin, open the <a href="https://discord.com/developers" target="_blank">
-    Discord Developer Portal <i class="fa fa-up-right-from-square"></i></a>
+    With a Discord server ready to use, it&#39;s now time to setup the Discord bot. To begin, open the
+    <ExtLink href="https://discord.com/developers" wrap>Discord Developer Portal</ExtLink>
     then click the <span class="has-text-weight-bold">New Application</span> button.
   </p>
   <figure class="image max-1024">

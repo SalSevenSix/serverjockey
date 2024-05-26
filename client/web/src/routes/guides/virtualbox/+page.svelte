@@ -1,6 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import BackToTop from '$lib/widget/BackToTop.svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
 
@@ -12,8 +13,7 @@
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2 notranslate">VirtualBox</h2>
     <p>
-      <a class="notranslate" href="https://www.virtualbox.org" target="_blank">
-        VirtualBox <i class="fa fa-up-right-from-square"></i></a>
+      <ExtLink href="https://www.virtualbox.org" notranslate>VirtualBox</ExtLink>
       is a free virtualization system for enterprise and personal use. It allows you to run a virtual machine
       on a real machine. ServerJockey is available as a VirtualBox Appliance (virtual machine image).
       The appliance is running Ubuntu Server OS with ServerJockey pre-installed and ready to use.
@@ -21,8 +21,7 @@
     <p>
       This guide provides information on how to configure, use and care for the appliance.
       For comprehensive information about VirtualBox, consult the
-      <a href="https://www.virtualbox.org/manual/UserManual.html" target="_blank">
-        online manual <i class="fa fa-up-right-from-square"></i></a>.
+      <ExtLink href="https://www.virtualbox.org/manual/UserManual.html">online manual</ExtLink>
     </p>
     <ul>
       <li><a href="#vbsettings" use:scrollto={'#vbsettings'}>Memory and Processor Settings</a>
@@ -107,7 +106,7 @@
   <p>
     By default remote access using SSH is disabled for security reasons. If you wish to login remotely
     you can turn on SSH with the command shown below. If you want to login remotely from a Windows machine,
-    <a href="https://putty.org" target="_blank">PuTTY <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://putty.org" notranslate>PuTTY</ExtLink>
     is a popular SSH client.
   </p>
   <CodeBlock>sudo systemctl start ssh</CodeBlock>

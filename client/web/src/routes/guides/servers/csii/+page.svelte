@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -11,8 +12,7 @@
 
 <WebappTitle module="csii" serverName="Counter Strike 2">
   <p>
-    <a class="notranslate" href="https://www.counter-strike.net" target="_blank">
-      Counter Strike 2 <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://www.counter-strike.net" notranslate>Counter Strike 2</ExtLink>
     is a popular competitive PvP FPS built on the Source 2 engine.
     This guide will show you how to install, configure and run
     a Counter Strike 2 server using this Webapp.

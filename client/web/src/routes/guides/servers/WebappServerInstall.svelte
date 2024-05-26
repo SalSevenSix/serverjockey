@@ -1,6 +1,9 @@
 <script>
+  import ExtLink from '$lib/widget/ExtLink.svelte';
+
   export let module;
 </script>
+
 
 <div class="content">
   <hr />
@@ -9,8 +12,9 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Go to the <a href="/servers" target="_blank">Instances <i class="fa fa-up-right-from-square"></i></a> page.
-    If opened in a new tab, you will need to enter the login token again.
+    Go to the
+    <ExtLink href="/servers">Instances</ExtLink>
+    page. If opened in a new tab, you will need to enter the login token again.
   </p>
   <figure class="image max-1024 is-bordered">
     <img src="/assets/guides/games/goto_instances.png" alt="Go to instances page" />

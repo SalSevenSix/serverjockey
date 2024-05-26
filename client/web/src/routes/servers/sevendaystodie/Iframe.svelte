@@ -1,5 +1,6 @@
 <script>
   import { onMount, getContext } from 'svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const serverStatus = getContext('serverStatus');
 
@@ -17,7 +18,7 @@
 <div class="block">
   {#if showConsole}
     <p class="pl-2">
-      <a href={url} target="_blank">Open console in new tab &nbsp;<i class="fa fa-up-right-from-square"></i></a>
+      <ExtLink href={url}>Open console in new tab&nbsp;</ExtLink>
     </p>
     <iframe src={url} title="Console Commands"></iframe>
   {:else}

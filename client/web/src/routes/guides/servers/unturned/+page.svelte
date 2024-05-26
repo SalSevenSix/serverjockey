@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -12,8 +13,7 @@
 
 <WebappTitle module="unturned" serverName="Unturned">
   <p>
-    <a class="notranslate" href="https://smartlydressedgames.com" target="_blank">
-      Unturned <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://smartlydressedgames.com" notranslate>Unturned</ExtLink>
     is a free-to-play zombie apocalypse survival game set in a 3D open world.
     It features combat, looting, gear upgrades, exploration, and RPG elements.
   </p>

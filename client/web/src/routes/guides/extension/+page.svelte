@@ -1,6 +1,7 @@
 <script>
   import { browserName } from '$lib/util/util';
   import BackToTop from '$lib/widget/BackToTop.svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const isChrome = browserName === 'Chrome';
   const isEdge = browserName === 'Edge';
@@ -18,10 +19,9 @@
     <p>
       ServerJockey has a browser extension for
       {#if isChrome || isEdge}
-        <a href="https://www.google.com/chrome" target="_blank">Google Chrome
-          <i class="fa fa-up-right-from-square"></i></a> and
-        <a href="https://www.microsoft.com/en-us/edge" target="_blank">Microsoft Edge
-          <i class="fa fa-up-right-from-square"></i></a>
+        <ExtLink href="https://www.google.com/chrome" notranslate>Google Chrome</ExtLink>
+        and
+        <ExtLink href="https://www.microsoft.com/en-us/edge" notranslate>Microsoft Edge</ExtLink>
       {:else}
         Google Chrome and Microsoft Edge
       {/if}
@@ -36,11 +36,10 @@
   {#if isChrome}
     <p><span class="step-title"></span>
       First step is to
-      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
-         target="_blank">download and install the extension <i class="fa fa-up-right-from-square"></i></a>
-      from the Chrome web store.
-      First click the <span class="has-text-weight-bold">Add to Chrome</span> button on the page then the
-      <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+      <ExtLink href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
+               wrap>download and install the extension</ExtLink>
+      from the Chrome web store. First click the <span class="has-text-weight-bold">Add to Chrome</span> button on
+      the page then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
     </p>
     <figure class="image max-800">
       <img src="/assets/guides/extension/chrome_extension_page.jpg" alt="Chrome extension page" />
@@ -48,11 +47,10 @@
   {:else if isEdge}
     <p><span class="step-title"></span>
       First step is to
-      <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
-         target="_blank">download and install the extension <i class="fa fa-up-right-from-square"></i></a>
-      from the Edge website.
-      First click the <span class="has-text-weight-bold">Get</span> button on the page then the
-      <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+      <ExtLink href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
+               wrap>download and install the extension</ExtLink>
+      from the Edge website. First click the <span class="has-text-weight-bold">Get</span> button on the page
+      then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
     </p>
     <figure class="image max-800">
       <img src="/assets/guides/extension/edge_extension_page.png" alt="Edge extension page" />
@@ -60,28 +58,29 @@
   {:else}
     <p class="pb-3"><span class="step-title"></span>
       First step is to download and install either
-      <a href="https://www.google.com/chrome" target="_blank">
-        Chrome browser <i class="fa fa-up-right-from-square"></i></a> or
-      <a href="https://www.microsoft.com/en-us/edge/download" target="_blank">
-        Edge browser <i class="fa fa-up-right-from-square"></i></a>
+      <ExtLink href="https://www.google.com/chrome">Chrome browser</ExtLink>
+      or
+      <ExtLink href="https://www.microsoft.com/en-us/edge/download">Edge browser</ExtLink>
       then return to this guide using that browser. Then download and install the
-      <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
-         target="_blank">Chrome extension <i class="fa fa-up-right-from-square"></i></a> or
-      <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
-         target="_blank">Edge extension <i class="fa fa-up-right-from-square"></i></a> accordingly.
+      <ExtLink href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
+         >Chrome extension</ExtLink>
+      or
+      <ExtLink href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
+         >Edge extension</ExtLink>
+      accordingly.
     </p>
     <div class="columns is-gapless is-tablet">
       <div class="column is-one-fifth"></div>
       <div class="column is-one-fifth content">
-        <a href="https://www.google.com/chrome" title="Download Chrome" target="_blank">
-          <i class="fa-brands fa-chrome fa-6x theme-black-white"></i></a>
+        <ExtLink href="https://www.google.com/chrome" title="Download Chrome"
+                 wrap><i class="fa-brands fa-chrome fa-6x theme-black-white"></i></ExtLink>
       </div>
       <div class="column is-one-fifth content">
         <i class="fa fa-cloud-arrow-down fa-5x theme-black-white"></i>
       </div>
       <div class="column is-one-fifth content">
-        <a href="https://www.microsoft.com/en-us/edge/download" title="Download Edge" target="_blank">
-          <i class="fa-brands fa-edge fa-6x theme-black-white"></i></a>
+        <ExtLink href="https://www.microsoft.com/en-us/edge/download" title="Download Edge"
+                 wrap><i class="fa-brands fa-edge fa-6x theme-black-white"></i></ExtLink>
       </div>
       <div class="column is-one-fifth"></div>
     </div>
@@ -106,8 +105,9 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    The extension can only be opened on the <a href="https://steamcommunity.com" target="_blank">Steam Community site
-      <i class="fa fa-up-right-from-square"></i></a> with features only available on Project Zomboid Workshop mod pages.
+    The extension can only be opened on the
+    <ExtLink href="https://steamcommunity.com" wrap>Steam Community site</ExtLink>
+    with features only available on Project Zomboid Workshop mod pages.
     To begin, navigate to a mod page on the workshop, then open the extension panel with the pinned button.
     When opening the extension panel for the first time, you will need to connect the extension to your
     ServerJockey system. Enter the URL for the ServerJockey webapp and the login token, then click

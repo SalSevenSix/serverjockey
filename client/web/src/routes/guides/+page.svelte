@@ -1,6 +1,7 @@
 <script>
   import { browserName } from '$lib/util/util';
   import GuideBooks from '$lib/widget/GuideBooks.svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const isChrome = browserName === 'Chrome';
   const isEdge = browserName === 'Edge';
@@ -73,11 +74,13 @@
     <p>
       ServerJockey has a
       {#if isChrome}
-        <a href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
-           target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Google Chrome
+        <ExtLink href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
+           >browser extension</ExtLink>
+        for Google Chrome
       {:else if isEdge}
-        <a href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
-           target="_blank">browser extension <i class="fa fa-up-right-from-square"></i></a> for Microsoft Edge
+        <ExtLink href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
+           >browser extension</ExtLink>
+        for Microsoft Edge
       {:else}
         browser extension for Google Chrome and Microsoft Edge
       {/if}

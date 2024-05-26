@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import WebappTitle from '../WebappTitle.svelte';
@@ -13,8 +14,7 @@
 
 <WebappTitle module="projectzomboid" serverName="Project Zomboid">
   <p>
-    <a class="notranslate" href="https://projectzomboid.com" target="_blank">
-      Project Zomboid <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://projectzomboid.com" notranslate>Project Zomboid</ExtLink>
     is a zombie apocalypse survival horror game set in an open world using an isometric view with 3D elements.
     Gameplay involves combat, exploration, crafting, base building and RPG elements with a focus on realism.
   </p>
@@ -112,8 +112,7 @@ UPnP=false
     <tbody>
       <tr>
         <td class="white-space-nowrap notranslate">
-          <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2740018049" target="_blank">
-            2740018049 <i class="fa fa-up-right-from-square"></i></a></td>
+          <ExtLink href="https://steamcommunity.com/sharedfiles/filedetails/?id=2740018049">2740018049</ExtLink>
         <td class="notranslate">PIT</td>
         <td>Adds the in-game date &amp; time to the server status in both the webapp and discord.</td>
       </tr>
@@ -171,8 +170,8 @@ UPnP=false
   <h4 class="title is-5">Docker/Pterodactyl Issue</h4>
   <p>
     There is
-    <a href="https://theindiestone.com/forums/index.php?/topic/49783-javautilconcurrentexecutionexception-javaioioexception-no-space-left-on-device/" target="_blank">
-        a known issue <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://theindiestone.com/forums/index.php?/topic/49783-javautilconcurrentexecutionexception-javaioioexception-no-space-left-on-device"
+             wrap>a known issue</ExtLink>
     running the Project Zomboid dedicated server on Docker as well as Pterodactyl because it uses Docker.
     The server will often crash while starting around the automatic map backup stage.
     The workaround is simply to disable all of the automatic map backups in the

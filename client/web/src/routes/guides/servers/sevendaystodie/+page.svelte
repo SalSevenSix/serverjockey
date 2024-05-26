@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -16,8 +17,7 @@
 
 <WebappTitle module="sevendaystodie" serverName="7 Days to Die">
   <p>
-    <a class="notranslate" href="https://7daystodie.com" target="_blank">
-      7 Days to Die <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://7daystodie.com" notranslate>7 Days to Die</ExtLink>
     is zombie apocalypse survival horror game set in a 3D open world. It features combat, looting, mining, crafting,
     base building &amp; defence, exploration, and RPG elements.
   </p>

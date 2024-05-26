@@ -1,4 +1,5 @@
 <script>
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -49,9 +50,10 @@
         <div class="content">
           <p>
             For help with configuration, see the
-            <a href="https://developer.valvesoftware.com/wiki/7_Days_to_Die_Dedicated_Server#Serverconfig.xml"
-               target="_blank">dedicated server guide <i class="fa fa-up-right-from-square"></i></a>
-            on the wiki.<br /> Default Admin config file is not generated until after first server start.
+            <ExtLink href="https://developer.valvesoftware.com/wiki/7_Days_to_Die_Dedicated_Server#Serverconfig.xml"
+                     wrap>dedicated server guide</ExtLink>
+            on the wiki.<br />
+            Default Admin config file is not generated until after first server start.
           </p>
         </div>
         <ConfigFile name="Launch Options" path="/config/cmdargs" />

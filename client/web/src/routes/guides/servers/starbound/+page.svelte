@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -12,8 +13,7 @@
 
 <WebappTitle module="starbound" serverName="Starbound">
   <p>
-    <a class="notranslate" href="https://playstarbound.com" target="_blank">
-      Starbound <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://playstarbound.com" notranslate>Starbound</ExtLink>
     is an action-adventure game with fighting, mining and crafting in a procedurally generated 2D world.
     It has RPG elements and a focus on exploration and player guided storytelling.
   </p>

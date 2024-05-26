@@ -1,4 +1,5 @@
 <script>
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -55,8 +56,10 @@
       <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>For help with configuration, see the
-          <a href="https://docs.smartlydressedgames.com/en/stable/servers/server-hosting.html#how-to-configure-server"
-             target="_blank">server guide <i class="fa fa-up-right-from-square"></i></a> on the docs website.<br />
+          <ExtLink
+             href="https://docs.smartlydressedgames.com/en/stable/servers/server-hosting.html#how-to-configure-server"
+             wrap>server guide</ExtLink>
+          on the docs website.<br />
           Default configuration files are not generated until after first server start.</p>
         </div>
         <ConfigFile name="Command Line Args" path="/config/cmdargs" />

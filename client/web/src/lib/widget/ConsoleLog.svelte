@@ -3,6 +3,7 @@
   import { notifyError } from '$lib/util/notifications';
   import { RollingLog } from '$lib/util/util';
   import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const subs = new SubscriptionHelper();
   const logLines = new RollingLog();
@@ -89,8 +90,7 @@
   <div class="content mb-2">
     <span class="has-text-weight-bold">
       {#if downloadUrl}
-        <a href={downloadUrl} title="Open" target="_blank">
-          {title} &nbsp;<i class="fa fa-up-right-from-square fa-lg"></i></a>
+        <ExtLink href={downloadUrl} title="Open" bigger>{title}&nbsp;</ExtLink>
       {:else}
         {title}
       {/if}

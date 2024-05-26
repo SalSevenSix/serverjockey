@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -15,8 +16,7 @@
 
 <WebappTitle module="palworld" serverName="Palworld">
   <p>
-    <a class="notranslate" href="https://www.pocketpair.jp/palworld" target="_blank">
-      Palworld <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://www.pocketpair.jp/palworld" notranslate>Palworld</ExtLink>
     is a monster-catching, survival and crafting game, but incorporates a variety of mechanics from other genres in
     order to provide a new experience for everyone. Fight, farm, build and work alongside mysterious creatures called
     &quot;Pals&quot; in a multiplayer open world survival and crafting game.

@@ -99,7 +99,7 @@
     <div class="column is-10">
       <p>
         <a href={'#'} on:click|preventDefault={function() { objectUrls.openObject(results); }}>
-          results <i class="fa fa-up-right-from-square"></i></a>&nbsp;
+          results&nbsp;<i class="fa fa-up-right-from-square"></i></a>&nbsp;
         <span class="white-space-nowrap">from &nbsp;{shortISODateTimeString(activity.meta.atfrom)}&nbsp;</span>
         <span class="white-space-nowrap">to &nbsp;{shortISODateTimeString(activity.meta.atto)}&nbsp;</span>
         <span class="white-space-nowrap notranslate">({humanDuration(activity.meta.atrange)})</span>

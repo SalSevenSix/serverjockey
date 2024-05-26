@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -11,8 +12,7 @@
 
 <WebappTitle module="factorio" serverName="Factorio">
   <p>
-    <a class="notranslate" href="https://www.factorio.com" target="_blank">
-      Factorio <i class="fa fa-up-right-from-square"></i></a>
+    <ExtLink href="https://www.factorio.com" notranslate>Factorio</ExtLink>
     is a game where you build, maintain and protect a factory. This involves mining resources,
     researching technologies, building infrastructure, automating production, and fighting enemies.
   </p>
