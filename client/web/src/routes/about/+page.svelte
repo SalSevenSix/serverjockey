@@ -9,12 +9,11 @@
   </div>
   <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">About</h2>
-    <p>
+    <p class="pb-2">
       <span class="has-text-weight-bold">ServerJockey</span> is a game server management system for
       <span class="has-text-weight-bold">Project Zomboid</span> and other supported games. It is designed
       to be an easy to use self-hosting option for multiplayer servers, allowing you to create and remotely
-      manage your servers. Both this webapp and Discord can be used to manage servers. However to
-      use Discord you will need to <a href="/guides/discord/setup">setup a discord bot</a> first.
+      manage your servers. Both this webapp and Discord can be used to manage servers.
     </p>
     <p class="has-text-weight-bold">
       Join the ServerJockey Discord

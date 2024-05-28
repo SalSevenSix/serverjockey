@@ -36,6 +36,7 @@
 </div>
 
 <div class="content">
+  <hr />
   <h3 id="vbsettings" class="title is-4">Memory and Processor Settings</h3>
   <p>
     You can configure how much of your real machine Memory and Processor the appliance is allowed to use.

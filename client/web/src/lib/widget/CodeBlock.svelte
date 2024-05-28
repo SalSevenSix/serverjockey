@@ -17,7 +17,7 @@
 {:else}
   <div class="position-relative">
     <pre class="pre is-thinner notranslate" bind:this={codeElement}><slot /></pre>
-    <button title="Copy" class="button is-dark" on:click={copyToClipboard}>
+    <button class="button is-dark" title="COPY" on:click={copyToClipboard}>
       <i class="fa fa-copy fa-xl"></i>
     </button>
   </div>
