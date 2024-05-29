@@ -26,7 +26,7 @@ class ServerCommandHandler(httpabc.PostHandler):
         self._mailer = mailer
 
     async def handle_post(self, resource, data):
-        command = 'signal_' + str(util.get('command', data))
+        command = 'signal_' + str(util.get('command', data)).lower()
         if command not in ServerCommandHandler.COMMANDS:
             return httpabc.ResponseBody.BAD_REQUEST
         respond, response = util.get('respond', data, False), {}
