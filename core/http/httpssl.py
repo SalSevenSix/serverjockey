@@ -1,16 +1,15 @@
 import os
 import ssl
-# ALLOW const.* util.* msg*.* context.* http.*
-from core.const import wc
+# ALLOW util.* msg*.* context.* http.*
 from core.context import contextsvc
 from core.http import httpabc, httpcnt
-from core.util import util, io, funcutil, shellutil, idutil
+from core.util import gc, util, io, funcutil, shellutil, idutil
 
 _CERT_FILE, _KEY_FILE = '/serverjockey.crt', '/serverjockey.key'
 
 
 def sync_get_scheme(home: str) -> str:
-    return wc.HTTPS if os.path.isfile(home + _CERT_FILE) and os.path.isfile(home + _KEY_FILE) else wc.HTTP
+    return gc.HTTPS if os.path.isfile(home + _CERT_FILE) and os.path.isfile(home + _KEY_FILE) else gc.HTTP
 
 
 class SslTool:
@@ -28,7 +27,7 @@ class SslTool:
         return ssl_context
 
     def is_active(self):
-        return self._scheme == wc.HTTPS
+        return self._scheme == gc.HTTPS
 
     async def is_enabled(self):
         return await _files_exist(self._sslcert, self._sslkey)

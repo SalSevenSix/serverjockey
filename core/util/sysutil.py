@@ -4,7 +4,7 @@ import asyncio
 import aiohttp
 import socket
 import time
-# ALLOW const.* util.*
+# ALLOW util.*
 from core.util import io, funcutil, shellutil, tasks
 
 

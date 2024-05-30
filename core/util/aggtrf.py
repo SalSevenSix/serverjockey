@@ -1,6 +1,6 @@
 import abc
 import typing
-# ALLOW const.* util.*
+# ALLOW util.*
 
 
 class Aggregator(metaclass=abc.ABCMeta):

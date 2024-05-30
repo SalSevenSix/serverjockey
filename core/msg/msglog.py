@@ -2,7 +2,7 @@ import logging
 import time
 import typing
 import aiofiles
-# ALLOW const.* util.* msg.msgabc msg.msgftr msg.msgtrf
+# ALLOW util.* msg.msgabc msg.msgftr msg.msgtrf
 from core.util import util, dtutil, io, funcutil
 from core.msg import msgabc, msgftr, msgtrf
 

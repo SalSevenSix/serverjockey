@@ -1,7 +1,7 @@
 import logging
 import asyncio
 import re
-# ALLOW const.* util.* msg*.* context.* http.* system.svrabc system.svrsvc
+# ALLOW util.* msg*.* context.* http.* system.svrabc system.svrsvc
 from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc

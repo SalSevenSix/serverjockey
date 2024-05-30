@@ -5,7 +5,7 @@ import typing
 import inspect
 from aiohttp import web_exceptions as we
 from yarl import URL
-# ALLOW const.* util.* msg.* context.*
+# ALLOW util.* msg.* context.*
 from core.util import io
 
 

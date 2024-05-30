@@ -1,4 +1,4 @@
-# ALLOW const.* util.* msg.* context.*
+# ALLOW util.* msg.* context.*
 from core.util import io
 
 

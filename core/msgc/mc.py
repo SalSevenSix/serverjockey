@@ -1,4 +1,4 @@
-# ALLOW const.* util.* msg.msgftr msg.msgtrf
+# ALLOW util.* msg.msgftr msg.msgtrf
 from core.msg import msgftr, msgtrf
 
 

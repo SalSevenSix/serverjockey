@@ -1,8 +1,8 @@
 import typing
 import asyncio
 import base64
-# ALLOW const.*
-from core.const import gc, wc
+# ALLOW util.gc
+from core.util import gc
 
 _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
@@ -43,15 +43,15 @@ def urlsafe_b64decode(value: str) -> str:
     return str(value, gc.UTF_8)
 
 
-def build_url(scheme: str = wc.HTTP,
+def build_url(scheme: str = gc.HTTP,
               host: str | None = 'localhost',
-              port: int | None = wc.HTTP_PORT,
+              port: int | None = gc.HTTP_PORT,
               path: str = '') -> str:
     parts = [scheme, '://']
     if host:
         parts.append(host)
-        if (port and not (scheme == wc.HTTP and port == wc.HTTP_PORT)
-                and not (scheme == wc.HTTPS and port == wc.HTTPS_PORT)):
+        if (port and not (scheme == gc.HTTP and port == gc.HTTP_PORT)
+                and not (scheme == gc.HTTPS and port == gc.HTTPS_PORT)):
             parts.append(':')
             parts.append(str(port))
     if path:

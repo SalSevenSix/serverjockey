@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing
-# ALLOW const.* util.*
+# ALLOW util.*
 from core.util import util
 
 

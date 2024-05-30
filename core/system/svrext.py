@@ -1,8 +1,7 @@
-# ALLOW const.* util.* msg*.* context.* http.* system.* EXCEPT system.bootstrap
-from core.const import gc
+# ALLOW util.* msg*.* context.* http.* system.* EXCEPT system.bootstrap
 from core.util import util, funcutil
 from core.msg import msgabc, msgftr
-from core.msgc import mc
+from core.msgc import sc, mc
 from core.http import httpabc, httpsubs, httpcnt
 from core.system import svrsvc
 
@@ -70,9 +69,9 @@ class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if self._maintenance_filter.accepts(message):
-            svrsvc.ServerStatus.notify_state(self._mailer, self, gc.MAINTENANCE)
+            svrsvc.ServerStatus.notify_state(self._mailer, self, sc.MAINTENANCE)
             return None
         if self._ready_filter.accepts(message):
-            svrsvc.ServerStatus.notify_state(self._mailer, self, gc.READY)
+            svrsvc.ServerStatus.notify_state(self._mailer, self, sc.READY)
             return None
         return None

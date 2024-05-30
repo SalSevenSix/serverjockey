@@ -2,11 +2,10 @@ from __future__ import annotations
 import logging
 import asyncio
 import typing
-# ALLOW const.* util.* msg*.* context.* http.* system.svrabc
-from core.const import gc
+# ALLOW util.* msg*.* context.* http.* system.svrabc
 from core.util import tasks, util, dtutil
 from core.msg import msgabc, msgext, msgftr
-from core.msgc import mc
+from core.msgc import sc, mc
 from core.context import contextsvc
 from core.system import svrabc
 
@@ -69,19 +68,19 @@ class ServerService(msgabc.AbcSubscriber):
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
-                logging.debug(gc.STARTING + ' instance ' + identity)
+                logging.debug(sc.STARTING + ' instance ' + identity)
                 ServerStatus.notify_running(self._context, self, self._running)
                 start = dtutil.now_millis()
                 try:
                     await self._server.run()
                 except Exception as e:
-                    ServerStatus.notify_status(self._context, self, gc.EXCEPTION, {'error': str(e)})
-                    logging.warning(gc.EXCEPTION + ' instance ' + identity + ' [' + repr(e) + ']')
+                    ServerStatus.notify_status(self._context, self, sc.EXCEPTION, {'error': str(e)})
+                    logging.warning(sc.EXCEPTION + ' instance ' + identity + ' [' + repr(e) + ']')
                 finally:
                     self._running = False
                     controller.check_uptime(dtutil.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
-                    logging.debug(gc.STOPPED + ' instance ' + identity)
+                    logging.debug(sc.STOPPED + ' instance ' + identity)
 
     async def handle(self, message):
         action = message.name()
@@ -216,7 +215,7 @@ class _Status:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._running, self._state = False, gc.READY
+        self._running, self._state = False, sc.READY
         self._details, self._startmillis = {}, 0
 
     def notify_running(self, running) -> bool:
@@ -241,7 +240,7 @@ class _Status:
         if state is None or state == self._state:
             return False
         self._state = state
-        if state == gc.READY:
+        if state == sc.READY:
             self._details = {}
         return True
 

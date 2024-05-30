@@ -1,6 +1,6 @@
 import logging
 import asyncio
-# ALLOW const.* util.util
+# ALLOW util.util
 
 
 async def run_script(script: str) -> str:

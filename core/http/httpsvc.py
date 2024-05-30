@@ -3,13 +3,11 @@ import re
 import aiohttp
 from yarl import URL
 from aiohttp import web, abc as webabc, web_exceptions as err
-# ALLOW const.* util.* msg*.* context.* http.httpabc http.httpcnt http.httpstatics
-from core.const import gc, wc
-from core.util import pack, io, objconv
+# ALLOW util.* msg*.* context.* http.httpabc http.httpcnt http.httpstatics
+from core.util import gc, pack, io, objconv
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics, httpssl
 
-_HTTP_PROTOCALS = (wc.HTTP, wc.HTTPS)
 _ACCEPTED_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
     httpcnt.MIME_APPLICATION_JSON,
@@ -117,7 +115,7 @@ class _RequestHandler:
 
     def _request_url(self) -> URL:
         url, proto = self._request.url, self._headers.get(httpcnt.X_FORWARDED_PROTO)
-        if proto and proto in _HTTP_PROTOCALS:
+        if proto and proto in gc.HTTP_PROTOCALS:
             url = url.with_scheme(proto)
         return url
 

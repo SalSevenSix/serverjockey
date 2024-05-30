@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing
-# ALLOW const.* util.* msg*.* context.* http.* system.* proc.*
+# ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext
 from core.msgc import mc

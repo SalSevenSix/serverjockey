@@ -1,7 +1,7 @@
 import types
 import pkgutil
 import importlib
-# ALLOW const.* util.*
+# ALLOW util.*
 from core.util import funcutil
 
 _import_module = funcutil.to_async(importlib.import_module)

@@ -1,7 +1,7 @@
 import logging
 import os
 import signal
-# ALLOW const.* util.*
+# ALLOW util.*
 from core.util import shellutil
 
 

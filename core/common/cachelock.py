@@ -1,7 +1,7 @@
 import logging
 import typing
 import asyncio
-# ALLOW const.* util.* msg*.* context.* http.* system.* proc.*
+# ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import io, tasks
 from core.msg import msgabc, msgftr
 from core.context import contextsvc

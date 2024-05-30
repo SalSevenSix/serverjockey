@@ -4,7 +4,7 @@ import abc
 import typing
 import inspect
 import time
-# ALLOW const.* util.*
+# ALLOW util.*
 
 
 class Message:

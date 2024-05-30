@@ -1,6 +1,5 @@
 # ALLOW core.* serverlink.*
-from core.const import wc
-from core.util import util, logutil, io, aggtrf, objconv
+from core.util import gc, util, logutil, io, aggtrf, objconv
 from core.msg import msgtrf, msgftr, msglog
 from core.msgc import mc
 from core.context import contextsvc, contextext
@@ -80,7 +79,7 @@ class _ServerProcessFactory:
     def __init__(self, context: contextsvc.Context, config: str, clientfile: str):
         self._context, self._config, self._clientfile = context, config, clientfile
         self._env, self._executable, self._script = None, None, None
-        if context.config('scheme') == wc.HTTPS:
+        if context.config('scheme') == gc.HTTPS:
             self._env = context.env()
             self._env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 

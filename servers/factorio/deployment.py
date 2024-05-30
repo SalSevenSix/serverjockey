@@ -1,9 +1,9 @@
 import aiohttp
 import socket
 # ALLOW core.* factorio.messaging
-from core.const import gc
 from core.util import util, idutil, tasks, io, pack, aggtrf, funcutil, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
+from core.msgc import sc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.system import svrsvc
@@ -121,7 +121,7 @@ class Deployment:
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('Factorio game server not installed. Please Install Runtime first.')
-        svrsvc.ServerStatus.notify_state(self._mailer, self, gc.START)  # Pushing early because slow pre-start tasks
+        svrsvc.ServerStatus.notify_state(self._mailer, self, sc.START)  # Pushing early because slow pre-start tasks
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_settings))
         await self._sync_mods()
         await self._ensure_map()

@@ -1,6 +1,6 @@
 import types
 import inspect
-# ALLOW const.* util.* context.* system.svrabc
+# ALLOW util.* context.* system.svrabc
 from core.util import util, pkg
 from core.context import contextsvc
 from core.system import svrabc

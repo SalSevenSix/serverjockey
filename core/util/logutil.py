@@ -1,5 +1,5 @@
 import logging
-# ALLOW const.* util.util
+# ALLOW util.util
 
 
 def prev_logname(logname: str) -> str:

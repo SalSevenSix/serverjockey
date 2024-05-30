@@ -4,7 +4,7 @@ import argparse
 import asyncio
 import sys
 import os
-# ALLOW const.* util.* msg.* context.* http.* system.svrabc system.system
+# ALLOW util.* msg.* context.* http.* system.svrabc system.system
 from core.util import util, idutil, funcutil, sysutil, steamutil, logutil, io, tasks
 from core.msg import msglog
 from core.context import contextsvc, contextext

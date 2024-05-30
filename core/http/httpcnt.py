@@ -3,9 +3,8 @@ import typing
 import re
 import time
 import aiohttp
-# ALLOW const.* util.* msg*.* context.* http.httpabc
-from core.const import gc
-from core.util import util
+# ALLOW util.* msg*.* context.* http.httpabc
+from core.util import gc, util
 from core.http import httpabc
 
 _SECURE = '_SECURE'

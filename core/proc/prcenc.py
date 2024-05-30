@@ -1,5 +1,5 @@
 import abc
-# ALLOW const.* util.* msg.* context.*
+# ALLOW util.* msg.* context.*
 
 
 class LineDecoder(metaclass=abc.ABCMeta):

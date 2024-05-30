@@ -1,5 +1,5 @@
 import unittest
-import asyncio
+# import asyncio
 from core.util import pack
 
 
@@ -13,5 +13,6 @@ class TestCoreUtilPack(unittest.IsolatedAsyncioTestCase):
 
 
 class _PrintLogger:
+    # noinspection All
     def info(self, msg, *args, **kwargs):
         print(msg)
