@@ -1,9 +1,9 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import NginxIcon from '$lib/svg/NginxIcon.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
-  import NginxIcon from '$lib/widget/NginxIcon.svelte';
 </script>
 
 
@@ -64,7 +64,7 @@
   <CodeBlock>sudo systemctl status nginx</CodeBlock>
   <p>
     Now test that the Nginx default welcome page can be accessed over the internet.
-    Try and open the website with a browser using the public IP address,
+    Try to open the website with a browser using the public IP address,
     <span class="is-italic">also your domain name.</span>
     If you have any issues try the following...
   </p>

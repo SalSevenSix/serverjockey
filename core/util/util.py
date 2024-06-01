@@ -73,8 +73,9 @@ def human_file_size(value: int | None) -> str:
     return f'{value:.1f} YiB'
 
 
+# TODO just use dict.get()
 def get(key: typing.Any, dictionary: dict, default: typing.Any = None) -> typing.Any:
-    if key and dictionary and key in dictionary:
+    if dictionary and key in dictionary:
         return dictionary[key]
     return default
 

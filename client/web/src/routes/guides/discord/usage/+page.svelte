@@ -1,7 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import Clyde from '$lib/svg/Clyde.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
-  import Clyde from '$lib/widget/Clyde.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
 

@@ -1,10 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-    xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    viewBox="0 0 574.29 575.78"
-    version="1.1">
-  <title id="title12297">Browser Extension</title>
+<svg viewBox="0 0 574.29 575.78">
   <defs id="defs11848">
     <clipPath id="clipPath1016">
       <path

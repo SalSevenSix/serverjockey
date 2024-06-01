@@ -23,7 +23,7 @@ class HttpService:
     def __init__(self, context: contextsvc.Context, callbacks: httpabc.HttpServiceCallbacks):
         self._context, self._callbacks = context, callbacks
         self._security = httpcnt.SecurityService(context.config('secret'))
-        self._statics = httpstatics.Statics(context)
+        self._statics = httpstatics.Statics()
         self._resources = None
         self._app = web.Application()
         self._app.on_startup.append(self._initialise)

@@ -1,8 +1,8 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import Clyde from '$lib/svg/Clyde.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
-  import Clyde from '$lib/widget/Clyde.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import ServerStatus from '$lib/instance/ServerStatus.svelte';

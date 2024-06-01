@@ -1,8 +1,8 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import TerminalCube from '$lib/svg/TerminalCube.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
-  import TerminalCube from '$lib/widget/TerminalCube.svelte';
 </script>
 
 

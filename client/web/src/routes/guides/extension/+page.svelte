@@ -1,5 +1,6 @@
 <script>
   import { browserName } from '$lib/util/util';
+  import Jigsaw from '$lib/svg/Jigsaw.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
@@ -10,9 +11,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
-    <figure class="image mt-1 max-300">
-      <img src="/assets/guides/extension/browser_extension.svg" alt="Browser Extension logo" />
-    </figure>
+    <figure class="image max-300"><Jigsaw /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Browser Extension</h2>

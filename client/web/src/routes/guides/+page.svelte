@@ -1,6 +1,6 @@
 <script>
   import { browserName } from '$lib/util/util';
-  import GuideBooks from '$lib/widget/GuideBooks.svelte';
+  import GuideBooks from '$lib/svg/GuideBooks.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const isChrome = browserName === 'Chrome';

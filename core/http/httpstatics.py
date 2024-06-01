@@ -3,15 +3,14 @@ import logging
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg*.* context.* http.httpabc http.httpcnt
-from core.util import util, pack, pkg
-from core.context import contextsvc
+from core.util import pack, pkg
 from core.http import httpabc, httpcnt
 
 
 class Statics:
 
-    def __init__(self, context: contextsvc.Context):
-        self._loader = _Loader() if context.is_debug() else _CacheLoader()
+    def __init__(self):
+        self._loader = _CacheLoader()
 
     async def handle(self, request: webabc.Request) -> web.Response:
         resource = await self._loader.load(request.path)
@@ -41,7 +40,7 @@ class _CacheLoader:
         self._cache = {}
 
     async def load(self, path: str) -> typing.Optional[_Resource]:
-        resource = util.get(path, self._cache)
+        resource = self._cache.get(path)
         if resource is not None:
             return resource
         resource = await self._loader.load(path)
