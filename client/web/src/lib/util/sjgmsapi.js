@@ -1,9 +1,17 @@
 import { writable, get } from 'svelte/store';
+import { base } from '$app/paths';
 import { sleep } from '$lib/util/util';
 import { notifyError } from '$lib/util/notifications';
 
 export const securityToken = writable();
 
+
+export function surl(path) {
+  if (path && path.startsWith('http')) return path;  // Assuming full urls are correct
+  if (base && path) return base + path;
+  if (path) return path;
+  return base ? base : '';
+}
 
 export function newGetRequest() {
   return {
@@ -28,10 +36,6 @@ export function newPostRequest(ct = 'application/json') {
       'Content-Type': ct, 'X-Secret': get(securityToken)
     }
   };
-}
-
-export function buildUnstanceUrl(module, identity) {
-  return '/servers/' + module + '?i=' + identity;
 }
 
 
@@ -75,7 +79,7 @@ export class SubscriptionHelper {
   }
 
   async #subscribe(subscribeUrl) {
-    return await fetch(subscribeUrl, newPostRequest())
+    return await fetch(surl(subscribeUrl), newPostRequest())
       .then(function(response) {
         if (response.status === 404) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);

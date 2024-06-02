@@ -1,5 +1,5 @@
 <script>
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
 
@@ -10,7 +10,7 @@
     const actionTitle = this.title;
     confirmModal('Are you sure you want to ' + actionTitle + ' ?\nThis action cannot be undone.', function() {
       processing = true;
-      fetch('/store/' + actionName, newPostRequest())
+      fetch(surl('/store/' + actionName), newPostRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo(actionTitle + ' completed.');

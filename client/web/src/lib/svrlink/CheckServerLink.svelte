@@ -1,13 +1,13 @@
 <script>
   import { onMount } from 'svelte';
-  import { newGetRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest } from '$lib/util/sjgmsapi';
 
   let loaded = false;
   let hasServerLink = false;
   let hasToken = false;
 
   onMount(function() {
-    fetch('/instances/serverlink/config', newGetRequest())
+    fetch(surl('/instances/serverlink/config'), newGetRequest())
       .then(function(response) {
         if (!response.ok) return null;
         return response.json();

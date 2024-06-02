@@ -1,4 +1,5 @@
 <script>
+  import { surl } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
   export let module;
@@ -13,11 +14,11 @@
 <div class="content">
   <p><span class="step-title"></span>
     Go to the
-    <ExtLink href="/servers">Instances</ExtLink>
+    <ExtLink href={surl('/servers')}>Instances</ExtLink>
     page. If opened in a new tab, you will need to enter the login token again.
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/guides/games/goto_instances.png" alt="Go to instances page" />
+    <img src={surl('/assets/guides/games/goto_instances.png')} alt="Go to instances page" />
   </figure>
 </div>
 
@@ -29,7 +30,7 @@
     Click the <span class="has-text-weight-bold">Create</span> button to create the new instance.
   </p>
   <figure class="image max-400 is-bordered">
-    <img src="/assets/guides/games/new_instance.png" alt="Create a new instance" loading="lazy" />
+    <img src={surl('/assets/guides/games/new_instance.png')} alt="Create a new instance" loading="lazy" />
   </figure>
 </div>
 
@@ -39,7 +40,7 @@
     Click the open folder button to view it.
   </p>
   <figure class="image max-600 is-bordered">
-    <img src="/assets/guides/games/view_instance.png" alt="Go to new instance" loading="lazy" />
+    <img src={surl('/assets/guides/games/view_instance.png')} alt="Go to new instance" loading="lazy" />
   </figure>
 </div>
 
@@ -51,7 +52,7 @@
     Now click the <span class="has-text-weight-bold">Install</span> button.
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/guides/games/install_start.png" alt="Start install runtime" loading="lazy" />
+    <img src={surl('/assets/guides/games/install_start.png')} alt="Start install runtime" loading="lazy" />
   </figure>
   <p>
     Scroll back up to the <span class="has-text-weight-bold">Console Log</span>.
@@ -59,6 +60,6 @@
     Once completed successfully, you will be able to start the game server.
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/guides/games/install_log.png" alt="View install logging" loading="lazy" />
+    <img src={surl('/assets/guides/games/install_log.png')} alt="View install logging" loading="lazy" />
   </figure>
 </div>

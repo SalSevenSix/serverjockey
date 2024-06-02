@@ -137,19 +137,22 @@ class WebResource(httpabc.Resource):
     def allows(self, method: httpabc.Method) -> bool:
         return httpabc.AllowMethod.call(method, self._handler)
 
-    async def handle_get(self, url: URL, secure: bool) -> httpabc.ABC_RESPONSE:
+    async def handle_get(self, url: URL, secure: bool, subpath: str = '') -> httpabc.ABC_RESPONSE:
         data = PathProcessor.extract_args_query(url)
         data.update(PathProcessor(self).extract_args_url(url))
+        data['baseurl'] = util.build_url(url.scheme, url.host, url.port, subpath)
         httpcnt.make_secure(data, secure)
         return await httpabc.GetHandler.call(self._handler, self, data)
 
-    async def handle_post(
-            self, url: URL, body: typing.Union[str, httpabc.ABC_DATA_GET, io.Readable]) -> httpabc.ABC_RESPONSE:
+    async def handle_post(self, url: URL,
+                          body: typing.Union[str, httpabc.ABC_DATA_GET, io.Readable],
+                          subpath: str = '') -> httpabc.ABC_RESPONSE:
         data = PathProcessor(self).extract_args_url(url)
         if isinstance(body, dict):
             data.update(body)
         else:
-            data.update({'body': body})
+            data['body'] = body
+        data['baseurl'] = util.build_url(url.scheme, url.host, url.port, subpath)
         return await httpabc.PostHandler.call(self._handler, self, data)
 
 
@@ -202,9 +205,7 @@ class PathProcessor:
         return data
 
     def extract_args_url(self, url: URL) -> httpabc.ABC_DATA_GET:
-        data = self.extract_args_path(url.path)
-        data.update({'baseurl': util.build_url(url.scheme, url.host, url.port)})
-        return data
+        return self.extract_args_path(url.path)
 
     def extract_args_path(self, path: str) -> httpabc.ABC_DATA_GET:
         path, current, data = PathProcessor._split(path), self._resource, {}

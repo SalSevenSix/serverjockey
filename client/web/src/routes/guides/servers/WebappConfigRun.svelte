@@ -1,3 +1,8 @@
+<script>
+  import { surl } from '$lib/util/sjgmsapi';
+</script>
+
+
 <div class="content">
   <p><span class="step-title"></span>
     With the game server fully installed now, you can view and edit the configuration files. Expand the
@@ -5,7 +10,7 @@
     Make sure changes are saved before closing the section, otherwise the changes will be lost!
   </p>
   <figure class="image max-1024 is-bordered">
-    <img src="/assets/guides/games/configuration.png" alt="View and edit config" loading="lazy" />
+    <img src={surl('/assets/guides/games/configuration.png')} alt="View and edit config" loading="lazy" />
   </figure>
 </div>
 
@@ -32,12 +37,12 @@
   <div class="columns">
     <div class="column">
       <figure class="image max-400 is-bordered">
-        <img src="/assets/guides/games/set_auto.png" alt="Set auto setting" loading="lazy" />
+        <img src={surl('/assets/guides/games/set_auto.png')} alt="Set auto setting" loading="lazy" />
       </figure>
     </div>
     <div class="column">
       <figure class="image max-400 is-bordered">
-        <img src="/assets/guides/games/server_start.png" alt="Start server" loading="lazy" />
+        <img src={surl('/assets/guides/games/server_start.png')} alt="Start server" loading="lazy" />
       </figure>
     </div>
   </div>

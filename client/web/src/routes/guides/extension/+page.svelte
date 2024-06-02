@@ -1,5 +1,6 @@
 <script>
   import { browserName } from '$lib/util/util';
+  import { surl } from '$lib/util/sjgmsapi';
   import Jigsaw from '$lib/svg/Jigsaw.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
@@ -41,7 +42,7 @@
       the page then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
     </p>
     <figure class="image max-800">
-      <img src="/assets/guides/extension/chrome_extension_page.jpg" alt="Chrome extension page" />
+      <img src={surl('/assets/guides/extension/chrome_extension_page.jpg')} alt="Chrome extension page" />
     </figure>
   {:else if isEdge}
     <p><span class="step-title"></span>
@@ -52,7 +53,7 @@
       then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
     </p>
     <figure class="image max-800">
-      <img src="/assets/guides/extension/edge_extension_page.png" alt="Edge extension page" />
+      <img src={surl('/assets/guides/extension/edge_extension_page.png')} alt="Edge extension page" />
     </figure>
   {:else}
     <p class="pb-3"><span class="step-title"></span>
@@ -95,9 +96,9 @@
   </p>
   <figure class="image max-500">
     {#if isEdge}
-      <img src="/assets/guides/extension/edge_pin_extension.png" alt="Pin Edge extension" />
+      <img src={surl('/assets/guides/extension/edge_pin_extension.png')} alt="Pin Edge extension" />
     {:else}
-      <img src="/assets/guides/extension/chrome_pin_extension.png" alt="Pin Chrome extension" />
+      <img src={surl('/assets/guides/extension/chrome_pin_extension.png')} alt="Pin Chrome extension" />
     {/if}
   </figure>
 </div>
@@ -113,7 +114,7 @@
     <span class="has-text-weight-bold notranslate">Connect</span>.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/extension/mod_britas_login.jpg" alt="Connect to ServerJockey" loading="lazy" />
+    <img src={surl('/assets/guides/extension/mod_britas_login.jpg')} alt="Connect to ServerJockey" loading="lazy" />
   </figure>
 </div>
 
@@ -126,7 +127,7 @@
     button. Click the button to add the workshop item.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/extension/mod_britas_add.jpg" alt="Add the workshop item" loading="lazy" />
+    <img src={surl('/assets/guides/extension/mod_britas_add.jpg')} alt="Add the workshop item" loading="lazy" />
   </figure>
 </div>
 
@@ -140,7 +141,7 @@
     list.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/extension/mod_britas_available.jpg" alt="Available mods" loading="lazy" />
+    <img src={surl('/assets/guides/extension/mod_britas_available.jpg')} alt="Available mods" loading="lazy" />
   </figure>
 </div>
 
@@ -154,7 +155,7 @@
     Note that the server will need to be restarted for these changes to take effect.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/extension/mod_britas_selected.jpg" alt="Selected mods" loading="lazy" />
+    <img src={surl('/assets/guides/extension/mod_britas_selected.jpg')} alt="Selected mods" loading="lazy" />
   </figure>
 </div>
 
@@ -169,7 +170,7 @@
     should always be at the bottom.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/extension/mod_chinatown_available.jpg" alt="Map mod" loading="lazy" />
+    <img src={surl('/assets/guides/extension/mod_chinatown_available.jpg')} alt="Map mod" loading="lazy" />
   </figure>
 </div>
 
@@ -181,7 +182,7 @@
     Use the cross button to remove any workshop item, but remember to save changes.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/extension/mod_chinatown_workshops.jpg" alt="Workshop list" loading="lazy" />
+    <img src={surl('/assets/guides/extension/mod_chinatown_workshops.jpg')} alt="Workshop list" loading="lazy" />
   </figure>
 </div>
 

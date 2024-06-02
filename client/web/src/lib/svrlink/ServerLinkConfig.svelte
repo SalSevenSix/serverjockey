@@ -1,7 +1,7 @@
 <script>
   import { onMount, getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
 
   const instance = getContext('instance');
 
@@ -47,7 +47,8 @@
 <div class="block">
   {#if showHints}
     <div class="content">
-      <p>For help setting up the ServerLink discord bot, please see <a href="/guides/discord/setup">the guide</a>.</p>
+      <p>For help setting up the ServerLink discord bot, please see
+         <a href={surl('/guides/discord/setup')}>the guide</a>.</p>
     </div>
   {/if}
   <div class="field">

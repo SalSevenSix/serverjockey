@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
 
   let modules = [];
   let serverForm = {};
@@ -18,7 +18,7 @@
     processing = true;
     const request = newPostRequest();
     request.body = JSON.stringify(serverForm);
-    fetch('/instances', request)
+    fetch(surl('/instances'), request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         serverForm.identity = null;
@@ -28,7 +28,7 @@
   }
 
   onMount(function() {
-    fetch('/modules', newGetRequest())
+    fetch(surl('/modules'), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();

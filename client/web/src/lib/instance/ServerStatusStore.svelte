@@ -2,7 +2,7 @@
   import { onMount, onDestroy, tick, setContext } from 'svelte';
   import { writable } from 'svelte/store';
   import { notifyError } from '$lib/util/notifications';
-  import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, SubscriptionHelper } from '$lib/util/sjgmsapi';
 
   const subs = new SubscriptionHelper();
 
@@ -28,7 +28,7 @@
     if (window.location.port) {
       url += ':' + window.location.port;
     }
-    url += '/instances/' + getInstanceIdentity();
+    url += surl('/instances/' + getInstanceIdentity());
     return path ? url + path : url;
   }
 

@@ -1,3 +1,8 @@
+<script>
+  import { surl } from '$lib/util/sjgmsapi';
+</script>
+
+
 <div class="content">
   <p><span class="step-title"></span>
     This game server requires you run it once to generate the default configuration files.
@@ -7,19 +12,19 @@
   <div class="columns is-gapless">
     <div class="column">
       <figure class="image max-400 is-bordered ml-1 mr-1 mb-2">
-        <img src="/assets/guides/games/server_ready.png"
+        <img src={surl('/assets/guides/games/server_ready.png')}
              alt="Run server to generate default config" loading="lazy" />
       </figure>
     </div>
     <div class="column">
       <figure class="image max-400 is-bordered ml-1 mr-1 mb-2">
-        <img src="/assets/guides/games/server_started.png"
+        <img src={surl('/assets/guides/games/server_started.png')}
              alt="Stop started server" loading="lazy" />
       </figure>
     </div>
     <div class="column">
       <figure class="image max-400 is-bordered ml-1 mr-1 mb-2">
-        <img src="/assets/guides/games/server_stopped.png"
+        <img src={surl('/assets/guides/games/server_stopped.png')}
              alt="Server stopped" loading="lazy" />
       </figure>
     </div>
@@ -33,6 +38,7 @@
     the button to reset the game world save then click it.
   </p>
   <figure class="image max-600 is-bordered">
-    <img src="/assets/guides/games/wipe_world_save.png" alt="Wipe world save" loading="lazy" />
+    <img src={surl('/assets/guides/games/wipe_world_save.png')}
+         alt="Wipe world save" loading="lazy" />
   </figure>
 </div>

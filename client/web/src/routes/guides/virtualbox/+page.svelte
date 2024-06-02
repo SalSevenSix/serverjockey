@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import { surl } from '$lib/util/sjgmsapi';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
@@ -8,7 +9,9 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
-    <figure class="image mr-0 max-300"><img src="/assets/brands/Virtualbox_logo.png" alt="Virtualbox logo" /></figure>
+    <figure class="image mr-0 max-300">
+      <img src={surl('/assets/brands/Virtualbox_logo.png')} alt="Virtualbox logo" />
+    </figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2 notranslate">VirtualBox</h2>
@@ -43,7 +46,7 @@
     To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/virtualbox/main.png" alt="VirtualBox Settings" />
+    <img src={surl('/assets/guides/virtualbox/main.png')} alt="VirtualBox Settings" />
   </figure>
   <p>
     Select the <span class="has-text-weight-bold">System</span> section on the left panel, then the
@@ -52,7 +55,7 @@
     but enough to support the game server you are running with 2Gb spare.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/virtualbox/sysmem.png" alt="VirtualBox Memory" loading="lazy" />
+    <img src={surl('/assets/guides/virtualbox/sysmem.png')} alt="VirtualBox Memory" loading="lazy" />
   </figure>
   <p>
     On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much
@@ -60,7 +63,7 @@
     Click <span class="has-text-weight-bold">OK</span> to save changes.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/virtualbox/syscpu.png" alt="VirtualBox Processor" loading="lazy" />
+    <img src={surl('/assets/guides/virtualbox/syscpu.png')} alt="VirtualBox Processor" loading="lazy" />
   </figure>
 
   <h3 id="sshutdown" class="title is-4">Safe Shutdown</h3>
@@ -69,7 +72,7 @@
     option under <span class="has-text-weight-bold">Machine</span> in the menu.
   </p>
   <figure class="image max-400">
-    <img src="/assets/guides/virtualbox/shutdown.png" alt="Safe Shutdown" loading="lazy" />
+    <img src={surl('/assets/guides/virtualbox/shutdown.png')} alt="Safe Shutdown" loading="lazy" />
   </figure>
 
   <h3 id="howtologin" class="title is-4">Login to OS</h3>
@@ -81,7 +84,7 @@
     Remote access is disabled so this default password is acceptable for initial use.
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/virtualbox/login.png" alt="Console Login prompt" loading="lazy" />
+    <img src={surl('/assets/guides/virtualbox/login.png')} alt="Console Login prompt" loading="lazy" />
   </figure>
 
   <h3 id="changepwd" class="title is-4">Change Password</h3>
@@ -91,7 +94,7 @@
   </p>
   <CodeBlock>passwd</CodeBlock>
   <figure class="image max-400">
-    <img src="/assets/guides/virtualbox/changepwd.png" alt="Change Password" loading="lazy" />
+    <img src={surl('/assets/guides/virtualbox/changepwd.png')} alt="Change Password" loading="lazy" />
   </figure>
 
   <h3 id="updateos" class="title is-4">Update OS</h3>
@@ -134,7 +137,7 @@
     <br /><span class="has-text-weight-bold">e.g.</span>&nbsp; <span class="is-family-monospace">\\192.168.1.6</span>
   </p>
   <figure class="image max-800">
-    <img src="/assets/guides/virtualbox/samba.png" alt="Samba sharing" loading="lazy" />
+    <img src={surl('/assets/guides/virtualbox/samba.png')} alt="Samba sharing" loading="lazy" />
   </figure>
 </div>
 

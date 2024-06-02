@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import typing
 import re
 import time
@@ -30,6 +31,7 @@ ORIGIN_ALL = '*'
 ORIGIN_EXT_PREFIX = 'chrome-extension://'
 ORIGIN_WEBDEV = 'http://localhost:5173'
 X_FORWARDED_PROTO = 'X-Forwarded-Proto'
+X_FORWARDED_SUBPATH = 'X-Forwarded-Subpath'
 
 
 def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):
@@ -41,6 +43,19 @@ def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):
 
 def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
     return util.get(_SECURE, data, False) is True
+
+
+def dump_request(request: aiohttp.abc.Request):
+    logging.debug('    REQ method     : ' + str(request.method))
+    logging.debug('    REQ host       : ' + str(request.host))
+    logging.debug('    REQ url        : ' + str(request.url))
+    logging.debug('    REQ rel_url    : ' + str(request.rel_url))
+    logging.debug('    REQ raw_path   : ' + str(request.raw_path))
+    logging.debug('    REQ remote     : ' + str(request.remote))
+    logging.debug('    REQ forwarded  : ' + str(request.forwarded))
+    logging.debug('    REQ keep_alive : ' + str(request.keep_alive))
+    for key in request.headers.keys():
+        logging.debug('    HDR ' + key + ' : ' + request.headers.getone(key))
 
 
 class LoginResponse:

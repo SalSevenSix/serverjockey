@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
   import { sleep, humanFileSize, humanDuration } from '$lib/util/util';
-  import { newGetRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest } from '$lib/util/sjgmsapi';
   import RubiksCube from '$lib/svg/RubiksCube.svelte';
   import HealthSymbol from '$lib/widget/HealthSymbol.svelte';
   import SpinnerOverlay from '$lib/widget/SpinnerOverlay.svelte';
@@ -17,7 +17,7 @@
 
   onMount(async function() {
     while (looping) {
-      await fetch('/system/info', newGetRequest())
+      await fetch(surl('/system/info'), newGetRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           return response.json();

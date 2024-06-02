@@ -3,7 +3,7 @@
   import { notifyError } from '$lib/util/notifications';
   import { confirmDangerModal } from '$lib/modal/modals';
   import { goto } from '$app/navigation';
-  import { newGetRequest, newPostRequest, buildUnstanceUrl, SubscriptionHelper } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const subs = new SubscriptionHelper();
@@ -13,54 +13,50 @@
   let deleting = false;
 
   function viewInstance(selected) {
-    goto(buildUnstanceUrl(selected.module, selected.identity));
+    goto(surl('/servers/' + selected.module + '?i=' + selected.identity));
   }
 
   function deleteInstance(selected) {
     const message = 'Delete instance ' + selected.identity + '?\nThis action cannot be undone.';
     confirmDangerModal(message, selected.identity, function() {
       deleting = true;
-      fetch(selected.url + '/server/delete', newPostRequest())
+      fetch(surl('/instances/' + selected.identity + '/server/delete'), newPostRequest())
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); })
-        .finally(function() { deleting = false; });
+        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
     });
   }
 
+  function handleInstanceEvent(data) {
+    if (data.event === 'running') {
+      instances = instances.map(function(value) {
+        if (value.identity != data.instance) return value;
+        return { identity: value.identity, module: value.module, running: data.running };
+      });
+    } else if (data.event === 'created') {
+      instances = [...instances, { identity: data.instance.identity, module: data.instance.module, running: false }];
+    } else if (data.event === 'deleted') {
+      instances = instances.filter(function(value) {
+        return value.identity != data.instance.identity;
+      });
+      deleting = false;
+    }
+    return true;
+  }
+
   onMount(function() {
-    fetch('/instances', newGetRequest())
+    fetch(surl('/instances'), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
       .then(function(json) {
         Object.keys(json).forEach(function(key) {
-          instances = [...instances, { identity: key, running: json[key].running,
-                                       module: json[key].module, url: json[key].url }];
+          instances = [...instances, { identity: key, module: json[key].module, running: json[key].running }];
         });
-        subs.start('/instances/subscribe', function(data) {
-          if (data.event === 'running') {
-            instances = instances.map(function(value) {
-              if (value.identity != data.instance) return value;
-              return { identity: value.identity, running: data.running, module: value.module, url: value.url };
-            });
-          } else if (data.event === 'created') {
-            data.instance.url = '/instances/' + data.instance.identity;
-            instances = [...instances, data.instance];
-          } else if (data.event === 'deleted') {
-            instances = instances.filter(function(value) {
-              return value.identity != data.instance.identity;
-            });
-          }
-          return true;
-        });
+        subs.start('/instances/subscribe', handleInstanceEvent);
       })
-      .catch(function(error) {
-        notifyError('Failed to load instances.');
-      })
-      .finally(function() {
-        loading = false;
-      });
+      .catch(function(error) { notifyError('Failed to load instances.'); })
+      .finally(function() { loading = false; });
   });
 
   onDestroy(function() {
@@ -116,7 +112,6 @@
 
   .stop {
     width: 1em;
-    /* color: #F14668; */
   }
 
   .fa-folder-open {

@@ -3,7 +3,7 @@
   import { closeModal } from 'svelte-modals';
   import { noStorage } from '$lib/util/util';
   import { notifyError } from '$lib/util/notifications';
-  import { securityToken } from '$lib/util/sjgmsapi';
+  import { surl, securityToken } from '$lib/util/sjgmsapi';
 
   class LoginFailed extends Error {
     constructor() {
@@ -27,7 +27,7 @@
 
   function login() {
     if (cannotLogin) return;
-    fetch('/login', { method: 'post', headers: { 'X-Secret': token } })
+    fetch(surl('/login'), { method: 'post', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (response.status === 401) throw new LoginFailed();
         if (!response.ok) throw new Error('Status: ' + response.status);

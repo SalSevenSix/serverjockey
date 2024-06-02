@@ -1,10 +1,9 @@
 import logging
 import re
 import aiohttp
-from yarl import URL
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg*.* context.* http.httpabc http.httpcnt http.httpstatics
-from core.util import gc, pack, io, objconv
+from core.util import gc, util, pack, io, objconv
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpstatics, httpssl
 
@@ -60,6 +59,8 @@ class HttpService:
             if method is httpabc.Method.GET:
                 return await self._statics.handle(request)
             raise err.HTTPNotFound
+        if self._context.is_trace():
+            httpcnt.dump_request(request)
         return await _RequestHandler(self._context, self._security, method, request, resource).handle()
 
 
@@ -82,9 +83,10 @@ class _RequestHandler:
             return self._build_response_options()
 
         # GET
-        request_url, secure = self._request_url(), self._security.check(self._request)
+        secure = self._security.check(self._request)
+        request_url, request_subpath = self._extract_request()
         if self._method is httpabc.Method.GET:
-            response_body = await self._resource.handle_get(request_url, secure)
+            response_body = await self._resource.handle_get(request_url, secure, request_subpath)
             if response_body is None:
                 raise err.HTTPNotFound
             return await self._build_response(response_body)
@@ -110,19 +112,24 @@ class _RequestHandler:
                 request_body = objconv.json_to_dict(request_body)
                 if request_body is None:
                     raise err.HTTPBadRequest
-        response_body = await self._resource.handle_post(request_url, request_body)
+        response_body = await self._resource.handle_post(request_url, request_body, request_subpath)
         return await self._build_response(response_body)
 
-    def _request_url(self) -> URL:
-        url, proto = self._request.url, self._headers.get(httpcnt.X_FORWARDED_PROTO)
-        if proto and proto in gc.HTTP_PROTOCALS:
-            url = url.with_scheme(proto)
-        return url
+    def _extract_request(self) -> tuple:
+        url, scheme = self._request.url, self._headers.get(httpcnt.X_FORWARDED_PROTO)
+        if scheme:
+            assert scheme in gc.HTTP_PROTOCALS
+            url = url.with_scheme(scheme)
+        subpath = self._headers.get(httpcnt.X_FORWARDED_SUBPATH)
+        if subpath:
+            assert subpath == util.script_escape(subpath)
+            subpath = subpath.strip('/')
+        return url, subpath if subpath else ''
 
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:
             # noinspection PyCallingNonCallable
-            response = body()
+            response = body()  # it will be callable, trust me bro
             self._add_allow_origin(response)
             raise response
         if isinstance(body, Exception):

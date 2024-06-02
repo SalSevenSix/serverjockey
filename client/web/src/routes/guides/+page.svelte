@@ -1,5 +1,6 @@
 <script>
   import { browserName } from '$lib/util/util';
+  import { surl } from '$lib/util/sjgmsapi';
   import GuideBooks from '$lib/svg/GuideBooks.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
@@ -29,7 +30,8 @@
       <span class="has-text-weight-bold">ServerJockey</span>. Congratulations!
     </p>
     <p>
-      The guides section will provide information on how to <a href="/guides/discord/setup">setup the Discord bot</a>.
+      The guides section will provide information on how to
+      <a href={surl('/guides/discord/setup')}>setup the Discord bot</a>.
       As well as help on how to setup, configure and start supported game servers, and more.
     </p>
   </div>
@@ -41,7 +43,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord/setup"><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+    <a href={surl('/guides/discord/setup')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
       Discord Bot Setup</a>
   </div>
   <div class="column is-four-fifths content">
@@ -54,7 +56,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/discord/usage"><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+    <a href={surl('/guides/discord/usage')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
       Discord Bot Usage</a>
   </div>
   <div class="column is-four-fifths content">
@@ -67,7 +69,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/extension"><i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
+    <a href={surl('/guides/extension')}><i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
       Browser Extension</a>
   </div>
   <div class="column is-four-fifths content">
@@ -91,7 +93,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
-    <a href="/guides/virtualbox"><i class="fa fa-computer fa-lg theme-black-white"></i>
+    <a href={surl('/guides/virtualbox')}><i class="fa fa-computer fa-lg theme-black-white"></i>
       VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
@@ -103,7 +105,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/cli"><i class="fa fa-terminal fa-lg theme-black-white"></i>
+    <a href={surl('/guides/cli')}><i class="fa fa-terminal fa-lg theme-black-white"></i>
       Command Line Interface</a>
   </div>
   <div class="column is-four-fifths content">
@@ -115,7 +117,7 @@
 </div>
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href="/guides/nginx"><i class="fa fa-server fa-lg theme-black-white"></i>
+    <a href={surl('/guides/nginx')}><i class="fa fa-server fa-lg theme-black-white"></i>
       Hosting behind Nginx</a>
   </div>
   <div class="column is-four-fifths content">
@@ -133,12 +135,12 @@
 <div class="columns is-multiline">
   {#each games as game}
     <div class="column is-one-quarter-desktop is-one-third-tablet">
-      <a href="/guides/servers/{game.module}" title="{game.serverName} guide">
+      <a href={surl('/guides/servers/' + game.module)} title="{game.serverName} guide">
         <div class="card">
           <header class="card-header card-header-title notranslate">{game.serverName}</header>
           <div class="card-image">
             <figure class="image">
-              <img src="/assets/games/{game.module}-tile.jpg" alt="{game.serverName} icon" />
+              <img src={surl('/assets/games/' + game.module + '-tile.jpg')} alt="{game.serverName} icon" />
             </figure>
           </div>
         </div>

@@ -2,7 +2,7 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
   import { RollingLog } from '$lib/util/util';
-  import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
+  import { surl, SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const subs = new SubscriptionHelper();
@@ -63,7 +63,7 @@
   }
 
   onMount(function() {
-    fetch(loadUrl, newGetRequest())
+    fetch(surl(loadUrl), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.text();
@@ -90,7 +90,7 @@
   <div class="content mb-2">
     <span class="has-text-weight-bold">
       {#if downloadUrl}
-        <ExtLink href={downloadUrl} title="Open" bigger>{title}&nbsp;</ExtLink>
+        <ExtLink href={surl(downloadUrl)} title="Open" bigger>{title}&nbsp;</ExtLink>
       {:else}
         {title}
       {/if}

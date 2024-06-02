@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import { surl } from '$lib/util/sjgmsapi';
   import NginxIcon from '$lib/svg/NginxIcon.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
@@ -49,7 +50,7 @@
     Note that a domain name can be used with ServerJockey without needing Nginx.
   </p>
   <figure class="image max-1024">
-    <img src="/assets/guides/nginx/duckdns_example.png" alt="DuckDNS example" />
+    <img src={surl('/assets/guides/nginx/duckdns_example.png')} alt="DuckDNS example" />
   </figure>
 
   <h3 id="installnginx" class="title is-4">Install Nginx</h3>
@@ -75,7 +76,7 @@
     <li>Clear browser cache and double check all networking
   </ul>
   <figure class="image max-1024">
-    <img src="/assets/guides/nginx/nginx_welcome.png" alt="Nginx welcome page" loading="lazy" />
+    <img src={surl('/assets/guides/nginx/nginx_welcome.png')} alt="Nginx welcome page" loading="lazy" />
   </figure>
 
   <h3 id="generatesslcert" class="title is-4">Generate SSL certificate</h3>
@@ -110,7 +111,7 @@
   </p>
   <CodeBlock>/etc/letsencrypt/live/example.duckdns.org</CodeBlock>
   <figure class="image max-1024">
-    <img src="/assets/guides/nginx/example_cert_files.png" alt="Example certificate files" loading="lazy" />
+    <img src={surl('/assets/guides/nginx/example_cert_files.png')} alt="Example certificate files" loading="lazy" />
   </figure>
 
   <h3 id="nginxconfig" class="title is-4">Nginx configuration</h3>
@@ -195,7 +196,7 @@ http &#123;
     Now open ServerJockey in a browser using HTTPS and your domain name.
   </p>
   <figure class="image max-1024 mt-0">
-    <img src="/assets/guides/nginx/proxied_serverjockey.png" alt="ServerJockey behind Nginx" loading="lazy" />
+    <img src={surl('/assets/guides/nginx/proxied_serverjockey.png')} alt="ServerJockey behind Nginx" loading="lazy" />
   </figure>
 </div>
 

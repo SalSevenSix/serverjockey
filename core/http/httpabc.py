@@ -151,11 +151,12 @@ class Resource(AllowMethod, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    async def handle_get(self, url: URL, secure: bool) -> ABC_RESPONSE:
+    async def handle_get(self, url: URL, secure: bool, subpath: str = '') -> ABC_RESPONSE:
         pass
 
     @abc.abstractmethod
-    async def handle_post(self, url: URL, body: typing.Union[str, ABC_DATA_GET, ByteStream]) -> ABC_RESPONSE:
+    async def handle_post(self, url: URL,
+                          body: typing.Union[str, ABC_DATA_GET, ByteStream], subpath: str = '') -> ABC_RESPONSE:
         pass
 
 

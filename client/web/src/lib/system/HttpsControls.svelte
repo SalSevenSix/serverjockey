@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
 
@@ -17,7 +17,7 @@
       processing = true;
       const request = newPostRequest();
       request.body = JSON.stringify({ enabled: !httpsInfo.enabled });
-      fetch('/ssl', request)
+      fetch(surl('/ssl'), request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           httpsInfo.enabled = !httpsInfo.enabled;
@@ -29,7 +29,7 @@
   }
 
   onMount(function() {
-    fetch('/ssl', newGetRequest())
+    fetch(surl('/ssl'), newGetRequest())
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
