@@ -27,13 +27,13 @@
       <ExtLink href="https://www.virtualbox.org/manual/UserManual.html">online manual</ExtLink>
     </p>
     <ul>
-      <li><a href="#vbsettings" use:scrollto={'#vbsettings'}>Memory and Processor Settings</a>
-      <li><a href="#sshutdown" use:scrollto={'#sshutdown'}>Safe Shutdown</a>
-      <li><a href="#howtologin" use:scrollto={'#howtologin'}>Login to OS</a>
-      <li><a href="#changepwd" use:scrollto={'#changepwd'}>Change Password</a>
-      <li><a href="#updateos" use:scrollto={'#updateos'}>Update OS</a>
-      <li><a href="#enablessh" use:scrollto={'#enablessh'}>Remote access using SSH</a>
-      <li><a href="#enablesamba" use:scrollto={'#enablesamba'}>Remote access using File Sharing</a>
+      <li><a href="#vbsettings" use:scrollto={'#vbsettings'}>Memory and Processor Settings</a></li>
+      <li><a href="#sshutdown" use:scrollto={'#sshutdown'}>Safe Shutdown</a></li>
+      <li><a href="#howtologin" use:scrollto={'#howtologin'}>Login to OS</a></li>
+      <li><a href="#changepwd" use:scrollto={'#changepwd'}>Change Password</a></li>
+      <li><a href="#updateos" use:scrollto={'#updateos'}>Update OS</a></li>
+      <li><a href="#enablessh" use:scrollto={'#enablessh'}>Remote access using SSH</a></li>
+      <li><a href="#enablesamba" use:scrollto={'#enablesamba'}>Remote access using File Sharing</a></li>
     </ul>
   </div>
 </div>

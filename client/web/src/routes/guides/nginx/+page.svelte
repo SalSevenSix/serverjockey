@@ -24,10 +24,10 @@
       and terminal access to the machine with familiarity using it.
     </p>
     <ul>
-      <li><a href="#obtaindomain" use:scrollto={'#obtaindomain'}>Obtain a domain name</a>
-      <li><a href="#installnginx" use:scrollto={'#installnginx'}>Install Nginx</a>
-      <li><a href="#generatesslcert" use:scrollto={'#generatesslcert'}>Generate SSL certificate</a>
-      <li><a href="#nginxconfig" use:scrollto={'#nginxconfig'}>Nginx configuration</a>
+      <li><a href="#obtaindomain" use:scrollto={'#obtaindomain'}>Obtain a domain name</a></li>
+      <li><a href="#installnginx" use:scrollto={'#installnginx'}>Install Nginx</a></li>
+      <li><a href="#generatesslcert" use:scrollto={'#generatesslcert'}>Generate SSL certificate</a></li>
+      <li><a href="#nginxconfig" use:scrollto={'#nginxconfig'}>Nginx configuration</a></li>
     </ul>
   </div>
 </div>
@@ -70,10 +70,10 @@
     If you have any issues try the following...
   </p>
   <ul>
-    <li>Make sure the URL is using HTTP not HTTPS
-    <li>Ensure port 80 and 443 are open to the internet for TCP
-    <li>If the domain name is not working, check that the correct IP is associated
-    <li>Clear browser cache and double check all networking
+    <li>Make sure the URL is using HTTP not HTTPS</li>
+    <li>Ensure port 80 and 443 are open to the internet for TCP</li>
+    <li>If the domain name is not working, check that the correct IP is associated</li>
+    <li>Clear browser cache and double check all networking</li>
   </ul>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/nginx/nginx_welcome.png')} alt="Nginx welcome page" loading="lazy" />
@@ -172,6 +172,7 @@ http &#123;
       proxy_set_header X-Real-IP $remote_addr&#59;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for&#59;
       proxy_set_header X-Forwarded-Proto https&#59;
+      proxy_set_header X-Forwarded-Subpath &quot;&quot;&#59;
       proxy_read_timeout 90s&#59;
       access_log off&#59;
     &#125;
@@ -198,6 +199,18 @@ http &#123;
   <figure class="image max-1024 mt-0">
     <img src={surl('/assets/guides/nginx/proxied_serverjockey.png')} alt="ServerJockey behind Nginx" loading="lazy" />
   </figure>
+  <p>
+    <span class="has-text-weight-bold">If you want to use a subpath...</span>
+    Define the subpath in the location block and add a trailing slash to the
+    <span class="is-family-monospace notranslate">proxy_pass</span> url. Also put the subpath in the
+    <span class="is-family-monospace white-space-nowrap notranslate">X-Forwarded-Subpath</span> header.
+  </p>
+  <CodeBlock>location /serverjockey/ &#123;
+  proxy_pass http&#58;//serverjockey/&#59;
+  ...
+  proxy_set_header X-Forwarded-Subpath /serverjockey&#59;
+  ...
+&#125;</CodeBlock>
 </div>
 
 <BackToTop />

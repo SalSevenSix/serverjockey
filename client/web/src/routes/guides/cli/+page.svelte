@@ -17,10 +17,10 @@
       (CLI). In order to use it, you must access a terminal to run the CLI executable.
     </p>
     <ul>
-      <li><a href="#clishowhelp" use:scrollto={'#clishowhelp'}>Show Help</a>
-      <li><a href="#clitasks" use:scrollto={'#clitasks'}>Tasks</a>
-      <li><a href="#clicommands" use:scrollto={'#clicommands'}>Commands</a>
-      <li><a href="#clibackup" use:scrollto={'#clibackup'}>Backup Example</a>
+      <li><a href="#clishowhelp" use:scrollto={'#clishowhelp'}>Show Help</a></li>
+      <li><a href="#clitasks" use:scrollto={'#clitasks'}>Tasks</a></li>
+      <li><a href="#clicommands" use:scrollto={'#clicommands'}>Commands</a></li>
+      <li><a href="#clibackup" use:scrollto={'#clibackup'}>Backup Example</a></li>
     </ul>
   </div>
 </div>
@@ -64,13 +64,13 @@
     The process does the following...
   </p>
   <ol>
-    <li>Select the instance called  <span class="is-family-monospace notranslate">myserver</span>
-    <li>If the server is not running, then stop processing commands and exit
-    <li>Broadcast a 5 minute warning message to all players, then wait 4 minutes
-    <li>Broadcast a 1 minute warning message to all players, then wait 1 minute
-    <li>Stop the server then wait 10 seconds for that to happen
-    <li>Backup the game world save and delete all backups older than 168 hours
-    <li>Start up the server
+    <li>Select the instance called  <span class="is-family-monospace notranslate">myserver</span></li>
+    <li>If the server is not running, then stop processing commands and exit</li>
+    <li>Broadcast a 5 minute warning message to all players, then wait 4 minutes</li>
+    <li>Broadcast a 1 minute warning message to all players, then wait 1 minute</li>
+    <li>Stop the server then wait 10 seconds for that to happen</li>
+    <li>Backup the game world save and delete all backups older than 168 hours</li>
+    <li>Start up the server</li>
   </ol>
   <CodeBlock>serverjockey_cmd.pyz -c \
   use:myserver exit-down \
