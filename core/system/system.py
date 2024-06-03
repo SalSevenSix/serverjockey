@@ -6,7 +6,7 @@ from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
 from core.context import contextsvc, contextext
-from core.http import httpabc, httpcnt, httprsc, httpext, httpsubs, httpssl
+from core.http import httpabc, httpcnt, httpsec, httprsc, httpext, httpsubs, httpssl
 from core.system import svrmodules, svrsvc, sysstore, mprof, steamapi, igd
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
@@ -197,7 +197,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._system, self._modules, = system, modules
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         return await self._system.instances_info(util.get('baseurl', data, ''))
 
@@ -218,7 +218,7 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._system = system
 
     def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         result = self._system.instance_info(resource.name())
         return result if result else httpabc.ResponseBody.NOT_FOUND
@@ -243,7 +243,7 @@ class _SystemInfoHandler(httpabc.GetHandler):
         self._startmillis = dtutil.now_millis()
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         info = await sysutil.system_info()
         info['startmillis'] = self._startmillis

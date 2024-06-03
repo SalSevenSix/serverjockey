@@ -2,7 +2,7 @@ import os
 import ssl
 # ALLOW util.* msg*.* context.* http.*
 from core.context import contextsvc
-from core.http import httpabc, httpcnt
+from core.http import httpabc, httpsec
 from core.util import gc, util, io, funcutil, shellutil, idutil
 
 _CERT_FILE, _KEY_FILE = '/serverjockey.crt', '/serverjockey.key'
@@ -62,7 +62,7 @@ class SslHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._context = context
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         tool = SslTool(self._context)
         return {'active': tool.is_active(), 'enabled': await tool.is_enabled()}

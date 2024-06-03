@@ -5,7 +5,7 @@ from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg*.* context.* http.httpabc http.httpcnt http.httpstatics
 from core.util import gc, util, pack, io, objconv
 from core.context import contextsvc
-from core.http import httpabc, httpcnt, httpstatics, httpssl
+from core.http import httpabc, httpcnt, httpsec, httpstatics, httpssl
 
 _ACCEPTED_MIME_TYPES = (
     httpcnt.MIME_TEXT_PLAIN,
@@ -21,7 +21,7 @@ class HttpService:
 
     def __init__(self, context: contextsvc.Context, callbacks: httpabc.HttpServiceCallbacks):
         self._context, self._callbacks = context, callbacks
-        self._security = httpcnt.SecurityService(context.config('secret'))
+        self._security = httpsec.SecurityService(context.config('secret'))
         self._statics = httpstatics.Statics()
         self._resources = None
         self._app = web.Application()
@@ -66,7 +66,7 @@ class HttpService:
 
 class _RequestHandler:
 
-    def __init__(self, context: contextsvc.Context, security: httpcnt.SecurityService,
+    def __init__(self, context: contextsvc.Context, security: httpsec.SecurityService,
                  method: httpabc.Method, request: webabc.Request, resource: httpabc.Resource):
         self._context, self._security = context, security
         self._method, self._request = method, request
@@ -137,8 +137,8 @@ class _RequestHandler:
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_STORE)
         self._add_allow_origin(response)
-        if isinstance(body, httpcnt.LoginResponse):
-            response.set_cookie('secret', self._security.secret(), max_age=86400, httponly=True, samesite='Lax')
+        if isinstance(body, httpsec.LoginResponse):
+            self._security.set_cookie(response)
             body = httpabc.ResponseBody.NO_CONTENT
         if body is httpabc.ResponseBody.NO_CONTENT:
             response.set_status(httpabc.ResponseBody.NO_CONTENT.status_code)
@@ -190,7 +190,8 @@ class _RequestHandler:
         response.headers.add(httpcnt.ALLOW, methods)
         self._add_allow_origin(response)
         response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_METHODS, methods)
-        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS, httpcnt.CONTENT_TYPE + ',' + httpcnt.X_SECRET)
+        response.headers.add(httpcnt.ACCESS_CONTROL_ALLOW_HEADERS,
+                             httpcnt.CONTENT_TYPE + ',' + httpcnt.AUTHORIZATION + ',' + httpcnt.X_SECRET)
         response.headers.add(httpcnt.ACCESS_CONTROL_MAX_AGE, '600')  # 10 minutes
         return response
 

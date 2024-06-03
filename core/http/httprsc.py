@@ -2,9 +2,9 @@ from __future__ import annotations
 import logging
 import typing
 from yarl import URL
-# ALLOW util.* msg*.* context.* http.httpabc http.httpcnt
+# ALLOW util.* msg*.* context.* http.httpabc http.httpsec
 from core.util import util, objconv, io
-from core.http import httpabc, httpcnt
+from core.http import httpabc, httpsec
 
 ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL)
 
@@ -141,7 +141,7 @@ class WebResource(httpabc.Resource):
         data = PathProcessor.extract_args_query(url)
         data.update(PathProcessor(self).extract_args_url(url))
         data['baseurl'] = util.build_url(url.scheme, url.host, url.port, subpath)
-        httpcnt.make_secure(data, secure)
+        httpsec.make_secure(data, secure)
         return await httpabc.GetHandler.call(self._handler, self, data)
 
     async def handle_post(self, url: URL,

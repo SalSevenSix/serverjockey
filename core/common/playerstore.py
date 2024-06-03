@@ -4,7 +4,7 @@ import typing
 from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext
 from core.msgc import mc
-from core.http import httpabc, httpcnt
+from core.http import httpabc, httpsec
 from core.system import svrsvc
 
 
@@ -14,7 +14,7 @@ class PlayersHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         return await PlayersSubscriber.get(self._mailer, self)
 

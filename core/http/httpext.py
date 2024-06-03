@@ -6,13 +6,13 @@ import aiofiles
 # ALLOW util.* msg*.* context.* http.*
 from core.util import util, io, tasks, aggtrf, objconv, dtutil
 from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
-from core.http import httpabc, httpcnt, httpsubs
+from core.http import httpabc, httpcnt, httpsec, httpsubs
 
 
 class LoginHandler(httpabc.PostHandler):
 
     def handle_post(self, resource, data):
-        return httpcnt.LoginResponse()
+        return httpsec.LoginResponse()
 
 
 class MessengerHandler(httpabc.PostHandler):
@@ -58,7 +58,7 @@ class StaticHandler(httpabc.GetHandler):
         self._response, self._protected = response, protected
 
     def handle_get(self, resource, data):
-        if self._protected and not httpcnt.is_secure(data):
+        if self._protected and not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         return self._response
 
@@ -103,7 +103,7 @@ class RollingLogHandler(httpabc.GetHandler):
         mailer.register(self._subscriber)
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         return await msgext.RollingLogSubscriber.get(self._mailer, self, self._subscriber.identity())
 
@@ -140,7 +140,7 @@ class MtimeHandler(httpabc.GetHandler):
         return self
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         result = await self._find_mtime()
         return {'timestamp': dtutil.to_millis(result) if result else None}
@@ -183,7 +183,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._read_tracker, self._write_tracker = read_tracker, write_tracker
 
     async def handle_get(self, resource, data):
-        if self._protected and not httpcnt.is_secure(data):
+        if self._protected and not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         path = self._path + '/' + data[self._tail] if self._tail else self._path
         if await io.file_exists(path):

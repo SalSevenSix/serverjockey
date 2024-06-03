@@ -4,7 +4,7 @@ from core.util import util, objconv
 from core.msg import msgabc, msgftr
 from core.msgc import sc, mc
 from core.context import contextsvc
-from core.http import httpabc, httpcnt, httprsc, httpext
+from core.http import httpabc, httpsec, httprsc, httpext
 from core.store import storeabc, storetxn, storesvc
 
 
@@ -120,7 +120,7 @@ class _AbstractQueryHandler(httpabc.GetHandler):
         self._mailer = mailer
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         result = await storeabc.query(self._mailer, self, self.get_query(data))
         if isinstance(result, Exception):

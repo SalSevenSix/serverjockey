@@ -1,7 +1,7 @@
 import aiohttp
 # ALLOW util.* http.*
 from core.util import util
-from core.http import httpabc, httpcnt, httprsc
+from core.http import httpabc, httpcnt, httpsec, httprsc
 
 
 def resources(resource: httprsc.WebResource):
@@ -13,7 +13,7 @@ def resources(resource: httprsc.WebResource):
 class _GetPublishedFileDetailsHandler(httpabc.GetHandler):
 
     async def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         items = util.get('ids', data)
         assert items

@@ -1,7 +1,7 @@
 import collections
 from pympler import muppy
 # ALLOW util.* http.*
-from core.http import httpabc, httpcnt
+from core.http import httpabc, httpsec
 
 # https://github.com/pympler/pympler
 # https://pympler.readthedocs.io/en/latest/
@@ -15,7 +15,7 @@ class MemoryProfilingHandler(httpabc.GetHandler):
         self._captures = collections.deque()
 
     def handle_get(self, resource, data):
-        if not httpcnt.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         while len(self._captures) >= 26:
             self._captures.pop()

@@ -1,15 +1,11 @@
-from __future__ import annotations
 import logging
 import typing
 import re
-import time
 import aiohttp
 # ALLOW util.* msg*.* context.* http.httpabc
 from core.util import gc, util
 from core.http import httpabc
 
-_SECURE = '_SECURE'
-X_SECRET = 'X-Secret'
 RESOURCES_READY = 'RESOURCES_READY'
 
 HOST = 'Host'
@@ -18,6 +14,7 @@ CONTENT_TYPE = 'Content-Type'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
 GZIP = 'gzip'
+AUTHORIZATION = 'Authorization'
 CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'
 CACHE_CONTROL_NO_STORE = 'no-store'
@@ -32,17 +29,7 @@ ORIGIN_EXT_PREFIX = 'chrome-extension://'
 ORIGIN_WEBDEV = 'http://localhost:5173'
 X_FORWARDED_PROTO = 'X-Forwarded-Proto'
 X_FORWARDED_SUBPATH = 'X-Forwarded-Subpath'
-
-
-def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):
-    if _SECURE in data:
-        del data[_SECURE]
-    if secure:
-        data[_SECURE] = True
-
-
-def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
-    return util.get(_SECURE, data, False) is True
+X_SECRET = 'X-Secret'
 
 
 def dump_request(request: aiohttp.abc.Request):
@@ -56,12 +43,6 @@ def dump_request(request: aiohttp.abc.Request):
     logging.debug('    REQ keep_alive : ' + str(request.keep_alive))
     for key in request.headers.keys():
         logging.debug('    HDR ' + key + ' : ' + request.headers.getone(key))
-
-
-class LoginResponse:
-
-    def __init__(self):
-        pass
 
 
 class ContentTypeImpl(httpabc.ContentType):
@@ -112,72 +93,6 @@ class ContentTypeImpl(httpabc.ContentType):
         if not result[1].startswith(_CHARSET):
             return result[0], None
         return result[0], result[1][len(_CHARSET):]
-
-
-class SecurityService:
-    COUNT, TIMOUT = 3, 5.0
-
-    def __init__(self, secret: str):
-        self._secret = secret
-        self._failures = _SecurityFailures()
-
-    def secret(self) -> str:
-        return self._secret
-
-    def check(self, request: aiohttp.abc.Request) -> bool:
-        now, remote = time.time(), request.remote
-        count, last = self._failures.get(remote)
-        if count >= SecurityService.COUNT:
-            if (now - last) < SecurityService.TIMOUT:
-                self._failures.set(remote, now)
-                raise httpabc.ResponseBody.UNAUTHORISED
-            self._failures.remove(remote)
-        secret = SecurityService._get_secret(request)
-        if secret is None:
-            return False  # No token provided, which is acceptable for public requests
-        if secret == self._secret:
-            return True  # Correct token provided
-        # Incorrect token...
-        self._failures.add(remote, now)
-        raise httpabc.ResponseBody.UNAUTHORISED
-
-    @staticmethod
-    def _get_secret(request) -> str | None:
-        secret = HeadersTool(request).get(X_SECRET)
-        if secret is None:
-            secret = request.cookies.get('secret')
-        return secret
-
-
-class _SecurityFailures:
-
-    def __init__(self):
-        self._failures = {}
-
-    def get(self, remote) -> tuple:
-        failure = util.get(remote, self._failures)
-        return failure if failure else (0, None)
-
-    def set(self, remote, now: float):
-        count = self.get(remote)[0]
-        self._failures[remote] = (count, now)
-
-    def add(self, remote, now: float):
-        self._clear(now)
-        count = self.get(remote)[0]
-        self._failures[remote] = (count + 1, now)
-
-    def remove(self, remote):
-        if remote in self._failures:
-            del self._failures[remote]
-
-    def _clear(self, now: float):
-        remotes = []
-        for remote, failure in self._failures.items():
-            if (now - failure[1]) >= SecurityService.TIMOUT:
-                remotes.append(remote)
-        for remote in remotes:
-            self.remove(remote)
 
 
 class HeadersTool:
