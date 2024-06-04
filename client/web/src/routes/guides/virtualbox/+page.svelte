@@ -79,8 +79,10 @@
   <p>
     The appliance is running Ubuntu Server OS. You can login to the command line console if needed.
     Hit the <span class="has-text-weight-bold">Enter</span> key to show the login prompt.
-    Login with user <span class="is-family-monospace">zombox</span> and password
-    <span class="is-family-monospace">zombox</span>.
+    Login with user
+    <span class="is-family-monospace notranslate">zombox</span>
+    and password
+    <span class="is-family-monospace notranslate">zombox</span>.
     Remote access is disabled so this default password is acceptable for initial use.
   </p>
   <figure class="image max-800">

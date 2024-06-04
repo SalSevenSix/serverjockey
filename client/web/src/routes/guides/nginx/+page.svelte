@@ -90,9 +90,9 @@
     is nonprofit certificate authority that provides SSL certificates for free.
     <ExtLink href="https://certbot.eff.org" notranslate>Certbot</ExtLink>
     is a command line tool you can use to generate SSL certificates using Let&#39;s Encrypt.
-    Check the Certbot website for install options for your machine.
-    If <span class="is-family-monospace notranslate">snap</span> is available,
-    it&#39;s recommended you install that version with the following command.
+    Check the Certbot website for install options for your machine. If
+    <span class="is-family-monospace notranslate">snap</span>
+    is available, it&#39;s recommended you install that version with the following command.
   </p>
   <CodeBlock>sudo snap install --classic certbot</CodeBlock>
   <p>
@@ -118,12 +118,14 @@
   <p>
     Final step is to configure Nginx to use HTTPS, the domain name, the SSL configuration file, the certificate files,
     and to direct http requests to ServerJockey. Use a text editor such as
-    <span class="is-family-monospace notranslate">nano</span> to edit the Nginx configuration file.
+    <span class="is-family-monospace notranslate">nano</span>
+    to edit the Nginx configuration file.
   </p>
   <CodeBlock>sudo nano /etc/nginx/nginx.conf</CodeBlock>
   <p>
     Below is a single file working example configuration. Replace the entire contents of
-    <span class="is-family-monospace notranslate">nginx.conf</span> but
+    <span class="is-family-monospace notranslate">nginx.conf</span>
+    but
     <span class="is-italic">remember to substitute your domain name.</span>
   </p>
   <CodeBlock>user www-data&#59;
@@ -202,8 +204,10 @@ http &#123;
   <p>
     <span class="has-text-weight-bold">If you want to use a subpath...</span>
     Define the subpath in the location block and add a trailing slash to the
-    <span class="is-family-monospace notranslate">proxy_pass</span> url. Also put the subpath in the
-    <span class="is-family-monospace white-space-nowrap notranslate">X-Forwarded-Subpath</span> header.
+    <span class="is-family-monospace notranslate">proxy_pass</span>
+    url. Also put the subpath in the
+    <span class="is-family-monospace white-space-nowrap notranslate">X-Forwarded-Subpath</span>
+    header.
   </p>
   <CodeBlock>location /serverjockey/ &#123;
   proxy_pass http&#58;//serverjockey/&#59;

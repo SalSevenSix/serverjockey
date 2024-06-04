@@ -73,7 +73,8 @@ UPnP=false
   <h4 class="title is-5">Admin Character</h4>
   <p>
     When a Project Zomboid server starts it will generate a new map if one does not exist.
-    It will also create an Admin user called <span class="is-family-monospace notranslate">admin</span>.
+    It will also create an Admin user called
+    <span class="is-family-monospace notranslate">admin</span>.
     You can login to the game world with this user to play as the admin character.
     The password is the same as the Webapp login token. It will not change when the token changes.
   </p>
@@ -131,9 +132,12 @@ UPnP=false
     done to disk.
   </p>
   <p>
-    For this feature to work, you need <span class="is-family-monospace">vmtouch</span> installed on the machine.
-    <span class="is-italic">The VirtualBox and Docker/Pterodactyl distributions of ServerJockey already have this
-    pre-installed.</span> For the DEB, RPM and Source distributions, use the appropriate package manager to install;
+    For this feature to work, you need
+    <span class="is-family-monospace notranslate">vmtouch</span>
+    installed on the machine.
+    <span class="is-italic">The VirtualBox and Docker/Pterodactyl distributions
+    of ServerJockey already have this pre-installed.</span>
+    For the DEB, RPM and Source distributions, use the appropriate package manager to install;
     e.g.
   </p>
   <CodeBlock>sudo apt install vmtouch</CodeBlock>
@@ -158,9 +162,11 @@ UPnP=false
   </p>
   <CodeBlock>/etc/security/limits.conf</CodeBlock>
   <p>
-    Finally, with <span class="is-family-monospace">vmtouch</span> installed, this feature can be enabled in the
-    <span class="has-text-weight-bold">Launch Options</span> configuration.
-    Please ensure enough free memory is available when cache locking the map files.
+    Finally, with
+    <span class="is-family-monospace notranslate">vmtouch</span>
+    installed, this feature can be enabled in the
+    <span class="has-text-weight-bold">Launch Options</span>
+    configuration. Please ensure enough free memory is available when cache locking the map files.
   </p>
   <CodeBlock nocopy>&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
 &quot;cache_map_files&quot;: true</CodeBlock>
