@@ -53,6 +53,15 @@ class ResponseBody:
     UNAUTHORISED = we.HTTPUnauthorized
     ERRORS = (NOT_FOUND, CONFLICT, BAD_REQUEST, UNAVAILABLE, UNAUTHORISED)
 
+    def __init__(self, body: bytes, content_type: ContentType):
+        self._body, self._content_type = body, content_type
+
+    def body(self):
+        return self._body
+
+    def content_type(self):
+        return self._content_type
+
 
 class ContentType(metaclass=abc.ABCMeta):
 
@@ -90,7 +99,7 @@ class ByteStream(io.Readable, metaclass=abc.ABCMeta):
 
 ABC_DATA_GET = typing.Dict[str, typing.Union[str, int, float, bool]]
 ABC_DATA_POST = typing.Dict[str, typing.Union[ABC_DATA_GET, str, int, float, bool, tuple, list, ByteStream]]
-ABC_RESPONSE = typing.Union[dict, tuple, list, str, ByteStream, we.HTTPException]
+ABC_RESPONSE = typing.Union[dict, tuple, list, str, bytes, ByteStream, ResponseBody, we.HTTPException]
 
 
 class AllowMethod(metaclass=abc.ABCMeta):

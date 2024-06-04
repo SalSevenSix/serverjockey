@@ -44,8 +44,6 @@ def _argument_parser() -> argparse.ArgumentParser:
                    help='Home directory to use for server instances, default is current working directory')
     p.add_argument('--tempdir', type=str, default='.tmp',
                    help='Directory to use for temporary files, default is .tmp under home')
-    p.add_argument('--clientfile', type=str, default='serverjockey-client.json',
-                   help='Filename for client file, relative to "home" unless starts with "/" or "."')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
     p.add_argument('--nostore', action='store_true',
@@ -62,15 +60,14 @@ def _create_context(args: typing.Collection) -> contextsvc.Context | None:
         return None
     home = util.full_path(os.getcwd(), config.home)
     tempdir = util.full_path(home, config.tempdir)
-    clientfile = util.full_path(home, config.clientfile)
     logfile = util.full_path(home, config.logfile)
     dbfile = None if config.nostore else util.full_path(home, 'serverjockey.db')
+    host = None if config.host == '0.0.0.0' else config.host
     return contextsvc.Context(
-        debug=config.debug, trace=config.trace, home=home, tempdir=tempdir,
-        stime=_stime(home), secret=idutil.generate_token(10, True), showtoken=config.showtoken,
+        debug=config.debug, trace=config.trace, home=home, tempdir=tempdir, stime=_stime(home),
+        secret=idutil.generate_token(10, True), showtoken=config.showtoken,
         scheme=httpssl.sync_get_scheme(home), env=os.environ.copy(), python=sys.executable,
-        clientfile=clientfile, dbfile=dbfile, logfile=logfile, noupnp=config.noupnp,
-        host=None if config.host == '0.0.0.0' else config.host, port=config.port)
+        dbfile=dbfile, logfile=logfile, noupnp=config.noupnp, host=host, port=config.port)
 
 
 def _setup_logging(context: contextsvc.Context):

@@ -27,8 +27,7 @@ class TestContext:
             debug=True, trace=False, home=home, tempdir=tempdir,
             stime=None, secret='token', showtoken=False,
             scheme=_SCHEME, env=os.environ.copy(), python=sys.executable,
-            logfile=None, dbfile=None, clientfile=None, noupnp=True,
-            host=None, port=None)
+            logfile=None, dbfile=None, noupnp=True, host=None, port=None)
 
     async def initialise(self):
         if self._resources:

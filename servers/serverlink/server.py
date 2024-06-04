@@ -32,7 +32,7 @@ class Server(svrabc.Server):
         self._context, home = context, context.config('home')
         self._config = util.full_path(home, 'serverlink.json')
         self._log_file = util.full_path(home, 'serverlink.log') if logutil.is_logging_to_file() else None
-        self._clientfile = contextext.ClientFile(context, util.full_path(home, 'serverjockey-client.json'))
+        self._clientfile = contextext.ClientFile(context)
         self._server_factory = _ServerProcessFactory(context, self._config, self._clientfile.path())
         self._stopper = spstopper.ServerProcessStopper(context, 10.0)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)

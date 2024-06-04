@@ -49,8 +49,7 @@ def _find_clientfile(user: str | None) -> str:
             return candidate
         raise Exception('Clientfile for user ' + user + ' not found. ServerJockey may be down.')
     home = os.environ['HOME']
-    candidates = (home + filename, home + '/serverjockey' + filename, '/home/sjgms' + filename)
-    for candidate in candidates:
+    for candidate in (home + filename, home + '/serverjockey' + filename, '/home/sjgms' + filename):
         if os.path.isfile(candidate):
             return candidate
     raise Exception('Unable to find Clientfile. ServerJockey may be down. Or try using --user option.')

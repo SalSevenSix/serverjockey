@@ -153,6 +153,9 @@ class _RequestHandler:
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = objconv.obj_to_json(body)
             body = body.encode(gc.UTF_8)
+        if isinstance(body, httpabc.ResponseBody):
+            content_type = body.content_type()
+            body = body.body()
         allow_gzip = self._headers.accepts_encoding(httpcnt.GZIP)
         if allow_gzip and isinstance(body, bytes) and len(body) > 512:
             body = await pack.gzip_compress(body)

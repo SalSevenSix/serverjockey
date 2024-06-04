@@ -7,7 +7,7 @@ from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httpsec, httprsc, httpext, httpsubs, httpssl
-from core.system import svrmodules, svrsvc, sysstore, mprof, steamapi, igd
+from core.system import svrmodules, svrsvc, sysstore, sysmetrics, mprof, steamapi, igd
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 
@@ -19,7 +19,7 @@ class SystemService:
         self._context = context
         self._home_dir = context.config('home')
         self._pidfile = _PidFileSubscriber(context)
-        self._clientfile = contextext.ClientFile(context, context.config('clientfile'))
+        self._clientfile = contextext.ClientFile(context, tokenfile=True)
         self._modules = svrmodules.Modules(context)
         self._sysstoresvc = sysstore.SystemStoreService(context)
         self._resource = self._build_resources()
@@ -34,6 +34,7 @@ class SystemService:
         r.put('login', httpext.LoginHandler())
         r.put('modules', httpext.StaticHandler(self._modules.names()))
         r.put('ssl', httpssl.SslHandler(self._context))
+        r.put('metrics', sysmetrics.SystemMetricsHandler())
         r.put('mprof', mprof.MemoryProfilingHandler())
         r.psh('system')
         r.put('info', _SystemInfoHandler())

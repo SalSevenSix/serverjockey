@@ -19,8 +19,10 @@ class RootUrl:
 
 class ClientFile:
 
-    def __init__(self, context: contextsvc.Context, clientfile: str):
-        self._context, self._clientfile = context, clientfile
+    def __init__(self, context: contextsvc.Context, tokenfile: bool = False):
+        self._context, home = context, context.config('home')
+        self._clientfile = util.full_path(home, 'serverjockey-client.json')
+        self._tokenfile = util.full_path(home, 'serverjockey-token.text') if tokenfile else None
 
     def path(self):
         return self._clientfile
@@ -28,11 +30,16 @@ class ClientFile:
     async def write(self):
         if not self._clientfile:
             return
+        secret = self._context.config('secret')
         data = objconv.obj_to_json({
             'SERVER_URL': RootUrl(self._context).build(),
-            'SERVER_TOKEN': self._context.config('secret')
+            'SERVER_TOKEN': secret
         })
         await io.write_file(self._clientfile, data)
+        if self._tokenfile:
+            await io.write_file(self._tokenfile, secret)
 
     async def delete(self):
         await funcutil.silently_call(io.delete_file(self._clientfile))
+        if self._tokenfile:
+            await funcutil.silently_call(io.delete_file(self._tokenfile))

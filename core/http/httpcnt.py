@@ -87,12 +87,14 @@ class ContentTypeImpl(httpabc.ContentType):
 
     @staticmethod
     def _parse(content_type: str) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
-        result = content_type.replace(' ', '').split(';')
-        if len(result) == 1:
-            return result[0], None
-        if not result[1].startswith(_CHARSET):
-            return result[0], None
-        return result[0], result[1][len(_CHARSET):]
+        mime_type, encoding = None, None
+        for part in content_type.replace(' ', '').split(';'):
+            if mime_type:
+                if part.lower().startswith(_CHARSET):
+                    encoding = part[len(_CHARSET):]
+            else:
+                mime_type = part
+        return mime_type, encoding
 
 
 class HeadersTool:

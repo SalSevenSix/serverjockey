@@ -5,13 +5,6 @@ import typing
 
 
 class _Tasker:
-    __instance = None
-
-    @staticmethod
-    def instance():
-        if not _Tasker.__instance:
-            _Tasker.__instance = _Tasker()
-        return _Tasker.__instance
 
     def __init__(self):
         self._tasks = []
@@ -31,6 +24,9 @@ class _Tasker:
             logging.debug('tsk> REMAINING ' + repr(task))
 
 
+_TASKER = _Tasker()
+
+
 def _str_name(name: typing.Any) -> str:
     if isinstance(name, str):
         return name
@@ -38,7 +34,7 @@ def _str_name(name: typing.Any) -> str:
 
 
 def task_start(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
-    return _Tasker.instance().task_start(coro, _str_name(name))
+    return _TASKER.task_start(coro, _str_name(name))
 
 
 def task_fork(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
@@ -48,11 +44,11 @@ def task_fork(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
 
 
 def task_end(task: asyncio.Task):
-    _Tasker.instance().task_end(task)
+    _TASKER.task_end(task)
 
 
 def dump():
-    _Tasker.instance().dump()
+    _TASKER.dump()
 
 
 async def wait_for(task: asyncio.Task, timeout: float):
