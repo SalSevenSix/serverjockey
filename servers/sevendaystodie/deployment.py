@@ -1,6 +1,6 @@
 from xml.dom import minidom
 # ALLOW core.* sevendaystodie.messaging
-from core.util import util, objconv, io
+from core.util import gc, util, objconv, io
 from core.msg import msgftr, msgtrf, msglog, msgext
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -155,14 +155,14 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('server_upnp', cmdargs, True):
             server_port = int(util.get('ServerPort', config, 26900))
-            portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, '7D2D TCP server')
-            portmapper.map_port(self._mailer, self, server_port, portmapper.UDP, '7D2D UDP server')
-            portmapper.map_port(self._mailer, self, server_port + 1, portmapper.UDP, '7D2D aux1')
-            portmapper.map_port(self._mailer, self, server_port + 2, portmapper.UDP, '7D2D aux2')
-            portmapper.map_port(self._mailer, self, server_port + 3, portmapper.UDP, '7D2D aux3')
+            portmapper.map_port(self._mailer, self, server_port, gc.TCP, '7D2D TCP server')
+            portmapper.map_port(self._mailer, self, server_port, gc.UDP, '7D2D UDP server')
+            portmapper.map_port(self._mailer, self, server_port + 1, gc.UDP, '7D2D aux1')
+            portmapper.map_port(self._mailer, self, server_port + 2, gc.UDP, '7D2D aux2')
+            portmapper.map_port(self._mailer, self, server_port + 3, gc.UDP, '7D2D aux3')
         if util.get('console_upnp', cmdargs, False) and objconv.to_bool(util.get('WebDashboardEnabled', config)):
             console_port = int(util.get('WebDashboardPort', config, 8080))
-            portmapper.map_port(self._mailer, self, console_port, portmapper.TCP, '7D2D web console')
+            portmapper.map_port(self._mailer, self, console_port, gc.TCP, '7D2D web console')
         if util.get('telnet_upnp', cmdargs, False) and objconv.to_bool(util.get('TelnetEnabled', config)):
             telnet_port = int(util.get('TelnetPort', config, 8081))
-            portmapper.map_port(self._mailer, self, telnet_port, portmapper.TCP, '7D2D telnet')
+            portmapper.map_port(self._mailer, self, telnet_port, gc.TCP, '7D2D telnet')

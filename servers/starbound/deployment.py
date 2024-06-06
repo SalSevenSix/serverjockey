@@ -1,5 +1,5 @@
 # ALLOW core.* starbound.messaging
-from core.util import util, idutil, io, objconv
+from core.util import gc, util, idutil, io, objconv
 from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -113,12 +113,12 @@ class Deployment:
         if util.get('server_upnp', cmdargs, True):
             server_port = util.get('gameServerPort', config, 21025)
             query_port = util.get('queryServerPort', config, server_port)
-            portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, 'Starbound server')
+            portmapper.map_port(self._mailer, self, server_port, gc.TCP, 'Starbound server')
             if query_port != server_port:
-                portmapper.map_port(self._mailer, self, query_port, portmapper.TCP, 'Starbound query')
+                portmapper.map_port(self._mailer, self, query_port, gc.TCP, 'Starbound query')
         if util.get('rcon_upnp', cmdargs, False):
             rcon_port = util.get('rconServerPort', config)
-            portmapper.map_port(self._mailer, self, rcon_port, portmapper.TCP, 'Starbound rcon')
+            portmapper.map_port(self._mailer, self, rcon_port, gc.TCP, 'Starbound rcon')
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')

@@ -3,10 +3,9 @@ import typing
 from core.util import util
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
-from core.system import svrsvc, igd
+from core.remotes import igd
+from core.system import svrsvc
 from core.proc import proch
-
-TCP, UDP = igd.TCP, igd.UDP
 
 
 def map_port(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):

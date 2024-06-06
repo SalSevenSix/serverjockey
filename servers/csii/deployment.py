@@ -1,5 +1,5 @@
 # ALLOW core.* csii.messaging
-from core.util import util, idutil, io, objconv, steamutil
+from core.util import gc, util, idutil, io, objconv, steamutil
 from core.msg import msgext, msgftr, msglog, msgtrf
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -112,8 +112,8 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         server_port = util.get('-port', cmdargs, 27015)
         if util.get('upnp', cmdargs, True):
-            portmapper.map_port(self._mailer, self, server_port, portmapper.TCP, 'CS2 TCP server')
-            portmapper.map_port(self._mailer, self, server_port, portmapper.UDP, 'CS2 UDP server')
+            portmapper.map_port(self._mailer, self, server_port, gc.TCP, 'CS2 TCP server')
+            portmapper.map_port(self._mailer, self, server_port, gc.UDP, 'CS2 UDP server')
         rconsvc.RconService.set_config(self._mailer, self, server_port, util.get('+rcon_password', cmdargs))
         server = proch.ServerProcess(self._mailer, self._python).use_cwd(bin_dir)
         server.append_arg(self._wrapper).append_arg(executable).append_arg('-dedicated')

@@ -2,13 +2,13 @@ import logging
 import typing
 import asyncio
 import upnpy
-# ALLOW util.* msg*.* context.* http.* system.svrabc
-from core.util import util, funcutil, sysutil
+# ALLOW util.* msg*.* context.* http.*
+from core.util import gc, util, funcutil, sysutil
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 
-TCP, UDP = 'TCP', 'UDP'
-_VALID_PROTOCALS = TCP, UDP
+
+_VALID_PROTOCALS = (gc.TCP, gc.UDP)
 
 
 def initialise(context: contextsvc.Context, source: typing.Any):

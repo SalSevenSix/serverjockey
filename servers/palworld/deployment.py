@@ -1,7 +1,7 @@
 from __future__ import annotations
 import re
 # ALLOW core.* palworld.messaging
-from core.util import util, idutil, io, steamutil, objconv
+from core.util import gc, util, idutil, io, steamutil, objconv
 from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -152,15 +152,15 @@ class Deployment:
                 server_port = util.get('-port', cmdargs)
             if not server_port:
                 server_port = 8211
-            portmapper.map_port(self._mailer, self, int(server_port), portmapper.UDP, 'PalWorld UDP server')
+            portmapper.map_port(self._mailer, self, int(server_port), gc.UDP, 'PalWorld UDP server')
         if query_upnp:
             query_port = util.get('-queryport', cmdargs)
             if not query_port:
                 query_port = 27015
-            portmapper.map_port(self._mailer, self, int(query_port), portmapper.UDP, 'PalWorld UDP query')
+            portmapper.map_port(self._mailer, self, int(query_port), gc.UDP, 'PalWorld UDP query')
         if rcon_upnp:
             rcon_port = settings.get('RCONPort')  # This should always be set
-            portmapper.map_port(self._mailer, self, int(rcon_port), portmapper.TCP, 'PalWorld TCP rcon')
+            portmapper.map_port(self._mailer, self, int(rcon_port), gc.TCP, 'PalWorld TCP rcon')
         return util.delete_dict(cmdargs, upnp_keys)
 
 

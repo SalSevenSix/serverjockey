@@ -1,7 +1,7 @@
 import aiohttp
 import socket
 # ALLOW core.* factorio.messaging
-from core.util import util, idutil, tasks, io, pack, aggtrf, funcutil, objconv
+from core.util import gc, util, idutil, tasks, io, pack, aggtrf, funcutil, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
 from core.msgc import sc
 from core.context import contextsvc
@@ -131,7 +131,7 @@ class Deployment:
             server.append_arg('--port').append_arg(port)
         port = port if port else 34197
         if util.get('server-upnp', cmdargs, True):
-            portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Factorio server')
+            portmapper.map_port(self._mailer, self, port, gc.UDP, 'Factorio server')
         rcon_port = util.get('rcon-port', cmdargs)
         rcon_port = rcon_port if rcon_port else port + 1
         server.append_arg('--rcon-port').append_arg(rcon_port)
@@ -140,7 +140,7 @@ class Deployment:
         server.append_arg('--rcon-password').append_arg(rcon_password)
         rconsvc.RconService.set_config(self._mailer, self, rcon_port, rcon_password)
         if util.get('rcon-upnp', cmdargs, False):
-            portmapper.map_port(self._mailer, self, rcon_port, portmapper.TCP, 'Factorio rcon')
+            portmapper.map_port(self._mailer, self, rcon_port, gc.TCP, 'Factorio rcon')
         if cmdargs['use-authserver-bans']:
             server.append_arg('--use-authserver-bans')
         if cmdargs['use-server-whitelist']:

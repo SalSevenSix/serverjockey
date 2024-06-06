@@ -1,13 +1,16 @@
 import logging
 import asyncio
 import re
-# ALLOW util.* msg*.* context.* http.* system.svrabc system.svrsvc
+# ALLOW util.* msg*.* context.* http.* remotes.* metrics.* store.* system.svrabc system.svrsvc
 from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httpsec, httprsc, httpext, httpsubs, httpssl
-from core.system import svrmodules, svrsvc, sysstore, sysmetrics, mprof, steamapi, igd
+from core.remotes import steamapi, igd
+from core.metrics import sysmetrics, mprof
+from core.store import sysstore
+from core.system import svrmodules, svrsvc
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 

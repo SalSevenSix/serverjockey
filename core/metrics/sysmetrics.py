@@ -31,9 +31,9 @@ class _AppendLabelsCollector(registry.Collector):
 
 
 prometheus_client.disable_created_metrics()
-_INSTANCE_LABEL = 'sjgms_instance'
+_LABEL_KEY = 'process'
 _REGISTRY = registry.CollectorRegistry()
-_REGISTRY.register(_AppendLabelsCollector(prometheus_client.REGISTRY, {_INSTANCE_LABEL: 'serverjockey'}))
+_REGISTRY.register(_AppendLabelsCollector(prometheus_client.REGISTRY, {_LABEL_KEY: 'serverjockey'}))
 
 
 def _sync_register_process_collector(
@@ -41,7 +41,7 @@ def _sync_register_process_collector(
         get_pid: typing.Callable) -> typing.Optional[registry.Collector]:
     try:
         collector = prometheus_client.process_collector.ProcessCollector(pid=get_pid, registry=None)
-        collector = _AppendLabelsCollector(collector, {_INSTANCE_LABEL: instance})
+        collector = _AppendLabelsCollector(collector, {_LABEL_KEY: instance})
         instance_registry.register(collector)
         return collector
     except Exception as e:
@@ -63,7 +63,7 @@ def _sync_unregister_collector(a_registry: registry.CollectorRegistry, collector
 
 
 def _sync_new_gauge(instance_registry: registry.CollectorRegistry, name: str, documentation: str) -> metrics.Gauge:
-    return metrics.Gauge(name, documentation, labelnames=[_INSTANCE_LABEL], registry=instance_registry)
+    return metrics.Gauge(name, documentation, labelnames=[_LABEL_KEY], registry=instance_registry)
 
 
 def _sync_set_gauge(gauge: metrics.Gauge, instance: str, value: float, inc: bool = None):

@@ -1,5 +1,5 @@
 # ALLOW core.* unturned.messaging
-from core.util import util, io, objconv
+from core.util import gc, util, io, objconv
 from core.msg import msgftr, msgext, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -120,5 +120,5 @@ class Deployment:
             for line in commands.split('\n'):
                 if line and line.lower().startswith(port_key):
                     port = int(util.lchop(line.lower(), port_key))
-        portmapper.map_port(self._mailer, self, port, portmapper.UDP, 'Unturned query')
-        portmapper.map_port(self._mailer, self, port + 1, portmapper.UDP, 'Unturned server')
+        portmapper.map_port(self._mailer, self, port, gc.UDP, 'Unturned query')
+        portmapper.map_port(self._mailer, self, port + 1, gc.UDP, 'Unturned server')
