@@ -1,7 +1,7 @@
 import abc
 # ALLOW util.* msg*.* context.* http.* store.*
 from core.util import util, objconv
-from core.msg import msgabc, msgftr
+from core.msg import msgabc
 from core.msgc import sc, mc
 from core.context import contextsvc
 from core.http import httpabc, httpsec, httprsc, httpext
@@ -24,7 +24,8 @@ class SystemStoreService:
     def initialise_instance(self, subcontext: contextsvc.Context):
         if not self._dbfile:
             return
-        subcontext.register(_InstanceRouting(subcontext))
+        subcontext.register(_InstanceEventRouting(subcontext))
+        subcontext.register(_InstancePlayerRouting(subcontext))
 
     def resources(self, resource: httprsc.WebResource):
         if not self._dbfile:
@@ -58,50 +59,58 @@ class _SystemRouting(msgabc.AbcSubscriber):
         return None
 
 
-class _InstanceRouting(msgabc.AbcSubscriber):
-    _LOGIN, _LOGOUT, _CLEAR, _CHAT = 'LOGIN', 'LOGOUT', 'CLEAR', 'CHAT'
+class _InstanceEventRouting(msgabc.AbcSubscriber):
 
     def __init__(self, subcontext: contextsvc.Context):
-        super().__init__(msgftr.Or(mc.ServerStatus.UPDATED_FILTER, mc.PlayerStore.EVENT_FILTER))
+        super().__init__(mc.ServerStatus.UPDATED_FILTER)
         self._identity, self._mailer = subcontext.config('identity'), subcontext.root()
-        self._last_state, self._player_names = sc.READY, set()
+        self._last_state = sc.READY
 
     async def handle(self, message):
         source, data = message.source(), message.data()
-        if mc.ServerStatus.UPDATED_FILTER.accepts(message):
-            state = util.get('state', data)
-            if state == self._last_state:
-                return None
-            self._last_state = state
-            details = objconv.obj_to_json(util.get('details', data))
-            storeabc.execute(self._mailer, source, storetxn.InsertInstanceEvent(self._identity, state, details))
+        state = util.get('state', data)
+        if state == self._last_state:
             return None
-        if mc.PlayerStore.EVENT_FILTER.accepts(message):
-            event = data.asdict()
-            event_name = event['event'].upper()
-            if event_name == _InstanceRouting._CLEAR:
-                for player_name in self._player_names:
-                    storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
-                        self._identity, _InstanceRouting._LOGOUT, player_name, None))
-                self._player_names = set()
-                return None
-            player_name = event['player']['name']
-            if event_name == _InstanceRouting._CHAT:
-                storeabc.execute(self._mailer, source, storetxn.InsertPlayerChat(
-                    self._identity, player_name, event['text']))
-                return None
-            steamid = event['player']['steamid']
-            if event_name == _InstanceRouting._LOGIN:
-                self._player_names.add(player_name)
+        self._last_state = state
+        details = objconv.obj_to_json(util.get('details', data))
+        storeabc.execute(self._mailer, source, storetxn.InsertInstanceEvent(self._identity, state, details))
+        return None
+
+
+class _InstancePlayerRouting(msgabc.AbcSubscriber):
+
+    def __init__(self, subcontext: contextsvc.Context):
+        super().__init__(mc.PlayerStore.EVENT_FILTER)
+        self._identity, self._mailer = subcontext.config('identity'), subcontext.root()
+        self._player_names = set()
+
+    async def handle(self, message):
+        source, data = message.source(), message.data().asdict()
+        event_name = data['event'].upper()
+        if event_name == sc.CLEAR:
+            for player_name in self._player_names:
                 storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
-                    self._identity, event_name, player_name, steamid))
-                return None
-            if event_name == _InstanceRouting._LOGOUT:
+                    self._identity, sc.LOGOUT, player_name, None))
+            self._player_names = set()
+            return None
+        player_name = data['player']['name']
+        if event_name == sc.CHAT:
+            storeabc.execute(self._mailer, source, storetxn.InsertPlayerChat(
+                self._identity, player_name, data['text']))
+            return None
+        steamid = data['player']['steamid']
+        if event_name == sc.LOGIN:
+            self._player_names.add(player_name)
+            storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
+                self._identity, event_name, player_name, steamid))
+            return None
+        if event_name == sc.LOGOUT:
+            if player_name in self._player_names:
                 self._player_names.remove(player_name)
-                storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
-                    self._identity, event_name, player_name, steamid))
-                return None
+            storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
+                self._identity, event_name, player_name, steamid))
             return None
+        return None
 
 
 class _StoreResetHandler(httpabc.PostHandler):

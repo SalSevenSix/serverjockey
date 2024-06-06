@@ -14,7 +14,8 @@ class ServerService(msgabc.AbcSubscriber):
     START, RESTART, STOP = 'ServerService.Start', 'ServerService.Restart', 'ServerService.Stop'
     DELETE, DELETE_ME = 'ServerService.Delete', 'ServerService.DeletedMe'
     SHUTDOWN, SHUTDOWN_RESPONSE = 'ServerService.Shutdown', 'ServerService.ShutdownResponse'
-    CLEANUP_FILTER = msgftr.NameIn((DELETE, SHUTDOWN))
+    CLEANUP_NAMES = (DELETE, SHUTDOWN)
+    CLEANUP_FILTER = msgftr.NameIn(CLEANUP_NAMES)
 
     @staticmethod
     def signal_start(mailer: msgabc.Mailer, source: typing.Any):
@@ -98,7 +99,7 @@ class ServerService(msgabc.AbcSubscriber):
             await self._server_stop()
             await self._queue_join()
             return None
-        if action in (ServerService.DELETE, ServerService.SHUTDOWN):
+        if action in ServerService.CLEANUP_NAMES:
             self._queue.put_nowait(_RunController(False, False, False))
             await self._server_stop()
             await self._queue_join()

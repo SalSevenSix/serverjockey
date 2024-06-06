@@ -29,6 +29,15 @@ async def silently_kill_tree(pid: int):
         logging.debug('silent_kill_tree() ' + repr(e))
 
 
+async def get_leaf(pid: int) -> int | None:
+    script = _leaf_pid_script().strip().replace('{rootpid}', str(pid))
+    try:
+        return int(await shellutil.run_script(script))
+    except Exception as e:
+        logging.debug('get_leaf_pid() ' + repr(e))
+    return None
+
+
 def _kill_tree_script():
     return '''
 gather_pids() {
@@ -39,4 +48,15 @@ gather_pids() {
   echo "$children"
 }
 kill -9 $(gather_pids "{rootpid}") {rootpid}
+'''
+
+
+def _leaf_pid_script():
+    return '''
+pid_chain() {
+  local child=$(ps -o pid= --ppid "$1" | head -1 | tr -d '[:space:]')
+  [ -z "$child" ] || pid_chain "$child"
+  echo "$1"
+}
+pid_chain "{rootpid}" | head -1
 '''

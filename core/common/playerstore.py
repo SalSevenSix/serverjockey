@@ -132,6 +132,8 @@ class _Players:
         return result
 
 
+# TODO use uppercase event names from core.msgc.sc
+
 class _EventLogin:
 
     def __init__(self, name: str, steamid: str | None = None):
