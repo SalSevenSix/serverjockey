@@ -1,12 +1,13 @@
 # ALLOW core.*
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.system import svrsvc, svrext
-from core.proc import proch, jobh, prcext
+from core.proc import jobh, prcext
 from core.common import playerstore, rconsvc
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches(
         '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
 DEPLOYMENT_MSG, DEPLOYMENT_START, DEPLOYMENT_DONE = 'Deployment.Message', 'Deployment.Start', 'Deployment.Done'
@@ -14,7 +15,7 @@ FILTER_DEPLOYMENT_MSG = msgftr.NameIs(DEPLOYMENT_MSG)
 FILTER_DEPLOYMENT_START = msgftr.NameIs(DEPLOYMENT_START)
 FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_ALL_LINES,
+    mc.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
     rconsvc.RconService.FILTER_OUTPUT,
     msglog.FILTER_ALL_LEVELS,
@@ -42,7 +43,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, local_ip: str):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER,
@@ -84,7 +85,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
                       _PlayerEventSubscriber.LEAVE_FILTER,

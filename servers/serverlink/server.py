@@ -4,13 +4,15 @@ from core.msg import msgtrf, msgftr, msglog
 from core.msgc import mc
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsubs, httprsc, httpext
+from core.metrics import mtxinstance
 from core.system import svrabc, svrext
 from core.proc import proch, prcext
 from core.common import spstopper
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
+_LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES
 _SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('ServerLink Bot has STARTED'))
 
 
@@ -26,7 +28,6 @@ def _default_config():
 
 
 class Server(svrabc.Server):
-    LOG_FILTER = proch.ServerProcess.FILTER_ALL_LINES
 
     def __init__(self, context: contextsvc.Context):
         self._context, home = context, context.config('home')
@@ -41,13 +42,14 @@ class Server(svrabc.Server):
         if not await io.file_exists(self._config):
             await io.write_file(self._config, objconv.obj_to_json(_default_config()))
         await self._server_factory.initialise()
+        await mtxinstance.initialise(self._context, noplayers=True)
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream():
-            self._context.register(msglog.PrintSubscriber(Server.LOG_FILTER, transformer=msgtrf.GetData()))
+            self._context.register(msglog.PrintSubscriber(_LOG_FILTER, transformer=msgtrf.GetData()))
         if self._log_file:
             await io.write_file(self._log_file, '\n')
             self._context.register(msglog.LogfileSubscriber(
-                self._log_file, msg_filter=Server.LOG_FILTER, transformer=msgtrf.GetData()))
+                self._log_file, msg_filter=_LOG_FILTER, transformer=msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)
@@ -57,8 +59,8 @@ class Server(svrabc.Server):
         r.pop()
         r.put('config', httpext.FileSystemHandler(self._config))
         r.psh('log', httpext.FileSystemHandler(self._log_file) if self._log_file else httpext.StaticHandler(_NO_LOG))
-        r.put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER))
-        r.put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n')))
+        r.put('tail', httpext.RollingLogHandler(self._context, _LOG_FILTER))
+        r.put('subscribe', self._httpsubs.handler(_LOG_FILTER, aggtrf.StrJoin('\n')))
         r.pop()
         r.psh(self._httpsubs.resource(resource, 'subscriptions'))
         r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))

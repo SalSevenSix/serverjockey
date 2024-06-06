@@ -1,18 +1,19 @@
 # ALLOW core.*
 from core.util import util
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.system import svrsvc, svrext
-from core.proc import proch, jobh, prcext
+from core.proc import jobh, prcext
 from core.common import playerstore
 
 _SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp (.*) : usecElapsed >= 0$'
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataEquals('Loading level: 100%'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(
-        proch.ServerProcess.FILTER_ALL_LINES,
+        mc.ServerProcess.FILTER_ALL_LINES,
         msgftr.Not(msgftr.DataMatches(_SPAM))),
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
@@ -38,7 +39,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             _ServerDetailsSubscriber.VERSION_FILTER))
         self._mailer = mailer
 
@@ -65,7 +66,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.LOGIN_FILTER,
                       _PlayerEventSubscriber.LOGOUT_FILTER,

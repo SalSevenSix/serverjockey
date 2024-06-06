@@ -11,37 +11,32 @@ from core.system import svrabc
 
 
 class ServerService(msgabc.AbcSubscriber):
-    START, RESTART, STOP = 'ServerService.Start', 'ServerService.Restart', 'ServerService.Stop'
-    DELETE, DELETE_ME = 'ServerService.Delete', 'ServerService.DeletedMe'
-    SHUTDOWN, SHUTDOWN_RESPONSE = 'ServerService.Shutdown', 'ServerService.ShutdownResponse'
-    CLEANUP_NAMES = (DELETE, SHUTDOWN)
-    CLEANUP_FILTER = msgftr.NameIn(CLEANUP_NAMES)
 
     @staticmethod
     def signal_start(mailer: msgabc.Mailer, source: typing.Any):
-        mailer.post(source, ServerService.START)
+        mailer.post(source, mc.ServerService.START)
 
     @staticmethod
     def signal_restart(mailer: msgabc.Mailer, source: typing.Any):
-        mailer.post(source, ServerService.RESTART)
+        mailer.post(source, mc.ServerService.RESTART)
 
     @staticmethod
     def signal_stop(mailer: msgabc.Mailer, source: typing.Any):
-        mailer.post(source, ServerService.STOP)
+        mailer.post(source, mc.ServerService.STOP)
 
     @staticmethod
     def signal_delete(mailer: msgabc.Mailer, source: typing.Any):
-        mailer.post(source, ServerService.DELETE)
+        mailer.post(source, mc.ServerService.DELETE)
 
     @staticmethod
     async def shutdown(mailer: msgabc.MulticastMailer, source: typing.Any) -> asyncio.Task:
-        response = await msgext.SynchronousMessenger(mailer).request(source, ServerService.SHUTDOWN)
+        response = await msgext.SynchronousMessenger(mailer).request(source, mc.ServerService.SHUTDOWN)
         return response.data()
 
     def __init__(self, context: contextsvc.Context, server: svrabc.Server):
         super().__init__(msgftr.NameIn((
-            ServerService.START, ServerService.RESTART, ServerService.STOP,
-            ServerService.DELETE, ServerService.SHUTDOWN)))
+            mc.ServerService.START, mc.ServerService.RESTART, mc.ServerService.STOP,
+            mc.ServerService.DELETE, mc.ServerService.SHUTDOWN)))
         self._context, self._server = context, server
         self._queue = asyncio.Queue(maxsize=1)
         self._running, self._task = False, None
@@ -85,29 +80,29 @@ class ServerService(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         action = message.name()
-        if not self._running and action is ServerService.START:
+        if not self._running and action is mc.ServerService.START:
             self._queue.put_nowait(_RunController(True, True, self._is_daemon()))
             await self._queue_join()
             return None
-        if self._running and action is ServerService.RESTART:
+        if self._running and action is mc.ServerService.RESTART:
             self._queue.put_nowait(_RunController(True, True, self._is_daemon()))
             await self._server_stop()
             await self._queue_join()
             return None
-        if self._running and action is ServerService.STOP:
+        if self._running and action is mc.ServerService.STOP:
             self._queue.put_nowait(_RunController(True, False, False))
             await self._server_stop()
             await self._queue_join()
             return None
-        if action in ServerService.CLEANUP_NAMES:
+        if action in mc.ServerService.CLEANUP_NAMES:
             self._queue.put_nowait(_RunController(False, False, False))
             await self._server_stop()
             await self._queue_join()
             await tasks.wait_for(self._task, 10.0)
-            if action is ServerService.DELETE:
-                self._context.root().post(self, ServerService.DELETE_ME, self._context)
-            if action is ServerService.SHUTDOWN:
-                self._context.post(self, ServerService.SHUTDOWN_RESPONSE, self._task, message)
+            if action is mc.ServerService.DELETE:
+                self._context.root().post(self, mc.ServerService.DELETE_ME, self._context)
+            if action is mc.ServerService.SHUTDOWN:
+                self._context.post(self, mc.ServerService.SHUTDOWN_RESPONSE, self._task, message)
             return True
         return None
 

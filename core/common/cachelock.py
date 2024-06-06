@@ -1,12 +1,13 @@
 import logging
 import typing
 import asyncio
-# ALLOW util.* msg*.* context.* http.* system.* proc.*
+# ALLOW util.* msg*.* context.* http.* system.*
 from core.util import io, tasks
 from core.msg import msgabc, msgftr
+from core.msgc import mc
 from core.context import contextsvc
 from core.system import svrsvc
-from core.proc import proch
+# TODO can move to another package now?
 
 # vmtouch & memlock
 #  https://github.com/hoytech/vmtouch/issues/18
@@ -38,7 +39,7 @@ class CachLockService(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             msgftr.IsStop(),
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
-            proch.ServerProcess.FILTER_STATE_STARTED,
+            mc.ServerProcess.FILTER_STATE_STARTED,
             CachLockService.CACHE_PATH_FILTER))
         self._mailer, self._executable = mailer, executable
         self._cachelock = None
@@ -49,7 +50,7 @@ class CachLockService(msgabc.AbcSubscriber):
                 self._cachelock.stop()
             self._cachelock = None
             return True if message is msgabc.STOP else None
-        if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+        if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             if self._cachelock and not await self._cachelock.start():
                 self._cachelock = None
             return None

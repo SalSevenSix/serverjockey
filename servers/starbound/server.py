@@ -3,6 +3,7 @@ from core.util import aggtrf
 from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
+from core.metrics import mtxinstance
 from core.system import svrabc, svrext
 from core.common import playerstore, interceptors, spstopper
 from servers.starbound import deployment as dep, messaging as msg, console as con
@@ -11,30 +12,31 @@ from servers.starbound import deployment as dep, messaging as msg, console as co
 class Server(svrabc.Server):
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
+        self._context = context
         self._stopper = spstopper.ServerProcessStopper(context, 20.0, use_interrupt=True)
         self._deployment = dep.Deployment(context)
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        con.initialise(self._mailer)
-        await msg.initialise(self._mailer)
+        await mtxinstance.initialise(self._context)
+        con.initialise(self._context)
+        await msg.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
-        con.resources(self._mailer, resource)
+        con.resources(self._context, resource)
         self._deployment.resources(resource)
         r = httprsc.ResourceBuilder(resource)
-        r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.psh('server', svrext.ServerStatusHandler(self._mailer))
+        r.reg('m', interceptors.block_maintenance_only(self._context))
+        r.psh('server', svrext.ServerStatusHandler(self._context))
         r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
-        r.put('{command}', svrext.ServerCommandHandler(self._mailer), 'm')
+        r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
         r.pop()
         r.psh('log')
-        r.put('tail', httpext.RollingLogHandler(self._mailer, msg.CONSOLE_LOG_FILTER))
+        r.put('tail', httpext.RollingLogHandler(self._context, msg.CONSOLE_LOG_FILTER))
         r.put('subscribe', self._httpsubs.handler(msg.CONSOLE_LOG_FILTER, aggtrf.StrJoin('\n')))
         r.pop()
-        r.psh('players', playerstore.PlayersHandler(self._mailer))
+        r.psh('players', playerstore.PlayersHandler(self._context))
         r.put('subscribe', self._httpsubs.handler(mc.PlayerStore.EVENT_FILTER, mc.PlayerStore.EVENT_TRF))
         r.pop()
         r.psh(self._httpsubs.resource(resource, 'subscriptions'))

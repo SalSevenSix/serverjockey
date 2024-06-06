@@ -1,6 +1,7 @@
 # ALLOW core.*
 from core.util import util, dtutil
 from core.msg import msgabc, msglog, msgftr, msgext
+from core.msgc import mc
 from core.context import contextsvc
 from core.system import svrsvc, svrext
 from core.proc import proch, jobh, prcext
@@ -13,11 +14,11 @@ _READY_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('*** SERVER STARTED ***'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(
-        proch.ServerProcess.FILTER_ALL_LINES,
+        mc.ServerProcess.FILTER_ALL_LINES,
         msgftr.Not(msgftr.Or(
             msgftr.DataStrContains('password', True),
             msgftr.DataStrContains('token', True),
@@ -26,7 +27,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     msglog.FILTER_ALL_LEVELS,
     cachelock.FILTER_NOTIFICATIONS)
 CONSOLE_OUTPUT_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
 SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
@@ -122,7 +123,7 @@ class _PlayerChatSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.DataStrContains(_CHAT_KEY_STRING)))
         self._mailer = mailer
 

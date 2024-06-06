@@ -3,6 +3,7 @@ from core.util import aggtrf
 from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
+from core.metrics import mtxinstance
 from core.system import svrabc, svrext
 from core.common import playerstore, interceptors, spstopper
 from servers.sevendaystodie import deployment as dep, messaging as msg
@@ -17,6 +18,7 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
+        await mtxinstance.initialise(self._context)
         msg.initialise(self._context)
         await self._deployment.initialise()
 

@@ -3,6 +3,7 @@ import asyncio
 # ALLOW core.*
 from core.util import util, dtutil, tasks
 from core.msg import msgabc, msgftr
+from core.msgc import mc
 from core.system import svrsvc
 from core.proc import proch
 from servers.projectzomboid import messaging as msg
@@ -32,9 +33,9 @@ class _CheckModsNeedUpdate(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
             _CHECK_MINUTES_FILTER,
-            proch.ServerProcess.FILTER_STATE_STARTED,
-            proch.ServerProcess.FILTER_STATE_STOPPING,
-            proch.ServerProcess.FILTER_STATES_DOWN,
+            mc.ServerProcess.FILTER_STATE_STARTED,
+            mc.ServerProcess.FILTER_STATE_STOPPING,
+            mc.ServerProcess.FILTER_STATES_DOWN,
             msg.SERVER_RESTART_REQUIRED_FILTER))
         self._mailer, self._seconds = mailer, 0.0
         self._checker = _CheckModsNeedUpdateTask(mailer, self._seconds)
@@ -44,13 +45,13 @@ class _CheckModsNeedUpdate(msgabc.AbcSubscriber):
             minutes = message.data()
             self._seconds = minutes * 60.0 if minutes > 0 else 0.0
             return None
-        if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+        if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             self._checker.stop()
             self._checker = _CheckModsNeedUpdateTask(self._mailer, self._seconds)
             self._checker.start()
             return None
-        if (proch.ServerProcess.FILTER_STATE_STOPPING.accepts(message)
-                or proch.ServerProcess.FILTER_STATES_DOWN.accepts(message)
+        if (mc.ServerProcess.FILTER_STATE_STOPPING.accepts(message)
+                or mc.ServerProcess.FILTER_STATES_DOWN.accepts(message)
                 or msg.SERVER_RESTART_REQUIRED_FILTER.accepts(message)):
             self._checker.stop()
         return None
@@ -120,13 +121,13 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             msg.SERVER_RESTART_REQUIRED_FILTER,
             _RestartSubscriber.WAIT_FILTER,
-            proch.ServerProcess.FILTER_STATES_DOWN,
+            mc.ServerProcess.FILTER_STATES_DOWN,
             msgftr.IsStop()))
         self._mailer = mailer
         self._initiated, self._second_message = 0, False
 
     async def handle(self, message):
-        if message is msgabc.STOP or proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
+        if message is msgabc.STOP or mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._initiated, self._second_message = 0, False
             return True if message is msgabc.STOP else None
         if self._initiated == 0 and msg.SERVER_RESTART_REQUIRED_FILTER.accepts(message):

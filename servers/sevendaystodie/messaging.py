@@ -1,15 +1,16 @@
 # ALLOW core.*
 from core.util import util
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.system import svrsvc, svrext
-from core.proc import proch, jobh, prcext
+from core.proc import jobh, prcext
 from core.common import playerstore
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('INF [Steamworks.NET] GameServer.LogOn successful, SteamID='))
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_ALL_LINES,
+    mc.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
 MAINTENANCE_STATE_FILTER = msgftr.Or(
@@ -39,7 +40,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.IP_FILTER,
@@ -79,7 +80,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
                       _PlayerEventSubscriber.LEAVE_FILTER)))

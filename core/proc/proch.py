@@ -6,7 +6,7 @@ from asyncio import streams
 # ALLOW util.* msg*.* context.* proc.prcenc proc.prcprd
 from core.util import signals, cmdutil, funcutil, tasks
 from core.msg import msgabc, msgext, msgftr
-from core.msgc import sc
+from core.msgc import mc
 from core.proc import prcenc, prcprd
 
 
@@ -71,8 +71,8 @@ class PipeInLineService(msgabc.Subscriber):
         self._enabled = False
         self._msg_filter = msgftr.Or(
             PipeInLineService.FILTER_REQUEST,
-            ServerProcess.FILTER_STATE_STARTED,
-            ServerProcess.FILTER_STATES_DOWN)
+            mc.ServerProcess.FILTER_STATE_STARTED,
+            mc.ServerProcess.FILTER_STATES_DOWN)
         if pipe is None:
             self._msg_filter = msgftr.Or(self._msg_filter, PipeInLineService.FILTER_PIPE_NEW)
             self._persistent = True
@@ -87,14 +87,14 @@ class PipeInLineService(msgabc.Subscriber):
         return self._msg_filter.accepts(message)
 
     async def handle(self, message):
-        if ServerProcess.FILTER_STATE_STARTED.accepts(message):
+        if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             self._enabled = True
             return None
         if PipeInLineService.FILTER_PIPE_NEW.accepts(message):
             assert self._handler is None
             self._handler = _PipeInLineHandler(self._mailer, message.data())
             return None
-        if ServerProcess.FILTER_STATES_DOWN.accepts(message):
+        if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._enabled = False
             if self._handler is not None:
                 await self._handler.close()
@@ -110,25 +110,6 @@ class PipeInLineService(msgabc.Subscriber):
 
 
 class ServerProcess:
-    STDERR_LINE = 'ServerProcess.StdErrLine'
-    STDOUT_LINE = 'ServerProcess.StdOutLine'
-
-    FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
-    FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
-    FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
-
-    STATE_START = 'ServerProcess.' + sc.START
-    STATE_STARTING = 'ServerProcess.' + sc.STARTING
-    STATE_STARTED = 'ServerProcess.' + sc.STARTED
-    STATE_STOPPING = 'ServerProcess.' + sc.STOPPING
-    STATE_STOPPED = 'ServerProcess.' + sc.STOPPED
-    STATE_EXCEPTION = 'ServerProcess.' + sc.EXCEPTION
-
-    FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
-    FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
-    FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING))
-    FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION))
-    FILTER_STATE_ALL = msgftr.Or(FILTER_STATES_UP, FILTER_STATES_DOWN)
 
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer
@@ -164,14 +145,14 @@ class ServerProcess:
 
     def wait_for_started(self, msg_filter: msgabc.Filter, timeout: float) -> ServerProcess:
         self._started_catcher = msgext.SingleCatcher(msgftr.Or(
-            ServerProcess.FILTER_STATE_STOPPING, ServerProcess.FILTER_STATES_DOWN, msg_filter), timeout)
+            mc.ServerProcess.FILTER_STATE_STOPPING, mc.ServerProcess.FILTER_STATES_DOWN, msg_filter), timeout)
         self._mailer.register(self._started_catcher)
         return self
 
     async def run(self):
         cmdline, stderr, stdout = self._command.build_str(), None, None
         try:
-            self._mailer.post(self, ServerProcess.STATE_START, cmdline)
+            self._mailer.post(self, mc.ServerProcess.STATE_START, cmdline)
             cmdlist = self._command.build_list()
             self._process = await asyncio.create_subprocess_exec(
                 cmdlist[0], *cmdlist[1:],
@@ -183,23 +164,23 @@ class ServerProcess:
             if rc is not None:  # I don't think this can happen but to be sure
                 raise Exception('PID {} exit after START, rc={}'.format(pid, rc))
             stderr = prcprd.PipeOutLineProducer(
-                self._mailer, self, ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
+                self._mailer, self, mc.ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
             stdout = prcprd.PipeOutLineProducer(
-                self._mailer, self, ServerProcess.STDOUT_LINE, self._process.stdout, self._out_decoder)
+                self._mailer, self, mc.ServerProcess.STDOUT_LINE, self._process.stdout, self._out_decoder)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
             if not self._pipeinsvc:
                 PipeInLineService(self._mailer, self._process.stdin)
-            self._mailer.post(self, ServerProcess.STATE_STARTING, self._process)
+            self._mailer.post(self, mc.ServerProcess.STATE_STARTING, self._process)
             if self._started_catcher:
                 tasks.task_fork(self._wait_for_started(), 'wait_for_started({})'.format(pid))
             else:
-                self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
+                self._mailer.post(self, mc.ServerProcess.STATE_STARTED, self._process)
             rc = await self._process.wait()
             if rc not in self._success_rcs:
                 raise Exception('PID {} non-zero exit after STARTED, rc={}'.format(pid, rc))
-            self._mailer.post(self, ServerProcess.STATE_STOPPED, self._process)
+            self._mailer.post(self, mc.ServerProcess.STATE_STOPPED, self._process)
         except Exception as e:
-            self._mailer.post(self, ServerProcess.STATE_EXCEPTION, e)
+            self._mailer.post(self, mc.ServerProcess.STATE_EXCEPTION, e)
             logging.error('Exception executing "%s" > %s', cmdline, repr(e))
         finally:
             await funcutil.silently_cleanup(stdout)
@@ -212,11 +193,11 @@ class ServerProcess:
             if self._process.returncode is not None:  # One last check before wait
                 return
             message = await self._started_catcher.get()
-            if ServerProcess.FILTER_STATES_DOWN.accepts(message):
+            if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
                 return
-            if ServerProcess.FILTER_STATE_STOPPING.accepts(message):
+            if mc.ServerProcess.FILTER_STATE_STOPPING.accepts(message):
                 return
-            self._mailer.post(self, ServerProcess.STATE_STARTED, self._process)
+            self._mailer.post(self, mc.ServerProcess.STATE_STARTED, self._process)
         except asyncio.TimeoutError:
             pid, rc = self._process.pid, self._process.returncode
             if rc is not None:

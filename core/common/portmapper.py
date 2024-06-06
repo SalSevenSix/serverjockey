@@ -1,11 +1,11 @@
 import typing
-# ALLOW util.* msg*.* context.* http.* system.* proc.*
+# ALLOW util.* msg*.* context.* http.* system.*
 from core.util import util
 from core.msg import msgabc, msgftr
+from core.msgc import mc
 from core.context import contextsvc
 from core.remotes import igd
 from core.system import svrsvc
-from core.proc import proch
 
 
 def map_port(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
@@ -18,15 +18,15 @@ class PortMapperService(msgabc.AbcSubscriber):
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(
-            svrsvc.ServerService.CLEANUP_FILTER,
+            mc.ServerService.CLEANUP_FILTER,
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
-            proch.ServerProcess.FILTER_STATE_STARTED,
+            mc.ServerProcess.FILTER_STATE_STARTED,
             PortMapperService.MAP_PORT_FILTER))
         self._root_context = context.root()
         self._active, self._trash = [], []
 
     def handle(self, message):
-        if svrsvc.ServerService.CLEANUP_FILTER.accepts(message):
+        if mc.ServerService.CLEANUP_FILTER.accepts(message):
             self._trash.extend(self._active)
             self._delete_trash(True)
             return True
@@ -34,7 +34,7 @@ class PortMapperService(msgabc.AbcSubscriber):
             self._trash.extend(self._active)
             self._active = []
             return None
-        if proch.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+        if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             self._delete_trash(False)
             return None
         if PortMapperService.MAP_PORT_FILTER.accepts(message):

@@ -3,6 +3,7 @@ from collections.abc import Iterable
 # ALLOW core.* projectzomboid.messaging projectzomboid.playerstore
 from core.util import cmdutil, util
 from core.msg import msgabc, msgext, msgftr
+from core.msgc import mc
 from core.http import httpabc, httprsc, httpsec
 from core.proc import proch, prcext
 from core.common import interceptors, playerstore
@@ -72,7 +73,7 @@ class _PlayersHandler(httpabc.GetHandler):
             return httpabc.ResponseBody.UNAUTHORISED
         response = await proch.PipeInLineService.request(
             self._mailer, self, 'players', msgext.MultiCatcher(
-                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                catch_filter=mc.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
                 stop_filter=msgftr.DataEquals(''), include_stop=False,
                 timeout=10.0))
@@ -134,7 +135,7 @@ class _OptionLoader:
     async def all(self) -> typing.Collection[_Option]:
         response = await proch.PipeInLineService.request(
             self._mailer, self._source, 'showoptions', msgext.MultiCatcher(
-                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                catch_filter=mc.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('List of Server Options:'), include_start=False,
                 stop_filter=msgftr.DataStrContains('ServerWelcomeMessage'), include_stop=True,
                 timeout=10.0))

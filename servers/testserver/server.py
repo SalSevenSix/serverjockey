@@ -5,6 +5,7 @@ from core.msg import msgabc, msgext, msgftr, msglog, msgtrf
 from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext, httpsec
+from core.metrics import mtxinstance
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
 from core.common import interceptors, playerstore, spstopper
@@ -17,6 +18,7 @@ quit        login {player}
 crash       logout {player}
 '''
 
+_LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES
 _MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
 _READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
@@ -32,9 +34,8 @@ def _default_config():
 
 class Server(svrabc.Server):
     STARTED_FILTER = msgftr.And(
-        proch.ServerProcess.FILTER_STDOUT_LINE,
+        mc.ServerProcess.FILTER_STDOUT_LINE,
         msgftr.DataStrContains('SERVER STARTED'))
-    LOG_FILTER = proch.ServerProcess.FILTER_ALL_LINES
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -51,6 +52,7 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         await self.build_world()
+        await mtxinstance.initialise(self._context)
         self._context.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE),
             self.build_world))
@@ -65,7 +67,7 @@ class Server(svrabc.Server):
         self._context.register(msgext.SyncWrapper(
             self._context, msgext.Unpacker(self._context, self._tempdir), msgext.SyncReply.AT_START))
         self._context.register(msglog.LogfileSubscriber(
-            self._log_dir + '/%Y%m%d-%H%M%S.log', proch.ServerProcess.FILTER_STDOUT_LINE,
+            self._log_dir + '/%Y%m%d-%H%M%S.log', mc.ServerProcess.FILTER_STDOUT_LINE,
             svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
@@ -78,8 +80,8 @@ class Server(svrabc.Server):
         r.put('{command}', svrext.ServerCommandHandler(self._context))
         r.pop()
         r.psh('log')
-        r.put('tail', httpext.RollingLogHandler(self._context, Server.LOG_FILTER, size=200))
-        r.put('subscribe', self._httpsubs.handler(Server.LOG_FILTER, aggtrf.StrJoin('\n')))
+        r.put('tail', httpext.RollingLogHandler(self._context, _LOG_FILTER, size=200))
+        r.put('subscribe', self._httpsubs.handler(_LOG_FILTER, aggtrf.StrJoin('\n')))
         r.pop()
         r.psh('logs', httpext.FileSystemHandler(self._log_dir))
         r.put('*{path}', httpext.FileSystemHandler(self._log_dir, 'path'), 'r')
@@ -163,7 +165,7 @@ class _PlayersHandler(httpabc.GetHandler):
             return httpabc.ResponseBody.UNAUTHORISED
         response = await proch.PipeInLineService.request(
             self._context, self, 'players', msgext.MultiCatcher(
-                catch_filter=proch.ServerProcess.FILTER_STDOUT_LINE,
+                catch_filter=mc.ServerProcess.FILTER_STDOUT_LINE,
                 start_filter=msgftr.DataStrContains('Players connected'), include_start=False,
                 stop_filter=msgftr.DataEquals(''), include_stop=False, timeout=5.0))
         result = []
@@ -183,7 +185,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.INGAMETIME_FILTER,
                 _ServerDetailsSubscriber.VERSION_FILTER,
@@ -219,7 +221,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
                       _PlayerEventSubscriber.LEAVE_FILTER)))

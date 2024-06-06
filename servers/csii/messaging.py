@@ -1,19 +1,20 @@
 # ALLOW core.*
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.system import svrsvc, svrext
-from core.proc import proch, jobh, prcext
+from core.proc import jobh, prcext
 from core.common import rconsvc, playerstore
 
 _SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(.*):' \
         r' Assertion Failed: usecElapsed >= 0$'
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches(r'^SV: .* player server started$'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(
-        proch.ServerProcess.FILTER_ALL_LINES,
+        mc.ServerProcess.FILTER_ALL_LINES,
         msgftr.Not(msgftr.DataMatches(_SPAM))),
     rconsvc.RconService.FILTER_OUTPUT,
     jobh.JobProcess.FILTER_ALL_LINES,
@@ -44,7 +45,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.MAP_FILTER,
                 _ServerDetailsSubscriber.VERSION_FILTER,
@@ -83,7 +84,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            msgftr.Or(proch.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(mc.ServerProcess.FILTER_STDOUT_LINE,
                       rconsvc.RconService.FILTER_OUTPUT),
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,

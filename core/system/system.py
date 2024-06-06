@@ -8,7 +8,7 @@ from core.msgc import mc
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpcnt, httpsec, httprsc, httpext, httpsubs, httpssl
 from core.remotes import steamapi, igd
-from core.metrics import sysmetrics, mprof
+from core.metrics import mtxhandler, mprof
 from core.store import sysstore
 from core.system import svrmodules, svrsvc
 
@@ -37,7 +37,7 @@ class SystemService:
         r.put('login', httpext.LoginHandler())
         r.put('modules', httpext.StaticHandler(self._modules.names()))
         r.put('ssl', httpssl.SslHandler(self._context))
-        r.put('metrics', sysmetrics.MetricsHandler())
+        r.put('metrics', mtxhandler.MetricsHandler())
         r.put('mprof', mprof.MemoryProfilingHandler())
         r.psh('system')
         r.put('info', _SystemInfoHandler())
@@ -146,7 +146,6 @@ class SystemService:
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         subcontext.register(msgext.RelaySubscriber(self._context, mc.ServerStatus.UPDATED_FILTER))
         self._sysstoresvc.initialise_instance(subcontext)
-        await sysmetrics.initialise_instance(subcontext)
         server = await self._modules.create_server(subcontext)
         await server.initialise()
         resource = httprsc.WebResource(subcontext.config('identity'), handler=_InstanceHandler(self))
@@ -187,7 +186,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
 class _DeleteInstanceSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, system: SystemService):
-        super().__init__(msgftr.NameIs(svrsvc.ServerService.DELETE_ME))
+        super().__init__(msgftr.NameIs(mc.ServerService.DELETE_ME))
         self._system = system
 
     async def handle(self, message):

@@ -3,6 +3,7 @@ from core.util import aggtrf
 from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpsubs, httpext
+from core.metrics import mtxinstance
 from core.system import svrabc, svrext
 from core.proc import proch
 from core.common import interceptors, spstopper
@@ -19,6 +20,7 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
+        await mtxinstance.initialise(self._context)
         msg.initialise(self._context)
         mck.initialise(self._context)
         await self._deployment.initialise()

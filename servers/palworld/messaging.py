@@ -1,15 +1,16 @@
 # ALLOW core.*
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.system import svrext
-from core.proc import proch, jobh, prcext
+from core.proc import jobh, prcext
 from core.common import rconsvc
 
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDERR_LINE, msgftr.DataEquals(
+    mc.ServerProcess.FILTER_STDERR_LINE, msgftr.DataEquals(
         '[S_API FAIL] Tried to access Steam interface SteamNetworkingUtils004 before SteamAPI_Init succeeded.'))
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_ALL_LINES,
+    mc.ServerProcess.FILTER_ALL_LINES,
     rconsvc.RconService.FILTER_OUTPUT,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)

@@ -4,6 +4,7 @@ from asyncio import subprocess
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import signals
 from core.msg import msgabc, msgext
+from core.msgc import mc
 from core.proc import proch
 from core.common import rconsvc
 
@@ -22,8 +23,8 @@ class ServerProcessStopper:
         process = self._process_subscriber.get()
         if not process:
             return
-        self._mailer.post(self, proch.ServerProcess.STATE_STOPPING, process)
-        catcher = msgext.SingleCatcher(proch.ServerProcess.FILTER_STATES_DOWN, self._timeout)
+        self._mailer.post(self, mc.ServerProcess.STATE_STOPPING, process)
+        catcher = msgext.SingleCatcher(mc.ServerProcess.FILTER_STATES_DOWN, self._timeout)
         self._mailer.register(catcher)
         if self._quit_command:
             if self._use_rcon:
@@ -43,17 +44,17 @@ class ServerProcessStopper:
 class _ServerProcessSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self):
-        super().__init__(proch.ServerProcess.FILTER_STATE_ALL)
+        super().__init__(mc.ServerProcess.FILTER_STATE_ALL)
         self._process = None
 
     def get(self) -> subprocess.Process:
         return self._process
 
     def handle(self, message):
-        if proch.ServerProcess.FILTER_STATES_UP.accepts(message) and isinstance(message.data(), subprocess.Process):
+        if mc.ServerProcess.FILTER_STATES_UP.accepts(message) and isinstance(message.data(), subprocess.Process):
             self._process = message.data()
             return None
-        if proch.ServerProcess.FILTER_STATES_DOWN.accepts(message):
+        if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._process = None
             return None
         return None

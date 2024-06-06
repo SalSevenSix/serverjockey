@@ -1,16 +1,17 @@
 # ALLOW core.*
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
+from core.msgc import mc
 from core.system import svrsvc, svrext
-from core.proc import proch, jobh, prcext
+from core.proc import jobh, prcext
 from core.common import rconsvc, playerstore
 
 SERVER_STARTED_FILTER = msgftr.And(
-    proch.ServerProcess.FILTER_STDOUT_LINE,
+    mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('[Info] Root: Writing runtime configuration to'))
 DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_LOG_FILTER = msgftr.Or(
-    proch.ServerProcess.FILTER_ALL_LINES,
+    mc.ServerProcess.FILTER_ALL_LINES,
     msgftr.NameIs(DEPLOYMENT_MSG),
     rconsvc.RconService.FILTER_OUTPUT,
     jobh.JobProcess.FILTER_ALL_LINES,
@@ -40,7 +41,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER, _ServerDetailsSubscriber.PORT_FILTER)))
         self._mailer = mailer
         self._public_ip = public_ip
@@ -74,7 +75,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
-            proch.ServerProcess.FILTER_STDOUT_LINE,
+            mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.CONNECT_FILTER,
                       _PlayerEventSubscriber.DISCONNECT_FILTER)))
