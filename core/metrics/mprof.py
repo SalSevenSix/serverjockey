@@ -2,35 +2,41 @@ import collections
 from pympler import muppy
 # ALLOW util.* http.*
 from core.http import httpabc, httpsec
+from core.metrics import mtxutil
 
 # https://github.com/pympler/pympler
 # https://pympler.readthedocs.io/en/latest/
 
+_TOTAL = 'TOTAL'
 _BASIC_TYPES = ('int', 'float', 'str', 'dict', 'list', 'bytes')
 
 
 class MemoryProfilingHandler(httpabc.GetHandler):
 
     def __init__(self):
-        self._captures = collections.deque()
+        self._captures, self._objcount_gauge = None, None
 
-    def handle_get(self, resource, data):
+    async def handle_get(self, resource, data):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        while len(self._captures) >= 26:
-            self._captures.pop()
-        self._captures.appendleft(_generate_capture())
-        entries = _generate_entries(self._captures)
-        results = _generate_results(entries)
-        return 'CLASS'.ljust(32) + ',  COUNT,   ~,' \
-            + '  01,  02,  03,  04,  05,  06,  07,  08,  09,  10,' \
-            + '  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,' \
-            + '  21,  22,  23,  24,  25\n' + '\n'.join(results) + '\n'
+        if self._captures:
+            while len(self._captures) >= 26:
+                self._captures.pop()
+        else:  # Lazy init
+            self._captures = collections.deque()
+            self._objcount_gauge = await mtxutil.create_gauge(mtxutil.REGISTRY, 'python_all_objects',
+                                                              'Count of all python objects in memory')
+        result = _generate_capture()
+        await mtxutil.set_gauge(self._objcount_gauge, mtxutil.LABEL_VALUE_SELF, result[_TOTAL])
+        self._captures.appendleft(result)
+        result = _process_captures(self._captures)
+        result = _build_report(result)
+        return _format_report(result)
 
 
 def _generate_capture() -> dict:
     all_objects = muppy.get_objects()
-    capture = {'TOTAL': len(all_objects)}
+    capture = {_TOTAL: len(all_objects)}
     for obj in filter(_filter_objects, all_objects):
         classname = obj.__class__.__name__
         if classname in capture:
@@ -40,7 +46,7 @@ def _generate_capture() -> dict:
     return capture
 
 
-def _generate_entries(captures: iter) -> tuple:
+def _process_captures(captures: iter) -> tuple:
     unique_classnames = set()
     for capture in captures:
         unique_classnames.update(capture.keys())
@@ -58,7 +64,7 @@ def _generate_entries(captures: iter) -> tuple:
     return tuple(entries)
 
 
-def _generate_results(entries: tuple) -> tuple:
+def _build_report(entries: tuple) -> tuple:
     results = []
     for entry in filter(_filter_entries, entries):
         classname, count, deltas = entry['classname'], entry['count'], entry['deltas']
@@ -68,6 +74,13 @@ def _generate_results(entries: tuple) -> tuple:
             dsum += delta
         results.append(classname.ljust(32) + ',' + str(count).rjust(7) + ',' + str(dsum).rjust(4) + line)
     return tuple(results)
+
+
+def _format_report(report: iter) -> str:
+    return 'CLASS'.ljust(32) + ',  COUNT,   ~,' \
+        + '  01,  02,  03,  04,  05,  06,  07,  08,  09,  10,' \
+        + '  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,' \
+        + '  21,  22,  23,  24,  25\n' + '\n'.join(report) + '\n'
 
 
 def _sort_entries(entry) -> int:
@@ -83,7 +96,7 @@ def _filter_objects(obj) -> bool:
 
 def _filter_entries(entry) -> bool:
     classname, deltas = entry['classname'], entry['deltas']
-    if classname == 'TOTAL' or len(deltas) == 0:
+    if classname == _TOTAL or len(deltas) == 0:
         return True
     for delta in deltas:
         if delta != 0:

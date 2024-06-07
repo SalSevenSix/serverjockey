@@ -20,7 +20,7 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
-        await mtxinstance.initialise(self._context)
+        await mtxinstance.initialise(self._context, error_filter=msg.CONSOLE_LOG_ERROR_FILTER)
         msg.initialise(self._context)
         mck.initialise(self._context)
         await self._deployment.initialise()

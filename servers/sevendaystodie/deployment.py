@@ -2,9 +2,9 @@ from xml.dom import minidom
 # ALLOW core.* sevendaystodie.messaging
 from core.util import gc, util, objconv, io
 from core.msg import msgftr, msgtrf, msglog, msgext
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
-from core.system import svrsvc
 from core.proc import proch, jobh
 from core.common import steam, interceptors, portmapper
 from servers.sevendaystodie import messaging as msg
@@ -53,7 +53,7 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        roll_filter = msgftr.Or(svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
+        roll_filter = msgftr.Or(mc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
             httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._log_dir, invert=True)))
         self._mailer.register(msglog.LogfileSubscriber(
             self._log_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER, roll_filter, msgtrf.GetData()))

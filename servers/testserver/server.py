@@ -68,7 +68,7 @@ class Server(svrabc.Server):
             self._context, msgext.Unpacker(self._context, self._tempdir), msgext.SyncReply.AT_START))
         self._context.register(msglog.LogfileSubscriber(
             self._log_dir + '/%Y%m%d-%H%M%S.log', mc.ServerProcess.FILTER_STDOUT_LINE,
-            svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
+            mc.ServerStatus.RUNNING_FALSE_FILTER, msgtrf.GetData()))
 
     def resources(self, resource: httpabc.Resource):
         r = httprsc.ResourceBuilder(resource)

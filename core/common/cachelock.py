@@ -6,7 +6,6 @@ from core.util import io, tasks
 from core.msg import msgabc, msgftr
 from core.msgc import mc
 from core.context import contextsvc
-from core.system import svrsvc
 # TODO can move to another package now?
 
 # vmtouch & memlock
@@ -38,14 +37,14 @@ class CachLockService(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.Mailer, executable: str):
         super().__init__(msgftr.Or(
             msgftr.IsStop(),
-            svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
+            mc.ServerStatus.RUNNING_FALSE_FILTER,
             mc.ServerProcess.FILTER_STATE_STARTED,
             CachLockService.CACHE_PATH_FILTER))
         self._mailer, self._executable = mailer, executable
         self._cachelock = None
 
     async def handle(self, message):
-        if message is msgabc.STOP or svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
+        if message is msgabc.STOP or mc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             if self._cachelock:
                 self._cachelock.stop()
             self._cachelock = None

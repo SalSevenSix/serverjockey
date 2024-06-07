@@ -8,15 +8,15 @@ from core.context import contextsvc
 from core.metrics import mtxutil
 
 
-async def initialise(context: contextsvc.Context, noplayers: bool = False):
+async def initialise(context: contextsvc.Context, players: bool = True, error_filter: msgabc.Filter = None):
+    instance = context.config('identity')
     instance_registry = await mtxutil.create_instance_registry()
     context.register(_InstanceCleanup(instance_registry))
-    context.register(_InstanceProcessMetrics(context, instance_registry))
-    if noplayers:
-        return
-    subscriber = _InstancePlayerMetrics(context, instance_registry)
-    await subscriber.initialise()
-    context.register(subscriber)
+    context.register(await _InstanceProcessMetrics(instance, instance_registry).initialise())
+    if players:
+        context.register(await _InstancePlayerMetrics(instance, instance_registry).initialise())
+    if error_filter:
+        context.register(await _InstanceErrorMetrics(instance, instance_registry, error_filter).initialise())
 
 
 class _InstanceCleanup(msgabc.AbcSubscriber):
@@ -32,27 +32,35 @@ class _InstanceCleanup(msgabc.AbcSubscriber):
 
 class _InstanceProcessMetrics(msgabc.AbcSubscriber):
 
-    def __init__(self, context: contextsvc.Context, instance_registry: registry.CollectorRegistry):
+    def __init__(self, instance: str, instance_registry: registry.CollectorRegistry):
         super().__init__(msgftr.Or(mc.ServerProcess.FILTER_STATE_STARTED, mc.ServerProcess.FILTER_STATES_DOWN))
-        self._instance, self._instance_registry = context.config('identity'), instance_registry
-        self._collector, self._pid = None, None
+        self._instance, self._instance_registry = instance, instance_registry
+        self._running_gauge, self._process_collector, self._pid = None, None, None
+
+    async def initialise(self) -> msgabc.Subscriber:
+        self._running_gauge = await mtxutil.create_gauge(
+            self._instance_registry, 'process_running', 'Process running state')
+        await mtxutil.set_gauge(self._running_gauge, self._instance, 0)
+        return self
 
     async def handle(self, message):
         if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+            await mtxutil.set_gauge(self._running_gauge, self._instance, 1)
             process: subprocess.Process = message.data()
             if not process or process.returncode is not None:
                 return None
             self._pid = await signals.get_leaf(process.pid)
             if not self._pid:
                 return None
-            self._collector = await mtxutil.create_process_collector(
+            self._process_collector = await mtxutil.create_process_collector(
                 self._instance_registry, self._instance, self._get_pid)
             return None
         if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
-            if not self._collector:
+            await mtxutil.set_gauge(self._running_gauge, self._instance, 0)
+            if not self._process_collector:
                 return None
-            await mtxutil.unregister_collector(self._instance_registry, self._collector)
-            self._collector, self._pid = None, None
+            await mtxutil.unregister_collector(self._instance_registry, self._process_collector)
+            self._process_collector, self._pid = None, None
         return None
 
     def _get_pid(self):
@@ -61,15 +69,16 @@ class _InstanceProcessMetrics(msgabc.AbcSubscriber):
 
 class _InstancePlayerMetrics(msgabc.AbcSubscriber):
 
-    def __init__(self, context: contextsvc.Context, instance_registry: registry.CollectorRegistry):
+    def __init__(self, instance: str, instance_registry: registry.CollectorRegistry):
         super().__init__(mc.PlayerStore.EVENT_FILTER)
-        self._instance, self._instance_registry = context.config('identity'), instance_registry
+        self._instance, self._instance_registry = instance, instance_registry
         self._player_gauge, self._player_names = None, []
 
-    async def initialise(self):
-        self._player_gauge = await mtxutil.create_gauge(self._instance_registry, 'online_players',
-                                                        'Number of players connected to the game server')
+    async def initialise(self) -> msgabc.Subscriber:
+        self._player_gauge = await mtxutil.create_gauge(
+            self._instance_registry, 'online_players', 'Number of players connected to the game server')
         await mtxutil.set_gauge(self._player_gauge, self._instance, 0)
+        return self
 
     async def handle(self, message):
         data = message.data().asdict()
@@ -90,4 +99,23 @@ class _InstancePlayerMetrics(msgabc.AbcSubscriber):
                 self._player_names.remove(player_name)
                 await mtxutil.set_gauge(self._player_gauge, self._instance, len(self._player_names))
             return None
+        return None
+
+
+class _InstanceErrorMetrics(msgabc.AbcSubscriber):
+
+    def __init__(self, instance: str, instance_registry: registry.CollectorRegistry, error_filter: msgabc.Filter):
+        super().__init__(msgftr.Or(mc.ServerStatus.RUNNING_TRUE_FILTER, error_filter))
+        self._instance, self._instance_registry = instance, instance_registry
+        self._error_counter = None
+
+    async def initialise(self) -> msgabc.Subscriber:
+        self._error_counter = await mtxutil.create_counter(self._instance_registry, 'errors', 'Count of errors raised')
+        return self
+
+    async def handle(self, message):
+        if mc.ServerStatus.RUNNING_TRUE_FILTER.accepts(message):
+            await mtxutil.reset_counter(self._error_counter, self._instance)
+            return None
+        await mtxutil.inc_counter(self._error_counter, self._instance)
         return None

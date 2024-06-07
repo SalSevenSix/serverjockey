@@ -20,7 +20,7 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
-        await mtxinstance.initialise(self._context, noplayers=True)
+        await mtxinstance.initialise(self._context, players=False)
         con.initialise(self._context)
         msg.initialise(self._context)
         await self._deployment.initialise()

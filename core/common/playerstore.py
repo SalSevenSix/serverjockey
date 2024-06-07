@@ -5,7 +5,6 @@ from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext
 from core.msgc import mc
 from core.http import httpabc, httpsec
-from core.system import svrsvc
 
 
 class PlayersHandler(httpabc.GetHandler):
@@ -28,7 +27,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.Or(
             mc.PlayerStore.EVENT_FILTER,
             PlayersSubscriber.GET_FILTER,
-            svrsvc.ServerStatus.RUNNING_FALSE_FILTER))
+            mc.ServerStatus.RUNNING_FALSE_FILTER))
         self._mailer = mailer
         self._players = _Players()
 
@@ -58,7 +57,7 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
             elif isinstance(event, _EventClear):
                 self._players.clear()
             return None
-        if svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
+        if mc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             self._mailer.post(self, mc.PlayerStore.EVENT, _EventClear())
             return None
         if PlayersSubscriber.GET_FILTER.accepts(message):

@@ -26,6 +26,9 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS,
     cachelock.FILTER_NOTIFICATIONS)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(
+    mc.ServerProcess.FILTER_ALL_LINES,
+    msgftr.DataStrStartsWith('ERROR: General'))
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))

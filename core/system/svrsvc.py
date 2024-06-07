@@ -153,19 +153,15 @@ class _RunController:
 
 
 class ServerStatus(msgabc.AbcSubscriber):
-    REQUEST, RESPONSE = 'ServerStatus.Request', 'ServerStatus.Response'
-    NOTIFY_RUNNING = 'ServerStatus.NotifyRunning'
-    NOTIFY_STATUS = 'ServerStatus.NotifyStatus'
-    RUNNING_FALSE_FILTER = msgftr.And(msgftr.NameIs(NOTIFY_RUNNING), msgftr.DataEquals(False))
 
     @staticmethod
     async def get_status(mailer: msgabc.MulticastMailer, source: typing.Any):
-        response = await msgext.SynchronousMessenger(mailer).request(source, ServerStatus.REQUEST)
+        response = await msgext.SynchronousMessenger(mailer).request(source, mc.ServerStatus.REQUEST)
         return response.data()
 
     @staticmethod
     def notify_running(mailer: msgabc.Mailer, source: typing.Any, running: bool):
-        mailer.post(source, ServerStatus.NOTIFY_RUNNING, running)
+        mailer.post(source, mc.ServerStatus.NOTIFY_RUNNING, running)
 
     @staticmethod
     def notify_status(
@@ -176,7 +172,7 @@ class ServerStatus(msgabc.AbcSubscriber):
             status['state'] = state
         if details:
             status['details'] = details
-        mailer.post(source, ServerStatus.NOTIFY_STATUS, status)
+        mailer.post(source, mc.ServerStatus.NOTIFY_STATUS, status)
 
     @staticmethod
     def notify_state(mailer: msgabc.Mailer, source: typing.Any, state: str):
@@ -188,19 +184,19 @@ class ServerStatus(msgabc.AbcSubscriber):
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.NameIn((
-            ServerStatus.REQUEST, ServerStatus.NOTIFY_RUNNING, ServerStatus.NOTIFY_STATUS)))
+            mc.ServerStatus.REQUEST, mc.ServerStatus.NOTIFY_RUNNING, mc.ServerStatus.NOTIFY_STATUS)))
         self._context = context
         self._status = _Status(context)
 
     def handle(self, message):
         action = message.name()
-        if action is ServerStatus.REQUEST:
-            self._context.post(self, ServerStatus.RESPONSE, self._status.asdict(), message)
+        if action is mc.ServerStatus.REQUEST:
+            self._context.post(self, mc.ServerStatus.RESPONSE, self._status.asdict(), message)
             return None
         data, updated = message.data(), False
-        if action is ServerStatus.NOTIFY_RUNNING:
+        if action is mc.ServerStatus.NOTIFY_RUNNING:
             updated = self._status.notify_running(data)
-        elif action is ServerStatus.NOTIFY_STATUS:
+        elif action is mc.ServerStatus.NOTIFY_STATUS:
             updated = self._status.notify_status(data)
         if updated:
             self._context.post(self, mc.ServerStatus.UPDATED, self._status.asdict())

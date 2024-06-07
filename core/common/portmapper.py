@@ -5,7 +5,6 @@ from core.msg import msgabc, msgftr
 from core.msgc import mc
 from core.context import contextsvc
 from core.remotes import igd
-from core.system import svrsvc
 
 
 def map_port(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
@@ -19,7 +18,7 @@ class PortMapperService(msgabc.AbcSubscriber):
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(
             mc.ServerService.CLEANUP_FILTER,
-            svrsvc.ServerStatus.RUNNING_FALSE_FILTER,
+            mc.ServerStatus.RUNNING_FALSE_FILTER,
             mc.ServerProcess.FILTER_STATE_STARTED,
             PortMapperService.MAP_PORT_FILTER))
         self._root_context = context.root()
@@ -30,7 +29,7 @@ class PortMapperService(msgabc.AbcSubscriber):
             self._trash.extend(self._active)
             self._delete_trash(True)
             return True
-        if svrsvc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
+        if mc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             self._trash.extend(self._active)
             self._active = []
             return None

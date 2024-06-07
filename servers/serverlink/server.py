@@ -42,7 +42,7 @@ class Server(svrabc.Server):
         if not await io.file_exists(self._config):
             await io.write_file(self._config, objconv.obj_to_json(_default_config()))
         await self._server_factory.initialise()
-        await mtxinstance.initialise(self._context, noplayers=True)
+        await mtxinstance.initialise(self._context, players=False)
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream():
             self._context.register(msglog.PrintSubscriber(_LOG_FILTER, transformer=msgtrf.GetData()))

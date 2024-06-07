@@ -1,9 +1,9 @@
 # ALLOW core.* csii.messaging
 from core.util import gc, util, idutil, io, objconv, steamutil
 from core.msg import msgext, msgftr, msglog, msgtrf
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
-from core.system import svrsvc
 from core.proc import proch, jobh, wrapper
 from core.common import steam, interceptors, portmapper, rconsvc
 from servers.csii import messaging as msg
@@ -67,7 +67,7 @@ class Deployment:
             msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
         self._mailer.register(
             msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        roll_filter = msgftr.Or(svrsvc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
+        roll_filter = msgftr.Or(mc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
             httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._logs_dir, invert=True)))
         self._mailer.register(msglog.LogfileSubscriber(
             self._logs_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER, roll_filter, msgtrf.GetData()))

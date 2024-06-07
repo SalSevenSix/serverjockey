@@ -18,6 +18,11 @@ class ServerService:
 
 
 class ServerStatus:
+    REQUEST, RESPONSE = 'ServerStatus.Request', 'ServerStatus.Response'
+    NOTIFY_RUNNING, NOTIFY_STATUS = 'ServerStatus.NotifyRunning', 'ServerStatus.NotifyStatus'
+    RUNNING_TRUE_FILTER = msgftr.And(msgftr.NameIs(NOTIFY_RUNNING), msgftr.DataEquals(True))
+    RUNNING_FALSE_FILTER = msgftr.And(msgftr.NameIs(NOTIFY_RUNNING), msgftr.DataEquals(False))
+
     UPDATED = 'ServerStatus.Updated'
     UPDATED_FILTER = msgftr.NameIs(UPDATED)
 
