@@ -7,6 +7,7 @@ import time
 # ALLOW util.*
 from core.util import io, funcutil, shellutil, tasks
 
+# TODO investigate using /proc data instead of executing programs
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
 

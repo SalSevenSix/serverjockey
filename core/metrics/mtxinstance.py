@@ -5,7 +5,7 @@ from core.util import signals
 from core.msg import msgabc, msgftr
 from core.msgc import sc, mc
 from core.context import contextsvc
-from core.metrics import mtxutil
+from core.metrics import mtxutil, mtxproc
 
 
 async def initialise(context: contextsvc.Context, players: bool = True, error_filter: msgabc.Filter = None):
@@ -35,7 +35,8 @@ class _InstanceProcessMetrics(msgabc.AbcSubscriber):
     def __init__(self, instance: str, instance_registry: registry.CollectorRegistry):
         super().__init__(msgftr.Or(mc.ServerProcess.FILTER_STATE_STARTED, mc.ServerProcess.FILTER_STATES_DOWN))
         self._instance, self._instance_registry = instance, instance_registry
-        self._running_gauge, self._process_collector, self._pid = None, None, None
+        self._pid, self._standard_collector, self._additional_collector = None, None, None
+        self._running_gauge = None
 
     async def initialise(self) -> msgabc.Subscriber:
         self._running_gauge = await mtxutil.create_gauge(
@@ -52,15 +53,18 @@ class _InstanceProcessMetrics(msgabc.AbcSubscriber):
             self._pid = await signals.get_leaf(process.pid)
             if not self._pid:
                 return None
-            self._process_collector = await mtxutil.create_process_collector(
+            self._standard_collector = await mtxutil.create_process_collector(
                 self._instance_registry, self._instance, self._get_pid)
+            self._additional_collector = await mtxproc.create_process_collector(
+                self._instance_registry, self._instance, self._pid)
             return None
         if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             await mtxutil.set_gauge(self._running_gauge, self._instance, 0)
-            if not self._process_collector:
-                return None
-            await mtxutil.unregister_collector(self._instance_registry, self._process_collector)
-            self._process_collector, self._pid = None, None
+            if self._additional_collector:
+                await mtxutil.unregister_collector(self._instance_registry, self._additional_collector)
+            if self._standard_collector:
+                await mtxutil.unregister_collector(self._instance_registry, self._standard_collector)
+            self._pid, self._standard_collector, self._additional_collector = None, None, None
         return None
 
     def _get_pid(self):

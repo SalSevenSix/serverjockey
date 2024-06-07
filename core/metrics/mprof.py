@@ -27,7 +27,7 @@ class MemoryProfilingHandler(httpabc.GetHandler):
             self._objcount_gauge = await mtxutil.create_gauge(mtxutil.REGISTRY, 'python_all_objects',
                                                               'Count of all python objects in memory')
         result = _generate_capture()
-        await mtxutil.set_gauge(self._objcount_gauge, mtxutil.LABEL_VALUE_SELF, result[_TOTAL])
+        await mtxutil.set_gauge(self._objcount_gauge, mtxutil.PROC_LABEL_VALUE_SELF, result[_TOTAL])
         self._captures.appendleft(result)
         result = _process_captures(self._captures)
         result = _build_report(result)

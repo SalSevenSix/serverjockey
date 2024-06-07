@@ -24,9 +24,9 @@ class _AppendLabelsCollector(registry.Collector):
 
 
 prometheus_client.disable_created_metrics()
-_LABEL_KEY, LABEL_VALUE_SELF = 'process', 'serverjockey'
+PROC_LABEL_KEY, PROC_LABEL_VALUE_SELF = 'process', 'serverjockey'
 REGISTRY = registry.CollectorRegistry()
-REGISTRY.register(_AppendLabelsCollector(prometheus_client.REGISTRY, {_LABEL_KEY: LABEL_VALUE_SELF}))
+REGISTRY.register(_AppendLabelsCollector(prometheus_client.REGISTRY, {PROC_LABEL_KEY: PROC_LABEL_VALUE_SELF}))
 
 
 def _sync_create_process_collector(
@@ -34,11 +34,11 @@ def _sync_create_process_collector(
         get_pid: typing.Callable) -> typing.Optional[registry.Collector]:
     try:
         collector = prometheus_client.process_collector.ProcessCollector(pid=get_pid, registry=None)
-        collector = _AppendLabelsCollector(collector, {_LABEL_KEY: instance})
+        collector = _AppendLabelsCollector(collector, {PROC_LABEL_KEY: instance})
         instance_registry.register(collector)
         return collector
     except Exception as e:
-        logging.debug('_register_process_collector() ' + str(e))
+        logging.debug('mtxutil.create_process_collector() ' + str(e))
     return None
 
 
@@ -56,7 +56,7 @@ def _sync_unregister_collector(a_registry: registry.CollectorRegistry, collector
 
 
 def _sync_create_gauge(a_registry: registry.CollectorRegistry, name: str, documentation: str) -> metrics.Gauge:
-    return metrics.Gauge(name, documentation, labelnames=[_LABEL_KEY], registry=a_registry)
+    return metrics.Gauge(name, documentation, labelnames=[PROC_LABEL_KEY], registry=a_registry)
 
 
 def _sync_set_gauge(gauge: metrics.Gauge, instance: str, value: float, inc: bool = None):
@@ -70,7 +70,7 @@ def _sync_set_gauge(gauge: metrics.Gauge, instance: str, value: float, inc: bool
 
 
 def _sync_create_counter(a_registry: registry.CollectorRegistry, name: str, documentation: str) -> metrics.Counter:
-    return metrics.Counter(name, documentation, labelnames=[_LABEL_KEY], registry=a_registry)
+    return metrics.Counter(name, documentation, labelnames=[PROC_LABEL_KEY], registry=a_registry)
 
 
 def _sync_reset_counter(counter: metrics.Counter, instance: str):

@@ -30,6 +30,8 @@ async def silently_kill_tree(pid: int):
 
 
 async def get_leaf(pid: int) -> int | None:
+    if not pid:
+        return None
     script = _leaf_pid_script().strip().replace('{rootpid}', str(pid))
     try:
         return int(await shellutil.run_script(script))
