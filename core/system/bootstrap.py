@@ -142,6 +142,7 @@ def main(args: typing.Optional[typing.Collection] = None) -> int:
         logging.info('*** START ServerJockey ***')
         logging.info('Version: ' + sysutil.system_version())
         logging.info('Python3: ' + sys.version)
+        logging.info('PID: ' + str(os.getpid()))
         logging.info('Paths: ' + str(sys.path))
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0

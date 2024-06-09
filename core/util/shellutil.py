@@ -4,7 +4,7 @@ import asyncio
 
 
 async def run_script(script: str) -> str:
-    _log('SCRIPT', script)
+    _log('shl> SCRIPT', script)
     process = await asyncio.create_subprocess_shell(
         script, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()

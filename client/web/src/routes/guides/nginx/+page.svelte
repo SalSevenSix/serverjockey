@@ -128,7 +128,8 @@
     but
     <span class="is-italic">remember to substitute your domain name.</span>
   </p>
-  <CodeBlock>user www-data&#59;
+  <CodeBlock>
+user www-data&#59;
 worker_processes 1&#59;
 pid /run/nginx.pid&#59;
 include /etc/nginx/modules-enabled/*.conf&#59;
@@ -209,7 +210,8 @@ http &#123;
     <span class="is-family-monospace white-space-nowrap notranslate">X-Forwarded-Subpath</span>
     header.
   </p>
-  <CodeBlock>location /serverjockey/ &#123;
+  <CodeBlock>
+location /serverjockey/ &#123;
   proxy_pass http&#58;//serverjockey/&#59;
   ...
   proxy_set_header X-Forwarded-Subpath /serverjockey&#59;

@@ -57,7 +57,8 @@ UPnP=false
     As a general rule, the memory required is 2Gb + 500Mb per player. Whatever value is set,
     the machine that the server is running on should have 2Gb more of free memory.
   </p>
-  <CodeBlock nocopy>"vmArgs": [
+  <CodeBlock nocopy>
+"vmArgs": [
     "-Djava.awt.headless=true",
     "-Xmx8g",
     "-Dzomboid.steam=1",
@@ -92,7 +93,8 @@ UPnP=false
     the <span class="has-text-weight-bold">Launch Options</span> configuration.
     Use 0 minutes to disable automatic restarts.
   </p>
-  <CodeBlock nocopy>&quot;_comment_mod_check_minutes&quot;: &quot;Check interval for updated mods in minutes. Use 0 to disable checks.&quot;,
+  <CodeBlock nocopy>
+&quot;_comment_mod_check_minutes&quot;: &quot;Check interval for updated mods in minutes. Use 0 to disable checks.&quot;,
 &quot;mod_check_minutes&quot;: 15</CodeBlock>
 </div>
 
@@ -168,7 +170,8 @@ UPnP=false
     <span class="has-text-weight-bold">Launch Options</span>
     configuration. Please ensure enough free memory is available when cache locking the map files.
   </p>
-  <CodeBlock nocopy>&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
+  <CodeBlock nocopy>
+&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
 &quot;cache_map_files&quot;: true</CodeBlock>
 </div>
 
@@ -183,7 +186,8 @@ UPnP=false
     The workaround is simply to disable all of the automatic map backups in the
     <span class="has-text-weight-bold">INI Settings</span>.
   </p>
-  <CodeBlock nocopy>BackupsOnStart=false
+  <CodeBlock nocopy>
+BackupsOnStart=false
 BackupsOnVersionChange=false</CodeBlock>
   <p>
     Also delete any map backups that the server made.

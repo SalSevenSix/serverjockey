@@ -9,7 +9,7 @@ from core.metrics import mtxutil
 # Uses blocking IO because it must
 class _ProcessCollector(registry.Collector):
 
-    def __init__(self, instance: str, pid: int):
+    def __init__(self, instance: str, pid: int | None = None):
         self._instance, self._pid = instance, pid
 
     def collect(self) -> typing.Iterable[metrics.Metric]:
@@ -17,7 +17,7 @@ class _ProcessCollector(registry.Collector):
         try:
             result.extend(self._collect_io_metrics())
         except Exception as e:
-            logging.debug('Process metrics collection failed: ' + str(e))
+            logging.debug('collect_io_metrics() ' + str(e))
         return result
 
     def _collect_io_metrics(self) -> list:
@@ -38,20 +38,22 @@ class _ProcessCollector(registry.Collector):
         return result
 
     def _read_proc(self, filename) -> str:
-        with open('/proc/' + str(self._pid) + '/' + filename, 'rt') as file:
+        pid = str(self._pid) if self._pid else 'self'
+        with open('/proc/' + pid + '/' + filename, 'rt') as file:
             return file.read()
 
 
 def _sync_create_process_collector(
-        instance_registry: registry.CollectorRegistry,
-        instance: str, pid: int) -> typing.Optional[registry.Collector]:
+        a_registry: registry.CollectorRegistry,
+        instance: str, pid: int | None = None) -> typing.Optional[registry.Collector]:
     try:
         collector = _ProcessCollector(instance, pid)
-        instance_registry.register(collector)
+        a_registry.register(collector)
         return collector
     except Exception as e:
         logging.debug('mtxproc.create_process_collector() ' + str(e))
     return None
 
 
+_sync_create_process_collector(mtxutil.REGISTRY, mtxutil.PROC_LABEL_VALUE_SELF)
 create_process_collector = funcutil.to_async(_sync_create_process_collector)

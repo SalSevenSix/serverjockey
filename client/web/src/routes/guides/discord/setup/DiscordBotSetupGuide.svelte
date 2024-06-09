@@ -324,27 +324,27 @@
     Then click the <span class="has-text-weight-bold">Save</span> button to save changes.
   </p>
 </div>
-<hr />
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
-    <ServerLinkConfig noHints />
+    <div class="box">
+      <ServerLinkConfig noHints />
+    </div>
   </div>
 </div>
-<hr />
 
 <div class="content">
   <p><span class="step-title"></span>
     Finally time to start the bot! Click the <span class="has-text-weight-bold">Start</span> button below.
   </p>
 </div>
-<hr />
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
-    <ServerStatus stateOnly />
-    <ServerControls />
+    <div class="box">
+      <ServerStatus stateOnly />
+      <ServerControls />
+    </div>
   </div>
 </div>
-<hr />
 
 <div class="content">
   <p><span class="step-title"></span>

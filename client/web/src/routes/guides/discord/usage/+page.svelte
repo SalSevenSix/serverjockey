@@ -126,7 +126,8 @@
   <p><span class="step-title"></span>
     For the purpose of the guide, I only updated the public server name and welcome message in the downloaded INI file.
   </p>
-  <CodeBlock>PublicName=ZomBox demo server
+  <CodeBlock>
+PublicName=ZomBox demo server
 ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
 </div>
 

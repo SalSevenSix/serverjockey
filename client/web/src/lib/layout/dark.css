@@ -1,10 +1,5 @@
 /*
-https://www.schemecolor.com/mojave-dark-mode.php
-#223C5B
-#4A6488
-#091C32
-#293045
-#52596E
+  https://www.schemecolor.com/mojave-dark-mode.php
 */
 
 html.dark {
@@ -107,7 +102,11 @@ body.dark .radio {
   color: #DBDBDB;
 }
 
-body.dark .modal-card-title {
+body.dark .box {
+  background-color: #223C5B;
+}
+
+body.dark .box .label, body.dark .box .table td, body.dark .modal-card-title {
   color: #B6B6D7;
 }
 

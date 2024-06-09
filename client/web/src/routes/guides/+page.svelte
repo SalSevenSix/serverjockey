@@ -127,6 +127,19 @@
     </p>
   </div>
 </div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href={surl('/guides/prometheus')}><i class="fa fa-wave-square fa-lg theme-black-white"></i>
+      Monitoring with Prometheus</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      Prometheus is a flexible and powerful open-source monitoring system that stores metrics in an efficient
+      time series database. It can be used to monitor machine health and game servers managed by ServerJockey.
+      This guide will show how to install and configure Prometheus and integrate with ServerJockey.
+    </p>
+  </div>
+</div>
 
 <div class="content">
   <hr />

@@ -84,7 +84,7 @@ class _RequestHandler:
 
         # GET
         secure = self._security.check(self._request)
-        request_url, request_subpath = self._extract_request()
+        request_url, request_subpath = self._request_url(), self._request_subpath()
         if self._method is httpabc.Method.GET:
             response_body = await self._resource.handle_get(request_url, secure, request_subpath)
             if response_body is None:
@@ -115,16 +115,19 @@ class _RequestHandler:
         response_body = await self._resource.handle_post(request_url, request_body, request_subpath)
         return await self._build_response(response_body)
 
-    def _extract_request(self) -> tuple:
+    def _request_url(self):
         url, scheme = self._request.url, self._headers.get(httpcnt.X_FORWARDED_PROTO)
         if scheme:
             assert scheme in gc.HTTP_PROTOCALS
             url = url.with_scheme(scheme)
+        return url
+
+    def _request_subpath(self) -> str:
         subpath = self._headers.get(httpcnt.X_FORWARDED_SUBPATH)
         if subpath:
             assert subpath == util.script_escape(subpath)
             subpath = subpath.strip('/')
-        return url, subpath if subpath else ''
+        return subpath if subpath else ''
 
     async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:

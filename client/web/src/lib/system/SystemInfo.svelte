@@ -103,7 +103,7 @@
             Available</td><td class="notranslate">{humanFileSize(info.memory.available)}</td></tr>
           <tr><td class="field-column" title="Swap usage">
             Swap</td><td class="notranslate">{#if info.memory.swap}
-            <HealthSymbol red={80.0} amber={50.0} value={info.memory.swap.percent} />
+            <HealthSymbol red={50.0} amber={25.0} value={info.memory.swap.percent} />
             {info.memory.swap.percent}%{:else}n/a{/if}</td></tr>
         </tbody>
       {:else}

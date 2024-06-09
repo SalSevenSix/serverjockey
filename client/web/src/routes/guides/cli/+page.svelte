@@ -72,7 +72,8 @@
     <li>Backup the game world save and delete all backups older than 168 hours</li>
     <li>Start up the server</li>
   </ol>
-  <CodeBlock>serverjockey_cmd.pyz -c \
+  <CodeBlock>
+serverjockey_cmd.pyz -c \
   use:myserver exit-down \
   world-broadcast:"Server shutdown in 5 minutes. Please logout." sleep:240 \
   world-broadcast:"Server shutdown in 1 minute. Please logout." sleep:60 \

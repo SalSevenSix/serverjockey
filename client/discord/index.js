@@ -22,7 +22,7 @@ function initialise() {
   logger.info('discord.js: ' + require('discord.js/package.json').version);
   logger.info(tls_key + ': ' + process.env[tls_key]);
   logger.info('Initialised with config...');
-  logger.raw(JSON.stringify(config, null, 2).split('\n').slice(1, -1).join('\n'));
+  logger.raw(JSON.stringify(config, null, 2).split('\n').slice(1, -1).join('\n'));  // TODO hide SERVER_TOKEN
   return config;
 }
 
