@@ -136,7 +136,7 @@
     <p>
       Prometheus is a flexible and powerful open-source monitoring system that stores metrics in an efficient
       time series database. It can be used to monitor machine health and game servers managed by ServerJockey.
-      This guide will show how to install and configure Prometheus and integrate with ServerJockey.
+      This guide will show how to install and configure Prometheus.
     </p>
   </div>
 </div>

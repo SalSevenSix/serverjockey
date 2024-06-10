@@ -14,7 +14,7 @@ if [ $? -ne 0 ]; then
   adduser --system --home $HOME_DIR --disabled-login --disabled-password $SJGMS_USER || exit 1
   mkdir -p $SERVERLINK_DIR
   echo '{ "module": "serverlink", "hidden": true }' > $SERVERLINK_DIR/instance.json
-  find $HOME_DIR -type d -exec chmod 755 {} +
+  find $HOME_DIR -type d -exec chmod 750 {} +
   find $HOME_DIR -type f -exec chmod 600 {} +
   chown -R $SJGMS_USER $HOME_DIR
   chgrp -R $(ls -ld $HOME_DIR | awk '{print $4}') $HOME_DIR

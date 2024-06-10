@@ -5,6 +5,7 @@
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
+  import NanoGuide from '$lib/widget/NanoGuide.svelte';
 </script>
 
 
@@ -117,9 +118,7 @@
   <h3 id="nginxconfig" class="title is-4">Nginx configuration</h3>
   <p>
     Final step is to configure Nginx to use HTTPS, the domain name, the SSL configuration file, the certificate files,
-    and to direct http requests to ServerJockey. Use a text editor such as
-    <span class="is-family-monospace notranslate">nano</span>
-    to edit the Nginx configuration file.
+    and to direct http requests to ServerJockey. <NanoGuide>to edit the Nginx configuration file.</NanoGuide>
   </p>
   <CodeBlock>sudo nano /etc/nginx/nginx.conf</CodeBlock>
   <p>
