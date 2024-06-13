@@ -29,18 +29,15 @@
 <div class="content">
   <hr />
   <p><span class="step-title"></span>
-    First step is to create a system user for Prometheus to run under. Also added the user to the
-    <span class="is-family-monospace notranslate">sjgms</span>
-    user group so it can read files from that home directory.
+    First step is to create a system user for Prometheus to run under.
   </p>
   <CodeBlock>sudo adduser --system --home /home/prometheus --disabled-login --disabled-password prometheus</CodeBlock>
-  <CodeBlock>sudo usermod -a -G $(ls -ld /home/sjgms | awk &#39;&#123;print $4&#125;&#39;) prometheus</CodeBlock>
 
   <p><span class="step-title"></span>
     Download and upack Prometheus into its home directory. Note that these commands install version
     <span class="is-family-monospace notranslate">2.52.0</span>
     of Prometheus. Please check the
-    <ExtLink href="https://prometheus.io/download/">downloads</ExtLink>
+    <ExtLink href="https://prometheus.io/download/#prometheus">downloads</ExtLink>
     page to find the latest version.
   </p>
   <CodeBlock>wget https://github.com/prometheus/prometheus/releases/download/v2.52.0/prometheus-2.52.0.linux-amd64.tar.gz</CodeBlock>
@@ -62,9 +59,11 @@
 
   <p><span class="step-title"></span>
     Now setup Prometheus as a systemd service. <NanoGuide>to create the service file.</NanoGuide>
-    Copy, paste and save the service configuration as shown below.
   </p>
   <CodeBlock>sudo nano /etc/systemd/system/prometheus.service</CodeBlock>
+  <p>
+    Copy, paste and save the service configuration as shown below.
+  </p>
   <CodeBlock>
 [Unit]
 Description=Prometheus Server
@@ -85,9 +84,11 @@ WantedBy=multi-user.target</CodeBlock>
 
   <p><span class="step-title"></span>
     Create a systemd service file for Node Exporter too.
-    Copy, paste and save the service configuration as shown below.
   </p>
   <CodeBlock>sudo nano /etc/systemd/system/node_exporter.service</CodeBlock>
+  <p>
+    Copy, paste and save the service configuration as shown below.
+  </p>
   <CodeBlock>
 [Unit]
 Description=Prometheus Node Exporter
@@ -157,7 +158,7 @@ scrape_configs:
   <CodeBlock>sudo systemctl restart prometheus</CodeBlock>
 
   <p><span class="step-title"></span>
-    To confirm the everything is working, open the Prometheus console in a browser using the machine IP or hostname.
+    To confirm everything is working, open the Prometheus console in a browser using the machine IP or hostname.
     By default Prometheus uses http listening on port
     <span class="is-family-monospace">9090</span>
     without any authentication. Find the scrape targets status page in the menu under
@@ -167,7 +168,8 @@ scrape_configs:
     <span class="is-family-monospace">http://192.168.1.5:9090/targets</span>
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/prometheus/targets_status.png')} alt="Prometheus Targets Status Page" />
+    <img src={surl('/assets/guides/prometheus/targets_status.png')}
+         alt="Prometheus Targets Status Page" loading="lazy" />
   </figure>
 </div>
 

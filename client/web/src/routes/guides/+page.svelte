@@ -140,6 +140,17 @@
     </p>
   </div>
 </div>
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href={surl('/guides/grafana')}><i class="fa fa-chart-line fa-lg theme-black-white"></i>
+      Something Grafana</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      TODO
+    </p>
+  </div>
+</div>
 
 <div class="content">
   <hr />

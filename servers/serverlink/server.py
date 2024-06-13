@@ -18,10 +18,8 @@ _SERVER_STARTED_FILTER = msgftr.And(
 
 def _default_config():
     return {
-        'CMD_PREFIX': '!',
-        'ADMIN_ROLE': 'pzadmin',
-        'PLAYER_ROLE': 'everyone',
-        'BOT_TOKEN': None,
+        'BOT_TOKEN': None, 'CMD_PREFIX': '!',
+        'ADMIN_ROLE': '@pzadmin', 'PLAYER_ROLE': '@everyone',
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to our server.\nYour login is ${user} and password is ${pass}'
     }
