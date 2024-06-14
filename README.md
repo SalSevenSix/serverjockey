@@ -29,8 +29,8 @@ sudo apt install lib32gcc-s1 steamcmd
 
 * Download and install the deb package
 ```bash
-wget -O sjgms.deb https://4sas.short.gy/sjgms-deb-latest
-sudo apt install ./sjgms.deb
+wget https://serverjockey.net/downloads/sjgms-master-latest.deb
+sudo apt install ./sjgms-master-latest.deb
 ```
 
 * The ServerJockey system should automatically be started.
@@ -70,7 +70,7 @@ serverjockey_cmd.pyz -nc showtoken
 ## VirtualBox Appliance
 ServerJockey is available pre-installed on a virtual machine (VM) image that
 can be imported into VirtualBox. Use this option on Windows systems.
-* [Download the VM image](https://4sas.short.gy/zombox-latest)
+* [Download the VM image](https://serverjockey.net/downloads/ZomBox-latest.ova)
 * Install [VirtualBox](https://www.virtualbox.org/) if not installed.
 * Import the VM image file into VirtualBox.
 * Start the VM. Webapp URL and login token will be displayed in the console.
@@ -83,7 +83,7 @@ ServerJockey is available as a Docker image.
 Webapp URL and login token will be shown in the console output.
 Images are compatible with [Pterodactyl](https://pterodactyl.io/).
 * [Docker Images](https://hub.docker.com/r/salsevensix/serverjockey/tags)
-* [Pterodactyl Egg](https://4sas.short.gy/ptero-egg-latest)
+* [Pterodactyl Egg](https://serverjockey.net/downloads/egg-server-jockey-latest.json)
 
 Start ServerJockey using Docker as follows.
 Open additional ports for game servers as needed.
