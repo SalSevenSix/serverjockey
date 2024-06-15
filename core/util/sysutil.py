@@ -59,7 +59,7 @@ class _LocalIp:
             return result.strip().split()[0]
         except Exception as e:
             logging.error('_get_local_ip() failed %s', repr(e))
-        return 'localhost'
+        return 'UNAVAILABLE'
 
 
 class _PublicIp:

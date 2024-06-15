@@ -1,5 +1,4 @@
 <script>
-  import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import PrometheusIcon from '$lib/svg/PrometheusIcon.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
@@ -56,6 +55,7 @@
     To finish the file install process, set the correct user and group for the prometheus home directory.
   </p>
   <CodeBlock>sudo chown -R prometheus:$(ls -ld /home/prometheus | awk &#39;&#123;print $4&#125;&#39;) /home/prometheus</CodeBlock>
+  <p>TODO terminal screenie to show homedir here</p>
 
   <p><span class="step-title"></span>
     Now setup Prometheus as a systemd service. <NanoGuide>to create the service file.</NanoGuide>
@@ -119,6 +119,7 @@ WantedBy=multi-user.target</CodeBlock>
     At any time you can check the status of the Prometheus service to see if it&#39;s running.
   </p>
   <CodeBlock>sudo systemctl status prometheus</CodeBlock>
+  <p>TODO terminal screenie of service status here</p>
 
   <p><span class="step-title"></span>
     Enable and start the Node Exporter service too.
@@ -177,8 +178,9 @@ scrape_configs:
   <hr />
   <h4 class="title is-5">So what next?</h4>
   <p>
-    ...
-    <a href={surl('/guides/grafana')}>Grafana guide</a>
+    Although Prometheus has a web console that allows you to query metrics and generate graphs,
+    its features are basic. Grafana is often paired with Prometheus to provide more comprehensive reporting.
+    Read the <a href={surl('/guides/grafana')}>Grafana guide</a> for help installing and configuring Grafana.
   </p>
 </div>
 

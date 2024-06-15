@@ -1,10 +1,8 @@
 <script>
-  import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import GrafanaIcon from '$lib/svg/GrafanaIcon.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
-  import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
 
 

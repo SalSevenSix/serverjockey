@@ -6,6 +6,19 @@ exports.raw = function(value) {
   console.log(value);
 }
 
+exports.dump = function(obj) {
+  if (obj == null) return;
+  const clone = {};
+  for (let key in obj) {
+    if (obj[key] && key.toUpperCase().endsWith('TOKEN') && util.isString(obj[key])) {
+      clone[key] = '*'.repeat(obj[key].length);
+    } else {
+      clone[key] = obj[key];
+    }
+  }
+  console.log(JSON.stringify(clone, null, 2).split('\n').slice(1, -1).join('\n'));
+}
+
 exports.info = function(value) {
   console.log(util.shortISODateTimeString() + ' INFO ' + value);
 }

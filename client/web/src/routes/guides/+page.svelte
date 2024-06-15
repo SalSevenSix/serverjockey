@@ -143,11 +143,12 @@
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href={surl('/guides/grafana')}><i class="fa fa-chart-line fa-lg theme-black-white"></i>
-      Something Grafana</a>
+      Installing Grafana</a>
   </div>
   <div class="column is-four-fifths content">
     <p>
-      TODO
+      Grafana is an observability platform that provides graphs and alerts from metrics data sources such as Prometheus.
+      This guide will show how to install, configure and integrate Grafana with Prometheus.
     </p>
   </div>
 </div>

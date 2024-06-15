@@ -10,6 +10,6 @@
 {/if}
 
 If you are new to Nano here is a
-<ExtLink href="https://youtu.be/DLeATFgGM-A" wrap>video guide</ExtLink>
+<ExtLink href="https://youtu.be/DLeATFgGM-A">video guide</ExtLink>
 and the
-<ExtLink href="https://www.nano-editor.org/dist/latest/cheatsheet.html" wrap>shortcut cheatsheet</ExtLink>.
+<ExtLink href="https://www.nano-editor.org/dist/latest/cheatsheet.html">shortcut cheatsheet</ExtLink>.

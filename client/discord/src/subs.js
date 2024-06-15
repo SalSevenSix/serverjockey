@@ -18,7 +18,7 @@ exports.Helper = class Helper {
     while (context.running && url == null) {
       while (context.running && url == null) {
         url = await this.subscribe(subscribeUrl);
-        if (url) { logger.info(subscribeUrl + ' => ' + url); }
+        // if (url) { logger.info(subscribeUrl + ' => ' + url); }
         counter = 60;
         while (context.running && url == null && counter > 0) {
           await util.sleep(200);
