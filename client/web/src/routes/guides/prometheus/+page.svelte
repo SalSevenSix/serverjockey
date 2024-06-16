@@ -55,7 +55,14 @@
     To finish the file install process, set the correct user and group for the prometheus home directory.
   </p>
   <CodeBlock>sudo chown -R prometheus:$(ls -ld /home/prometheus | awk &#39;&#123;print $4&#125;&#39;) /home/prometheus</CodeBlock>
-  <p>TODO terminal screenie to show homedir here</p>
+
+  <p><span class="has-text-weight-bold">Optional:</span>
+    Check to confirm the prometheus home directory is setup correctly.
+  </p>
+  <CodeBlock>sudo ls -la /home/prometheus</CodeBlock>
+  <figure class="image max-1024">
+    <img src={surl('/assets/guides/prometheus/homedir.png')} alt="Prometheus Home Directory List" />
+  </figure>
 
   <p><span class="step-title"></span>
     Now setup Prometheus as a systemd service. <NanoGuide>to create the service file.</NanoGuide>
@@ -85,7 +92,7 @@ WantedBy=multi-user.target</CodeBlock>
   <p><span class="step-title"></span>
     Create a systemd service file for Node Exporter too.
   </p>
-  <CodeBlock>sudo nano /etc/systemd/system/node_exporter.service</CodeBlock>
+  <CodeBlock>sudo nano /etc/systemd/system/node-exporter.service</CodeBlock>
   <p>
     Copy, paste and save the service configuration as shown below.
   </p>
@@ -119,7 +126,9 @@ WantedBy=multi-user.target</CodeBlock>
     At any time you can check the status of the Prometheus service to see if it&#39;s running.
   </p>
   <CodeBlock>sudo systemctl status prometheus</CodeBlock>
-  <p>TODO terminal screenie of service status here</p>
+  <figure class="image max-1024">
+    <img src={surl('/assets/guides/prometheus/service_status.png')} alt="Prometheus Service Status" loading="lazy" />
+  </figure>
 
   <p><span class="step-title"></span>
     Enable and start the Node Exporter service too.
@@ -165,8 +174,6 @@ scrape_configs:
     without any authentication. Find the scrape targets status page in the menu under
     <span class="has-text-weight-bold">Status &gt; Targets</span>.
     On this page you should find Node Exporter, ServerJockey and Prometheus itself as active scrape targets.
-    <br /><span class="has-text-weight-bold">e.g.</span>&nbsp;
-    <span class="is-family-monospace">http://192.168.1.5:9090/targets</span>
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/prometheus/targets_status.png')}
