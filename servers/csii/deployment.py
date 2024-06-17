@@ -104,7 +104,7 @@ class Deployment:
         for config_file in self._config_files:
             r.put(config_file.identity(), httpext.FileSystemHandler(config_file.world_path()), 'm')
 
-    async def new_server_process(self):
+    async def new_server_process(self) -> proch.ServerProcess:
         bin_dir = self._runtime_dir + '/game/bin/linuxsteamrt64'
         executable = bin_dir + '/cs2'
         if not await io.file_exists(executable):

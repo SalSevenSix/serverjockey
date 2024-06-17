@@ -149,7 +149,7 @@
   </figure>
 
   <p><span class="step-title"></span>
-    With Prometheus now connected, machine metrics can now be reported by importing a pre-made Dashboard.
+    With Prometheus now connected, machine metrics can be reported by importing a pre-made Dashboard.
     In the menu go to the
     <span class="has-text-weight-bold">Dashboard</span>
     page. Then click the

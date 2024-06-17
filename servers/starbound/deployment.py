@@ -77,7 +77,7 @@ class Deployment:
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
 
-    async def new_server_process(self):
+    async def new_server_process(self) -> proch.ServerProcess:
         config, bin_dir = {}, self._runtime_dir + '/linux'
         executable = bin_dir + '/starbound_server'
         if not await io.file_exists(executable):

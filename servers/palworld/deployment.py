@@ -93,7 +93,7 @@ class Deployment:
         r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
         r.put('settings', httpext.FileSystemHandler(self._settings_file), 'm')
 
-    async def new_server_process(self):
+    async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/PalServer.sh'
         if not await io.file_exists(executable):
             raise FileNotFoundError('PalWorld game server not installed. Please Install Runtime first.')

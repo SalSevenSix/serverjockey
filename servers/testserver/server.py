@@ -121,13 +121,13 @@ class Server(svrabc.Server):
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('Testserver game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._config_file))
-        process = proch.ServerProcess(self._context, self._python)
-        process.use_pipeinsvc(self._pipeinsvc)
-        process.wait_for_started(Server.STARTED_FILTER, 10)
-        process.append_arg(self._executable)
+        server = proch.ServerProcess(self._context, self._python)
+        server.use_pipeinsvc(self._pipeinsvc)
+        server.wait_for_started(Server.STARTED_FILTER, 10)
+        server.append_arg(self._executable)
         for key in cmdargs.keys():
-            process.append_arg(cmdargs[key])
-        await process.run()
+            server.append_arg(cmdargs[key])
+        await server.run()
 
     async def stop(self):
         await self._stopper.stop()

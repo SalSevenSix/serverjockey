@@ -133,8 +133,8 @@ WantedBy=multi-user.target</CodeBlock>
   <p><span class="step-title"></span>
     Enable and start the Node Exporter service too.
   </p>
-  <CodeBlock>sudo systemctl enable node_exporter</CodeBlock>
-  <CodeBlock>sudo systemctl start node_exporter</CodeBlock>
+  <CodeBlock>sudo systemctl enable node-exporter</CodeBlock>
+  <CodeBlock>sudo systemctl start node-exporter</CodeBlock>
 
   <p><span class="step-title"></span>
     Finally, Prometheus can now be configured to scrape metrics from both Node Exporter and ServerJockey.
