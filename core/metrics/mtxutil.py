@@ -49,24 +49,27 @@ def _sync_create_instance_registry() -> registry.CollectorRegistry:
 
 
 def _sync_unregister_collector(a_registry: registry.CollectorRegistry, collector: registry.Collector):
+    if not collector:
+        return
     try:
         a_registry.unregister(collector)
     except Exception as e:
         logging.warning('_unregister_collector()' + str(e))
 
 
-def _sync_create_gauge(a_registry: registry.CollectorRegistry, name: str, documentation: str) -> metrics.Gauge:
-    return metrics.Gauge(name, documentation, labelnames=[PROC_LABEL_KEY], registry=a_registry)
+def _sync_create_gauge(a_registry: registry.CollectorRegistry, name: str,
+                       documentation: str, labelnames: iter = None) -> metrics.Gauge:
+    allnames = [PROC_LABEL_KEY]
+    if labelnames:
+        allnames.extend(labelnames)
+    return metrics.Gauge(name, documentation, labelnames=allnames, registry=a_registry)
 
 
-def _sync_set_gauge(gauge: metrics.Gauge, instance: str, value: float, inc: bool = None):
-    metric = gauge.labels(instance)
-    if inc is True:
-        metric.inc(value)
-    elif inc is False:
-        metric.dec(value)
-    else:
-        metric.set(value)
+def _sync_set_gauge(gauge: metrics.Gauge, instance: str, value: float, labelvalues: iter = None):
+    allvalues = [instance]
+    if labelvalues:
+        allvalues.extend(labelvalues)
+    gauge.labels(*allvalues).set(value)
 
 
 def _sync_create_counter(a_registry: registry.CollectorRegistry, name: str, documentation: str) -> metrics.Counter:

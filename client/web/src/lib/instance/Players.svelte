@@ -92,9 +92,9 @@
     </table>
   </div>
 {:else}
-  <div class="columns mt-1">
+  <div class="columns is-gapless mt-1">
     {#each chunks as column, index}
-      <div class="column {chunks.length > 2 ? 'is-one-third' : 'is-one-half'} mt-0 mb-0 pt-0 pb-0">
+      <div class="column {chunks.length > 2 ? 'is-one-third' : 'is-one-half'}">
         <table class="table">
           {#if index === 0}
             <thead><tr class="table-header">

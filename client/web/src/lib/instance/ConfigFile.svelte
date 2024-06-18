@@ -78,7 +78,9 @@
     <label for={configFileTextId} class="label">
       <ExtLink href={instance.url(path)}>{name}&nbsp;</ExtLink>
     </label>
-    <slot />
+    {#if $$slots.default}
+      <div class="content mb-2"><slot /></div>
+    {/if}
     <div class="control pr-6">
       <textarea id={configFileTextId} class="textarea is-family-monospace is-size-7" spellcheck="false"
                 disabled={cannotEdit} bind:value={configText}></textarea>

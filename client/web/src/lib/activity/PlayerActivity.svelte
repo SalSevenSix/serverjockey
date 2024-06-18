@@ -150,9 +150,9 @@
           <div><ChartCanvas data={chartDataIntervals(activity.results[instance])} /></div>
         {/if}
       </div>
-      <div class="columns mt-1">
+      <div class="columns is-gapless mt-1">
         {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn}
-          <div class="column is-one-third mt-0 mb-0 pt-0 pb-0">
+          <div class="column is-one-third">
             <table class="table is-narrow"><tbody>
               <tr><td></td><td></td></tr>
               {#each entryColumn as entry}

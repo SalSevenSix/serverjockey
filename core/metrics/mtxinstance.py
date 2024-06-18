@@ -9,10 +9,10 @@ from core.metrics import mtxutil, mtxproc
 
 
 async def initialise(context: contextsvc.Context, players: bool = True, error_filter: msgabc.Filter = None):
-    instance = context.config('identity')
+    instance, module = context.config('identity'), context.config('module')
     instance_registry = await mtxutil.create_instance_registry()
     context.register(_InstanceCleanup(instance_registry))
-    context.register(_InstanceProcessMetrics(instance, instance_registry))
+    context.register(await _InstanceProcessMetrics(instance, module, instance_registry).initialise())
     if players:
         context.register(await _InstancePlayerMetrics(instance, instance_registry).initialise())
     if error_filter:
@@ -32,13 +32,21 @@ class _InstanceCleanup(msgabc.AbcSubscriber):
 
 class _InstanceProcessMetrics(msgabc.AbcSubscriber):
 
-    def __init__(self, instance: str, instance_registry: registry.CollectorRegistry):
+    def __init__(self, instance: str, module: str, instance_registry: registry.CollectorRegistry):
         super().__init__(msgftr.Or(mc.ServerProcess.FILTER_STATE_STARTED, mc.ServerProcess.FILTER_STATES_DOWN))
         self._instance, self._instance_registry = instance, instance_registry
         self._pid, self._standard_collector, self._additional_collector = None, None, None
+        self._info_gauge, self._info_values = None, (module, )
+
+    async def initialise(self) -> msgabc.Subscriber:
+        self._info_gauge = await mtxutil.create_gauge(
+            self._instance_registry, 'process_info', 'Process information, also UP metric', ('module', ))
+        await mtxutil.set_gauge(self._info_gauge, self._instance, 0, self._info_values)
+        return self
 
     async def handle(self, message):
         if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+            await mtxutil.set_gauge(self._info_gauge, self._instance, 1, self._info_values)
             process: subprocess.Process = message.data()
             if not process or process.returncode is not None:
                 return None
@@ -51,10 +59,9 @@ class _InstanceProcessMetrics(msgabc.AbcSubscriber):
                 self._instance_registry, self._instance, self._pid)
             return None
         if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
-            if self._additional_collector:
-                await mtxutil.unregister_collector(self._instance_registry, self._additional_collector)
-            if self._standard_collector:
-                await mtxutil.unregister_collector(self._instance_registry, self._standard_collector)
+            await mtxutil.set_gauge(self._info_gauge, self._instance, 0, self._info_values)
+            await mtxutil.unregister_collector(self._instance_registry, self._additional_collector)
+            await mtxutil.unregister_collector(self._instance_registry, self._standard_collector)
             self._pid, self._standard_collector, self._additional_collector = None, None, None
         return None
 

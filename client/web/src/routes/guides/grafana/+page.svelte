@@ -12,7 +12,7 @@
     <figure class="image mt-2 max-200"><GrafanaIcon /></figure>
   </div>
   <div class="column is-three-quarters content">
-    <h2 class="title is-3 mt-2">Installing Grafana</h2>
+    <h2 class="title is-3 mt-2">Reporting with Grafana</h2>
     <p>
       <ExtLink href="https://grafana.com" notranslate>Grafana</ExtLink>
       is a popular observability platform often paired with Prometheus to provide comprehensive graphing
@@ -151,7 +151,7 @@
   <p><span class="step-title"></span>
     With Prometheus now connected, machine metrics can be reported by importing a pre-made Dashboard.
     In the menu go to the
-    <span class="has-text-weight-bold">Dashboard</span>
+    <span class="has-text-weight-bold">Dashboards</span>
     page. Then click the
     <span class="has-text-weight-bold">Import</span>
     option from the
@@ -193,7 +193,7 @@
   </figure>
 
   <p><span class="step-title"></span>
-    You can explore metrics and build your own dashboards in the
+    You can explore metrics in the
     <span class="has-text-weight-bold">Explore &gt; Metrics</span>
     section. Find ServerJockey specific metrics using the labels as shown below. Note that the
     <span class="has-text-weight-bold">process</span>
@@ -205,6 +205,15 @@
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/grafana/13_explore_metrics.png')} alt="Explore Metrics" loading="lazy" />
+  </figure>
+
+  <p><span class="step-title"></span>
+    There is also a
+    <ExtLink href={surl('/assets/guides/grafana/dashboard.json')}>ServerJockey dashboard</ExtLink>
+    available to download and import. It allows you to conveniently view instance (process) level metrics.
+  </p>
+  <figure class="image max-1024">
+    <img src={surl('/assets/guides/grafana/14_serverjockey_dashboard.png')} alt="ServerJockey Dashboard" loading="lazy" />
   </figure>
 </div>
 
