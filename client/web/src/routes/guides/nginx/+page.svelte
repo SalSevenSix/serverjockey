@@ -29,6 +29,7 @@
       <li><a href="#installnginx" use:scrollto={'#installnginx'}>Install Nginx</a></li>
       <li><a href="#generatesslcert" use:scrollto={'#generatesslcert'}>Generate SSL certificate</a></li>
       <li><a href="#nginxconfig" use:scrollto={'#nginxconfig'}>Nginx configuration</a></li>
+      <li><a href="#dnstools" use:scrollto={'#dnstools'}>DNS Tools</a></li>
     </ul>
   </div>
 </div>
@@ -38,7 +39,8 @@
   <h3 id="obtaindomain" class="title is-4">Obtain a domain name</h3>
   <p>
     A public internet domain name is used to find a machine on the internet by its IP address.
-    You can obtain a domain name from a domain name registry such as <span class="has-text-weight-bold">GoDaddy</span>
+    You can obtain a domain name from a domain name registry such as
+    <span class="has-text-weight-bold">porkbun.com</span>
     and many others. However you will need to pay a recurring fee to use the domain name.
     Alternatively you can use a dynamic DNS service such as
     <ExtLink href="https://www.duckdns.org" notranslate>Duck DNS</ExtLink>
@@ -198,7 +200,7 @@ http &#123;
   <p>
     Now open ServerJockey in a browser using HTTPS and your domain name.
   </p>
-  <figure class="image max-1024 mt-0">
+  <figure class="image max-1024 mt-0 mb-3">
     <img src={surl('/assets/guides/nginx/proxied_serverjockey.png')} alt="ServerJockey behind Nginx" loading="lazy" />
   </figure>
   <p>
@@ -216,6 +218,22 @@ location /serverjockey/ &#123;
   proxy_set_header X-Forwarded-Subpath /serverjockey&#59;
   ...
 &#125;</CodeBlock>
+
+  <h3 id="dnstools" class="title is-4">DNS Tools</h3>
+  <p>
+    The <a href={surl('/guides/cli')}>ServerJockey CLI</a> has some tasks to help update IPs for
+    <span class="has-text-weight-bold notranslate">www.duckdns.org</span>
+    and
+    <span class="has-text-weight-bold notranslate">porkbun.com</span>
+    domain name services. To get detailed help, use the collowing command.
+  </p>
+  <CodeBlock>serverjockey_cmd.pyz -t ddns:help</CodeBlock>
+  <p>
+    For example, to update
+    <span class="has-text-weight-bold is-family-monospace notranslate">example.duckdns.org</span>
+    you would use the following command with your own token.
+  </p>
+  <CodeBlock>serverjockey_cmd.pyz -t ddns:duck,&lt;your_token_here&gt;,example</CodeBlock>
 </div>
 
 <BackToTop />
