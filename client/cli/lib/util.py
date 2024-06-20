@@ -1,6 +1,9 @@
 import subprocess
 import pkgutil
+import time
 # ALLOW NONE
+
+GET, POST = 'GET', 'POST'
 
 
 def get_resource(name: str) -> str | None:
@@ -42,9 +45,38 @@ def to_int(value: str | None, fallback: int = None) -> int | None:
         return fallback
 
 
-def get_ip() -> str:
-    result = subprocess.run(('hostname', '-I'), capture_output=True)
-    if result.returncode != 0 or not result.stdout:
+def get_local_ip4() -> str:
+    # noinspection PyBroadException
+    try:
+        return get_local_ips()[0][0]  # first ipv4
+    except Exception:
         return 'localhost'
-    result = result.stdout.decode().strip().split()
-    return result[0]
+
+
+def get_local_ips() -> tuple:
+    result, count = _get_local_ips(), 6
+    while len(result[0]) == 0 and len(result[1]) == 0 and count > 0:
+        time.sleep(4.0)
+        result = _get_local_ips()
+        count -= 1
+    return result
+
+
+def _get_local_ips() -> tuple:
+    result = subprocess.run(('hostname', '-I'), capture_output=True)
+    result = result.stdout if result.returncode == 0 else None
+    return _extract_hostname_ips(result)
+
+
+def _extract_hostname_ips(hostnames: str | bytes | None) -> tuple:
+    data = hostnames.decode() if isinstance(hostnames, bytes) else hostnames
+    data, ipv4, ipv6 = data.strip() if data else None, [], []
+    if not data:
+        return tuple(ipv4), tuple(ipv6)
+    for item in data.split():
+        len_item = len(item)
+        if len(item.replace('.', '')) == (len_item - 3):
+            ipv4.append(item)
+        elif len(item.replace(':', '')) == (len_item - 7):
+            ipv6.append(item)
+    return tuple(ipv4), tuple(ipv6)

@@ -215,14 +215,14 @@ class CommandProcessor:
         logging.info(self._out)
         logging.info(self._out + ' Open the webapp then login with the token.')
         logging.info(self._out)
-        logging.info(self._out + ' Address   ' + self._url.replace('localhost', util.get_ip()))
+        logging.info(self._out + ' Address   ' + self._url.replace('localhost', util.get_local_ip4()))
         logging.info(self._out + ' Token     ' + self._token)
         logging.info(self._out)
         logging.info(self._out + ' (hit ENTER key to show login prompt)')
         return True
 
     def _showtoken(self) -> bool:
-        logging.info(self._out + 'URL: ' + self._url.replace('localhost', util.get_ip()))
+        logging.info(self._out + 'URL: ' + self._url.replace('localhost', util.get_local_ip4()))
         logging.info(self._out + 'Token: ' + self._token)
         return True
 

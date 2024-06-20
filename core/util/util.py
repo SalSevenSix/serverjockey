@@ -164,3 +164,17 @@ def clear_queue(queue: asyncio.Queue):
             queue.task_done()
     except Exception:
         pass
+
+
+def extract_hostname_ips(hostnames: str | bytes | None) -> tuple:
+    data = hostnames.decode() if isinstance(hostnames, bytes) else hostnames
+    data, ipv4, ipv6 = data.strip() if data else None, [], []
+    if not data:
+        return tuple(ipv4), tuple(ipv6)
+    for item in data.split():
+        len_item = len(item)
+        if len(item.replace('.', '')) == (len_item - 3):
+            ipv4.append(item)
+        elif len(item.replace(':', '')) == (len_item - 7):
+            ipv6.append(item)
+    return tuple(ipv4), tuple(ipv6)

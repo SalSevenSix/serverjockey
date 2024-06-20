@@ -5,7 +5,7 @@ import aiohttp
 import socket
 import time
 # ALLOW util.*
-from core.util import io, funcutil, shellutil, tasks
+from core.util import util, io, funcutil, shellutil, tasks
 
 # TODO investigate using /proc data instead of executing programs
 
@@ -47,7 +47,7 @@ class _OsName:
                     if line.startswith('PRETTY_NAME="'):
                         return line[13:-1]
         except Exception as e:
-            logging.error('_get_os_name() failed %s', repr(e))
+            logging.error('_OsName.get() failed %s', repr(e))
         return 'UNKNOWN'
 
 
@@ -56,9 +56,10 @@ class _LocalIp:
     async def get(self) -> str:
         try:
             result = await shellutil.run_executable('hostname', '-I')
-            return result.strip().split()[0]
+            result = util.extract_hostname_ips(result)
+            return result[0][0]  # first ipv4
         except Exception as e:
-            logging.error('_get_local_ip() failed %s', repr(e))
+            logging.error('_LocalIp.get() failed %s', repr(e))
         return 'UNAVAILABLE'
 
 

@@ -1,9 +1,8 @@
 import logging
 import inspect
 import subprocess
-from http import client
-# ALLOW lib.util
-from . import util
+# ALLOW lib.util, lib.ddns
+from . import util, ddns
 
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
@@ -120,31 +119,13 @@ class TaskProcessor:
             raise Exception('Service ' + argument + ' task failed')
 
     def _ddns(self, argument: str):
-        provider, token, domain, ipv4, ipv6 = util.split_argument(argument, 5)
-        if not provider or not token or not domain:
-            raise Exception('DDNS Service Provider, Token and Domain required')
-        if provider != 'duck':
+        provider, = util.split_argument(argument, 1)
+        if provider == 'help':
+            for line in util.get_resource('ddnshelp.text').strip().split('\n'):
+                logging.info(self._out + line)
+        elif provider == 'duck':
+            ddns.update_duck(*util.split_argument(argument, 3))
+        elif provider == 'pork':
+            ddns.update_pork(*util.split_argument(argument, 4))
+        else:
             raise Exception('Unknown DDNS Service Provider')
-        http_verb, ddns_domain = 'GET', 'www.duckdns.org'
-        path = '/update?domains=' + domain + '&token=' + token
-        if ipv4:
-            path += '&ip=' + ipv4
-        if ipv6:
-            path += '&ipv6=' + ipv6
-        logging.info(http_verb + ' https://' + ddns_domain + path)
-        connection, response = client.HTTPSConnection(ddns_domain), None
-        try:
-            connection.request(http_verb, path)
-            response = connection.getresponse()
-            if response.status == 200:
-                body = response.read()
-                if body:
-                    body = body.decode().strip()
-                if body == 'OK':
-                    return
-                raise Exception('DDNS update failed, response body was ' + str(body))
-            raise Exception('HTTP GET Status: {} Reason: {}'.format(response.status, response.reason))
-        finally:
-            if response:
-                response.close()
-            connection.close()

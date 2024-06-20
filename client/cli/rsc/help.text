@@ -3,13 +3,12 @@ examples:
   sudo serverjockey_cmd.pyz -t upgrade
 
 tasks:
-  ddns:duck,<token>,<domain>,<ipv4>,<ipv6> | Update duckdns.org domain,
-                                           | IPs are optional
   upgrade                | Upgrade ServerJockey to latest version
   uninstall              | Uninstall ServerJockey and delete default user
   adduser:<name>,<port>  | Add a new ServerJockey service user
                          | called <name> with webapp using <port>
   userdel:<name>         | Delete alternate service user and home folder
+  ddns:help              | Show help on DDNS tools
   For tasks below, use --user option to set alternate user if needed
   service                | Show ServerJockey service status
   service:start          | Start ServerJockey service

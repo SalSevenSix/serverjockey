@@ -1,0 +1,4 @@
+ddns:duck,<token>,<domain>
+    | Update IPs for existing duckdns.org domain name
+ddns:pork,<apikey>,<secretapikey>,<domain>
+    | Update IPs for existing porkbun.com domain name

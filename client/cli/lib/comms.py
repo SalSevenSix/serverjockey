@@ -3,8 +3,7 @@ import json
 import ssl
 from http import client
 # ALLOW lib.util
-
-_GET, _POST = 'GET', 'POST'
+from . import util
 
 
 class HttpConnection:
@@ -21,7 +20,7 @@ class HttpConnection:
             self._connection = client.HTTPConnection(url[7:])
 
     def get(self, path: str) -> str | list | dict | None:
-        self._connection.request(_GET, path, headers=self._headers_get)
+        self._connection.request(util.GET, path, headers=self._headers_get)
         response = self._connection.getresponse()
         try:
             if response.status == 204:
@@ -37,7 +36,7 @@ class HttpConnection:
 
     def post(self, path: str, body: dict = None) -> str | dict | None:
         payload = json.dumps(body) if body else None
-        self._connection.request(_POST, path, headers=self._headers_post, body=payload)
+        self._connection.request(util.POST, path, headers=self._headers_post, body=payload)
         response = self._connection.getresponse()
         try:
             if response.status == 204:
@@ -54,7 +53,7 @@ class HttpConnection:
     def drain(self, url_dict: dict):
         path = '/' + '/'.join(url_dict['url'].split('/')[3:])
         while True:
-            self._connection.request(_GET, path, headers=self._headers_get)
+            self._connection.request(util.GET, path, headers=self._headers_get)
             response = self._connection.getresponse()
             try:
                 if response.status == 200:

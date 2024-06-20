@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 5,
   "links": [],
   "panels": [
     {
@@ -244,7 +244,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 5,
         "x": 0,
         "y": 4
       },
@@ -274,13 +274,30 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "avg_over_time(process_info{job=\"$job\", instance=\"$instance\", process=\"$process\"}[$__range]) * 100",
+          "expr": "avg_over_time(up{job=\"$job\", instance=\"$instance\"}[$__range]) * 100",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "System",
           "range": true,
           "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "avg_over_time(process_info{job=\"$job\", instance=\"$instance\", process=\"$process\"}[$__range]) * 100",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Process",
+          "range": true,
+          "refId": "B",
           "useBackend": false
         }
       ],
@@ -319,8 +336,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 4,
+        "w": 7,
+        "x": 5,
         "y": 4
       },
       "id": 6,
@@ -854,7 +871,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "serverjockey",
           "value": "serverjockey"
         },
@@ -890,6 +907,6 @@
   "timezone": "browser",
   "title": "ServerJockey",
   "uid": "adp2c6z2g5hj4c",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
