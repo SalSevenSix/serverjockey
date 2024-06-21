@@ -221,16 +221,16 @@ location /serverjockey/ &#123;
 
   <h3 id="dnstools" class="title is-4">DNS Tools</h3>
   <p>
-    The <a href={surl('/guides/cli')}>ServerJockey CLI</a> has some tasks to help update IPs for
-    <span class="has-text-weight-bold notranslate">www.duckdns.org</span>
+    The <a href={surl('/guides/cli')}>ServerJockey CLI</a> has a task to help update IPs for
+    <span class="has-text-weight-bold notranslate">duckdns.org</span>
     and
     <span class="has-text-weight-bold notranslate">porkbun.com</span>
-    domain name services. To get detailed help, use the collowing command.
+    domain name services. To get detailed help, use the following command.
   </p>
-  <CodeBlock>serverjockey_cmd.pyz -t ddns:help</CodeBlock>
+  <CodeBlock>serverjockey_cmd.pyz -nt ddns:help</CodeBlock>
   <p>
     For example, to update
-    <span class="has-text-weight-bold is-family-monospace notranslate">example.duckdns.org</span>
+    <span class="is-family-monospace has-text-weight-bold notranslate">example.duckdns.org</span>
     you would use the following command with your own token.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -t ddns:duck,&lt;your_token_here&gt;,example</CodeBlock>
