@@ -53,3 +53,7 @@ class ServerProcess:
     FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING))
     FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION))
     FILTER_STATE_ALL = msgftr.Or(FILTER_STATES_UP, FILTER_STATES_DOWN)
+
+
+class WebResource:
+    READY = 'WebResource.Ready'

@@ -6,7 +6,7 @@ from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
 from core.context import contextsvc, contextext
-from core.http import httpabc, httpcnt, httpsec, httprsc, httpext, httpsubs, httpssl
+from core.http import httpabc, httpsec, httprsc, httpext, httpsubs, httpssl
 from core.remotes import steamapi, igd
 from core.metrics import mtxhandler, mprof
 from core.store import sysstore
@@ -170,7 +170,7 @@ class _AutoStartsSubscriber(msgabc.AbcSubscriber):
     def __init__(self):
         super().__init__(msgftr.Or(
             msgftr.NameIs(_AutoStartsSubscriber.AUTOS),
-            msgftr.NameIs(httpcnt.RESOURCES_READY)))
+            msgftr.NameIs(mc.WebResource.READY)))
         self._autos = []
 
     def handle(self, message):

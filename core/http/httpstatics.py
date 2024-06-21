@@ -3,7 +3,7 @@ import logging
 import typing
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg*.* context.* http.httpabc http.httpcnt
-from core.util import pack, pkg
+from core.util import gc, pack, pkg
 from core.http import httpabc, httpcnt
 
 
@@ -20,8 +20,8 @@ class Statics:
         response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
         cache_control = 'private, max-age=3600' if content_type.is_text_type() else 'public, max-age=2592000'
         response.headers.add(httpcnt.CACHE_CONTROL, cache_control)
-        if httpcnt.HeadersTool(request).accepts_encoding(httpcnt.GZIP) and await resource.compress():
-            response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
+        if httpcnt.HeadersTool(request).accepts_encoding(gc.GZIP) and await resource.compress():
+            response.headers.add(httpcnt.CONTENT_ENCODING, gc.GZIP)
             body = resource.compressed()
         else:
             body = await resource.uncompressed()

@@ -2,7 +2,7 @@
   https://www.schemecolor.com/mojave-dark-mode.php
     https://www.colorhex.app/color/091C32 dark blue, background
     https://www.colorhex.app/color/293045 darkish steel blue
-    https://www.colorhex.app/color/52596E lighter steel blue (unused)
+    https://www.colorhex.app/color/52596E lighter steel blue
     https://www.colorhex.app/color/223C5B light blue
     https://www.colorhex.app/color/4A6488 lightest blue, text colour
   others
@@ -84,11 +84,11 @@ body.dark .table.is-log tr.row-hdr {
 }
 
 body.dark .table.is-log tr.row-nrm {
-  background-color: #293045;
+  background-color: #52596E;
 }
 
 body.dark .table.is-log tr.row-alt {
-  background-color: #272846;
+  background-color: #293045;
 }
 
 body.dark .control.has-icons-left .icon, body.dark .control.has-icons-right .icon {

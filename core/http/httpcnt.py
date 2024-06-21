@@ -6,14 +6,11 @@ import aiohttp
 from core.util import gc, util
 from core.http import httpabc
 
-RESOURCES_READY = 'RESOURCES_READY'
-
 HOST = 'Host'
 ORIGIN = 'Origin'
 CONTENT_TYPE = 'Content-Type'
 CONTENT_LENGTH = 'Content-Length'
 CONTENT_ENCODING = 'Content-Encoding'
-GZIP = 'gzip'
 AUTHORIZATION = 'Authorization'
 CONTENT_DISPOSITION = 'Content-Disposition'
 CACHE_CONTROL = 'Cache-Control'

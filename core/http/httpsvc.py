@@ -4,6 +4,7 @@ import aiohttp
 from aiohttp import web, abc as webabc, web_exceptions as err
 # ALLOW util.* msg*.* context.* http.httpabc http.httpcnt http.httpstatics
 from core.util import gc, util, pack, io, objconv
+from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpsec, httpstatics, httpssl
 
@@ -43,7 +44,7 @@ class HttpService:
     # noinspection PyUnusedLocal
     async def _initialise(self, app: web.Application):
         self._resources = await self._callbacks.initialise()
-        self._context.post(self, httpcnt.RESOURCES_READY)
+        self._context.post(self, mc.WebResource.READY)
 
     # noinspection PyUnusedLocal
     async def _shutdown(self, app: web.Application):
@@ -159,10 +160,10 @@ class _RequestHandler:
         if isinstance(body, httpabc.ResponseBody):
             content_type = body.content_type()
             body = body.body()
-        allow_gzip = self._headers.accepts_encoding(httpcnt.GZIP)
+        allow_gzip = self._headers.accepts_encoding(gc.GZIP)
         if allow_gzip and isinstance(body, bytes) and len(body) > 512:
             body = await pack.gzip_compress(body)
-            response.headers.add(httpcnt.CONTENT_ENCODING, httpcnt.GZIP)
+            response.headers.add(httpcnt.CONTENT_ENCODING, gc.GZIP)
         if isinstance(body, httpabc.ByteStream):
             response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
             response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
