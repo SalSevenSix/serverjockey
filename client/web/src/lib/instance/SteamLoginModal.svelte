@@ -4,6 +4,8 @@
   import { sleep, RollingLog } from '$lib/util/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
+  import InputText from '$lib/widget/InputText.svelte';
+  import InputPassword from '$lib/widget/InputPassword.svelte';
 
   const subs = new SubscriptionHelper();
   const logLines = new RollingLog();
@@ -121,14 +123,8 @@
            Please provide Steam credentials to continue.</p>
       </div>
       {#if stage < 2}
-        <div class="field">
-          <label for="steamLoginModalLogin" class="label">Steam Login</label>
-          <div class="control">
-            <!-- svelte-ignore a11y-autofocus -->
-            <input id="steamLoginModalLogin" class="input" type="text" autofocus
-                   disabled={stage > 0} on:keypress={kpStartLogin} bind:value={steamLogin}>
-          </div>
-        </div>
+        <InputText id="steamLoginModalLogin" name="Steam Login" bind:value={steamLogin}
+                   disabled={stage > 0} onKeypress={kpStartLogin} autofocus />
         <div class="field buttons is-right">
           <button name="steam-login-start" title="Login Steam" class="button is-primary"
                   disabled={stage > 0} on:click={startLogin}>
@@ -136,14 +132,8 @@
         </div>
       {/if}
       {#if stage == 2}
-        <div class="field">
-          <label for="steamLoginModalPassword" class="label">Enter Password</label>
-          <div class="control">
-            <!-- svelte-ignore a11y-autofocus -->
-            <input id="steamLoginModalPassword" class="input" type="password" autofocus
-                   on:keypress={kpEnterPassword} bind:value={steamPassword}>
-          </div>
-        </div>
+        <InputPassword id="steamLoginModalPassword" name="Enter Password" bind:value={steamPassword}
+                       onKeypress={kpEnterPassword} autofocus />
         <div class="field buttons is-right">
           <button name="steam-password-enter" title="Enter Password" class="button is-primary"
                   on:click={enterPassword}>
@@ -151,14 +141,8 @@
         </div>
       {/if}
       {#if stage == 3}
-        <div class="field">
-          <label for="steamLoginModalCode" class="label">Enter Steam Guard Code</label>
-          <div class="control">
-            <!-- svelte-ignore a11y-autofocus -->
-            <input id="steamLoginModalCode" class="input" type="text" autofocus
-                   on:keypress={kpEnterCode} bind:value={steamCode}>
-          </div>
-        </div>
+        <InputText id="steamLoginModalCode" name="Enter Steam Guard Code" bind:value={steamCode}
+                   onKeypress={kpEnterCode} autofocus />
         <div class="field buttons is-right">
           <button name="steam-code-enter" title="Enter Code" class="button is-primary"
                   on:click={enterCode}>

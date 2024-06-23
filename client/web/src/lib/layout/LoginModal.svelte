@@ -4,6 +4,7 @@
   import { noStorage } from '$lib/util/util';
   import { notifyError } from '$lib/util/notifications';
   import { surl, securityToken } from '$lib/util/sjgmsapi';
+  import InputText from '$lib/widget/InputText.svelte';
 
   class LoginFailed extends Error {
     constructor() {
@@ -67,13 +68,7 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <div class="field">
-        <label for="loginModalToken" class="label">Login Token</label>
-        <div class="control">
-          <!-- svelte-ignore a11y-autofocus -->
-          <input id="loginModalToken" class="input" type="text" on:keypress={kpLogin} bind:value={token} autofocus>
-        </div>
-      </div>
+      <InputText id="loginModalToken" name="Login Token" bind:value={token} onKeypress={kpLogin} autofocus />
       <div class="field">
         <div class="control">
           <label class="checkbox">

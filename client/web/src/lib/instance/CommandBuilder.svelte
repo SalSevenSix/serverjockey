@@ -4,6 +4,8 @@
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import InputText from '$lib/widget/InputText.svelte';
+  import InputRadio from '$lib/widget/InputRadio.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
@@ -80,30 +82,12 @@
 
 <div class={Object.keys(commands).length === 1 ? 'is-hidden' : 'content'}>
   <p class="has-text-weight-bold">Command</p>
-  <div class="field">
-    <div class="control">
-      {#each Object.keys(commands) as commandOption}
-        <label class="radio m-1 p-2 notranslate">
-          <input type="radio" bind:group={command} name="command" value={commandOption}>
-          {capitalizeKebabCase(commandOption)}
-        </label>
-      {/each}
-    </div>
-  </div>
+  <InputRadio name="command" bind:group={command} options={Object.keys(commands)} notranslate />
 </div>
 {#if command}
   <div class={Object.keys(commands[command]).length === 1 ? 'is-hidden' : 'content'}>
     <p class="has-text-weight-bold">Action</p>
-    <div class="field">
-      <div class="control">
-        {#each Object.keys(commands[command]) as actionOption}
-          <label class="radio m-1 p-2 notranslate">
-            <input type="radio" bind:group={action} name="action" value={actionOption}>
-            {capitalizeKebabCase(actionOption)}
-          </label>
-        {/each}
-      </div>
-    </div>
+    <InputRadio name="action" bind:group={action} options={Object.keys(commands[command])} notranslate />
   </div>
   {#if action}
     <div class="content">
@@ -112,36 +96,14 @@
           {loadDisplay(commands[command][action].indexOf(arg))}
           <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
           <pre class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
-        {/if}
-        {#if arg.input === 'text' || arg.input === 'text>'}
-          <div class="field">
-            <label for="commandBuilderI{arg.name}" class="label">{capitalizeKebabCase(arg.name)}</label>
-            <div class="control">
-              {#if arg.input === 'text'}
-                <input id="commandBuilderI{arg.name}" class="input" type="text"
-                       bind:value={args[commands[command][action].indexOf(arg)]}>
-              {:else}
-                <!-- svelte-ignore a11y-autofocus -->
-                <input autofocus on:keypress={kpSend}
-                       id="commandBuilderI{arg.name}" class="input" type="text"
-                       bind:value={args[commands[command][action].indexOf(arg)]}>
-              {/if}
-            </div>
-          </div>
-        {/if}
-        {#if arg.input === 'radio'}
+        {:else if arg.input === 'text' || arg.input === 'text>'}
+          <InputText id="commandBuilderI{arg.name}" name={capitalizeKebabCase(arg.name)}
+                     bind:value={args[commands[command][action].indexOf(arg)]}
+                     autofocus={arg.input === 'text>'} onKeypress={arg.input === 'text>' ? kpSend : null} />
+        {:else if arg.input === 'radio'}
           <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
-          <div class="field">
-            <div class="control">
-              {#each arg.options as option}
-                <label class="radio m-1 p-2 notranslate">
-                  <input type="radio" name={arg.name} value={option}
-                         bind:group={args[commands[command][action].indexOf(arg)]}>
-                  {capitalizeKebabCase(option)}
-                </label>
-              {/each}
-            </div>
-          </div>
+          <InputRadio name={arg.name} options={arg.options} notranslate
+                      bind:group={args[commands[command][action].indexOf(arg)]} />
         {/if}
       {/each}
     </div>
@@ -151,14 +113,3 @@
     </div>
   {/if}
 {/if}
-
-
-<style>
-  .radio {
-    background-color: white;
-    border: 2px;
-    border-style: solid;
-    border-color: #DBDBDB;
-    border-radius: 5px;
-  }
-</style>

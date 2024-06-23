@@ -5,17 +5,18 @@ from core.util import util, pkg
 from core.context import contextsvc
 from core.system import svrabc
 
-_MODULES = ('projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii', 'palworld')
+_MODULE_SERVERLINK, _MODULE_TESTSERVER = 'serverlink', 'testserver'
+_MODULES = 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii', 'palworld'
 
 
 class Modules:
 
     def __init__(self, context: contextsvc.Context):
-        public_modules, all_modules = [], ['serverlink']
+        public_modules, all_modules = [], [_MODULE_SERVERLINK]
         if context.is_debug():
-            public_modules.append('testserver')
+            public_modules.append(_MODULE_TESTSERVER)
         else:
-            all_modules.append('testserver')
+            all_modules.append(_MODULE_TESTSERVER)
         public_modules.extend(_MODULES)
         all_modules.extend(public_modules)
         self._public_modules, self._all_modules = tuple(public_modules), tuple(all_modules)

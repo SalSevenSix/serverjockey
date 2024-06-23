@@ -40,10 +40,11 @@ def update_pork(provider, apikey, secretapikey, domain):
                 body['type'], body['content'] = record_type, content
                 if name != domain:
                     body['name'] = name[0:len(name) - len(domain) - 1]
+                logging.info('updating ' + record_type + ' for ' + name + ' to ' + content)
                 body = _http_request(host, path, body, timeout=12.0)
                 body = json.loads(body) if body else None
                 if not body or body.get('status') != 'SUCCESS':
-                    raise Exception('error response: ' + str(body))
+                    raise Exception(host + ' error response: ' + str(body))
 
 
 def _get_public_ips() -> tuple:
@@ -90,7 +91,7 @@ def _http_request(host: str, path: str, request_body: dict = None,
         connection.close()
 
 
-# force IPv4
+# TODO test this on python 3.12
 class _HTTPSConnection(client.HTTPSConnection):
     # noinspection All
     def connect(self):

@@ -31,6 +31,16 @@ a[target="_blank"] {
   line-height: 1;
 }
 
+.radio {
+  background-color: white;
+  border: 2px;
+  border-color: #DBDBDB;
+  border-style: solid;
+  border-radius: 5px;
+  margin: 4px;
+  padding: 8px;
+}
+
 .control.has-icons-left .icon, .control.has-icons-right .icon {
   color: #363636;
 }

@@ -29,8 +29,8 @@ sudo apt install lib32gcc-s1 steamcmd
 
 * Download and install the deb package
 ```bash
-wget https://serverjockey.net/downloads/sjgms-master-latest.deb
-sudo apt install ./sjgms-master-latest.deb
+wget -O sjgms.deb https://serverjockey.net/downloads/sjgms-master-latest.deb
+sudo apt install ./sjgms.deb
 ```
 
 * The ServerJockey system should automatically be started.

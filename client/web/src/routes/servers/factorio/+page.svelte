@@ -72,7 +72,7 @@
           <p>
             For automatic mod downloading both username and token in the
             <span class="has-text-weight-bold">Server</span> configuration need to be set.
-            You can find these credentials in your Factorio profile i.e.
+            You can find these credentials in your Factorio profile<br />i.e.&nbsp;
             <span class="is-family-monospace is-size-6 notranslate">
               C:\Users\&lt;YOU&gt;\AppData\Roaming\Factorio\player-data.json</span><br />
             Mod version can optionally be specified using

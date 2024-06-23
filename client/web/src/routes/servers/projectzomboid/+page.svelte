@@ -1,4 +1,5 @@
 <script>
+  import { surl } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
@@ -130,8 +131,10 @@
             For help understanding Project Zomboid configuration files. Please see the
             <ExtLink href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605"
                      wrap>excellent guide on Steam</ExtLink>
-            by Aiteron.<br />
-            Default configuration files are not generated until after first server start.
+            by Aiteron. Also, consider using
+            <a href={surl('/guides/extension')}>the Browser Extension</a>
+            for mod configuration.
+            <br />Default configuration files are not generated until after first server start.
           </p>
         </div>
         <ConfigFile name="INI Settings" path="/config/ini" />

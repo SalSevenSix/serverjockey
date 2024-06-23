@@ -1,5 +1,6 @@
 <script>
   import { closeModal } from 'svelte-modals';
+  import InputText from '$lib/widget/InputText.svelte';
 
   export let isOpen;
   export let onConfirm;
@@ -27,14 +28,9 @@
         <p>{message}</p>
       </div>
       {#if confirmName}
-        <div class="field">
-          <label for="confirmModalName" class="label" title="Enter name to confirm action">Confirm Name</label>
-          <div class="control">
-            <!-- svelte-ignore a11y-autofocus -->
-            <input id="confirmModalName" class="input notranslate" type="text"
-                   placeholder={confirmName} bind:value={enteredName} autofocus>
-          </div>
-        </div>
+        <InputText id="confirmModalName" name="Confirm Name"
+                   bind:value={enteredName} placeholder={confirmName}
+                   title="Enter name to confirm action" autofocus notranslate />
       {/if}
     </section>
     <footer class="modal-card-foot">

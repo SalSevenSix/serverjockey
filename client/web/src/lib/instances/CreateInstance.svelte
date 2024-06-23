@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
   import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import InputText from '$lib/widget/InputText.svelte';
 
   let modules = [];
   let serverForm = {};
@@ -57,15 +58,9 @@
       <span class="icon is-small is-left"><i class="fa fa-cube"></i></span>
     </p>
   </div>
-  <div class="field">
-    <label for="createInstanceIdentity" class="label"
-           title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores.">
-      Name</label>
-    <div class="control">
-      <input id="createInstanceIdentity" class="input" type="text"
-             disabled={processing} on:keypress={kpCreate} bind:value={serverForm.identity}>
-    </div>
-  </div>
+  <InputText id="createInstanceIdentity" name="Name"
+             bind:value={serverForm.identity} onKeypress={kpCreate} disabled={processing}
+             title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores." />
   <div class="block buttons">
     <button name="create" title="Create" class="button is-primary is-fullwidth"
             disabled={cannotCreate} on:click={create}>

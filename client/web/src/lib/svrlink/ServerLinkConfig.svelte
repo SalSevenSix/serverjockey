@@ -2,6 +2,9 @@
   import { onMount, getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import InputPassword from '$lib/widget/InputPassword.svelte';
+  import InputText from '$lib/widget/InputText.svelte';
+  import InputTextArea from '$lib/widget/InputTextArea.svelte';
 
   const instance = getContext('instance');
 
@@ -51,78 +54,30 @@
          <a href={surl('/guides/discord/setup')}>the guide</a>.</p>
     </div>
   {/if}
-  <div class="field">
-    <label for="serverLinkConfigBotToken" class="label"
-           title="Login token for the discord bot">
-      Discord Bot Token</label>
-    <div class="control">
-      <input id="serverLinkConfigBotToken" class="input" type="password"
-             disabled={processing} bind:value={formData.BOT_TOKEN}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigCommandPrefix" class="label"
-           title="Prefix the bot will recognise as commands, more than one character is allowed">
-      Command Prefix</label>
-    <div class="control">
-      <input id="serverLinkConfigCommandPrefix" class="input" type="text"
-             disabled={processing} bind:value={formData.CMD_PREFIX}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigAdminRole" class="label"
-           title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator">
-      Admin Roles</label>
-    <div class="control">
-      <input id="serverLinkConfigAdminRole" class="input" type="text"
-             disabled={processing} bind:value={formData.ADMIN_ROLE}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigPlayerRole" class="label"
-           title="Discord roles allowed to get server info and use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members">
-      Player Roles</label>
-    <div class="control">
-      <input id="serverLinkConfigPlayerRole" class="input" type="text"
-             disabled={processing} bind:value={formData.PLAYER_ROLE}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigChannelEventsServer" class="label"
-           title="Discord channel ID for Server event logging">
-      Server Event Channel ID</label>
-    <div class="control">
-      <input id="serverLinkConfigChannelEventsServer" class="input" type="text"
-             disabled={processing} bind:value={formData.EVENT_CHANNELS.server}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigChannelEventsPlayerLogin" class="label"
-           title="Discord channel ID for Player login/logout event logging">
-      Player Event Channel ID</label>
-    <div class="control">
-      <input id="serverLinkConfigChannelEventsPlayerLogin" class="input" type="text"
-             disabled={processing} bind:value={formData.EVENT_CHANNELS.login}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigChannelEventsPlayerChat" class="label"
-           title="Discord channel ID for Chat integration">
-      Chat Integration Channel ID</label>
-    <div class="control">
-      <input id="serverLinkConfigChannelEventsPlayerChat" class="input" type="text"
-             disabled={processing} bind:value={formData.EVENT_CHANNELS.chat}>
-    </div>
-  </div>
-  <div class="field">
-    <label for="serverLinkConfigWhitelistDm" class="label"
-           title="DM message that will be sent to the user when whitelisted by Discord tag">
-      Whitelist DM</label>
-    <div class="control">
-      <textarea id="serverLinkConfigWhitelistDm" class="textarea"
-                disabled={processing} bind:value={formData.WHITELIST_DM}></textarea>
-    </div>
-  </div>
+  <InputPassword id="serverLinkConfigBotToken" name="Discord Bot Token"
+     bind:value={formData.BOT_TOKEN} disabled={processing}
+     title="Login token for the discord bot" />
+  <InputText id="serverLinkConfigCommandPrefix" name="Command Prefix"
+     bind:value={formData.CMD_PREFIX} disabled={processing}
+     title="Prefix the bot will recognise as commands, more than one character is allowed" />
+  <InputText id="serverLinkConfigAdminRole" name="Admin Roles"
+     bind:value={formData.ADMIN_ROLE} disabled={processing}
+     title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
+  <InputText id="serverLinkConfigPlayerRole" name="Player Roles"
+     bind:value={formData.PLAYER_ROLE} disabled={processing}
+     title="Discord roles allowed to get server info and use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members" />
+  <InputText id="serverLinkConfigChannelEventsServer" name="Server Event Channel ID"
+     bind:value={formData.EVENT_CHANNELS.server} disabled={processing}
+     title="Discord channel ID for Server events" />
+  <InputText id="serverLinkConfigChannelEventsPlayerLogin" name="Player Event Channel ID"
+     bind:value={formData.EVENT_CHANNELS.login} disabled={processing}
+     title="Discord channel ID for Player login and logout events" />
+  <InputText id="serverLinkConfigChannelEventsPlayerChat" name="Chat Integration Channel ID"
+     bind:value={formData.EVENT_CHANNELS.chat} disabled={processing}
+     title="Discord channel ID for Chat integration" />
+  <InputTextArea id="serverLinkConfigWhitelistDm" name="Whitelist DM"
+     bind:value={formData.WHITELIST_DM} disabled={processing}
+     title="DM message that will be sent to the user when whitelisted by Discord tag" />
   <div class="block buttons">
     <button name="save" title="Save" class="button is-primary is-fullwidth"
             disabled={cannotSave} on:click={save}>
