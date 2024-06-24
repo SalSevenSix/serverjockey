@@ -84,7 +84,7 @@ export function chunkArray(arr, rows=20, columns=3) {
   return result;
 }
 
-export function humanDuration(millis, parts = 3) {
+export function humanDuration(millis, parts=3) {
   if (!millis) { millis = 0; }
   let days = -1;
   if (parts > 2) {

@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
-  import { newPostRequest, rawPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import FileSystem from '$lib/instance/FileSystem.svelte';
 
@@ -63,7 +63,7 @@
       return notifyError(fnHelp);
     }
     uploading = true;
-    const request = rawPostRequest();
+    const request = newPostRequest(null);
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
     fetch(instance.url('/backups/' + filename), request)  // Blocks until complete

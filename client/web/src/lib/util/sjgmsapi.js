@@ -14,28 +14,12 @@ export function surl(path) {
 }
 
 export function newGetRequest() {
-  return {
-    method: 'get',
-    headers: {
-      'X-Secret': get(securityToken)
-    }
-  };
+  return { method: 'get', headers: { 'X-Secret': get(securityToken) }};
 }
 
-export function rawPostRequest() {
-  return {
-    method: 'post',
-    headers: { 'X-Secret': get(securityToken) }
-  };
-}
-
-export function newPostRequest(ct = 'application/json') {
-  return {
-    method: 'post',
-    headers: {
-      'Content-Type': ct, 'X-Secret': get(securityToken)
-    }
-  };
+export function newPostRequest(ct='application/json') {
+  const headers = ct ? { 'Content-Type': ct, 'X-Secret': get(securityToken) } : { 'X-Secret': get(securityToken) }
+  return { method: 'post', headers: headers };
 }
 
 

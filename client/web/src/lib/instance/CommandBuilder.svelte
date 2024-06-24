@@ -81,12 +81,12 @@
 
 
 <div class={Object.keys(commands).length === 1 ? 'is-hidden' : 'content'}>
-  <p class="has-text-weight-bold">Command</p>
+  <p class="has-text-weight-bold mb-1">Command</p>
   <InputRadio name="command" bind:group={command} options={Object.keys(commands)} notranslate />
 </div>
 {#if command}
   <div class={Object.keys(commands[command]).length === 1 ? 'is-hidden' : 'content'}>
-    <p class="has-text-weight-bold">Action</p>
+    <p class="has-text-weight-bold mb-1">Action</p>
     <InputRadio name="action" bind:group={action} options={Object.keys(commands[command])} notranslate />
   </div>
   {#if action}
@@ -94,14 +94,13 @@
       {#each commands[command][action] as arg}
         {#if arg.input === 'display'}
           {loadDisplay(commands[command][action].indexOf(arg))}
-          <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
           <pre class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
         {:else if arg.input === 'text' || arg.input === 'text>'}
           <InputText id="commandBuilderI{arg.name}" name={capitalizeKebabCase(arg.name)}
                      bind:value={args[commands[command][action].indexOf(arg)]}
                      autofocus={arg.input === 'text>'} onKeypress={arg.input === 'text>' ? kpSend : null} />
         {:else if arg.input === 'radio'}
-          <p class="has-text-weight-bold">{capitalizeKebabCase(arg.name)}</p>
+          <p class="has-text-weight-bold mb-1">{capitalizeKebabCase(arg.name)}</p>
           <InputRadio name={arg.name} options={arg.options} notranslate
                       bind:group={args[commands[command][action].indexOf(arg)]} />
         {/if}
