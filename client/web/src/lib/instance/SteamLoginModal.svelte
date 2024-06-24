@@ -1,5 +1,6 @@
 <script>
   import { onDestroy, tick } from 'svelte';
+  import { fade } from 'svelte/transition';
   import { closeModal } from 'svelte-modals';
   import { sleep, RollingLog } from '$lib/util/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
@@ -123,33 +124,37 @@
            Please provide Steam credentials to continue.</p>
       </div>
       {#if stage < 2}
-        <InputText id="steamLoginModalLogin" name="Steam Login" bind:value={steamLogin}
-                   disabled={stage > 0} onKeypress={kpStartLogin} autofocus />
-        <div class="field buttons is-right">
-          <button name="steam-login-start" title="Login Steam" class="button is-primary"
-                  disabled={stage > 0} on:click={startLogin}>
-            <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
+        <div class="block">
+          <InputText id="steamLoginModalLogin" name="Steam Login" bind:value={steamLogin}
+                     disabled={stage > 0} onKeypress={kpStartLogin} nowrap autofocus />
+          <div class="field buttons is-right">
+            <button name="steam-login-start" title="Login Steam" class="button is-primary"
+                    disabled={stage > 0} on:click={startLogin}>
+              <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
+          </div>
+        </div>
+      {:else if stage == 2}
+        <div class="block" in:fade={{ duration: 500 }}>
+          <InputPassword id="steamLoginModalPassword" name="Enter Password" bind:value={steamPassword}
+                         onKeypress={kpEnterPassword} nowrap autofocus />
+          <div class="field buttons is-right">
+            <button name="steam-password-enter" title="Enter Password" class="button is-primary"
+                    on:click={enterPassword}>
+              <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
+          </div>
+        </div>
+      {:else if stage == 3}
+        <div class="block" in:fade={{ duration: 500 }}>
+          <InputText id="steamLoginModalCode" name="Enter Steam Guard Code" bind:value={steamCode}
+                     onKeypress={kpEnterCode} nowrap autofocus />
+          <div class="field buttons is-right">
+            <button name="steam-code-enter" title="Enter Code" class="button is-primary"
+                    on:click={enterCode}>
+              <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
+          </div>
         </div>
       {/if}
-      {#if stage == 2}
-        <InputPassword id="steamLoginModalPassword" name="Enter Password" bind:value={steamPassword}
-                       onKeypress={kpEnterPassword} autofocus />
-        <div class="field buttons is-right">
-          <button name="steam-password-enter" title="Enter Password" class="button is-primary"
-                  on:click={enterPassword}>
-            <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
-        </div>
-      {/if}
-      {#if stage == 3}
-        <InputText id="steamLoginModalCode" name="Enter Steam Guard Code" bind:value={steamCode}
-                   onKeypress={kpEnterCode} autofocus />
-        <div class="field buttons is-right">
-          <button name="steam-code-enter" title="Enter Code" class="button is-primary"
-                  on:click={enterCode}>
-            <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
-        </div>
-      {/if}
-      <div class="field">
+      <div class="block field">
         <div class="control">
           <textarea class="textarea has-fixed-size is-family-monospace is-size-7" rows="4"
                     bind:this={logBox} readonly>{logText}</textarea>

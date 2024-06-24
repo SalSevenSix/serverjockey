@@ -9,11 +9,12 @@
   export let disabled = false;
   export let autofocus = false;
   export let notranslate = false;
+  export let nowrap = false;
 </script>
 
 
 <div class="field">
-  <label for={id} class="label" title={title}>{name}</label>
+  <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{name}</label>
   <div class="control">
     <!-- svelte-ignore a11y-autofocus -->
     <input id={id} type="text" class="input" class:notranslate={notranslate}
