@@ -21,6 +21,10 @@
 </script>
 
 
+<svelte:head>
+	<title>ServerJockey</title>
+</svelte:head>
+
 <section class="section">
   <div class="container">
     {#if $securityToken}
