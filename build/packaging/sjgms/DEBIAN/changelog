@@ -1,5 +1,5 @@
 sjgms (0.10.0) unstable; urgency=low
-* Feature release v0.10.0
+* Nginx and Prometheus integrations release
 -- Bowden Salis <bsalis76@gmail.com>
 
 sjgms (0.9.0) unstable; urgency=low

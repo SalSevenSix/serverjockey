@@ -121,8 +121,9 @@ class Deployment:
 
     async def _get_world_name(self) -> str:
         if await io.directory_exists(self._multiplayer_dir):
-            for entry in [e for e in await io.directory_list(self._multiplayer_dir) if e['type'] == 'directory']:
-                return entry['name']
+            for entry in await io.directory_list(self._multiplayer_dir):
+                if entry['type'] == 'directory':
+                    return entry['name']
         return _WORLD_NAME_DEF
 
 

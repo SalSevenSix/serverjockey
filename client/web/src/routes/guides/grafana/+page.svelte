@@ -15,9 +15,12 @@
     <h2 class="title is-3 mt-2">Reporting with Grafana</h2>
     <p>
       <ExtLink href="https://grafana.com" notranslate>Grafana</ExtLink>
-      is a popular observability platform often paired with Prometheus to provide comprehensive graphing
-      and alerts. This guide will show how to install the open source (OSS) version of Grafana
-      and integrate it with Prometheus. Prequisites are a user with root privilages (i.e. sudo)
+      is a popular observability platform often paired with
+      <a href={surl('/guides/prometheus')}>Prometheus</a>
+      to provide comprehensive graphing and alerts.
+      This guide will show how to install the open source (OSS) version of Grafana and integrate it with Prometheus.
+      Prequisites are a user with root privilages (i.e.
+      <span class="is-family-monospace notranslate">sudo</span>)
       and terminal access to the machine with familiarity using it.
     </p>
   </div>

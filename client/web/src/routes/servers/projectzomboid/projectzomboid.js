@@ -31,17 +31,17 @@ export const consoleCommands = {
       {input: 'radio', type: 'string', name: 'level', options: ['none', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
     ],
     'tele-to': [
-      {input: 'text>', type: 'item', name: 'player'},
-      {input: 'text', type: 'string', name: 'toplayer'}
+      {input: 'text>', type: 'item', name: 'player', label: 'Move Player'},
+      {input: 'text', type: 'string', name: 'toplayer', label: 'To Player'}
     ],
     'tele-at': [
-      {input: 'text>', type: 'item', name: 'player'},
-      {input: 'text', type: 'string', name: 'location'}
+      {input: 'text>', type: 'item', name: 'player', label: 'Move Player'},
+      {input: 'text', type: 'string', name: 'location', label: 'To Location x,y,z'}
     ],
     'give-xp': [
       {input: 'text>', type: 'item', name: 'player'},
       {input: 'radio', type: 'string', name: 'skill', options: ['Combat', 'Axe', 'Blunt', 'SmallBlunt', 'LongBlade', 'SmallBlade', 'Spear', 'Maintenance', 'Firearm', 'Aiming', 'Reloading', 'Agility', 'Sprinting', 'Lightfoot', 'Nimble', 'Sneak', 'Crafting', 'Woodwork', 'Cooking', 'Farming', 'Doctor', 'Electricity', 'MetalWelding', 'Mechanics', 'Tailoring', 'Survivalist', 'Fishing', 'Trapping', 'PlantScavenging']},
-      {input: 'text', type: 'number', name: 'xp'}
+      {input: 'text', type: 'number', name: 'xp', label: 'XP'}
     ],
     'give-item': [
       {input: 'text>', type: 'item', name: 'player'},
@@ -76,10 +76,10 @@ export const consoleCommands = {
   },
   'banlist': {
     'add-id': [
-      {input: 'text>', type: 'string', name: 'steamid'}
+      {input: 'text>', type: 'string', name: 'steamid', label: 'Steam ID'}
     ],
     'remove-id': [
-      {input: 'text>', type: 'string', name: 'steamid'}
+      {input: 'text>', type: 'string', name: 'steamid', label: 'Steam ID'}
     ]
   }
 };

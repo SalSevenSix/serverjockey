@@ -14,7 +14,9 @@
 
 
 <div class="field">
-  <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{name}</label>
+  {#if name}
+    <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{name}</label>
+  {/if}
   <div class="control">
     <!-- svelte-ignore a11y-autofocus -->
     <input id={id} type="text" class="input" class:notranslate={notranslate}

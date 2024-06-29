@@ -96,7 +96,8 @@
           {loadDisplay(commands[command][action].indexOf(arg))}
           <pre class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
         {:else if arg.input === 'text' || arg.input === 'text>'}
-          <InputText id="commandBuilderI{arg.name}" name={capitalizeKebabCase(arg.name)}
+          <InputText id="commandBuilderI{arg.name}"
+                     name={arg.hasOwnProperty('label') ? arg.label : capitalizeKebabCase(arg.name)}
                      bind:value={args[commands[command][action].indexOf(arg)]}
                      autofocus={arg.input === 'text>'} onKeypress={arg.input === 'text>' ? kpSend : null} />
         {:else if arg.input === 'radio'}
@@ -112,3 +113,10 @@
     </div>
   {/if}
 {/if}
+
+
+<style>
+  .button {
+    width: 160px;
+  }
+</style>

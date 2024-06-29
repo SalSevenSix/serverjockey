@@ -23,7 +23,7 @@
     'console': {
       'send': [
         {name: 'help', input: 'display'},
-        {name: 'line', input: 'text>', type: 'string'}
+        {name: 'line', input: 'text>', type: 'string', label: null}
       ]
     }
   };

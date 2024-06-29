@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Tue Apr 30 2024 Bowden Salis <bsalis76@gmail.com> - 0.10.0
-- Feature release v0.10.0
+* Sat Jun 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.10.0
+- Nginx and Prometheus integrations release
 * Mon Apr 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.9.0
 - Technical release, library upgrades and Ubuntu 24 support
 * Mon Apr 15 2024 Bowden Salis <bsalis76@gmail.com> - 0.8.0
