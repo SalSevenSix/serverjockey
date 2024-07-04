@@ -127,8 +127,8 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         logging.info('Local IPv4: ' + local_ip)
         logging.info('Public IPv4: ' + public_ip)
         if self._context.is_debug() or self._context.config('showtoken'):
-            print('URL   : ' + contextext.RootUrl(self._context).build(local_ip))
-            print('TOKEN : ' + self._context.config('secret'))
+            print('URL   : ' + contextext.RootUrl(self._context).build(local_ip), flush=True)
+            print('TOKEN : ' + self._context.config('secret'), flush=True)
 
 
 def main(args: typing.Optional[typing.Collection] = None) -> int:
