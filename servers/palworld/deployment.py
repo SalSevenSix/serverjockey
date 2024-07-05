@@ -1,7 +1,7 @@
 from __future__ import annotations
 import re
 # ALLOW core.* palworld.messaging
-from core.util import gc, util, idutil, io, steamutil, objconv
+from core.util import gc, util, idutil, io, objconv
 from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
@@ -44,7 +44,6 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._user_home_dir = context.env('HOME')
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
@@ -56,7 +55,6 @@ class Deployment:
         self._settings_file = self._ini_dir + '/PalWorldSettings.ini'
 
     async def initialise(self):
-        await steamutil.link_steamclient_to_sdk(self._user_home_dir)
         await self.build_world()
         self._mailer.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
