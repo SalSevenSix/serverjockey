@@ -10,8 +10,8 @@ REPOTAG="salsevensix/serverjockey:${1}"
 [ -f sjgms.deb ] || exit 1
 
 echo "Building docker image"
-docker rmi $REPOTAG > /dev/null 2>&1
 docker system prune -f
+docker rmi $REPOTAG > /dev/null 2>&1
 docker build --no-cache -t $REPOTAG . || exit 1
 
 echo "Publishing docker image"
