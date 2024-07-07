@@ -1,4 +1,5 @@
 import logging
+import os
 import inspect
 import subprocess
 # ALLOW lib.util, lib.ddns
@@ -6,6 +7,16 @@ from . import util, ddns
 
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
+
+
+def _checkpyz():
+    if not os.path.isfile('/usr/local/bin/serverjockey_cmd.pyz'):
+        raise Exception('Task not applicable when running from Source')
+
+
+def _extract_user_and_port(argument: str):
+    user, port = util.split_argument(argument, 2)
+    return user if user else _DEFAULT_USER, int(port) if port else _DEFAULT_PORT
 
 
 class TaskProcessor:
@@ -41,11 +52,6 @@ class TaskProcessor:
             if not result:
                 return
 
-    @staticmethod
-    def _extract_user_and_port(argument: str):
-        user, port = util.split_argument(argument, 2)
-        return user if user else _DEFAULT_USER, int(port) if port else _DEFAULT_PORT
-
     def _dump_to_log(self, *data: str | bytes):
         if not data:
             return
@@ -63,12 +69,13 @@ class TaskProcessor:
             raise Exception('Task not run')
 
     def _sysdsvc(self, argument: str):
-        user, port = TaskProcessor._extract_user_and_port(argument)
+        user, port = _extract_user_and_port(argument)
         args = ' --port ' + str(port) if port != _DEFAULT_PORT else ''
         result = util.get_resource('serverjockey.service').format(user=user, args=args)
         self._dump_to_log(result)
 
     def _upgrade(self):
+        _checkpyz()
         self._checkroot('upgrade')
         script = util.get_resource('upgrade.sh')
         result = subprocess.run(script, shell=True, capture_output=True)
@@ -77,6 +84,7 @@ class TaskProcessor:
             raise Exception('Upgrade task failed')
 
     def _uninstall(self):
+        _checkpyz()
         self._checkroot('uninstall')
         script = util.get_resource('uninstall.sh').replace('{userdef}', _DEFAULT_USER)
         result = subprocess.run(script, shell=True, capture_output=True)
@@ -85,8 +93,9 @@ class TaskProcessor:
             raise Exception('Uninstall task failed')
 
     def _adduser(self, argument: str):
+        _checkpyz()
         self._checkroot('adduser:<name>,<port>')
-        user, port = TaskProcessor._extract_user_and_port(argument)
+        user, port = _extract_user_and_port(argument)
         if user == 'serverjockey':
             raise Exception('User name not allowed')
         script = util.get_resource('adduser.sh')
@@ -97,8 +106,9 @@ class TaskProcessor:
             raise Exception('New user task failed')
 
     def _userdel(self, argument: str):
+        _checkpyz()
         self._checkroot('userdel:<name>')
-        user = TaskProcessor._extract_user_and_port(argument)[0]
+        user = _extract_user_and_port(argument)[0]
         if user == _DEFAULT_USER:
             raise Exception('Unable to delete default user.')
         script = util.get_resource('userdel.sh').replace('{user}', user)
@@ -108,6 +118,7 @@ class TaskProcessor:
             raise Exception('Delete user task failed')
 
     def _service(self, argument: str):
+        _checkpyz()
         self._checkroot('service:<command>')
         args = argument if argument else 'status'
         args += ' '
