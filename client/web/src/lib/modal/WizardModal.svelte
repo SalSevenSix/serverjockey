@@ -11,7 +11,7 @@
 
   export let isOpen;
   export let data;
-  export let onSaveChanges;
+  export let onSave;
 
   let section = Object.keys(data)[0];
 
@@ -19,9 +19,9 @@
     return name + unique;
   }
 
-  function saveChanges() {
+  function save() {
     closeModal();
-    onSaveChanges(data);
+    onSave(data);
   }
 </script>
 
@@ -59,7 +59,7 @@
     <footer class="modal-card-foot">
       <button title="Cancel" class="button" on:click={closeModal}>
         <i class="fa fa-rectangle-xmark fa-lg"></i>&nbsp;&nbsp;Cancel</button>
-      <button title="Save" class="button is-success" on:click={saveChanges}>
+      <button title="Save" class="button is-success" on:click={save}>
         <i class="fa fa-square-check fa-lg"></i>&nbsp;&nbsp;Save</button>
     </footer>
   </div>
