@@ -14,13 +14,16 @@
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Discord Bot Usage</h2>
     <p>
-      This guide covers installing, configuring and starting a Project Zomboid server using Discord.
-      You will need to <a href={surl('/guides/discord/setup')}>setup the discord bot</a> first if you have not already.
+      This guide covers installing, configuring and starting a Project Zomboid server using Discord. You will need to
+      <a href={surl('/guides/discord/setup')}>setup the discord bot</a>
+      first if you have not already.
     </p>
     <p>
       If you are following this guide after the discord bot setup guide, then an instance already exists, so you can
       <a href="#setupWithBotTwo" use:scrollto={'#setupWithBotTwo'}>jump to the second step</a>.
-      Otherwise start at the <a href="#setupWithBotOne" use:scrollto={'#setupWithBotOne'}>first step</a> to begin.
+      Otherwise start at the
+      <a href="#setupWithBotOne" use:scrollto={'#setupWithBotOne'}>first step</a>
+      to begin.
     </p>
   </div>
 </div>
@@ -28,10 +31,11 @@
 <div class="content" id="setupWithBotOne">
   <hr />
   <p><span class="step-title"></span>
-    First step is to create an instance for the server.
-    For the guide the instance is called <span class="has-text-weight-bold">myserver</span>.
+    First step is to create an instance for the server. For the guide the instance is called
+    <span class="has-text-weight-bold">myserver</span>.
     The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
-    The second value is <span class="has-text-weight-bold">projectzomboid</span>.
+    The second value is
+    <span class="has-text-weight-bold">projectzomboid</span>.
     This is the module, which is a supported game server. So this instance will be for a Project Zomboid server.
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
@@ -75,10 +79,6 @@
     With the server installed, it can now be started with the following command.
   </p>
   <CodeBlock>!server start</CodeBlock>
-  <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/41_server_start_hourglass.png')}
-         alt="Start Server Hourglass" loading="lazy" />
-  </figure>
   <figure class="image max-800">
     <img src={surl('/assets/guides/discord/41_server_start_success.png')}
          alt="Start Server Success" loading="lazy" />

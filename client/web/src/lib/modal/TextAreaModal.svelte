@@ -32,7 +32,7 @@
         <div class="control buttons">
           <button name="close" title="Close" class="button" on:click={closeModal}>
             <i class="fa fa-xmark fa-lg"></i>&nbsp;&nbsp;Close</button>
-          <button name="save" title="Save" class="button is-primary" on:click={save}>
+          <button name="save" title="Save" class="button is-primary is-hidden-mobile" on:click={save}>
             <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
           <button name="saveAndClose" title="Save and Close" class="button is-primary" on:click={saveAndClose}>
             <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save&nbsp;&amp;&nbsp;Close</button>
