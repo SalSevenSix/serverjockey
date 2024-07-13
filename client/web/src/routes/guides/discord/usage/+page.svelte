@@ -32,15 +32,15 @@
   <hr />
   <p><span class="step-title"></span>
     First step is to create an instance for the server. For the guide the instance is called
-    <span class="has-text-weight-bold">myserver</span>.
+    <span class="has-text-weight-bold notranslate">myserver</span>.
     The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
     The second value is
-    <span class="has-text-weight-bold">projectzomboid</span>.
+    <span class="has-text-weight-bold notranslate">projectzomboid</span>.
     This is the module, which is a supported game server. So this instance will be for a Project Zomboid server.
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/38_create_instance_success.png')}
+    <img src={surl('/assets/guides/discord/setup/create_instance_success.png')}
          alt="Create Instances Success" />
   </figure>
 </div>
@@ -51,7 +51,7 @@
   </p>
   <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/39_help_pz.png')}
+    <img src={surl('/assets/guides/discord/usage/help_pz.png')}
          alt="Help PZ" loading="lazy" />
   </figure>
 </div>
@@ -65,11 +65,11 @@
   </p>
   <CodeBlock>!deployment install-runtime</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/40_deploy_runtime_hourglass.png')}
+    <img src={surl('/assets/guides/discord/usage/deploy_runtime_hourglass.png')}
          alt="Deploy Runtime Hourglass" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/40_deploy_runtime_success.png')}
+    <img src={surl('/assets/guides/discord/usage/deploy_runtime_success.png')}
          alt="Deploy Runtime Success" loading="lazy" />
   </figure>
 </div>
@@ -80,7 +80,7 @@
   </p>
   <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/41_server_start_success.png')}
+    <img src={surl('/assets/guides/discord/usage/server_start_success.png')}
          alt="Start Server Success" loading="lazy" />
   </figure>
 </div>
@@ -92,7 +92,7 @@
   </p>
   <CodeBlock>!server</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/42_server_status_up.png')}
+    <img src={surl('/assets/guides/discord/usage/server_status_up.png')}
          alt="Server Status Up" loading="lazy" />
   </figure>
 </div>
@@ -105,7 +105,7 @@
   </p>
   <CodeBlock>!server stop</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/43_server_stop.png')}
+    <img src={surl('/assets/guides/discord/usage/server_stop.png')}
          alt="Server Stop" loading="lazy" />
   </figure>
 </div>
@@ -117,7 +117,7 @@
   </p>
   <CodeBlock>!getconfig ini</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/44_getconfig_ini.png')}
+    <img src={surl('/assets/guides/discord/usage/getconfig_ini.png')}
          alt="Get Config INI" loading="lazy" />
   </figure>
 </div>
@@ -126,9 +126,9 @@
   <p><span class="step-title"></span>
     For the purpose of the guide, I only updated the public server name and welcome message in the downloaded INI file.
   </p>
-  <CodeBlock>
-PublicName=ZomBox demo server
-ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
+  <CodeBlock nocopy>
+PublicName=ServerJockey guide server
+ServerWelcomeMessage=Welcome to the ServerJockey guide server.</CodeBlock>
 </div>
 
 <div class="content">
@@ -138,7 +138,7 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
   </p>
   <CodeBlock>!setconfig ini</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/46_setconfig_ini.png')}
+    <img src={surl('/assets/guides/discord/usage/setconfig_ini.png')}
          alt="Set Config INI" loading="lazy" />
   </figure>
 </div>
@@ -150,28 +150,28 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
   </p>
   <CodeBlock>!deployment wipe-world-save</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/47_wipe_map.png')}
+    <img src={surl('/assets/guides/discord/usage/wipe_map.png')}
          alt="Wipe Map" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now start the server again. For the guide I used the local network IP to login. After logging in I am greeted
-    with the new Welcome Message I configured earlier. Also, if you have the Player Event Channel ID set in the
+    Now start the server again. For the guide I used the local network IP to connect. After login I am greeted
+    with the new welcome message I configured earlier. Also, if you have the Player Event Channel ID set in the
     discord bot configuration, you should see a login event message in that channel.
   </p>
   <CodeBlock>!server start</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/48_login_server_details.png')}
+    <img src={surl('/assets/guides/discord/usage/login_server_details.png')}
          alt="Login Server Details" loading="lazy" />
   </figure>
-  <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/48_login_welcome_message.png')}
+  <figure class="image max-600">
+    <img src={surl('/assets/guides/discord/usage/login_welcome_message.png')}
          alt="Login Welcome Message" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/48_login_event.png')}
+    <img src={surl('/assets/guides/discord/usage/login_event.png')}
          alt="Login Event" loading="lazy" />
   </figure>
 </div>
@@ -182,18 +182,18 @@ ServerWelcomeMessage=Welcome to the ZomBox demo server.</CodeBlock>
     You can broadcast a message to all players on the server. Items can also be spawned in a players inventory.
     Use the help command for the full list of server console commands.
   </p>
-  <CodeBlock>!world broadcast Hello Everyone</CodeBlock>
-  <CodeBlock>!player Demo give-item Base Axe 2</CodeBlock>
+  <CodeBlock>!world broadcast Hello everyone</CodeBlock>
+  <CodeBlock>!player GuidePlayer give-item Base Axe 2</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/49_console_commands.png')}
+    <img src={surl('/assets/guides/discord/usage/console_commands.png')}
          alt="Console Commands" loading="lazy" />
   </figure>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/49_world_broadcast.jpg')}
+    <img src={surl('/assets/guides/discord/usage/world_broadcast.jpg')}
          alt="World Broadcast" loading="lazy" />
   </figure>
-  <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/49_give_item.png')}
+  <figure class="image max-600">
+    <img src={surl('/assets/guides/discord/usage/give_item.png')}
          alt="Give Item" loading="lazy" />
   </figure>
 </div>

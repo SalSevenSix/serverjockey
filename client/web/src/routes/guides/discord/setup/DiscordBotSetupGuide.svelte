@@ -45,10 +45,11 @@
     <ExtLink href="https://discord.com/login" wrap>login to Discord</ExtLink>
     in your browser. If you don&#39;t have an account then
     <ExtLink href="https://discord.com/register">register</ExtLink>
-    a new one. Below is screenshot of a fresh account for the guide.
+    a new one. Below is screenshot of a fresh account for the guide called
+    <span class="has-text-weight-bold notranslate">GuideUser</span>.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/01_new_account.png')}
+    <img src={surl('/assets/guides/discord/setup/new_account.png')}
          alt="New Discord Account" />
   </figure>
 </div>
@@ -60,7 +61,7 @@
     button on the left panel.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/02_add_server_button.png')}
+    <img src={surl('/assets/guides/discord/setup/add_server_button.png')}
          alt="Add a Server" loading="lazy" />
   </figure>
 </div>
@@ -72,7 +73,7 @@
     option.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/03_create_server_options.png')}
+    <img src={surl('/assets/guides/discord/setup/create_server_options.png')}
          alt="Create Server Options" loading="lazy" />
   </figure>
 </div>
@@ -82,27 +83,29 @@
     Choose the kind of Discord server you want, or skip to choose later.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/04_choose_server_type.png')}
+    <img src={surl('/assets/guides/discord/setup/choose_server_type.png')}
          alt="Choose Server Type" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    Give your new Discord server a name.
+    Give your new Discord server a name. For the guide, I called the it
+    <span class="has-text-weight-bold notranslate">ServerJockeyGuide</span>.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/05_name_server.png')}
+    <img src={surl('/assets/guides/discord/setup/name_server.png')}
          alt="Name the Server" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    You should now have a new Discord server. For the guide, I called the server ZomBoxGuide.
+    You should now have a new Discord server.
+    Use the members button on the top right to toggle the member list panel on the right.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/06_fresh_server.png')}
+    <img src={surl('/assets/guides/discord/setup/fresh_server.png')}
          alt="Fresh Discord Server" loading="lazy" />
   </figure>
 </div>
@@ -115,8 +118,8 @@
     <span class="has-text-weight-bold">New Application</span>
     button.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/07_developers_home.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/developers_home.png')}
          alt="Discord Developer Portal" loading="lazy" />
   </figure>
 </div>
@@ -124,10 +127,10 @@
 <div class="content">
   <p><span class="step-title"></span>
     Give your application a name. For the guide, I called it
-    <span class="has-text-weight-bold notranslate">zombox-demo</span>.
+    <span class="has-text-weight-bold notranslate">ServerLink</span>.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/08_name_application.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/name_application.png')}
          alt="Name New App" loading="lazy" />
   </figure>
 </div>
@@ -136,22 +139,38 @@
   <p><span class="step-title"></span>
     You should now have a new Discord application. It should look like the screenshot below.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/09_fresh_application.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/fresh_application.png')}
          alt="Fresh App" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    In
-    <span class="has-text-weight-bold">SETTINGS</span>
-    on the left panel, select the
-    <span class="has-text-weight-bold">Bot</span>
-    section.
+    On the left panel, select the
+    <span class="has-text-weight-bold">Installation</span>
+    section. Change the
+    <span class="has-text-weight-bold">Install Link</span>
+    to be
+    <span class="has-text-weight-bold">None</span>
+    in the dropdown. Then click
+    <span class="has-text-weight-bold">Save Changes</span>
+    button.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/12_fresh_bot.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/install_link_none.png')}
+         alt="Install Link None" loading="lazy" />
+  </figure>
+</div>
+
+<div class="content">
+  <p><span class="step-title"></span>
+    Now select the
+    <span class="has-text-weight-bold">Bot</span>
+    section to configure the bot.
+  </p>
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/fresh_bot.png')}
          alt="Fresh Bot" loading="lazy" />
   </figure>
 </div>
@@ -166,32 +185,29 @@
     <span class="has-text-weight-bold">Save Changes</span>
     button.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/13_make_bot_private.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/make_bot_private.png')}
          alt="Make Bot Private" loading="lazy" />
   </figure>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/13_allow_receive_messages.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/allow_receive_messages.png')}
          alt="Allow Receive Messages" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    With the new bot created, it&#39;s time to invite the bot to your Discord server. In the
-    <span class="has-text-weight-bold">SETTINGS</span>
-    on the left panel, select the
+    With the new bot created, it&#39;s time to invite the bot to your Discord server.
+    On the left panel, select the
     <span class="has-text-weight-bold">OAuth2</span>
-    section, then select the
-    <span class="has-text-weight-bold">URL Generator</span>
-    under that. Now on the right panel in
+    section. Now on the right panel in
     <span class="has-text-weight-bold">SCOPES</span>,
     check the
     <span class="has-text-weight-bold">bot</span>
     checkbox.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/14_bot_invite_scope.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/bot_invite_scope.png')}
          alt="Set Bot Scope" loading="lazy" />
   </figure>
 </div>
@@ -200,12 +216,12 @@
   <p><span class="step-title"></span>
     Scroll down to
     <span class="has-text-weight-bold">BOT PERMISSIONS</span>,
-    then check all the checkboxes as shown in the screenshot below. Now click the
+    then check all the checkboxes as shown in screenshot below. Then click the
     <span class="has-text-weight-bold">Copy</span>
     button to copy the generated invite URL.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/15_bot_invite_perms.png')}
+  <figure class="image max-860">
+    <img src={surl('/assets/guides/discord/setup/bot_invite_perms.png')}
          alt="Set Bot Perms" loading="lazy" />
   </figure>
 </div>
@@ -214,8 +230,8 @@
   <p><span class="step-title"></span>
     Open a new tab in your browser. Paste the URL into the address bar then hit Enter.
   </p>
-  <figure class="image">
-    <img src={surl('/assets/guides/discord/16_bot_invite_url.png')}
+  <figure class="image max-1024">
+    <img src={surl('/assets/guides/discord/setup/bot_invite_url.png')}
          alt="Invite Bot" loading="lazy" />
   </figure>
 </div>
@@ -229,7 +245,7 @@
     button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/17_bot_invite_choose_server.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_choose_server.png')}
          alt="Choose Server for Bot" loading="lazy" />
   </figure>
 </div>
@@ -241,7 +257,7 @@
     button to complete the bot invite.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/18_bot_invite_authorize.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_authorize.png')}
          alt="Authorise Bot" loading="lazy" />
   </figure>
 </div>
@@ -251,19 +267,19 @@
     Your new bot has now joined your Discord server!
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/19_bot_invite_authorized.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_authorized.png')}
          alt="Bot Authorised" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now go to the Discord server browser tab. You should now see the bot as a member on the right panel.
-    It will be offline, that is expected. If you do not see the member panel on the right,
-    click the people button. It&#39;s just to the left of Search.
+    Now go to the Discord server browser tab.
+    You should now see the bot as a member on the right panel.
+    It will be offline, that is expected.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/20_bot_invite_fresh.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_fresh.png')}
          alt="Bot Invited" loading="lazy" />
   </figure>
 </div>
@@ -281,7 +297,7 @@
     with the cog button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/21_open_settings.png')}
+    <img src={surl('/assets/guides/discord/setup/open_settings.png')}
          alt="Open Discord Settings" loading="lazy" />
   </figure>
 </div>
@@ -297,7 +313,7 @@
     button at the top right to close Settings.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/22_enable_developer_mode.png')}
+    <img src={surl('/assets/guides/discord/setup/enable_developer_mode.png')}
          alt="Enable Developer Mode" loading="lazy" />
   </figure>
 </div>
@@ -305,11 +321,11 @@
 <div class="content">
   <p><span class="step-title"></span>
     With Developer Mode enabled. If you right-click on a Channel, there is now a menu option to
-    <span class="has-text-weight-bold">Copy ID</span>.
+    <span class="has-text-weight-bold">Copy Channel ID</span>.
     This will be useful later on.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/23_copy_channel_id.png')}
+    <img src={surl('/assets/guides/discord/setup/copy_channel_id.png')}
          alt="Copy Channel ID" loading="lazy" />
   </figure>
 </div>
@@ -320,10 +336,10 @@
     <span class="has-text-weight-bold">Bot</span>
     section click the
     <span class="has-text-weight-bold">Reset Token</span>
-    button. This will reset and generate a new token.
+    button. This will generate a new token.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/24_reset_bot_token.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/reset_bot_token.png')}
          alt="Reset Bot Token" loading="lazy" />
   </figure>
 </div>
@@ -334,8 +350,8 @@
     <span class="has-text-weight-bold">Yes, do it!</span>
     button to confirm.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/25_accept_reset_bot_token.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/accept_reset_bot_token.png')}
          alt="Accept Reset Bot Token" loading="lazy" />
   </figure>
 </div>
@@ -346,8 +362,8 @@
     <span class="has-text-weight-bold">Copy</span>
     button to copy the new token.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/26_copy_bot_token.png')}
+  <figure class="image max-1028">
+    <img src={surl('/assets/guides/discord/setup/copy_bot_token.png')}
          alt="Copy Bot Token" loading="lazy" />
   </figure>
 </div>
@@ -391,22 +407,22 @@
   <p><span class="step-title"></span>
     Go to the Discord server browser tab again. You should now see the bot online on the right panel.
     Congratulations making it this far! Note that the Discord bot configuration and controls can be found
-    on the home page of this webapp. No need to come back here to make changes or stop &amp; start the bot.
+    on the home page of this webapp. No need to come back here to make changes or start &amp; stop the bot.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/29_bot_logged_in.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_logged_in.png')}
          alt="Bot Logged In" loading="lazy" />
   </figure>
 </div>
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now try out the bot, it will work from any channel it has access to.
+    Now try out the bot, it will work on any channel it has access to.
     First try the help command as shown below. The bot should reply with available commands.
   </p>
   <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/30_help_system.png')}
+    <img src={surl('/assets/guides/discord/setup/help_system.png')}
          alt="System Help" loading="lazy" />
   </figure>
 </div>
@@ -418,7 +434,7 @@
   </p>
   <CodeBlock>!instances</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/31_instances_empty.png')}
+    <img src={surl('/assets/guides/discord/setup/instances_empty.png')}
          alt="Instances Empty" loading="lazy" />
   </figure>
 </div>
@@ -430,7 +446,7 @@
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/32_create_instance_locked.png')}
+    <img src={surl('/assets/guides/discord/setup/create_instance_locked.png')}
          alt="Create Instances Locked" loading="lazy" />
   </figure>
 </div>
@@ -443,7 +459,7 @@
     <span class="has-text-weight-bold">Roles</span>.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/33_open_roles.png')}
+    <img src={surl('/assets/guides/discord/setup/open_roles.png')}
          alt="Open Roles" loading="lazy" />
   </figure>
 </div>
@@ -455,7 +471,7 @@
     button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/34_create_role_new.png')}
+    <img src={surl('/assets/guides/discord/setup/create_role_new.png')}
          alt="Create New Role" loading="lazy" />
   </figure>
 </div>
@@ -473,7 +489,7 @@
     tab.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/35_create_pzadmin_role.png')}
+    <img src={surl('/assets/guides/discord/setup/create_admin_role.png')}
          alt="Create Admin Role" loading="lazy" />
   </figure>
 </div>
@@ -485,7 +501,7 @@
     button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/36_add_member.png')}
+    <img src={surl('/assets/guides/discord/setup/add_member.png')}
          alt="Add Members to Role" loading="lazy" />
   </figure>
 </div>
@@ -499,7 +515,7 @@
     button at the top right to close Settings.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/37_choose_member.png')}
+    <img src={surl('/assets/guides/discord/setup/choose_member.png')}
          alt="Choose Members for Role" loading="lazy" />
   </figure>
 </div>
@@ -507,15 +523,15 @@
 <div class="content">
   <p><span class="step-title"></span>
     Now try creating an instance again. For the guide the instance is called
-    <span class="has-text-weight-bold">myserver</span>.
+    <span class="has-text-weight-bold notranslate">myserver</span>.
     The name must be lower case letters and numbers, no spaces or special characters except dashes and underscores.
     The second value is
-    <span class="has-text-weight-bold">projectzomboid</span>.
+    <span class="has-text-weight-bold notranslate">projectzomboid</span>.
     This is the module, which is a supported game server. So this instance will be for a Project Zomboid server.
   </p>
   <CodeBlock>!create myserver projectzomboid</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/38_create_instance_success.png')}
+    <img src={surl('/assets/guides/discord/setup/create_instance_success.png')}
          alt="Create Instances Success" loading="lazy" />
   </figure>
   <p>
@@ -523,7 +539,7 @@
   </p>
   <CodeBlock>!instances</CodeBlock>
   <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/38_list_new_instance.png')}
+    <img src={surl('/assets/guides/discord/setup/list_new_instance.png')}
          alt="View New Instance" loading="lazy" />
   </figure>
 </div>
@@ -540,3 +556,14 @@
 
 </ServerStatusStore>
 <BackToTop />
+
+
+<style>
+  figure.max-860 img {
+    max-width: 860px;
+  }
+
+  figure.max-1028 img {
+    max-width: 1028px;
+  }
+</style>
