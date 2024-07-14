@@ -43,9 +43,9 @@
   <p><span class="step-title"></span>
     First step is to
     <ExtLink href="https://discord.com/login" wrap>login to Discord</ExtLink>
-    in your browser. If you don&#39;t have an account then
+    in a browser. If you don&#39;t have an account then
     <ExtLink href="https://discord.com/register">register</ExtLink>
-    a new one. Below is screenshot of a fresh account for the guide called
+    a new one. Below is a screenshot of a fresh account for the guide called
     <span class="has-text-weight-bold notranslate">GuideUser</span>.
   </p>
   <figure class="image max-1024">
@@ -90,7 +90,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Give your new Discord server a name. For the guide, I called the it
+    Give your new Discord server a name. For the guide, I called it
     <span class="has-text-weight-bold notranslate">ServerJockeyGuide</span>.
   </p>
   <figure class="image max-1024">
@@ -216,7 +216,7 @@
   <p><span class="step-title"></span>
     Scroll down to
     <span class="has-text-weight-bold">BOT PERMISSIONS</span>,
-    then check all the checkboxes as shown in screenshot below. Then click the
+    then check all the checkboxes as shown in the screenshot below. Then click the
     <span class="has-text-weight-bold">Copy</span>
     button to copy the generated invite URL.
   </p>
@@ -228,7 +228,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Open a new tab in your browser. Paste the URL into the address bar then hit Enter.
+    Open a new tab in a browser. Paste the URL into the address bar then hit Enter key.
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/bot_invite_url.png')}
@@ -429,18 +429,6 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Now try the instances command. An instance is a game server container. This command will list them all.
-    The response shows none are found because no instance has been created yet.
-  </p>
-  <CodeBlock>!instances</CodeBlock>
-  <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/setup/instances_empty.png')}
-         alt="Instances Empty" loading="lazy" />
-  </figure>
-</div>
-
-<div class="content">
-  <p><span class="step-title"></span>
     Now try creating an instance as shown below. The bot reacts with a lock emoji which means it didn&#39;t work!
     This is expected, you aren&#39;t authorised to create an instance yet. Next steps will remedy this.
   </p>
@@ -480,9 +468,7 @@
   <p><span class="step-title"></span>
     Enter role name
     <span class="has-text-weight-bold notranslate">admin</span>
-    as specified in the
-    <span class="has-text-weight-bold">Admin Roles</span>
-    in the bot configuration. Now
+    as specified in Admin Roles in the bot configuration. Now
     <span class="has-text-weight-bold">Save Changes</span>
     then select the
     <span class="has-text-weight-bold">Manage Members</span>
@@ -533,14 +519,6 @@
   <figure class="image max-800">
     <img src={surl('/assets/guides/discord/setup/create_instance_success.png')}
          alt="Create Instances Success" loading="lazy" />
-  </figure>
-  <p>
-    After creation, you can try the instances command again. The arrow will mark the current selected instance.
-  </p>
-  <CodeBlock>!instances</CodeBlock>
-  <figure class="image max-800">
-    <img src={surl('/assets/guides/discord/setup/list_new_instance.png')}
-         alt="View New Instance" loading="lazy" />
   </figure>
 </div>
 

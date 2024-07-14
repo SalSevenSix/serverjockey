@@ -47,7 +47,22 @@
 
 <div class="content" id="setupWithBotTwo">
   <p><span class="step-title"></span>
-    With an instance created, you can now view all of the commands available for the instance using the help command.
+    With an instance created now, try the instances command. An instance is a game server container.
+    This command will list them all. The arrow marks the default instance to receive commands.
+    You can change the default instance with the
+    <span class="is-family-monospace">!use</span>
+    command.
+  </p>
+  <CodeBlock>!instances</CodeBlock>
+  <figure class="image max-800">
+    <img src={surl('/assets/guides/discord/setup/list_new_instance.png')}
+         alt="View New Instance" loading="lazy" />
+  </figure>
+</div>
+
+<div class="content">
+  <p><span class="step-title"></span>
+    Now view all of the commands available for the instance using the help command.
   </p>
   <CodeBlock>!help</CodeBlock>
   <figure class="image max-800">
@@ -101,7 +116,7 @@
   <p><span class="step-title"></span>
     Before you login and play, the server configuration needs attention.
     After starting the Project Zomboid server for the first time, the configuration files
-    are created with default values. Stop the server with the following command.
+    were created with default values. Stop the server with the following command.
   </p>
   <CodeBlock>!server stop</CodeBlock>
   <figure class="image max-800">
