@@ -1,5 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
+  import { surl } from '$lib/util/sjgmsapi';
   import TerminalCube from '$lib/svg/TerminalCube.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
@@ -36,6 +37,9 @@
     which are explained below.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -h</CodeBlock>
+  <figure class="image max-800">
+    <img src={surl('/assets/guides/cli/cli_help.png')} alt="CLI help text" />
+  </figure>
 
   <h3 id="clitasks" class="title is-4 pt-2">Tasks</h3>
   <p>

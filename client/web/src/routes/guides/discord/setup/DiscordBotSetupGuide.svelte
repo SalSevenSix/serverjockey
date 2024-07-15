@@ -228,7 +228,7 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Open a new tab in a browser. Paste the URL into the address bar then hit Enter key.
+    Open a new tab in the browser. Paste the URL into the address bar then hit Enter key.
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/bot_invite_url.png')}
@@ -468,11 +468,9 @@
   <p><span class="step-title"></span>
     Enter role name
     <span class="has-text-weight-bold notranslate">admin</span>
-    as specified in Admin Roles in the bot configuration. Now
+    as specified in Admin Roles in the bot configuration. Then click
     <span class="has-text-weight-bold">Save Changes</span>
-    then select the
-    <span class="has-text-weight-bold">Manage Members</span>
-    tab.
+    button.
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/create_admin_role.png')}
@@ -482,7 +480,9 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Click the
+    Select the
+    <span class="has-text-weight-bold">Manage Members</span>
+    tab. Then click the
     <span class="has-text-weight-bold">Add Members</span>
     button.
   </p>
