@@ -23,9 +23,9 @@ def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, proto
     mailer.post(source, IgdService.ADD_PORT_MAPPING, {'port': port, 'protocal': protocal, 'description': description})
 
 
-def delete_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, sync: bool = False):
+def delete_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str):
     assert protocal in _VALID_PROTOCALS
-    mailer.post(source, IgdService.DELETE_PORT_MAPPING, {'port': port, 'protocal': protocal, 'sync': sync})
+    mailer.post(source, IgdService.DELETE_PORT_MAPPING, {'port': port, 'protocal': protocal})
 
 
 class IgdService(msgabc.AbcSubscriber):
@@ -51,22 +51,18 @@ class IgdService(msgabc.AbcSubscriber):
 
     async def _handle(self, action, data):
         if action is IgdService.DISCOVER:
-            self._service = await asyncio.wait_for(_get_mapping_service(self._upnp), 20.0)
+            self._service = await _get_mapping_service(self._upnp)
             return None if self._service else False
         if not self._service:
             return False
+        port, protocal = util.get('port', data), util.get('protocal', data)
         if action is IgdService.ADD_PORT_MAPPING:
-            local_ip = await sysutil.local_ip()
-            port, protocal = util.get('port', data), util.get('protocal', data)
             description = util.get('description', data)
+            local_ip = await sysutil.local_ip()
             await asyncio.wait_for(_add_port_mapping(self._service, local_ip, port, protocal, description), 4.0)
             return None
         if action is IgdService.DELETE_PORT_MAPPING:
-            sync, port, protocal = util.get('sync', data, False), util.get('port', data), util.get('protocal', data)
-            if sync:  # TODO probably don't need to block now with graceful shutdown fixed
-                _sync_delete_port_mapping(self._service, port, protocal)
-            else:
-                await asyncio.wait_for(_delete_port_mapping(self._service, port, protocal), 4.0)
+            await asyncio.wait_for(_delete_port_mapping(self._service, port, protocal), 4.0)
             return None
         return None
 
@@ -78,9 +74,9 @@ def _sync_get_mapping_service(upnp):
             for service in device.get_services():
                 for action in service.get_actions():
                     if action.name == 'AddPortMapping':
-                        logging.debug('Found port mapping service: ' + repr(service))
+                        logging.info('Found port mapping service: ' + repr(service))
                         return service
-        logging.info('No IGD port mapping service found.')
+        logging.info('No IGD port mapping service found')
     except Exception as e:
         logging.error('UPnP discovery error: ' + repr(e))
     return None

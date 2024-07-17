@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Sun Jun 30 2024 Bowden Salis <bsalis76@gmail.com> - 0.11.0
-- Feature release v0.11.0
+* Web Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.11.0
+- Discord guide doco refresh
 * Sat Jun 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.10.0
 - Nginx and Prometheus integrations release
 * Mon Apr 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.9.0
