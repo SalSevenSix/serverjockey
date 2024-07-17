@@ -69,12 +69,17 @@ class IgdService(msgabc.AbcSubscriber):
 
 def _sync_get_mapping_service(upnp):
     try:
-        logging.debug('Discovering UPnP devices.')
+        logging.debug('Discovering UPnP devices')
         for device in upnp.discover(delay=3):
+            device_repr = repr(device)
+            logging.debug('net> discovered device: ' + device_repr)
             for service in device.get_services():
+                service_repr = repr(service)
+                logging.debug('net>  discovered service: ' + service_repr)
                 for action in service.get_actions():
+                    logging.debug('net>   discovered action: ' + repr(action))
                     if action.name == 'AddPortMapping':
-                        logging.info('Found port mapping service: ' + repr(service))
+                        logging.info('Found port mapping service: ' + device_repr + ' ' + service_repr)
                         return service
         logging.info('No IGD port mapping service found')
     except Exception as e:
