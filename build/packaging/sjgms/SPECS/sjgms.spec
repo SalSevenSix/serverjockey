@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.11.0
+Version:        0.12.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -53,6 +53,8 @@ exit 0
 
 
 %changelog
+* Web Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.12.0
+- Feature release v0.12.0
 * Web Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.11.0
 - Discord guide doco refresh
 * Sat Jun 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.10.0

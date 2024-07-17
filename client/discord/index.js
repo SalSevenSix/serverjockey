@@ -16,7 +16,7 @@ function initialise() {
   if (process.env[tls_key] != 0 && config.SERVER_URL.startsWith('https')) {
     process.env[tls_key] = 0;
   }
-  logger.info('Version: 0.11.0 ({timestamp})');
+  logger.info('Version: 0.12.0 ({timestamp})');
   logger.info('Executable: ' + process.argv[0]);
   logger.info('JS Runtime: ' + process.version);
   logger.info('discord.js: ' + require('discord.js/package.json').version);
