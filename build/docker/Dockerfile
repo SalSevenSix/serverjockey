@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:noble
 LABEL maintainer="bsalis76@gmail.com"
 RUN apt update && apt -y upgrade
 RUN apt -y install locales vmtouch lib32gcc-s1 software-properties-common

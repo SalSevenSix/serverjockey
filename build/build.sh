@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo "Initialising build process"
-[ $(python3 --version | grep "Python 3\.10\." | wc -l) -eq 0 ] && exit 1
+[ $(python3 --version | grep "Python 3\.12\." | wc -l) -eq 0 ] && exit 1
+PYTHON_LIBDIR="python3.10"
 which wget > /dev/null || exit 1
 which unzip > /dev/null || exit 1
 cd "$(dirname $0)" || exit 1
@@ -14,8 +15,6 @@ SERVERJOCKEY="serverjockey"
 SERVERJOCKEY_DIR="$DIST_DIR/$SERVERJOCKEY"
 TARGET_DIR="$DIST_DIR/sjgms"
 TARGET_BIN_DIR="$TARGET_DIR/usr/local/bin"
-LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/python3.10/site-packages"
-LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/python3.10/site-packages"
 export PIPENV_VENV_IN_PROJECT=1
 rm -rf "$SERVERJOCKEY_DIR" "$TARGET_DIR" > /dev/null 2>&1
 
@@ -26,7 +25,7 @@ if [ "$BRANCH" = "local" ]; then
   [ -d "build" ] || exit 1
   mkdir -p "$SERVERJOCKEY_DIR/build" || exit 1
   find . -maxdepth 1 | while read file; do
-    [[ $file == "." || $file == "./build" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
+    [[ $file == "." || $file == "./build" || $file == "./venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
   done
   cd "build" || exit 1
   find . -maxdepth 1 | while read file; do
@@ -89,11 +88,13 @@ echo "Download and merge ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
 python3 -m pipenv sync || exit 1
 [ -d ".venv" ] || exit 1
+LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/$PYTHON_LIBDIR/site-packages"
 if [ -d "$LIB32_DIR" ]; then
   rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* $LIB32_DIR/greenlet* > /dev/null 2>&1
   rm -rf $LIB32_DIR/setuptools* $LIB32_DIR/pkg_resources* $LIB32_DIR/_distutils_hack > /dev/null 2>&1
   cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
 fi
+LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/$PYTHON_LIBDIR/site-packages"
 if [ -d "$LIB64_DIR" ]; then
   rm -rf $LIB64_DIR/pip* $LIB64_DIR/test* $LIB64_DIR/wheel* $LIB64_DIR/greenlet* > /dev/null 2>&1
   rm -rf $LIB64_DIR/setuptools* $LIB64_DIR/pkg_resources* $LIB64_DIR/_distutils_hack > /dev/null 2>&1
