@@ -92,10 +92,10 @@ check_discord() {
   if [ $? -ne 0 ]; then
     echo "ERROR Nodejs not found."
     echo "For Ubuntu/Debian;"
-    echo "  $ curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -"
-    echo "  $ sudo apt install nodejs"
+    echo "  $ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -"
+    echo "  $ sudo apt-get install nodejs"
     echo "For RedHat/CentOS;"
-    echo "  $ curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -"
+    echo "  $ curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -"
     echo "  $ sudo yum install nodejs"
     exit 1
   fi
@@ -108,11 +108,11 @@ check_discord() {
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt-get purge nodejs"
     echo "  $ sudo apt autoremove"
-    echo "  $ curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -"
-    echo "  $ sudo apt install nodejs"
+    echo "  $ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -"
+    echo "  $ sudo apt-get install nodejs"
     echo "For RedHat/CentOS;"
     echo "  $ sudo yum autoremove nodejs"
-    echo "  $ curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -"
+    echo "  $ curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -"
     echo "  $ sudo yum install nodejs"
     exit 1
   fi
