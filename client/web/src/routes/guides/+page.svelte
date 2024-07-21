@@ -14,7 +14,8 @@
     <h2 class="title is-3 mt-2">Guides</h2>
     <p>
       If you are reading this, you have successfully installed and started
-      <span class="has-text-weight-bold">ServerJockey</span>. Congratulations!
+      <span class="has-text-weight-bold">ServerJockey</span>.
+      Congratulations!
     </p>
     <p>
       The guides section will provide information on how to

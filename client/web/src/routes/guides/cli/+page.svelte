@@ -33,7 +33,9 @@
     The CLI help text can be shown with the
     <span class="is-family-monospace notranslate">-h</span>
     option. There are two kinds of operations that can be performed.
-    <span class="has-text-weight-bold">Tasks</span> and <span class="has-text-weight-bold">Commands</span>
+    <span class="has-text-weight-bold">Tasks</span>
+    and
+    <span class="has-text-weight-bold">Commands</span>
     which are explained below.
   </p>
   <CodeBlock>serverjockey_cmd.pyz -h</CodeBlock>
@@ -44,7 +46,8 @@
   <h3 id="clitasks" class="title is-4 pt-2">Tasks</h3>
   <p>
     Tasks are system admin operations that usually require root privilages (i.e.
-    <span class="is-family-monospace notranslate">sudo</span>). Tasks are run using the
+    <span class="is-family-monospace notranslate">sudo</span>).
+    Tasks are run using the
     <span class="is-family-monospace notranslate">-t</span>
     option. The example below will upgrade the ServerJockey system to the latest version.
   </p>

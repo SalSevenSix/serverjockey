@@ -43,14 +43,19 @@
   <h3 id="vbsettings" class="title is-4">Memory and Processor Settings</h3>
   <p>
     You can configure how much of your real machine Memory and Processor the appliance is allowed to use.
-    To do this click the <span class="has-text-weight-bold">Settings</span> cog button.
+    To do this click the
+    <span class="has-text-weight-bold">Settings</span>
+    cog button.
   </p>
   <figure class="image max-800">
     <img src={surl('/assets/guides/virtualbox/main.png')} alt="VirtualBox Settings" />
   </figure>
   <p>
-    Select the <span class="has-text-weight-bold">System</span> section on the left panel, then the
-    <span class="has-text-weight-bold">Motherboard</span> tab. The ServerJockey appliance has 10Gb of memory allocated.
+    Select the
+    <span class="has-text-weight-bold">System</span>
+    section on the left panel, then the
+    <span class="has-text-weight-bold">Motherboard</span>
+    tab. The ServerJockey appliance has 10Gb of memory allocated.
     You can change this value as needed. It should less than how much free memory your real machine has,
     but enough to support the game server you are running with 2Gb spare.
   </p>
@@ -58,9 +63,12 @@
     <img src={surl('/assets/guides/virtualbox/sysmem.png')} alt="VirtualBox Memory" loading="lazy" />
   </figure>
   <p>
-    On the <span class="has-text-weight-bold">Processor</span> tab you can adjust how much
-    processor is allocated. You can specify a number of cores as well as an execution cap.
-    Click <span class="has-text-weight-bold">OK</span> to save changes.
+    On the
+    <span class="has-text-weight-bold">Processor</span>
+    tab you can adjust how much processor is allocated.
+    You can specify a number of cores as well as an execution cap. Click
+    <span class="has-text-weight-bold">OK</span>
+    to save changes.
   </p>
   <figure class="image max-800">
     <img src={surl('/assets/guides/virtualbox/syscpu.png')} alt="VirtualBox Processor" loading="lazy" />
@@ -68,8 +76,11 @@
 
   <h3 id="sshutdown" class="title is-4">Safe Shutdown</h3>
   <p>
-    To safely shutdown the appliance use the <span class="has-text-weight-bold">ACPI Shutdown</span>
-    option under <span class="has-text-weight-bold">Machine</span> in the menu.
+    To safely shutdown the appliance use the
+    <span class="has-text-weight-bold">ACPI Shutdown</span>
+    option under
+    <span class="has-text-weight-bold">Machine</span>
+    in the menu.
   </p>
   <figure class="image max-400">
     <img src={surl('/assets/guides/virtualbox/shutdown.png')} alt="Safe Shutdown" loading="lazy" />
@@ -77,9 +88,9 @@
 
   <h3 id="howtologin" class="title is-4">Login to OS</h3>
   <p>
-    The appliance is running Ubuntu Server OS. You can login to the command line console if needed.
-    Hit the <span class="has-text-weight-bold">Enter</span> key to show the login prompt.
-    Login with user
+    The appliance is running Ubuntu Server OS. You can login to the command line console if needed. Hit the
+    <span class="has-text-weight-bold">Enter</span>
+    key to show the login prompt. Login with user
     <span class="is-family-monospace notranslate">zombox</span>
     and password
     <span class="is-family-monospace notranslate">zombox</span>.
@@ -91,7 +102,8 @@
 
   <h3 id="changepwd" class="title is-4">Change Password</h3>
   <p>
-    It&#39;s recommended you change the default password, <span class="is-italic">especially</span>
+    It&#39;s recommended you change the default password,
+    <span class="is-italic">especially</span>
     when enabling remote access. Use the following command to change the password.
   </p>
   <CodeBlock>passwd</CodeBlock>
@@ -123,8 +135,8 @@
 
   <h3 id="enablesamba" class="title is-4 pt-2">Remote access using File Sharing</h3>
   <p>
-    By default File Sharing is disabled for security reasons. If you wish to remotely access the filesystem
-    with sharing, you can turn on Samba with the command shown below.
+    By default File Sharing is disabled for security reasons. If you wish to remotely access
+    the filesystem with sharing, you can turn on Samba with the command shown below.
   </p>
   <CodeBlock>sudo systemctl start smbd</CodeBlock>
   <p>
@@ -132,11 +144,15 @@
   </p>
   <CodeBlock>sudo systemctl enable smbd</CodeBlock>
   <p>
-    On Windows, you can find the appliance in the Network section of Windows File Explorer, but don&#39;t expect
-    windows to discover it. Instead, enter the <span class="has-text-weight-bold">Local IP</span> of the appliance
-    starting with two backslashes in the address bar then hit <span class="has-text-weight-bold">Enter</span>.
-    A folder called <span class="has-text-weight-bold">zombox</span> should be visible to browse and mount as a drive.
-    <br /><span class="has-text-weight-bold">e.g.</span>&nbsp; <span class="is-family-monospace">\\192.168.1.6</span>
+    On Windows, you can find the appliance in the Network section of Windows File Explorer,
+    but don&#39;t expect Windows to discover it. Instead, enter the
+    <span class="has-text-weight-bold">Local IP</span>
+    of the appliance starting with two backslashes in the address bar then hit
+    <span class="has-text-weight-bold">Enter</span>.
+    A folder called
+    <span class="has-text-weight-bold">zombox</span>
+    should be visible to browse and mount as a drive.<br />
+    <span class="has-text-weight-bold">e.g.</span>&nbsp; <span class="is-family-monospace">\\192.168.1.6</span>
   </p>
   <figure class="image max-800">
     <img src={surl('/assets/guides/virtualbox/samba.png')} alt="Samba sharing" loading="lazy" />

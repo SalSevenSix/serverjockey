@@ -38,8 +38,11 @@
       First step is to
       <ExtLink href="https://chromewebstore.google.com/detail/serverjockey/bcgjnafdidbpegbeijnbpaioipfckiaj"
                wrap>download and install the extension</ExtLink>
-      from the Chrome web store. First click the <span class="has-text-weight-bold">Add to Chrome</span> button on
-      the page then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+      from the Chrome web store. First click the
+      <span class="has-text-weight-bold">Add to Chrome</span>
+      button on the page then the
+      <span class="has-text-weight-bold">Add extension</span>
+      button on the confirmation popup.
     </p>
     <figure class="image max-800">
       <img src={surl('/assets/guides/extension/chrome_extension_page.jpg')} alt="Chrome extension page" />
@@ -49,8 +52,11 @@
       First step is to
       <ExtLink href="https://microsoftedge.microsoft.com/addons/detail/serverjockey/fcfknahceaoeohgehmbialifgdbihloe"
                wrap>download and install the extension</ExtLink>
-      from the Edge website. First click the <span class="has-text-weight-bold">Get</span> button on the page
-      then the <span class="has-text-weight-bold">Add extension</span> button on the confirmation popup.
+      from the Edge website. First click the
+      <span class="has-text-weight-bold">Get</span>
+      button on the page then the
+      <span class="has-text-weight-bold">Add extension</span>
+      button on the confirmation popup.
     </p>
     <figure class="image max-800">
       <img src={surl('/assets/guides/extension/edge_extension_page.png')} alt="Edge extension page" />
@@ -176,7 +182,8 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Click the  <span class="has-text-weight-bold notranslate">show selected items</span>
+    Click the
+    <span class="has-text-weight-bold notranslate">show selected items</span>
     toggle button to show or hide the selected workshop items list.
     You are able to jump to any workshop item using the workshop ID link.
     Use the cross button to remove any workshop item, but remember to save changes.

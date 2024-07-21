@@ -46,7 +46,8 @@
     <ExtLink href="https://www.duckdns.org" notranslate>Duck DNS</ExtLink>
     which is free to use. This guide uses the domain name
     <span class="is-family-monospace has-text-weight-bold notranslate">example.duckdns.org</span>
-    as a placeholder, <span class="is-italic">please make sure you use your own domain name instead!</span>
+    as a placeholder,
+    <span class="is-italic">please make sure you use your own domain name instead!</span>
   </p>
   <p>
     Whatever service you use, ensure that the configured IP address for the domain name is kept up-to-date.
@@ -62,7 +63,9 @@
   </p>
   <CodeBlock>sudo apt install nginx</CodeBlock>
   <p>
-    It will be setup as an enabled <span class="notranslate">systemd</span> service and automatically started.
+    It will be setup as an enabled
+    <span class="notranslate">systemd</span>
+    service and automatically started.
     You can check the status of the Nginx service with the command shown below.
   </p>
   <CodeBlock>sudo systemctl status nginx</CodeBlock>

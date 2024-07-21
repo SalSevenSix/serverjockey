@@ -7,6 +7,7 @@
   export let onKeypress = null;
   export let placeholder = null;
   export let disabled = false;
+  export let spellcheck = false;
   export let autofocus = false;
   export let notranslate = false;
   export let nowrap = false;
@@ -21,6 +22,6 @@
     <!-- svelte-ignore a11y-autofocus -->
     <input id={id} type="text" class="input" class:notranslate={notranslate}
            bind:value={value} on:keypress={onKeypress} placeholder={placeholder}
-           disabled={disabled} autofocus={autofocus}>
+           disabled={disabled} spellcheck={spellcheck} autofocus={autofocus}>
   </div>
 </div>
