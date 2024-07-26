@@ -273,8 +273,8 @@ exports.players = function($) {
           line += util.humanDuration(body[i].uptime, 2);
         }
         chunk.push(line);
-        chars += line.length;
-        if (chars > 1600) {
+        chars += line.length + 1;
+        if (chars > 1600) {  // Discord message limit is 2000 characters
           result.push('```\n' + chunk.join('\n') + '\n```');
           chars = 0;
           chunk = [];

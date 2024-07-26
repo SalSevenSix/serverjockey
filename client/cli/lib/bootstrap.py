@@ -1,6 +1,5 @@
 import logging
 import signal
-import typing
 import argparse
 import sys
 import os
@@ -65,7 +64,7 @@ def _load_clientfile(clientfile: str) -> tuple:
         return data['SERVER_URL'], data['SERVER_TOKEN']
 
 
-def _initialise(args: typing.Collection) -> dict:
+def _initialise() -> dict:
     p = argparse.ArgumentParser(
         description='ServerJockey CLI.',
         epilog=util.get_resource('help.text'),
@@ -75,14 +74,14 @@ def _initialise(args: typing.Collection) -> dict:
     p.add_argument('--user', '-u', type=str, help='Specify alternate user')
     p.add_argument('--tasks', '-t', type=str, nargs='+', help='List of tasks to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
-    args = [] if args is None or len(args) < 2 else args[1:]
-    args = p.parse_args(args)
+    args = p.parse_args(sys.argv[1:])
     _setup_logging(args.debug, args.nolog)
     url, token = None, None
     if args.commands or not args.tasks:
         url, token = _load_clientfile(_find_clientfile(args.user))
-    return {'out': _OUT, 'debug': args.debug, 'url': url, 'token': token,
-            'user': args.user, 'tasks': args.tasks, 'commands': args.commands}
+    return dict(out=_OUT, url=url, token=token,
+                debug=args.debug, user=args.user,
+                tasks=args.tasks, commands=args.commands)
 
 
 # noinspection PyUnusedLocal
@@ -94,7 +93,7 @@ def _terminate(sig, frame):
 def main() -> int:
     config, connection = None, None
     try:
-        config = _initialise(sys.argv)
+        config = _initialise()
         tasks, commands = config['tasks'], config['commands']
         if tasks or commands:
             signal.signal(signal.SIGINT, _terminate)

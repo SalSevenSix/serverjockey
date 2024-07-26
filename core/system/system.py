@@ -63,10 +63,11 @@ class SystemService:
     async def _initialise_instances(self):
         autos, ls = [], await io.directory_list(self._home_dir)
         for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
-            config_file = self._home_dir + '/' + identity + '/instance.json'
+            home_dir = self._home_dir + '/' + identity
+            config_file = home_dir + '/instance.json'
             if await io.file_exists(config_file):
                 configuration = objconv.json_to_dict(await io.read_file(config_file))
-                configuration.update({'identity': identity, 'home': self._home_dir + '/' + identity})
+                configuration.update(dict(identity=identity, home=home_dir))
                 subcontext = await self._initialise_instance(configuration)
                 if subcontext.config('auto'):
                     autos.append(subcontext)
@@ -125,7 +126,7 @@ class SystemService:
             logging.debug('CREATING instance ' + identity)
             await io.create_directory(home_dir)
             await io.write_file(home_dir + '/instance.json', objconv.obj_to_json(configuration))
-            configuration.update({'identity': identity, 'home': home_dir})
+            configuration.update(dict(identity=identity, home=home_dir))
             return await self._initialise_instance(configuration)
         except Exception as e:
             await funcutil.silently_call(io.delete_directory(home_dir))
@@ -140,7 +141,7 @@ class SystemService:
         logging.debug('DELETED instance ' + identity)
 
     async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
-        subcontext = self._context.create_subcontext(**configuration)
+        subcontext = self._context.create_subcontext(configuration)
         subcontext.start()
         if subcontext.is_trace():
             subcontext.register(msglog.LoggerSubscriber(level=logging.DEBUG))
@@ -212,7 +213,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):
             return httpabc.ResponseBody.BAD_REQUEST
-        subcontext = await self._system.create_instance({'module': module, 'identity': identity})
+        subcontext = await self._system.create_instance(dict(module=module, identity=identity))
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
 
 

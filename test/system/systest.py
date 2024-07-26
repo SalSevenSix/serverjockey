@@ -23,11 +23,10 @@ class TestContext:
         shutil.copytree(template, home)
         tempdir = home + '/.tmp'
         os.makedirs(tempdir)
-        self._context = contextsvc.Context(
-            debug=True, trace=False, home=home, tempdir=tempdir,
-            stime=None, secret='token', showtoken=False,
-            scheme=_SCHEME, env=os.environ.copy(), python=sys.executable,
-            logfile=None, dbfile=None, noupnp=True, host=None, port=None)
+        self._context = contextsvc.Context(dict(
+            home=home, logfile=None, tempdir=tempdir, host=None, port=None, showtoken=False,
+            noupnp=True, dbfile=None, debug=True, trace=False, secret='token', python=sys.executable,
+            stime=None, scheme=_SCHEME, env=os.environ.copy()))
 
     async def initialise(self):
         if self._resources:

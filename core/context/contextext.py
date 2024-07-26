@@ -11,8 +11,7 @@ class RootUrl:
     def build(self, fallback_host: str = 'localhost') -> str:
         scheme = self._context.config('scheme')
         host = self._context.config('host')
-        if not host:
-            host = fallback_host
+        host = host[0] if host else fallback_host
         port = self._context.config('port')
         return util.build_url(scheme, host, port)
 

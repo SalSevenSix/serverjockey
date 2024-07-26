@@ -1,11 +1,10 @@
 import logging
-import typing
 import argparse
 import asyncio
 import sys
 import os
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
-from core.util import util, idutil, funcutil, sysutil, steamutil, logutil, io, tasks
+from core.util import util, idutil, funcutil, sysutil, steamutil, logutil, io, tasks, objconv
 from core.msg import msglog
 from core.context import contextsvc, contextext
 from core.http import httpabc, httpsvc, httpssl
@@ -22,52 +21,66 @@ class _NoTraceFilter(logging.Filter):
 
 
 def _stime(home: str) -> float | None:
-    pidfile = home + '/.pid'
-    return os.stat(pidfile).st_atime if os.path.isfile(pidfile) else None
+    file = home + '/.pid'
+    return os.stat(file).st_atime if os.path.isfile(file) else None
+
+
+def _load_config(home: str) -> dict:
+    file = home + '/serverjockey.json'
+    if not os.path.isfile(file):
+        return {}
+    with open(file) as fd:
+        result = objconv.json_to_dict(fd.read())
+        if not result:
+            raise Exception('Invalid JSON file: ' + file)
+        return result
 
 
 def _argument_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description='Start ServerJockey game server management system.')
-    p.add_argument('--version', action='store_true',
-                   help='Show version then exit')
-    p.add_argument('--debug', action='store_true',
-                   help='Debug mode')
-    p.add_argument('--trace', action='store_true',
-                   help='Debug mode with detailed logging')
-    p.add_argument('--showtoken', action='store_true',
-                   help='Print the login token to stdout')
-    p.add_argument('--host', type=str,
-                   help='Host or IP to bind http service, default is open to all')
-    p.add_argument('--port', type=int, default=6164,
-                   help='Port for http service, default is 6164')
-    p.add_argument('--home', type=str, default='.',
+    p.add_argument('--version', action='store_true', help='Show version then exit')
+    p.add_argument('--home', type=str,
                    help='Home directory to use for server instances, default is current working directory')
-    p.add_argument('--tempdir', type=str, default='.tmp',
-                   help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
                    help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
-    p.add_argument('--nostore', action='store_true',
-                   help='Do not use database to store activity')
-    p.add_argument('--noupnp', action='store_true',
-                   help='Do not enable UPnP services')
+    p.add_argument('--tempdir', type=str, help='Directory to use for temporary files, default is .tmp under home')
+    p.add_argument('--host', type=str, help='Comma delimited IPs to bind http service, default is all')
+    p.add_argument('--port', type=int, help='Port for http service, default is 6164')
+    p.add_argument('--showtoken', action='store_true', help='Print the login token to stdout')
+    p.add_argument('--noupnp', action='store_true', help='Do not enable UPnP services')
+    p.add_argument('--nostore', action='store_true', help='Do not use database to store activity')
+    p.add_argument('--debug', action='store_true', help='Debug mode')
+    p.add_argument('--trace', action='store_true', help='Debug mode with more logging')
     return p
 
 
-def _create_context(args: typing.Collection) -> contextsvc.Context | None:
-    config = _argument_parser().parse_args([] if args is None or len(args) < 2 else args[1:])
-    if config.version:
+def _create_context() -> contextsvc.Context | None:
+    args = _argument_parser().parse_args(sys.argv[1:])
+    if args.version:
         print(sysutil.system_version())
         return None
-    home = util.full_path(os.getcwd(), config.home)
-    tempdir = util.full_path(home, config.tempdir)
-    logfile = util.full_path(home, config.logfile)
-    dbfile = None if config.nostore else util.full_path(home, 'serverjockey.db')
-    host = None if config.host == '0.0.0.0' else config.host
-    return contextsvc.Context(
-        debug=config.debug, trace=config.trace, home=home, tempdir=tempdir, stime=_stime(home),
-        secret=idutil.generate_token(10, True), showtoken=config.showtoken,
-        scheme=httpssl.sync_get_scheme(home), env=os.environ.copy(), python=sys.executable,
-        dbfile=dbfile, logfile=logfile, noupnp=config.noupnp, host=host, port=config.port)
+    home = util.full_path(os.getcwd(), args.home if args.home else '.')
+    cfg = util.get('cmdargs', _load_config(home), {})
+    assert isinstance(cfg, dict)
+    logfile = args.logfile if args.logfile else util.get('logfile', cfg)
+    logfile = 'serverjockey.log' if objconv.to_bool(logfile) and not isinstance(logfile, str) else logfile
+    logfile = util.full_path(home, logfile)
+    tempdir = args.tempdir if args.tempdir else util.get('tempdir', cfg, '.tmp')
+    tempdir = util.full_path(home, tempdir)
+    host = args.host if args.host else util.get('host', cfg)
+    host = tuple(host.split(',')) if host else None
+    port = args.port if args.port else util.get('port', cfg, 6164)
+    showtoken = True if args.showtoken else objconv.to_bool(util.get('showtoken', cfg))
+    noupnp = True if args.noupnp else objconv.to_bool(util.get('noupnp', cfg))
+    nostore = True if args.nostore else objconv.to_bool(util.get('nostore', cfg))
+    dbfile = None if nostore else util.full_path(home, 'serverjockey.db')
+    debug = True if args.debug else objconv.to_bool(util.get('debug', cfg))
+    trace = True if args.trace else objconv.to_bool(util.get('trace', cfg))
+    secret = util.get('secret', cfg, idutil.generate_token(10, True))
+    return contextsvc.Context(dict(
+        home=home, logfile=logfile, tempdir=tempdir, host=host, port=port, showtoken=showtoken,
+        noupnp=noupnp, dbfile=dbfile, debug=debug, trace=trace, secret=secret, python=sys.executable,
+        stime=_stime(home), scheme=httpssl.sync_get_scheme(home), env=os.environ.copy()))
 
 
 def _setup_logging(context: contextsvc.Context):
@@ -131,10 +144,10 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
             print('TOKEN : ' + self._context.config('secret'), flush=True)
 
 
-def main(args: typing.Optional[typing.Collection] = None) -> int:
+def main() -> int:
     if sys.version[:5] not in ('3.10.', '3.11.', '3.12.'):
         raise Exception('Unsupported python3 version, 3.10 or 3.11 or 3.12 required.')
-    context = _create_context(args if args else sys.argv)
+    context = _create_context()
     if not context:
         return 0
     _setup_logging(context)
