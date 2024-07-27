@@ -84,22 +84,18 @@ $SERVERJOCKEY_DIR/client/web/build.sh ci || exit 1
 echo "Building extension client"
 $SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
 
-echo "Download and merge ServerJockey dependencies"
+echo "Download ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
 python3 -m pipenv sync || exit 1
-[ -d ".venv" ] || exit 1
-LIB32_DIR="$SERVERJOCKEY_DIR/.venv/lib/$PYTHON_LIBDIR/site-packages"
-if [ -d "$LIB32_DIR" ]; then
-  rm -rf $LIB32_DIR/pip* $LIB32_DIR/test* $LIB32_DIR/wheel* $LIB32_DIR/greenlet* > /dev/null 2>&1
-  rm -rf $LIB32_DIR/setuptools* $LIB32_DIR/pkg_resources* $LIB32_DIR/_distutils_hack > /dev/null 2>&1
-  cp -r $LIB32_DIR/* "$SERVERJOCKEY_DIR" || exit 1
-fi
-LIB64_DIR="$SERVERJOCKEY_DIR/.venv/lib64/$PYTHON_LIBDIR/site-packages"
-if [ -d "$LIB64_DIR" ]; then
-  rm -rf $LIB64_DIR/pip* $LIB64_DIR/test* $LIB64_DIR/wheel* $LIB64_DIR/greenlet* > /dev/null 2>&1
-  rm -rf $LIB64_DIR/setuptools* $LIB64_DIR/pkg_resources* $LIB64_DIR/_distutils_hack > /dev/null 2>&1
-  cp -r $LIB64_DIR/* "$SERVERJOCKEY_DIR" || exit 1
-fi
+for VENV_LIBDIR in lib lib64; do
+  LIBDIR="$SERVERJOCKEY_DIR/.venv/$VENV_LIBDIR/$PYTHON_LIBDIR/site-packages"
+  if [ -d "$LIBDIR" ]; then
+    rm -rf $LIBDIR/pip* $LIBDIR/test* $LIBDIR/wheel* $LIBDIR/greenlet* > /dev/null 2>&1
+    rm -rf $LIBDIR/setuptools* $LIBDIR/pkg_resources* $LIBDIR/_distutils_hack > /dev/null 2>&1
+    echo "Merging $LIBDIR"
+    cp -r $LIBDIR/* "$SERVERJOCKEY_DIR" || exit 1
+  fi
+done
 
 echo "Running tests"
 python3 -m unittest discover -t . -s test -p "*.py" || exit 1

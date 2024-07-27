@@ -47,7 +47,10 @@
   }
 
   function kpSend(event) {
-    if (event.key === 'Enter') { send(); }
+    if (event.key === 'Enter') {
+      send();
+      this.select();
+    }
   }
 
   function send() {

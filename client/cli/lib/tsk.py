@@ -5,6 +5,7 @@ import subprocess
 # ALLOW lib.util, lib.ddns
 from . import util, ddns
 
+_DEFAULT_SERVICE = 'serverjockey'
 _DEFAULT_USER = 'sjgms'
 _DEFAULT_PORT = 6164
 
@@ -68,13 +69,12 @@ class TaskProcessor:
         if result.returncode != 0:
             raise Exception('Task not run')
 
-    def _sysdsvc(self, argument: str):
-        user, port = _extract_user_and_port(argument)
-        args = ' --port ' + str(port) if port != _DEFAULT_PORT else ''
-        result = util.get_resource('serverjockey.service').format(user=user, args=args)
-        self._dump_to_log(result)
+    def _sysdsvc(self, argument: str) -> bool:
+        resource = util.get_resource('serverjockey.service')
+        self._dump_to_log(resource.format(user=argument))
+        return True
 
-    def _upgrade(self):
+    def _upgrade(self) -> bool:
         _checkpyz()
         self._checkroot('upgrade')
         script = util.get_resource('upgrade.sh')
@@ -82,8 +82,9 @@ class TaskProcessor:
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('Upgrade task failed')
+        return True
 
-    def _uninstall(self):
+    def _uninstall(self) -> bool:
         _checkpyz()
         self._checkroot('uninstall')
         script = util.get_resource('uninstall.sh').replace('{userdef}', _DEFAULT_USER)
@@ -91,45 +92,50 @@ class TaskProcessor:
         if result.returncode != 0:
             self._dump_to_log(result.stdout, result.stderr)
             raise Exception('Uninstall task failed')
+        return False
 
-    def _adduser(self, argument: str):
+    def _adduser(self, argument: str) -> bool:
         _checkpyz()
         self._checkroot('adduser:<name>,<port>')
         user, port = _extract_user_and_port(argument)
-        if user == 'serverjockey':
+        if user == _DEFAULT_SERVICE:
             raise Exception('User name not allowed')
         script = util.get_resource('adduser.sh')
-        script = script.replace('{userdef}', _DEFAULT_USER).replace('{user}', user).replace('{port}', str(port))
+        script = script.replace('{userdef}', _DEFAULT_USER).replace('{user}', user)
+        script = script.replace('{portdef}', str(_DEFAULT_PORT)).replace('{port}', str(port))
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('New user task failed')
+        return True
 
-    def _userdel(self, argument: str):
+    def _userdel(self, argument: str) -> bool:
         _checkpyz()
         self._checkroot('userdel:<name>')
         user = _extract_user_and_port(argument)[0]
         if user == _DEFAULT_USER:
-            raise Exception('Unable to delete default user.')
+            raise Exception('Cannot delete default user. Use uninstall task instead.')
         script = util.get_resource('userdel.sh').replace('{user}', user)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('Delete user task failed')
+        return True
 
-    def _service(self, argument: str):
+    def _service(self, argument: str) -> bool:
         _checkpyz()
         self._checkroot('service:<command>')
         args = argument if argument else 'status'
         args += ' '
-        args += 'serverjockey' if self._user == _DEFAULT_USER else self._user
+        args += _DEFAULT_SERVICE if self._user == _DEFAULT_USER else self._user
         script = util.get_resource('systemctl.sh').format(args=args)
         result = subprocess.run(script, shell=True, capture_output=True)
         self._dump_to_log(result.stdout, result.stderr)
         if result.returncode != 0:
             raise Exception('Service ' + argument + ' task failed')
+        return True
 
-    def _ddns(self, argument: str):
+    def _ddns(self, argument: str) -> bool:
         provider, = util.split_argument(argument, 1)
         if provider == 'help':
             for line in util.get_resource('ddnshelp.text').strip().split('\n'):
@@ -140,3 +146,4 @@ class TaskProcessor:
             ddns.update_pork(*util.split_argument(argument, 4))
         else:
             raise Exception('Unknown DDNS Service Provider')
+        return True

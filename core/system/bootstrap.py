@@ -25,15 +25,17 @@ def _stime(home: str) -> float | None:
     return os.stat(file).st_atime if os.path.isfile(file) else None
 
 
-def _load_config(home: str) -> dict:
+def _load_cmdargs(home: str) -> dict:
     file = home + '/serverjockey.json'
     if not os.path.isfile(file):
         return {}
     with open(file) as fd:
         result = objconv.json_to_dict(fd.read())
-        if not result:
-            raise Exception('Invalid JSON file: ' + file)
-        return result
+    if not result:
+        raise Exception('Invalid JSON file: ' + file)
+    result = util.get('cmdargs', result, {})
+    assert isinstance(result, dict)
+    return result
 
 
 def _argument_parser() -> argparse.ArgumentParser:
@@ -60,8 +62,7 @@ def _create_context() -> contextsvc.Context | None:
         print(sysutil.system_version())
         return None
     home = util.full_path(os.getcwd(), args.home if args.home else '.')
-    cfg = util.get('cmdargs', _load_config(home), {})
-    assert isinstance(cfg, dict)
+    cfg = _load_cmdargs(home)
     logfile = args.logfile if args.logfile else util.get('logfile', cfg)
     logfile = 'serverjockey.log' if objconv.to_bool(logfile) and not isinstance(logfile, str) else logfile
     logfile = util.full_path(home, logfile)

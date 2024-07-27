@@ -10,7 +10,8 @@ fi
 
 if id -u $SJGMS_USER > /dev/null 2>&1; then
   echo "removing user"
-  userdel $SJGMS_USER
+  which apt > /dev/null && deluser --remove-home $SJGMS_USER
+  which yum > /dev/null && userdel --remove $SJGMS_USER
   rm -rf /home/$SJGMS_USER > /dev/null 2>&1
 fi
 
