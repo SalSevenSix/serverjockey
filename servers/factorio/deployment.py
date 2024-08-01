@@ -46,14 +46,8 @@ class Deployment:
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
-        self._runtime_metafile = self._runtime_dir + '/data/changelog.txt'
         self._executable = self._runtime_dir + '/bin/x64/factorio'
-        self._current_log = self._runtime_dir + '/factorio-current.log'
-        self._autosave_dir = self._runtime_dir + '/saves'
         self._mods_dir = self._runtime_dir + '/mods'
-        self._server_settings_def = self._runtime_dir + '/data/server-settings.example.json'
-        self._map_settings_def = self._runtime_dir + '/data/map-settings.example.json'
-        self._map_gen_settings_def = self._runtime_dir + '/data/map-gen-settings.example.json'
         self._world_dir = self._home_dir + '/world'
         self._save_dir = self._world_dir + '/saves'
         self._map_file = self._save_dir + '/' + _MAP + _ZIP
@@ -82,7 +76,7 @@ class Deployment:
         r = httprsc.ResourceBuilder(resource)
         r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.put('log', httpext.FileSystemHandler(self._current_log))
+        r.put('log', httpext.FileSystemHandler(self._runtime_dir + '/factorio-current.log'))
         r.psh('logs', httpext.FileSystemHandler(self._runtime_dir, ls_filter=_logfiles))
         r.put('*{path}', httpext.FileSystemHandler(self._runtime_dir, 'path'), 'r')
         r.pop()
@@ -97,7 +91,7 @@ class Deployment:
         r.put('banlist', httpext.FileSystemHandler(self._server_banlist), 'm')
         r.pop()
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/data/changelog.txt'))
         r.put('install-runtime', _InstallRuntimeHandler(self, self._mailer), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().check(self._map_file).dir(self._save_dir))
@@ -158,11 +152,11 @@ class Deployment:
             return
         await io.create_directory(self._mods_dir)
         if not await io.file_exists(self._server_settings):
-            await io.copy_text_file(self._server_settings_def, self._server_settings)
+            await io.copy_text_file(self._runtime_dir + '/data/server-settings.example.json', self._server_settings)
         if not await io.file_exists(self._map_settings):
-            await io.copy_text_file(self._map_settings_def, self._map_settings)
+            await io.copy_text_file(self._runtime_dir + '/data/map-settings.example.json', self._map_settings)
         if not await io.file_exists(self._map_gen_settings):
-            await io.copy_text_file(self._map_gen_settings_def, self._map_gen_settings)
+            await io.copy_text_file(self._runtime_dir + '/data/map-gen-settings.example.json', self._map_gen_settings)
         if not await io.file_exists(self._server_whitelist):
             await io.write_file(self._server_whitelist, '[]')
         if not await io.file_exists(self._server_banlist):
@@ -214,8 +208,9 @@ class Deployment:
                 '--create', self._map_file,
                 '--map-gen-settings', self._map_gen_settings,
                 '--map-settings', self._map_settings))
-        if not await io.symlink_exists(self._autosave_dir):
-            await io.create_symlink(self._autosave_dir, self._save_dir)
+        autosave_dir = self._runtime_dir + '/saves'
+        if not await io.symlink_exists(autosave_dir):
+            await io.create_symlink(autosave_dir, self._save_dir)
 
     async def _sync_mods(self):
         mods = objconv.json_to_dict(await io.read_file(self._mods_list))

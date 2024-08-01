@@ -77,6 +77,7 @@
 <style>
   .background-frame {
     background-color: white;
+    border: 1px solid #DBDBDB;
     border-radius: 1em;
   }
 </style>

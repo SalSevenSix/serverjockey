@@ -21,7 +21,7 @@ if [ $? -ne 0 ]; then
   chgrp -R $(ls -ld $HOME_DIR | awk '{print $4}') $HOME_DIR
 fi
 
-/usr/local/bin/serverjockey_cmd.pyz -nt sysdsvc:$SJGMS_USER > /etc/systemd/system/$SERVICE_NAME.service
+/usr/local/bin/serverjockey_cmd.pyz -nt sysdsvc:$SJGMS_USER > /etc/systemd/system/${SERVICE_NAME}.service
 systemctl daemon-reload
 systemctl enable $SERVICE_NAME
 systemctl start $SERVICE_NAME

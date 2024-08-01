@@ -164,10 +164,10 @@ class _SteamConfig:
         self._home_dir = home_dir
 
     async def _config_path(self) -> str:
-        for path in ('/.local/share/Steam/config/config.vdf', '/Steam/config/config.vdf'):
-            result = self._home_dir + path
-            if await io.file_exists(result):
-                return result
+        for path in (self._home_dir + '/.local/share/Steam/config/config.vdf',
+                     self._home_dir + '/Steam/config/config.vdf'):
+            if await io.file_exists(path):
+                return path
         raise Exception('Steam config file not found.')
 
     async def _load(self) -> tuple:

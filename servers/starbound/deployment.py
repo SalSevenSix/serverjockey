@@ -125,7 +125,7 @@ class Deployment:
         workshop_files, workshop_dir = [], self._runtime_dir + '/steamapps/workshop/content/211820'
         if await io.directory_exists(workshop_dir):
             workshop_files = await io.directory_list(workshop_dir)
-        workshop_items, mods_dir = [], self._runtime_dir + '/mods'
+        workshop_items, mods_dir = ['mods_go_here'], self._runtime_dir + '/mods'
         for workshop_item in [str(o['name']) for o in workshop_files if o['type'] == 'directory']:
             pack_file = workshop_dir + '/' + workshop_item + '/contents.pak'
             if await io.file_exists(pack_file):
@@ -137,11 +137,9 @@ class Deployment:
             else:
                 self._mailer.post(self, msg.DEPLOYMENT_MSG,
                                   'ERROR Adding   ' + workshop_item + ' because contents.pak not found')
-        mod_files = await io.directory_list(mods_dir)
-        for mod_file in [o['name'] for o in mod_files if o['type'] == 'link']:
-            if mod_file not in workshop_items:
-                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Removing ' + mod_file[:-4])
-                await io.delete_file(mods_dir + '/' + mod_file)
+        for mod_file in [o['name'] for o in await io.directory_list(mods_dir) if o['name'] not in workshop_items]:
+            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Removing ' + mod_file[:-4])
+            await io.delete_file(mods_dir + '/' + mod_file)
 
 
 def _logfiles(entry) -> bool:

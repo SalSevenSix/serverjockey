@@ -33,7 +33,7 @@
   <CodeBlock>sudo adduser --system --home /home/prometheus --disabled-login --disabled-password prometheus</CodeBlock>
 
   <p><span class="step-title"></span>
-    Download and upack Prometheus into its home directory. Note that these commands install version
+    Download and unpack Prometheus into its home directory. Note that these commands install version
     <span class="is-family-monospace notranslate">2.52.0</span>
     of Prometheus. Please check the
     <ExtLink href="https://prometheus.io/download/#prometheus">downloads</ExtLink>

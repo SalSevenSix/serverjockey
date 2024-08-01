@@ -22,7 +22,7 @@
   <table class="table is-thinner">
     <tbody>
       <tr><td class="has-text-weight-bold">Off</td>
-          <td>No automaic actions</td></tr>
+          <td>No automatic actions</td></tr>
       <tr><td class="has-text-weight-bold">Start</td>
           <td>Automatically start the game server when ServerJockey starts</td></tr>
       <tr><td class="has-text-weight-bold">Restart</td>
