@@ -34,6 +34,7 @@ chown $BUILD_USER $COMMIT_FILE || exit 1
 chgrp $BUILD_USER $COMMIT_FILE || exit 1
 
 echo "CI Preparing"
+systemctl stop serverjockey > /dev/null 2>&1
 rm build.sh > /dev/null 2>&1
 wget -O build.sh $REPO_URL/build/build.sh || exit 1
 chmod 755 build.sh || exit 1
@@ -41,8 +42,8 @@ chown $BUILD_USER build.sh || exit 1
 chgrp $BUILD_USER build.sh || exit 1
 
 echo "CI Building"
-BUILD_OK_FILE="$DIST_DIR/sjgms/build.ok"
 su - $BUILD_USER -c "$BUILD_DIR/build.sh $BRANCH"
+BUILD_OK_FILE="$DIST_DIR/sjgms/build.ok"
 [ -f "$BUILD_OK_FILE" ] || exit 1
 TIMESTAMP="$(head -1 $BUILD_OK_FILE)"
 

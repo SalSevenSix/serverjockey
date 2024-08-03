@@ -34,7 +34,7 @@ async def ensure_steamcmd(home_dir: str):
     if not await io.file_exists(steamcmd_exe):
         logging.warning(steamcmd_exe + ' not found, unable to install SteamCMD for user')
         return
-    logging.info('Installing SteamCMD in ' + home_dir)
+    logging.info('Installing SteamCMD into ' + home_dir)
     try:
         await shellutil.run_script(steamcmd_exe + ' +quit >/dev/null 2>&1')
         logging.info('SteamCMD install completed')

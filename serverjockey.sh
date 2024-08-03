@@ -33,9 +33,9 @@ check_jockey() {
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt install software-properties-common"
     echo "  $ sudo add-apt-repository ppa:deadsnakes/ppa"
-    echo "  $ sudo apt install python3.10"
+    echo "  $ sudo apt install python3.12"
     echo "For RedHat/CentOS;"
-    echo "  $ sudo yum install python3.10"
+    echo "  $ sudo yum install python3.12"
     exit 1
   fi
 
@@ -67,12 +67,12 @@ check_jockey() {
   echo "  checking for pipenv."
   python3 -m pipenv --version
   if [ $? -ne 0 ]; then
-    echo "  pipenv not found, installing now."
-    python3 -m pip install --user pipenv
-    if [ $? -ne 0 ]; then
-      echo "ERROR Failed installing pipenv. Sorry."
-      exit 1
-    fi
+    echo "ERROR Pip not found."
+    echo "For Ubuntu/Debian;"
+    echo "  $ sudo apt install pipenv"
+    echo "For RedHat/CentOS;"
+    echo "  $ sudo yum install pipenv"
+    exit 1
   fi
 
   echo

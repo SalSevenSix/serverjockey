@@ -1,8 +1,9 @@
 #!/bin/bash
 
 echo "Initialising build process"
+PYTHON_LIBDIR="python3.12"
 [ $(python3 --version | grep "Python 3\.12\." | wc -l) -eq 0 ] && exit 1
-PYTHON_LIBDIR="python3.10"
+python3 -m pipenv --version > /dev/null || exit 1
 which wget > /dev/null || exit 1
 which unzip > /dev/null || exit 1
 cd "$(dirname $0)" || exit 1
@@ -60,8 +61,6 @@ if [ ! -d "../../.git" ]; then
     chmod 755 $BUILD_DIR/rpm.sh || exit 1
   fi
 fi
-
-echo "Delete source zip"
 rm "$BRANCH.zip" > /dev/null 2>&1
 
 echo "Applying build timestamp"
