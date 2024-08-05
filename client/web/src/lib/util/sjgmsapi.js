@@ -18,7 +18,7 @@ export function newGetRequest() {
 }
 
 export function newPostRequest(ct='application/json') {
-  const headers = ct ? { 'Content-Type': ct, 'X-Secret': get(securityToken) } : { 'X-Secret': get(securityToken) }
+  const headers = ct ? { 'Content-Type': ct, 'X-Secret': get(securityToken) } : { 'X-Secret': get(securityToken) };
   return { method: 'post', headers: headers };
 }
 

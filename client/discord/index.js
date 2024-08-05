@@ -19,7 +19,7 @@ function initialise() {
   logger.info('Version: 0.12.0 ({timestamp})');
   logger.info('Executable: ' + process.argv[0]);
   logger.info('JS Runtime: ' + process.version);
-  logger.info('discord.js: ' + require('discord.js/package.json').version);
+  logger.info('discord.js: ' + require('./node_modules/discord.js/package.json').version);
   logger.info(tls_key + ': ' + process.env[tls_key]);
   logger.info('Initialised with config...');
   logger.dump(config);

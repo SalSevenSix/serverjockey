@@ -232,7 +232,7 @@ class _Status:
         if state is None or state == self._state:
             return False
         self._state = state
-        if state == sc.READY:
+        if state == sc.MAINTENANCE:
             self._details = {}
         return True
 

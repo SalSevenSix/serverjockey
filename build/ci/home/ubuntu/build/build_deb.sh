@@ -36,7 +36,7 @@ chgrp $BUILD_USER $COMMIT_FILE || exit 1
 echo "CI Preparing"
 systemctl stop serverjockey > /dev/null 2>&1
 rm build.sh > /dev/null 2>&1
-wget -O build.sh $REPO_URL/build/build.sh || exit 1
+wget -4 -O build.sh $REPO_URL/build/build.sh || exit 1
 chmod 755 build.sh || exit 1
 chown $BUILD_USER build.sh || exit 1
 chgrp $BUILD_USER build.sh || exit 1
@@ -74,9 +74,9 @@ rm -rf docker > /dev/null 2>&1
 mkdir docker || exit 1
 cd docker || exit 1
 cp $WEB_DIR/$TARGET_FILE sjgms.deb || exit 1
-wget -O Dockerfile $REPO_URL/build/docker/Dockerfile || exit 1
-wget -O entrypoint.sh $REPO_URL/build/docker/entrypoint.sh || exit 1
-wget -O build.sh $REPO_URL/build/docker/build.sh || exit 1
+wget -4 -O Dockerfile $REPO_URL/build/docker/Dockerfile || exit 1
+wget -4 -O entrypoint.sh $REPO_URL/build/docker/entrypoint.sh || exit 1
+wget -4 -O build.sh $REPO_URL/build/docker/build.sh || exit 1
 chmod 755 build.sh || exit 1
 ./build.sh $BRANCH || exit 1
 
