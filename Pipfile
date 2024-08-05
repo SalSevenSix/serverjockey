@@ -12,7 +12,6 @@ sqlalchemy = "*"
 vdf = "*"
 rcon = "*"
 upnpy = "*"
-pympler = "*"
 prometheus-client = "*"
 
 [requires]

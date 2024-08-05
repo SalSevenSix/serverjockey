@@ -1,11 +1,12 @@
 import collections
-from pympler import muppy
+import gc
 # ALLOW util.* http.*
 from core.http import httpabc, httpsec
 from core.metrics import mtxutil
 
 # https://github.com/pympler/pympler
 # https://pympler.readthedocs.io/en/latest/
+# TODO switched from using pympler to bad custom solution because issues on python3.12
 
 _TOTAL = 'TOTAL'
 _BASIC_TYPES = ('int', 'float', 'str', 'dict', 'list', 'bytes')
@@ -35,9 +36,9 @@ class MemoryProfilingHandler(httpabc.GetHandler):
 
 
 def _generate_capture() -> dict:
-    all_objects = muppy.get_objects()
+    all_objects = _get_all_objects()
     capture = {_TOTAL: len(all_objects)}
-    for obj in filter(_filter_objects, all_objects):
+    for obj in all_objects:
         classname = obj.__class__.__name__
         if classname in capture:
             capture[classname] += 1
@@ -87,13 +88,6 @@ def _sort_entries(entry) -> int:
     return entry['count']
 
 
-def _filter_objects(obj) -> bool:
-    if obj.__class__.__name__ in _BASIC_TYPES:
-        return True
-    modulename = obj.__class__.__module__
-    return modulename.startswith('core.') or modulename.startswith('servers.')
-
-
 def _filter_entries(entry) -> bool:
     classname, deltas = entry['classname'], entry['deltas']
     if classname == _TOTAL or len(deltas) == 0:
@@ -102,3 +96,28 @@ def _filter_entries(entry) -> bool:
         if delta != 0:
             return True
     return False
+
+
+def _filter_objects(obj) -> bool:
+    if obj.__class__.__name__ in _BASIC_TYPES:
+        return True
+    modulename = obj.__class__.__module__
+    return modulename.startswith('core.') or modulename.startswith('servers.')
+
+
+def _getr(slist, olist, seen):
+    for o in slist:
+        oid = id(o)
+        if oid not in seen and _filter_objects(o):
+            seen[oid] = None
+            olist.append(o)
+            tl = gc.get_referents(o)
+            if tl:
+                _getr(tl, olist, seen)
+
+
+def _get_all_objects():
+    gcl, seen, olist = gc.get_objects(), {}, []
+    seen[id(gcl)], seen[id(seen)], seen[id(olist)] = None, None, None
+    _getr(gcl, olist, seen)
+    return olist
