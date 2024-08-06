@@ -4,18 +4,27 @@ import asyncio
 import upnpy
 # ALLOW util.* msg*.* context.* http.*
 from core.util import gc, util, funcutil, sysutil
-from core.msg import msgabc, msgftr
+from core.msg import msgabc, msgftr, msgext
 from core.context import contextsvc
 
 
 _VALID_PROTOCALS = (gc.TCP, gc.UDP)
+_GET_STATUS, _SET_STATUS, _STATUS = 'IgdStatus.Get', 'IgdStatus.Set', 'IgdStatus.Status'
 
 
 def initialise(context: contextsvc.Context, source: typing.Any):
     if context.config('noupnp'):
         return
-    context.register(IgdService())
+    context.register(msgext.SetGetSubscriber(context, _GET_STATUS, _SET_STATUS, _STATUS, '...'))
+    context.register(IgdService(context))
     context.post(source, IgdService.DISCOVER)
+
+
+async def status(context: contextsvc.Context, source: typing.Any) -> str:
+    if context.config('noupnp'):
+        return 'Disabled'
+    response = await msgext.SynchronousMessenger(context).request(source, _GET_STATUS)
+    return response.data()
 
 
 def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
@@ -33,13 +42,12 @@ class IgdService(msgabc.AbcSubscriber):
     ADD_PORT_MAPPING = 'IgdService.AddPortMapping'
     DELETE_PORT_MAPPING = 'IgdService.DeletePortMapping'
 
-    def __init__(self):
+    def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.NameIn((
             IgdService.DISCOVER,
             IgdService.ADD_PORT_MAPPING,
             IgdService.DELETE_PORT_MAPPING)))
-        self._upnp = upnpy.UPnP()
-        self._service = None
+        self._mailer, self._service = mailer, None
 
     async def handle(self, message):
         action, data = message.name(), message.data()
@@ -51,8 +59,12 @@ class IgdService(msgabc.AbcSubscriber):
 
     async def _handle(self, action, data):
         if action is IgdService.DISCOVER:
-            self._service = await _get_mapping_service(self._upnp)
-            return None if self._service else False
+            self._mailer.post(self, _SET_STATUS, 'discovery...')
+            self._service = await _get_mapping_service()
+            if self._service:
+                self._mailer.post(self, _SET_STATUS, 'Active')
+                return None
+            self._mailer.post(self, _SET_STATUS, 'Unavailable')
         if not self._service:
             return False
         port, protocal = util.get('port', data), util.get('protocal', data)
@@ -67,10 +79,22 @@ class IgdService(msgabc.AbcSubscriber):
         return None
 
 
-def _sync_get_mapping_service(upnp):
+def _sort_device(device):
+    value = repr(device)
+    if value.find('IGD') > -1:
+        return 0
+    value = value.lower()
+    if value.find('gateway') > -1 or value.find('router') > -1:
+        return 0
+    return 1
+
+
+def _sync_get_mapping_service():
     try:
         logging.debug('Discovering UPnP devices')
-        for device in upnp.discover(delay=3):
+        devices = list(upnpy.UPnP().discover(delay=3))
+        devices.sort(key=_sort_device)
+        for device in devices:
             device_repr = repr(device)
             logging.debug('net> discovered device: ' + device_repr)
             for service in device.get_services():

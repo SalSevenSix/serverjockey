@@ -40,7 +40,7 @@ class SystemService:
         r.put('metrics', mtxhandler.MetricsHandler())
         r.put('mprof', mprof.MemoryProfilingHandler())
         r.psh('system')
-        r.put('info', _SystemInfoHandler())
+        r.put('info', _SystemInfoHandler(self._context))
         r.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
         r.put('shutdown', _ShutdownHandler())
         r.pop()
@@ -244,13 +244,15 @@ class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
 
 class _SystemInfoHandler(httpabc.GetHandler):
 
-    def __init__(self):
+    def __init__(self, context: contextsvc.Context):
+        self._context = context
         self._startmillis = dtutil.now_millis()
 
     async def handle_get(self, resource, data):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         info = await sysutil.system_info()
+        info['upnp'] = await igd.status(self._context, self)
         info['startmillis'] = self._startmillis
         info['uptime'] = dtutil.now_millis() - self._startmillis
         return info

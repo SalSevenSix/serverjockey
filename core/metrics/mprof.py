@@ -9,7 +9,7 @@ from core.metrics import mtxutil
 # TODO switched from using pympler to bad custom solution because issues on python3.12
 
 _TOTAL = 'TOTAL'
-_BASIC_TYPES = ('int', 'float', 'str', 'dict', 'list', 'bytes')
+_BASIC_TYPES = (int, float, str, dict, set, tuple, list, bytes)
 
 
 class MemoryProfilingHandler(httpabc.GetHandler):
@@ -99,7 +99,7 @@ def _filter_entries(entry) -> bool:
 
 
 def _filter_objects(obj) -> bool:
-    if obj.__class__.__name__ in _BASIC_TYPES:
+    if obj.__class__ in _BASIC_TYPES:
         return True
     modulename = obj.__class__.__module__
     return modulename.startswith('core.') or modulename.startswith('servers.')

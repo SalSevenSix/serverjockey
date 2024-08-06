@@ -47,8 +47,6 @@
         <tbody>
           <tr><td class="field-column has-text-weight-bold" title="ServerJockey version">
             Version</td><td class="notranslate">{info.version}</td></tr>
-          <tr><td class="field-column has-text-weight-bold" title="ServerJockey uptime">
-            Uptime</td><td class="notranslate">{humanDuration(info.uptime)}</td></tr>
           <tr><td class="field-column has-text-weight-bold" title="Operating system name">
             OS</td><td class="notranslate"><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
           <tr><td class="field-column has-text-weight-bold" title="Disk usage">
@@ -64,11 +62,12 @@
             IPv4</td><td class="notranslate">{info.net.public}</td></tr>
           <tr><td class="field-column" title="Local (LAN) IPv4 address">
             Local</td><td class="notranslate">{info.net.local}</td></tr>
+          <tr><td class="field-column" title="UPnP Service Status">
+            UPnP</td><td>{info.upnp}</td></tr>
         </tbody>
       {:else}
         <tbody>
           <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
-          <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">OS</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">Disk</td><td>...</td></tr>
           <tr><td>Total</td><td>...</td></tr>
@@ -76,6 +75,7 @@
           <tr><td>Available</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">IPv4</td><td>...</td></tr>
           <tr><td>Local</td><td>...</td></tr>
+          <tr><td>UPnP</td><td>...</td></tr>
         </tbody>
       {/if}
     </table>
@@ -85,6 +85,8 @@
     <table class="table is-thinner">
       {#if info}
         <tbody>
+          <tr><td class="field-column has-text-weight-bold" title="ServerJockey uptime">
+            Uptime</td><td class="notranslate">{humanDuration(info.uptime)}</td></tr>
           <tr><td class="field-column has-text-weight-bold" title="CPU usage">
             CPU</td><td class="notranslate"><HealthSymbol red={80.0} amber={50.0} value={info.cpu.percent} />
             {info.cpu.percent}%</td></tr>
@@ -108,6 +110,7 @@
         </tbody>
       {:else}
         <tbody>
+          <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
           <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
           <tr><td>Model</td><td>...</td></tr>
           <tr><td class="notranslate">A | C | T</td><td>...</td></tr>

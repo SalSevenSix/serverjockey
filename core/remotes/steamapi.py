@@ -27,7 +27,7 @@ class _GetPublishedFileDetailsHandler(httpabc.GetHandler):
         return await _fetch_json(url, data, headers)
 
 
-async def _fetch_json(url: str, data: str, headers: dict) -> str:
+async def _fetch_json(url: str, data: str, headers: dict):
     connector, timeout = aiohttp.TCPConnector(force_close=True), aiohttp.ClientTimeout(total=12.0)
     async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
         async with session.post(url, data=data, headers=headers) as response:

@@ -287,3 +287,21 @@ class CallableSubscriber(msgabc.AbcSubscriber):
     async def handle(self, message):
         await funcutil.silently_call(self._callback)
         return None
+
+
+class SetGetSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, mailer: msgabc.Mailer, name_get: str, name_set: str, name_response: str, value: any = None):
+        super().__init__(msgftr.NameIn((name_get, name_set)))
+        self._mailer, self._value = mailer, value
+        self._name_get, self._name_set, self._name_response = name_get, name_set, name_response
+
+    async def handle(self, message):
+        action = message.name()
+        if action is self._name_get:
+            self._mailer.post(message.source(), self._name_response, self._value, message)
+            return None
+        if action is self._name_set:
+            self._value = message.data()
+            return None
+        return None

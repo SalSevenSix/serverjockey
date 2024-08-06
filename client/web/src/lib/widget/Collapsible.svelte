@@ -32,7 +32,7 @@
 </div>
 
 {#if visible}
-  <div transition:slide={{ duration: 100, easing: quadInOut }}>
+  <div transition:slide={{ duration: 150, easing: quadInOut }}>
     <slot />
   </div>
 {/if}
