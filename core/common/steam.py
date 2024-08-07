@@ -4,7 +4,7 @@ import re
 import asyncio
 from asyncio import subprocess
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
-from core.util import aggtrf, util, io, tasks
+from core.util import steamutil, aggtrf, util, io, tasks
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
 from core.http import httpabc, httpext, httpsubs
@@ -163,16 +163,9 @@ class _SteamConfig:
     def __init__(self, home_dir: str):
         self._home_dir = home_dir
 
-    async def _config_path(self) -> str:
-        for path in (self._home_dir + '/.local/share/Steam/config/config.vdf',
-                     self._home_dir + '/Steam/config/config.vdf'):
-            if await io.file_exists(path):
-                return path
-        raise Exception('Steam config file not found.')
-
     async def _load(self) -> tuple:
         try:
-            config_path = await self._config_path()
+            config_path = await steamutil.get_config_path(self._home_dir)
             root = vdf.loads(await io.read_file(config_path))
             valve = root['InstallConfigStore']['Software']['Valve']
             steamer = util.get('Steam', valve, util.get('steam', valve))

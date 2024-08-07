@@ -8,17 +8,20 @@
 * `sudo apt upgrade`
 * `sudo reboot`
 * `sudo systemctl start ssh`
+
 ### Install ServerJockey
 * Build DEB file
 * scp DEB file to zombox
 * `sudo apt install ./<deb>`
 * Delete DEB file
+
 ### Cleanup
 * `sudo serverjockey_cmd.pyz -t service:stop`
 * Delete ServerJockey logs, database, .pid, .tmp
 * Delete ServerLink logs and config
 * `apt clean && apt autoclean && apt autoremove --purge`
 * `journalctl --rotate && journalctl --vacuum-time=1s`
+
 ### Compact
 * `sudo reboot`
 * esc esc esc
@@ -28,6 +31,7 @@
 * `zerofree -v /dev/sda2`
 * `shutdown 0`
 * On windows: `~Tools\bin\compact_zombox.bat`
+
 ### Export
 * Export appliance using format 2.0
 * Name: ZomBox-yyyymmdd.ova
@@ -35,22 +39,53 @@
 
 ## Building Fresh Appliance
 
-1. Shape: 80Gb disc / 10Gb mem / 2 cpu
-2. Boot order optical then hdd only
-3. ... usb? no clipboard?
-4. Install Ubuntu OS, with SSH
-5. Check swap exists
-6. Check zerofree installed
-7. Disable SSH service
-8. Install welcome.sh & add to cron
-9. Install vmtouch
-10. Install steamcmd
-11. Install Samba & configure (see below)
+### VM Settings
+1. Name: ZomBox
+2. Shape: 80Gb disc / 10240Mb mem / 2 cpu
+3. Clipboard OFF
+4. Paste in Description
+5. Boot order optical then hdd only
+6. No Audio
+7. Bridged Network
+8. USB 1.1
+9. User Menu at Top
 
+### Description...
+```
+ZomBox is the VirtualBox distribution of the ServerJockey. A game server management system for Project Zomboid
+and other supported games. It is designed to be an easy to use self-hosting option for multiplayer servers,
+allowing you to create and remotely manage your servers using a browser or discord bot.
 
-## Samba Setup
+Join the ServerJockey Discord
+https://discord.gg/TEuurWAhHn
 
-### Commands
+If you like using this system, please consider supporting it on Ko-fi
+https://ko-fi.com/D1D4E4ZYZ
+
+For instructional guides and dev updates, visit the YouTube channel
+https://www.youtube.com/@BSALIS76
+
+ServerJockey on GitHub
+https://github.com/SalSevenSix/serverjockey
+```
+
+### Install Ubuntu OS
+1. Confim USA repo
+2. No LVM group
+3. Name everything zombox
+4. Install OpenSSH server
+
+### After Install
+1. Check swap exists 4Gb
+2. apt update && apt upgrade
+3. Check zerofree installed
+4. Install vmtouch
+5. Install steamcmd
+6. Install Samba & configure (see below)
+7. Install welcome.sh & add to cron
+8. Disable SSH service
+
+### Samba Setup Commands
 ```
 sudo apt install samba
 sudo smbpasswd -a zombox
@@ -58,9 +93,9 @@ sudo nano /etc/samba/smb.conf
 sudo systemctl disable smbd
 ```
 
-### Configuration
-* Uncomment to enable these, also change eth0 to enp0s3 
-  * interfaces = 127.0.0.0/8 enp0s3
+### Samba Configuration
+* Uncomment and use these settings...
+  * interfaces = 127.0.0.0/8 192.168.1.0/24
   * bind interfaces only = yes
 * Turn these off...
   * unix password sync = no
