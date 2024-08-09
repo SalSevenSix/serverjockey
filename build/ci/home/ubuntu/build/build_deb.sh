@@ -7,8 +7,9 @@ which jq > /dev/null || exit 1
 which gh > /dev/null || exit 1
 cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
-DIST_DIR="$BUILD_DIR/dist"
 BUILD_USER="$(pwd | tr '/' ' ' | awk '{print $2}')"
+DIST_DIR="$BUILD_DIR/dist"
+CI_OK_FILE="$BUILD_DIR/build_deb.ok"
 WEB_DIR="/var/www/downloads"
 [ -d "$WEB_DIR" ] || exit 1
 BRANCH="develop"
@@ -29,11 +30,14 @@ if [ "$LAST_URL" = "$CURRENT_URL" ]; then
   echo "No new commit found NOT building"
   exit 0
 fi
+
+echo "CI Preparing"
+rm $CI_OK_FILE > /dev/null 2>&1
 echo $CURRENT_URL > $COMMIT_FILE
 chown $BUILD_USER $COMMIT_FILE || exit 1
 chgrp $BUILD_USER $COMMIT_FILE || exit 1
 
-echo "CI Preparing"
+echo "CI Starting"
 systemctl stop serverjockey > /dev/null 2>&1
 rm build.sh > /dev/null 2>&1
 wget -4 -O build.sh $REPO_URL/build/build.sh || exit 1
@@ -64,10 +68,6 @@ echo "CI Cleanup"
 rm -rf "$DIST_DIR" > /dev/null 2>&1
 find . -type f -name "sjgms-${BRANCH}-*.deb" -mtime +7 -delete
 
-echo "CI Upgrade"
-apt -y remove sjgms > /dev/null 2>&1
-apt -y install ./$TARGET_FILE || exit 1
-
 echo "CI Docker"
 cd $BUILD_DIR || exit 1
 rm -rf docker > /dev/null 2>&1
@@ -80,5 +80,13 @@ wget -4 -O build.sh $REPO_URL/build/docker/build.sh || exit 1
 chmod 755 build.sh || exit 1
 ./build.sh $BRANCH || exit 1
 
-echo "Done CI build process"
+echo "CI Upgrade"
+cd $WEB_DIR || exit 1
+apt -y remove sjgms || exit 1
+apt -y install ./$TARGET_FILE || exit 1
+
+echo "CI Finishing"
+echo $TIMESTAMP > $CI_OK_FILE
+
+echo "CI Done build process"
 exit 0

@@ -105,19 +105,21 @@ def _filter_objects(obj) -> bool:
     return modulename.startswith('core.') or modulename.startswith('servers.')
 
 
-def _getr(slist, olist, seen):
-    for o in slist:
-        oid = id(o)
-        if oid not in seen and _filter_objects(o):
-            seen[oid] = None
-            olist.append(o)
-            tl = gc.get_referents(o)
-            if tl:
-                _getr(tl, olist, seen)
+def _recurse_objects(objs, data):
+    if not objs:
+        return
+    for obj in objs:
+        objid = id(obj)
+        if objid not in data and _filter_objects(obj):
+            data[objid] = obj
+            _recurse_objects(gc.get_referents(obj), data)
 
 
 def _get_all_objects():
-    gcl, seen, olist = gc.get_objects(), {}, []
-    seen[id(gcl)], seen[id(seen)], seen[id(olist)] = None, None, None
-    _getr(gcl, olist, seen)
-    return olist
+    objs, data = gc.get_objects(), {}
+    objsid, dataid = id(objs), id(data)
+    data[objsid], data[dataid] = objs, data
+    _recurse_objects(objs, data)
+    del data[objsid]
+    del data[dataid]
+    return data.values()

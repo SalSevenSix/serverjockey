@@ -19,6 +19,7 @@ docker system prune
 docker build --no-cache -t <image>:<tag> .
 docker commit -m "<comment>" -a "Bowden Salis <bsalis76@gmail.com>" <container> salsevensix/<image>:<tag>
 docker commit -m "Release 0.5.0" -a "Bowden Salis <bsalis76@gmail.com>" 37968a3761cc salsevensix/serverjockey:0.5.0
+docket tag salsevensix/serverjockey:<tag> salsevensix/serverjockey:latest
 
 docker login
 docker push salsevensix/<image>:<tag>

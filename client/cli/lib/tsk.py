@@ -1,4 +1,5 @@
 import logging
+import time
 import os
 import inspect
 import subprocess
@@ -72,6 +73,13 @@ class TaskProcessor:
     def _sysdsvc(self, argument: str) -> bool:
         resource = util.get_resource('serverjockey.service')
         self._dump_to_log(resource.format(user=argument))
+        return True
+
+    def _pteroegg(self, argument: str) -> bool:
+        timestamp = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime()) + '+00:00'
+        resource = util.get_resource('pteroegg.json')
+        resource = resource.replace('{version}', argument).replace('{timestamp}', timestamp)
+        self._dump_to_log(resource)
         return True
 
     def _upgrade(self) -> bool:
