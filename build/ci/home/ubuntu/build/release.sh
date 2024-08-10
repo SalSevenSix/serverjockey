@@ -23,10 +23,13 @@ VERSION="$(dpkg-deb -f $SOURCE_FILE Version)"
 RELEASE_FILE="sjgms-${VERSION}.${OSVER}.x86_64.deb"
 [ -f $RELEASE_FILE ] && exit 1
 echo " release deb : $RELEASE_FILE"
-RELEASE_EGG_FILE="egg-server-jockey-v$(echo $VERSION | tr '.' '-').json"
-[ -f $RELEASE_EGG_FILE ] && exit 1
+ZOMBOX_FILE="ZomBox-$(echo $TIMESTAMP | cut -c1-8).ova"
+[ -f $ZOMBOX_FILE ] || exit 1
+echo " zombox  ova : $ZOMBOX_FILE"
 echo " source  img : ${DOCKER_IMAGE}:develop"
 echo " release img : ${DOCKER_IMAGE}:${VERSION}"
+RELEASE_EGG_FILE="egg-server-jockey-v$(echo $VERSION | tr '.' '-').json"
+[ -f $RELEASE_EGG_FILE ] && exit 1
 echo " release egg : $RELEASE_EGG_FILE"
 read -p "press enter to continue"
 
@@ -41,13 +44,19 @@ docker push ${DOCKER_IMAGE}:latest || exit 1
 echo "Pterodactyl egg release"
 cd $WEB_DIR || exit 1
 /usr/local/bin/serverjockey_cmd.pyz -nt pteroegg:$VERSION > $RELEASE_EGG_FILE || exit 1
-chmod 644 $RELEASE_EGG_FILE
+chmod 644 $RELEASE_EGG_FILE || exit 1
 ln -fs $RELEASE_EGG_FILE egg-server-jockey-latest.json || exit 1
 
 echo "DEB package release"
 cp $SOURCE_FILE $RELEASE_FILE || exit 1
-chmod 644 $RELEASE_FILE
+chmod 644 $RELEASE_FILE || exit 1
 ln -fs $RELEASE_FILE sjgms-master-latest.deb || exit 1
+
+echo "ZomBox ova release"
+chown root $ZOMBOX_FILE || exit 1
+chgrp root $ZOMBOX_FILE || exit 1
+chmod 644 $ZOMBOX_FILE || exit 1
+ln -fs $ZOMBOX_FILE ZomBox-latest.ova || exit 1
 
 echo "Done release process"
 exit 0

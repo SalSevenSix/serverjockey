@@ -1,19 +1,21 @@
 #!/bin/bash
 
-wait_seconds=30
-until [ "$(/sbin/runlevel)" == "N 5" ]; do
-  [ $wait_seconds -eq 0 ] && exit 1
-  sleep 1
-  ((wait_seconds = wait_seconds - 1))
+[ "$(whoami)" = "root" ] || exit 1
+SJGMS_CLI="/usr/local/bin/serverjockey_cmd.pyz"
+[ -f $SJGMS_CLI ] || exit 1
+
+LOOP_RETRY=30
+until [ "$(/sbin/runlevel)" = "N 5" ]; do
+  [ $LOOP_RETRY -eq 0 ] && exit 1
+  sleep 1 && ((LOOP_RETRY = LOOP_RETRY - 1))
 done
 sleep 1
 
-wait_seconds=10
-until /usr/local/bin/serverjockey_cmd.pyz -n; do
-  [ $wait_seconds -eq 0 ] && exit 1
-  sleep 1
-  ((wait_seconds = wait_seconds - 1))
+LOOP_RETRY=10
+until $SJGMS_CLI -n; do
+  [ $LOOP_RETRY -eq 0 ] && exit 1
+  sleep 1 && ((LOOP_RETRY = LOOP_RETRY - 1))
 done
 
-/usr/local/bin/serverjockey_cmd.pyz -nc welcome > /dev/tty1
-exit $?
+$SJGMS_CLI -nc welcome > /dev/tty1 || exit 1
+exit 0

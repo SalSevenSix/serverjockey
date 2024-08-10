@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 aiohttp = "*"
 aiofiles = "*"
+async-timeout = "4.0.3"  # for backward compatability
 sqlalchemy = "*"
 vdf = "*"
 rcon = "*"
