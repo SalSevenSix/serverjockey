@@ -18,11 +18,10 @@
 
   $: version = ($serverStatus.details && $serverStatus.details.version) ? $serverStatus.details.version : '';
 
-  $: connect = getConnect($serverStatus.details);
-  function getConnect(details) {
+  $: connect = getConnect($serverStatus.details); function getConnect(details) {
     if (!details) return '';
     let result = details.ip ? details.ip : '';
-    if (details.ip && details.port) { result += ':'; }
+    if (details.ip && details.port) { result += '<wbr />:'; }
     if (details.port) { result += details.port; }
     return result;
   }
@@ -51,7 +50,7 @@
       </td></tr>
       {#if !stateOnly}
         <tr><td class="has-text-weight-bold">Version</td><td>{version}</td></tr>
-        <tr><td class="has-text-weight-bold">Connect</td><td>{connect}</td></tr>
+        <tr><td class="has-text-weight-bold">Connect</td><td>{@html connect}</td></tr>
       {/if}
       {#if $serverStatus.details}
         {#each Object.keys($serverStatus.details) as key}

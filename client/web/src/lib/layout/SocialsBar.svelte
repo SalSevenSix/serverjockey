@@ -34,7 +34,7 @@
   }
 
   #kofiIcon {
-    width: 33px;
-    height: 22.7167px;
+    width: 2.0625em;
+    height: 1.4198em;
   }
 </style>

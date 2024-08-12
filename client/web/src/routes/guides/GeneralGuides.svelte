@@ -10,7 +10,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/discord/setup')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+    <a href={surl('/guides/discord/setup')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>&nbsp;
       Discord Bot Setup</a>
   </div>
   <div class="column is-four-fifths content">
@@ -24,7 +24,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/discord/usage')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>
+    <a href={surl('/guides/discord/usage')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>&nbsp;
       Discord Bot Usage</a>
   </div>
   <div class="column is-four-fifths content">
@@ -63,7 +63,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
-    <a href={surl('/guides/virtualbox')}><i class="fa fa-computer fa-lg theme-black-white"></i>
+    <a href={surl('/guides/virtualbox')}><i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
       VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
@@ -102,7 +102,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/prometheus')}><i class="fa fa-wave-square fa-lg theme-black-white"></i>
+    <a href={surl('/guides/prometheus')}><i class="fa fa-wave-square fa-lg theme-black-white"></i>&nbsp;
       Monitoring with Prometheus</a>
   </div>
   <div class="column is-four-fifths content">
@@ -130,6 +130,6 @@
 
 <style>
   .fa, .fa-brands {
-    width: 26px;
+    width: 1.2em;
   }
 </style>

@@ -15,8 +15,8 @@ If your like using this system, please consider supporting it on Ko-fi.
 
 
 ## DEB Package Install
-Arch x86_64/amd64 only. Requires Python 3.10 or 3.11 or 3.12 installed.
-Tested and works on **Ubuntu 22 LTS** (recommended) and Ubuntu 24 LTS.
+Arch x86_64/amd64 only. Requires Python 3.10 or 3.11 or 3.12 installed as default.
+Tested and works on **Ubuntu 24.04 LTS** (recommended) and Ubuntu 22.04 LTS.
 
 * Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed
 ```bash

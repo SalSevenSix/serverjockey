@@ -21,7 +21,7 @@ cd $SJGMS_HOME || exit 1
 echo "Waiting for ServerJockey log file"
 LOOP_RETRY=3
 until [ -f $SJGMS_LOG ]; do
-  echo " nope $LOOP_RETRY"
+  echo " retry $LOOP_RETRY"
   [ $LOOP_RETRY -eq 0 ] && exit 1
   sleep 10 && ((LOOP_RETRY = LOOP_RETRY - 1))
 done
@@ -29,15 +29,15 @@ done
 echo "Waiting for SteamCMD install complete"
 LOOP_RETRY=6
 until grep "SteamCMD install completed" $SJGMS_LOG > /dev/null; do
-  echo " nope $LOOP_RETRY"
+  echo " retry $LOOP_RETRY"
   [ $LOOP_RETRY -eq 0 ] && exit 1
   sleep 10 && ((LOOP_RETRY = LOOP_RETRY - 1))
 done
 
 echo "Waiting for UPnP discovery completed"
-LOOP_RETRY=12
+LOOP_RETRY=15
 until grep -E "No IGD port mapping service found|Found port mapping service" $SJGMS_LOG > /dev/null; do
-  echo " nope $LOOP_RETRY"
+  echo " retry $LOOP_RETRY"
   [ $LOOP_RETRY -eq 0 ] && exit 1
   sleep 10 && ((LOOP_RETRY = LOOP_RETRY - 1))
 done

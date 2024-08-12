@@ -23,7 +23,7 @@
 </script>
 
 
-<div class="block">
+<div class="block mr-5">
   <InputText id={inputId} name={name} bind:value={text} title={title}
              onKeypress={kpExecute} placeholder={placeholder} />
 </div>

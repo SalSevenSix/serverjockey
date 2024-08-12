@@ -81,14 +81,14 @@
           {/if}
         </td></tr>
       {:else}
-        {#each instances as instance, index}
+        {#each instances as instance}
           <tr>
             <td class="word-break-all notranslate">
-              <i class="fa {instance.running ? 'fa-play play' : 'fa-stop stop'} fa-xl"></i>
+              <i class="fa {instance.running ? 'fa-play' : 'fa-stop'} fa-xl"></i>
               {instance.identity}
             </td>
             <td class="word-break-all notranslate">{instance.module}</td>
-            <td class="word-break-all">
+            <td class="buttons-column">
               <button title="View" class="button is-primary mb-1" disabled={deleting}
                       on:click={function() { viewInstance(instance); }}>
                 <i class="fa fa-folder-open fa-lg"></i></button>
@@ -105,13 +105,18 @@
 
 
 <style>
-  .play {
+  .fa-play {
     width: 1em;
     color: #48C78E;
   }
 
-  .stop {
+  .fa-stop {
     width: 1em;
+  }
+
+  .buttons-column {
+    width: 33%;
+    text-align: right;
   }
 
   .fa-folder-open {

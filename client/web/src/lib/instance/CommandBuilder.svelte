@@ -120,6 +120,6 @@
 
 <style>
   .button {
-    width: 160px;
+    width: 10em;
   }
 </style>

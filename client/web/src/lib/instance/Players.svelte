@@ -127,7 +127,7 @@
 
 <style>
   .table-header {
-    height: 34px;
+    height: 2.1em;
   }
 
   .player-column {

@@ -94,9 +94,9 @@
 
 
 {#if !headless}
-  <div class="columns is-gapless">
+  <div class="columns">
     <div class="column">
-      <div class="columns">
+      <div class="columns is-gapless">
         <div class="column is-7">
           <div class="field">
             <label for={atfromId} class="label" title="Begin date and time for search range">Date From</label>
@@ -121,7 +121,7 @@
       </div>
     </div>
     <div class="column">
-      <div class="columns">
+      <div class="columns is-gapless">
         <div class="column is-7">
           <div class="field">
             <label for={attoId} class="label" title="End date and time for search range">Date To</label>

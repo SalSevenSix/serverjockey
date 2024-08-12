@@ -1,41 +1,20 @@
 # VirtualBox Build Notes
 
 ## Release Process
-
-### Preperation
-* `sudo serverjockey_cmd.pyz -t uninstall`
-* `sudo apt update`
-* `sudo apt upgrade`
-* `sudo reboot`
-* `sudo systemctl start ssh`
-
-### Install ServerJockey
-* Build DEB file
-* scp DEB file to zombox
-* `sudo apt install ./<deb>`
-* Delete DEB file
-
-### Cleanup
-* `sudo serverjockey_cmd.pyz -t service:stop`
-* Delete ServerJockey logs, database, .pid, .tmp
-* Delete ServerLink logs and config
-* `apt clean && apt autoclean && apt autoremove --purge`
-* `journalctl --rotate && journalctl --vacuum-time=1s`
-
-### Compact
-* `sudo reboot`
+* `sudo su`
+* `serverjockey_cmd.pyz -t uninstall`
+* `apt update && apt upgrade`
+* `reboot`
+* `sudo su`
+* `/root/install.sh <debfile>`
+* `reboot`
 * esc esc esc
 * advanced options -> recovery mode -> root console
-* `echo "u" > /proc/sysrq-trigger`
-* `mount /dev/mapper / -o remount,ro`
-* `zerofree -v /dev/sda2`
+* `/root/zerofree.sh`
 * `shutdown 0`
 * On windows: `~Tools\bin\compact_zombox.bat`
-
-### Export
-* Export appliance using format 2.0
-* Name: ZomBox-yyyymmdd.ova
-
+  * "C:\...\VBoxManage" modifymedium "C:\...\VirtualBox VMs\ZomBox\ZomBox.vdi" --compact
+* Export using format 2.0, name: ZomBox-yyyymmdd.ova
 
 ## Building Fresh Appliance
 

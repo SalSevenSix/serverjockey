@@ -1,6 +1,7 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
   import RubiksCube from '$lib/svg/RubiksCube.svelte';
+  import FontSizeToggler from '$lib/layout/FontSizeToggler.svelte';
   import ThemeToggler from '$lib/layout/ThemeToggler.svelte';
 
   let menuOpen = false;
@@ -39,7 +40,8 @@
           <i class="fa fa-book fa-lg"></i>&nbsp;&nbsp;Guides</a>
         <a on:click={closeMenu} class="navbar-item" href={surl('/about')}>
           <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;About</a>
-        <ThemeToggler clazz="navbar-item" onAfterToggle={closeMenu} />
+        <FontSizeToggler onAfterToggle={closeMenu} />
+        <ThemeToggler onAfterToggle={closeMenu} />
       </div>
     </div>
   </nav>

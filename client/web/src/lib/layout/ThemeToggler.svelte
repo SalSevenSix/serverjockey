@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import { noStorage } from '$lib/util/util';
 
-  export let clazz = '';
   export let onAfterToggle = function() {};
 
   let themeLink;
@@ -15,9 +14,9 @@
     if (!document.body) return;
     document.body.classList.remove(current === 'light' ? 'dark' : 'light');
     document.body.classList.add(current);
-    if (!document.body.parentElement) return;
-    document.body.parentElement.classList.remove(current === 'light' ? 'dark' : 'light');
-    document.body.parentElement.classList.add(current);
+    if (!document.documentElement) return;
+    document.documentElement.classList.remove(current === 'light' ? 'dark' : 'light');
+    document.documentElement.classList.add(current);
   }
 
   function toggleTheme() {
@@ -40,5 +39,5 @@
 </script>
 
 
-<a bind:this={themeLink} href={'#'} class={clazz}
+<a bind:this={themeLink} href={'#'} class="navbar-item"
    on:click|preventDefault={toggleTheme}>&nbsp;<i class="fa {themeIcon} fa-lg"></i>&nbsp;</a>
