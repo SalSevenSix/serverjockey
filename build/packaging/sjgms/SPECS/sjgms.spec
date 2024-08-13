@@ -53,9 +53,9 @@ exit 0
 
 
 %changelog
-* Web Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.12.0
-- Feature release v0.12.0
-* Web Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.11.0
+* Wed Aug 14 2024 Bowden Salis <bsalis76@gmail.com> - 0.12.0
+- Ubuntu 24 migration technical release
+* Wed Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.11.0
 - Discord guide doco refresh
 * Sat Jun 29 2024 Bowden Salis <bsalis76@gmail.com> - 0.10.0
 - Nginx and Prometheus integrations release

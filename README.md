@@ -27,7 +27,8 @@ sudo apt update
 sudo apt install lib32gcc-s1 steamcmd
 ```
 
-* Download and install the deb package
+* Download and install the [Ubuntu 24](https://serverjockey.net/downloads/sjgms-master-latest.deb)
+or [Ubuntu 22](https://serverjockey.net/downloads/sjgms-master-latest-ub22.deb) package; e.g.
 ```bash
 wget -O sjgms.deb https://serverjockey.net/downloads/sjgms-master-latest.deb
 sudo apt install ./sjgms.deb
