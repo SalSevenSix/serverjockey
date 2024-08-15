@@ -105,6 +105,14 @@ def delete_dict(dictionary: dict, keys: typing.Collection) -> dict:
     return result
 
 
+def delete_dict_by_value(dictionary: dict, value: any) -> dict:
+    result = {}
+    for key, candidate in dictionary.items():
+        if value != candidate:
+            result[key] = candidate
+    return result
+
+
 def lchop(value: str, keyword: str, strip: bool = True) -> str:
     index = value.find(keyword)
     if index == -1:
