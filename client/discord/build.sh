@@ -4,16 +4,15 @@ echo "Initialising discord build"
 INSTALL_COMMAND="${1-skip}"
 TARGET_FILE="${2}"
 JS_RUNTIME="node"
-if which bun > /dev/null; then
-  JS_RUNTIME="bun"
-  echo "Bun version $(bun --version)"
+if ~/.bun/bin/bun --version > /dev/null 2>&1; then
+  JS_RUNTIME=~/.bun/bin/bun
+  echo "Bun version $(${JS_RUNTIME} --version)"
 else
   which node > /dev/null || exit 1
   which npm > /dev/null || exit 1
   which nexe > /dev/null || exit 1
   echo "Node version $(node --version)"
 fi
-
 
 cd "$(dirname $0)" || exit 1
 rm -rf build > /dev/null 2>&1
