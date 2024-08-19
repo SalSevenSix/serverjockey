@@ -108,7 +108,7 @@
 
 <div class="content pb-1">
   <h3 class="title is-5 mb-3">Runtime</h3>
-  <p>Please be patient with the Install process, it may take a while. Check the console log to confirm success.</p>
+  <p>Install process may take a while. Check the console log to confirm success.</p>
   <div class="field has-addons">
     <div class="control">
       <button name="install-runtime" class="button is-warning" title="Install game server"

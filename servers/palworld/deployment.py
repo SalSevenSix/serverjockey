@@ -11,7 +11,7 @@ from core.common import steam, interceptors, portmapper, rconsvc
 # https://tech.palworldgame.com/settings-and-operation/arguments
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_port': 'Port number used for player connections. Default is 8211 if not specified.',
         '-port': None,

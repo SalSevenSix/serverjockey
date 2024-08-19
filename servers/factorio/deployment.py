@@ -15,7 +15,7 @@ _MAP, _ZIP = 'map', '.zip'
 _AUTOSAVE_PREFIX = '_autosave'
 
 
-def _default_cmdargs_settings():
+def _default_cmdargs_settings() -> dict:
     return {
         '_comment_port': 'Port for the Factorio server to use. Default 34197 used if null.',
         'port': None,
@@ -35,7 +35,7 @@ def _default_cmdargs_settings():
     }
 
 
-def _default_mods_list():
+def _default_mods_list() -> dict:
     return {'mods': [{'name': 'base', 'enabled': True}]}
 
 

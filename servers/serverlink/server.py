@@ -16,7 +16,7 @@ _SERVER_STARTED_FILTER = msgftr.And(
     msgftr.DataStrContains('ServerLink Bot has STARTED'))
 
 
-def _default_config():
+def _default_config() -> dict:
     return {
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',
         'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
@@ -85,17 +85,18 @@ class _ServerProcessFactory:
 
     async def initialise(self):
         env_path = self._context.env('PATH')
-        self._executable = self._context.env('HOME') + '/.bun/bin/bun'
-        if not await io.file_exists(self._executable):
-            self._executable = None
-        if not self._executable:
-            self._executable = await io.find_in_env_path(env_path, 'bun')
-        if not self._executable:
-            self._executable = await io.find_in_env_path(env_path, 'node')
         script = self._context.config('home') + '/index.js'
-        if self._executable and await io.file_exists(script):
-            self._script = script
-            return
+        if await io.file_exists(script):
+            self._executable = self._context.env('HOME') + '/.bun/bin/bun'
+            if not await io.file_exists(self._executable):
+                self._executable = None
+            if not self._executable:
+                self._executable = await io.find_in_env_path(env_path, 'bun')
+            if not self._executable:
+                self._executable = await io.find_in_env_path(env_path, 'node')
+            if self._executable:
+                self._script = script
+                return
         self._executable = self._context.config('home') + '/serverlink'
         if await io.file_exists(self._executable):
             return

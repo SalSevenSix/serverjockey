@@ -9,7 +9,7 @@ from core.common import steam, interceptors, portmapper, rconsvc
 from servers.csii import messaging as msg
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_ip': 'IP binding.',
         '-ip': '0.0.0.0',

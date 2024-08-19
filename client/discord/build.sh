@@ -1,24 +1,25 @@
 #!/bin/bash
 
-echo "Initialising discord build"
+echo "Initialising discord bot build"
 INSTALL_COMMAND="${1-skip}"
 TARGET_FILE="${2}"
 JS_RUNTIME="node"
 if ~/.bun/bin/bun --version > /dev/null 2>&1; then
   JS_RUNTIME=~/.bun/bin/bun
-  echo "Bun version $(${JS_RUNTIME} --version)"
+  echo "bun version $(~/.bun/bin/bun --version)"
 else
   which node > /dev/null || exit 1
+  echo "node version $(node --version)"
   which npm > /dev/null || exit 1
-  which nexe > /dev/null || exit 1
-  echo "Node version $(node --version)"
+  echo "npm version $(npm --version)"
+  which nexe > /dev/null || exit
 fi
 
 cd "$(dirname $0)" || exit 1
 rm -rf build > /dev/null 2>&1
 mkdir build || exit 1
 if [ "$INSTALL_COMMAND" != "skip" ]; then
-  echo "installing dependencies"
+  echo "Installing dependencies"
   if [ "$JS_RUNTIME" = "node" ]; then
     npm $INSTALL_COMMAND || exit 1
   else  # bun
@@ -27,6 +28,7 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
   fi
 fi
 
+echo "Discord bot build"
 if [ "$JS_RUNTIME" = "node" ]; then
   PYTHON_EXE=$(which python3)
   NODE_OUT_DIR=~/.nexe/$(node --version | cut -c2-)/out/Release
@@ -44,9 +46,10 @@ else  # bun
 fi
 
 if [ ! -z $TARGET_FILE ]; then
+  echo "Exporting serverlink executable"
   rm $TARGET_FILE > /dev/null 2>&1
   cp build/serverlink $TARGET_FILE || exit 1
 fi
 
-echo "Done discord build"
+echo "Done discord bot build"
 exit 0

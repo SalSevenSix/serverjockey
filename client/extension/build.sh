@@ -1,22 +1,30 @@
 #!/bin/bash
 
 echo "Initialising extension build"
-which npm > /dev/null || exit 1
 which zip > /dev/null || exit 1
-cd "$(dirname $0)" || exit 1
-rm -rf build chrome-extension.zip > /dev/null 2>&1
-
-INSTALL_COMMAND="${1}"
-if [ ! -z $INSTALL_COMMAND ]; then
-  echo "extension npm $INSTALL_COMMAND"
-  npm $INSTALL_COMMAND || exit 1
+INSTALL_COMMAND="${1-skip}"
+JS_PKGMGR="npm"
+if ~/.bun/bin/bun --version > /dev/null 2>&1; then
+  JS_PKGMGR=~/.bun/bin/bun
+  [ "$INSTALL_COMMAND" = "ci" ] && INSTALL_COMMAND="install --frozen-lockfile"
+  echo "bun version $(~/.bun/bin/bun --version)"
+else
+  which npm > /dev/null || exit 1
+  echo "npm version $(npm --version)"
 fi
 
-echo "extension npm build"
-npm run build || exit 1
+cd "$(dirname $0)" || exit 1
+rm -rf build chrome-extension.zip > /dev/null 2>&1
+if [ "$INSTALL_COMMAND" != "skip" ]; then
+  echo "Installing dependencies"
+  $JS_PKGMGR $INSTALL_COMMAND || exit 1
+fi
+
+echo "Extension build"
+$JS_PKGMGR run build || exit 1
 
 if [ -d ../../web ]; then
-  echo "extension zip"
+  echo "Extension zip"
   rm -rf ../../web/assets/extensions > /dev/null 2>&1
   mkdir -p ../../web/assets/extensions || exit 1
   cd build || exit 1

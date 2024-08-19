@@ -10,7 +10,7 @@ from servers.projectzomboid import modcheck as mck
 _WORLD_NAME_DEF = 'servertest'
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_mod_check_minutes': 'Check interval for updated mods in minutes. Use 0 to disable checks.',
         'mod_check_minutes': 15,

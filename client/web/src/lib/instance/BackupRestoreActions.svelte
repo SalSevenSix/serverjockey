@@ -89,8 +89,7 @@
 
 <div class="content">
   <p>
-    Please be patient with Backups/Restores/Uploads. These processes may take a while.
-    Check the console log to confirm success.
+    Backup, Restore and Upload processes may take a while. Check the console log to confirm success.
   </p>
   {#if uploading}
     <p class="has-text-weight-bold">

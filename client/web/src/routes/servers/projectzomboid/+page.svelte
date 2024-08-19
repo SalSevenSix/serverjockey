@@ -62,7 +62,6 @@
           <p>
             Change -Xmx to set the memory available to the server.
             e.g. &quot;-Xmx8g&quot; for 8Gb memory.
-            Do not change other values unless you know what you are doing!
           </p>
         </ConfigFile>
       </Collapsible>
