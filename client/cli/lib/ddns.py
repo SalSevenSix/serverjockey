@@ -91,7 +91,6 @@ def _http_request(host: str, path: str, request_body: dict = None,
         connection.close()
 
 
-# TODO test this on python 3.12
 class _HTTPSConnection(client.HTTPSConnection):
     # noinspection All
     def connect(self):
