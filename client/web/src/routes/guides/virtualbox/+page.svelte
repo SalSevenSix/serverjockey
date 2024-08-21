@@ -124,7 +124,7 @@
   <p>
     By default remote access using SSH is disabled for security reasons. If you wish to login remotely
     you can turn on SSH with the command shown below. If you want to login remotely from a Windows machine,
-    <ExtLink href="https://putty.org" notranslate>PuTTY</ExtLink>
+    <ExtLink href="https://apps.microsoft.com/detail/xpfnzksklbp7rj" notranslate>PuTTY</ExtLink>
     is a popular SSH client.
   </p>
   <CodeBlock>sudo systemctl start ssh</CodeBlock>

@@ -66,7 +66,11 @@ ln -fs "$TARGET_FILE" "sjgms-${BRANCH}-latest.deb" || exit 1
 
 echo "CI Cleanup"
 rm -rf "$DIST_DIR" > /dev/null 2>&1
-find . -type f -name "sjgms-${BRANCH}-*.deb" -mtime +7 -delete
+KEEP_COUNT=6
+ls -t sjgms-${BRANCH}-*.deb | while read file; do
+  [ $KEEP_COUNT -gt 0 ] || rm $file
+  ((KEEP_COUNT = KEEP_COUNT - 1))
+done
 
 echo "CI Docker"
 cd $BUILD_DIR || exit 1
