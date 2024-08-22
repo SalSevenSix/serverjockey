@@ -1,6 +1,11 @@
 import logging
-import time
 import inspect
+import time
+import ssl
+import json
+import smtplib
+import email.utils
+from email.message import EmailMessage
 # ALLOW lib.util, lib.comms
 from . import util, comms
 
@@ -219,6 +224,27 @@ class CommandProcessor:
         logging.info(self._out + ' Token     ' + self._token)
         logging.info(self._out)
         logging.info(self._out + ' (hit ENTER key to show login prompt)')
+        return True
+
+    def _emailtoken(self, argument: str | None) -> bool:
+        with open(file=argument if argument else 'emailtoken.json', mode='r') as file:
+            cfg = json.load(file)
+        msg = EmailMessage()
+        msg['Subject'] = cfg['subject']
+        msg['From'] = email.utils.formataddr((cfg['sender']['name'], cfg['sender']['email']))
+        msg['To'] = cfg['recipient']['email']
+        msg.set_content(cfg['content'].format(
+            url=self._url.replace('localhost', util.get_local_ip4()), token=self._token))
+        server = smtplib.SMTP(cfg['smtp']['host'], cfg['smtp']['port'])
+        try:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context(
+                purpose=ssl.Purpose.SERVER_AUTH, cafile=None, capath=None))
+            server.ehlo()
+            server.login(cfg['smtp']['login'], cfg['smtp']['password'])
+            server.sendmail(cfg['sender']['email'], cfg['recipient']['email'], msg.as_string())
+        finally:
+            server.close()
         return True
 
     def _showtoken(self) -> bool:
