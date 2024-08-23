@@ -4,6 +4,8 @@ import argparse
 import sys
 import os
 import json
+import time
+
 # ALLOW lib.*
 from . import util, tsk, cmd, comms
 
@@ -58,6 +60,21 @@ def _find_clientfile(user: str | None) -> str:
     raise Exception('Unable to find Clientfile. ServerJockey may be down. Or try using --user option.')
 
 
+def _get_clientfile(user: str | None, retries: int | None) -> str:
+    if not retries or retries <= 0:
+        return _find_clientfile(user)
+    while True:
+        try:
+            clientfile = _find_clientfile(user)
+            time.sleep(1.0)  # in case file is still being written
+            return clientfile
+        except Exception as e:
+            if retries <= 0:
+                raise e
+        retries -= 1
+        time.sleep(1.0)
+
+
 def _load_clientfile(clientfile: str) -> tuple:
     with open(file=clientfile, mode='r') as file:
         data = json.load(file)
@@ -71,6 +88,7 @@ def _initialise() -> dict:
         formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
+    p.add_argument('--wait', '-w', type=int, default=0, help='Seconds to wait for ServerJockey service to start')
     p.add_argument('--user', '-u', type=str, help='Specify alternate user')
     p.add_argument('--tasks', '-t', type=str, nargs='+', help='List of tasks to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
@@ -78,7 +96,7 @@ def _initialise() -> dict:
     _setup_logging(args.debug, args.nolog)
     url, token = None, None
     if args.commands or not args.tasks:
-        url, token = _load_clientfile(_find_clientfile(args.user))
+        url, token = _load_clientfile(_get_clientfile(args.user, args.wait))
     return dict(out=_OUT, url=url, token=token,
                 debug=args.debug, user=args.user,
                 tasks=args.tasks, commands=args.commands)

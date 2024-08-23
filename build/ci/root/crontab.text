@@ -1,1 +1,2 @@
+@reboot /usr/local/bin/serverjockey_cmd.pyz -w 20 -c emailtoken > /dev/null 2>&1
 20 18 * * * /home/ubuntu/build/build_deb.sh > /home/ubuntu/build/build_deb.log 2>&1

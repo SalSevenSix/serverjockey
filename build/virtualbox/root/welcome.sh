@@ -11,11 +11,5 @@ until [ "$(/sbin/runlevel)" = "N 5" ]; do
 done
 sleep 1
 
-LOOP_RETRY=10
-until $SJGMS_CLI -n; do
-  [ $LOOP_RETRY -eq 0 ] && exit 1
-  sleep 1 && ((LOOP_RETRY = LOOP_RETRY - 1))
-done
-
-$SJGMS_CLI -nc welcome > /dev/tty1 || exit 1
-exit 0
+$SJGMS_CLI -n -w 15 -c welcome > /dev/tty1
+exit $?

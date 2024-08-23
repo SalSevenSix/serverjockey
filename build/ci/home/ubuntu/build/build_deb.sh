@@ -92,8 +92,7 @@ apt -y install ./$TARGET_FILE || exit 1
 echo "CI Finishing"
 cd $BUILD_DIR || exit 1
 echo $TIMESTAMP > $CI_OK_FILE
-sleep 20
-/usr/local/bin/serverjockey_cmd.pyz -c emailtoken
+/usr/local/bin/serverjockey_cmd.pyz -w 20 -c emailtoken
 
 echo "CI Done build process"
 exit 0
