@@ -213,6 +213,8 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):
             return httpabc.ResponseBody.BAD_REQUEST
+        if identity in ('sjgms', 'serverjockey', 'serverlink'):
+            return httpabc.ResponseBody.BAD_REQUEST
         subcontext = await self._system.create_instance(dict(module=module, identity=identity))
         return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
 

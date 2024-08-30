@@ -22,7 +22,7 @@
   .spinner {
     width: calc(5vw + 60px);
     height: calc(5vw + 60px);
-    border: 18px solid #FFFDF8;
+    border: 18px solid var(--color-standard-lightest-def);
     border-top: 18px solid #00D1B2;
     border-radius: 50%;
     animation: spin 2s linear infinite;

@@ -243,26 +243,19 @@ class RollingLogSubscriber(msgabc.Subscriber):
     REQUEST = 'RollingLogSubscriber.Request'
     RESPONSE = 'RollingLogSubscriber.Response'
 
-    def __init__(self, mailer: msgabc.Mailer, size: int = 20,
+    def __init__(self, mailer: msgabc.MulticastMailer, size: int = 20,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  transformer: msgabc.Transformer = msgtrf.Noop(),
                  aggregator: aggtrf.Aggregator = aggtrf.Noop()):
         self._mailer, self._size = mailer, size
         self._transformer, self._aggregator = transformer, aggregator
-        self._identity = idutil.generate_id()
-        self._request_filter = msgftr.And(
-            msgftr.NameIs(RollingLogSubscriber.REQUEST),
-            msgftr.DataEquals(self._identity))
+        self._request_filter = msgftr.And(msgftr.SourceIs(self), msgftr.NameIs(RollingLogSubscriber.REQUEST))
         self._msg_filter = msgftr.Or(msg_filter, self._request_filter)
         self._container = collections.deque()
 
-    @staticmethod
-    async def get(mailer: msgabc.MulticastMailer, source: typing.Any, identity: str) -> typing.Any:
-        response = await SynchronousMessenger(mailer).request(source, RollingLogSubscriber.REQUEST, identity)
+    async def get(self) -> typing.Any:
+        response = await SynchronousMessenger(self._mailer).request(self, RollingLogSubscriber.REQUEST)
         return response.data()
-
-    def identity(self) -> str:
-        return self._identity
 
     def accepts(self, message):
         return self._msg_filter.accepts(message)

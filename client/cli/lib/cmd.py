@@ -226,6 +226,7 @@ class CommandProcessor:
         logging.info(self._out + ' (hit ENTER key to show login prompt)')
         return True
 
+    # https://blogs.oracle.com/cloud-infrastructure/post/step-by-step-instructions-to-send-email-with-oci-email-delivery
     def _emailtoken(self, argument: str | None) -> bool:
         with open(file=argument if argument else 'emailtoken.json', mode='r') as file:
             cfg = json.load(file)

@@ -1,129 +1,116 @@
-/*
-  https://www.schemecolor.com/mojave-dark-mode.php
-    https://www.colorhex.app/color/091C32 dark blue, background
-    https://www.colorhex.app/color/293045 darkish steel blue
-    https://www.colorhex.app/color/52596E lighter steel blue
-    https://www.colorhex.app/color/223C5B light blue
-    https://www.colorhex.app/color/4A6488 lightest blue, text colour
-  others
-    https://www.colorhex.app/color/B6B6D7 neon blue, hover link
-    https://www.colorhex.app/color/DBDBDB light grey
-*/
-
 html.dark {
-  background-color: #091C32;
+  background-color: var(--color-dark-dark-def);
 }
 
 body.dark {
-  background-color: #091C32;
-  color: #4A6488;
+  background-color: var(--color-dark-dark-def);
+  color: var(--color-dark-lightest-def);
 }
 
 body.dark a:hover {
-  color: #B6B6D7;
+  color: var(--color-standard-bright-hlt);
 }
 
 body.dark hr {
-  background-color: #293045;
+  background-color: var(--color-dark-darkish-alt);
 }
 
 body.dark .navbar, body.dark .navbar-menu.is-active {
-  background-color: #223C5B;
+  background-color: var(--color-dark-light-def);
 }
 
 body.dark .navbar-item, body.dark .navbar-link, body.dark .navbar-burger, body.dark svg.navbar-rubiks {
-  color: #B6B6D7;
+  color: var(--color-standard-bright-hlt);
 }
 
 body.dark .navbar-start .navbar-item:hover {
-  background-color: #091C32;
+  background-color: var(--color-dark-dark-def);
 }
 
 body.dark .title {
-  color: #4A6488;
+  color: var(--color-dark-lightest-def);
 }
 
 body.dark .label {
-  color: #4A6488;
+  color: var(--color-dark-lightest-def);
 }
 
 body.dark .pre {
-  background-color: #293045;
-  color: #DBDBDB;
+  background-color: var(--color-dark-darkish-alt);
+  color: var(--color-standard-light-bwg);
 }
 
 body.dark .table {
-  color: #4A6488;
-/*  border: #4A6488; */
+  color: var(--color-dark-lightest-def);
 }
 
 body.dark .table th, body.dark .table td {
-  color: #4A6488;
-  border-color: #293045;
+  color: var(--color-dark-lightest-def);
+  border-color: var(--color-dark-darkish-alt);
 }
 
 body.dark .content table th, body.dark .content table td {
-  border-color: #293045;
+  border-color: var(--color-dark-darkish-alt);
 }
 
 body.dark .table.is-log {
-  border-color: #091C32;
+  border-color: var(--color-dark-dark-def);
 }
 
 body.dark .table.is-log th, body.dark .table.is-log td {
-  color: #DBDBDB;
-  border-color: #091C32;
+  color: var(--color-standard-light-bwg);
+  border-color: var(--color-dark-dark-def);
 }
 
 body.dark .table.is-log td:last-child {
-  border-left: 1px solid #091C32;
+  border-left: 1px solid var(--color-dark-dark-def);
 }
 
 body.dark .table.is-log tr.row-hdr {
-  background-color: #091C32;
+  background-color: var(--color-dark-dark-def);
 }
 
 body.dark .table.is-log tr.row-nrm {
-  background-color: #52596E;
+  background-color: var(--color-dark-lighter-alt);
 }
 
 body.dark .table.is-log tr.row-alt {
-  background-color: #293045;
+  background-color: var(--color-dark-darkish-alt);
 }
 
 body.dark .control.has-icons-left .icon, body.dark .control.has-icons-right .icon {
-  color: #DBDBDB;
+  color: var(--color-standard-light-bwg);
 }
 
 body.dark .input, body.dark .textarea, body.dark .select select {
-  background-color: #293045;
-  color: #DBDBDB;
+  background-color: var(--color-dark-darkish-alt);
+  color: var(--color-standard-light-bwg);
 }
 
 body.dark .input::placeholder {
-  color: #4A6488;
+  color: var(--color-dark-lightest-def);
 }
 
 body.dark .radio {
-  background-color: #293045;
-  border-color: #223C5B;
-  color: #DBDBDB;
+  background-color: var(--color-dark-darkish-alt);
+  border-color: var(--color-dark-light-def);
+  color: var(--color-standard-light-bwg);
 }
 
 body.dark .box {
-  background-color: #223C5B;
+  background-color: var(--color-dark-light-def);
 }
 
 body.dark .box .label, body.dark .box .table td, body.dark .modal-card-title {
-  color: #B6B6D7;
+  color: var(--color-standard-bright-hlt);
 }
 
 body.dark .modal-card-head, body.dark .modal-card-foot {
-  background-color: #223C5B;
+  background-color: var(--color-dark-light-def);
 }
 
 body.dark .modal-card-body, body.dark .modal-content .box {
-  background-color: #091C32;
+  background-color: var(--color-dark-dark-def);
 }
 
 body.dark .theme-black-white {
@@ -135,11 +122,11 @@ body.dark .theme-black-white {
 /* Specific cases */
 
 body.dark .date-time-field input {
-  background-color: #293045;
-  border-color: #DBDBDB;
-  color: #DBDBDB;
+  background-color: var(--color-dark-darkish-alt);
+  border-color: var(--color-standard-light-bwg);
+  color: var(--color-standard-light-bwg);
 }
 
 body.dark svg.rubiks {
-  color: #4A6488;
+  color: var(--color-dark-lightest-def);
 }

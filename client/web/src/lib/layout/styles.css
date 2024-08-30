@@ -1,7 +1,32 @@
+/* Variables */
+
+:root {
+  /* Standard colours */
+  --color-standard-lightest-def: #FFFDF8;  /* https://www.colorhex.app/color/FFFDF8 */
+  --color-standard-light-bwg: #DBDBDB;     /* https://www.colorhex.app/color/DBDBDB */
+  --color-standard-lightest-bwg: #EEEEEE;  /* https://www.colorhex.app/color/EEEEEE */
+  --color-standard-darker-bwg: #363636;    /* https://www.colorhex.app/color/363636 */
+  --color-standard-bright-hlt: #B6B6D7;    /* https://www.colorhex.app/color/B6B6D7 */
+  --color-standard-success-def: #48C78E;   /* https://www.colorhex.app/color/48C78E */
+  --color-standard-warning-def: #FFE08A;   /* https://www.colorhex.app/color/FFE08A */
+  --color-standard-error-def: #F14668;     /* https://www.colorhex.app/color/F14668 */
+
+  /* Mojave Dark colours: https://www.schemecolor.com/mojave-dark-mode.php */
+  --color-dark-dark-def: #091C32;      /* https://www.colorhex.app/color/091C32 */
+  --color-dark-darkish-alt: #293045;   /* https://www.colorhex.app/color/293045 */
+  --color-dark-lighter-alt: #52596E;   /* https://www.colorhex.app/color/52596E */
+  --color-dark-light-def: #223C5B;     /* https://www.colorhex.app/color/223C5B */
+  --color-dark-lightest-def: #4A6488;  /* https://www.colorhex.app/color/4A6488 */
+
+  /* https://date-picker-svelte.kasper.space */
+	--date-input-width: 95%;
+}
+
+
 /* General site changes */
 
 html {
-  background-color: #FFFDF8;
+  background-color: var(--color-standard-lightest-def);
 }
 
 html.base-font-size-default {
@@ -17,7 +42,7 @@ html.base-font-size-huge {
 }
 
 body {
-  background-color: #FFFDF8;
+  background-color: var(--color-standard-lightest-def);
   top: 0px !important;
   counter-reset: section;
 }
@@ -27,7 +52,7 @@ body div:first-of-type .skiptranslate {
 }
 
 hr {
-  background-color: #DBDBDB;
+  background-color: var(--color-standard-light-bwg);
 }
 
 a[target="_blank"] {
@@ -35,7 +60,7 @@ a[target="_blank"] {
 }
 
 .navbar {
-  border: 1px solid #DBDBDB;
+  border: 1px solid var(--color-standard-light-bwg);
 }
 
 .table {
@@ -46,7 +71,7 @@ a[target="_blank"] {
 .radio {
   background-color: white;
   border: 2px;
-  border-color: #DBDBDB;
+  border-color: var(--color-standard-light-bwg);
   border-style: solid;
   border-radius: 5px;
   margin: 4px;
@@ -54,22 +79,22 @@ a[target="_blank"] {
 }
 
 .control.has-icons-left .icon, .control.has-icons-right .icon {
-  color: #363636;
+  color: var(--color-standard-darker-bwg);
 }
 
 
 /* Utilities */
 
 .status-color-green {
-  color: #48C78E;
+  color: var(--color-standard-success-def);
 }
 
 .status-color-amber {
-  color: #FFE08A;
+  color: var(--color-standard-warning-def);
 }
 
 .status-color-red {
-  color: #F14668;
+  color: var(--color-standard-error-def);
 }
 
 .position-relative {
@@ -77,7 +102,7 @@ a[target="_blank"] {
 }
 
 figure.is-bordered img {
-  border: 8px solid #DBDBDB;
+  border: 8px solid var(--color-standard-light-bwg);
   border-radius: 8px;
 }
 
@@ -130,16 +155,16 @@ table.is-thinner {
 
 .table.is-log {
   color: black;
-  border: 1px solid #DBDBDB;
+  border: 1px solid var(--color-standard-light-bwg);
   width: 100%;
 }
 
 .table.is-log td:last-child {
-  border-left: 1px solid #DBDBDB;
+  border-left: 1px solid var(--color-standard-light-bwg);
 }
 
 .table.is-log tr.row-hdr {
-  background-color: #DBDBDB;
+  background-color: var(--color-standard-light-bwg);
 }
 
 .table.is-log tr.row-nrm {
@@ -147,7 +172,7 @@ table.is-thinner {
 }
 
 .table.is-log tr.row-alt {
-  background-color: #EEEEEE;
+  background-color: var(--color-standard-lightest-bwg);
 }
 
 .word-break-all {
@@ -168,13 +193,6 @@ table.is-thinner {
 }
 
 
-/* Component variables */
-
-:root {
-	--date-input-width: 95%;
-}
-
-
 /* Specific cases */
 
 .date-time-field input {
@@ -183,5 +201,5 @@ table.is-thinner {
 }
 
 svg.rubiks, svg.navbar-rubiks {
-  color: #FFFDF8;
+  color: var(--color-standard-lightest-def);
 }

@@ -21,16 +21,16 @@ FILTER_NOTIFICATIONS = msgftr.NameIs(NOTIFICATION)
 async def initialise(context: contextsvc.Context):
     executable = await io.find_in_env_path(context.env('PATH'), 'vmtouch')
     if executable:
-        context.register(CachLockService(context, executable))
+        context.register(_CachLockService(context, executable))
     else:
         logging.info('vmtouch not installed or not in path')
 
 
 def set_path(mailer: msgabc.Mailer, source: typing.Any, path: str):
-    mailer.post(source, CachLockService.CACHE_PATH, path)
+    mailer.post(source, _CachLockService.CACHE_PATH, path)
 
 
-class CachLockService(msgabc.AbcSubscriber):
+class _CachLockService(msgabc.AbcSubscriber):
     CACHE_PATH = 'CachLockService.CachePath'
     CACHE_PATH_FILTER = msgftr.NameIs(CACHE_PATH)
 
@@ -39,7 +39,7 @@ class CachLockService(msgabc.AbcSubscriber):
             msgftr.IsStop(),
             mc.ServerStatus.RUNNING_FALSE_FILTER,
             mc.ServerProcess.FILTER_STATE_STARTED,
-            CachLockService.CACHE_PATH_FILTER))
+            _CachLockService.CACHE_PATH_FILTER))
         self._mailer, self._executable = mailer, executable
         self._cachelock = None
 
@@ -53,7 +53,7 @@ class CachLockService(msgabc.AbcSubscriber):
             if self._cachelock and not await self._cachelock.start():
                 self._cachelock = None
             return None
-        if CachLockService.CACHE_PATH_FILTER.accepts(message):
+        if _CachLockService.CACHE_PATH_FILTER.accepts(message):
             if self._cachelock:
                 self._cachelock.stop()
             self._cachelock = _CacheLock(self._mailer, self._executable, message.data())

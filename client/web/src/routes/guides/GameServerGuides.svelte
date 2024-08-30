@@ -40,7 +40,7 @@
   }
 
   .card:hover {
-    color: #363636;
+    color: var(--color-standard-darker-bwg);
   }
 
   .card-header-title {

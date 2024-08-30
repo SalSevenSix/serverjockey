@@ -107,7 +107,7 @@
 <style>
   .fa-play {
     width: 1em;
-    color: #48C78E;
+    color: var(--color-standard-success-def);
   }
 
   .fa-stop {

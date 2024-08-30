@@ -97,15 +97,13 @@ class UnpackerHandler(httpabc.PostHandler):
 class RollingLogHandler(httpabc.GetHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, msg_filter: msgabc.Filter, size: int = 100):
-        self._mailer = mailer
-        self._subscriber = msgext.RollingLogSubscriber(
-            mailer, size, msg_filter, msgtrf.GetData(), aggtrf.StrJoin('\n'))
-        mailer.register(self._subscriber)
+        self._log = msgext.RollingLogSubscriber(mailer, size, msg_filter, msgtrf.GetData(), aggtrf.StrJoin('\n'))
+        mailer.register(self._log)
 
     async def handle_get(self, resource, data):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        return await msgext.RollingLogSubscriber.get(self._mailer, self, self._subscriber.identity())
+        return await self._log.get()
 
 
 class WipeHandler(httpabc.PostHandler):
