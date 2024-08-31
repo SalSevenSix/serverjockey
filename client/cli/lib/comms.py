@@ -3,16 +3,16 @@ import json
 import ssl
 from http import client
 # ALLOW lib.util
-from . import util
+from . import util, cxt
 
 
 class HttpConnection:
 
-    def __init__(self, config: dict):
-        self._headers_get = {'X-Secret': config['token']}
+    def __init__(self, context: cxt.Context):
+        url, token = context.credentials()
+        self._headers_get = {'X-Secret': token}
         self._headers_post = self._headers_get.copy()
         self._headers_post.update({'Content-Type': 'application/json', 'Connection': 'close'})
-        url = config['url']
         if url.startswith('https'):
             # noinspection PyProtectedMember
             self._connection = client.HTTPSConnection(url[8:], context=ssl._create_unverified_context())

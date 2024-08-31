@@ -8,7 +8,7 @@ tasks:
   adduser:<name>,<port>  | Add a new ServerJockey service user
                          | called <name> with webapp using <port>
   userdel:<name>         | Delete alternate service user and home folder
-  ddns:help              | Show help on DDNS tools
+  ddns                   | Show help on DDNS tools
   For tasks below, use --user option to set alternate user if needed
   service                | Show ServerJockey service status
   service:start          | Start ServerJockey service
@@ -16,6 +16,7 @@ tasks:
   service:stop           | Stop ServerJockey service
   service:enable         | Enable ServerJockey service
   service:disable        | Disable ServerJockey service
+  wait:<seconds>         | Wait seconds for service to be started
 
 commands:
   showtoken         | Show webapp url and login token

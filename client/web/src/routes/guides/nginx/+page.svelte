@@ -230,7 +230,7 @@ location /serverjockey/ &#123;
     <span class="has-text-weight-bold notranslate">porkbun.com</span>
     domain name services. To get detailed help, use the following command.
   </p>
-  <CodeBlock>serverjockey_cmd.pyz -nt ddns:help</CodeBlock>
+  <CodeBlock>serverjockey_cmd.pyz -nt ddns</CodeBlock>
   <p>
     For example, to update
     <span class="is-family-monospace has-text-weight-bold notranslate">example.duckdns.org</span>

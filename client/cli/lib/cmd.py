@@ -7,16 +7,16 @@ import smtplib
 import email.utils
 from email.message import EmailMessage
 # ALLOW lib.util, lib.comms
-from . import util, comms
+from . import util, cxt, comms
 
 
 class CommandProcessor:
 
-    def __init__(self, config: dict, connection: comms.HttpConnection):
-        self._url, self._token = config['url'], config['token']
-        self._connection, self._commands, self._instance = connection, [], None
+    def __init__(self, context: cxt.Context, connection: comms.HttpConnection):
+        self._url, self._token = context.credentials()
         self._instances: dict = connection.get('/instances')
-        for command in config['commands']:
+        self._connection, self._commands, self._instance = connection, [], None
+        for command in context.commands():
             argument, index = None, command.find(':')
             if index > 0:
                 command, argument = command[:index], command[index + 1:]

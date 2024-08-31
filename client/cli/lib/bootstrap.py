@@ -1,13 +1,10 @@
 import logging
-import signal
-import argparse
 import sys
-import os
-import json
-import time
+import argparse
+import signal
 
 # ALLOW lib.*
-from . import util, tsk, cmd, comms
+from . import util, cxt, comms, tsk, cmd
 
 
 class _NoLogFilter(logging.Filter):
@@ -35,69 +32,19 @@ def _setup_logging(debug: bool, nolog: bool):
         logger.addFilter(_NoLogFilter())
 
 
-def _find_clientfile(user: str | None) -> str:
-    candidate = user
-    if candidate and candidate.find('.') > -1:  # "user" is a file name
-        if os.path.isfile(candidate):
-            return candidate
-        raise Exception('Clientfile ' + candidate + ' not found. ServerJockey may be down.')
-    filename = '/serverjockey-client.json'
-    if candidate:  # user is a username
-        candidate = '/home/' + user + filename
-        if os.path.isfile(candidate):
-            return candidate
-        raise Exception('Clientfile for user ' + user + ' not found. ServerJockey may be down.')
-    home = os.environ['HOME']
-    candidates = [home + filename, home + '/serverjockey' + filename, '/home/sjgms' + filename]
-    if len(sys.path) > 0 and not sys.path[0].endswith('/serverjockey_cmd.pyz'):  # Running from Source
-        home = os.getcwd() + '/../..'
-        candidates.extend([home + filename, home + '/..' + filename])
-    for candidate in candidates:
-        if os.path.isfile(candidate):
-            return candidate
-    raise Exception('Unable to find Clientfile. ServerJockey may be down. Or try using --user option.')
-
-
-def _get_clientfile(user: str | None, retries: int | None) -> str:
-    if not retries or retries <= 0:
-        return _find_clientfile(user)
-    while True:
-        try:
-            clientfile = _find_clientfile(user)
-            time.sleep(1.0)  # in case file is still being written
-            return clientfile
-        except Exception as e:
-            if retries <= 0:
-                raise e
-        retries -= 1
-        time.sleep(1.0)
-
-
-def _load_clientfile(clientfile: str) -> tuple:
-    with open(file=clientfile, mode='r') as file:
-        data = json.load(file)
-        return data['SERVER_URL'], data['SERVER_TOKEN']
-
-
-def _initialise() -> dict:
+def _initialise() -> cxt.Context:
     p = argparse.ArgumentParser(
         description='ServerJockey CLI.',
         epilog=util.get_resource('help.text'),
         formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
-    p.add_argument('--wait', '-w', type=int, default=0, help='Seconds to wait for ServerJockey service to start')
     p.add_argument('--user', '-u', type=str, help='Specify alternate user')
     p.add_argument('--tasks', '-t', type=str, nargs='+', help='List of tasks to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = p.parse_args(sys.argv[1:])
     _setup_logging(args.debug, args.nolog)
-    url, token = None, None
-    if args.commands or not args.tasks:
-        url, token = _load_clientfile(_get_clientfile(args.user, args.wait))
-    return dict(url=url, token=token,
-                debug=args.debug, user=args.user,
-                tasks=args.tasks, commands=args.commands)
+    return cxt.Context(args.debug, args.user, args.tasks, args.commands)
 
 
 # noinspection PyUnusedLocal
@@ -107,21 +54,22 @@ def _terminate(sig, frame):
 
 
 def main() -> int:
-    config, connection = None, None
+    context, connection = None, None
     try:
-        config = _initialise()
-        tasks, commands = config['tasks'], config['commands']
-        if tasks or commands:
+        context = _initialise()
+        if context.has_tasks() or context.has_commands():
             signal.signal(signal.SIGINT, _terminate)
-        if tasks:
-            tsk.TaskProcessor(config).process()
-        if commands:
-            connection = comms.HttpConnection(config)
-            cmd.CommandProcessor(config, connection).process()
+        else:
+            assert context.credentials()  # just check service is started
+        if context.has_tasks():
+            tsk.TaskProcessor(context).process()
+        if context.has_commands():
+            connection = comms.HttpConnection(context)
+            cmd.CommandProcessor(context, connection).process()
         logging.info('OK')
         return 0
     except Exception as e:
-        if config and config['debug']:
+        if not context or context.is_debug():
             raise e
         logging.error(str(e))
         return 1

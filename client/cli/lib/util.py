@@ -5,6 +5,9 @@ import time
 
 OUT = '    '
 GET, POST = 'GET', 'POST'
+DEFAULT_SERVICE = 'serverjockey'
+DEFAULT_USER = 'sjgms'
+DEFAULT_PORT = 6164
 
 
 def get_resource(name: str) -> str | None:
