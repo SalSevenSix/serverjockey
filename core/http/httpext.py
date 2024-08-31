@@ -126,15 +126,15 @@ class MtimeHandler(httpabc.GetHandler):
         self._items = []
 
     def check(self, path: str) -> MtimeHandler:
-        self._items.append({'type': 0, 'path': path})
+        self._items.append(dict(type=0, path=path))
         return self
 
     def file(self, path: str) -> MtimeHandler:
-        self._items.append({'type': 1, 'path': path})
+        self._items.append(dict(type=1, path=path))
         return self
 
     def dir(self, path: str) -> MtimeHandler:
-        self._items.append({'type': 2, 'path': path})
+        self._items.append(dict(type=2, path=path))
         return self
 
     async def handle_get(self, resource, data):

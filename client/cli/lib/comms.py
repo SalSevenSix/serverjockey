@@ -12,7 +12,7 @@ class HttpConnection:
         self._headers_get = {'X-Secret': config['token']}
         self._headers_post = self._headers_get.copy()
         self._headers_post.update({'Content-Type': 'application/json', 'Connection': 'close'})
-        url, self._out = config['url'], config['out']
+        url = config['url']
         if url.startswith('https'):
             # noinspection PyProtectedMember
             self._connection = client.HTTPSConnection(url[8:], context=ssl._create_unverified_context())
@@ -58,7 +58,7 @@ class HttpConnection:
             try:
                 if response.status == 200:
                     for line in response.readlines():
-                        logging.info(self._out + line.decode().strip())
+                        logging.info(util.OUT + line.decode().strip())
                 elif response.status == 404:
                     return
                 elif response.status != 204:

@@ -9,18 +9,16 @@ import time
 # ALLOW lib.*
 from . import util, tsk, cmd, comms
 
-_OUT = '    '
-
 
 class _NoLogFilter(logging.Filter):
     def filter(self, record):
-        return record.getMessage().startswith(_OUT)
+        return record.getMessage().startswith(util.OUT)
 
 
 class _NoLogFormatter(logging.Formatter):
     def format(self, record):
-        if record.msg and record.msg.startswith(_OUT):
-            record.msg = record.msg[len(_OUT):]
+        if record.msg and record.msg.startswith(util.OUT):
+            record.msg = record.msg[len(util.OUT):]
         return super(_NoLogFormatter, self).format(record)
 
 
@@ -97,7 +95,7 @@ def _initialise() -> dict:
     url, token = None, None
     if args.commands or not args.tasks:
         url, token = _load_clientfile(_get_clientfile(args.user, args.wait))
-    return dict(out=_OUT, url=url, token=token,
+    return dict(url=url, token=token,
                 debug=args.debug, user=args.user,
                 tasks=args.tasks, commands=args.commands)
 

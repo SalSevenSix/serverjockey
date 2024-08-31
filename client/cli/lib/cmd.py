@@ -13,7 +13,7 @@ from . import util, comms
 class CommandProcessor:
 
     def __init__(self, config: dict, connection: comms.HttpConnection):
-        self._out, self._url, self._token = config['out'], config['url'], config['token']
+        self._url, self._token = config['url'], config['token']
         self._connection, self._commands, self._instance = connection, [], None
         self._instances: dict = connection.get('/instances')
         for command in config['commands']:
@@ -55,17 +55,17 @@ class CommandProcessor:
 
     def _metrics(self) -> bool:
         for line in self._connection.get('/metrics').split('\n'):
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _mprof(self) -> bool:
         for line in self._connection.get('/mprof').split('\n'):
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _modules(self) -> bool:
         for module in self._connection.get('/modules'):
-            logging.info(self._out + module)
+            logging.info(util.OUT + module)
         return True
 
     def _instances(self) -> bool:
@@ -74,7 +74,7 @@ class CommandProcessor:
             logging.info('No instances found.')
             return True
         for identity in identities:
-            logging.info(self._out + identity + ' ' + self._instances[identity]['module'])
+            logging.info(util.OUT + identity + ' ' + self._instances[identity]['module'])
         return True
 
     def _use(self, argument: str | None) -> bool:
@@ -114,13 +114,13 @@ class CommandProcessor:
     def _runtime_meta(self) -> bool:
         result = self._connection.get(self._instance_path('/deployment/runtime-meta'))
         for line in result.split('\n'):
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _world_meta(self) -> bool:
         result = self._connection.get(self._instance_path('/deployment/world-meta'))
         for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _install_runtime(self, argument: str | None) -> bool:
@@ -207,23 +207,24 @@ class CommandProcessor:
             logging.warning('Invalid argument for sleep command, must be a number > 0, was: ' + str(argument))
         return True
 
+    # noinspection PyMethodMayBeStatic
     def _print(self, argument: str) -> bool:
-        logging.info(self._out + argument if argument else '')
+        logging.info(util.OUT + argument if argument else '')
         return True
 
     def _welcome(self) -> bool:
-        logging.info(self._out)
-        logging.info(self._out)
-        logging.info(self._out + ' ===========================================================')
-        logging.info(self._out + ' =                    WELCOME TO ZOMBOX                    =')
-        logging.info(self._out + ' ===========================================================')
-        logging.info(self._out)
-        logging.info(self._out + ' Open the webapp then login with the token.')
-        logging.info(self._out)
-        logging.info(self._out + ' Address   ' + self._url.replace('localhost', util.get_local_ip4()))
-        logging.info(self._out + ' Token     ' + self._token)
-        logging.info(self._out)
-        logging.info(self._out + ' (hit ENTER key to show login prompt)')
+        logging.info(util.OUT)
+        logging.info(util.OUT)
+        logging.info(util.OUT + ' ===========================================================')
+        logging.info(util.OUT + ' =                    WELCOME TO ZOMBOX                    =')
+        logging.info(util.OUT + ' ===========================================================')
+        logging.info(util.OUT)
+        logging.info(util.OUT + ' Open the webapp then login with the token.')
+        logging.info(util.OUT)
+        logging.info(util.OUT + ' Address   ' + self._url.replace('localhost', util.get_local_ip4()))
+        logging.info(util.OUT + ' Token     ' + self._token)
+        logging.info(util.OUT)
+        logging.info(util.OUT + ' (hit ENTER key to show login prompt)')
         return True
 
     # https://blogs.oracle.com/cloud-infrastructure/post/step-by-step-instructions-to-send-email-with-oci-email-delivery
@@ -249,8 +250,8 @@ class CommandProcessor:
         return True
 
     def _showtoken(self) -> bool:
-        logging.info(self._out + 'URL: ' + self._url.replace('localhost', util.get_local_ip4()))
-        logging.info(self._out + 'Token: ' + self._token)
+        logging.info(util.OUT + 'URL: ' + self._url.replace('localhost', util.get_local_ip4()))
+        logging.info(util.OUT + 'Token: ' + self._token)
         return True
 
     def _server(self, argument: str | None) -> bool:
@@ -259,7 +260,7 @@ class CommandProcessor:
             return True
         result = self._connection.get(self._instance_path('/server'))
         for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _auto(self, argument: str | None) -> bool:
@@ -268,9 +269,9 @@ class CommandProcessor:
 
     def _players(self) -> bool:
         result: list = self._connection.get(self._instance_path('/players'))
-        # logging.info(self._out + 'Players online: ' + str(len(result)))
+        # logging.info(util.OUT + 'Players online: ' + str(len(result)))
         for player in result:
-            line = self._out
+            line = util.OUT
             line += str(player['startmillis']) if 'startmillis' in player else '0'
             line += ' '
             line += str(player['uptime']) if 'uptime' in player else '0'
@@ -287,7 +288,7 @@ class CommandProcessor:
     def _system(self) -> bool:
         result = self._connection.get('/system/info')
         for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _report(self) -> bool:
@@ -300,7 +301,7 @@ class CommandProcessor:
             result = self._connection.get(self._instance_path('/server'))
             del result['instance']
             for line in util.repr_dict(result, identity).strip().split('\n'):
-                logging.info(self._out + line)
+                logging.info(util.OUT + line)
         self._instance = original
         return True
 
@@ -314,7 +315,7 @@ class CommandProcessor:
         if len(result) > 0 and lines < 100:
             result = result[-lines:]
         for line in result:
-            logging.info(self._out + line)
+            logging.info(util.OUT + line)
         return True
 
     def _log_tail_f(self) -> bool:
@@ -328,7 +329,7 @@ class CommandProcessor:
         if result:
             result = util.repr_dict(result) if isinstance(result, dict) else str(result)
             for line in result.strip().split('\n'):
-                logging.info(self._out + line)
+                logging.info(util.OUT + line)
         return True
 
     def _world_broadcast(self, argument: str) -> bool:

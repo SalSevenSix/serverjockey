@@ -3,6 +3,7 @@ import pkgutil
 import time
 # ALLOW NONE
 
+OUT = '    '
 GET, POST = 'GET', 'POST'
 
 
