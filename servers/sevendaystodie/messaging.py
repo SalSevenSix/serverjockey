@@ -1,5 +1,5 @@
 # ALLOW core.*
-from core.util import util
+from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
 from core.system import svrsvc, svrext
@@ -19,20 +19,17 @@ READY_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
-def initialise(mailer: msgabc.MulticastMailer):
+async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
     mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer))
+    mailer.register(await _ServerDetailsSubscriber(mailer).initialise())
     mailer.register(_PlayerEventSubscriber(mailer))
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_PREFIX = 'INF Version:'
-    VERSION_SUFFIX = 'Compatibility Version:'
+    VERSION_PREFIX, VERSION_SUFFIX = 'INF Version:', 'Compatibility Version:'
     VERSION_FILTER = msgftr.DataMatches('.*' + VERSION_PREFIX + '.*' + VERSION_SUFFIX + '.*')
-    IP_PREFIX = 'INF [EOS] Session address:'
-    IP_FILTER = msgftr.DataStrContains(IP_PREFIX)
     PORT_PREFIX = 'GamePref.ConnectToServerPort ='
     PORT_FILTER = msgftr.DataStrContains(PORT_PREFIX)
     CON_PORT_PREFIX = 'GamePref.UNUSED_ControlPanelPort ='
@@ -43,10 +40,13 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.VERSION_FILTER,
-                _ServerDetailsSubscriber.IP_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER,
                 _ServerDetailsSubscriber.CON_PORT_FILTER)))
-        self._mailer = mailer
+        self._mailer, self._ip = mailer, None
+
+    async def initialise(self) -> msgabc.Subscriber:
+        self._ip = await sysutil.public_ip()
+        return self
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
@@ -54,13 +54,9 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
             return None
-        if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.IP_PREFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
-            return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': self._ip, 'port': value})
             return None
         if _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)

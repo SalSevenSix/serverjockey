@@ -5,9 +5,7 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext
 from core.proc import proch, jobh, prcenc, wrapper
 from core.common import steam, interceptors, portmapper
-
-# https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Launch-Server-on-Linux
-# https://unturned.info/Server-Hosting/ServerHosting/
+from servers.unturned import messaging as msg
 
 
 def _default_cmdargs():
@@ -19,6 +17,8 @@ def _default_cmdargs():
     }
 
 
+# https://github.com/SmartlyDressedGames/U3-Docs/blob/master/ServerHosting.md#How-to-Launch-Server-on-Linux
+# https://unturned.info/Server-Hosting/ServerHosting/
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
@@ -114,7 +114,7 @@ class Deployment:
             await io.create_symlink(save_dir, self._save_dir)
 
     async def _map_ports(self):
-        port_key, port = 'port', 27015
+        port_key, port = 'port', msg.DEFAULT_PORT
         if await io.file_exists(self._commands_file):
             commands = await io.read_file(self._commands_file)
             for line in commands.split('\n'):

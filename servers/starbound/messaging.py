@@ -32,7 +32,6 @@ async def initialise(mailer: msgabc.MulticastMailer):
 
 # [Info] Server Version 1.4.4 (linux x86_64) Source ID: 8cbe6faf22282659828a194e06a08999f213769e Protocol: 747
 # [Info] UniverseServer: listening for incoming TCP connections on 0000:0000:0000:0000:0000:0000:0000:0000:21025
-
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_PREFIX, VERSION_SUFFIX = '[Info] Server Version', 'Source ID:'
     VERSION_FILTER = msgftr.DataMatches(

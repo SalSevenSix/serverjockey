@@ -4,10 +4,6 @@ import gc
 from core.http import httpabc, httpsec
 from core.metrics import mtxutil
 
-# https://github.com/pympler/pympler
-# https://pympler.readthedocs.io/en/latest/
-# TODO switched from using pympler to bad custom solution because issues on python3.12
-
 _TOTAL = 'TOTAL'
 _BASIC_TYPES = (int, float, str, dict, set, tuple, list, bytes)
 

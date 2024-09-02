@@ -172,18 +172,18 @@ class MtimeHandler(httpabc.GetHandler):
 
 class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
-    def __init__(self, path: str, tail: typing.Optional[str] = None, protected: bool = True,
+    def __init__(self, path: str, tail: typing.Optional[str] = None,
                  tempdir: str = '/tmp', ls_filter: typing.Callable = None,
                  read_tracker: io.BytesTracker = io.NullBytesTracker(),
                  write_tracker: io.BytesTracker = io.NullBytesTracker()):
-        self._path, self._tail, self._protected = path, tail, protected
+        self._path, self._tail = path, tail
         self._tempdir, self._ls_filter = tempdir, ls_filter
         self._read_tracker, self._write_tracker = read_tracker, write_tracker
 
     async def handle_get(self, resource, data):
-        if self._protected and not httpsec.is_secure(data):
+        if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        path = self._path + '/' + data[self._tail] if self._tail else self._path
+        path = self._resolve_path(data)
         if await io.file_exists(path):
             content_type = httpcnt.ContentTypeImpl.lookup(path)
             size = await io.file_size(path)
@@ -196,8 +196,7 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
         return httpabc.ResponseBody.NOT_FOUND
 
     async def handle_post(self, resource, data):
-        path = self._path + '/' + data[self._tail] if self._tail else self._path
-        body = util.get('body', data)
+        path, body = self._resolve_path(data), util.get('body', data)
         if not body:
             if await io.file_exists(path):
                 await io.delete_file(path)
@@ -217,6 +216,16 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
             await io.stream_write_file(path, body, tempdir=self._tempdir, tracker=self._write_tracker)
             return httpabc.ResponseBody.NO_CONTENT
         return httpabc.ResponseBody.BAD_REQUEST
+
+    def _resolve_path(self, data) -> str:
+        if not self._tail:
+            return self._path
+        tail = util.get(self._tail, data)
+        if not tail:
+            return self._path
+        if tail.find('..') > -1:
+            raise httpabc.ResponseBody.BAD_REQUEST
+        return self._path + '/' + tail
 
 
 class _FileByteStream(httpabc.ByteStream):

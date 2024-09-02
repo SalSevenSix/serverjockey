@@ -21,7 +21,7 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         await mtxinstance.initialise(self._context)
-        msg.initialise(self._context)
+        await msg.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httpabc.Resource):
