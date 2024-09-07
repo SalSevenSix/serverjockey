@@ -50,6 +50,7 @@ ln -fs $RELEASE_EGG_FILE egg-server-jockey-latest.json || exit 1
 echo "DEB package release"
 cp $SOURCE_FILE $RELEASE_FILE || exit 1
 chmod 644 $RELEASE_FILE || exit 1
+ln -fs $RELEASE_FILE sjgms-master-latest-${OSVER}.deb || exit 1
 ln -fs $RELEASE_FILE sjgms-master-latest.deb || exit 1
 
 echo "ZomBox ova release"

@@ -31,7 +31,7 @@
   <h3 id="clishowhelp" class="title is-4">Show Help</h3>
   <p>
     The CLI help text can be shown with the
-    <span class="is-family-monospace notranslate">-h</span>
+    <span class="is-family-monospace white-space-nowrap notranslate">-h</span>
     option. There are two kinds of operations that can be performed.
     <span class="has-text-weight-bold">Tasks</span>
     and
@@ -48,7 +48,7 @@
     Tasks are system admin operations that usually require root privilages (i.e.
     <span class="is-family-monospace notranslate">sudo</span>).
     Tasks are run using the
-    <span class="is-family-monospace notranslate">-t</span>
+    <span class="is-family-monospace white-space-nowrap notranslate">-t</span>
     option. The example below will upgrade the ServerJockey system to the latest version.
   </p>
   <CodeBlock>sudo serverjockey_cmd.pyz -t upgrade</CodeBlock>
@@ -57,7 +57,7 @@
   <p>
     Commands are operations that interact with a running ServerJockey service to manage game servers.
     A list of Commands can be run using the
-    <span class="is-family-monospace notranslate">-c</span>
+    <span class="is-family-monospace white-space-nowrap notranslate">-c</span>
     option. The example below will select the
     <span class="is-family-monospace notranslate">myserver</span>
     instance, then start the server.

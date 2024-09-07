@@ -63,23 +63,18 @@ if [ ! -d "../../.git" ]; then
 fi
 rm "$BRANCH.zip" > /dev/null 2>&1
 
-echo "Applying build timestamp"
+echo "Preparing for build"
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/index.js || exit 1
-
-echo "Prepare build directory"
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
 mkdir -p $TARGET_BIN_DIR || exit 1
 
 echo "Building cli client"
 $SERVERJOCKEY_DIR/client/cli/build.sh $TARGET_BIN_DIR/${SERVERJOCKEY}_cmd.pyz || exit 1
-
 echo "Building discord client"
 $SERVERJOCKEY_DIR/client/discord/build.sh ci $TARGET_BIN_DIR/serverlink || exit 1
-
 echo "Building web client"
 $SERVERJOCKEY_DIR/client/web/build.sh ci || exit 1
-
 echo "Building extension client"
 $SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
 
