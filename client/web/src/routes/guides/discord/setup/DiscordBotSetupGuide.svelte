@@ -208,7 +208,7 @@
   </p>
   <figure class="image max-1028">
     <img src={surl('/assets/guides/discord/setup/bot_invite_scope.png')}
-         alt="Set Bot Scope" loading="lazy" />
+         alt="Choose Bot Scope" loading="lazy" />
   </figure>
 </div>
 
@@ -220,9 +220,9 @@
     <span class="has-text-weight-bold">Copy</span>
     button to copy the generated invite URL.
   </p>
-  <figure class="image max-860">
+  <figure class="image max-850">
     <img src={surl('/assets/guides/discord/setup/bot_invite_perms.png')}
-         alt="Set Bot Perms" loading="lazy" />
+         alt="Choose Bot Perms" loading="lazy" />
   </figure>
 </div>
 
@@ -537,8 +537,8 @@
 
 
 <style>
-  figure.max-860 img {
-    max-width: 860px;
+  figure.max-850 img {
+    max-width: 850px;
   }
 
   figure.max-1028 img {

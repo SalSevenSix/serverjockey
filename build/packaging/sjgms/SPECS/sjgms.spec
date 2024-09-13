@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Thu Aug 15 2024 Bowden Salis <bsalis76@gmail.com> - 0.13.0
-- Feature release v0.13.0
+* Sat Sep 14 2024 Bowden Salis <bsalis76@gmail.com> - 0.13.0
+- Technical upgrades release
 * Wed Aug 14 2024 Bowden Salis <bsalis76@gmail.com> - 0.12.0
 - Ubuntu 24 migration technical release
 * Wed Jul 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.11.0
