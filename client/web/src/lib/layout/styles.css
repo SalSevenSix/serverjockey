@@ -110,12 +110,24 @@ figure.max-1024 img {
   max-width: 1024px;
 }
 
+figure.max-1024.is-bordered img {
+  max-width: 1040px;
+}
+
 figure.max-800 img {
   max-width: 800px;
 }
 
+figure.max-800.is-bordered img {
+  max-width: 816px;
+}
+
 figure.max-600 img {
   max-width: 600px;
+}
+
+figure.max-600.is-bordered img {
+  max-width: 616px;
 }
 
 figure.max-500 img {

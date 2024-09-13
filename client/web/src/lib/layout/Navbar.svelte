@@ -23,14 +23,14 @@
         <RubiksCube size="30" clazz="navbar-rubiks" />
         <span class="ml-1 is-size-5 has-text-weight-bold notranslate">ServerJockey</span>
       </div>
-      <a href={'#'} role="button" on:click|preventDefault={toggleMenu} class:is-active={menuOpen}
-         class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMain">
+      <a href={'#'} role="button" on:click|preventDefault={toggleMenu} class="navbar-burger"
+         class:is-active={menuOpen} aria-label="menu" aria-expanded="false" data-target="navbarMain">
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
       </a>
     </div>
-    <div id="navbarMain" class:is-active={menuOpen} class="navbar-menu">
+    <div id="navbarMain" class="navbar-menu" class:is-active={menuOpen}>
       <div class="navbar-start">
         <a on:click={closeMenu} class="navbar-item" href={surl('/')}>
           <i class="fa fa-house fa-lg"></i>&nbsp;&nbsp;Home</a>

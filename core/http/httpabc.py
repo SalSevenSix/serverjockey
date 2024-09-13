@@ -15,6 +15,7 @@ class HttpServiceCallbacks(metaclass=abc.ABCMeta):
     async def initialise(self) -> Resource:
         pass
 
+    @abc.abstractmethod
     async def shutdown(self):
         pass
 

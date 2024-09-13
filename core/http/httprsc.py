@@ -162,7 +162,7 @@ class PathProcessor:
         self._resource = resource
 
     def lookup_resource(self, path: str) -> typing.Optional[httpabc.Resource]:
-        found, tail, current = False, False, self._resource
+        found, current = False, self._resource
         for element in PathProcessor._split(path):
             found_path, found_arg = False, False
             for path_resource in current.children(httpabc.ResourceKind.PATH):

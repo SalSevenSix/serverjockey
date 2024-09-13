@@ -154,7 +154,7 @@
     should be visible to browse and mount as a drive.<br />
     <span class="has-text-weight-bold">e.g.</span>&nbsp; <span class="is-family-monospace">\\192.168.1.6</span>
   </p>
-  <figure class="image max-800">
+  <figure class="image max-800 is-bordered">
     <img src={surl('/assets/guides/virtualbox/samba.png')} alt="Samba sharing" loading="lazy" />
   </figure>
 </div>

@@ -89,6 +89,19 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href={surl('/guides/migrations')}><i class="fa fa-boxes-packing fa-lg theme-black-white"></i>&nbsp;
+      Game Save Migrations</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      This guide will show you how to migrate an existing game save (world) into ServerJockey.
+      Also how a game save can be copied or moved between ServerJockey instances, on the same or different machine.
+    </p>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
     <a href={surl('/guides/nginx')}><i class="fa fa-server fa-lg theme-black-white"></i>
       Hosting behind Nginx</a>
   </div>

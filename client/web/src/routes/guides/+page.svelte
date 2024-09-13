@@ -27,12 +27,12 @@
 
 <div class="content">
   <hr />
-  <h3 class="title is-4">General Guides</h3>
+  <h3 id="generalguides" class="title is-4">General Guides</h3>
 </div>
 <GeneralGuides />
 
 <div class="content">
   <hr />
-  <h3 class="title is-4">Game Server Guides</h3>
+  <h3 id="gameserverguides" class="title is-4">Game Server Guides</h3>
 </div>
 <GameServerGuides />
