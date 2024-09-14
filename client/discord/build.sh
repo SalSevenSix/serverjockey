@@ -42,7 +42,7 @@ if [ "$JS_RUNTIME" = "node" ]; then
     nexe index.js --output build/serverlink --build --python=$PYTHON_EXE || exit 1
   fi
 else  # bun
-  $JS_RUNTIME build ./index.js --compile --outfile=build/serverlink || exit 1
+  $JS_RUNTIME build --compile --target=bun-linux-x64-baseline --outfile=build/serverlink ./index.js || exit 1
 fi
 
 if [ ! -z $TARGET_FILE ]; then

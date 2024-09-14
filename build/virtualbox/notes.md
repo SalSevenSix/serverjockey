@@ -62,7 +62,7 @@ https://github.com/SalSevenSix/serverjockey
 5. Install steamcmd
 6. Install Samba & configure (see below)
 7. Install welcome.sh & add to cron
-8. Disable SSH service
+8. Disable SSH service including socket trigger
 
 ### Samba Setup Commands
 ```

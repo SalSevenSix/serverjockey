@@ -1,6 +1,16 @@
 'use strict';
 
 function initialise() {
+  const metarg = process.argv.length > 2 ? process.argv[2] : null;
+  if (metarg == null || metarg === '-h' || metarg === '--help') {
+    console.log('usage: serverlink [-h|--help] [-v|--version] [config1.json config2.json ...]');
+    process.exit(metarg == null ? 1 : 0);
+  }
+  const version = '0.13.0 ({timestamp})';
+  if (metarg === '-v' || metarg === '--version') {
+    console.log(version);
+    process.exit(0);
+  }
   let config = {};
   for (let i = 2; i < process.argv.length; i++) {
     config = { ...config, ...require(process.argv[i]) };
@@ -16,7 +26,7 @@ function initialise() {
   if (process.env[tls_key] != 0 && config.SERVER_URL.startsWith('https')) {
     process.env[tls_key] = 0;
   }
-  logger.info('Version: 0.13.0 ({timestamp})');
+  logger.info('Version: ' + version);
   logger.info('Executable: ' + process.argv[0]);
   logger.info('JS Runtime: ' + process.version);
   logger.info('discord.js: ' + require('./node_modules/discord.js/package.json').version);
