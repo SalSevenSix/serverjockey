@@ -67,7 +67,7 @@
     Group select all the the files &amp; folders and pack them into a zip file with a name starting with
     &nbsp;<span class="is-family-monospace has-text-weight-bold notranslate">world-</span>&nbsp;
     for the guide I called it
-    &nbsp;<span class="is-family-monospace notranslate">world-migrated.zip</span>
+    &nbsp;<span class="is-family-monospace white-space-nowrap notranslate">world-migrated.zip</span>
   </p>
   <p>
     Compare the zip file downloaded to the new zip file containing the game save to migrate.
