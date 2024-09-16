@@ -46,7 +46,7 @@ class Server(svrabc.Server):
     async def run(self):
         server_process = await self._deployment.new_server_process()
         server_process.use_pipeinsvc(self._pipeinsvc)
-        server_process.wait_for_started(msg.SERVER_STARTED_FILTER, 90)
+        server_process.wait_for_started(msg.SERVER_STARTED_FILTER, 300)
         await server_process.run()
 
     async def stop(self):
