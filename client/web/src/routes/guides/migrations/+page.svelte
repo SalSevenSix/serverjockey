@@ -83,13 +83,14 @@
     Now upload the migration game save zip, then restore it.
     After this has been done, the existing save should be successfully migrated into the instance!
   </p>
-  <p>
-    Note that this overall process can be used to simply copy game saves between ServerJockey instances.
-    However you only need to create a world backup, download it, then upload it to the target instance and restore it.
-  </p>
   <figure class="image max-1024 is-bordered">
     <img src={surl('/assets/guides/migrations/restore_world.png')} alt="Upload and restore migration" loading="lazy" />
   </figure>
+  <p>
+    <span class="has-text-weight-bold">Note</span>
+    that this overall process can be used to simply copy game saves between ServerJockey instances.
+    However you only need to create a world backup, download it, then upload it to the target instance and restore it.
+  </p>
 </div>
 
 <BackToTop />

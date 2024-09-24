@@ -46,3 +46,26 @@
     </div>
   </nav>
 </div>
+
+
+<style>
+  .navbar-menu.is-active {
+    animation: dropmenu .2s ease-in-out;
+  }
+
+  @keyframes dropmenu {
+    0% {
+      display: none;
+      opacity: 0;
+      height: 0;
+    }
+    80% {
+      display: block;
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+      height: 16em;
+    }
+  }
+</style>

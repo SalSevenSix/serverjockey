@@ -6,6 +6,7 @@ PYTHON_LIBDIR="python3.12"
 python3 -m pipenv --version > /dev/null || exit 1
 which wget > /dev/null || exit 1
 which unzip > /dev/null || exit 1
+
 cd "$(dirname $0)" || exit 1
 BRANCH="${1-local}"
 BUILD_DIR="$(pwd)"
@@ -48,16 +49,16 @@ cd $DIST_DIR || exit 1
 if [ ! -d "../../.git" ]; then
   echo "Updating build scripts"
   if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
-    cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh"
+    cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" || exit 1
     echo "Build script updated. Please run again."
     exit 1
   fi
   if which apt > /dev/null; then
-    cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh"
+    cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh" || exit 1
     chmod 755 $BUILD_DIR/deb.sh || exit 1
   fi
   if which yum > /dev/null; then
-    cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh"
+    cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh" || exit 1
     chmod 755 $BUILD_DIR/rpm.sh || exit 1
   fi
 fi
