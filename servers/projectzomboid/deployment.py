@@ -13,7 +13,11 @@ _WORLD_NAME_DEF = 'servertest'
 def _default_cmdargs() -> dict:
     return {
         '_comment_mod_check_minutes': 'Check interval for updated mods in minutes. Use 0 to disable checks.',
-        'mod_check_minutes': 15,
+        'mod_check_minutes': 20,
+        '_comment_mod_check_action':
+            'Action to take after updated mods have been detected. '
+            'Options: 1=NotifyOnly 2=RestartOnEmpty 3=RestartAfterWarnings 4=RestartImmediately',
+        'mod_check_action': 3,
         '_comment_cache_map_files': 'Force map files to be cached in memory while server is running (EXPERIMENTAL)',
         'cache_map_files': False
     }
@@ -104,7 +108,7 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('cache_map_files', cmdargs, False):
             cachelock.set_path(self._mailer, self, self._save_dir)
-        mck.set_check_interval(self._mailer, self, util.get('mod_check_minutes', cmdargs, 0))
+        mck.apply_config(self._mailer, self, cmdargs)
         server = proch.ServerProcess(self._mailer, executable)
         server.append_arg('-cachedir=' + self._world_dir)
         if world_name != _WORLD_NAME_DEF:

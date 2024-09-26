@@ -1,9 +1,10 @@
 import logging
 import asyncio
+import enum
 # ALLOW core.*
 from core.util import util, dtutil, tasks
 from core.msg import msgabc, msgftr
-from core.msgc import mc
+from core.msgc import mc, sc
 from core.system import svrsvc
 from core.proc import proch
 from servers.projectzomboid import messaging as msg
@@ -13,26 +14,46 @@ from servers.projectzomboid import messaging as msg
 # LOG : General, 1703088424899> 2,217,885> Checking started. The answer will be written in the log file and in the chat
 # LOG : General, 1703088425200> 2,218,186> CheckModsNeedUpdate: Mods need update
 
-_CHECK_MINUTES = 'modcheck.CHECK_MINUTES'
-_CHECK_MINUTES_FILTER = msgftr.NameIs(_CHECK_MINUTES)
-
 
 def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(_RestartSubscriber(mailer))
+    mailer.register(_WarnThenRestartSubscriber(mailer))
+    mailer.register(_EmptyThenRestartSubscriber(mailer))
+    mailer.register(_HandleRestartSubscriber(mailer))
     mailer.register(_ModsNeedUpdateSubscriber(mailer))
     mailer.register(_CheckModsNeedUpdate(mailer))
 
 
-def set_check_interval(mailer: msgabc.Mailer, source, minutes: int):
-    assert isinstance(minutes, int) and minutes >= 0
-    mailer.post(source, _CHECK_MINUTES, minutes)
+def apply_config(mailer: msgabc.Mailer, source, config: dict):
+    mailer.post(source, _CheckModsConfig.APPLY, _CheckModsConfig(config))
+
+
+class _CheckModsAction(enum.Enum):
+    NOTIFY_ONLY, RESTART_ON_EMPTY, RESTART_AFTER_WARNING, RESTART_IMMEDIATELY = 1, 2, 3, 4
+
+
+class _CheckModsConfig:
+    APPLY = '_CheckModsConfig.Apply'
+    APPLY_FILTER = msgftr.NameIs(APPLY)
+
+    def __init__(self, config: dict):
+        minutes = util.get('mod_check_minutes', config, 0)
+        assert isinstance(minutes, int) and minutes >= 0
+        self._seconds = minutes * 60.0 if minutes > 0 else 0.0
+        action = util.get('mod_check_action', config)
+        self._action = _CheckModsAction(action) if action else _CheckModsAction.RESTART_AFTER_WARNING
+
+    def mod_check_seconds(self) -> int:
+        return self._seconds
+
+    def mod_check_action(self) -> _CheckModsAction:
+        return self._action
 
 
 class _CheckModsNeedUpdate(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
-            _CHECK_MINUTES_FILTER,
+            _CheckModsConfig.APPLY_FILTER,
             mc.ServerProcess.FILTER_STATE_STARTED,
             mc.ServerProcess.FILTER_STATE_STOPPING,
             mc.ServerProcess.FILTER_STATES_DOWN,
@@ -41,9 +62,8 @@ class _CheckModsNeedUpdate(msgabc.AbcSubscriber):
         self._checker = _CheckModsNeedUpdateTask(mailer, self._seconds)
 
     def handle(self, message):
-        if _CHECK_MINUTES_FILTER.accepts(message):
-            minutes = message.data()
-            self._seconds = minutes * 60.0 if minutes > 0 else 0.0
+        if _CheckModsConfig.APPLY_FILTER.accepts(message):
+            self._seconds = message.data().mod_check_seconds()
             return None
         if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             self._checker.stop()
@@ -113,14 +133,71 @@ class _ModsNeedUpdateSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class _RestartSubscriber(msgabc.AbcSubscriber):
-    WAIT = '_RestartSubscriber.Wait'
-    WAIT_FILTER = msgftr.NameIs(WAIT)
+class _HandleRestartSubscriber(msgabc.AbcSubscriber):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(msgftr.Or(_CheckModsConfig.APPLY_FILTER, msg.SERVER_RESTART_REQUIRED_FILTER))
+        self._mailer, self._action = mailer, None
+
+    async def handle(self, message):
+        if _CheckModsConfig.APPLY_FILTER.accepts(message):
+            self._action = message.data().mod_check_action()
+            return None
+        if self._action is _CheckModsAction.NOTIFY_ONLY:
+            await proch.PipeInLineService.request(self._mailer, self, 'servermsg "Mod updated. No further action."')
+        elif self._action is _CheckModsAction.RESTART_ON_EMPTY:
+            await proch.PipeInLineService.request(self._mailer, self, 'servermsg "Mod updated. Restarting when empty."')
+            self._mailer.post(self, _EmptyThenRestartSubscriber.RESTART)
+        elif self._action is _CheckModsAction.RESTART_AFTER_WARNING:
+            self._mailer.post(self, _WarnThenRestartSubscriber.RESTART)
+        elif self._action is _CheckModsAction.RESTART_IMMEDIATELY:
+            await proch.PipeInLineService.request(self._mailer, self, 'servermsg "Mod updated. Server restarting NOW."')
+            await asyncio.sleep(10.0)  # grace
+            svrsvc.ServerService.signal_restart(self._mailer, self)
+        return None
+
+
+class _EmptyThenRestartSubscriber(msgabc.AbcSubscriber):
+    RESTART = '_EmptyThenRestartSubscriber.Restart'
+    RESTART_FILTER = msgftr.NameIs(RESTART)
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.Or(mc.PlayerStore.EVENT_FILTER, _EmptyThenRestartSubscriber.RESTART_FILTER))
+        self._mailer = mailer
+        self._player_names, self._waiting = set(), False
+
+    def handle(self, message):
+        if _EmptyThenRestartSubscriber.RESTART_FILTER.accepts(message):
+            if len(self._player_names) == 0:
+                svrsvc.ServerService.signal_restart(self._mailer, self)
+            else:
+                self._waiting = True
+            return None
+        data = message.data().asdict()
+        event_name = data['event'].upper()
+        if event_name == sc.CLEAR:
+            self._player_names, self._waiting = set(), False
+            return None  # No shutdown because CLEAR does not mean last player logged out
+        player_name = data['player']['name']
+        if event_name == sc.LOGIN:
+            self._player_names.add(player_name)
+        elif event_name == sc.LOGOUT:
+            if player_name in self._player_names:
+                self._player_names.remove(player_name)
+                if self._waiting and len(self._player_names) == 0:
+                    self._player_names, self._waiting = set(), False
+                    svrsvc.ServerService.signal_restart(self._mailer, self)
+        return None
+
+
+class _WarnThenRestartSubscriber(msgabc.AbcSubscriber):
+    RESTART, WAIT = '_WarnThenRestartSubscriber.Restart', '_WarnThenRestartSubscriber.Wait'
+    RESTART_FILTER, WAIT_FILTER = msgftr.NameIs(RESTART), msgftr.NameIs(WAIT)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
-            msg.SERVER_RESTART_REQUIRED_FILTER,
-            _RestartSubscriber.WAIT_FILTER,
+            _WarnThenRestartSubscriber.RESTART_FILTER,
+            _WarnThenRestartSubscriber.WAIT_FILTER,
             mc.ServerProcess.FILTER_STATES_DOWN,
             msgftr.IsStop()))
         self._mailer = mailer
@@ -130,14 +207,14 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
         if message is msgabc.STOP or mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._initiated, self._second_message = 0, False
             return True if message is msgabc.STOP else None
-        if self._initiated == 0 and msg.SERVER_RESTART_REQUIRED_FILTER.accepts(message):
+        if self._initiated == 0 and _WarnThenRestartSubscriber.RESTART_FILTER.accepts(message):
             self._initiated, self._second_message = dtutil.now_millis(), False
             await proch.PipeInLineService.request(
                 self._mailer, self,
                 'servermsg "Mod updated. Server restart in 5 minutes. Please find a safe place and logout."')
-            self._mailer.post(self, _RestartSubscriber.WAIT)
+            self._mailer.post(self, _WarnThenRestartSubscriber.WAIT)
             return None
-        if self._initiated > 0 and _RestartSubscriber.WAIT_FILTER.accepts(message):
+        if self._initiated > 0 and _WarnThenRestartSubscriber.WAIT_FILTER.accepts(message):
             waited = dtutil.now_millis() - self._initiated
             if waited > 300000:  # 5 minutes
                 self._initiated, self._second_message = 0, False
@@ -148,8 +225,8 @@ class _RestartSubscriber(msgabc.AbcSubscriber):
                 await proch.PipeInLineService.request(
                     self._mailer, self,
                     'servermsg "Mod updated. Server restart in 1 minute. Please find a safe place and logout."')
-                self._mailer.post(self, _RestartSubscriber.WAIT)
+                self._mailer.post(self, _WarnThenRestartSubscriber.WAIT)
                 return None
             await asyncio.sleep(1.0)
-            self._mailer.post(self, _RestartSubscriber.WAIT)
+            self._mailer.post(self, _WarnThenRestartSubscriber.WAIT)
         return None
