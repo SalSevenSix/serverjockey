@@ -8,7 +8,7 @@ find_steamcmd() {
 
 check_steamcmd() {
   echo
-  echo "  checking for SteamCMD, this may take some time."
+  echo "  checking for SteamCMD, this may take some time"
   find_steamcmd
   if [ $? -ne 0 ]; then
     echo "ERROR SteamCMD not found."
@@ -27,7 +27,7 @@ check_steamcmd() {
 
 check_jockey() {
   echo
-  echo "  checking for python3."
+  echo "  checking for python3"
   if [ $(which python3 | wc -l) -eq 0 ]; then
     echo "ERROR python3 not found."
     echo "For Ubuntu/Debian;"
@@ -40,19 +40,19 @@ check_jockey() {
   fi
 
   echo
-  echo "  checking python3 version, 3.10 or 3.11 or 3.12 required."
-  local python_check=0
-  [ $python_check -eq 0 ] && python_check=$(python3 --version | grep "Python 3\.10\." | wc -l)
-  [ $python_check -eq 0 ] && python_check=$(python3 --version | grep "Python 3\.11\." | wc -l)
-  [ $python_check -eq 0 ] && python_check=$(python3 --version | grep "Python 3\.12\." | wc -l)
-  if [ $python_check -eq 0 ]; then
+  echo "  checking python3 version, 3.10 or 3.11 or 3.12 required"
+  local PYTHON_CHECK=0
+  [ $PYTHON_CHECK -eq 0 ] && PYTHON_CHECK=$(python3 --version | grep "Python 3\.10\." | wc -l)
+  [ $PYTHON_CHECK -eq 0 ] && PYTHON_CHECK=$(python3 --version | grep "Python 3\.11\." | wc -l)
+  [ $PYTHON_CHECK -eq 0 ] && PYTHON_CHECK=$(python3 --version | grep "Python 3\.12\." | wc -l)
+  if [ $PYTHON_CHECK -eq 0 ]; then
     echo "ERROR python3 executable is not version 3.10 or 3.11 or 3.12"
     echo "ServerJockey cannot run on this system until python3 is an acceptable version."
     exit 1
   fi
 
   echo
-  echo "  checking for pip."
+  echo "  checking for pip"
   python3 -m pip --version
   if [ $? -ne 0 ]; then
     echo "ERROR Pip not found."
@@ -64,7 +64,7 @@ check_jockey() {
   fi
 
   echo
-  echo "  checking for pipenv."
+  echo "  checking for pipenv"
   python3 -m pipenv --version
   if [ $? -ne 0 ]; then
     echo "ERROR Pip not found."
@@ -76,7 +76,7 @@ check_jockey() {
   fi
 
   echo
-  echo "  installing ServerJockey module dependencies."
+  echo "  installing ServerJockey module dependencies"
   cd "$JOCKEY_DIR" || exit 1
   python3 -m pipenv sync
   if [ $? -ne 0 ]; then
@@ -87,66 +87,41 @@ check_jockey() {
 
 check_discord() {
   echo
-  echo "  checking for nodejs."
-  node --version
+  echo "  checking for bun"
+  ~/.bun/bin/bun --version
   if [ $? -ne 0 ]; then
-    echo "ERROR Nodejs not found."
-    echo "For Ubuntu/Debian;"
-    echo "  $ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -"
-    echo "  $ sudo apt-get install nodejs"
-    echo "For RedHat/CentOS;"
-    echo "  $ curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -"
-    echo "  $ sudo yum install nodejs"
+    echo "ERROR Bun not found."
+    echo "  $ curl -fsSL https://bun.sh/install | bash"
     exit 1
   fi
 
   echo
-  echo "  checking nodejs version, v18 or higher required."
-  local node_version=$(node --version | awk -F"." '{print$1}' | cut -c2-)
-  if [ $node_version -lt 18 ]; then
-    echo "ERROR Nodejs version too low, version 18 or higher required."
-    echo "For Ubuntu/Debian;"
-    echo "  $ sudo apt-get purge nodejs"
-    echo "  $ sudo apt autoremove"
-    echo "  $ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -"
-    echo "  $ sudo apt-get install nodejs"
-    echo "For RedHat/CentOS;"
-    echo "  $ sudo yum autoremove nodejs"
-    echo "  $ curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -"
-    echo "  $ sudo yum install nodejs"
+  echo "  installing ServerLink module dependencies"
+  local DISCORD_DIR="$JOCKEY_DIR/client/discord"
+  cd $DISCORD_DIR || exit 1
+  ~/.bun/bin/bun install --frozen-lockfile
+  if [ $? -ne 0 ]; then
+    echo "ERROR Failed installing ServerLink dependencies. Sorry."
     exit 1
   fi
 
   echo
-  echo "  checking for ServerLink module dependencies."
-  local discord_dir="$JOCKEY_DIR/client/discord"
-  if [ ! -d "$discord_dir/node_modules" ]; then
-    echo "  dependencies not found, installing now."
-    cd $discord_dir || exit 1
-    npm ci
-    if [ $? -ne 0 ]; then
-      echo "ERROR Failed installing ServerLink dependencies. Sorry."
-      exit 1
-    fi
-  fi
-
-  echo
-  echo "  checking for ServerLink instance."
-  local serverlink_dir="$HOME_DIR/serverlink"
-  if [ ! -d "$serverlink_dir" ]; then
-    echo "  instance not found, creating it now."
-    mkdir -p $serverlink_dir
-    cd $serverlink_dir || exit 1
-    ln -s "$discord_dir/index.js" "index.js"
+  echo "  checking for ServerLink instance"
+  local SERVERLINK_DIR="$HOME_DIR/serverlink"
+  if [ ! -d "$SERVERLINK_DIR" ]; then
+    echo "  instance not found, creating it now"
+    mkdir -p $SERVERLINK_DIR
+    cd $SERVERLINK_DIR || exit 1
+    ln -s "$DISCORD_DIR/index.js" "index.js"
     echo '{ "module": "serverlink", "hidden": true }' > instance.json
   fi
 }
 
 check_webapp() {
   echo
-  echo "  checking for webapp."
+  echo "  checking for webapp"
   if [ ! -d "$JOCKEY_DIR/web" ]; then
-    echo "  webapp not found, building it now."
+    echo "  webapp not found, building it now"
     $JOCKEY_DIR/client/web/build.sh ci
     if [ $? -ne 0 ]; then
       echo "ERROR Failed building webapp. Sorry."
@@ -157,7 +132,7 @@ check_webapp() {
 
 check_dependencies() {
   echo
-  echo "CHECKING dependencies."
+  echo "CHECKING dependencies..."
   cd $JOCKEY_DIR || exit 1
   check_jockey
   check_discord

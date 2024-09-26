@@ -40,18 +40,18 @@ def _load_cmdargs(home: str) -> dict:
 
 def _argument_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description='Start ServerJockey game server management system.')
-    p.add_argument('--version', action='store_true', help='Show version then exit')
+    p.add_argument('--version', action='store_true', help='Show version and exit')
     p.add_argument('--home', type=str,
                    help='Home directory to use for server instances, default is current working directory')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
-                   help='Optional Log file to use, relative to "home" unless starts with "/" or "."')
-    p.add_argument('--tempdir', type=str, help='Directory to use for temporary files, default is .tmp under home')
+                   help='Optional log file to use, relative to HOME unless starts with "/" or "."')
+    p.add_argument('--tempdir', type=str, help='Directory to use for temporary files, default is .tmp under HOME')
     p.add_argument('--host', type=str, help='Comma delimited IPs to bind http service, default is all')
     p.add_argument('--port', type=int, help='Port for http service, default is 6164')
     p.add_argument('--showtoken', action='store_true', help='Print the login token to stdout')
     p.add_argument('--noupnp', action='store_true', help='Do not enable UPnP services')
     p.add_argument('--nostore', action='store_true', help='Do not use database to store activity')
-    p.add_argument('--debug', action='store_true', help='Debug mode')
+    p.add_argument('--debug', action='store_true', help='Debug mode logging')
     p.add_argument('--trace', action='store_true', help='Debug mode with more logging')
     return p
 
