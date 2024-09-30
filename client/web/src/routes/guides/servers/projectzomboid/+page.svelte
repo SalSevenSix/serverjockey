@@ -88,14 +88,20 @@ UPnP=false
 <div class="content pt-4" id="modUpdateRestarts">
   <h4 class="title is-5">Restarts for Mod updates</h4>
   <p>
-    ServerJockey will automatically restart a Project Zomboid server if any of the mods used have been updated
-    on the Steam Workshop. By default, the mods are checked every 15 minutes. This interval can be changed in
-    the <span class="has-text-weight-bold">Launch Options</span> configuration.
-    Use 0 minutes to disable automatic restarts.
+    ServerJockey will automatically restart a Project Zomboid server if any of the mods used have been updated on
+    the Steam Workshop. By default, the mods are checked every 20 minutes. This interval can be changed in the
+    <span class="has-text-weight-bold">Launch Options</span>
+    configuration. Use 0 minutes to disable automatic restarts.
+  </p>
+  <p>
+    By default, a warning to players is given 5 minutes and 1 minute before the restart.
+    Other action options are available in the configuration. These are explained in the configuration comments.
   </p>
   <CodeBlock nocopy>
 &quot;_comment_mod_check_minutes&quot;: &quot;Check interval for updated mods in minutes. Use 0 to disable checks.&quot;,
-&quot;mod_check_minutes&quot;: 15</CodeBlock>
+&quot;mod_check_minutes&quot;: 20,
+&quot;_comment_mod_check_action&quot;: &quot;Action to take after updated mods have been detected. Options: 1=NotifyOnly 2=RestartOnEmpty 3=RestartAfterWarnings 4=RestartImmediately&quot;,
+&quot;mod_check_action&quot;: 3,</CodeBlock>
 </div>
 
 <div class="content pt-4" id="integrationMods">
