@@ -67,7 +67,7 @@ check_jockey() {
   echo "  checking for pipenv"
   python3 -m pipenv --version
   if [ $? -ne 0 ]; then
-    echo "ERROR Pip not found."
+    echo "ERROR Pipenv not found."
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt install pipenv"
     echo "For RedHat/CentOS;"

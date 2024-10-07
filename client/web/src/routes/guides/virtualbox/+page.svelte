@@ -129,7 +129,7 @@
   </p>
   <CodeBlock>sudo systemctl start ssh</CodeBlock>
   <p>
-    Enable the SSH service to automatically start SSH when the appliance starts.
+    Enable the SSH service to automatically start when the appliance starts.
   </p>
   <CodeBlock>sudo systemctl enable ssh</CodeBlock>
 
@@ -140,7 +140,7 @@
   </p>
   <CodeBlock>sudo systemctl start smbd</CodeBlock>
   <p>
-    Enable the Samba service to automatically start Samba when the appliance starts.
+    Enable the Samba service to automatically start when the appliance starts.
   </p>
   <CodeBlock>sudo systemctl enable smbd</CodeBlock>
   <p>

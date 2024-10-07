@@ -44,8 +44,8 @@ def _argument_parser() -> argparse.ArgumentParser:
     p.add_argument('--home', type=str,
                    help='Home directory to use for server instances, default is current working directory')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',
-                   help='Optional log file to use, relative to HOME unless starts with "/" or "."')
-    p.add_argument('--tempdir', type=str, help='Directory to use for temporary files, default is .tmp under HOME')
+                   help='Optional log file to use, relative to home unless starts with "/" or "."')
+    p.add_argument('--tempdir', type=str, help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--host', type=str, help='Comma delimited IPs to bind http service, default is all')
     p.add_argument('--port', type=int, help='Port for http service, default is 6164')
     p.add_argument('--showtoken', action='store_true', help='Print the login token to stdout')

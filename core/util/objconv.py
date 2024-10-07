@@ -15,6 +15,14 @@ def to_bool(value: typing.Any) -> bool:
     return True
 
 
+def to_int(value: typing.Any, fallback: int = 0) -> int:
+    # noinspection PyBroadException
+    try:
+        return int(value)
+    except Exception:
+        return fallback
+
+
 def obj_to_str(obj: typing.Any) -> str:
     value = repr(obj)
     if obj is None or isinstance(obj, (str, tuple, list, dict, bool, int, float)):

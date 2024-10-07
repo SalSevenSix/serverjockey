@@ -144,19 +144,20 @@ class _HandleRestartSubscriber(msgabc.AbcSubscriber):
             self._action = message.data().mod_check_action()
             return None
         if self._action is _CheckModsAction.NOTIFY_ONLY:
-            await proch.PipeInLineService.request(self._mailer, self, 'servermsg "Mod updated. No further action."')
+            await _servermsg(self._mailer, self, 'Mod updated. No further action.')
         elif self._action is _CheckModsAction.RESTART_ON_EMPTY:
-            await proch.PipeInLineService.request(self._mailer, self, 'servermsg "Mod updated. Restarting when empty."')
+            await _servermsg(self._mailer, self, 'Mod updated. Restarting when empty.')
             self._mailer.post(self, _EmptyThenRestartSubscriber.RESTART)
         elif self._action is _CheckModsAction.RESTART_AFTER_WARNING:
             self._mailer.post(self, _WarnThenRestartSubscriber.RESTART)
         elif self._action is _CheckModsAction.RESTART_IMMEDIATELY:
-            await proch.PipeInLineService.request(self._mailer, self, 'servermsg "Mod updated. Server restarting NOW."')
+            await _servermsg(self._mailer, self, 'Mod updated. Server restarting NOW.')
             await asyncio.sleep(10.0)  # grace
             svrsvc.ServerService.signal_restart(self._mailer, self)
         return None
 
 
+# TODO this can be moved into core package
 class _EmptyThenRestartSubscriber(msgabc.AbcSubscriber):
     RESTART = '_EmptyThenRestartSubscriber.Restart'
     RESTART_FILTER = msgftr.NameIs(RESTART)
@@ -209,9 +210,8 @@ class _WarnThenRestartSubscriber(msgabc.AbcSubscriber):
             return True if message is msgabc.STOP else None
         if self._initiated == 0 and _WarnThenRestartSubscriber.RESTART_FILTER.accepts(message):
             self._initiated, self._second_message = dtutil.now_millis(), False
-            await proch.PipeInLineService.request(
-                self._mailer, self,
-                'servermsg "Mod updated. Server restart in 5 minutes. Please find a safe place and logout."')
+            await _servermsg(self._mailer, self,
+                             'Mod updated. Server restart in 5 minutes. Please find a safe place and logout.')
             self._mailer.post(self, _WarnThenRestartSubscriber.WAIT)
             return None
         if self._initiated > 0 and _WarnThenRestartSubscriber.WAIT_FILTER.accepts(message):
@@ -222,11 +222,14 @@ class _WarnThenRestartSubscriber(msgabc.AbcSubscriber):
                 return None
             if not self._second_message and waited > 240000:  # 4 minutes
                 self._second_message = True
-                await proch.PipeInLineService.request(
-                    self._mailer, self,
-                    'servermsg "Mod updated. Server restart in 1 minute. Please find a safe place and logout."')
+                await _servermsg(self._mailer, self,
+                                 'Mod updated. Server restart in 1 minute. Please find a safe place and logout.')
                 self._mailer.post(self, _WarnThenRestartSubscriber.WAIT)
                 return None
             await asyncio.sleep(1.0)
             self._mailer.post(self, _WarnThenRestartSubscriber.WAIT)
         return None
+
+
+async def _servermsg(mailer: msgabc.MulticastMailer, source: any, message: str):
+    await proch.PipeInLineService.request(mailer, source, 'servermsg "' + message + '"')
