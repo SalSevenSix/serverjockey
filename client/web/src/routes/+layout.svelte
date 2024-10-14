@@ -22,7 +22,7 @@
 
 
 <svelte:head>
-	<title>ServerJockey</title>
+  <title>ServerJockey</title>
 </svelte:head>
 
 <section class="section">

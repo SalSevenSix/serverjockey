@@ -19,7 +19,7 @@
   --color-dark-lightest-def: #4A6488;  /* https://www.colorhex.app/color/4A6488 */
 
   /* https://date-picker-svelte.kasper.space */
-	--date-input-width: 95%;
+  --date-input-width: 95%;
 }
 
 
