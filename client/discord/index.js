@@ -99,6 +99,8 @@ function handleMessage(message) {
   if (instanceData && instanceData.server && instanceData.server.hasOwnProperty(command)) {
     if (command === 'help' && data.length === 0) {
       system.help(args);
+      /* demo mode
+      return; */
     }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
     instanceData.server[command](args);

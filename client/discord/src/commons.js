@@ -100,6 +100,12 @@ exports.server = function($) {
     $.message.react('⛔');
     return;
   }
+  /* demo mode
+  $.message.react('⌛');
+  util.sleep(1200).then(function() {
+    $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
+  });
+  return; */
   $.httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
     let currentState = json.current.state;
     let targetUp = cmd === 'start';
@@ -185,6 +191,9 @@ exports.setconfig = function($) {
     $.message.react('❓');
     return;
   }
+  /* demo mode
+  util.sleep(250).then(function() { $.message.react('✅'); });
+  return; */
   fetch(attachment.url)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
@@ -211,6 +220,13 @@ exports.deployment = function($) {
     if (data.length > 0) { body = { prunehours: data[0] }; }
   }
   if (cmd === 'install-runtime') {
+    /* demo mode
+    $.message.react('⌛');
+    util.sleep(3000).then(function() {
+      $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
+      $.message.channel.send({ files: [{ attachment: '/tmp/demo.log', name: $.message.id + '.text' }] });
+    });
+    return; */
     body = { wipe: false, validate: true };
     if (data.length > 0) { body.beta = data[0]; }
   }
