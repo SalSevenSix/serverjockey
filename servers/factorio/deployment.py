@@ -13,6 +13,7 @@ from servers.factorio import messaging as msg
 
 _MAP, _ZIP = 'map', '.zip'
 _AUTOSAVE_PREFIX = '_autosave'
+_BASE_MOD_NAMES = 'base', 'elevated-rails', 'quality', 'space-age'
 
 
 def _default_cmdargs_settings() -> dict:
@@ -36,7 +37,10 @@ def _default_cmdargs_settings() -> dict:
 
 
 def _default_mods_list() -> dict:
-    return {'mods': [{'name': 'base', 'enabled': True}]}
+    mods = []
+    for mod in _BASE_MOD_NAMES:
+        mods.append({'name': mod, 'enabled': True})
+    return {'mods': mods}
 
 
 class Deployment:
@@ -115,7 +119,7 @@ class Deployment:
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('Factorio game server not installed. Please Install Runtime first.')
-        svrsvc.ServerStatus.notify_state(self._mailer, self, sc.START)  # Pushing early because slow pre-start tasks
+        svrsvc.ServerStatus.notify_state(self._mailer, self, sc.START)  # pushing early because slow pre-start tasks
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_settings))
         await self._sync_mods()
         await self._ensure_map()
@@ -213,54 +217,61 @@ class Deployment:
             await io.create_symlink(autosave_dir, self._save_dir)
 
     async def _sync_mods(self):
-        mods = objconv.json_to_dict(await io.read_file(self._mods_list))
-        if not util.get('mods', mods):
+        mods = util.get('mods', objconv.json_to_dict(await io.read_file(self._mods_list)))
+        if not mods:
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
             return
+        live_mod_list, mod_list = self._mods_dir + '/mod-list.json', []
+        for mod in [m for m in mods if m['name'] in _BASE_MOD_NAMES]:
+            mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
         settings = objconv.json_to_dict(await io.read_file(self._server_settings))
-        if not settings.get('username') or not settings.get('token'):
+        if not util.get('username', settings) or not util.get('token', settings):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
+            if len(mods) == len(mod_list):
+                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game only')
+                await io.write_file(live_mod_list, objconv.obj_to_json({'mods': mod_list}))
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
-        baseurl, mod_files, mod_list, chunk_size = 'https://mods.factorio.com', [], [], io.DEFAULT_CHUNK_SIZE
-        connector = aiohttp.TCPConnector(family=socket.AF_INET)  # Force IPv4
+        baseurl, mod_files, chunk_size = 'https://mods.factorio.com', [], io.DEFAULT_CHUNK_SIZE
+        connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
         timeout = aiohttp.ClientTimeout(total=8.0)
-        credentials = '?username=' + settings['username'] + '&token=' + settings['token']
+        credentials = '?username=' + util.get('username', settings) + '&token=' + util.get('token', settings)
         async with aiohttp.ClientSession(connector=connector) as session:
-            for mod in mods['mods']:
+            for mod in [m for m in mods if m['name'] not in _BASE_MOD_NAMES]:
                 mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
-                if mod['name'] != 'base':
-                    mod_meta_url = baseurl + '/api/mods/' + mod['name']
-                    async with session.get(mod_meta_url, timeout=timeout) as meta_response:
-                        assert meta_response.status == 200
-                        meta = await meta_response.json()
-                        if not mod.get('version'):
-                            mod['version'] = meta['releases'][-1]['version']
-                    mod_version_found = False
-                    for release in meta['releases']:
-                        if release['version'] == mod['version']:
-                            mod_version_found = True
-                            mod_files.append(release['file_name'])
-                            filename = self._mods_dir + '/' + release['file_name']
-                            if not await io.file_exists(filename):
-                                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
-                                download_url = baseurl + release['download_url'] + credentials
-                                async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
-                                    assert modfile_response.status == 200
-                                    tracker, content_length = None, modfile_response.headers.get('Content-Length')
-                                    if content_length:
-                                        tracker = msglog.PercentTracker(
-                                            self._mailer, int(content_length), notifications=5, prefix='downloaded')
-                                    await io.stream_write_file(
-                                        filename, io.WrapReader(modfile_response.content),
-                                        chunk_size, self._tempdir, tracker)
-                    if not mod_version_found:
-                        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
-                                          + mod['version'] + ' not found, see ' + mod_meta_url)
+                mod_meta_url = baseurl + '/api/mods/' + mod['name']
+                async with session.get(mod_meta_url, timeout=timeout) as meta_response:
+                    assert meta_response.status == 200
+                    meta = await meta_response.json()
+                    if not util.get('version', mod):
+                        mod['version'] = meta['releases'][-1]['version']
+                mod_version_found = False
+                for release in meta['releases']:
+                    if release['version'] == mod['version']:
+                        mod_version_found = True
+                        mod_files.append(release['file_name'])
+                        filename = self._mods_dir + '/' + release['file_name']
+                        if not await io.file_exists(filename):
+                            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
+                            download_url = baseurl + release['download_url'] + credentials
+                            async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
+                                assert modfile_response.status == 200
+                                tracker, content_length = None, modfile_response.headers.get('Content-Length')
+                                if content_length:
+                                    tracker = msglog.PercentTracker(
+                                        self._mailer, int(content_length), notifications=5, prefix='downloaded')
+                                await io.stream_write_file(
+                                    filename, io.WrapReader(modfile_response.content),
+                                    chunk_size, self._tempdir, tracker)
+                if not mod_version_found:
+                    self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
+                                      + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith(_ZIP) and file['name'] not in mod_files:
+                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Deleting unused mod file ' + file['name'])
                 await io.delete_file(self._mods_dir + '/' + file['name'])
-        await io.write_file(self._mods_dir + '/mod-list.json', objconv.obj_to_json({'mods': mod_list}))
+        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game and mods')
+        await io.write_file(live_mod_list, objconv.obj_to_json({'mods': mod_list}))
 
     async def restore_autosave(self, filename: str):
         map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP

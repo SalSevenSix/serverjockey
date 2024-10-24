@@ -18,6 +18,7 @@
   </p>
   <p>
     This guide will show you how to install, configure and run a Factorio server using this Webapp.
+    Both base game and Space Age expansion are supported.
   </p>
   <p>
     Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>

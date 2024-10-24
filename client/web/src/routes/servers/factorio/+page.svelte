@@ -65,7 +65,7 @@
         <ConfigFile name="Map Gen" path="/config/mapgen" />
         <ConfigFile name="Mods List" path="/config/modslist">
           <p>
-            For automatic mod downloads, both username and token in the
+            Select both expansions and mods here. For automatic mod downloads, both username and token in the
             <span class="has-text-weight-bold">Server</span>
             configuration need to be set. You can find these credentials in your Factorio profile<br />i.e.&nbsp;
             <span class="is-family-monospace word-break-all notranslate">C:\Users\&lt;YOU&gt;\AppData\Roaming\Factorio\player-data.json</span>
