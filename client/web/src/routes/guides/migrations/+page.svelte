@@ -7,8 +7,8 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0">
-    <p class="has-text-centered pt-2 pb-1">
-      <i class="fa fa-boxes-packing fa-7x theme-black-white"></i>
+    <p class="has-text-centered pt-2">
+      <i class="fa fa-dolly fa-8x theme-black-white"></i>
     </p>
   </div>
   <div class="column is-three-quarters content">

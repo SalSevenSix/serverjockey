@@ -89,7 +89,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/migrations')}><i class="fa fa-boxes-packing fa-lg theme-black-white"></i>&nbsp;
+    <a href={surl('/guides/migrations')}><i class="fa fa-dolly fa-lg theme-black-white"></i>
       Game Save Migrations</a>
   </div>
   <div class="column is-four-fifths content">
@@ -136,6 +136,18 @@
     <p>
       Grafana is an observability platform that provides graphs and alerts from metrics data sources such as Prometheus.
       This guide will show how to install, configure and integrate Grafana with Prometheus.
+    </p>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a href={surl('/guides/megasync')}><i class="fa fa-boxes-packing fa-lg theme-black-white"></i>&nbsp;
+      Offsite backups using MEGA</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      This guide will show you how to ... TODO
     </p>
   </div>
 </div>
