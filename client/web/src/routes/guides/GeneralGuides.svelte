@@ -147,7 +147,9 @@
   </div>
   <div class="column is-four-fifths content">
     <p>
-      This guide will show you how to ... TODO
+      MEGA is a popular cloud storage service with a generous free-tier plan.
+      This guide will show you how to install and configure the MEGA CMD App
+      to automatically copy backups to the MEGA platform for off-site backups.
     </p>
   </div>
 </div>
