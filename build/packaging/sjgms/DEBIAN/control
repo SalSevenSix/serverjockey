@@ -6,5 +6,4 @@ Architecture: amd64
 Recommends: python3
 Maintainer: Bowden Salis <bsalis76@gmail.com>
 Description: ServerJockey Game Management System
- Server management system for game servers.
- Under heavy development.
+ Game server management system for Project Zomboid and other supporteds.

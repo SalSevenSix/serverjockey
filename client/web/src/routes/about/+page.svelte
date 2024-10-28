@@ -1,6 +1,7 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
   import RubiksCube from '$lib/svg/RubiksCube.svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
 </script>
 
 
@@ -11,7 +12,7 @@
   <div class="column is-two-thirds content">
     <h2 class="title is-3 mt-2">About</h2>
     <p class="pb-2">
-      <span class="has-text-weight-bold">ServerJockey</span>
+      <ExtLink href="https://serverjockey.net" notranslate>ServerJockey</ExtLink>
       is a game server management system for
       <span class="has-text-weight-bold">Project Zomboid</span>
       and other supported games. It is designed to be an easy to use self-hosting option

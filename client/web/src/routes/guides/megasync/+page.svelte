@@ -18,7 +18,7 @@
     <p>
       <ExtLink href="https://mega.io" notranslate>MEGA</ExtLink>
       is a free cloud storage service you can use for off-site backups.
-      This guide will show you how to install and configure the MEGA CMD App on your server,
+      This guide will show you how to install and configure the MEGA CMD App on your machine,
       then setup the Sync feature to automatically copy backups.
       Prequisites are a user with root privilages (i.e.
       <span class="is-family-monospace notranslate">sudo</span>)

@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Wed Sep 18 2024 Bowden Salis <bsalis76@gmail.com> - 0.14.0
-- Feature release v0.14.0
+* Mon Oct 28 2024 Bowden Salis <bsalis76@gmail.com> - 0.14.0
+- Factorio Space Age support release
 * Tue Sep 17 2024 Bowden Salis <bsalis76@gmail.com> - 0.13.0
 - Technical upgrades release
 * Wed Aug 14 2024 Bowden Salis <bsalis76@gmail.com> - 0.12.0

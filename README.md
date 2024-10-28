@@ -5,6 +5,7 @@ and other supported games. It is designed to be an easy to use self-hosting
 option for multiplayer servers. It allows you to create and remotely
 manage your servers using a webapp and Discord bot.
 
+* Visit the [website](https://serverjockey.net/)
 * Join the [Discord](https://discord.gg/TEuurWAhHn)
 * Instructional guides and dev updates on [YouTube](https://www.youtube.com/@BSALIS76)
 * Source code on [GitHub](https://github.com/SalSevenSix/serverjockey)
@@ -38,33 +39,6 @@ Find the login details for the webapp by using the CLI client as shown below.
 ```bash
 serverjockey_cmd.pyz -nc showtoken
 ```
-
-
-<!--
-## RPM Package Install
-Arch x86_64 only. Requires Python 3.10 installed. Tested and works on **Fedora 36**
-
-* Download and install the rpm package
-```bash
-wget -O sjgms.rpm https://4sas.short.gy/sjgms-rpm-latest
-sudo yum install ./sjgms.rpm
-```
-
-* Manually install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD)
-```bash
-sudo yum install glibc.i686 libstdc++.i686
-sudo su - sjgms
-mkdir ~/Steam && cd ~/Steam
-curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
-./steamcmd.sh +quit
-```
-
-* The ServerJockey system should automatically be started.
-Find the login details for the webapp by using the CLI client as shown below.
-```bash
-serverjockey_cmd.pyz -nc showtoken
-```
--->
 
 
 ## VirtualBox Appliance
