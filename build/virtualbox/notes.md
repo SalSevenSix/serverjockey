@@ -46,6 +46,9 @@ https://www.youtube.com/@BSALIS76
 
 ServerJockey on GitHub
 https://github.com/SalSevenSix/serverjockey
+
+Website
+https://serverjockey.net
 ```
 
 ### Install Ubuntu OS
