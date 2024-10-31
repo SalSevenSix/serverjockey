@@ -7,12 +7,12 @@ manage your servers using a webapp and Discord bot.
 
 * Visit the [website](https://serverjockey.net/)
 * Join the [Discord](https://discord.gg/TEuurWAhHn)
-* Instructional guides and dev updates on [YouTube](https://www.youtube.com/@BSALIS76)
+* Instructional guides and dev updates on [YouTube](https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw)
 * Source code on [GitHub](https://github.com/SalSevenSix/serverjockey)
 
 If your like using this system, please consider supporting it on Ko-fi.
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D4E4ZYZ)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/serverjockey)
 
 
 ## DEB Package Install

@@ -6,9 +6,7 @@ from core.system import svrsvc, svrext
 from core.proc import jobh, prcext
 from core.common import playerstore
 
-SERVER_STARTED_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataStrContains('INF [Steamworks.NET] GameServer.LogOn successful, SteamID='))
+SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('INF StartGame done'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     mc.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,

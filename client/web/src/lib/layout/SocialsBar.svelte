@@ -9,12 +9,12 @@
       <i class="fa-brands fa-discord fa-xl theme-black-white" title="ServerJockey on Discord"></i></a>
   </p></div>
   <div class="block icon-container ml-3"><p class="has-text-right">
-    <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
+    <a href="https://ko-fi.com/serverjockey" target="_blank">
       <img id="kofiIcon" src={surl('/assets/brands/ko-fi-icon.png')}
            alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" /></a>
   </p></div>
   <div class="block icon-container ml-1"><p class="has-text-right">
-    <a href="https://www.youtube.com/@BSALIS76/videos" target="_blank">
+    <a href="https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw" target="_blank">
       <i class="fa-brands fa-youtube fa-xl theme-black-white" title="ServerJockey on YouTube"></i></a>
   </p></div>
   <div class="block icon-container ml-1"><p class="has-text-right">

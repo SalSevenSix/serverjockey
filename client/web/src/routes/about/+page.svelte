@@ -37,7 +37,7 @@
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
-        <a href="https://ko-fi.com/D1D4E4ZYZ" target="_blank">
+        <a href="https://ko-fi.com/serverjockey" target="_blank">
           <figure class="image">
             <img src={surl('/assets/brands/KoFi_SupportMe_dark.png')}
                  alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
@@ -50,7 +50,7 @@
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
-        <a href="https://www.youtube.com/@BSALIS76" target="_blank">
+        <a href="https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw" target="_blank">
           <figure class="image background-frame pl-5 pr-5 pt-4 pb-3">
             <img src={surl('/assets/brands/yt_logo_rgb_light.png')}
                  alt="ServerJockey on YouTube" title="ServerJockey on YouTube" />
