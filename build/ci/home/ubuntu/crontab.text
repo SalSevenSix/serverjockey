@@ -1,4 +1,2 @@
-@reboot sleep 20 && /usr/local/bin/serverjockey_cmd.pyz -t ddns:duck,***,sjgms > ~/duckdns.log 2>&1
-@reboot /usr/local/bin/serverjockey_cmd.pyz -t ddns:pork,***,***,serverjockey.net > ~/porkbun.log 2>&1
 10 * * * * /usr/local/bin/serverjockey_cmd.pyz -nc mprof > ~/mprof/current.log 2>&1
 15 18 * * * mv ~/mprof/current.log ~/mprof/$(date +\%Y\%m\%d).log
