@@ -25,7 +25,7 @@
     <div class="columns is-centered">
       <div class="column is-two-thirds">
         <a href="https://discord.gg/TEuurWAhHn" target="_blank">
-          <figure class="image background-frame pl-4 pr-4 pt-4 pb-2">
+          <figure class="image background-frame pl-5 pr-5 pt-4 pb-3">
             <img src={surl('/assets/brands/discord_full_logo_black_RGB.svg')}
                  alt="ServerJockey on Discord" title="ServerJockey on Discord" />
           </figure>
@@ -38,8 +38,8 @@
     <div class="columns is-centered">
       <div class="column is-two-thirds">
         <a href="https://ko-fi.com/serverjockey" target="_blank">
-          <figure class="image">
-            <img src={surl('/assets/brands/KoFi_SupportMe_dark.png')}
+          <figure class="image background-frame pl-5 pr-5 pt-1 pb-0">
+            <img src={surl('/assets/brands/kofi_logo.png')}
                  alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
           </figure>
         </a>
@@ -79,6 +79,6 @@
   .background-frame {
     background-color: white;
     border: 1px solid var(--color-standard-light-bwg);
-    border-radius: 1em;
+    border-radius: 16px;
   }
 </style>

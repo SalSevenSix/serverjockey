@@ -66,7 +66,7 @@ sudo docker run -p 6164:6164/tcp <image>:<tag>
 ```
 
 
-## Running from source
+## Running from Source
 ServerJockey can be run from the source code. This option should work on
 a wider range of linux distros. Note that the `serverjockey.sh` script
 will check for required dependencies. Follow the instructions provided by

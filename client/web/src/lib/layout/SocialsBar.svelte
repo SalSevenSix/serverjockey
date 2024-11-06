@@ -8,9 +8,9 @@
     <a href="https://discord.gg/TEuurWAhHn" target="_blank">
       <i class="fa-brands fa-discord fa-xl theme-black-white" title="ServerJockey on Discord"></i></a>
   </p></div>
-  <div class="block icon-container ml-3"><p class="has-text-right">
+  <div class="block icon-container ml-2"><p class="has-text-right">
     <a href="https://ko-fi.com/serverjockey" target="_blank">
-      <img id="kofiIcon" src={surl('/assets/brands/ko-fi-icon.png')}
+      <img id="kofiIcon" src={surl('/assets/brands/kofi_symbol.png')}
            alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" /></a>
   </p></div>
   <div class="block icon-container ml-1"><p class="has-text-right">
@@ -30,7 +30,7 @@
   }
 
   #kofiIcon {
-    width: 2.0625em;
-    height: 1.4198em;
+    width: 1.8663em;
+    height: 1.5em;
   }
 </style>
