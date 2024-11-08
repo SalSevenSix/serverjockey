@@ -1,0 +1,11 @@
+[Unit]
+Description=ServerJockey Welcome Banner
+Requires=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/welcome.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

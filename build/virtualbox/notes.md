@@ -61,10 +61,10 @@ https://serverjockey.net
 1. Check swap exists 4Gb
 2. apt update && apt upgrade
 3. Check zerofree installed
-4. Install vmtouch
-5. Install steamcmd
-6. Install Samba & configure (see below)
-7. Install welcome.sh & add to cron
+4. Install vmtouch, inotify-tools, steamcmd
+5. Copy root shell scripts
+6. Add and enable serverjockey-welcome service
+7. Install Samba & configure (see below)
 8. Disable SSH service including socket trigger
 
 ### Samba Setup Commands

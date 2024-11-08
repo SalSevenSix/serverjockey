@@ -5,6 +5,14 @@ import json
 from . import util
 
 
+def _get_env_home() -> str | None:
+    # noinspection PyBroadException
+    try:
+        return os.environ['HOME']
+    except Exception:
+        return None
+
+
 def _load_clientfile(clientfile: str) -> tuple:
     with open(file=clientfile, mode='r') as file:
         data = json.load(file)
@@ -18,6 +26,7 @@ class Context:
         self._user = user if user else None
         self._tasks = tuple(tasks) if tasks else ()
         self._commands = tuple(commands) if commands else ()
+        self._env_home = _get_env_home()
         self._credentials = None
 
     def is_debug(self) -> bool:
@@ -54,11 +63,15 @@ class Context:
             if os.path.isfile(candidate):
                 return candidate
             raise Exception('Clientfile for user ' + self._user + ' not found. ServerJockey may be down.')
-        home = os.environ['HOME']
-        candidates = [home + filename, home + '/serverjockey' + filename, '/home/sjgms' + filename]
-        if len(sys.path) > 0 and not sys.path[0].endswith('/serverjockey_cmd.pyz'):  # running from source
+        home, candidates = self._env_home, []
+        if home:
+            candidates.append(home + filename)
+            candidates.append(home + '/serverjockey' + filename)
+        candidates.append('/home/sjgms' + filename)
+        if home and len(sys.path) > 0 and not sys.path[0].endswith('/serverjockey_cmd.pyz'):  # running from source
             home = os.getcwd() + '/../..'
-            candidates.extend([home + filename, home + '/..' + filename])
+            candidates.append(home + filename)
+            candidates.append(home + '/..' + filename)
         for candidate in candidates:
             if os.path.isfile(candidate):
                 return candidate
