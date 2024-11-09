@@ -8,7 +8,7 @@ fi
 rm sjgms.${PKGTYPE} > /dev/null 2>&1
 wget --version > /dev/null 2>&1 || ${INSTALLER} -y install wget
 echo "downloading package"
-wget -q -O sjgms.${PKGTYPE} https://serverjockey.net/downloads/sjgms-master-latest.${PKGTYPE} || exit 1
+wget -q -O sjgms.${PKGTYPE} https://dl.serverjockey.net/sjgms-master-latest.${PKGTYPE} || exit 1
 ${INSTALLER} -y install ./sjgms.${PKGTYPE} || exit 1
 rm sjgms.${PKGTYPE} > /dev/null 2>&1
 

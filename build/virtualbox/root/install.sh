@@ -3,7 +3,7 @@
 echo "Initialising install process"
 [ "$(whoami)" = "root" ] || exit 1
 which wget > /dev/null || exit 1
-DEB_URL="https://serverjockey.net/downloads/${1}"
+DEB_URL="https://dl.serverjockey.net/${1}"
 DEB_FILE="sjgms.deb"
 SJGMS_LOG="serverjockey.log"
 SJGMS_HOME="/home/sjgms"
