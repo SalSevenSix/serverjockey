@@ -92,10 +92,10 @@
         {/if}
       </div>
     {/if}
-    <div class="save-button">
-      <button class="process hero" disabled={cannotSave} on:click={saveIni}>{processing ? '...' : 'Save'}</button>
-    </div>
   </div>
+  <div in:fly={{ delay: 300, duration: 300, y: 80 }} class="save-button"><div>
+    <button class="process hero" disabled={cannotSave} on:click={saveIni}>{processing ? '...' : 'Save'}</button>
+  </div></div>
 {:else}
   <div>
     <p><br />&nbsp; ...</p>
@@ -105,6 +105,16 @@
 
 <style>
   .save-button {
-    margin: 24px 0px 100px 0px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    background-color: rgba(22, 32, 45, 0.8);
+    backdrop-filter: blur(3px);
+  }
+
+  .save-button > div {
+    margin: 12px 8px;
   }
 </style>
