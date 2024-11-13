@@ -2,8 +2,9 @@
   import { onMount, getContext } from 'svelte';
   import { dev } from '$app/environment';
   import { fly } from 'svelte/transition';
+  import { domClean, isModPage } from '$lib/util';
   import { newGetRequest, newPostRequest, logError } from '$lib/sjgmsapi';
-  import { devDom, isModPage, processResults } from '$lib/ModPicker';
+  import { devDom, processResults } from '$lib/ModPicker';
   import ModPickerWorkshop from '$lib/ModPickerWorkshop.svelte';
   import ModPickerItem from '$lib/ModPickerItem.svelte';
 
@@ -58,7 +59,8 @@
     chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(function(tabs) {
       if (tabs && tabs.length > 0) {
         chrome.tabs.sendMessage(tabs[0].id, { name: 'serverjockey-send-dom' }).then(function(dom) {
-          if (isModPage(dom)) { fetchIni(dom); }
+          dom = domClean(dom);
+          if (isModPage(dom)) { fetchIni(dom); } else { processing = false; }
         });
       }
     });
@@ -93,17 +95,30 @@
       </div>
     {/if}
   </div>
+  <div class="footer-space"></div>
   <div in:fly={{ delay: 300, duration: 300, y: 80 }} class="save-button"><div>
     <button class="process hero" disabled={cannotSave} on:click={saveIni}>{processing ? '...' : 'Save'}</button>
   </div></div>
 {:else}
-  <div>
-    <p><br />&nbsp; ...</p>
+  <div class="no-mod-message">
+    {#if processing}
+      <p>&nbsp;&nbsp;loading&nbsp;...</p>
+    {:else}
+      <p class="text-warning">mod details not found</p>
+    {/if}
   </div>
 {/if}
 
 
 <style>
+  .no-mod-message {
+    margin: 40px 0;
+  }
+
+  .footer-space {
+    margin-top: 120px;
+  }
+
   .save-button {
     position: fixed;
     bottom: 0;

@@ -1,3 +1,4 @@
+import { domExtract, iniExtract, jsonExtract } from '$lib/util';
 import { baseurl, logError, newGetRequest, noStorage } from '$lib/sjgmsapi';
 
 const workshopCacheKey = 'sjgmsExtensionWorkshopCache';
@@ -7,50 +8,6 @@ export const devDom = '<div class="workshopItemTitle">Dummy Mod</div> ' +
                       'Mod ID: Alpha< Mod ID: Beta Xyz< Mod ID: Gamma< ' +
                       'Map Folder: Green< Map Folder: Blue Abc';
 
-function toUnique(arr, reverse=false) {
-  let result = [...arr];
-  if (reverse) { result.reverse(); }
-  result = result.filter(function(value, index, array) { return array.indexOf(value) === index; });
-  if (reverse) { result.reverse(); }
-  return result
-}
-
-function domExtract(dom, cutlen, regex, single=false) {
-  let result = dom.match(regex);
-  if (!result) return single ? null : [];
-  result = result.map(function(value) { return value.substring(cutlen, value.length - 1); });
-  return single ? result[result.length - 1] : toUnique(result, true);
-}
-
-function iniExtract(ini, cutlen, regex) {
-  let result = ini.match(regex);
-  if (!result) return [];
-  result = result[result.length - 1].substring(cutlen);
-  result = result.split(';');
-  result = result.filter(function(value) { return value.trim(); });
-  return toUnique(result);
-}
-
-function jsonExtract(data) {
-  const [mods, maps] = [[], []];
-  const lines = data.description.replaceAll('\r', '\n').split('\n');
-  lines.reverse();
-  let checking = true;
-  lines.forEach(function(line) {
-    if (checking && line) {
-      if (line.startsWith('Map Folder:')) {
-        maps.push(line.substring(12));
-      } else if (line.startsWith('Mod ID:')) {
-        mods.push(line.substring(8));
-      } else if (line.startsWith('Workshop ID:')) {
-        checking = false;
-      }
-    }
-  });
-  maps.reverse();
-  mods.reverse();
-  return { workshop: data.publishedfileid, name: data.title, mods: mods, maps: maps };
-}
 
 function bumpItemUp(items, item) {
   const index = items.indexOf(item);
@@ -151,35 +108,12 @@ async function fetchWorkshops(workshops) {
 }
 
 
-export function isModPage(dom) {
-  if (!dom) return false;
-  const expected = [
-    'steamcommunity.com/app/108600">Project Zomboid',
-    'steamcommunity.com/app/108600/workshop/">Workshop',
-    'Workshop ID:', 'Mod ID:'];
-  const actual = expected.filter(function(value) { return dom.includes(value); });
-  if (expected.length != actual.length) return false;
-  return !dom.includes('<div id="mainContentsCollection">');
-}
-
-
 export function processResults(dom, ini, updated) {
   const self = { raw: { dom: dom, ini: ini } };
-  let cleanDom = dom.replaceAll('<span class="searchedForText">', '').replaceAll('</span>', '');
-  self.dom = {
-    workshop: domExtract(cleanDom, 13, /Workshop ID:(.*?)</g, true),
-    name: domExtract(cleanDom, 26, /class="workshopItemTitle">(.*?)</g, true),
-    mods: domExtract(cleanDom, 8, /Mod ID:(.*?)</g),
-    maps: domExtract(cleanDom, 12, /Map Folder:(.*?)</g)
-  };
-  cleanDom = null;  // free memory
+  self.dom = domExtract(dom);
   workshopCache.add(self.dom.workshop, self.dom.name, self.dom.mods, self.dom.maps);
   workshopCache.save();
-  self.ini = {
-    workshops: iniExtract(ini, 14, /^WorkshopItems=.*$/gm),
-    mods: iniExtract(ini, 5, /^Mods=.*$/gm),
-    maps: iniExtract(ini, 4, /^Map=.*$/gm)
-  };
+  self.ini = iniExtract(ini);
   self.workshop = {
     available: !self.ini.workshops.includes(self.dom.workshop),
     selected: [...self.ini.workshops],
