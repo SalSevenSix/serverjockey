@@ -1,10 +1,10 @@
 <script>
   import { onMount, getContext } from 'svelte';
-  import { dev } from '$app/environment';
   import { fly } from 'svelte/transition';
-  import { domClean, isModPage } from '$lib/util';
+  import { dev } from '$app/environment';
   import { newGetRequest, newPostRequest, logError } from '$lib/sjgmsapi';
-  import { devDom, processResults } from '$lib/ModPicker';
+  import { devDom, domClean, isModPage } from '$lib/util';
+  import { processResults } from '$lib/ModPicker';
   import ModPickerWorkshop from '$lib/ModPickerWorkshop.svelte';
   import ModPickerItem from '$lib/ModPickerItem.svelte';
 
@@ -104,32 +104,7 @@
     {#if processing}
       <p>&nbsp;&nbsp;loading&nbsp;...</p>
     {:else}
-      <p class="text-warning">mod details not found</p>
+      <p class="warning-text">mod details not found</p>
     {/if}
   </div>
 {/if}
-
-
-<style>
-  .no-mod-message {
-    margin: 40px 0;
-  }
-
-  .footer-space {
-    margin-top: 120px;
-  }
-
-  .save-button {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
-    background-color: rgba(22, 32, 45, 0.8);
-    backdrop-filter: blur(3px);
-  }
-
-  .save-button > div {
-    margin: 12px 8px;
-  }
-</style>

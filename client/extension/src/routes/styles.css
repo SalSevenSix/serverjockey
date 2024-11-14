@@ -1,3 +1,5 @@
+/* BASE */
+
 html {
   background-color: #1B2838;
 }
@@ -9,6 +11,14 @@ body {
 }
 
 a {
+  color: #EBEBEB;
+}
+
+a:hover {
+  color: #DDDD22;
+}
+
+a:active {
   color: #EBEBEB;
 }
 
@@ -81,6 +91,10 @@ button:not(:disabled):hover {
   background-color: #5AA9D6;
 }
 
+button:not(:disabled):active {
+  background-color: #417B9C;
+}
+
 button.process {
   min-width: 100px;
   height: 28px;
@@ -102,6 +116,10 @@ button.process.hero:disabled {
 
 button.process.hero:not(:disabled):hover {
   background-color: #B6D908;
+}
+
+button.process.hero:not(:disabled):active {
+  background-color: #5C7E10;
 }
 
 button.action {
@@ -134,14 +152,63 @@ button.action.cross {
   background: url("/images/cross.svg") center no-repeat;
 }
 
-.text-error {
+
+/* SPECIFIC */
+
+.header-container h1 {
+  margin: 8px 0;
+  letter-spacing: 0.1em;
+}
+
+.error-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+  background-color: rgba(22, 32, 45, 0.9);
+  backdrop-filter: blur(3px);
+}
+
+.error-container > div {
+  margin: 32px 16px;
+  font-size: 1.1em;
+  color: #EBEBEB;
+}
+
+.error-header {
   font-weight: bold;
   color: red;
 }
 
-.text-warning {
+.no-mod-message {
+  margin: 40px 0;
+}
+
+.save-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  background-color: rgba(22, 32, 45, 0.8);
+  backdrop-filter: blur(3px);
+}
+
+.save-button > div {
+  margin: 12px 8px;
+}
+
+
+/* UTILITIES */
+
+.warning-text {
   font-style: italic;
   color: #DDDD22;
+}
+
+.footer-space {
+  margin-top: 120px;
 }
 
 .white-space-nowrap {

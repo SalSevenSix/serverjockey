@@ -20,7 +20,7 @@
   {/each}
 </ul>
 {#if items.available.length === source.length}
-  <p class="text-warning">&nbsp; no {itemName.toLowerCase()} selected</p>
+  <p class="warning-text">&nbsp; no {itemName.toLowerCase()} selected</p>
 {/if}
 
 <h2>Selected {itemName}</h2>

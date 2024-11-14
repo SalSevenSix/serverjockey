@@ -3,12 +3,6 @@ import { baseurl, logError, newGetRequest, noStorage } from '$lib/sjgmsapi';
 
 const workshopCacheKey = 'sjgmsExtensionWorkshopCache';
 
-export const devDom = '<div class="workshopItemTitle">Dummy Mod</div> ' +
-                      'Workshop ID: 9999999999< ' +
-                      'Mod ID: Alpha< Mod ID: Beta Xyz< Mod ID: Gamma< ' +
-                      'Map Folder: Green< Map Folder: Blue Abc';
-
-
 function bumpItemUp(items, item) {
   const index = items.indexOf(item);
   if (index === 0) {
