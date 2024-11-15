@@ -91,10 +91,6 @@ button:not(:disabled):hover {
   background-color: #5AA9D6;
 }
 
-button:not(:disabled):active {
-  background-color: #417B9C;
-}
-
 button.process {
   min-width: 100px;
   height: 28px;
@@ -116,10 +112,6 @@ button.process.hero:disabled {
 
 button.process.hero:not(:disabled):hover {
   background-color: #B6D908;
-}
-
-button.process.hero:not(:disabled):active {
-  background-color: #5C7E10;
 }
 
 button.action {

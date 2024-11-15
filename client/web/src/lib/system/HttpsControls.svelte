@@ -7,7 +7,7 @@
   let httpsInfo = null;
   let processing = false;
 
-  $: httpsLabel = httpsInfo && httpsInfo.enabled ? 'Disable HTTPS' : 'Enable HTTPS';
+  $: httpsAction = httpsInfo && httpsInfo.enabled ? 'Disable' : 'Enable';
   $: httpsClass = httpsInfo && httpsInfo.enabled ? 'is-danger' : 'is-primary';
   $: httpsIcon = httpsInfo && httpsInfo.enabled ? 'fa-square-xmark' : 'fa-shield';
 
@@ -43,8 +43,8 @@
 {#if httpsInfo}
   <div class="columns">
     <div class="column is-one-quarter">
-      <button class="button {httpsClass}" disabled={processing} on:click={toggleHttps}>
-        <i class="fa {httpsIcon} fa-lg"></i>&nbsp; {httpsLabel}</button>
+      <button class="button {httpsClass}" title={httpsAction} disabled={processing} on:click={toggleHttps}>
+        <i class="fa {httpsIcon} fa-lg"></i>&nbsp; {httpsAction} HTTPS</button>
     </div>
     <div class="column is-three-quarters">
       Change takes effect after system restart. Note that when enabled, a self-signed certificate will be used.
