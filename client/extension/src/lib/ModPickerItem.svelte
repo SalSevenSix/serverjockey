@@ -8,7 +8,7 @@
 <div class="divider"><hr /></div>
 
 <h2>Available {itemName}</h2>
-<ul>
+<ul id="modPicker{itemName}Available">
   {#each items.available as item}
     <li>
       <button class="action arrow-down-to-line" title="Add to bottom"
@@ -20,11 +20,11 @@
   {/each}
 </ul>
 {#if items.available.length === source.length}
-  <p class="warning-text">&nbsp; no {itemName.toLowerCase()} selected</p>
+  <p id="modPicker{itemName}NoneSelected" class="warning-text">&nbsp; no {itemName.toLowerCase()} selected</p>
 {/if}
 
 <h2>Selected {itemName}</h2>
-<ol>
+<ol id="modPicker{itemName}Selected">
   {#each items.selected as item}
     {#if source.includes(item)}
       <li>

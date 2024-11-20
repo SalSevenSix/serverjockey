@@ -10,7 +10,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/discord/setup')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>&nbsp;
+    <a id="generalGuidesDiscordBotSetup"
+       href={surl('/guides/discord/setup')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>&nbsp;
       Discord Bot Setup</a>
   </div>
   <div class="column is-four-fifths content">
@@ -24,7 +25,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/discord/usage')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>&nbsp;
+    <a id="generalGuidesDiscordBotUsage"
+       href={surl('/guides/discord/usage')}><i class="fa-brands fa-discord fa-lg theme-black-white"></i>&nbsp;
       Discord Bot Usage</a>
   </div>
   <div class="column is-four-fifths content">
@@ -38,7 +40,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/extension')}><i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
+    <a id="generalGuidesBrowserExtension"
+       href={surl('/guides/extension')}><i class="fa-brands {isEdge ? 'fa-edge' : 'fa-chrome'} fa-lg theme-black-white"></i>
       Browser Extension</a>
   </div>
   <div class="column is-four-fifths content">
@@ -63,7 +66,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold notranslate">
-    <a href={surl('/guides/virtualbox')}><i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
+    <a id="generalGuidesVirtualBox"
+       href={surl('/guides/virtualbox')}><i class="fa fa-computer fa-lg theme-black-white"></i>&nbsp;
       VirtualBox</a>
   </div>
   <div class="column is-four-fifths content">
@@ -76,7 +80,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/cli')}><i class="fa fa-terminal fa-lg theme-black-white"></i>
+    <a id="generalGuidesCommandLineInterface"
+       href={surl('/guides/cli')}><i class="fa fa-terminal fa-lg theme-black-white"></i>
       Command Line Interface</a>
   </div>
   <div class="column is-four-fifths content">
@@ -89,7 +94,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/migrations')}><i class="fa fa-dolly fa-lg theme-black-white"></i>
+    <a id="generalGuidesGameSaveMigrations"
+       href={surl('/guides/migrations')}><i class="fa fa-dolly fa-lg theme-black-white"></i>
       Game Save Migrations</a>
   </div>
   <div class="column is-four-fifths content">
@@ -102,7 +108,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/nginx')}><i class="fa fa-server fa-lg theme-black-white"></i>
+    <a id="generalGuidesHostingBehindNginx"
+       href={surl('/guides/nginx')}><i class="fa fa-server fa-lg theme-black-white"></i>
       Hosting behind Nginx</a>
   </div>
   <div class="column is-four-fifths content">
@@ -115,7 +122,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/prometheus')}><i class="fa fa-wave-square fa-lg theme-black-white"></i>&nbsp;
+    <a id="generalGuidesMonitoringWithPrometheus"
+       href={surl('/guides/prometheus')}><i class="fa fa-wave-square fa-lg theme-black-white"></i>&nbsp;
       Monitoring with Prometheus</a>
   </div>
   <div class="column is-four-fifths content">
@@ -129,7 +137,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/grafana')}><i class="fa fa-chart-line fa-lg theme-black-white"></i>
+    <a id="generalGuidesReportingWithGrafana"
+       href={surl('/guides/grafana')}><i class="fa fa-chart-line fa-lg theme-black-white"></i>
       Reporting with Grafana</a>
   </div>
   <div class="column is-four-fifths content">
@@ -142,7 +151,8 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a href={surl('/guides/megasync')}><i class="fa fa-boxes-packing fa-lg theme-black-white"></i>&nbsp;
+    <a id="generalGuidesOffsiteBackupsUsingMEGA"
+       href={surl('/guides/megasync')}><i class="fa fa-boxes-packing fa-lg theme-black-white"></i>&nbsp;
       Offsite backups using MEGA</a>
   </div>
   <div class="column is-four-fifths content">

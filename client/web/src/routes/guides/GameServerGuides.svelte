@@ -15,7 +15,8 @@
 <div class="columns is-multiline">
   {#each games as game}
     <div class="column is-one-quarter-desktop is-one-third-tablet">
-      <a href={surl('/guides/servers/' + game.module)} title="{game.serverName} guide">
+      <a id="gameServerGuidesM{game.module}" title="{game.serverName} guide"
+         href={surl('/guides/servers/' + game.module)}>
         <div class="card">
           <header class="card-header card-header-title notranslate">{game.serverName}</header>
           <div class="card-image">

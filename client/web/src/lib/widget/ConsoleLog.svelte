@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, tick } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
-  import { RollingLog } from '$lib/util/util';
+  import { RollingLog, toCamelCase } from '$lib/util/util';
   import { surl, SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
@@ -14,6 +14,8 @@
   export let downloadUrl = null;
   export let heightSmall = '100px';
   export let heightBig = '420px';
+
+  const idPrefix = 'consoleLog' + toCamelCase(title);
 
   let loading = true;
   let logBox;
@@ -101,23 +103,23 @@
       <span class="pl-2"><i class="fa {classScroll} fa-lg scroll-button"></i></span>
       <span class="pl-2"><i class="fa {classHeight} fa-lg height-button"></i></span>
     {:else}
-      <span class="pl-2"><a href={'#'} title="Clear" on:click|preventDefault={clearLog}>
+      <span class="pl-2"><a id="{idPrefix}Clear" href={'#'} title="Clear" on:click|preventDefault={clearLog}>
         <i class="fa fa-eraser fa-lg clear-button"></i>
       </a></span>
-      <span class="pl-2"><a href={'#'} title={titlePlay} on:click|preventDefault={togglePlay}>
+      <span class="pl-2"><a id="{idPrefix}Play" href={'#'} title={titlePlay} on:click|preventDefault={togglePlay}>
         <i class="fa {classPlay} fa-lg play-button"></i>
       </a></span>
-      <span class="pl-2"><a href={'#'} title={titleScroll} on:click|preventDefault={toggleScroll}>
+      <span class="pl-2"><a id="{idPrefix}Scroll" href={'#'} title={titleScroll} on:click|preventDefault={toggleScroll}>
         <i class="fa {classScroll} fa-lg scroll-button"></i>
       </a></span>
-      <span class="pl-2"><a href={'#'} title={titleHeight} on:click|preventDefault={toggleHeight}>
+      <span class="pl-2"><a id="{idPrefix}Height" href={'#'} title={titleHeight} on:click|preventDefault={toggleHeight}>
         <i class="fa {classHeight} fa-lg height-button"></i>
       </a></span>
     {/if}
   </div>
   <div class="block">
-    <textarea bind:this={logBox} class="textarea is-family-monospace is-size-7" style:height={logHeight}
-              disabled={loading} readonly>{logText}</textarea>
+    <textarea id="{idPrefix}Text" class="textarea is-family-monospace is-size-7" style:height={logHeight}
+              bind:this={logBox} disabled={loading} readonly>{logText}</textarea>
   </div>
 </div>
 

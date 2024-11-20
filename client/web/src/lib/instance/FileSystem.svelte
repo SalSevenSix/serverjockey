@@ -2,7 +2,7 @@
   import { onMount, getContext } from 'svelte';
   import { confirmModal } from '$lib/modal/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
-  import { isString, guessTextFile, humanFileSize } from '$lib/util/util';
+  import { isString, guessTextFile, humanFileSize, toCamelCase } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
@@ -19,6 +19,8 @@
   export let sorter = null;
   export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
   export let customMeta = null;
+
+  const idPrefix = 'fileSystem' + toCamelCase(rootPath.replaceAll('/', ' '));
 
   let pwdUrl = null;
   let notifyText = null;
@@ -154,13 +156,13 @@
         {#if hasActions}<th></th>{/if}
       </tr>
     </thead>
-    <tbody>
+    <tbody id="{idPrefix}Files">
       {#if pwdUrl && pwdUrl != rootUrl()}
         <tr>
           <td colspan={columnCount}>
-            <button name="root" title="ROOT" class="button mr-2 mb-1" on:click={loadRoot}>
+            <button id="{idPrefix}LoadRoot" title="ROOT" class="button mr-2 mb-1" on:click={loadRoot}>
               &nbsp;<i class="fa fa-angles-up fa-lg"></i>&nbsp;</button>
-            <button name="up" title="UP" class="button" on:click={upDirectory}>
+            <button id="{idPrefix}UpDirectory" title="UP" class="button" on:click={upDirectory}>
               <i class="fa fa-turn-down fa-lg rotate-180"></i>&nbsp;&nbsp;&nbsp;{urlToPath(pwdUrl)}</button>
           </td>
         </tr>
@@ -209,14 +211,13 @@
             {#if hasActions}
               <td>
                 {#if customMeta}
-                  <button name={customMeta.name} title={customMeta.name}
-                          disabled={cannotAction || path.type === 'directory'}
+                  <button title={customMeta.name} disabled={cannotAction || path.type === 'directory'}
                           class={'button ' + customMeta.button + (allowDelete > 0 ? ' mb-1' : '')}
                           on:click={function() { customAction(path.url); }}>
                     <i class="fa {customMeta.icon} fa-lg"></i></button>
                 {/if}
                 {#if allowDelete > 0}
-                  <button name="Delete" title="Delete" disabled={cannotDelete} class="button is-danger"
+                  <button title="Delete" disabled={cannotDelete} class="button is-danger"
                           on:click={function() { deleteAction(path.url); }}>
                     <i class="fa fa-trash-can fa-lg"></i></button>
                 {/if}

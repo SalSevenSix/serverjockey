@@ -1,6 +1,9 @@
 <script>
   import { setContext, tick } from 'svelte';
   import { writable, get } from 'svelte/store';
+  import { generateId } from '$lib/util/util';
+
+  export let contextId = null;
 
   const executes = {};
 
@@ -25,6 +28,7 @@
   }
 
   const query = {
+    contextId: contextId ? contextId : generateId(),
     callups: {},
     criteria: {},
     blocker: newBlockerStore(),

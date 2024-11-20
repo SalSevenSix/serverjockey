@@ -97,14 +97,15 @@
   </div>
   <div class="footer-space"></div>
   <div in:fly={{ delay: 300, duration: 300, y: 80 }} class="save-button"><div>
-    <button class="process hero" disabled={cannotSave} on:click={saveIni}>{processing ? '...' : 'Save'}</button>
+    <button id="modPickerSave" class="process hero" disabled={cannotSave}
+            on:click={saveIni}>{processing ? '...' : 'Save'}</button>
   </div></div>
 {:else}
   <div class="no-mod-message">
     {#if processing}
-      <p>&nbsp;&nbsp;loading&nbsp;...</p>
+      <p id="modPickerLoading">&nbsp;&nbsp;loading&nbsp;...</p>
     {:else}
-      <p class="warning-text">mod details not found</p>
+      <p id="modPickerNoModFound" class="warning-text">mod details not found</p>
     {/if}
   </div>
 {/if}

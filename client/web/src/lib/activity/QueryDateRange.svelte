@@ -1,11 +1,13 @@
 <script>
   import { getContext, tick } from 'svelte';
   import { DateInput } from 'date-picker-svelte'  // https://date-picker-svelte.kasper.space/docs
-  import { generateIds } from '$lib/util/util';
 
   const query = getContext('query');
   const minDate = new Date(946684800000);  // 2000-01-01 00:00:00
-  const [attoId, attoPresetId, atfromId, atfromMillisId] = generateIds(['todt', 'topreset', 'fromdt', 'fromms']);
+  const attoId = 'queryDateRange' + query.contextId + 'Itodt';
+  const attoPresetId = 'queryDateRange' + query.contextId + 'Itopreset';
+  const atfromId = 'queryDateRange' + query.contextId + 'Ifromdt';
+  const atfromMillisId = 'queryDateRange' + query.contextId + 'Ifromms';
   const attoOptions = [' ---', 'Now', 'Last Hour', 'Last Day', 'Last Month', 'This Month'];
   const atfromOptions = { '0': ' ---',
     '3600000': '1 hour', '10800000': '3 hours', '21600000': '6 hours', '43200000': '12 hours',

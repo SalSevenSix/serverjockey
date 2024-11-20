@@ -54,7 +54,8 @@
 
 
 <div class="buttons" class:is-hidden={translating || !canTranslate()}>
-  <button class="button is-dark is-small" title="Enable Google Translate" on:click={enableTranslation}>
+  <button id="translateControlsEnable" title="Enable Google Translate"
+          class="button is-dark is-small" on:click={enableTranslation}>
     &nbsp;<i class="fa fa-language fa-xl"></i>&nbsp;&nbsp;&nbsp;
     <svg viewBox="0 0 60 30" width="2.3em" height="1.15em">
       <clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
@@ -73,8 +74,8 @@
 <div class:is-hidden={!translating}>
   <div class="block is-flex is-flex-direction-row is-flex-wrap-nowrap">
     <div class="buttons mr-1">
-      <button class="button is-dark disable-button" title="Disable translation (page will be reloaded)"
-              on:click={disableTranslation}><i class="fa fa-xmark"></i></button>
+      <button id="translateControlsDisable" title="Disable translation (page will be reloaded)"
+              class="button is-dark disable-button" on:click={disableTranslation}><i class="fa fa-xmark"></i></button>
     </div>
     <div id="google_translate_element"></div>
   </div>

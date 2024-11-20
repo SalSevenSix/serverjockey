@@ -43,7 +43,8 @@
 {#if httpsInfo}
   <div class="columns">
     <div class="column is-one-quarter">
-      <button class="button {httpsClass}" title={httpsAction} disabled={processing} on:click={toggleHttps}>
+      <button id="httpsControlsToggle" class="button {httpsClass}" title={httpsAction}
+              disabled={processing} on:click={toggleHttps}>
         <i class="fa {httpsIcon} fa-lg"></i>&nbsp; {httpsAction} HTTPS</button>
     </div>
     <div class="column is-three-quarters">

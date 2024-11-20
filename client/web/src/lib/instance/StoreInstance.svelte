@@ -15,7 +15,7 @@
 
 <CheckStore>
   <Collapsible icon="fa-chart-pie" title="Activity">
-    <QueryCriteriaContext>
+    <QueryCriteriaContext contextId="Activity">
       <QueryChooseInstance />
       <QueryDateRange defaultFromMillis="2592000000" />
       <QueryExecute />
@@ -24,12 +24,12 @@
     </QueryCriteriaContext>
   </Collapsible>
   <Collapsible icon="fa-comments" title="Chat Log">
-    <QueryCriteriaContext>
+    <QueryCriteriaContext contextId="ChatLog">
       <QueryChooseInstance />
       <QueryDateRange defaultFromMillis="21600000" />
       <div class="columns">
         <div class="column">
-          <QuerySearchText name="Search for Player" title="Search for a Player by name"
+          <QuerySearchText label="Search for Player" title="Search for a Player by name"
                            placeholder="literal or regexp using '/'" />
         </div>
         <div class="column">

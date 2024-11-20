@@ -170,6 +170,7 @@ class _RequestHandler:
             content_length = await body.content_length()
             if content_length is None:
                 response.enable_chunked_encoding(io.DEFAULT_CHUNK_SIZE)
+                # TODO consider using response.enable_compression() as well
             else:
                 response.headers.add(httpcnt.CONTENT_LENGTH, str(content_length))
             await response.prepare(self._request)

@@ -39,5 +39,5 @@
 </script>
 
 
-<a bind:this={themeLink} href={'#'} class="navbar-item"
+<a id="navbarTheme" bind:this={themeLink} href={'#'} class="navbar-item"
    on:click|preventDefault={toggleTheme}>&nbsp;<i class="fa {themeIcon} fa-lg"></i>&nbsp;</a>

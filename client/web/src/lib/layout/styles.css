@@ -195,6 +195,10 @@ table.is-thinner {
   white-space: nowrap;
 }
 
+.white-space-pre {
+  white-space: pre;
+}
+
 .rotate-180 {
   transform: rotate(180deg);
 }

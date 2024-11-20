@@ -68,17 +68,18 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <InputText id="loginModalToken" name="Login Token" bind:value={token} onKeypress={kpLogin} autofocus />
+      <InputText id="loginModalToken" label="Login Token" bind:value={token}
+                 onKeypress={kpLogin} noautocomplete autofocus />
       <div class="field">
         <div class="control">
           <label class="checkbox">
-            <input type="checkbox" bind:checked={remember}>&nbsp; Remember Token
+            <input id="loginModalRemember" type="checkbox" bind:checked={remember}>&nbsp; Remember Token
           </label>
         </div>
       </div>
       <div class="field">
         <div class="control">
-          <button name="login" title="Login" class="button is-primary is-fullwidth"
+          <button id="loginModalLogin" title="Login" class="button is-primary is-fullwidth"
                   disabled={cannotLogin} on:click={login}>
             <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
         </div>

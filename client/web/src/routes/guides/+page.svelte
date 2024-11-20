@@ -19,7 +19,7 @@
     </p>
     <p>
       The guides section will provide information on how to
-      <a href={surl('/guides/discord/setup')}>setup the Discord bot</a>.
+      <a id="guidesPageDiscordBotSetup" href={surl('/guides/discord/setup')}>setup the Discord bot</a>.
       As well as help on how to setup, configure and start supported game servers, and more.
     </p>
   </div>

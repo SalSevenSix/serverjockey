@@ -54,13 +54,13 @@
 <div>
   <h2>Choose Instance</h2>
   {#if identities.length > 0}
-    <select bind:value={identity}>
+    <select id="instanceContextIdentity" bind:value={identity}>
       {#each identities as option}
         <option>{option}</option>
       {/each}
     </select>
   {:else if !loading}
-    <p class="warning-text">&nbsp; no projectzomboid instances found</p>
+    <p id="instanceContextNoInstancesFound" class="warning-text">&nbsp; no projectzomboid instances found</p>
   {/if}
 </div>
 

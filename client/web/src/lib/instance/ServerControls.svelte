@@ -21,10 +21,13 @@
 
 
 <div class="block buttons">
-  <button name="stop" title="Stop" class="button is-danger" on:click={doCommand} disabled={cannotStop}>
+  <button id="serverControlsStop" name="stop" title="Stop" class="button is-danger"
+          on:click={doCommand} disabled={cannotStop}>
     <i class="fa fa-stop fa-lg"></i>&nbsp;&nbsp;Stop</button>
-  <button name="restart" title="Restart" class="button is-warning" on:click={doCommand} disabled={cannotRestart}>
+  <button id="serverControlsRestart" name="restart" title="Restart" class="button is-warning"
+          on:click={doCommand} disabled={cannotRestart}>
     <i class="fa fa-arrows-rotate fa-lg"></i>&nbsp;&nbsp;Restart</button>
-  <button name="start" title="Start" class="button is-primary" on:click={doCommand} disabled={cannotStart}>
+  <button id="serverControlsStart" name="start" title="Start" class="button is-primary"
+          on:click={doCommand} disabled={cannotStart}>
     <i class="fa fa-play fa-lg"></i>&nbsp;&nbsp;Start</button>
 </div>

@@ -1,7 +1,7 @@
 <script>
   import { onMount, getContext } from 'svelte';
   import { confirmModal } from '$lib/modal/modals';
-  import { shortISODateTimeString } from '$lib/util/util';
+  import { shortISODateTimeString, toCamelCase } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
@@ -69,8 +69,8 @@
     {#each actions as action}
       <tr>
         <td class="button-column">
-          <button title={action.name} class="button is-danger is-fullwidth"
-                  name={action.key} disabled={cannotAction} on:click={doAction}>
+          <button id={'worldControls' + toCamelCase(action.name)} name={action.key} title={action.name}
+                  class="button is-danger is-fullwidth" disabled={cannotAction} on:click={doAction}>
             <i class="fa {action.icon ? action.icon : 'fa-burst'} fa-lg"></i>&nbsp; {action.name}</button>
         </td>
         <td>{action.desc}</td>

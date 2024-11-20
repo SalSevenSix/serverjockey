@@ -32,13 +32,13 @@
     </div>
     <div id="navbarMain" class="navbar-menu" class:is-active={menuOpen}>
       <div class="navbar-start">
-        <a on:click={closeMenu} class="navbar-item" href={surl('/')}>
+        <a id="navbarHome" on:click={closeMenu} class="navbar-item" href={surl('/')}>
           <i class="fa fa-house fa-lg"></i>&nbsp;&nbsp;Home</a>
-        <a on:click={closeMenu} class="navbar-item" href={surl('/servers')}>
+        <a id="navbarInstances" on:click={closeMenu} class="navbar-item" href={surl('/servers')}>
           <i class="fa fa-cubes fa-lg"></i>&nbsp;&nbsp;Instances</a>
-        <a on:click={closeMenu} class="navbar-item" href={surl('/guides')}>
+        <a id="navbarGuides" on:click={closeMenu} class="navbar-item" href={surl('/guides')}>
           <i class="fa fa-book fa-lg"></i>&nbsp;&nbsp;Guides</a>
-        <a on:click={closeMenu} class="navbar-item" href={surl('/about')}>
+        <a id="navbarAbout" on:click={closeMenu} class="navbar-item" href={surl('/about')}>
           <i class="fa fa-circle-info fa-lg"></i>&nbsp;&nbsp;About</a>
         <FontSizeToggler onAfterToggle={closeMenu} />
         <ThemeToggler onAfterToggle={closeMenu} />

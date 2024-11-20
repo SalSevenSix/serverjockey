@@ -85,8 +85,7 @@ python3 -m pipenv sync || exit 1
 for VENV_LIBDIR in lib lib64; do
   LIBDIR="$SERVERJOCKEY_DIR/.venv/$VENV_LIBDIR/$PYTHON_LIBDIR/site-packages"
   if [ -d "$LIBDIR" ]; then
-    rm -rf $LIBDIR/pip* $LIBDIR/test* $LIBDIR/wheel* $LIBDIR/greenlet* > /dev/null 2>&1
-    rm -rf $LIBDIR/setuptools* $LIBDIR/pkg_resources* $LIBDIR/_distutils_hack > /dev/null 2>&1
+    rm -rf $LIBDIR/pip* $LIBDIR/test* $LIBDIR/greenlet* $LIBDIR/*virtualenv* > /dev/null 2>&1
     echo "Merging $LIBDIR"
     cp -r $LIBDIR/* "$SERVERJOCKEY_DIR" || exit 1
   fi

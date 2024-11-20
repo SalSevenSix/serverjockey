@@ -6,7 +6,7 @@
 
 {#if $errorText}
   <div in:fly={{ duration: 300, y: -300 }} class="error-container"><div>
-    <p><span class="error-header">[ERROR]</span>
+    <p id="headerErrorMessage"><span class="error-header">[ERROR]</span>
       {$errorText}
     </p>
   </div></div>

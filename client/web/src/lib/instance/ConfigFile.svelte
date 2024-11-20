@@ -1,5 +1,6 @@
 <script>
   import { onMount, getContext } from 'svelte';
+  import { toCamelCase } from '$lib/util/util';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { textAreaModal } from '$lib/modal/modals';
   import { newPostRequest, newGetRequest } from '$lib/util/sjgmsapi';
@@ -13,7 +14,8 @@
   export let name;
   export let path;
 
-  let configFileTextId = 'configFileText' + name.replaceAll(' ', '');
+  const idPrefix = 'configFile' + toCamelCase(name);
+
   let processing = true;
   let originalText = '';
   let configText = '';
@@ -75,26 +77,26 @@
 
 <div class="block">
   <div class="field">
-    <label for={configFileTextId} class="label">
+    <label for="{idPrefix}Text" class="label">
       <ExtLink href={instance.url(path)}>{name}&nbsp;</ExtLink>
     </label>
     {#if $$slots.default}
       <div class="content mb-2"><slot /></div>
     {/if}
     <div class="control pr-6">
-      <textarea id={configFileTextId} class="textarea is-family-monospace is-size-7" spellcheck="false"
+      <textarea id="{idPrefix}Text" class="textarea is-family-monospace is-size-7" spellcheck="false"
                 disabled={cannotEdit} bind:value={configText}></textarea>
     </div>
   </div>
   <div class="field">
     <div class="control buttons">
-      <button disabled={cannotEdit} on:click={editor} name="editor" title="Editor" class="button">
+      <button id="{idPrefix}Editor" title="Editor" class="button" disabled={cannotEdit} on:click={editor}>
         <i class="fa fa-expand-arrows-alt fa-lg"></i>&nbsp;&nbsp;Editor</button>
-      <button disabled={cannotClear} on:click={clear} name="clear" title="Clear" class="button is-danger">
+      <button id="{idPrefix}Clear" title="Clear" class="button is-danger" disabled={cannotClear} on:click={clear}>
         <i class="fa fa-eraser fa-lg"></i>&nbsp;&nbsp;Clear</button>
-      <button disabled={cannotReload} on:click={reload} name="reload" title="Reload" class="button is-warning">
+      <button id="{idPrefix}Reload" title="Reload" class="button is-warning" disabled={cannotReload} on:click={reload}>
         <i class="fa fa-rotate-right fa-lg"></i>&nbsp;&nbsp;Reload</button>
-      <button disabled={cannotSave} on:click={save} name="save" title="Save" class="button is-primary">
+      <button id="{idPrefix}Save" title="Save" class="button is-primary" disabled={cannotSave} on:click={save}>
         <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
     </div>
   </div>

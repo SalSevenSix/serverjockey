@@ -33,19 +33,19 @@
 <div class="divider"><hr /></div>
 
 <h2>Workshop Item</h2>
-<p class="white-space-nowrap">
+<p id="modPickerWorkshopItem" class="white-space-nowrap">
   {#if items.available}
-    <button class="process" on:click={function() { items.add(); }}>Add</button>&nbsp;
+    <button id="modPickerWorkshopAdd" class="process" on:click={function() { items.add(); }}>Add</button>&nbsp;
   {:else}
-    <button class="process" on:click={function() { items.remove(); }}>Remove</button>&nbsp;
+    <button id="modPickerWorkshopRemove" class="process" on:click={function() { items.remove(); }}>Remove</button>&nbsp;
   {/if}
   {workshop}
 </p>
 
-<button class="process is-wide" on:click={toggleSelectedVisible}>{togglerText}</button>
+<button id="modPickerWorkshopToggle" class="process is-wide" on:click={toggleSelectedVisible}>{togglerText}</button>
 {#if selectedVisible}
   <div transition:slide={{ duration: 200 }}>
-    <ol>
+    <ol id="modPickerWorkshopSelected">
       {#each items.selected as item}
         <li>
           {#if dev}

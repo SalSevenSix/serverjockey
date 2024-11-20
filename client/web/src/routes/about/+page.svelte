@@ -24,8 +24,8 @@
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
-        <a href="https://discord.gg/TEuurWAhHn" target="_blank">
-          <figure class="image background-frame pl-5 pr-5 pt-4 pb-3">
+        <a id="aboutPageDiscord" href="https://discord.gg/TEuurWAhHn" target="_blank">
+          <figure class="image background-frame pl-5 pr-5 pt-3 pb-2">
             <img src={surl('/assets/brands/discord_full_logo_black_RGB.svg')}
                  alt="ServerJockey on Discord" title="ServerJockey on Discord" />
           </figure>
@@ -37,7 +37,7 @@
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
-        <a href="https://ko-fi.com/serverjockey" target="_blank">
+        <a id="aboutPageKofi" href="https://ko-fi.com/serverjockey" target="_blank">
           <figure class="image background-frame pl-5 pr-5 pt-1 pb-0">
             <img src={surl('/assets/brands/kofi_logo.png')}
                  alt="ServerJockey on Ko-fi" title="ServerJockey on Ko-fi" />
@@ -50,7 +50,7 @@
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
-        <a href="https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw" target="_blank">
+        <a id="aboutPageYoutube" href="https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw" target="_blank">
           <figure class="image background-frame pl-5 pr-5 pt-4 pb-3">
             <img src={surl('/assets/brands/yt_logo_rgb_light.png')}
                  alt="ServerJockey on YouTube" title="ServerJockey on YouTube" />
@@ -63,7 +63,7 @@
     </p>
     <div class="columns is-centered">
       <div class="column is-half">
-        <a href="https://github.com/SalSevenSix/serverjockey" target="_blank">
+        <a id="aboutPageGithub" href="https://github.com/SalSevenSix/serverjockey" target="_blank">
           <figure class="image background-frame pl-1 pr-1">
             <img src={surl('/assets/brands/GitHub_Logo.png')}
                  alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />

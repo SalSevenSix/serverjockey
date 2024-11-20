@@ -27,8 +27,8 @@
     <tbody>
       <tr>
         <td>
-          <button name='reset' title='Reset Activity' class="button is-danger is-fullwidth"
-                  disabled={processing} on:click={actionResetActivity}>
+          <button id="storeActionsResetActivity" name="reset" title="Reset Activity"
+                  class="button is-danger is-fullwidth" disabled={processing} on:click={actionResetActivity}>
             <i class="fa fa-explosion fa-lg"></i>&nbsp; Reset Activity</button>
         </td>
         <td>Delete all recorded Instance, Player and Chat activity from storage.</td>

@@ -54,32 +54,32 @@
          <a href={surl('/guides/discord/setup')}>the guide</a>.</p>
     </div>
   {/if}
-  <InputPassword id="serverLinkConfigBotToken" name="Discord Bot Token"
+  <InputPassword id="serverLinkConfigDiscordBotToken" label="Discord Bot Token"
      bind:value={formData.BOT_TOKEN} disabled={processing}
      title="Login token for the discord bot" />
-  <InputText id="serverLinkConfigCommandPrefix" name="Command Prefix"
+  <InputText id="serverLinkConfigCommandPrefix" label="Command Prefix"
      bind:value={formData.CMD_PREFIX} disabled={processing}
      title="Prefix the bot will recognise as commands, more than one character is allowed" />
-  <InputText id="serverLinkConfigAdminRole" name="Admin Roles"
+  <InputText id="serverLinkConfigAdminRoles" label="Admin Roles"
      bind:value={formData.ADMIN_ROLE} disabled={processing}
      title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
-  <InputText id="serverLinkConfigPlayerRole" name="Player Roles"
+  <InputText id="serverLinkConfigPlayerRoles" label="Player Roles"
      bind:value={formData.PLAYER_ROLE} disabled={processing}
      title="Discord roles allowed to get server info and use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members" />
-  <InputText id="serverLinkConfigChannelEventsServer" name="Server Event Channel ID"
+  <InputText id="serverLinkConfigServerEventChannelID" label="Server Event Channel ID"
      bind:value={formData.EVENT_CHANNELS.server} disabled={processing}
      title="Discord channel ID for Server events" />
-  <InputText id="serverLinkConfigChannelEventsPlayerLogin" name="Player Event Channel ID"
+  <InputText id="serverLinkConfigPlayerEventChannelID" label="Player Event Channel ID"
      bind:value={formData.EVENT_CHANNELS.login} disabled={processing}
      title="Discord channel ID for Player login and logout events" />
-  <InputText id="serverLinkConfigChannelEventsPlayerChat" name="Chat Integration Channel ID"
+  <InputText id="serverLinkConfigChatIntegrationChannelID" label="Chat Integration Channel ID"
      bind:value={formData.EVENT_CHANNELS.chat} disabled={processing}
      title="Discord channel ID for Chat integration" />
-  <InputTextArea id="serverLinkConfigWhitelistDm" name="Whitelist DM"
+  <InputTextArea id="serverLinkConfigWhitelistDM" label="Whitelist DM"
      bind:value={formData.WHITELIST_DM} disabled={processing}
      title="DM message that will be sent to the user when whitelisted by Discord tag" />
   <div class="block buttons">
-    <button name="save" title="Save" class="button is-primary is-fullwidth"
+    <button id="serverLinkConfigSave" title="Save" class="button is-primary is-fullwidth"
             disabled={cannotSave} on:click={save}>
       <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
   </div>

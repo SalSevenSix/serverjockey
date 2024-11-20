@@ -1,13 +1,11 @@
 <script>
   import { getContext } from 'svelte';
-  import { generateId } from '$lib/util/util';
   import InputText from '$lib/widget/InputText.svelte';
 
   const query = getContext('query');
-  const inputId = 'querySearchText' + generateId();
 
   export let key = 'search';
-  export let name = 'Search';
+  export let label = 'Search';
   export let title = null;
   export let placeholder = null;
 
@@ -24,6 +22,6 @@
 
 
 <div class="block mr-5">
-  <InputText id={inputId} name={name} bind:value={text} title={title}
-             onKeypress={kpExecute} placeholder={placeholder} />
+  <InputText id="querySearchText{query.contextId}" label={label} title={title}
+             bind:value={text} onKeypress={kpExecute} placeholder={placeholder} />
 </div>

@@ -12,14 +12,14 @@
 
 <CheckStore>
   <Collapsible icon="fa-chart-pie" title="Instance Activity">
-    <QueryCriteriaContext>
+    <QueryCriteriaContext contextId="InstanceActivity">
       <QueryChooseInstance />
       <QueryDateRange defaultFromMillis="2592000000" headless />
       <InstanceActivity />
     </QueryCriteriaContext>
   </Collapsible>
   <Collapsible icon="fa-user-clock" title="Player Activity">
-    <QueryCriteriaContext>
+    <QueryCriteriaContext contextId="PlayerActivity">
       <QueryChooseInstance />
       <QueryDateRange defaultFromMillis="2592000000" headless />
       <PlayerActivity />

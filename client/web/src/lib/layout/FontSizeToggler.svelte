@@ -37,5 +37,5 @@
 </script>
 
 
-<a bind:this={fontSizeLink} href={'#'} class="navbar-item"
+<a id="navbarFontSize" bind:this={fontSizeLink} href={'#'} class="navbar-item"
    on:click|preventDefault={toggleFontSize}>&nbsp;<i class="fa fa-text-height fa-lg"></i>&nbsp;</a>

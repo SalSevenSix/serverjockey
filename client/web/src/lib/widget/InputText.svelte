@@ -1,6 +1,6 @@
 <script>
   export let id;
-  export let name;
+  export let label;
   export let value;
 
   export let title = null;
@@ -8,6 +8,7 @@
   export let placeholder = null;
   export let disabled = false;
   export let spellcheck = false;
+  export let noautocomplete = false;
   export let autofocus = false;
   export let notranslate = false;
   export let nowrap = false;
@@ -15,13 +16,13 @@
 
 
 <div class="field">
-  {#if name}
-    <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{name}</label>
+  {#if label}
+    <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{label}</label>
   {/if}
   <div class="control">
     <!-- svelte-ignore a11y-autofocus -->
-    <input id={id} type="text" class="input" class:notranslate={notranslate}
-           bind:value={value} on:keypress={onKeypress} placeholder={placeholder}
-           disabled={disabled} spellcheck={spellcheck} autofocus={autofocus}>
+    <input id={id} type="text" class="input" class:notranslate={notranslate} bind:value={value}
+           on:keypress={onKeypress} placeholder={placeholder} disabled={disabled} spellcheck={spellcheck}
+           autocomplete={noautocomplete ? 'off' : 'on'} autofocus={autofocus}>
   </div>
 </div>

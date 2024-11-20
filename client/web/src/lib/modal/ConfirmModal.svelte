@@ -24,27 +24,21 @@
       <button class="delete is-large" aria-label="close" on:click={closeModal}></button>
     </header>
     <section class="modal-card-body">
-      <div id="confirmModalMessageContent" class="content">
+      <div class="content white-space-pre">
         <p>{message}</p>
       </div>
       {#if confirmName}
-        <InputText id="confirmModalName" name="Confirm Name"
+        <InputText id="confirmModalName" label="Confirm Name"
                    bind:value={enteredName} placeholder={confirmName}
                    title="Enter name to confirm action" autofocus notranslate />
       {/if}
     </section>
     <footer class="modal-card-foot">
-      <button title="Cancel" class="button" on:click={closeModal}>
+      <button id="confirmModalCancel" title="Cancel" class="button" on:click={closeModal}>
         <i class="fa fa-rectangle-xmark fa-lg"></i>&nbsp;&nbsp;Cancel</button>
-      <button title="Confirm" class="button is-success" disabled={confirmName != enteredName} on:click={confirm}>
+      <button id="confirmModalConfirm" title="Confirm" class="button is-success" on:click={confirm}
+              disabled={confirmName != enteredName}>
         <i class="fa fa-square-check fa-lg"></i>&nbsp;&nbsp;Confirm</button>
     </footer>
   </div>
 </div>
-
-
-<style>
-  #confirmModalMessageContent {
-    white-space: pre;
-  }
-</style>

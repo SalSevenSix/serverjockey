@@ -7,7 +7,8 @@
 
 <div>
   <p class="white-space-nowrap">
-    <button class="process" on:click={disconnect}>Disconnect</button>&nbsp;
-    <a title="Open ServerJockey in new tab" href={$connection.url} target="_blank">{$connection.url}</a>
+    <button id="logoutDisconnect" class="process" on:click={disconnect}>Disconnect</button>&nbsp;
+    <a id="logoutOpenServerJockey" title="Open ServerJockey in new tab"
+       href={$connection.url} target="_blank">{$connection.url}</a>
   </p>
 </div>

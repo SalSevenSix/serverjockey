@@ -102,7 +102,7 @@
               <th>Player</th><th>Online</th>
             </tr></thead>
           {/if}
-          <tbody>
+          <tbody id="playersColumn{index}">
             {#if index > 0}
               <tr class="table-header"><td colspan={columnCount}></td></tr>
             {/if}

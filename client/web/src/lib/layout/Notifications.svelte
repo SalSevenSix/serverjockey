@@ -36,7 +36,7 @@
            on:click={deleteMessage} on:keypress={function() {}}>
         <i class="delete is-large mt-1 mr-1"></i>
         <i class="fa {icons[notification.level]} fa-lg"></i>&nbsp;&nbsp;
-        {notification.message}
+        <span id="notificationsText{index}" class="pr-3">{notification.message}</span>
       </div>
     {/each}
   </div>

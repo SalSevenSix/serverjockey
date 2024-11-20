@@ -20,7 +20,8 @@
 
 <svelte:window on:scroll={handleOnScroll} />
 
-<div class="back-to-top" class:hidden role="button" tabindex="0" on:click={gotoTop} on:keypress={function() {}}>
+<div id="backToTop" class="back-to-top" class:hidden role="button" tabindex="0"
+     on:click={gotoTop} on:keypress={function() {}}>
   <i class="fa fa-circle-up fa-3x"></i>
 </div>
 

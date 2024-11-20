@@ -125,30 +125,30 @@
       </div>
       {#if stage < 2}
         <div class="block">
-          <InputText id="steamLoginModalLogin" name="Steam Login" bind:value={steamLogin}
+          <InputText id="steamLoginModalLogin" label="Steam Login" bind:value={steamLogin}
                      disabled={stage > 0} onKeypress={kpStartLogin} nowrap autofocus />
           <div class="field buttons is-right">
-            <button name="steam-login-start" title="Login Steam" class="button is-primary"
+            <button id="steamLoginModalLoginSubmit" title="Login Steam" class="button is-primary"
                     disabled={stage > 0} on:click={startLogin}>
               <i class="fa fa-right-to-bracket fa-lg"></i>&nbsp;&nbsp;Login</button>
           </div>
         </div>
       {:else if stage == 2}
         <div class="block" in:fade={{ duration: 500 }}>
-          <InputPassword id="steamLoginModalPassword" name="Enter Password" bind:value={steamPassword}
+          <InputPassword id="steamLoginModalPassword" label="Enter Password" bind:value={steamPassword}
                          onKeypress={kpEnterPassword} nowrap autofocus />
           <div class="field buttons is-right">
-            <button name="steam-password-enter" title="Enter Password" class="button is-primary"
+            <button id="steamLoginModalPasswordSubmit" title="Enter Password" class="button is-primary"
                     on:click={enterPassword}>
               <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
           </div>
         </div>
       {:else if stage == 3}
         <div class="block" in:fade={{ duration: 500 }}>
-          <InputText id="steamLoginModalCode" name="Enter Steam Guard Code" bind:value={steamCode}
+          <InputText id="steamLoginModalCode" label="Enter Steam Guard Code" bind:value={steamCode}
                      onKeypress={kpEnterCode} nowrap autofocus />
           <div class="field buttons is-right">
-            <button name="steam-code-enter" title="Enter Code" class="button is-primary"
+            <button id="steamLoginModalCodeSubmit" title="Enter Code" class="button is-primary"
                     on:click={enterCode}>
               <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
           </div>
@@ -156,7 +156,7 @@
       {/if}
       <div class="block field">
         <div class="control">
-          <textarea class="textarea has-fixed-size is-family-monospace is-size-7" rows="4"
+          <textarea id="steamLoginModalLog" class="textarea has-fixed-size is-family-monospace is-size-7" rows="4"
                     bind:this={logBox} readonly>{logText}</textarea>
         </div>
       </div>

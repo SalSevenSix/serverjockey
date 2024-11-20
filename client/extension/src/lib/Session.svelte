@@ -60,7 +60,7 @@
 
 
 {#if checking}
-  <p><br />&nbsp; connecting ...</p>
+  <p id="sessionConnecting"><br />&nbsp; connecting ...</p>
 {:else}
   {#if $connection}
     <Logout {disconnect} />

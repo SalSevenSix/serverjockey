@@ -71,13 +71,13 @@
     <thead>
       <tr><th>Name</th><th>Module</th><th></th></tr>
     </thead>
-    <tbody>
+    <tbody id="instanceList">
       {#if instances.length === 0}
         <tr><td colspan="3">
           {#if loading}
             <SpinnerIcon /> Loading...
           {:else}
-            <i class="fa fa-diamond fa-lg mr-1"></i> No instances found
+            <i id="instanceListNoInstancesFound" class="fa fa-diamond fa-lg mr-1"></i> No instances found
           {/if}
         </td></tr>
       {:else}

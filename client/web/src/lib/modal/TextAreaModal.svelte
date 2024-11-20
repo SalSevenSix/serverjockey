@@ -22,19 +22,19 @@
   <div class="modal-content">
     <div class="box">
       <div class="field">
-        <label for="textAreaModalEditor" class="label">{contentName}</label>
+        <label for="textAreaModalText" class="label">{contentName}</label>
         <div class="control">
-          <textarea id="textAreaModalEditor" class="textarea has-fixed-size is-family-monospace"
+          <textarea id="textAreaModalText" class="textarea has-fixed-size is-family-monospace full-height"
                     spellcheck="false" bind:value={contentText}></textarea>
         </div>
       </div>
       <div class="field">
         <div class="control buttons">
-          <button name="close" title="Close" class="button" on:click={closeModal}>
+          <button id="textAreaModalClose" title="Close" class="button" on:click={closeModal}>
             <i class="fa fa-xmark fa-lg"></i>&nbsp;&nbsp;Close</button>
-          <button name="save" title="Save" class="button is-primary is-hidden-mobile" on:click={save}>
+          <button id="textAreaModalSave" title="Save" class="button is-primary is-hidden-mobile" on:click={save}>
             <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
-          <button name="saveAndClose" title="Save and Close" class="button is-primary" on:click={saveAndClose}>
+          <button id="textAreaModalSaveClose" title="Save and Close" class="button is-primary" on:click={saveAndClose}>
             <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save&nbsp;&amp;&nbsp;Close</button>
         </div>
       </div>
@@ -50,7 +50,7 @@
     max-height: 100dvh;
   }
 
-  #textAreaModalEditor {
+  .full-height {
     min-height: calc(90vh - 8em);
     min-height: calc(90dvh - 8em);
   }

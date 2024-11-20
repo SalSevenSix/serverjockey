@@ -1,6 +1,7 @@
 <script>
   import { slide } from 'svelte/transition';
   import { quadInOut } from 'svelte/easing';
+  import { toCamelCase } from '$lib/util/util';
 
   export let open = false;
   export let icon = null;
@@ -24,7 +25,8 @@
   </div>
   <div class="column is-one-quarter">
     <div class="buttons is-right">
-      <button class="button is-dark" on:click={toggle} title={visible ? 'HIDE' : 'SHOW'}>
+      <button id={'collapsible' + toCamelCase(title)} class="button is-dark"
+              on:click={toggle} title={visible ? 'HIDE' : 'SHOW'}>
         <i class="fa {visible ? 'fa-caret-down' : 'fa-caret-left'} fa-2x"></i>
       </button>
     </div>

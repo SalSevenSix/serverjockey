@@ -1,6 +1,6 @@
 <script>
   export let id;
-  export let name;
+  export let label;
   export let value;
 
   export let title = null;
@@ -12,10 +12,10 @@
 
 
 <div class="field">
-  <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{name}</label>
+  <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{label}</label>
   <div class="control">
     <!-- svelte-ignore a11y-autofocus -->
-    <input id={id} type="password" class="input" bind:value={value}
+    <input id={id} type="password" class="input" autocomplete="off" bind:value={value}
            on:keypress={onKeypress} disabled={disabled} autofocus={autofocus}>
   </div>
 </div>

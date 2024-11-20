@@ -85,33 +85,37 @@
 
 <div class={Object.keys(commands).length === 1 ? 'is-hidden' : 'content'}>
   <p class="has-text-weight-bold mb-1">Command</p>
-  <InputRadio name="command" bind:group={command} options={Object.keys(commands)} notranslate />
+  <InputRadio id="commandBuilderCommand" name="command"
+              bind:group={command} options={Object.keys(commands)} notranslate />
 </div>
 {#if command}
   <div class={Object.keys(commands[command]).length === 1 ? 'is-hidden' : 'content'}>
     <p class="has-text-weight-bold mb-1">Action</p>
-    <InputRadio name="action" bind:group={action} options={Object.keys(commands[command])} notranslate />
+    <InputRadio id="commandBuilderAction" name="action"
+                bind:group={action} options={Object.keys(commands[command])} notranslate />
   </div>
   {#if action}
     <div class="content">
       {#each commands[command][action] as arg}
         {#if arg.input === 'display'}
           {loadDisplay(commands[command][action].indexOf(arg))}
-          <pre class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
+          <pre id="commandBuilderD{arg.name}"
+               class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
         {:else if arg.input === 'text' || arg.input === 'text>'}
           <InputText id="commandBuilderI{arg.name}"
-                     name={arg.hasOwnProperty('label') ? arg.label : capitalizeKebabCase(arg.name)}
+                     label={arg.hasOwnProperty('label') ? arg.label : capitalizeKebabCase(arg.name)}
                      bind:value={args[commands[command][action].indexOf(arg)]}
                      autofocus={arg.input === 'text>'} onKeypress={arg.input === 'text>' ? kpSend : null} />
         {:else if arg.input === 'radio'}
           <p class="has-text-weight-bold mb-1">{capitalizeKebabCase(arg.name)}</p>
-          <InputRadio name={arg.name} options={arg.options} notranslate
+          <InputRadio id="commandBuilderR{arg.name}"
+                      name={arg.name} options={arg.options} notranslate
                       bind:group={args[commands[command][action].indexOf(arg)]} />
         {/if}
       {/each}
     </div>
     <div class="block buttons">
-      <button name="send" title={sendTitle} class="button is-primary" disabled={cannotSend} on:click={send}>
+      <button id="commandBuilderSend" title={sendTitle} class="button is-primary" disabled={cannotSend} on:click={send}>
         <i class="fa fa-paper-plane fa-lg"></i>&nbsp;&nbsp;Send</button>
     </div>
   {/if}

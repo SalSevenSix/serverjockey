@@ -92,7 +92,7 @@
     Backup, Restore and Upload processes may take a while. Check the console log to confirm success.
   </p>
   {#if uploading}
-    <p class="has-text-weight-bold">
+    <p id="backupRestoreActionsUploading" class="has-text-weight-bold">
       <SpinnerIcon /> Please keep this section open while uploading...
     </p>
   {/if}
@@ -101,12 +101,12 @@
 <div class="block">
   <div class="file is-fullwidth is-info has-name">
     <div class="control buttons mr-2">
-      <button name="upload" title="Upload File" class="button is-success"
+      <button id="backupRestoreActionsUploadFile" title="Upload File" class="button is-success"
               disabled={noFileSelected || cannotUpload} on:click={uploadFile}>
         <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload</button>
     </div>
     <label class="file-label pr-6">
-      <input class="file-input" type="file" name="upload-file" bind:files={uploadFiles}>
+      <input id="backupRestoreActionsFilename" class="file-input" type="file" bind:files={uploadFiles}>
       <span class="file-cta" title={fnHelp}>
         <span class="file-icon"><i class="fa fa-file-circle-plus"></i></span>
         <span class="file-label">Choose file…</span>
@@ -117,10 +117,10 @@
     </label>
   </div>
   <div class="block buttons">
-    <button name="runtime" title="Backup Runtime" class="button is-primary"
+    <button id="backupRestoreActionsBackupRuntime" name="runtime" title="Backup Runtime" class="button is-primary"
             disabled={cannotBackup} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
-    <button name="world" title="Backup World" class="button is-primary"
+    <button id="backupRestoreActionsBackupWorld" name="world" title="Backup World" class="button is-primary"
             disabled={cannotBackup} on:click={createBackup}>
       <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
   </div>

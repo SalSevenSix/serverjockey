@@ -1,6 +1,6 @@
 <script>
   export let id;
-  export let name;
+  export let label;
   export let value;
 
   export let title = null;
@@ -9,7 +9,7 @@
 
 
 <div class="field">
-  <label for={id} class="label" title={title}>{name}</label>
+  <label for={id} class="label" title={title}>{label}</label>
   <div class="control">
     <textarea id={id} class="textarea" bind:value={value} disabled={disabled}></textarea>
   </div>

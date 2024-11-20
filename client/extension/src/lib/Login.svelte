@@ -5,7 +5,7 @@
 
   let connecting = false;
 
-  $: cannotConnect = !url || !token || connecting;
+  $: cannotConnect = !url || !token || token.length != 10 || connecting;
 
   function kpConnect(event) {
     if (event.key === 'Enter') { doConnect(); }
@@ -22,10 +22,10 @@
 <div>
   <p>Connect to your ServerJockey system...</p>
   <h2>URL</h2>
-  <input class="input" type="text" bind:value={url}>
+  <input id="loginURL" class="input" type="text" bind:value={url}>
   <h2>Token</h2>
-  <input class="input" type="text" bind:value={token} on:keypress={kpConnect}>
+  <input id="loginToken" class="input" type="text" autocomplete="off" bind:value={token} on:keypress={kpConnect}>
   <p>
-    <button class="process hero" disabled={cannotConnect} on:click={doConnect}>Connect</button>
+    <button id="loginConnect" class="process hero" disabled={cannotConnect} on:click={doConnect}>Connect</button>
   </p>
 </div>

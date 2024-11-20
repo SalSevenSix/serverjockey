@@ -1,6 +1,7 @@
 <script>
   import { isString, capitalizeKebabCase } from '$lib/util/util';
 
+  export let id;
   export let name;
   export let group;
   export let options;
@@ -16,7 +17,7 @@
 
 
 <div class="field">
-  <div class="control">
+  <div id={id} class="control">
     {#each options.map(optionToObject) as option}
       <label class="radio" class:notranslate={notranslate} style:width={width} title={option.title}>
         <input type="radio" name={name} value={option.value} bind:group={group}>
