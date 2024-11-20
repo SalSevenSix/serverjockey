@@ -26,12 +26,12 @@ if [ "$BRANCH" = "local" ]; then
   cd ../.. || exit 1
   [ -d "build" ] || exit 1
   mkdir -p "$SERVERJOCKEY_DIR/build" || exit 1
-  find . -maxdepth 1 | while read file; do
-    [[ $file == "." || $file == "./build" || $file == "./venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
+  ls | while read file; do
+    [[ $file == "build" || $file == "venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
   done
   cd "build" || exit 1
-  find . -maxdepth 1 | while read file; do
-    [[ $file == "." || $file == "./dist" ]] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
+  ls | while read file; do
+    [ $file == "dist" ] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
   done
 else
   if [ ! -f "$BRANCH.zip" ]; then
@@ -92,7 +92,8 @@ for VENV_LIBDIR in lib lib64; do
 done
 
 echo "Running tests"
-python3 -m unittest discover -t . -s test -p "*.py" || exit 1
+python3 -m unittest discover -t . -s test/unit -p "*.py" || exit 1
+python3 -m unittest discover -t . -s test/system -p "*.py" -f || exit 1
 
 echo "Removing ServerJockey junk"
 rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1
