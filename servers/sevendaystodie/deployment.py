@@ -9,6 +9,8 @@ from core.proc import proch, jobh
 from core.common import steam, interceptors, portmapper
 from servers.sevendaystodie import messaging as msg
 
+APPID = '294420'
+
 
 def _default_cmdargs():
     return {
@@ -29,7 +31,6 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._settings_def_file = self._runtime_dir + '/serverconfig.xml'
-        self._runtime_metafile = self._runtime_dir + '/steamapps/appmanifest_294420.acf'
         self._executable = self._runtime_dir + '/7DaysToDieServer.x86_64'
         self._world_dir = self._home_dir + '/world'
         self._config_dir = self._world_dir + '/config'
@@ -71,8 +72,8 @@ class Deployment:
         r.put('admin', httpext.FileSystemHandler(self._admin_file), 'm')
         r.pop()
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 294420), 'r')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().check(self._save_dir + '/Saves').dir(self._log_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')

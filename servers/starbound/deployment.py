@@ -8,6 +8,7 @@ from core.common import steam, rconsvc, interceptors, portmapper
 from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
+APPID = '211820'
 
 
 def _default_cmdargs():
@@ -57,8 +58,8 @@ class Deployment:
         r.put('settings', httpext.FileSystemHandler(self._config_file), 'm')
         r.pop()
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_211820.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 211820, anon=False), 'r')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID, anon=False), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().check(self._save_dir).file(self._log_file))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
@@ -122,7 +123,7 @@ class Deployment:
 
     async def _link_mods(self):
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')
-        workshop_files, workshop_dir = [], self._runtime_dir + '/steamapps/workshop/content/211820'
+        workshop_files, workshop_dir = [], self._runtime_dir + '/steamapps/workshop/content/' + APPID
         if await io.directory_exists(workshop_dir):
             workshop_files = await io.directory_list(workshop_dir)
         workshop_items, mods_dir = ['mods_go_here'], self._runtime_dir + '/mods'

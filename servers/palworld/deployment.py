@@ -9,6 +9,7 @@ from core.proc import proch, jobh
 from core.common import steam, interceptors, portmapper, rconsvc
 
 # https://tech.palworldgame.com/settings-and-operation/arguments
+APPID = '2394010'
 
 
 def _default_cmdargs() -> dict:
@@ -71,8 +72,8 @@ class Deployment:
         r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_2394010.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 2394010), 'r')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().check(self._save_dir).dir(self._ini_dir))
         r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')

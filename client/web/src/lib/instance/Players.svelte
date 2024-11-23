@@ -80,7 +80,7 @@
         {#if hasSteamId}<th>Steam ID</th>{/if}
         <th>Player</th><th>Online</th>
       </tr></thead>
-      <tbody><tr>
+      <tbody id="playersZeroOnline"><tr>
         <td colspan={columnCount}>
           {#if loading}
             <SpinnerIcon /> Loading...
@@ -98,8 +98,9 @@
         <table class="table">
           {#if index === 0}
             <thead><tr class="table-header">
-              {#if hasSteamId}<th>Steam ID</th>{/if}
-              <th>Player</th><th>Online</th>
+              {#if hasSteamId}<th id="playersHeaderSteamID">Steam ID</th>{/if}
+              <th id="playersHeaderPlayer">Player</th>
+              <th id="playersHeaderOnline">Online</th>
             </tr></thead>
           {/if}
           <tbody id="playersColumn{index}">

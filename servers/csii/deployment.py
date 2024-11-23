@@ -8,6 +8,8 @@ from core.proc import proch, jobh, wrapper
 from core.common import steam, interceptors, portmapper, rconsvc
 from servers.csii import messaging as msg
 
+APPID = '730'
+
 
 def _default_cmdargs() -> dict:
     return {
@@ -78,7 +80,7 @@ class Deployment:
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('deployment')
         r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/VERSIONS.txt'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 730, anon=False), 'r')
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID, anon=False), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().dir(self._logs_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')

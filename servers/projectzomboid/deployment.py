@@ -7,6 +7,7 @@ from core.proc import proch, jobh
 from core.common import steam, interceptors, cachelock
 from servers.projectzomboid import modcheck as mck
 
+APPID = '380870'
 _WORLD_NAME_DEF = 'servertest'
 
 
@@ -60,8 +61,8 @@ class Deployment:
         r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
         r.reg('m', interceptors.block_maintenance_only(self._mailer))
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_380870.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 380870), 'r')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().check(self._multiplayer_dir).file(self._log_file))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')

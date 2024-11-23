@@ -130,12 +130,12 @@
 
 {#if activity}
   {#if activity.results.length === 0}
-    <div class="content pb-4">
+    <div id="chatActivity{query.contextId}None" class="content pb-4">
       <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No chat activity found</p>
     </div>
   {:else}
     <div class="block chat-log-container mr-6"><div>
-      <table class="table is-narrow is-log"><tbody>
+      <table class="table is-narrow is-log"><tbody id="chatActivity{query.contextId}List">
         {#each activity.results as entry}
           <tr class={entry.clazz}>
             {#if entry.player}

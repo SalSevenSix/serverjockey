@@ -7,6 +7,8 @@ from core.proc import proch, jobh, prcenc, wrapper
 from core.common import steam, interceptors, portmapper
 from servers.unturned import messaging as msg
 
+APPID = '1110390'
+
 
 def _default_cmdargs():
     return {
@@ -27,7 +29,6 @@ class Deployment:
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
-        self._runtime_metafile = self._runtime_dir + '/steamapps/appmanifest_1110390.acf'
         self._executable = self._runtime_dir + '/Unturned_Headless.x86_64'
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
@@ -69,8 +70,8 @@ class Deployment:
         r.put('workshop', httpext.FileSystemHandler(self._workshop_file), 'm')
         r.pop()
         r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_metafile))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, 1110390), 'r')
+        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
+        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
         r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
         r.put('world-meta', httpext.MtimeHandler().check(self._map_dir).dir(self._logs_dir))
         r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')

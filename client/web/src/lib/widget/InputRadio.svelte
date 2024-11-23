@@ -1,5 +1,5 @@
 <script>
-  import { isString, capitalizeKebabCase } from '$lib/util/util';
+  import { isString, capitalizeKebabCase, toCamelCase } from '$lib/util/util';
 
   export let id;
   export let name;
@@ -10,8 +10,10 @@
   export let notranslate = false;
 
   function optionToObject(option) {
-    if (isString(option)) return {value: option};
-    return option;
+    const result = isString(option) ? {value: option} : option;
+    result.label = result.name ? result.name : capitalizeKebabCase(result.value);
+    result.id = id + toCamelCase(result.label);
+    return result;
   }
 </script>
 
@@ -20,8 +22,8 @@
   <div id={id} class="control">
     {#each options.map(optionToObject) as option}
       <label class="radio" class:notranslate={notranslate} style:width={width} title={option.title}>
-        <input type="radio" name={name} value={option.value} bind:group={group}>
-          {#if width}&nbsp;{/if}{option.name ? option.name : capitalizeKebabCase(option.value)}</label>
+        <input id={option.id} type="radio" name={name} value={option.value} bind:group={group}>
+          {#if width}&nbsp;{/if}{option.label}</label>
     {/each}
   </div>
 </div>

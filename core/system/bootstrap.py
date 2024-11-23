@@ -146,7 +146,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
 
 
 def main() -> int:
-    if sys.version[:5] not in ('3.10.', '3.11.', '3.12.'):
+    if sys.version_info.major != 3 or sys.version_info.minor not in (10, 11, 12, 13):
         raise Exception('Unsupported python3 version, 3.10 or 3.11 or 3.12 required.')
     context = _create_context()
     if not context:

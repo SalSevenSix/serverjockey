@@ -1,12 +1,12 @@
 import unittest
 from core.util import objconv
-from test.system import systest
+from test.system import systemcontext
 
 
 class TestSystem(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_modules(self):
-        result = await systest.get('/modules')
+        result = await systemcontext.get('/modules')
         self.assertEqual(8, len(result))
         self.assertTrue('testserver' in result)
         self.assertTrue('projectzomboid' in result)
@@ -18,7 +18,7 @@ class TestSystem(unittest.IsolatedAsyncioTestCase):
         self.assertTrue('palworld' in result)
 
     async def test_get_instances(self):
-        self.assertEqual(objconv.json_to_dict(_expected_get_instances()), await systest.get('/instances'))
+        self.assertEqual(objconv.json_to_dict(_expected_get_instances()), await systemcontext.get('/instances'))
 
 
 def _expected_get_instances():

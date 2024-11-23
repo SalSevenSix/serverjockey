@@ -12,7 +12,7 @@ _SCHEME = 'test'
 _BASEURL = _SCHEME + '://'
 
 
-class TestContext:
+class _SystemTestContext:
 
     def __init__(self):
         self._syssvc, self._resources = None, None
@@ -40,12 +40,12 @@ class TestContext:
         return self._resources
 
 
-CONTEXT = TestContext()
+_CONTEXT = _SystemTestContext()
 
 
 async def _resources() -> httprsc.WebResource:
-    await CONTEXT.initialise()
-    return CONTEXT.resources()
+    await _CONTEXT.initialise()
+    return _CONTEXT.resources()
 
 
 async def get(path: str, secure: bool = True):

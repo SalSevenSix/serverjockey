@@ -2,7 +2,7 @@
 
 echo "Initialising build process"
 PYTHON_LIBDIR="python3.12"
-[ $(python3 --version | grep "Python 3\.12\." | wc -l) -eq 0 ] && exit 1
+[ $(python3 --version | grep "Python 3\.12\." | wc -l) -eq 1 ] || exit 1
 python3 -m pipenv --version > /dev/null || exit 1
 which wget > /dev/null || exit 1
 which unzip > /dev/null || exit 1
@@ -62,9 +62,9 @@ if [ ! -d "../../.git" ]; then
     chmod 755 $BUILD_DIR/rpm.sh || exit 1
   fi
 fi
-rm "$BRANCH.zip" > /dev/null 2>&1
 
 echo "Preparing for build"
+rm "$BRANCH.zip" > /dev/null 2>&1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/index.js || exit 1
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
@@ -85,8 +85,9 @@ python3 -m pipenv sync || exit 1
 for VENV_LIBDIR in lib lib64; do
   LIBDIR="$SERVERJOCKEY_DIR/.venv/$VENV_LIBDIR/$PYTHON_LIBDIR/site-packages"
   if [ -d "$LIBDIR" ]; then
+    [ -d "$LIBDIR/selenium" ] && exit 1
     rm -rf $LIBDIR/pip* $LIBDIR/test* $LIBDIR/greenlet* $LIBDIR/*virtualenv* > /dev/null 2>&1
-    echo "Merging $LIBDIR"
+    echo " merging $LIBDIR"
     cp -r $LIBDIR/* "$SERVERJOCKEY_DIR" || exit 1
   fi
 done

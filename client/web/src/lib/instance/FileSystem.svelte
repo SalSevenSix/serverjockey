@@ -211,13 +211,15 @@
             {#if hasActions}
               <td>
                 {#if customMeta}
-                  <button title={customMeta.name} disabled={cannotAction || path.type === 'directory'}
+                  <button name="{idPrefix}ActionE{path.name}" title={customMeta.name}
+                          disabled={cannotAction || path.type === 'directory'}
                           class={'button ' + customMeta.button + (allowDelete > 0 ? ' mb-1' : '')}
                           on:click={function() { customAction(path.url); }}>
                     <i class="fa {customMeta.icon} fa-lg"></i></button>
                 {/if}
                 {#if allowDelete > 0}
-                  <button title="Delete" disabled={cannotDelete} class="button is-danger"
+                  <button name="{idPrefix}DeleteE{path.name}" title="Delete"
+                          disabled={cannotDelete} class="button is-danger"
                           on:click={function() { deleteAction(path.url); }}>
                     <i class="fa fa-trash-can fa-lg"></i></button>
                 {/if}

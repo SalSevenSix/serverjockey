@@ -23,9 +23,9 @@ echo "Running SteamCMD, log output may be delayed..."
 
 class SteamCmdInstallHandler(httpabc.PostHandler):
 
-    def __init__(self, context: contextsvc.Context, path: str, app_id: int, anon: bool = True):
+    def __init__(self, context: contextsvc.Context, path: str, app_id: int | str, anon: bool = True):
         self._mailer, self._steam_config = context, _SteamConfig(context.env('HOME'))
-        self._path, self._app_id, self._anon = path, app_id, anon
+        self._path, self._app_id, self._anon = path, str(app_id), anon
         self._handler = httpext.MessengerHandler(self._mailer, jobh.JobProcess.REQUEST, selector=httpsubs.Selector(
             msg_filter=jobh.JobProcess.FILTER_ALL_LINES,
             completed_filter=jobh.JobProcess.FILTER_DONE,
@@ -41,7 +41,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         script += '$(find_steamcmd)'
         script += ' +force_install_dir ' + self._path
         script += ' +login ' + login
-        script += ' +app_update ' + str(self._app_id)
+        script += ' +app_update ' + self._app_id
         beta = util.get('beta', data)
         if beta:
             script += ' -beta ' + util.script_escape(beta)

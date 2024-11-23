@@ -89,10 +89,12 @@
             </td>
             <td class="word-break-all notranslate">{instance.module}</td>
             <td class="buttons-column">
-              <button title="View" class="button is-primary mb-1" disabled={deleting}
+              <button name="instanceListViewI{instance.identity}" title="View"
+                      class="button is-primary mb-1" disabled={deleting}
                       on:click={function() { viewInstance(instance); }}>
                 <i class="fa fa-folder-open fa-lg"></i></button>
-              <button title="Delete" class="button is-danger ml-1" disabled={deleting}
+              <button name="instanceListDeleteI{instance.identity}" title="Delete"
+                      class="button is-danger ml-1" disabled={deleting}
                       on:click={function() { deleteInstance(instance); }}>
                 <i class="fa fa-trash-can fa-lg"></i></button>
             </td>
