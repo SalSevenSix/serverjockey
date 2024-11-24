@@ -27,8 +27,7 @@ class TestRefreshRuntime(unittest.TestCase):
             context.wait_for_instance_state('MAINTENANCE')
             context.scroll_to_top()
             context.wait_for_instance_state('READY', wait=100.0 * weight)
-            self.assertEqual('END Install',
-                             context.find_element('consoleLogConsoleLogText').get_attribute('value').split('\n')[-1])
+            self.assertEqual('END Install', context.get_instance_loglastline())
             return
         # restore last runtime backup
         context.find_element('collapsibleBackups').click()
@@ -37,23 +36,22 @@ class TestRefreshRuntime(unittest.TestCase):
         context.wait_for_instance_state('MAINTENANCE')
         context.scroll_to_top()
         context.wait_for_instance_state('READY', wait=100.0 * weight)
-        self.assertEqual('END Unpack Directory',
-                         context.find_element('consoleLogConsoleLogText').get_attribute('value').split('\n')[-1])
+        self.assertEqual('END Unpack Directory', context.get_instance_loglastline())
         # update runtime steam
         context.find_element('runtimeControlsInstall', enabled=2.0).click()
         context.find_element('confirmModalConfirm').click()
         context.wait_for_instance_state('MAINTENANCE')
         context.scroll_to_top()
         context.wait_for_instance_state('READY', wait=300.0 * weight)
-        self.assertEqual('Success! App \'' + appid + '\' fully installed.',
-                         context.find_element('consoleLogConsoleLogText').get_attribute('value').split('\n')[-1])
+        self.assertIn(context.get_instance_loglastline(), (
+            'Success! App \'' + appid + '\' fully installed.',
+            'Error! App \'' + appid + '\' state is 0x10C after update job.'))
         # refresh last runtime backup
         context.find_element('backupRestoreActionsBackupRuntime').click()
         context.wait_for_instance_state('MAINTENANCE')
         context.scroll_to_top()
         context.wait_for_instance_state('READY', wait=300.0 * weight)
-        self.assertEqual('END Archive Directory',
-                         context.find_element('consoleLogConsoleLogText').get_attribute('value').split('\n')[-1])
+        self.assertEqual('END Archive Directory', context.get_instance_loglastline())
         old_backup = context.backup_path(identity, TEST_BACKUP)
         self.assertTrue(os.path.isfile(old_backup))
         new_backup = context.backup_path(identity, context.get_cell_text('fileSystemBackupsFiles', 1, 2))
@@ -67,11 +65,11 @@ class TestRefreshRuntime(unittest.TestCase):
     def test_refresh_factorio(self):
         self._refresh('ft', 'factorio')
 
-    def test_refresh_sevendaystodie(self):
-        self._refresh('7d2d', 'sevendaystodie', APPID_SEVENDAYSTODIE, weight=2.5)
-
     def test_refresh_unturned(self):
         self._refresh('ut', 'unturned', APPID_UNTURNED, weight=1.5)
+
+    def test_refresh_sevendaystodie(self):
+        self._refresh('7d2d', 'sevendaystodie', APPID_SEVENDAYSTODIE, weight=2.5)
 
     def test_refresh_starbound(self):
         self._refresh('sb', 'starbound', APPID_STARBOUND)

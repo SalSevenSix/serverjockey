@@ -50,13 +50,16 @@
         {/if}
       </td></tr>
       {#if !stateOnly}
-        <tr><td class="has-text-weight-bold">Version</td><td id="serverStatusVersion">{version}</td></tr>
-        <tr><td class="has-text-weight-bold">Connect</td><td id="serverStatusConnect">{@html connect}</td></tr>
+        <tr><td class="has-text-weight-bold">Version</td>
+            <td id="serverStatusVersion">{version}</td></tr>
+        <tr><td class="has-text-weight-bold">Connect</td>
+            <td id="serverStatusConnect">{@html connect}</td></tr>
       {/if}
       {#if $serverStatus.details}
         {#each Object.keys($serverStatus.details) as key}
           {#if !commonKeys.includes(key)}
-            <tr><td class="has-text-weight-bold">{capitalize(key)}</td><td>{$serverStatus.details[key]}</td></tr>
+            <tr><td class="has-text-weight-bold">{capitalize(key)}</td>
+                <td id="serverStatus{capitalize(key)}">{$serverStatus.details[key]}</td></tr>
           {/if}
         {/each}
       {/if}

@@ -8,6 +8,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
+_BASE_URL = 'http://localhost:6164'
+
+
+def _de_increment_wait(wait: float) -> float:
+    if wait < 0.0:
+        raise Exception('wait timed out')
+    time.sleep(1.0)
+    wait -= 1.0
+    return wait
+
 
 class _WebTestContext:
 
@@ -16,19 +26,30 @@ class _WebTestContext:
         self.driver.set_window_size(1280, 720)
         self.actions = ActionChains(self.driver)
         self.home = '/'.join(os.getcwd().split('/')[0:3]) + '/serverjockey/'
+        self.path, self.net_public = None, None
 
-    def goto(self, path: str):
-        self.driver.get('http://localhost:6164' + path)
-        login_button = self.find_element('loginModalLogin')
-        if not login_button.is_displayed():
+    def goto(self, path: str = '/'):
+        if path == self.path:
             return
+        if self.path:
+            self.driver.get(_BASE_URL + path)
+            self.path = path
+            return
+        self.driver.get(_BASE_URL)
+        login_button = self.find_element('loginModalLogin')
         if not login_button.is_enabled():
             self.find_element('loginModalToken').send_keys('xxxxxxxxxx')
             assert login_button.is_enabled()
         login_button.click()
+        self.net_public = self.find_element('systemInfoNetPublic', exists=6.0).get_attribute('innerText')
+        self.path = '/'
+        self.goto(path)
 
     def goto_instance(self, identity: str, module: str):
-        self.goto('/servers/' + module + '?i=' + identity)
+        if not self.path:
+            self.goto()
+        self.find_element('navbarInstances').click()
+        self.find_element('instanceListViewI' + identity, by=By.NAME, exists=3.0).click()
         instance_header = self.find_element('instanceHeader', exists=2.0).get_attribute('innerText')
         assert instance_header == identity + ' \xA0\xA0 ' + module
 
@@ -66,6 +87,9 @@ class _WebTestContext:
         result = util.rchop(result, '(')
         return result
 
+    def get_instance_loglastline(self) -> str:
+        return self.find_element('consoleLogConsoleLogText').get_attribute('value').split('\n')[-1]
+
     def wait_for_instance_state(self, success: str, error: str = 'EXCEPTION', wait: float = 2.0):
         state = self.find_element('serverStatusState')
         success, error = success.upper(), error.upper() if error else None
@@ -75,11 +99,7 @@ class _WebTestContext:
                 return
             if value == error:
                 raise Exception('wait for state ended in ' + error)
-            if wait >= 0.0:
-                time.sleep(1.0)
-                wait -= 1.0
-            else:
-                raise Exception('wait for state ' + success + ' timed out')
+            wait = _de_increment_wait(wait)
 
     def backup_path(self, instance: str, filename: str = ''):
         return self.home + instance + '/backups/' + filename
