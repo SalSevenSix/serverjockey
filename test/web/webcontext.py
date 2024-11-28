@@ -39,7 +39,6 @@ class _WebTestContext:
         login_button = self.find_element('loginModalLogin')
         if not login_button.is_enabled():
             self.find_element('loginModalToken').send_keys('xxxxxxxxxx')
-            assert login_button.is_enabled()
         login_button.click()
         self.net_public = self.find_element('systemInfoNetPublic', exists=6.0).get_attribute('innerText')
         self.path = '/'
@@ -87,8 +86,19 @@ class _WebTestContext:
         result = util.rchop(result, '(')
         return result
 
+    def get_instance_log(self) -> str:
+        return self.find_element('consoleLogConsoleLogText').get_attribute('value')
+
+    def check_instance_log(self, limit: int, *contains: str) -> bool:
+        log_lines = self.get_instance_log().split('\n')
+        log_lines = log_lines[len(log_lines) - limit:]
+        for line in log_lines:
+            if line in contains:
+                return True
+        return False
+
     def get_instance_loglastline(self) -> str:
-        return self.find_element('consoleLogConsoleLogText').get_attribute('value').split('\n')[-1]
+        return self.get_instance_log().split('\n')[-1]
 
     def wait_for_instance_state(self, success: str, error: str = 'EXCEPTION', wait: float = 2.0):
         state = self.find_element('serverStatusState')

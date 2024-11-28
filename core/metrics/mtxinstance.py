@@ -84,7 +84,7 @@ class _InstancePlayerMetrics(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         data = message.data().asdict()
-        event_name = data['event'].upper()
+        event_name = data['event']
         if event_name == sc.CLEAR:
             if len(self._player_names) > 0:
                 await mtxutil.set_gauge(self._player_gauge, self._instance, 0)

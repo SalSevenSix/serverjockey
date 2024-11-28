@@ -86,7 +86,7 @@ class _InstancePlayerRouting(msgabc.AbcSubscriber):
 
     async def handle(self, message):
         source, data = message.source(), message.data().asdict()
-        event_name = data['event'].upper()
+        event_name = data['event']
         if event_name == sc.CLEAR:
             for player_name in self._player_names:
                 storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(

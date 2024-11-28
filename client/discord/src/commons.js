@@ -30,15 +30,15 @@ exports.startAllEventLogging = function(context, channels, instance, url) {
   exports.startServerEventLogging(context, channels, instance, url);
   if (!channels.login && !channels.chat) return;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
-    if (json.event === 'chat') {
+    if (json.event === 'CHAT') {
       if (!channels.chat) return true;
       channels.chat.send('`' + instance + '` 💬 ' + json.player.name + ': ' + json.text);
       return true;
     }
     if (!channels.login) return true;
     let result = null;
-    if (json.event === 'login') { result = ' 🟢 '; }
-    if (json.event === 'logout') { result = ' 🔴 '; }
+    if (json.event === 'LOGIN') { result = ' 🟢 '; }
+    if (json.event === 'LOGOUT') { result = ' 🔴 '; }
     if (!result) return true;
     result = '`' + instance + '`' + result + json.player.name;
     if (json.player.steamid) {

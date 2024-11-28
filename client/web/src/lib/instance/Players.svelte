@@ -31,12 +31,12 @@
   }, 10000);
 
   function handlePlayerEvent(data) {
-    if (data.event === 'clear') {
+    if (data.event === 'CLEAR') {
       players = [];
       return true;
     }
-    const loginEvent = (data.event === 'login');
-    if (loginEvent || data.event === 'logout') {
+    const loginEvent = (data.event === 'LOGIN');
+    if (loginEvent || data.event === 'LOGOUT') {
       const updatedPlayers = players.filter(function(value) {
         return value.name != data.player.name;
       });

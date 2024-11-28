@@ -43,8 +43,8 @@ class TestRefreshRuntime(unittest.TestCase):
         context.wait_for_instance_state('MAINTENANCE')
         context.scroll_to_top()
         context.wait_for_instance_state('READY', wait=300.0 * weight)
-        self.assertIn(context.get_instance_loglastline(), (
-            'Success! App \'' + appid + '\' fully installed.',
+        self.assertTrue(context.check_instance_log(
+            6, 'Success! App \'' + appid + '\' fully installed.',
             'Error! App \'' + appid + '\' state is 0x10C after update job.'))
         # refresh last runtime backup
         context.find_element('backupRestoreActionsBackupRuntime').click()

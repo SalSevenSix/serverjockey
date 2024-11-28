@@ -3,7 +3,7 @@ import typing
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import dtutil
 from core.msg import msgabc, msgftr, msgext
-from core.msgc import mc
+from core.msgc import mc, sc
 from core.http import httpabc, httpsec
 
 
@@ -131,8 +131,6 @@ class _Players:
         return result
 
 
-# TODO use uppercase event names from core.msgc.sc
-
 class _EventLogin:
 
     def __init__(self, name: str, steamid: str | None = None):
@@ -142,7 +140,7 @@ class _EventLogin:
         return self._player
 
     def asdict(self) -> dict:
-        return {'event': 'login', 'player': self._player.asdict()}
+        return {'event': sc.LOGIN, 'player': self._player.asdict()}
 
 
 class _EventChat:
@@ -152,7 +150,7 @@ class _EventChat:
         self._text = text
 
     def asdict(self) -> dict:
-        return {'event': 'chat', 'player': self._player.asdict(), 'text': self._text}
+        return {'event': sc.CHAT, 'player': self._player.asdict(), 'text': self._text}
 
 
 class _EventLogout:
@@ -164,11 +162,11 @@ class _EventLogout:
         return self._player
 
     def asdict(self) -> dict:
-        return {'event': 'logout', 'player': self._player.asdict()}
+        return {'event': sc.LOGOUT, 'player': self._player.asdict()}
 
 
 class _EventClear:
 
     # noinspection PyMethodMayBeStatic
     def asdict(self) -> dict:
-        return {'event': 'clear'}
+        return {'event': sc.CLEAR}
