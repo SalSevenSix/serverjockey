@@ -95,12 +95,10 @@ class _InstancePlayerMetrics(msgabc.AbcSubscriber):
             if player_name not in self._player_names:
                 self._player_names.append(player_name)
                 await mtxutil.set_gauge(self._player_gauge, self._instance, len(self._player_names))
-            return None
-        if event_name == sc.LOGOUT:
+        elif event_name == sc.LOGOUT:
             if player_name in self._player_names:
                 self._player_names.remove(player_name)
                 await mtxutil.set_gauge(self._player_gauge, self._instance, len(self._player_names))
-            return None
         return None
 
 

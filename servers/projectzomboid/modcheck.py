@@ -175,10 +175,10 @@ class _EmptyThenRestartSubscriber(msgabc.AbcSubscriber):
                 self._waiting = True
             return None
         data = message.data().asdict()
-        event_name = data['event'].upper()
+        event_name = data['event']
         if event_name == sc.CLEAR:
             self._player_names, self._waiting = set(), False
-            return None  # No shutdown because CLEAR does not mean last player logged out
+            return None  # no restart because CLEAR does not mean last player logged out
         player_name = data['player']['name']
         if event_name == sc.LOGIN:
             self._player_names.add(player_name)

@@ -102,14 +102,12 @@ class _InstancePlayerRouting(msgabc.AbcSubscriber):
         if event_name == sc.LOGIN:
             self._player_names.add(player_name)
             storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
-                self._identity, event_name, player_name, steamid))
-            return None
-        if event_name == sc.LOGOUT:
+                self._identity, sc.LOGIN, player_name, steamid))
+        elif event_name == sc.LOGOUT:
             if player_name in self._player_names:
                 self._player_names.remove(player_name)
             storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
-                self._identity, event_name, player_name, steamid))
-            return None
+                self._identity, sc.LOGOUT, player_name, steamid))
         return None
 
 

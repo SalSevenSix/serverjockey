@@ -38,12 +38,12 @@ exports.startAllEventLogging = function(context, channels, instance, url) {
     if (!channels.login) return true;
     let result = null;
     if (json.event === 'LOGIN') { result = ' 🟢 '; }
+    if (json.event === 'DEATH') { result = ' 💀 '; }
     if (json.event === 'LOGOUT') { result = ' 🔴 '; }
     if (!result) return true;
     result = '`' + instance + '`' + result + json.player.name;
-    if (json.player.steamid) {
-      result += ' [' + json.player.steamid + ']';
-    }
+    if (json.text) { result += ' [' + json.text + ']'; }
+    if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
     channels.login.send(result);
     return true;
   });

@@ -44,6 +44,10 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
         mailer.post(source, mc.PlayerStore.EVENT, _EventChat(name, text))
 
     @staticmethod
+    def event_death(mailer: msgabc.Mailer, source: typing.Any, name: str, text: str | None = None):
+        mailer.post(source, mc.PlayerStore.EVENT, _EventDeath(name, text))
+
+    @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any,
                   canonical: typing.Optional[typing.Collection[Player]] = None):
         response = await msgext.SynchronousMessenger(mailer).request(source, PlayersSubscriber.GET, canonical)
@@ -85,7 +89,7 @@ class Player:
             self._startmillis = player._startmillis
 
     def asdict(self) -> dict:
-        result = {'name': self._name, 'steamid': self._steamid}
+        result = dict(name=self._name, steamid=self._steamid)
         if self._startmillis > -1:
             result['startmillis'] = self._startmillis
             result['uptime'] = dtutil.now_millis() - self._startmillis
@@ -140,17 +144,25 @@ class _EventLogin:
         return self._player
 
     def asdict(self) -> dict:
-        return {'event': sc.LOGIN, 'player': self._player.asdict()}
+        return dict(event=sc.LOGIN, player=self._player.asdict())
 
 
 class _EventChat:
 
     def __init__(self, name: str, text: str):
-        self._player = Player(name)
-        self._text = text
+        self._player, self._text = Player(name), text
 
     def asdict(self) -> dict:
-        return {'event': sc.CHAT, 'player': self._player.asdict(), 'text': self._text}
+        return dict(event=sc.CHAT, player=self._player.asdict(), text=self._text)
+
+
+class _EventDeath:
+
+    def __init__(self, name: str, text: str | None = None):
+        self._player, self._text = Player(name), text
+
+    def asdict(self) -> dict:
+        return dict(event=sc.DEATH, player=self._player.asdict(), text=self._text)
 
 
 class _EventLogout:
@@ -162,11 +174,11 @@ class _EventLogout:
         return self._player
 
     def asdict(self) -> dict:
-        return {'event': sc.LOGOUT, 'player': self._player.asdict()}
+        return dict(event=sc.LOGOUT, player=self._player.asdict())
 
 
 class _EventClear:
 
     # noinspection PyMethodMayBeStatic
     def asdict(self) -> dict:
-        return {'event': sc.CLEAR}
+        return dict(event=sc.CLEAR)

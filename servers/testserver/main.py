@@ -85,6 +85,8 @@ def main() -> int:
         elif line.startswith('say'):
             parts = line.split(' ')
             p('### Chat ' + parts[1] + ': ' + ' '.join(parts[2:]))
+        elif line.startswith('kill'):
+            p('### Kill ' + line.split(' ')[-1])
         elif line.startswith('login'):
             player = line.split(' ')[-1]
             players.append(player)

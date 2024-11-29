@@ -13,9 +13,9 @@ from core.common import interceptors, playerstore, spstopper
 _MAIN_PY = 'main.py'
 _COMMANDS = cmdutil.CommandLines({'send': '{line}'})
 _COMMANDS_HELP_TEXT = '''CONSOLE COMMANDS
-players     say {player} {text}
-quit        login {player}
-crash       logout {player}
+players, say {player} {text},
+login {player}, logout {player},
+kill {player}, crash, quit
 '''
 
 _LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES
@@ -214,17 +214,17 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    CHAT, PLAYER, JOIN, LEAVE = '### Chat', '### Player', 'has joined the server', 'has left the server'
-    CHAT_FILTER = msgftr.DataStrContains(CHAT)
+    PLAYER, JOIN, LEAVE = '### Player', 'has joined the server', 'has left the server'
     JOIN_FILTER = msgftr.And(msgftr.DataStrContains(PLAYER), msgftr.DataStrContains(JOIN))
     LEAVE_FILTER = msgftr.And(msgftr.DataStrContains(PLAYER), msgftr.DataStrContains(LEAVE))
+    CHAT, KILL = '### Chat', '### Kill'
+    CHAT_FILTER, KILL_FILTER = msgftr.DataStrContains(CHAT), msgftr.DataStrContains(KILL)
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             mc.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
-                      _PlayerEventSubscriber.JOIN_FILTER,
-                      _PlayerEventSubscriber.LEAVE_FILTER)))
+            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER, _PlayerEventSubscriber.KILL_FILTER,
+                      _PlayerEventSubscriber.JOIN_FILTER, _PlayerEventSubscriber.LEAVE_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -233,6 +233,11 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.rchop(name, ':')
             text = util.lchop(message.data(), ':')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
+            return None
+        if _PlayerEventSubscriber.KILL_FILTER.accepts(message):
+            name = util.lchop(message.data(), _PlayerEventSubscriber.KILL)
+            playerstore.PlayersSubscriber.event_death(self._mailer, self, name, 'was killed by admin command')
+            return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
             value = util.lchop(message.data(), _PlayerEventSubscriber.PLAYER)
             value = util.rchop(value, _PlayerEventSubscriber.JOIN)
