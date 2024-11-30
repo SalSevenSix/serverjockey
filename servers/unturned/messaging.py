@@ -71,17 +71,26 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
+class DeathMessageFilter(msgabc.Filter):
+    def accepts(self, message):
+        data = message.data()
+        return data and data[-1] == '!'
+
+
 # Connecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
 # Disconnecting: PlayerID: 76561197968989085 Name: Apollo Character: Apollo
 # Successfully kicked Apollo!
 # [World] Apollo [Apollo]: "Hello World"
 # Say Hello Everyone   <-- command
+# Apollo [Apollo] was mauled by a zombie!
+# Apollo [Apollo] suffocated to death!
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     CHAT, NAME, CHARACTER, KICK = '[World]', 'Name:', 'Character:', 'Successfully kicked'
     CHAT_FILTER = msgftr.DataStrContains(CHAT)
     LOGIN_FILTER = msgftr.DataMatches('.*Connecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
     LOGOUT_FILTER = msgftr.DataMatches('.*Disconnecting: PlayerID:.*' + NAME + '.*' + CHARACTER + '.*')
     KICK_FILTER = msgftr.DataStrStartsWith(KICK)
+    DEATH_FILTER = DeathMessageFilter()
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
@@ -89,7 +98,8 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.LOGIN_FILTER,
                       _PlayerEventSubscriber.LOGOUT_FILTER,
-                      _PlayerEventSubscriber.KICK_FILTER)))
+                      _PlayerEventSubscriber.KICK_FILTER,
+                      _PlayerEventSubscriber.DEATH_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -104,10 +114,22 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             value = util.lchop(message.data(), _PlayerEventSubscriber.KICK)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value[:-1])
             return None
-        value = util.lchop(message.data(), _PlayerEventSubscriber.NAME)
-        value = util.rchop(value, _PlayerEventSubscriber.CHARACTER)
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
+            value = util.lchop(message.data(), _PlayerEventSubscriber.NAME)
+            value = util.rchop(value, _PlayerEventSubscriber.CHARACTER)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
-        else:
+            return None
+        if _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
+            value = util.lchop(message.data(), _PlayerEventSubscriber.NAME)
+            value = util.rchop(value, _PlayerEventSubscriber.CHARACTER)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            return None
+        if _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+            value = message.data()
+            name = util.rchop(value, '[')
+            prefix = name + ' [' + name + ']'
+            if value != prefix and value.startswith(prefix):
+                text = value[len(prefix) + 1:-1]
+                playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
+            return None
         return None

@@ -70,11 +70,13 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # 2024-08-14T19:39:45 253.185 INF Player Apollo disconnected after 0.4 minutes
 # 2024-08-14T19:39:45 253.479 INF Player disconnected: EntityID=171, PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085', PlayerName='Apollo', ClientNumber='1'
 # 2024-08-14T19:39:45 253.490 INF GMSG: Player 'Apollo' left the game
+# 2024-11-29T23:49:36 252.509 INF GMSG: Player 'Apollo' died
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    JOIN_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' joined the game.*')
+    JOIN_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' joined the game$')
     SPAWN_FILTER = msgftr.DataMatches(r'.*INF PlayerSpawnedInWorld \(reason.*OwnerID=\'.*PlayerName=\'.*\', ClientNumber=.*')
     CHAT_FILTER = msgftr.DataMatches(r'.*INF Chat \(from \'.*\', to \'Global\'\):.*')
-    LEAVE_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' left the game.*')
+    LEAVE_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' left the game$')
+    DEATH_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' died$')
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
@@ -82,7 +84,8 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
                       _PlayerEventSubscriber.SPAWN_FILTER,
-                      _PlayerEventSubscriber.LEAVE_FILTER)))
+                      _PlayerEventSubscriber.LEAVE_FILTER,
+                      _PlayerEventSubscriber.DEATH_FILTER)))
         self._mailer, self._idmap = mailer, {}
 
     def handle(self, message):
@@ -113,5 +116,10 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.rchop(name, '\' left the game')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
             self._idmap = util.delete_dict_by_value(self._idmap, name)
+            return None
+        if _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+            name = util.lchop(value, 'INF GMSG: Player \'')
+            name = util.rchop(name, '\' died')
+            playerstore.PlayersSubscriber.event_death(self._mailer, self, name)
             return None
         return None

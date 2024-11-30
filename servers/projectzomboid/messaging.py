@@ -1,5 +1,5 @@
 # ALLOW core.*
-from core.util import util, dtutil
+from core.util import util, dtutil, objconv
 from core.msg import msgabc, msglog, msgftr, msgext
 from core.msgc import mc
 from core.context import contextsvc
@@ -92,15 +92,20 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
+# LOG  : Network     , 1732903690678> 21,508,632> [30-11-24 01:08:10.678] > ConnectionManager: [fully-connected] "" connection: guid=1139410826453420400 ip=192.168.1.4 steam-id=76561197968989085 access= username="Sal" connection-type="UDPRakNet"
+# LOG  : Network     , 1732903874607> 21,692,562> Disconnected player "Sal" 76561197968989085
+# LOG  : General     , 1732956822901> 7,128,548> PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "x": 10897, "y": 10126, "z": 0 }}
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN, LOGOUT = '> ConnectionManager: [fully-connected]', '> Disconnected player'
     LOGIN_FILTER, LOGOUT_FILTER = msgftr.DataStrContains(LOGIN), msgftr.DataStrContains(LOGOUT)
+    DEATH_FILTER = msgftr.DataStrContains('> PlayerDeath { "player"')
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             CONSOLE_OUTPUT_FILTER,
             msgftr.Or(_PlayerEventSubscriber.LOGIN_FILTER,
-                      _PlayerEventSubscriber.LOGOUT_FILTER)))
+                      _PlayerEventSubscriber.LOGOUT_FILTER,
+                      _PlayerEventSubscriber.DEATH_FILTER)))
         self._mailer = mailer
 
     def handle(self, message):
@@ -117,11 +122,23 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             steamid, name = parts[-1], ' '.join(parts[:-1])
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
             return None
+        if _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+            data = objconv.json_to_dict(util.lchop(message.data(), 'PlayerDeath'))
+            name = util.get('player', data)
+            if name:
+                text = 'survived ' + str(util.get('hours', data, '?')) + ' hours'
+                text += ', killed ' + str(util.get('zkills', data, '?')) + ' zombies'
+                text += ', died at '
+                position = util.get('position', data)
+                text += str(util.get('x', position, '?')) + 'x '
+                text += str(util.get('y', position, '?')) + 'y '
+                text += str(util.get('z', position, '?')) + 'z'
+                playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
+            return None
         return None
 
 
 # New message 'ChatMessage{chat=General, author='Sal', text='Helo Everyone'}' was sent members of chat '0'
-
 class _PlayerChatSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
