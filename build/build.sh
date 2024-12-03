@@ -66,7 +66,7 @@ fi
 echo "Preparing for build"
 rm "$BRANCH.zip" > /dev/null 2>&1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
-sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/index.js || exit 1
+sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/src/main.js || exit 1
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
 mkdir -p $TARGET_BIN_DIR || exit 1
 
