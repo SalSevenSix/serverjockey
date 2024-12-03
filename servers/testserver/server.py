@@ -8,14 +8,14 @@ from core.http import httpabc, httprsc, httpsubs, httpext, httpsec
 from core.metrics import mtxinstance
 from core.system import svrabc, svrsvc, svrext
 from core.proc import proch, prcext
-from core.common import interceptors, playerstore, spstopper
+from core.common import interceptors, playerstore, restarts, spstopper
 
 _MAIN_PY = 'main.py'
 _COMMANDS = cmdutil.CommandLines({'send': '{line}'})
 _COMMANDS_HELP_TEXT = '''CONSOLE COMMANDS
-players, say {player} {text},
-login {player}, logout {player},
-kill {player}, crash, quit
+quit, crash, players, say {player} {text},
+login {player}, logout {player}, kill {player},
+broadcast {message}, restart-warnings, restart-empty
 '''
 
 _LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES
@@ -60,8 +60,11 @@ class Server(svrabc.Server):
             self._context, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
         self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(playerstore.PlayersSubscriber(self._context))
+        self._context.register(restarts.RestartAfterWarningsSubscriber(self._context))
+        self._context.register(restarts.RestartOnEmptySubscriber(self._context))
         self._context.register(_ServerDetailsSubscriber(self._context))
         self._context.register(_PlayerEventSubscriber(self._context))
+        self._context.register(_AutomaticRestartsSubscriber(self._context))
         self._context.register(msgext.SyncWrapper(
             self._context, msgext.Archiver(self._context, self._tempdir), msgext.SyncReply.AT_START))
         self._context.register(msgext.SyncWrapper(
@@ -247,5 +250,41 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             value = util.lchop(message.data(), _PlayerEventSubscriber.PLAYER)
             value = util.rchop(value, _PlayerEventSubscriber.LEAVE)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            return None
+        return None
+
+
+class _RestartWarnings(restarts.RestartWarnings):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer, self._messages = mailer, [
+            'broadcast Server restart in 10 seconds.',
+            'broadcast Server restart in 30 seconds.']
+
+    async def send_warning(self) -> float:
+        if len(self._messages) == 0:
+            return 0.0
+        await proch.PipeInLineService.request(self._mailer, self, self._messages.pop())
+        return 10.0 if len(self._messages) == 0 else 20.0
+
+
+class _AutomaticRestartsSubscriber(msgabc.AbcSubscriber):
+    AFTER_WARNINGS_RESTART_FILTER = msgftr.DataStrContains('### server restart after warnings')
+    ON_EMPTY_RESTART_FILTER = msgftr.DataStrContains('### server restart on empty')
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        super().__init__(msgftr.And(
+            mc.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(
+                _AutomaticRestartsSubscriber.AFTER_WARNINGS_RESTART_FILTER,
+                _AutomaticRestartsSubscriber.ON_EMPTY_RESTART_FILTER)))
+        self._mailer = mailer
+
+    def handle(self, message):
+        if _AutomaticRestartsSubscriber.AFTER_WARNINGS_RESTART_FILTER.accepts(message):
+            restarts.RestartAfterWarningsSubscriber.signal_restart(self._mailer, self, _RestartWarnings(self._mailer))
+            return None
+        if _AutomaticRestartsSubscriber.ON_EMPTY_RESTART_FILTER.accepts(message):
+            restarts.RestartOnEmptySubscriber.signal_restart(self._mailer, self)
             return None
         return None

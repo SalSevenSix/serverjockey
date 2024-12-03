@@ -122,8 +122,9 @@ UPnP=false
       <tr>
         <td class="white-space-nowrap notranslate">
           <ExtLink href="https://steamcommunity.com/sharedfiles/filedetails/?id=2740018049">2740018049</ExtLink>
-        <td class="notranslate">PIT</td>
-        <td>Adds the in-game date &amp; time to the server status in both the webapp and discord.</td>
+        <td class="notranslate">PITaPD</td>
+        <td>Adds the in-game date &amp; time to the server status in both the webapp and discord.
+            Also player death event messages are sent to discord.</td>
       </tr>
     </tbody>
   </table>

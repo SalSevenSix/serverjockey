@@ -82,6 +82,8 @@ def main() -> int:
                 time.sleep(0.2)
             p('')
             p('### some more junk')
+        elif line.startswith('broadcast'):
+            p('### Broadcast "' + line[10:] + '"')
         elif line.startswith('say'):
             parts = line.split(' ')
             p('### Chat ' + parts[1] + ': ' + ' '.join(parts[2:]))
@@ -99,6 +101,10 @@ def main() -> int:
             if found:
                 players.remove(found)
                 p('### Player {} has left the server'.format(found))
+        elif line == 'restart-warnings':
+            p('### server restart after warnings')
+        elif line == 'restart-empty':
+            p('### server restart on empty')
         elif line == 'quit':
             p('### shutting down')
             p('### messaging players')
