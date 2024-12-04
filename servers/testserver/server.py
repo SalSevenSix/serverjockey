@@ -1,4 +1,6 @@
 from collections.abc import Iterable
+
+from core.msg.msgftr import DataStrStartsWith
 # ALLOW core.*
 from core.util import util, dtutil, objconv, io, cmdutil, aggtrf, pkg
 from core.msg import msgabc, msgext, msgftr, msglog, msgtrf
@@ -13,12 +15,15 @@ from core.common import interceptors, playerstore, restarts, spstopper
 _MAIN_PY = 'main.py'
 _COMMANDS = cmdutil.CommandLines({'send': '{line}'})
 _COMMANDS_HELP_TEXT = '''CONSOLE COMMANDS
-quit, crash, players, say {player} {text},
-login {player}, logout {player}, kill {player},
-broadcast {message}, restart-warnings, restart-empty
+quit, crash, players,
+login {player}, logout {player},
+say {player} {text}, kill {player},
+broadcast {message}, error {message},
+restart-warnings, restart-empty
 '''
 
 _LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES
+_ERROR_FILTER = msgftr.And(_LOG_FILTER, msgftr.DataStrStartsWith('### ERROR:'))
 _MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
 _READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
@@ -52,7 +57,7 @@ class Server(svrabc.Server):
 
     async def initialise(self):
         await self.build_world()
-        await mtxinstance.initialise(self._context)
+        await mtxinstance.initialise(self._context, error_filter=_ERROR_FILTER)
         self._context.register(msgext.CallableSubscriber(
             msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE),
             self.build_world))

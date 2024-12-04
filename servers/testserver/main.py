@@ -82,6 +82,8 @@ def main() -> int:
                 time.sleep(0.2)
             p('')
             p('### some more junk')
+        elif line.startswith('error'):
+            p('### ERROR: ' + line[6:])
         elif line.startswith('broadcast'):
             p('### Broadcast "' + line[10:] + '"')
         elif line.startswith('say'):
