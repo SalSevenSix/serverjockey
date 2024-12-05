@@ -28,7 +28,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     cachelock.FILTER_NOTIFICATIONS)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_ALL_LINES,
-    msgftr.DataStrStartsWith('ERROR: General'))
+    msgftr.Or(msgftr.DataStrStartsWith('ERROR:'), msgftr.DataStrStartsWith('SEVERE:')))
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))

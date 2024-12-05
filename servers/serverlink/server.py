@@ -11,6 +11,9 @@ from core.common import spstopper
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
 _LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES
+_ERROR_FILTER = msgftr.And(
+    mc.ServerProcess.FILTER_ALL_LINES,
+    msgftr.DataMatches(r'^\d{4}-[01]\d-[0-3]\d [0-2]\d:[0-5]\d:[0-5]\d ERROR.*'))
 _SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataStrContains('ServerLink Bot has STARTED'))
@@ -40,7 +43,7 @@ class Server(svrabc.Server):
         if not await io.file_exists(self._config):
             await io.write_file(self._config, objconv.obj_to_json(_default_config()))
         await self._server_factory.initialise()
-        await mtxinstance.initialise(self._context, players=False)
+        await mtxinstance.initialise(self._context, players=False, error_filter=_ERROR_FILTER)
         self._context.register(prcext.ServerStateSubscriber(self._context))
         if logutil.is_logging_to_stream():
             self._context.register(msglog.PrintSubscriber(_LOG_FILTER, transformer=msgtrf.GetData()))

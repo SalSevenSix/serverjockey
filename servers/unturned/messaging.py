@@ -19,6 +19,9 @@ CONSOLE_LOG_FILTER = msgftr.Or(
         msgftr.Not(msgftr.DataMatches(_SPAM))),
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(
+    mc.ServerProcess.FILTER_ALL_LINES,
+    msgftr.DataStrContains(' k_EResult'))
 MAINTENANCE_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
 READY_STATE_FILTER = msgftr.Or(

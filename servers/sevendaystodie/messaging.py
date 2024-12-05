@@ -11,6 +11,9 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     mc.ServerProcess.FILTER_ALL_LINES,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(
+    mc.ServerProcess.FILTER_ALL_LINES,
+    msgftr.DataMatches(r'^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d \d*\.\d* ERR .*'))
 MAINTENANCE_STATE_FILTER = msgftr.Or(
     jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
 READY_STATE_FILTER = msgftr.Or(

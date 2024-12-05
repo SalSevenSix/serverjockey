@@ -155,6 +155,8 @@ class TestPlaying(unittest.TestCase):
         # check status info
         self.assertIsNotNone(re.compile(r'^v[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$').match(
             context.find_element('serverStatusVersion').get_attribute('innerText')))
+        self.assertEqual(context.net_public + ':8211',
+                         context.find_element('serverStatusConnect').get_attribute('innerText'))
         # send welcome message
         context.find_element('collapsibleConsoleCommands').click()
         time.sleep(6.0)  # grace to allow server to fully start

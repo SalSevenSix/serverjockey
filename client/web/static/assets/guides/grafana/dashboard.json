@@ -123,7 +123,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "",
+      "description": "Total number of players in game",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -244,7 +244,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 5,
+        "w": 4,
         "x": 0,
         "y": 4
       },
@@ -336,8 +336,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 7,
-        "x": 5,
+        "w": 5,
+        "x": 4,
         "y": 4
       },
       "id": 6,
@@ -384,7 +384,81 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "CPU used by process",
+      "description": "Total number of errors logged since last start",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 4
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "errors_total{job=\"$job\", instance=\"$instance\", process=\"$process\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Errors",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "CPU time used by process",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -488,6 +562,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "description": "Memory used by process",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -592,7 +667,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "",
+      "description": "Disk bytes read by process",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -694,7 +769,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "",
+      "description": "Disk bytes written by process",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -907,6 +982,6 @@
   "timezone": "browser",
   "title": "ServerJockey",
   "uid": "adp2c6z2g5hj4c",
-  "version": 2,
+  "version": 4,
   "weekStart": ""
 }

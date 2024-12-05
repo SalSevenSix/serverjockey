@@ -20,6 +20,9 @@ CONSOLE_LOG_FILTER = msgftr.Or(
     rconsvc.RconService.FILTER_OUTPUT,
     msglog.FILTER_ALL_LEVELS,
     FILTER_DEPLOYMENT_MSG)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(
+    mc.ServerProcess.FILTER_ALL_LINES,
+    msgftr.DataMatches(r'^\d*\.\d* Error .*'))
 MAINTENANCE_STATE_FILTER = msgftr.Or(
     FILTER_DEPLOYMENT_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
 READY_STATE_FILTER = msgftr.Or(
