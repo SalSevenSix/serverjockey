@@ -1,6 +1,4 @@
 from collections.abc import Iterable
-
-from core.msg.msgftr import DataStrStartsWith
 # ALLOW core.*
 from core.util import util, dtutil, objconv, io, cmdutil, aggtrf, pkg
 from core.msg import msgabc, msgext, msgftr, msglog, msgtrf

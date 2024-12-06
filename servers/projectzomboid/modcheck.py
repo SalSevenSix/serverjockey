@@ -106,7 +106,7 @@ class _CheckModsNeedUpdateTask:
         running = True
         try:
             while running and self._running:
-                running = await self._wait()
+                running = await self._next()
                 if running and self._running:
                     await proch.PipeInLineService.request(self._mailer, self, 'checkModsNeedUpdate')
         except Exception as e:
@@ -116,7 +116,7 @@ class _CheckModsNeedUpdateTask:
             util.clear_queue(self._queue)
             tasks.task_end(self._task)
 
-    async def _wait(self) -> bool:
+    async def _next(self) -> bool:
         try:
             await asyncio.wait_for(self._queue.get(), self._seconds)
             self._queue.task_done()

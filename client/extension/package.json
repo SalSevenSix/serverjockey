@@ -10,9 +10,9 @@
   "devDependencies": {
     "sveltekit-adapter-chrome-extension": "^2.0.1",
     "@sveltejs/adapter-static": "^3.0.6",
-    "@sveltejs/kit": "^2.7.3",
+    "@sveltejs/kit": "^2.9.0",
     "svelte": "^4.2.19",
-    "vite": "^5.4.10"
+    "vite": "^5.4.11"
   },
   "type": "module"
 }
