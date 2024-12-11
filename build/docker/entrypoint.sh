@@ -4,31 +4,27 @@ graceful_shutdown() {
   PID="$(ps -e -o pid,cmd | awk '/serverjockey\.pyz/{print $1}')"
   echo "Trapped shutdown signal, terminating $PID"
   kill $PID
-}
-
-setup_serverlink() {
-  mkdir serverlink || exit 1
-  echo '{ "module": "serverlink", "hidden": true }' > serverlink/instance.json
+  while ps -p $PID > /dev/null; do sleep 1; done
+  exit 0
 }
 
 sleep 1
-[ -z "$STARTUP" ] && STARTUP="/usr/local/bin/serverjockey.pyz --noupnp --showtoken"
-PATH="$PATH:/usr/games"
-export PATH
 TZ=${TZ:-UTC}
 export TZ
-
 cd /home/container || exit 1
-[ -d "serverlink" ] || setup_serverlink
-steamcmd +quit
+if [ ! -d "serverlink" ]; then
+  mkdir serverlink || exit 1
+  echo '{ "module": "serverlink", "hidden": true }' > serverlink/instance.json
+  /usr/games/steamcmd +quit
+fi
 
+[ -z "$STARTUP" ] && STARTUP="/usr/local/bin/serverjockey.pyz --noupnp --showtoken"
 MODIFIED_STARTUP=$(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
 echo -e ":/home/container$ ${MODIFIED_STARTUP}"
-trap 'graceful_shutdown' TERM INT
+trap "graceful_shutdown" TERM INT
 eval ${MODIFIED_STARTUP} &
-WAIT_PID=$!
-wait $WAIT_PID
-trap - TERM INT
-wait $WAIT_PID
-
-exit 0
+while read -r line; do
+  [ "$line" = "shutdown" ] && break
+  eval "/usr/local/bin/serverjockey_cmd.pyz -u container -c $line"
+done
+graceful_shutdown

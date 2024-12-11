@@ -53,6 +53,16 @@ class CommandProcessor:
                 raise Exception('_instance_path() was unable to find instance to use.')
         return '/instances/' + self._instance + command_path
 
+    # noinspection PyMethodMayBeStatic
+    def _help(self) -> bool:
+        printing = False
+        for line in util.get_resource('help.text').split('\n'):
+            if printing:
+                logging.info(util.OUT + line[2:])
+            else:
+                printing = line == 'commands:'
+        return True
+
     def _metrics(self) -> bool:
         for line in self._connection.get('/metrics').split('\n'):
             logging.info(util.OUT + line)
