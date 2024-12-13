@@ -168,8 +168,7 @@ class TaskProcessor:
     # noinspection PyMethodMayBeStatic
     def _ddns(self, argument: str) -> bool:
         if not argument:
-            for line in util.get_resource('ddnshelp.text').strip().split('\n'):
-                logging.info(util.OUT + line)
+            _dump_to_log(util.get_resource('ddnshelp.text'))
             return True
         provider, = util.split_argument(argument, 1)
         if provider == 'duck':

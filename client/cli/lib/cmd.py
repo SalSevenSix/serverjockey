@@ -10,6 +10,14 @@ from email.message import EmailMessage
 from . import util, cxt, comms
 
 
+def _dump_to_log(data: dict | str | list | tuple) -> bool:
+    data = util.repr_dict(data).strip() if isinstance(data, dict) else data
+    data = data.split('\n') if isinstance(data, str) else data
+    for line in data:
+        logging.info(util.OUT + line)
+    return True
+
+
 class CommandProcessor:
 
     def __init__(self, context: cxt.Context, connection: comms.HttpConnection):
@@ -64,19 +72,13 @@ class CommandProcessor:
         return True
 
     def _metrics(self) -> bool:
-        for line in self._connection.get('/metrics').split('\n'):
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(self._connection.get('/metrics'))
 
     def _mprof(self) -> bool:
-        for line in self._connection.get('/mprof').split('\n'):
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(self._connection.get('/mprof'))
 
     def _modules(self) -> bool:
-        for module in self._connection.get('/modules'):
-            logging.info(util.OUT + module)
-        return True
+        return _dump_to_log(self._connection.get('/modules'))
 
     def _instances(self) -> bool:
         identities = self._instances.keys()
@@ -122,16 +124,10 @@ class CommandProcessor:
         return True
 
     def _runtime_meta(self) -> bool:
-        result = self._connection.get(self._instance_path('/deployment/runtime-meta'))
-        for line in result.split('\n'):
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(self._connection.get(self._instance_path('/deployment/runtime-meta')))
 
     def _world_meta(self) -> bool:
-        result = self._connection.get(self._instance_path('/deployment/world-meta'))
-        for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(self._connection.get(self._instance_path('/deployment/world-meta')))
 
     def _install_runtime(self, argument: str | None) -> bool:
         body = {'wipe': False, 'validate': True}
@@ -268,10 +264,7 @@ class CommandProcessor:
         if argument and argument != 'status':
             self._connection.post(self._instance_path('/server/' + argument))
             return True
-        result = self._connection.get(self._instance_path('/server'))
-        for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(self._connection.get(self._instance_path('/server')))
 
     def _auto(self, argument: str | None) -> bool:
         self._connection.post(self._instance_path(), {'auto': util.to_int(argument, -1)})
@@ -279,7 +272,6 @@ class CommandProcessor:
 
     def _players(self) -> bool:
         result: list = self._connection.get(self._instance_path('/players'))
-        # logging.info(util.OUT + 'Players online: ' + str(len(result)))
         for player in result:
             line = util.OUT
             line += str(player['startmillis']) if 'startmillis' in player else '0'
@@ -296,10 +288,7 @@ class CommandProcessor:
         return True
 
     def _system(self) -> bool:
-        result = self._connection.get('/system/info')
-        for line in util.repr_dict(result).strip().split('\n'):
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(self._connection.get('/system/info'))
 
     def _report(self) -> bool:
         identities = self._instances.keys()
@@ -324,9 +313,7 @@ class CommandProcessor:
         result = result.strip().split('\n')
         if len(result) > 0 and lines < 100:
             result = result[-lines:]
-        for line in result:
-            logging.info(util.OUT + line)
-        return True
+        return _dump_to_log(result)
 
     def _log_tail_f(self) -> bool:
         self._log_tail('10')
@@ -335,12 +322,13 @@ class CommandProcessor:
         return True
 
     def _console_send(self, argument: str) -> bool:
+        if not argument:
+            return _dump_to_log(self._connection.get(self._instance_path('/console/help')))
         result = self._connection.post(self._instance_path('/console/send'), {'line': str(argument)})
-        if result:
-            result = util.repr_dict(result) if isinstance(result, dict) else str(result)
-            for line in result.strip().split('\n'):
-                logging.info(util.OUT + line)
-        return True
+        if not result:
+            return True
+        result = util.repr_dict(result) if isinstance(result, dict) else str(result)
+        return _dump_to_log(result.strip())
 
     def _world_broadcast(self, argument: str) -> bool:
         self._connection.post(self._instance_path('/world/broadcast'), {'message': str(argument)})
