@@ -1,74 +1,13 @@
 import typing
 import time
-import re
-from sqlalchemy import Executable, func
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
-# ALLOW util.* store.storeabc
+# ALLOW util.* store.storeabc, store.storeutil
 from core.util import util, dtutil
-from core.store import storeabc
+from core.store import storeabc, storeutil
 
 # Note that all this is blocking IO
-
-_CACHE_INSTANCE_ID, _CACHE_PLAYER_ID = {}, {}
-_NOT_FLAG_REGEX = re.compile(r'[^gmixsuUAJD]')
-
-
-def _to_regex(value: str) -> tuple:
-    if not value:
-        return None, None
-    value = value.strip()
-    if len(value) < 3 or value[0] != '/':
-        return None, None
-    index = value.rfind('/')
-    if index <= 0 or value[index - 1] == '\\':
-        return None, None
-    flags = value[index + 1:]
-    if flags and _NOT_FLAG_REGEX.search(flags):
-        return None, None
-    value = value[1:index]
-    try:
-        re.compile(value)
-    except re.error:
-        return None, None
-    return value, flags if flags else None
-
-
-def _load_instance(session: Session, identity: str) -> storeabc.Instance | None:
-    assert identity == util.script_escape(identity)
-    results = session.scalars(select(storeabc.Instance).where(storeabc.Instance.name == identity))
-    return results.first()
-
-
-def _get_instance_id(session: Session, identity: str) -> int:
-    assert identity and identity == util.script_escape(identity)
-    instance_id = util.get(identity, _CACHE_INSTANCE_ID)
-    if instance_id:
-        return instance_id
-    instance = _load_instance(session, identity)
-    assert instance is not None
-    instance_id = instance.id
-    _CACHE_INSTANCE_ID[identity] = instance_id
-    return instance_id
-
-
-def _lookup_player_id(session: Session, instance_id: int, player_name: str) -> int | None:
-    player_cache = util.get(instance_id, _CACHE_PLAYER_ID)
-    if not player_cache:
-        player_cache = {}
-        _CACHE_PLAYER_ID[instance_id] = player_cache
-    player_id = util.get(player_name, player_cache)
-    if player_id:
-        return player_id
-    results = session.scalars(select(storeabc.Player).where(
-        storeabc.Player.instance_id == instance_id,
-        storeabc.Player.name == player_name))
-    player = results.first()
-    if not player:
-        return None
-    player_id = player.id
-    player_cache[player_name] = player_id
-    return player_id
 
 
 class InsertInstance(storeabc.Transaction):
@@ -77,7 +16,7 @@ class InsertInstance(storeabc.Transaction):
         self._identity, self._module = identity, module
 
     def execute(self, session: Session) -> typing.Any:
-        instance = _load_instance(session, self._identity)
+        instance = storeutil.load_instance(session, self._identity)
         if not instance:
             session.add(storeabc.Instance(at=time.time(), name=self._identity, module=self._module))
         return None
@@ -89,14 +28,10 @@ class DeleteInstance(storeabc.Transaction):
         self._identity = identity
 
     def execute(self, session: Session) -> typing.Any:
-        instance = _load_instance(session, self._identity)
-        if not instance:
-            return None
-        if util.get(instance.id, _CACHE_PLAYER_ID):
-            del _CACHE_PLAYER_ID[instance.id]
-        if util.get(instance.name, _CACHE_INSTANCE_ID):
-            del _CACHE_INSTANCE_ID[instance.name]
-        session.delete(instance)
+        instance = storeutil.load_instance(session, self._identity)
+        if instance:
+            storeutil.clear_cache_for(instance)
+            session.delete(instance)
         return None
 
 
@@ -107,7 +42,7 @@ class InsertInstanceEvent(storeabc.Transaction):
         self._name, self._details = name, details
 
     def execute(self, session: Session) -> typing.Any:
-        instance_id = _get_instance_id(session, self._identity)
+        instance_id = storeutil.get_instance_id(session, self._identity)
         session.add(storeabc.InstanceEvent(at=time.time(), instance_id=instance_id,
                                            name=self._name, details=self._details))
         return None
@@ -120,8 +55,8 @@ class InsertPlayerEvent(storeabc.Transaction):
         self._event_name, self._player_name, self._steamid = event_name, player_name, steamid
 
     def execute(self, session: Session) -> typing.Any:
-        instance_id = _get_instance_id(session, self._identity)
-        player_id = _lookup_player_id(session, instance_id, self._player_name)
+        instance_id = storeutil.get_instance_id(session, self._identity)
+        player_id = storeutil.lookup_player_id(session, instance_id, self._player_name)
         now = time.time()
         if not player_id:
             player = storeabc.Player(at=now, instance_id=instance_id, name=self._player_name, steamid=self._steamid)
@@ -139,8 +74,8 @@ class InsertPlayerChat(storeabc.Transaction):
         self._player_name, self._text = player_name, text
 
     def execute(self, session: Session) -> typing.Any:
-        instance_id = _get_instance_id(session, self._identity)
-        player_id = _lookup_player_id(session, instance_id, self._player_name)
+        instance_id = storeutil.get_instance_id(session, self._identity)
+        player_id = storeutil.lookup_player_id(session, instance_id, self._player_name)
         if player_id:
             session.add(storeabc.PlayerChat(at=time.time(), player_id=player_id, text=self._text))
         return None
@@ -156,8 +91,9 @@ class SelectInstance(storeabc.Transaction):
         instance = util.get('instance', criteria)
         statement = select(storeabc.Instance.at, storeabc.Instance.name, storeabc.Instance.module)
         if instance:
-            statement = statement.where(storeabc.Instance.id == _get_instance_id(session, instance))
-        return _execute_query(session, statement, criteria, 'at', 'name', 'module')
+            # noinspection PyTypeChecker
+            statement = statement.where(storeabc.Instance.id == storeutil.get_instance_id(session, instance))
+        return storeutil.execute_query(session, statement, criteria, 'at', 'name', 'module')
 
 
 class SelectInstanceEvent(storeabc.Transaction):
@@ -171,7 +107,8 @@ class SelectInstanceEvent(storeabc.Transaction):
         statement = select(storeabc.InstanceEvent.at, storeabc.Instance.name, storeabc.InstanceEvent.name)
         statement = statement.join(storeabc.Instance.events)
         if instance:
-            statement = statement.where(storeabc.Instance.id == _get_instance_id(session, instance))
+            # noinspection PyTypeChecker
+            statement = statement.where(storeabc.Instance.id == storeutil.get_instance_id(session, instance))
         if at_from:
             at_from = int(at_from)
             if at_group:
@@ -194,7 +131,7 @@ class SelectInstanceEvent(storeabc.Transaction):
                 func.max(storeabc.InstanceEvent.at) if at_group == 'max' else func.min(storeabc.InstanceEvent.at))
         statement = statement.order_by(storeabc.InstanceEvent.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
-        return _execute_query(session, statement, criteria, 'at', 'instance', 'event')
+        return storeutil.execute_query(session, statement, criteria, 'at', 'instance', 'event')
 
 
 class SelectPlayerEvent(storeabc.Transaction):
@@ -212,7 +149,8 @@ class SelectPlayerEvent(storeabc.Transaction):
             entities.append(storeabc.Player.steamid)
         statement = select(*entities).join(storeabc.Instance.players).join(storeabc.Player.events)
         if instance:
-            statement = statement.where(storeabc.Instance.id == _get_instance_id(session, instance))
+            # noinspection PyTypeChecker
+            statement = statement.where(storeabc.Instance.id == storeutil.get_instance_id(session, instance))
         if at_from:
             at_from = int(at_from)
             if at_group:
@@ -226,10 +164,11 @@ class SelectPlayerEvent(storeabc.Transaction):
             else:
                 statement = statement.where(storeabc.PlayerEvent.at <= dtutil.to_seconds(at_to))
         if player:
-            regex, flags = _to_regex(player)
+            regex, flags = storeutil.to_regex(player)
             if regex:
                 statement = statement.where(storeabc.Player.name.regexp_match(regex, flags))
             else:
+                # noinspection PyTypeChecker
                 statement = statement.where(storeabc.Player.name == util.script_escape(player))
         if at_group:
             if at_group not in ('min', 'max'):
@@ -239,7 +178,7 @@ class SelectPlayerEvent(storeabc.Transaction):
                 func.max(storeabc.PlayerEvent.at) if at_group == 'max' else func.min(storeabc.PlayerEvent.at))
         statement = statement.order_by(storeabc.PlayerEvent.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
-        return _execute_query(session, statement, criteria, *columns)
+        return storeutil.execute_query(session, statement, criteria, *columns)
 
 
 class SelectPlayerChat(storeabc.Transaction):
@@ -252,7 +191,7 @@ class SelectPlayerChat(storeabc.Transaction):
         instance, at_from, at_to, player = util.unpack_dict(criteria)
         statement = select(storeabc.PlayerChat.at, storeabc.Player.name, storeabc.PlayerChat.text)
         statement = statement.join(storeabc.Player.chats)
-        statement = statement.where(storeabc.Player.instance_id == _get_instance_id(session, instance))
+        statement = statement.where(storeabc.Player.instance_id == storeutil.get_instance_id(session, instance))
         if at_from:
             at_from = int(at_from)
             statement = statement.where(storeabc.PlayerChat.at >= dtutil.to_seconds(at_from))
@@ -260,26 +199,12 @@ class SelectPlayerChat(storeabc.Transaction):
             at_to = int(at_to)
             statement = statement.where(storeabc.PlayerChat.at <= dtutil.to_seconds(at_to))
         if player:
-            regex, flags = _to_regex(player)
+            regex, flags = storeutil.to_regex(player)
             if regex:
                 statement = statement.where(storeabc.Player.name.regexp_match(regex, flags))
             else:
+                # noinspection PyTypeChecker
                 statement = statement.where(storeabc.Player.name == util.script_escape(player))
         statement = statement.order_by(storeabc.PlayerChat.at)
         criteria['atfrom'], criteria['atto'] = at_from, at_to
-        return _execute_query(session, statement, criteria, 'at', 'player', 'text')
-
-
-def _execute_query(session: Session, statement: Executable, criteria: dict, *columns: str) -> dict:
-    result, records = {'created': dtutil.now_millis(), 'criteria': criteria, 'headers': columns}, []
-    for row in session.execute(statement):
-        record, index = [], 0
-        for column in columns:
-            value = row[index]
-            if column == 'at':
-                value = dtutil.to_millis(value)
-            record.append(value)
-            index += 1
-        records.append(record)
-    result['records'] = records
-    return result
+        return storeutil.execute_query(session, statement, criteria, 'at', 'player', 'text')

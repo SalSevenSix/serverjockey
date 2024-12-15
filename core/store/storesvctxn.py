@@ -51,6 +51,7 @@ class IntegrityChecks(storeabc.Transaction):
             logging.debug('InstanceEvent correction: ' + str(event.instance_id) + ' ' + emap[event.name])
         statement = select(storeabc.PlayerEvent)
         statement = statement.group_by(storeabc.PlayerEvent.player_id)
+        # noinspection PyTypeChecker
         statement = statement.having(storeabc.PlayerEvent.name == sc.LOGIN)
         statement = statement.having(func.max(storeabc.PlayerEvent.at))
         for event in session.scalars(statement):

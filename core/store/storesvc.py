@@ -2,11 +2,11 @@ import logging
 import typing
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-# ALLOW util.* msg*.* context.* store.storeabc store.storesvctxn
+# ALLOW util.* msg*.* context.* store.storeabc store.storeutil store.storesvctxn
 from core.util import io, funcutil
 from core.msg import msgabc, msgftr
 from core.context import contextsvc
-from core.store import storeabc, storesvctxn
+from core.store import storeabc, storeutil, storesvctxn
 
 
 class StoreService(msgabc.AbcSubscriber):
@@ -87,6 +87,7 @@ def _sync_create_session(database_path: str, create_database: bool) -> Session:
 
 
 def _sync_reset_activity(session: Session):
+    storeutil.clear_cache()
     tables = (
         storeabc.PlayerChat.__table__,
         storeabc.PlayerEvent.__table__,

@@ -8,12 +8,11 @@ _SCRIPT_SPECIALS = str.maketrans({
     '#': r'\#', '$': r'\$', '=': r'\=', '[': r'\[', ']': r'\]',
     '!': r'\!', '<': r'\<', '>': r'\>', '{': r'\{', '}': r'\}',
     ';': r'\;', '|': r'\|', '~': r'\~', '(': r'\(', ')': r'\)',
-    '*': r'\*', '?': r'\?', '&': r'\&'
-})
+    '*': r'\*', '?': r'\?', '&': r'\&'})
 
 
 def script_escape(value: str) -> str:
-    if not isinstance(value, str):
+    if not value:
         return value
     return value.translate(_SCRIPT_SPECIALS)
 

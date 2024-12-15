@@ -26,7 +26,6 @@ _PLAYER = cmdutil.CommandLines({
     'spawn-horde': 'createhorde {count} "{player}"',
     'tele-to': 'teleport "{player}" "{toplayer}"',
     'tele-at': 'teleportto "{player}" {location}',
-    # 'gunshot': 'gunshot "{player}"',   Doesn't seem to work yet
     'lightning': 'lightning "{player}"',
     'thunder': 'thunder "{player}"',
     'kick': ['kickuser "{player}"', {'reason': '-r "{}"'}]})
