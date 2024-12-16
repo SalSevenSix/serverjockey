@@ -124,7 +124,7 @@ class CommandProcessor:
         return True
 
     def _runtime_meta(self) -> bool:
-        return _dump_to_log(self._connection.get(self._instance_path('/deployment/runtime-meta')))
+        return _dump_to_log(self._connection.get(self._instance_path('/deployment/runtime-meta'), 'Runtime Not Found'))
 
     def _world_meta(self) -> bool:
         return _dump_to_log(self._connection.get(self._instance_path('/deployment/world-meta')))
@@ -321,9 +321,10 @@ class CommandProcessor:
         self._connection.drain(result)
         return True
 
+    def _console_help(self) -> bool:
+        return _dump_to_log(self._connection.get(self._instance_path('/console/help')))
+
     def _console_send(self, argument: str) -> bool:
-        if not argument:
-            return _dump_to_log(self._connection.get(self._instance_path('/console/help')))
         result = self._connection.post(self._instance_path('/console/send'), {'line': str(argument)})
         if not result:
             return True

@@ -13,9 +13,8 @@ SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches(r'^SV: .* player server started$'))
 CONSOLE_LOG_FILTER = msgftr.Or(
-    msgftr.And(
-        mc.ServerProcess.FILTER_ALL_LINES,
-        msgftr.Not(msgftr.DataMatches(_SPAM))),
+    msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.HasData(), msgftr.Not(msgftr.Or(
+        msgftr.DataStrContains('UNEXPECTED LONG FRAME DETECTED'), msgftr.DataMatches(_SPAM)))),
     rconsvc.RconService.FILTER_OUTPUT,
     jobh.JobProcess.FILTER_ALL_LINES,
     msglog.FILTER_ALL_LEVELS)
@@ -50,8 +49,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
                 _ServerDetailsSubscriber.MAP_FILTER,
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER)))
-        self._mailer = mailer
-        self._public_ip = public_ip
+        self._mailer, self._public_ip = mailer, public_ip
 
     def handle(self, message):
         if _ServerDetailsSubscriber.MAP_FILTER.accepts(message):

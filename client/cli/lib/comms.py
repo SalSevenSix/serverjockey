@@ -19,7 +19,7 @@ class HttpConnection:
         else:
             self._connection = client.HTTPConnection(url[7:])
 
-    def get(self, path: str) -> str | list | dict | None:
+    def get(self, path: str, on_404: str = None) -> str | list | dict | None:
         self._connection.request(util.GET, path, headers=self._headers_get)
         response = self._connection.getresponse()
         try:
@@ -30,6 +30,8 @@ class HttpConnection:
                 if response.getheader('Content-Type') == 'application/json':
                     return json.loads(result)
                 return result
+            if on_404 and response.status == 404:
+                return on_404
             raise Exception('HTTP GET Status: {} Reason: {}'.format(response.status, response.reason))
         finally:
             response.close()

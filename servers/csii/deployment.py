@@ -45,7 +45,6 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._mailer = context
-        self._user_home_dir = context.env('HOME')
         self._python, self._wrapper = context.config('python'), None
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
@@ -58,7 +57,7 @@ class Deployment:
 
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
-        await steamutil.link_steamclient_to_sdk(self._user_home_dir)
+        await steamutil.link_steamclient_to_sdk(self._mailer.env('HOME'))
         await self.build_world()
         self._mailer.register(portmapper.PortMapperService(self._mailer))
         self._mailer.register(msgext.CallableSubscriber(

@@ -40,6 +40,7 @@ commands:
   players           | List the players currently in-game
   world-broadcast:"<message>" | Broadcast <message> to all players in-game
                               | Not all modules support this command
+  console-help                | Show server console help
   console-send:"<cmd>"        | Send command to the server console
                               | Not all modules support this command
   backup-world:<prunehours>   | Make a backup of the game world, optionally
