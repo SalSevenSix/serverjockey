@@ -56,7 +56,7 @@
       .then(function(json) {
         subs.poll(json.url, function(data) {
           logText = logLines.append(data).toText();
-          if (data.includes('Logging in user \'' + steamLogin + '\' to Steam Public...')) { stage = 2; }
+          if (data.includes('Cached credentials not found')) { stage = 2; }
           if (data.includes('Enter the current code from your Steam Guard Mobile Authenticator app')) { stage = 3; }
           return true;
         })

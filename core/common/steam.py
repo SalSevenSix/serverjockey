@@ -1,6 +1,5 @@
 import logging
 import vdf
-import re
 import asyncio
 from asyncio import subprocess
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
@@ -103,11 +102,10 @@ class _KillSteamOnSolicitPassword(msgabc.AbcSubscriber):
             jobh.JobProcess.FILTER_STARTED,
             jobh.JobProcess.FILTER_DONE))
         self._process: subprocess.Process | None = None
-        self._solicit_password = re.compile(r'^Logging in user \'.*\' to Steam Public\.\.\.$')
 
     def handle(self, message):
         if jobh.JobProcess.FILTER_STDOUT_LINE.accepts(message):
-            if self._solicit_password.match(message.data()) is not None:
+            if message.data().find('Cached credentials not found') > -1:
                 _terminate_process(self._process)
                 return True
         if jobh.JobProcess.FILTER_STARTED.accepts(message):

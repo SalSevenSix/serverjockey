@@ -19,4 +19,7 @@ class PtyLineDecoder(LineDecoder):
     _ANSI_ESCAPE = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
     def decode(self, line: bytes) -> str:
-        return PtyLineDecoder._ANSI_ESCAPE.sub('', line.decode().strip())
+        result = line.decode().strip()
+        result = PtyLineDecoder._ANSI_ESCAPE.sub('', result)
+        result = result.replace('\x1B', '').replace('\x07', ' ')
+        return result
