@@ -47,6 +47,9 @@ class _WebTestContext:
     def goto_instance(self, identity: str, module: str):
         if not self.path:
             self.goto()
+        if self.has_element('notificationsText0'):
+            self.find_element('notificationsText0').click()
+            time.sleep(1.0)
         self.find_element('navbarInstances').click()
         self.find_element('instanceListViewI' + identity, by=By.NAME, exists=3.0).click()
         instance_header = self.find_element('instanceHeader', exists=2.0).get_attribute('innerText')

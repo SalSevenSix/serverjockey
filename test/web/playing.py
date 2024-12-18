@@ -153,13 +153,13 @@ class TestPlaying(unittest.TestCase):
         context = webcontext.get()
         self._start_server('pw', 'palworld')
         # check status info
+        time.sleep(6.0)  # grace to allow server to fully start
         self.assertIsNotNone(re.compile(r'^v[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$').match(
             context.find_element('serverStatusVersion').get_attribute('innerText')))
         self.assertEqual(context.net_public + ':8211',
                          context.find_element('serverStatusConnect').get_attribute('innerText'))
         # send welcome message
         context.find_element('collapsibleConsoleCommands').click()
-        time.sleep(6.0)  # grace to allow server to fully start
         context.find_element('commandBuilderIline').send_keys('Broadcast Welcome_to_PW')
         self._send_console_command()
         self.assertEqual('Broadcasted: Welcome_to_PW', context.get_instance_loglastline())
