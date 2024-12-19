@@ -4,6 +4,7 @@ Requires=sysinit.target
 
 [Service]
 Type=oneshot
+User=root
 ExecStart=/root/welcome.sh
 RemainAfterExit=true
 

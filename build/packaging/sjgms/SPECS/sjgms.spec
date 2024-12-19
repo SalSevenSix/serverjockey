@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.15.0
+Version:        0.16.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -53,7 +53,9 @@ exit 0
 
 
 %changelog
-* Tue Dec 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.15.0
+* Fri Dec 20 2024 Bowden Salis <bsalis76@gmail.com> - 0.16.0
+- Feature release v0.16.0
+* Thu Dec 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.15.0
 - Small improvements and library upgrades release
 * Mon Oct 28 2024 Bowden Salis <bsalis76@gmail.com> - 0.14.0
 - Factorio Space Age support release

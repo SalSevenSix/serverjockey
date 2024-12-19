@@ -6,7 +6,7 @@
 * debian/control
 * debian/changelog
 * specs/sjgms.spec
-* discord/index.js
+* discord/src/main.js
 * extension/package.json
 * extension/static/manifest.json
 * web/package.json
