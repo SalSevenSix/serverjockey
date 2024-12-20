@@ -49,13 +49,13 @@
     as a placeholder,
     <span class="is-italic">please make sure you use your own domain name instead!</span>
   </p>
+  <figure class="image max-1024">
+    <img src={surl('/assets/guides/nginx/duckdns_example.png')} alt="DuckDNS example" />
+  </figure>
   <p>
     Whatever service you use, ensure that the configured IP address for the domain name is kept up-to-date.
     Note that a domain name can be used with ServerJockey without needing Nginx.
   </p>
-  <figure class="image max-1024">
-    <img src={surl('/assets/guides/nginx/duckdns_example.png')} alt="DuckDNS example" />
-  </figure>
 
   <h3 id="installnginx" class="title is-4">Install Nginx</h3>
   <p>

@@ -157,6 +157,7 @@ def main() -> int:
         logging.info('Version: ' + sysutil.system_version())
         logging.info('Python3: ' + sys.version)
         logging.info('PID: ' + str(os.getpid()))
+        logging.info('Home: ' + context.config('home'))
         logging.info('Paths: ' + str(sys.path))
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0

@@ -18,7 +18,7 @@ def _default_cmdargs() -> dict:
         '_comment_mod_check_action':
             'Action to take after updated mods have been detected. '
             'Options: 1=NotifyOnly 2=RestartOnEmpty 3=RestartAfterWarnings 4=RestartImmediately',
-        'mod_check_action': 3,
+        'mod_check_action': 2,
         '_comment_cache_map_files': 'Force map files to be cached in memory while server is running (EXPERIMENTAL)',
         'cache_map_files': False
     }
