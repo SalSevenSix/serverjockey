@@ -1,6 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
+  import VirtualBox from '$lib/svg/VirtualBox.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
@@ -9,9 +10,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
-    <figure class="image mr-0 max-300">
-      <img src={surl('/assets/brands/Virtualbox_logo.png')} alt="Virtualbox logo" />
-    </figure>
+    <figure class="image mt-3 max-300"><VirtualBox /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2 notranslate">VirtualBox</h2>
