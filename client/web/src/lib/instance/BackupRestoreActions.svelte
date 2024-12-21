@@ -3,25 +3,28 @@
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
   import { newPostRequest } from '$lib/util/sjgmsapi';
-  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import FileSystem from '$lib/instance/FileSystem.svelte';
+  import FileUpload from '$lib/instance/FileUpload.svelte';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
-  const fnHelp = 'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.';
 
   let fileSystem;
-  let uploading = false;
-  let uploadFiles = [];
   let notifyText = null;
 
-  $: noFileSelected = uploadFiles.length === 0;
-  $: cannotUpload = uploading || $serverStatus.state === 'MAINTENANCE';
-  $: cannotBackup = $serverStatus.running || cannotUpload;
+  $: cannotBackup = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
 
   $: if (!cannotBackup && notifyText) {
     notifyInfo(notifyText);
     notifyText = null;
+  }
+
+  const fnHelp = 'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.';
+  function validateFn(filename) {
+    return filename === filename.replaceAll(' ', '')
+        && filename === filename.toLowerCase()
+        && (filename.startsWith('runtime-') || filename.startsWith('world-'))
+        && filename.endsWith('.zip');
   }
 
   function createBackup() {
@@ -52,76 +55,30 @@
         });
     });
   }
-
-  function uploadFile() {
-    if (noFileSelected) return;
-    const filename = uploadFiles[0].name;
-    if (!(filename === filename.replaceAll(' ', '')
-        && filename === filename.toLowerCase()
-        && (filename.startsWith('runtime-') || filename.startsWith('world-'))
-        && filename.endsWith('.zip'))) {
-      return notifyError(fnHelp);
-    }
-    uploading = true;
-    const request = newPostRequest(null);
-    request.body = new FormData();
-    request.body.append('file', uploadFiles[0]);
-    fetch(instance.url('/backups/' + filename), request)  // Blocks until complete
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        notifyInfo(filename + ' uploaded successfully.');
-      })
-      .catch(function(error) {
-        notifyError('Failed to upload ' + filename);
-      })
-      .finally(function() {
-        uploading = false;
-        fileSystem.reload();  // Manual reload bacause upload does not use MAINTENANCE state
-      });
-  }
 </script>
 
 
 <FileSystem bind:this={fileSystem} rootPath="/backups" allowDelete={2}
             columnsMeta={{ type: false, date: 'Date', name: 'Backup', size: 'Size' }}
-            customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-undo', action: restoreBackup,
-                          sorter: function(a, b) { return b.name.localeCompare(a.name); }}} />
+            customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-undo', action: restoreBackup }} />
 
 <div class="content">
   <p>
     Backup, Restore and Upload processes may take a while. Check the console log to confirm success.
   </p>
-  {#if uploading}
-    <p id="backupRestoreActionsUploading" class="has-text-weight-bold">
-      <SpinnerIcon /> Please keep this section open while uploading...
-    </p>
-  {/if}
 </div>
 
-<div class="block">
-  <div class="file is-fullwidth is-info has-name">
-    <div class="control buttons mr-2">
-      <button id="backupRestoreActionsUploadFile" title="Upload File" class="button is-success"
-              disabled={noFileSelected || cannotUpload} on:click={uploadFile}>
-        <i class="fa fa-file-arrow-up fa-lg"></i>&nbsp;&nbsp;Upload</button>
-    </div>
-    <label class="file-label pr-6">
-      <input id="backupRestoreActionsFilename" class="file-input" type="file" bind:files={uploadFiles}>
-      <span class="file-cta" title={fnHelp}>
-        <span class="file-icon"><i class="fa fa-file-circle-plus"></i></span>
-        <span class="file-label">Choose file…</span>
-      </span>
-      <span class="file-name" title={fnHelp}>
-        {noFileSelected ? 'No file selected' : uploadFiles[0].name}
-      </span>
-    </label>
-  </div>
-  <div class="block buttons">
-    <button id="backupRestoreActionsBackupRuntime" name="runtime" title="Backup Runtime" class="button is-primary"
-            disabled={cannotBackup} on:click={createBackup}>
-      <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
-    <button id="backupRestoreActionsBackupWorld" name="world" title="Backup World" class="button is-primary"
-            disabled={cannotBackup} on:click={createBackup}>
-      <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
-  </div>
+<div class="mb-2">
+  <FileUpload idPrefix="backupRestoreActions" rootPath="/backups"
+              filenameHelp={fnHelp} validateFilename={validateFn}
+              onCompleted={function() { fileSystem.reload(); }} />
+</div>
+
+<div class="block buttons">
+  <button id="backupRestoreActionsBackupRuntime" name="runtime" title="Backup Runtime" class="button is-primary"
+          disabled={cannotBackup} on:click={createBackup}>
+    <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup Runtime</button>
+  <button id="backupRestoreActionsBackupWorld" name="world" title="Backup World" class="button is-primary"
+          disabled={cannotBackup} on:click={createBackup}>
+    <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
 </div>
