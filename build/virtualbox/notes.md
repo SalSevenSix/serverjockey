@@ -14,7 +14,7 @@
 * `shutdown 0`
 * On windows: `~Tools\bin\compact_zombox.bat`
   * "C:\...\VBoxManage" modifymedium "C:\...\VirtualBox VMs\ZomBox\ZomBox.vdi" --compact
-* Export using format 2.0, name: ZomBox-yyyymmdd.ova
+* Export using format 2.0, name: ZomBox-yyyymmdd.ova (use CI build date)
 
 ## Building Fresh Appliance
 
