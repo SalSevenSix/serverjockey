@@ -88,8 +88,8 @@
               {info.cpu.percent}%</td></tr>
         <tr><td title="CPU model name">Model</td>
             <td class="notranslate" id="systemInfoCpuName">{info.cpu.modelname}</td></tr>
-        <tr><td class="notranslate" title="CPU Architecture | Cores | Threads">A | C | T</td>
-            <td class="notranslate" id="systemInfoCpuInfo">{info.cpu.arch} | {info.cpu.cpus} | {info.cpu.threads}</td></tr>
+        <tr><td class="notranslate" title="CPU Architecture | Sockets | Cores-per-socket | Threads-per-core | Logical Processors">A|S|C|T|P</td>
+            <td class="notranslate" id="systemInfoCpuInfo">{info.cpu.arch} | {info.cpu.sockets} | {info.cpu.cores} | {info.cpu.threads} | {info.cpu.cpus}</td></tr>
         <tr><td class="has-text-weight-bold" title="Memory usage">Memory</td>
             <td class="notranslate" id="systemInfoMemoryPercent"><HealthSymbol red={90.0} amber={75.0} value={info.memory.percent} />
               {info.memory.percent}%</td></tr>
@@ -110,7 +110,7 @@
         <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
         <tr><td>Model</td><td>...</td></tr>
-        <tr><td class="notranslate">A | C | T</td><td>...</td></tr>
+        <tr><td class="notranslate">A|S|C|T|P</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">Memory</td><td>...</td></tr>
         <tr><td>Total</td><td>...</td></tr>
         <tr><td>Used</td><td>...</td></tr>

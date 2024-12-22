@@ -129,7 +129,8 @@ class _CpuInfo:
     async def get(self) -> dict:
         output = await shellutil.run_executable('lscpu')
         output = [o.strip() for o in output.split('\n')]
-        result = {'vendor': '???', 'modelname': '???', 'model': '???', 'arch': '???', 'cpus': 0, 'threads': 0}
+        result = {'vendor': '???', 'modelname': '???', 'model': '???', 'arch': '???',
+                  'sockets': 0, 'cores': 0, 'threads': 0, 'cpus': 0}
         for line in output:
             if line.startswith('Vendor ID:'):
                 result['vendor'] = line[10:].strip()
@@ -139,10 +140,14 @@ class _CpuInfo:
                 result['model'] = line[6:].strip()
             elif line.startswith('Architecture:'):
                 result['arch'] = line[13:].strip()
+            elif line.startswith('Socket(s):'):
+                result['sockets'] = objconv.to_int(line[10:].strip())
+            elif line.startswith('Core(s) per socket:'):
+                result['cores'] = objconv.to_int(line[19:].strip())
+            elif line.startswith('Thread(s) per core:'):
+                result['threads'] = objconv.to_int(line[19:].strip())
             elif line.startswith('CPU(s):'):
                 result['cpus'] = objconv.to_int(line[7:].strip())
-            elif line.startswith('Thread(s) per core:'):
-                result['threads'] = objconv.to_int(line[19:].strip()) * result['cpus']
         return result
 
 
