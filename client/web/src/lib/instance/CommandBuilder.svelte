@@ -23,6 +23,10 @@
 
   $: actionUpdated(action); function actionUpdated(current) {
     args = [null, null, null, null, null, null, null, null, null, null];
+    if (!current) return;
+    commands[command][action].forEach(function(value, index) {
+      if (value.hasOwnProperty('defval')) { args[index] = value.defval; }
+    });
   }
 
   $: cannotSend = sending || !($serverStatus.state === 'STARTED');

@@ -45,13 +45,13 @@ export const consoleCommands = {
     ],
     'give-item': [
       {input: 'text>', type: 'item', name: 'player'},
-      {input: 'text', type: 'string', name: 'module'},
+      {input: 'text', type: 'string', name: 'module', defval: 'Base'},
       {input: 'text', type: 'string', name: 'item'},
       {input: 'text', type: 'number', name: 'count'}
     ],
     'spawn-vehicle': [
       {input: 'text>', type: 'item', name: 'player'},
-      {input: 'text', type: 'string', name: 'module'},
+      {input: 'text', type: 'string', name: 'module', defval: 'Base'},
       {input: 'text', type: 'string', name: 'item'}
     ],
     'spawn-horde': [
