@@ -64,18 +64,16 @@ const helpText = {
     'Show help text. Use {command} and {action} for more detailed information. Both optional.'
   ],
   playersetaccesslevel: [
-    'Set access level for online player. Level options:',
-    '`admin, moderator, overseer, gm, observer, none`'
+    'Set access level for online player. Level options:', '```',
+    'admin, moderator, overseer, gm, observer, none', '```'
   ],
   playergivexp: [
-    'Give XP to online player. Skill options:',
-    '```Fitness, Strength,',
-    'Combat, Axe, Blunt, SmallBlunt, LongBlade, SmallBlade,',
-    'Spear, Maintenance, Firearm, Aiming, Reloading,',
-    'Agility, Sprinting, Lightfoot, Nimble, Sneak,',
-    'Crafting, Woodwork, Cooking, Farming, Doctor,',
-    'Electricity, MetalWelding, Mechanics, Tailoring,',
-    'Survivalist, Fishing, Trapping, PlantScavenging```'
+    'Give XP to online player. Skill options:', '```',
+    'Sprinting, Lightfoot, Nimble, Sneak, Aiming, Reloading,',
+    'Axe, SmallBlunt, Blunt, Spear, SmallBlade, LongBlade, Combat,',
+    'Woodwork, Cooking, Farming, Doctor, Electricity, MetalWelding,',
+    'Tailoring, Mechanics, FlintKnapping, Carving, Masonry, Pottery,',
+    'Fishing, Trapping, PlantScavenging, Fitness, Strength', '```'
   ],
   playergiveitem: [
     'Give item to player, {count} is optional.'

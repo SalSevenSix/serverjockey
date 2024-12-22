@@ -99,7 +99,6 @@ class TestPlaying(unittest.TestCase):
         # give item to player
         context.find_element('commandBuilderActionGiveItem').click()
         context.find_element('commandBuilderIplayer').send_keys(player_name)
-        context.find_element('commandBuilderImodule').send_keys('Base')
         context.find_element('commandBuilderIitem').send_keys('Axe')
         self._send_console_command()
         self._wait_for_logout_and_stop_server(player_name)

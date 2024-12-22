@@ -28,7 +28,8 @@ export const consoleCommands = {
     ],
     'set-access-level': [
       {input: 'text>', type: 'item', name: 'player'},
-      {input: 'radio', type: 'string', name: 'level', options: ['none', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
+      {input: 'radio', type: 'string', name: 'level', options: [
+        'none', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
     ],
     'tele-to': [
       {input: 'text>', type: 'item', name: 'player', label: 'Move Player'},
@@ -40,7 +41,12 @@ export const consoleCommands = {
     ],
     'give-xp': [
       {input: 'text>', type: 'item', name: 'player'},
-      {input: 'radio', type: 'string', name: 'skill', options: ['Combat', 'Axe', 'Blunt', 'SmallBlunt', 'LongBlade', 'SmallBlade', 'Spear', 'Maintenance', 'Firearm', 'Aiming', 'Reloading', 'Agility', 'Sprinting', 'Lightfoot', 'Nimble', 'Sneak', 'Crafting', 'Woodwork', 'Cooking', 'Farming', 'Doctor', 'Electricity', 'MetalWelding', 'Mechanics', 'Tailoring', 'Survivalist', 'Fishing', 'Trapping', 'PlantScavenging']},
+      {input: 'radio', type: 'string', name: 'skill', options: [
+        'Sprinting', 'Lightfoot', 'Nimble', 'Sneak', 'Aiming', 'Reloading',
+        'Axe', 'SmallBlunt', 'Blunt', 'Spear', 'SmallBlade', 'LongBlade', 'Combat',
+        'Woodwork', 'Cooking', 'Farming', 'Doctor', 'Electricity', 'MetalWelding',
+        'Tailoring', 'Mechanics', 'FlintKnapping', 'Carving', 'Masonry', 'Pottery',
+        'Fishing', 'Trapping', 'PlantScavenging', 'Fitness', 'Strength']},
       {input: 'text', type: 'number', name: 'xp', label: 'XP'}
     ],
     'give-item': [
