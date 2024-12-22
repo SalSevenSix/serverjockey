@@ -1,5 +1,6 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
+  import MegaUploadIcon from '$lib/svg/MegaUploadIcon.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
@@ -8,10 +9,8 @@
 
 
 <div class="columns">
-  <div class="column is-one-quarter content mb-0">
-    <p class="has-text-centered pt-2">
-      <i class="fa fa-boxes-packing fa-7x theme-black-white"></i>
-    </p>
+  <div class="column is-one-quarter content mb-0 pb-0">
+    <figure class="image mt-2 max-200"><MegaUploadIcon /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Offsite backups using MEGA</h2>
