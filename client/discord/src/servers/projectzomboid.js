@@ -9,6 +9,8 @@ const helpText = {
     'server                    : Server status',
     'server start              : Start server',
     'server restart            : Save world and restart server',
+    'server restart-after-warnings : Warnings then restart server',
+    'server restart-on-empty       : Restart when server is empty',
     'server stop               : Save world and stop server',
     'auto {mode}               : Set auto mode, valid values 0,1,2,3',
     'log                       : Get last 100 lines from the log',

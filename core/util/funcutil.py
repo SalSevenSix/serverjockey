@@ -16,16 +16,6 @@ def to_async(func):
     return run
 
 
-def callable_dict(obj: typing.Any, names: typing.Collection[str]) -> typing.Dict[str, typing.Callable]:
-    result = {}
-    for name in names:
-        if hasattr(obj, name):
-            attribute = getattr(obj, name)
-            if callable(attribute):
-                result[name] = attribute
-    return result
-
-
 async def silently_cleanup(obj: typing.Any):
     if obj is None:
         return

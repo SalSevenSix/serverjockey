@@ -63,7 +63,8 @@ class Server(svrabc.Server):
             self._context, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
         self._context.register(prcext.ServerStateSubscriber(self._context))
         self._context.register(playerstore.PlayersSubscriber(self._context))
-        self._context.register(restarts.RestartAfterWarningsSubscriber(self._context))
+        self._context.register(restarts.RestartAfterWarningsSubscriber(
+            self._context, _RestartWarningsBuilder(self._context)))
         self._context.register(restarts.RestartOnEmptySubscriber(self._context))
         self._context.register(_ServerDetailsSubscriber(self._context))
         self._context.register(_PlayerEventSubscriber(self._context))
@@ -83,7 +84,7 @@ class Server(svrabc.Server):
         r.reg('s', interceptors.block_not_started(self._context))
         r.psh('server', svrext.ServerStatusHandler(self._context))
         r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
-        r.put('{command}', svrext.ServerCommandHandler(self._context))
+        r.put('{command}', svrext.ServerCommandHandler(self._context, restarts.COMMANDS))
         r.pop()
         r.psh('log')
         r.put('tail', httpext.RollingLogHandler(self._context, _LOG_FILTER, size=200))
@@ -257,20 +258,6 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class _RestartWarnings(restarts.RestartWarnings):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer, self._messages = mailer, [
-            'broadcast Server restart in 10 seconds.',
-            'broadcast Server restart in 30 seconds.']
-
-    async def send_warning(self) -> float:
-        if len(self._messages) == 0:
-            return 0.0
-        await proch.PipeInLineService.request(self._mailer, self, self._messages.pop())
-        return 10.0 if len(self._messages) == 0 else 20.0
-
-
 class _AutomaticRestartsSubscriber(msgabc.AbcSubscriber):
     AFTER_WARNINGS_RESTART_FILTER = msgftr.DataStrContains('### server restart after warnings')
     ON_EMPTY_RESTART_FILTER = msgftr.DataStrContains('### server restart on empty')
@@ -285,9 +272,32 @@ class _AutomaticRestartsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _AutomaticRestartsSubscriber.AFTER_WARNINGS_RESTART_FILTER.accepts(message):
-            restarts.RestartAfterWarningsSubscriber.signal_restart(self._mailer, self, _RestartWarnings(self._mailer))
+            restarts.RestartAfterWarningsSubscriber.signal_restart(self._mailer, self)
             return None
         if _AutomaticRestartsSubscriber.ON_EMPTY_RESTART_FILTER.accepts(message):
             restarts.RestartOnEmptySubscriber.signal_restart(self._mailer, self)
             return None
         return None
+
+
+class _RestartWarnings(restarts.RestartWarnings):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer, self._messages = mailer, [
+            'broadcast Server restart in 10 seconds.',
+            'broadcast Server restart in 30 seconds.']
+
+    async def send_warning(self) -> float:
+        if len(self._messages) == 0:
+            return 0.0
+        await proch.PipeInLineService.request(self._mailer, self, self._messages.pop())
+        return 10.0 if len(self._messages) == 0 else 20.0
+
+
+class _RestartWarningsBuilder(restarts.RestartWarningsBuilder):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+
+    def create_warninger(self) -> restarts.RestartWarnings:
+        return _RestartWarnings(self._mailer)

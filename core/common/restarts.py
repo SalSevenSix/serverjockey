@@ -1,3 +1,4 @@
+import typing
 import abc
 import asyncio
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
@@ -12,19 +13,25 @@ class RestartWarnings(metaclass=abc.ABCMeta):
         pass
 
 
+class RestartWarningsBuilder(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def create_warninger(self) -> RestartWarnings:
+        pass
+
+
 class RestartAfterWarningsSubscriber(msgabc.AbcSubscriber):
     _RESTART, _WAIT = 'RestartAfterWarningsSubscriber.Restart', 'RestartAfterWarningsSubscriber.Wait'
     _RESTART_FILTER, _WAIT_FILTER = msgftr.NameIs(_RESTART), msgftr.NameIs(_WAIT)
 
     @staticmethod
-    def signal_restart(mailer: msgabc.Mailer, source: any, warninger: RestartWarnings):
+    def signal_restart(mailer: msgabc.Mailer, source: any, warninger: RestartWarnings = None):
         mailer.post(source, RestartAfterWarningsSubscriber._RESTART, warninger)
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
+    def __init__(self, mailer: msgabc.MulticastMailer, warninger_builder: RestartWarningsBuilder = None):
         super().__init__(msgftr.Or(
             RestartAfterWarningsSubscriber._RESTART_FILTER, RestartAfterWarningsSubscriber._WAIT_FILTER,
             mc.ServerProcess.FILTER_STATES_DOWN, msgftr.IsStop()))
-        self._mailer = mailer
+        self._mailer, self._warninger_builder = mailer, warninger_builder
         self._next_warning, self._warninger = None, None
 
     async def handle(self, message):
@@ -34,6 +41,10 @@ class RestartAfterWarningsSubscriber(msgabc.AbcSubscriber):
         if self._next_warning is None:
             if RestartAfterWarningsSubscriber._RESTART_FILTER.accepts(message):
                 warninger = message.data()
+                if not warninger and self._warninger_builder:
+                    warninger = self._warninger_builder.create_warninger()
+                if not warninger:
+                    return None  # silently fail
                 wait_warning = await warninger.send_warning()
                 if wait_warning > 0.0:
                     self._next_warning, self._warninger = message.created() + wait_warning, warninger
@@ -91,3 +102,8 @@ class RestartOnEmptySubscriber(msgabc.AbcSubscriber):
                     self._player_names, self._waiting = set(), False
                     svrsvc.ServerService.signal_restart(self._mailer, self)
         return None
+
+
+COMMANDS: typing.Dict[str, typing.Callable] = {
+    'restart-after-warnings': RestartAfterWarningsSubscriber.signal_restart,
+    'restart-on-empty': RestartOnEmptySubscriber.signal_restart}

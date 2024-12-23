@@ -17,7 +17,7 @@ from servers.projectzomboid import messaging as msg
 
 
 def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(restarts.RestartAfterWarningsSubscriber(mailer))
+    mailer.register(restarts.RestartAfterWarningsSubscriber(mailer, _NormalRestartWarningsBuilder(mailer)))
     mailer.register(restarts.RestartOnEmptySubscriber(mailer))
     mailer.register(_HandleRestartSubscriber(mailer))
     mailer.register(_ModsNeedUpdateSubscriber(mailer))
@@ -30,6 +30,42 @@ def apply_config(mailer: msgabc.Mailer, source, config: dict):
 
 async def _servermsg(mailer: msgabc.MulticastMailer, source: any, message: str):
     await proch.PipeInLineService.request(mailer, source, 'servermsg "' + message + '"')
+
+
+class _NormalRestartWarningsBuilder(restarts.RestartWarningsBuilder):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+
+    def create_warninger(self) -> restarts.RestartWarnings:
+        return _RestartWarnings(
+            self._mailer,
+            'Server restart in 5 minutes. Please find a safe place and logout.',
+            'Server restart in 1 minute. Please find a safe place and logout.')
+
+
+class _ModzRestartWarningsBuilder(restarts.RestartWarningsBuilder):
+
+    def __init__(self, mailer: msgabc.MulticastMailer):
+        self._mailer = mailer
+
+    def create_warninger(self) -> restarts.RestartWarnings:
+        return _RestartWarnings(
+            self._mailer,
+            'Mod updated. Server restart in 5 minutes. Please find a safe place and logout.',
+            'Mod updated. Server restart in 1 minute. Please find a safe place and logout.')
+
+
+class _RestartWarnings(restarts.RestartWarnings):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, initial_message: str, final_message: str):
+        self._mailer, self._messages = mailer, [final_message, initial_message]
+
+    async def send_warning(self) -> float:
+        if len(self._messages) == 0:
+            return 0.0
+        await _servermsg(self._mailer, self, self._messages.pop())
+        return 60.0 if len(self._messages) == 0 else 240.0
 
 
 class _CheckModsAction(enum.Enum):
@@ -138,25 +174,12 @@ class _ModsNeedUpdateSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-class _RestartWarnings(restarts.RestartWarnings):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer, self._messages = mailer, [
-            'Mod updated. Server restart in 1 minute. Please find a safe place and logout.',
-            'Mod updated. Server restart in 5 minutes. Please find a safe place and logout.']
-
-    async def send_warning(self) -> float:
-        if len(self._messages) == 0:
-            return 0.0
-        await _servermsg(self._mailer, self, self._messages.pop())
-        return 60.0 if len(self._messages) == 0 else 240.0
-
-
 class _HandleRestartSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(_CheckModsConfig.APPLY_FILTER, msg.SERVER_RESTART_REQUIRED_FILTER))
         self._mailer, self._action = mailer, None
+        self._wb = _ModzRestartWarningsBuilder(mailer)
 
     async def handle(self, message):
         if _CheckModsConfig.APPLY_FILTER.accepts(message):
@@ -168,7 +191,7 @@ class _HandleRestartSubscriber(msgabc.AbcSubscriber):
             await _servermsg(self._mailer, self, 'Mod updated. Restarting when empty.')
             restarts.RestartOnEmptySubscriber.signal_restart(self._mailer, self)
         elif self._action is _CheckModsAction.RESTART_AFTER_WARNING:
-            restarts.RestartAfterWarningsSubscriber.signal_restart(self._mailer, self, _RestartWarnings(self._mailer))
+            restarts.RestartAfterWarningsSubscriber.signal_restart(self._mailer, self, self._wb.create_warninger())
         elif self._action is _CheckModsAction.RESTART_IMMEDIATELY:
             await _servermsg(self._mailer, self, 'Mod updated. Server restarting NOW.')
             await asyncio.sleep(10.0)  # grace

@@ -27,7 +27,7 @@
     <div class="column">
       <div class="columns">
         <div class="column">
-          <ServerControls />
+          <ServerControls canRestartAfterWarnings canRestartOnEmpty />
           <ServerConfig />
         </div>
         <div class="column">

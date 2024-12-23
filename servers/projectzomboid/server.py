@@ -6,7 +6,7 @@ from core.http import httpabc, httprsc, httpsubs, httpext
 from core.metrics import mtxinstance
 from core.system import svrabc, svrext
 from core.proc import proch
-from core.common import interceptors, spstopper
+from core.common import interceptors, spstopper, restarts
 from servers.projectzomboid import deployment as dep, console as con, messaging as msg, modcheck as mck
 
 
@@ -32,7 +32,7 @@ class Server(svrabc.Server):
         r.reg('m', interceptors.block_maintenance_only(self._context))
         r.psh('server', svrext.ServerStatusHandler(self._context))
         r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
-        r.put('{command}', svrext.ServerCommandHandler(self._context), 'm')
+        r.put('{command}', svrext.ServerCommandHandler(self._context, restarts.COMMANDS), 'm')
         r.pop()
         r.psh('players')
         r.put('subscribe', self._httpsubs.handler(mc.PlayerStore.EVENT_FILTER, mc.PlayerStore.EVENT_TRF))

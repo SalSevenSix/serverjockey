@@ -95,9 +95,11 @@ exports.server = function($) {
     });
     return;
   }
-  const cmd = $.data[0].toLowerCase();
-  if (!['start', 'restart', 'stop'].includes(cmd)) {
-    $.message.react('⛔');
+  const signals = ['start', 'restart-immediately', 'restart-after-warnings', 'restart-on-empty', 'stop'];
+  let cmd = $.data[0].toLowerCase();
+  if (cmd === 'restart') { cmd = signals[1]; }
+  if (!signals.includes(cmd)) {
+    $.message.react('❓');
     return;
   }
   /* demo mode
@@ -108,7 +110,7 @@ exports.server = function($) {
   return; */
   $.httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
     let currentState = json.current.state;
-    let targetUp = cmd === 'start';
+    let targetUp = cmd === signals[0];
     if (targetUp && ['START', 'STARTING', 'STARTED', 'STOPPING'].includes(currentState)) {
       $.message.react('⛔');
       return;
@@ -117,8 +119,12 @@ exports.server = function($) {
       $.message.react('⛔');
       return;
     }
+    if ([signals[2], signals[3]].includes(cmd)) {
+      $.message.react('✅');
+      return;
+    }
     $.message.react('⌛');
-    targetUp = targetUp || cmd === 'restart';
+    targetUp = targetUp || cmd === signals[1];
     new subs.Helper($.context).poll(json.url, function(data) {
       if (data.state === currentState) return true;
       currentState = data.state;

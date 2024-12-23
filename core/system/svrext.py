@@ -1,5 +1,6 @@
+import typing
 # ALLOW util.* msg*.* context.* http.* system.* EXCEPT system.bootstrap
-from core.util import util, funcutil
+from core.util import util
 from core.msg import msgabc, msgftr
 from core.msgc import sc, mc
 from core.http import httpabc, httpsubs, httpsec
@@ -18,15 +19,22 @@ class ServerStatusHandler(httpabc.GetHandler):
 
 
 class ServerCommandHandler(httpabc.PostHandler):
-    COMMANDS = funcutil.callable_dict(
-        svrsvc.ServerService, ('signal_start', 'signal_restart', 'signal_stop', 'signal_delete'))
+    _COMMANDS: typing.Dict[str, typing.Callable] = {
+        'start': svrsvc.ServerService.signal_start,
+        'restart': svrsvc.ServerService.signal_restart,
+        'restart-immediately': svrsvc.ServerService.signal_restart,
+        'stop': svrsvc.ServerService.signal_stop,
+        'delete': svrsvc.ServerService.signal_delete}
 
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
+    def __init__(self, mailer: msgabc.MulticastMailer, additional_commands: typing.Dict[str, typing.Callable] = None):
+        self._mailer, self._commands = mailer, ServerCommandHandler._COMMANDS
+        if additional_commands:
+            self._commands = ServerCommandHandler._COMMANDS.copy()
+            self._commands.update(additional_commands)
 
     async def handle_post(self, resource, data):
-        command = 'signal_' + str(util.get('command', data)).lower()
-        if command not in ServerCommandHandler.COMMANDS:
+        command = str(util.get('command', data)).lower()
+        if command not in self._commands:
             return httpabc.ResponseBody.BAD_REQUEST
         respond, response = util.get('respond', data, False), {}
         if respond:
@@ -34,7 +42,7 @@ class ServerCommandHandler(httpabc.PostHandler):
                 self._mailer, self, httpsubs.Selector(mc.ServerStatus.UPDATED_FILTER))
             response['url'] = util.get('baseurl', data, '') + subscription_path
             response['current'] = await svrsvc.ServerStatus.get_status(self._mailer, self)
-        ServerCommandHandler.COMMANDS[command](self._mailer, self)
+        self._commands[command](self._mailer, self)
         return response if respond else httpabc.ResponseBody.NO_CONTENT
 
 
