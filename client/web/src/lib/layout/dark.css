@@ -27,6 +27,19 @@ body.dark .navbar-start .navbar-item:hover {
   background-color: var(--color-dark-dark-def);
 }
 
+body.dark .dropdown-content {
+  background-color: var(--color-dark-light-def);
+}
+
+body.dark .dropdown-item {
+  color: var(--color-standard-bright-hlt);
+}
+
+body.dark .dropdown-item:hover {
+  background-color: var(--color-dark-dark-def);
+  color: var(--color-standard-bright-hlt);
+}
+
 body.dark .title {
   color: var(--color-dark-lightest-def);
 }

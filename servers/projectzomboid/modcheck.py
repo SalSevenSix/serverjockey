@@ -83,7 +83,7 @@ class _CheckModsConfig:
         action = util.get('mod_check_action', config)
         self._action = _CheckModsAction(action) if action else _CheckModsAction.RESTART_AFTER_WARNING
 
-    def mod_check_seconds(self) -> int:
+    def mod_check_seconds(self) -> float:
         return self._seconds
 
     def mod_check_action(self) -> _CheckModsAction:
