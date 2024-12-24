@@ -51,14 +51,13 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER,
                 _ServerDetailsSubscriber.IP_FILTER)))
-        self._mailer = mailer
-        self._local_ip = local_ip
+        self._mailer, self._local_ip = mailer, local_ip
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), 'Factorio')
             value = util.rchop(value, '(build')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), '({')
@@ -66,7 +65,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = value.split(':')
             if value[0] == '0.0.0.0':
                 value[0] = self._local_ip
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value[0], 'port': value[1]})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value[0], port=value[1]))
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.lchop(message.data(), '({')
@@ -74,7 +73,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = value.split(':')
             if value[0] == '0.0.0.0':
                 value[0] = self._local_ip
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value[0]})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value[0]))
             return None
         return None
 

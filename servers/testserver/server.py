@@ -11,7 +11,7 @@ from core.proc import proch, prcext
 from core.common import interceptors, playerstore, restarts, spstopper
 
 _MAIN_PY = 'main.py'
-_COMMANDS = cmdutil.CommandLines({'send': '{line}'})
+_COMMANDS = cmdutil.CommandLines(dict(send='{line}'))
 _COMMANDS_HELP_TEXT = '''CONSOLE COMMANDS
 quit, crash, players,
 login {player}, logout {player},
@@ -179,7 +179,7 @@ class _PlayersHandler(httpabc.GetHandler):
         if response is None or not isinstance(response, Iterable):
             return result
         for line in [m.data() for m in response]:
-            result.append({'steamid': str(dtutil.now_millis()), 'name': line[1:]})
+            result.append(dict(steamid=str(dtutil.now_millis()), name=line[1:]))
         return result
 
 
@@ -201,21 +201,21 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         self._mailer = mailer
 
     def handle(self, message):
+        if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
+            value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=value))
+            return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value))
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': value})
-            return None
-        if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=value))
             return None
         return None
 

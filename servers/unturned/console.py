@@ -5,7 +5,7 @@ from core.http import httpabc, httprsc, httpext
 from core.proc import prcext, proch
 from core.common import interceptors
 
-_COMMANDS = cmdutil.CommandLines({'send': '{line}'})
+_COMMANDS = cmdutil.CommandLines(dict(send='{line}'))
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):

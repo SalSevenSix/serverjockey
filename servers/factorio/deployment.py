@@ -39,8 +39,8 @@ def _default_cmdargs_settings() -> dict:
 def _default_mods_list() -> dict:
     mods = []
     for mod in _BASE_MOD_NAMES:
-        mods.append({'name': mod, 'enabled': True})
-    return {'mods': mods}
+        mods.append(dict(name=mod, enabled=True))
+    return dict(mods=mods)
 
 
 class Deployment:
@@ -223,13 +223,13 @@ class Deployment:
             return
         live_mod_list, mod_list = self._mods_dir + '/mod-list.json', []
         for mod in [m for m in mods if m['name'] in _BASE_MOD_NAMES]:
-            mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
+            mod_list.append(dict(name=mod['name'], enabled=mod['enabled']))
         settings = objconv.json_to_dict(await io.read_file(self._server_settings))
         if not util.get('username', settings) or not util.get('token', settings):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             if len(mods) == len(mod_list):
                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game only')
-                await io.write_file(live_mod_list, objconv.obj_to_json({'mods': mod_list}))
+                await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
         baseurl, mod_files, chunk_size = 'https://mods.factorio.com', [], io.DEFAULT_CHUNK_SIZE
@@ -238,7 +238,7 @@ class Deployment:
         credentials = '?username=' + util.get('username', settings) + '&token=' + util.get('token', settings)
         async with aiohttp.ClientSession(connector=connector) as session:
             for mod in [m for m in mods if m['name'] not in _BASE_MOD_NAMES]:
-                mod_list.append({'name': mod['name'], 'enabled': mod['enabled']})
+                mod_list.append(dict(name=mod['name'], enabled=mod['enabled']))
                 mod_meta_url = baseurl + '/api/mods/' + mod['name']
                 async with session.get(mod_meta_url, timeout=timeout) as meta_response:
                     assert meta_response.status == 200
@@ -271,7 +271,7 @@ class Deployment:
                 self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Deleting unused mod file ' + file['name'])
                 await io.delete_file(self._mods_dir + '/' + file['name'])
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game and mods')
-        await io.write_file(live_mod_list, objconv.obj_to_json({'mods': mod_list}))
+        await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
 
     async def restore_autosave(self, filename: str):
         map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP
@@ -313,7 +313,8 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
                 aggregator=aggtrf.StrJoin('\n')))
         version = util.get('beta', data, 'stable')
         tasks.task_fork(self._deployment.install_runtime(version), 'factorio.install_runtime()')
-        return {'url': util.get('baseurl', data, '') + subscription_path}
+        url = util.get('baseurl', data, '') + subscription_path
+        return dict(url=url)
 
 
 class _RestoreAutosaveHandler(httpabc.PostHandler):

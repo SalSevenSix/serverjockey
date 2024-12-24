@@ -45,20 +45,19 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         super().__init__(msgftr.And(
             mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER, _ServerDetailsSubscriber.PORT_FILTER)))
-        self._mailer = mailer
-        self._public_ip = public_ip
+        self._mailer, self._public_ip = mailer, public_ip
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
             value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             value = util.rchop(value, '(')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = message.data()
             value = value[value.rfind(':') + 1:]
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': self._public_ip, 'port': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
             return None
         return None
 

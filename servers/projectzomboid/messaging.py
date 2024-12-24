@@ -70,24 +70,24 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     def handle(self, message):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ingametime': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=value))
             return None
         if SERVER_RESTART_REQUIRED_FILTER.accepts(message):
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'restart': dtutil.to_millis(message.created())})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(restart=dtutil.to_millis(message.created())))
             return None
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
             value = util.rchop(value, 'demo=')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
             return None
         if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value))
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
             value = util.rchop(value, 'port for connections')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'port': int(value)})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=objconv.to_int(value)))
             return None
         return None
 

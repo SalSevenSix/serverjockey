@@ -24,7 +24,7 @@ async def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(prcext.ServerStateSubscriber(mailer))
     mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
     mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(await _ServerDetailsSubscriber(mailer).initialise())
+    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.public_ip()))
     mailer.register(_PlayerEventSubscriber(mailer))
 
 
@@ -36,32 +36,28 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     CON_PORT_PREFIX = 'GamePref.UNUSED_ControlPanelPort ='
     CON_PORT_FILTER = msgftr.DataStrContains(CON_PORT_PREFIX)
 
-    def __init__(self, mailer: msgabc.Mailer):
+    def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
             mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(
                 _ServerDetailsSubscriber.VERSION_FILTER,
                 _ServerDetailsSubscriber.PORT_FILTER,
                 _ServerDetailsSubscriber.CON_PORT_FILTER)))
-        self._mailer, self._ip = mailer, None
-
-    async def initialise(self) -> msgabc.Subscriber:
-        self._ip = await sysutil.public_ip()
-        return self
+        self._mailer, self._public_ip = mailer, public_ip
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
             value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'version': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
             return None
         if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'ip': self._ip, 'port': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
             return None
         if _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, {'cport': value})
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(cport=value))
             return None
         return None
 
