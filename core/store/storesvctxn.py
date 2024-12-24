@@ -38,7 +38,7 @@ class IntegrityChecks(storeabc.Transaction):
         stime, corrections = self._context.config('stime'), 0
         emap = {sc.START: sc.EXCEPTION, sc.STARTING: sc.EXCEPTION, sc.STARTED: sc.EXCEPTION,
                 sc.STOPPING: sc.STOPPED, sc.MAINTENANCE: sc.READY}
-        details = objconv.obj_to_json({'error': 'Event inserted by startup integrity check'})
+        details = objconv.obj_to_json(dict(error='Event inserted by startup integrity check'))
         statement = select(storeabc.InstanceEvent)
         statement = statement.group_by(storeabc.InstanceEvent.instance_id)
         statement = statement.having(storeabc.InstanceEvent.name.in_(emap.keys()))

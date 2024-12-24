@@ -70,7 +70,7 @@ class ServerService(msgabc.AbcSubscriber):
                 try:
                     await self._server.run()
                 except Exception as e:
-                    ServerStatus.notify_status(self._context, self, sc.EXCEPTION, {'error': str(e)})
+                    ServerStatus.notify_status(self._context, self, sc.EXCEPTION, dict(error=str(e)))
                     logging.warning(sc.EXCEPTION + ' instance ' + identity + ' [' + repr(e) + ']')
                 finally:
                     self._running = False
@@ -243,8 +243,8 @@ class _Status:
         return True
 
     def asdict(self) -> typing.Dict[str, typing.Any]:
-        status = {'instance': self._context.config('identity'), 'running': self._running,
-                  'state': self._state, 'details': self._details.copy()}
+        status = dict(instance=self._context.config('identity'), running=self._running,
+                      state=self._state, details=self._details.copy())
         auto = self._context.config('auto')
         status['auto'] = auto if auto else 0
         if self._startmillis > 0:

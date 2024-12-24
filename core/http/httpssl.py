@@ -65,7 +65,8 @@ class SslHandler(httpabc.GetHandler, httpabc.PostHandler):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         tool = SslTool(self._context)
-        return {'active': tool.is_active(), 'enabled': await tool.is_enabled()}
+        active, enabled = tool.is_active(), await tool.is_enabled()
+        return dict(active=active, enabled=enabled)
 
     async def handle_post(self, resource, data):
         tool = SslTool(self._context)

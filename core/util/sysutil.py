@@ -78,34 +78,28 @@ class _DiskUsage:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
         result = await _disk_usage('/')
-        return {
-            'total': result[0], 'used': result[1], 'free': result[2],
-            'percent': round((result[1] / result[0]) * 100.0, 1)
-        }
+        return dict(total=result[0], used=result[1], free=result[2], percent=round((result[1] / result[0]) * 100.0, 1))
 
 
 class _VirtualMemory:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
-        result = {'total': -1, 'used': -1, 'available': -1, 'free': -1, 'percent': -1, 'swap': None}
+        result = dict(total=-1, used=-1, free=-1, available=-1, percent=-1)
         data = await shellutil.run_executable('free', '-b')
         line = _grep_last_line('Mem:', data)
         if line:
             line = line.strip().split(' ')
             line = [int(i) for i in line[1:] if i]
-            result.update({
-                'total': line[0], 'used': line[1], 'free': line[2], 'available': line[5],
-                'percent': round((line[1] / line[0]) * 100.0, 1)
-            })
+            result.update(dict(total=line[0], used=line[1], free=line[2], available=line[5],
+                               percent=round((line[1] / line[0]) * 100.0, 1)))
+        result['swap'] = None
         line = _grep_last_line('Swap:', data)
         if line:
             line = line.strip().split(' ')
             line = [int(i) for i in line[1:] if i]
             if line[0] > 0:
-                result['swap'] = {
-                    'total': line[0], 'used': line[1], 'free': line[2],
-                    'percent': round((line[1] / line[0]) * 100.0, 1)
-                }
+                result['swap'] = dict(total=line[0], used=line[1], free=line[2],
+                                      percent=round((line[1] / line[0]) * 100.0, 1))
         return result
 
 
@@ -129,8 +123,7 @@ class _CpuInfo:
     async def get(self) -> dict:
         output = await shellutil.run_executable('lscpu')
         output = [o.strip() for o in output.split('\n')]
-        result = {'vendor': '???', 'modelname': '???', 'model': '???', 'arch': '???',
-                  'sockets': 0, 'cores': 0, 'threads': 0, 'cpus': 0}
+        result = dict(vendor='???', modelname='???', model='???', arch='???', sockets=0, cores=0, threads=0, cpus=0)
         for line in output:
             if line.startswith('Vendor ID:'):
                 result['vendor'] = line[10:].strip()
@@ -177,7 +170,7 @@ class _Cacher:
 
 _VERSION, _BUILDSTAMP = '0.16.0', '{timestamp}'
 _VERSION_LABEL = _VERSION + ' (' + _BUILDSTAMP + ')'
-_VERSION_DICT = {'version': _VERSION, 'buildstamp': _BUILDSTAMP}
+_VERSION_DICT = dict(version=_VERSION, buildstamp=_BUILDSTAMP)
 _OS_NAME = _Cacher(_OsName(), 31536000.0)
 _LOCAL_IP = _Cacher(_LocalIp(), 31536000.0)
 _PUBLIC_IP = _Cacher(_PublicIp(), 31536000.0)
@@ -227,9 +220,5 @@ async def system_info() -> dict:
     # noinspection PyTypeChecker
     cpu, cpupct, os, disk, memory, local, public = await asyncio.gather(
         cpu_info(), cpu_percent(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
-    cpu['percent'] = cpupct
-    return {
-        'version': system_version(), 'os': os,
-        'cpu': cpu, 'memory': memory, 'disk': disk,
-        'net': {'local': local, 'public': public}
-    }
+    cpu['percent'], net = cpupct, dict(local=local, public=public)
+    return dict(version=system_version(), os=os, cpu=cpu, memory=memory, disk=disk, net=net)

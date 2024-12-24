@@ -29,12 +29,12 @@ async def status(context: contextsvc.Context, source: typing.Any) -> str:
 
 def add_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
     assert protocal in _VALID_PROTOCALS
-    mailer.post(source, IgdService.ADD_PORT_MAPPING, {'port': port, 'protocal': protocal, 'description': description})
+    mailer.post(source, IgdService.ADD_PORT_MAPPING, dict(port=port, protocal=protocal, description=description))
 
 
 def delete_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str):
     assert protocal in _VALID_PROTOCALS
-    mailer.post(source, IgdService.DELETE_PORT_MAPPING, {'port': port, 'protocal': protocal})
+    mailer.post(source, IgdService.DELETE_PORT_MAPPING, dict(port=port, protocal=protocal))
 
 
 class IgdService(msgabc.AbcSubscriber):

@@ -225,7 +225,8 @@ class _SubscribeHandler(httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         path = await HttpSubscriptionService.subscribe(self._mailer, self, self._selector)
-        return {'url': util.get('baseurl', data, '') + path}
+        url = util.get('baseurl', data, '') + path
+        return dict(url=url)
 
 
 class _InactivityCheck(msgabc.AbcSubscriber):

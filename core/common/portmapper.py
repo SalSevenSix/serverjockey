@@ -8,7 +8,7 @@ from core.remotes import igd
 
 
 def map_port(mailer: msgabc.Mailer, source: typing.Any, port: int, protocal: str, description: str):
-    mailer.post(source, PortMapperService.MAP_PORT, {'port': port, 'protocal': protocal, 'description': description})
+    mailer.post(source, PortMapperService.MAP_PORT, dict(port=port, protocal=protocal, description=description))
 
 
 class PortMapperService(msgabc.AbcSubscriber):
@@ -39,7 +39,7 @@ class PortMapperService(msgabc.AbcSubscriber):
         if PortMapperService.MAP_PORT_FILTER.accepts(message):
             data = message.data()
             port, protocal = util.get('port', data), util.get('protocal', data)
-            signature = {'port': port, 'protocal': protocal}
+            signature = dict(port=port, protocal=protocal)
             self._active.append(signature)
             if signature in self._trash:
                 self._trash.remove(signature)

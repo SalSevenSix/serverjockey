@@ -36,7 +36,7 @@ class RconService(msgabc.AbcSubscriber):
 
     @staticmethod
     def set_config(mailer: msgabc.Mailer, source: typing.Any, port: int, password: str):
-        mailer.post(source, RconService.CONFIG, {'port': port, 'password': password})
+        mailer.post(source, RconService.CONFIG, dict(port=port, password=password))
 
     def __init__(self, mailer: msgabc.Mailer, out_prefix: str = '', enforce_id: bool = True):
         super().__init__(msgftr.NameIn((RconService.CONFIG, RconService.REQUEST)))

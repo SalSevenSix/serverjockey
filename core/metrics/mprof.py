@@ -49,7 +49,7 @@ def _process_captures(captures: iter) -> tuple:
         unique_classnames.update(capture.keys())
     entries, unique_classnames = [], tuple(unique_classnames)
     for classname in unique_classnames:
-        entry, pc, count = {'classname': None, 'count': 0, 'deltas': []}, 0, 0
+        entry, pc, count = dict(classname=None, count=0, deltas=[]), 0, 0
         for capture in captures:
             pc, count = count, capture[classname] if classname in capture else 0
             if entry['classname']:

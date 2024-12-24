@@ -17,8 +17,7 @@ class LoginHandler(httpabc.PostHandler):
 
 class MessengerHandler(httpabc.PostHandler):
 
-    def __init__(self,
-                 mailer: msgabc.MulticastMailer, name: str,
+    def __init__(self, mailer: msgabc.MulticastMailer, name: str,
                  data: typing.Optional[httpabc.ABC_DATA_GET] = None,
                  selector: typing.Optional[httpsubs.Selector] = None):
         self._mailer, self._name = mailer, name
@@ -42,7 +41,8 @@ class MessengerHandler(httpabc.PostHandler):
                 httpsubs.HttpSubscriptionService.unsubscribe(self._mailer, source, subscription_path)
             raise result
         if subscription_path:
-            return {'url': util.get('baseurl', data, '') + subscription_path}
+            url = util.get('baseurl', data, '') + subscription_path
+            return dict(url=url)
         if result is False:
             return httpabc.ResponseBody.BAD_REQUEST
         if result is None:
@@ -68,7 +68,7 @@ class ArchiveHandler(httpabc.PostHandler):
     def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, source_dir: str):
         self._handler = MessengerHandler(
             mailer, msgext.Archiver.REQUEST,
-            {'backups_dir': backups_dir, 'source_dir': source_dir},
+            dict(backups_dir=backups_dir, source_dir=source_dir),
             httpsubs.Selector(
                 msg_filter=msglog.FILTER_ALL_LEVELS,
                 completed_filter=msgext.Archiver.FILTER_DONE,
@@ -84,7 +84,7 @@ class UnpackerHandler(httpabc.PostHandler):
                  to_root: bool = False, wipe: bool = True):
         self._handler = MessengerHandler(
             mailer, msgext.Unpacker.REQUEST,
-            {'backups_dir': backups_dir, 'root_dir': root_dir, 'to_root': to_root, 'wipe': wipe},
+            dict(backups_dir=backups_dir, root_dir=root_dir, to_root=to_root, wipe=wipe),
             httpsubs.Selector(
                 msg_filter=msglog.FILTER_ALL_LEVELS,
                 completed_filter=msgext.Unpacker.FILTER_DONE,
@@ -140,8 +140,9 @@ class MtimeHandler(httpabc.GetHandler):
     async def handle_get(self, resource, data):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        result = await self._find_mtime()
-        return {'timestamp': dtutil.to_millis(result) if result else None}
+        timestamp = await self._find_mtime()
+        timestamp = dtutil.to_millis(timestamp) if timestamp else None
+        return dict(timestamp=timestamp)
 
     async def _find_mtime(self) -> float | None:
         result = None

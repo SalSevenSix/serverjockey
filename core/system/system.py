@@ -91,10 +91,8 @@ class SystemService:
             subcontext = self._get_subcontext(child.name(), False)
             if subcontext and child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
                 status = await svrsvc.ServerStatus.get_status(subcontext, self)
-                result[child.name()] = {
-                    'running': status['running'],
-                    'module': subcontext.config('module'),
-                    'url': baseurl + child.path()}
+                running, module, url = status['running'], subcontext.config('module'), baseurl + child.path()
+                result[child.name()] = dict(running=running, module=module, url=url)
         return result
 
     def instance_info(self, identity: str) -> dict | None:
@@ -216,7 +214,8 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         if identity in ('sjgms', 'serverjockey', 'serverlink'):
             return httpabc.ResponseBody.BAD_REQUEST
         subcontext = await self._system.create_instance(dict(module=module, identity=identity))
-        return {'url': util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')}
+        url = util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')
+        return dict(url=url)
 
 
 class _InstanceHandler(httpabc.GetHandler, httpabc.PostHandler):
@@ -296,8 +295,8 @@ class _InstanceEventTransformer(msgabc.Transformer):
     def transform(self, message):
         if mc.ServerStatus.UPDATED_FILTER.accepts(message):
             status = message.data()
-            return {'event': 'running', 'instance': status['instance'], 'running': status['running']}
+            return dict(event='running', instance=status['instance'], running=status['running'])
         if mc.SystemService.SERVER_FILTER.accepts(message):
             event = 'created' if message.name() is mc.SystemService.SERVER_INITIALISED else 'deleted'
-            return {'event': event, 'instance': objconv.obj_to_dict(message.data())}
+            return dict(event=event, instance=objconv.obj_to_dict(message.data()))
         return None

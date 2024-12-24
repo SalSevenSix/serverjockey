@@ -116,7 +116,7 @@ class _OptionCommandHandler(httpabc.PostHandler):
 class _Option:
 
     def __init__(self, option: str, value: str):
-        self._data = {'option': option, 'value': value}
+        self._data = dict(option=option, value=value)
 
     def option(self) -> str:
         return self._data['option']

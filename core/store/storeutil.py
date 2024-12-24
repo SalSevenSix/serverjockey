@@ -84,7 +84,7 @@ def lookup_player_id(session: Session, instance_id: int, player_name: str) -> in
 
 
 def execute_query(session: Session, statement: Executable, criteria: dict, *columns: str) -> dict:
-    result, records = {'created': dtutil.now_millis(), 'criteria': criteria, 'headers': columns}, []
+    result, records = dict(created=dtutil.now_millis(), criteria=criteria, headers=columns), []
     for row in session.execute(statement):
         record, index = [], 0
         for column in columns:
