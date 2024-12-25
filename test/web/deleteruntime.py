@@ -18,7 +18,6 @@ class TestDeleteRuntime(unittest.TestCase):
         context.find_element('runtimeControlsMeta').click()
         self.assertEqual('Meta not found. No runtime installed.',
                          context.find_element('notificationsText0').get_attribute('innerText'))
-        context.find_element('notificationsText1').click()
         context.find_element('notificationsText0').click()
 
     def test_delete_projectzomboid(self):

@@ -8,8 +8,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
-_BASE_URL = 'http://localhost:6164'
-
 
 def _de_increment_wait(wait: float) -> float:
     if wait < 0.0:
@@ -26,34 +24,45 @@ class _WebTestContext:
         self.driver.set_window_size(1280, 720)
         self.actions = ActionChains(self.driver)
         self.home = '/'.join(os.getcwd().split('/')[0:3]) + '/serverjockey/'
-        self.path, self.net_public = None, None
+        self.net_public = self._login()
 
-    def goto(self, path: str = '/'):
-        if path == self.path:
-            return
-        if self.path:
-            self.driver.get(_BASE_URL + path)
-            self.path = path
-            return
-        self.driver.get(_BASE_URL)
+    def _login(self) -> str:
+        self.driver.get('http://localhost:6164')
         login_button = self.find_element('loginModalLogin')
         if not login_button.is_enabled():
             self.find_element('loginModalToken').send_keys('xxxxxxxxxx')
         login_button.click()
-        self.net_public = self.find_element('systemInfoNetPublic', exists=6.0).get_attribute('innerText')
-        self.path = '/'
-        self.goto(path)
+        return self.find_element('systemInfoNetPublic', exists=3.0).get_attribute('innerText')
 
-    def goto_instance(self, identity: str, module: str):
-        if not self.path:
-            self.goto()
+    def _clear_notification(self):
         if self.has_element('notificationsText0'):
             self.find_element('notificationsText0').click()
             time.sleep(1.0)
+
+    def goto_home(self):
+        self._clear_notification()
+        self.find_element('navbarHome').click()
+        assert self.find_element('systemInfoVersion', exists=3.0)
+
+    def goto_instances(self):
+        self._clear_notification()
+        self.find_element('navbarInstances').click()
+        time.sleep(1.0)  # for instances to load
+
+    def goto_instance(self, identity: str, module: str):
+        self._clear_notification()
         self.find_element('navbarInstances').click()
         self.find_element('instanceListViewI' + identity, by=By.NAME, exists=3.0).click()
         instance_header = self.find_element('instanceHeader', exists=2.0).get_attribute('innerText')
         assert instance_header == identity + ' \xA0\xA0 ' + module
+
+    def goto_guides(self):
+        self._clear_notification()
+        self.find_element('navbarGuides').click()
+
+    def goto_about(self):
+        self._clear_notification()
+        self.find_element('navbarAbout').click()
 
     def scroll_to_top(self):
         self.actions.send_keys(Keys.HOME).perform()
@@ -69,10 +78,10 @@ class _WebTestContext:
             WebDriverWait(self.driver, timeout=enabled).until(lambda x: element.is_enabled())
         return element
 
-    def has_element(self, value: str) -> bool:
+    def has_element(self, value: str, by=By.ID) -> bool:
         # noinspection PyBroadException
         try:
-            return self.find_element(value) is not None
+            return self.find_element(value, by) is not None
         except Exception:
             return False
 
