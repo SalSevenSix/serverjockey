@@ -9,7 +9,7 @@
     <span class="has-text-weight-bold">Configuration</span> section. Edit and save the configuration as desired.
     Make sure changes are saved before closing the section, otherwise the changes will be lost!
   </p>
-  <figure class="image max-1024 is-bordered">
+  <figure class="image max-600 is-bordered">
     <img src={surl('/assets/guides/games/configuration.png')} alt="View and edit config" loading="lazy" />
   </figure>
 </div>
