@@ -78,7 +78,7 @@
     too. Please change the default password for the admin user immediately after login.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/01_first_login.jpg')} alt="First Login" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/first_login.jpg')} alt="First Login" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -87,14 +87,14 @@
     page.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/02_menu_new_connection.png')} alt="Menu New Connection" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/menu_new_connection.png')} alt="Menu New Connection" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
     Find and click the Prometheus data source.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/03_select_prometheus.png')} alt="Select Prometheus" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/select_prometheus.png')} alt="Select Prometheus" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -103,7 +103,7 @@
     button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/04_view_prometheus.png')} alt="View Prometheus" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/view_prometheus.png')} alt="View Prometheus" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -114,7 +114,7 @@
     setting.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/05_config_page.png')} alt="Config Page" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/config_page.png')} alt="Config Page" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -124,7 +124,7 @@
   </p>
   <CodeBlock>http://localhost:9090</CodeBlock>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/06_config_url.png')} alt="Config URL" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/config_url.png')} alt="Config URL" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -139,7 +139,7 @@
     to the appropriate value for the version installed.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/07_config_performance.png')} alt="Config Performance" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/config_performance.png')} alt="Config Performance" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -148,7 +148,7 @@
     to save the connection configuration. Expect a success dialog as shown below.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/08_config_save.png')} alt="Config Save" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/config_save.png')} alt="Config Save" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -162,7 +162,7 @@
     dropdown-button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/09_import_dashboard.png')} alt="Import Dashboard" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/import_dashboard.png')} alt="Import Dashboard" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -174,7 +174,7 @@
   </p>
   <CodeBlock>https://grafana.com/grafana/dashboards/1860-node-exporter-full/</CodeBlock>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/10_import_by_url.png')} alt="Import by URL" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/import_by_url.png')} alt="Import by URL" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -185,14 +185,14 @@
     button to complete the import process.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/11_confirm_import.png')} alt="Confirm Import" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/confirm_import.png')} alt="Confirm Import" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
     Machine metrics can now be viewed on the imported Node Exporter dashboard.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/12_node_dashboard.png')} alt="Node Dashboard" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/node_dashboard.png')} alt="Node Dashboard" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -207,7 +207,7 @@
     for the Discord bot.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/13_explore_metrics.png')} alt="Explore Metrics" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/explore_metrics.png')} alt="Explore Metrics" loading="lazy" />
   </figure>
 
   <p><span class="step-title"></span>
@@ -216,7 +216,7 @@
     available to download and import. It allows you to conveniently view instance (process) level metrics.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/grafana/14_serverjockey_dashboard.png')} alt="ServerJockey Dashboard" loading="lazy" />
+    <img src={surl('/assets/guides/grafana/serverjockey_dashboard.png')} alt="ServerJockey Dashboard" loading="lazy" />
   </figure>
 </div>
 
