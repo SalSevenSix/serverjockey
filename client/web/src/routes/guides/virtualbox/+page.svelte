@@ -46,7 +46,7 @@
     <span class="has-text-weight-bold">Settings</span>
     cog button.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-825">
     <img src={surl('/assets/guides/virtualbox/main.png')} alt="VirtualBox Settings" />
   </figure>
   <p>
@@ -58,18 +58,17 @@
     You can change this value as needed. It should less than how much free memory your real machine has,
     but enough to support the game server you are running with 2Gb spare.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-825">
     <img src={surl('/assets/guides/virtualbox/sysmem.png')} alt="VirtualBox Memory" loading="lazy" />
   </figure>
   <p>
     On the
     <span class="has-text-weight-bold">Processor</span>
-    tab you can adjust how much processor is allocated.
-    You can specify a number of cores as well as an execution cap. Click
+    tab you can adjust how many processors can be used. Click
     <span class="has-text-weight-bold">OK</span>
     to save changes.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-825">
     <img src={surl('/assets/guides/virtualbox/syscpu.png')} alt="VirtualBox Processor" loading="lazy" />
   </figure>
 
@@ -151,7 +150,7 @@
     A folder called
     <span class="has-text-weight-bold">zombox</span>
     should be visible to browse and mount as a drive.<br />
-    <span class="has-text-weight-bold">e.g.</span>&nbsp; <span class="is-family-monospace">\\192.168.1.6</span>
+    <span class="has-text-weight-bold">e.g.</span>&nbsp;&nbsp;<span class="is-family-monospace">\\192.168.1.5</span>
   </p>
   <figure class="image max-800 is-bordered">
     <img src={surl('/assets/guides/virtualbox/samba.png')} alt="Samba sharing" loading="lazy" />
@@ -159,3 +158,10 @@
 </div>
 
 <BackToTop />
+
+
+<style>
+  figure.max-825 img {
+    max-width: 825px;
+  }
+</style>
