@@ -44,8 +44,8 @@
       <span class="has-text-weight-bold">Add extension</span>
       button on the confirmation popup.
     </p>
-    <figure class="image max-800">
-      <img src={surl('/assets/guides/extension/chrome_extension_page.jpg')} alt="Chrome extension page" />
+    <figure class="image max-1024">
+      <img src={surl('/assets/guides/extension/chrome_extension_page.png')} alt="Chrome extension page" />
     </figure>
   {:else if isEdge}
     <p><span class="step-title"></span>
@@ -58,7 +58,7 @@
       <span class="has-text-weight-bold">Add extension</span>
       button on the confirmation popup.
     </p>
-    <figure class="image max-800">
+    <figure class="image max-1024">
       <img src={surl('/assets/guides/extension/edge_extension_page.png')} alt="Edge extension page" />
     </figure>
   {:else}
@@ -119,7 +119,7 @@
     ServerJockey system. Enter the URL for the ServerJockey webapp and the login token, then click
     <span class="has-text-weight-bold notranslate">Connect</span>.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/extension/mod_britas_login.jpg')} alt="Connect to ServerJockey" loading="lazy" />
   </figure>
 </div>
@@ -132,7 +132,7 @@
     <span class="has-text-weight-bold notranslate">Add</span>
     button. Click the button to add the workshop item.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/extension/mod_britas_add.jpg')} alt="Add the workshop item" loading="lazy" />
   </figure>
 </div>
@@ -146,7 +146,7 @@
     <span class="has-text-weight-bold notranslate">Selected Mods</span>
     list.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/extension/mod_britas_available.jpg')} alt="Available mods" loading="lazy" />
   </figure>
 </div>
@@ -160,7 +160,7 @@
     button to commit changes to the INI file of the selected instance.
     Note that the server will need to be restarted for these changes to take effect.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/extension/mod_britas_selected.jpg')} alt="Selected mods" loading="lazy" />
   </figure>
 </div>
@@ -175,7 +175,7 @@
     &nbsp;<span class="is-family-monospace notranslate">Muldraugh, KY</span>&nbsp;
     should always be at the bottom.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/extension/mod_chinatown_available.jpg')} alt="Map mod" loading="lazy" />
   </figure>
 </div>
@@ -188,7 +188,7 @@
     You are able to jump to any workshop item using the workshop ID link.
     Use the cross button to remove any workshop item, but remember to save changes.
   </p>
-  <figure class="image max-800">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/extension/mod_chinatown_workshops.jpg')} alt="Workshop list" loading="lazy" />
   </figure>
 </div>
