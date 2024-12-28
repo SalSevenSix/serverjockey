@@ -187,10 +187,12 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
         path = self._resolve_path(data)
         if await io.file_exists(path):
             content_type = httpcnt.ContentTypeImpl.lookup(path)
-            size = await io.file_size(path)
-            if content_type.is_text_type() and size < 4194304:  # 4Mb
-                return await io.read_file(path)
-            return _FileByteStream(path, self._read_tracker)
+            content_length = await io.file_size(path)
+            if content_type.is_text_type():
+                if content_length < 2097152:  # 2Mb
+                    return await io.read_file(path)
+                return _FileByteStream(path, None, self._read_tracker)
+            return _FileByteStream(path, content_length, self._read_tracker)
         if await io.directory_exists(path):
             result = await io.directory_list(path, data['baseurl'] + resource.path(data))
             return [e for e in result if self._ls_filter(e)] if self._ls_filter else result
@@ -231,10 +233,9 @@ class FileSystemHandler(httpabc.GetHandler, httpabc.PostHandler):
 
 class _FileByteStream(httpabc.ByteStream):
 
-    def __init__(self, filename: str, tracker: io.BytesTracker = io.NullBytesTracker()):
-        self._filename, self._tracker = filename, tracker
-        self._name = filename.split('/')[-1]
-        self._content_type = httpcnt.ContentTypeImpl.lookup(filename)
+    def __init__(self, filename: str, content_length: int | None, tracker: io.BytesTracker = io.NullBytesTracker()):
+        self._filename, self._content_length, self._tracker = filename, content_length, tracker
+        self._name, self._content_type = filename.split('/')[-1], httpcnt.ContentTypeImpl.lookup(filename)
         self._queue = asyncio.Queue(maxsize=2)
         self._task, self._length = None, -1
 
@@ -244,8 +245,8 @@ class _FileByteStream(httpabc.ByteStream):
     def content_type(self) -> httpabc.ContentType:
         return self._content_type
 
-    async def content_length(self) -> int | None:
-        return await io.file_size(self._filename)
+    def content_length(self) -> int | None:
+        return self._content_length
 
     async def read(self, length: int = -1) -> bytes:
         if self._task is None:

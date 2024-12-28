@@ -160,17 +160,17 @@ class _RequestHandler:
         if isinstance(body, httpabc.ResponseBody):
             content_type = body.content_type()
             body = body.body()
-        allow_gzip = self._headers.accepts_encoding(gc.GZIP)
-        if allow_gzip and isinstance(body, bytes) and len(body) > 512:
+        if self._headers.accepts_encoding(gc.GZIP) and isinstance(body, bytes) and len(body) > 512:
             body = await pack.gzip_compress(body)
             response.headers.add(httpcnt.CONTENT_ENCODING, gc.GZIP)
         if isinstance(body, httpabc.ByteStream):
             response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
             response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
-            content_length = await body.content_length()
+            content_length = body.content_length()
             if content_length is None:
-                response.enable_chunked_encoding(io.DEFAULT_CHUNK_SIZE)
-                # TODO consider using response.enable_compression() as well
+                response.enable_chunked_encoding()
+                if self._headers.accepts_encoding(gc.DEFLATE):
+                    response.enable_compression()
             else:
                 response.headers.add(httpcnt.CONTENT_LENGTH, str(content_length))
             await response.prepare(self._request)

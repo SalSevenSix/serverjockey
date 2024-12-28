@@ -1,7 +1,7 @@
 # ALLOW NONE
 
 UTF_8 = 'utf-8'
-GZIP = 'gzip'
+GZIP, DEFLATE = 'gzip', 'deflate'
 TCP, UDP = 'TCP', 'UDP'
 HTTP, HTTPS = 'http', 'https'
 HTTP_PROTOCALS = (HTTP, HTTPS)
