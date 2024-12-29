@@ -6,7 +6,6 @@ from core.util import io, tasks
 from core.msg import msgabc, msgftr
 from core.msgc import mc
 from core.context import contextsvc
-# TODO can move to another package now?
 
 # vmtouch & memlock
 #  https://github.com/hoytech/vmtouch/issues/18

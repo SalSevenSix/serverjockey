@@ -7,7 +7,8 @@
   import HealthSymbol from '$lib/widget/HealthSymbol.svelte';
   import SpinnerOverlay from '$lib/widget/SpinnerOverlay.svelte';
 
-  let looping = true;
+  let running = true;
+  let errordown = 1;
   let info = null;
 
   function osIcon(osPrettyName) {
@@ -16,23 +17,31 @@
   }
 
   onMount(async function() {
-    while (looping) {
+    while (running) {
       await fetch(surl('/system/info'), newGetRequest())
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           return response.json();
         })
         .then(function(json) {
-          if (looping) { info = json; }
+          if (!running) return;
+          info = json;
+          errordown = 0;
         })
         .catch(function(error) {
-          notifyError('Failed to load System Info.');
+          if (!running) return;
+          if (errordown === 0) {
+            notifyError('Failed to load System Info.');
+            errordown = 3;
+          } else {
+            errordown = errordown - 1;
+          }
         });
-      if (looping) { await sleep(32000); }
+      if (running) { await sleep(12000); }
     }
   });
 
-  onDestroy(function() { looping = false; });
+  onDestroy(function() { running = false; });
 </script>
 
 

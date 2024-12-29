@@ -7,19 +7,21 @@ import time
 # ALLOW util.*
 from core.util import util, objconv, io, funcutil, shellutil, tasks
 
-# TODO investigate using /proc data instead of executing programs
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
 
 
-def _grep_last_line(startswith: str, text: str | None) -> str | None:
-    if not text:
-        return None
-    result = None
-    for line in text.split('\n'):
-        if line.startswith(startswith):
-            result = line
-    return result
+async def _get_cpu_idle() -> float:
+    result, cpus, stats = None, 0, await io.read_file('/proc/stat')
+    for line in stats.split('\n'):
+        if line.startswith('cpu'):
+            if line[3] == ' ':
+                result = int(line[4:].strip().split(' ')[3])
+            else:
+                cpus += 1
+    if result is None:
+        raise Exception('get_cpu_idle() failed')
+    return result / (100.0 * (cpus if cpus else 1.0))
 
 
 async def _fetch_text(url: str) -> str | None:
@@ -77,54 +79,59 @@ class _PublicIp:
 class _DiskUsage:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
-        result = await _disk_usage('/')
-        return dict(total=result[0], used=result[1], free=result[2], percent=round((result[1] / result[0]) * 100.0, 1))
+        data = await _disk_usage('/')
+        return dict(total=data[0], used=data[1], free=data[2], percent=round((data[1] / data[0]) * 100.0, 1))
 
 
 class _VirtualMemory:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
-        result = dict(total=-1, used=-1, free=-1, available=-1, percent=-1)
-        data = await shellutil.run_executable('free', '-b')
-        line = _grep_last_line('Mem:', data)
-        if line:
-            line = line.strip().split(' ')
-            line = [int(i) for i in line[1:] if i]
-            result.update(dict(total=line[0], used=line[1], free=line[2], available=line[5],
-                               percent=round((line[1] / line[0]) * 100.0, 1)))
+        result = dict(total=0, used=0, free=0, available=0, percent=0.0)
         result['swap'] = None
-        line = _grep_last_line('Swap:', data)
-        if line:
-            line = line.strip().split(' ')
-            line = [int(i) for i in line[1:] if i]
-            if line[0] > 0:
-                result['swap'] = dict(total=line[0], used=line[1], free=line[2],
-                                      percent=round((line[1] / line[0]) * 100.0, 1))
+        meminfo = await shellutil.run_executable('free', '-b')
+        for line in meminfo.split('\n'):
+            if line.startswith('Mem:'):
+                data = [int(i) for i in line.strip().split(' ')[1:] if i]
+                result.update(dict(total=data[0], used=data[1], free=data[2], available=data[5],
+                                   percent=round((data[1] / data[0]) * 100.0, 1)))
+            elif line.startswith('Swap:'):
+                data = [int(i) for i in line.strip().split(' ')[1:] if i]
+                if data[0] > 0:
+                    result['swap'] = dict(total=data[0], used=data[1], free=data[2],
+                                          percent=round((data[1] / data[0]) * 100.0, 1))
         return result
 
 
 class _CpuPercent:
-    # noinspection PyMethodMayBeStatic
+    def __init__(self, min_duration: float, max_duration: float):
+        self._min_duration, self._max_duration = min_duration, max_duration
+        self._last_time, self._last_idle = 0.0, None
+
     async def get(self) -> float:
-        result = await shellutil.run_executable('top', '-b', '-n', '2')
-        result = _grep_last_line('%Cpu(s)', result)
-        if not result:
-            return 0.0
-        result = result.strip().split(' ')
-        result = [i for i in result if i]
-        result = result[result.index('id,') - 1]
-        if result == 'ni,100.0':
-            return 0.0
-        return round(100.0 - float(result), 1)
+        last_idle, now = self._last_idle, time.time()
+        wait, duration = 0.0, now - self._last_time
+        if duration > self._max_duration:
+            wait, last_idle = self._min_duration, await _get_cpu_idle()
+        elif duration < self._min_duration:
+            wait = self._min_duration - duration
+        if wait > 0.0:
+            await asyncio.sleep(wait)
+            duration, now = self._min_duration, now + wait
+        this_idle = await _get_cpu_idle()
+        result = (duration - (this_idle - last_idle)) / duration
+        result = result if result > 0.0 else 0.0
+        result = result if result < 1.0 else 1.0
+        self._last_time, self._last_idle = now, this_idle
+        return round(result * 100.0, 1)
 
 
 class _CpuInfo:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
-        output = await shellutil.run_executable('lscpu')
-        output = [o.strip() for o in output.split('\n')]
         result = dict(vendor='???', modelname='???', model='???', arch='???', sockets=0, cores=0, threads=0, cpus=0)
-        for line in output:
+        data = await shellutil.run_executable('lscpu')
+        data = [o.strip() for o in data.split('\n')]
+        for line in data:
             if line.startswith('Vendor ID:'):
                 result['vendor'] = line[10:].strip()
             elif line.startswith('Model name:'):
@@ -176,7 +183,7 @@ _LOCAL_IP = _Cacher(_LocalIp(), 31536000.0)
 _PUBLIC_IP = _Cacher(_PublicIp(), 31536000.0)
 _DISK_USAGE = _Cacher(_DiskUsage(), 120.0)
 _VIRTUAL_MEMORY = _Cacher(_VirtualMemory(), 60.0)
-_CPU_PERCENT = _Cacher(_CpuPercent(), 30.0)
+_CPU_PERCENT = _Cacher(_CpuPercent(1.0, 15.0), 10.0)
 _CPU_INFO = _Cacher(_CpuInfo(), 31536000.0)
 
 
