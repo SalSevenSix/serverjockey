@@ -1,18 +1,15 @@
-import inspect
-import logging
 import typing
+import logging
 import asyncio
-from functools import partial, wraps
+import inspect
+from functools import wraps
 # ALLOW util.util
 
 
-def to_async(func):
+def to_async(func: typing.Callable) -> typing.Callable:
     @wraps(func)
-    async def run(*args, loop=None, executor=None, **kwargs):
-        if loop is None:
-            loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(executor, partial(func, *args, **kwargs))
-
+    async def run(*args, **kwargs):
+        return await asyncio.to_thread(func, *args, **kwargs)
     return run
 
 

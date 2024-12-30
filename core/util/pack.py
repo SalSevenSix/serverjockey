@@ -9,10 +9,19 @@ import itertools
 # ALLOW util.*
 from core.util import dtutil, idutil, funcutil, io, logutil, tasks, pkg
 
+
+def _sync_unpack_tarxz(file_path: str, target_directory: str):
+    with lzma.open(file_path) as fd:
+        with tarfile.open(fileobj=fd) as tar:
+            tar.extractall(target_directory)
+
+
+unpack_tarxz = funcutil.to_async(_sync_unpack_tarxz)
+gzip_compress = funcutil.to_async(gzip.compress)
+gzip_decompress = funcutil.to_async(gzip.decompress)
+
 _make_archive = funcutil.to_async(shutil.make_archive)
 _unpack_archive = funcutil.to_async(shutil.unpack_archive)
-_gzip_compress = funcutil.to_async(gzip.compress)
-_gzip_decompress = funcutil.to_async(gzip.decompress)
 
 
 async def archive_directory(
@@ -90,23 +99,6 @@ async def unpack_directory(
         progress_logger.stop()
         if not wipe:
             await funcutil.silently_call(io.delete_directory(working_dir))
-
-
-async def gzip_compress(data: bytes) -> bytes:
-    return await _gzip_compress(data)
-
-
-async def gzip_decompress(data: bytes) -> bytes:
-    return await _gzip_decompress(data)
-
-
-def _unpack_tarxz(file_path: str, target_directory: str):
-    with lzma.open(file_path) as fd:
-        with tarfile.open(fileobj=fd) as tar:
-            tar.extractall(target_directory)
-
-
-unpack_tarxz = funcutil.to_async(_unpack_tarxz)
 
 
 class _ProgressLogger:

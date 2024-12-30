@@ -214,14 +214,14 @@ class PathProcessor:
             while current is not None:
                 current = current.parent()
                 depth += 1
-            data.update({self._resource.name(): '/'.join(path[depth:])})
+            data[self._resource.name()] = '/'.join(path[depth:])
             path, current = path[:depth], self._resource.parent()
         path.reverse()
         for element in path:
             if current.kind() is httpabc.ResourceKind.ARG_ENCODED:
-                data.update({current.name(): util.urlsafe_b64decode(element)})
+                data[current.name()] = util.urlsafe_b64decode(element)
             elif current.kind() is httpabc.ResourceKind.ARG:
-                data.update({current.name(): element})
+                data[current.name()] = element
             current = current.parent()
             if current is None:
                 raise Exception('Resource should never be None')
