@@ -18,6 +18,7 @@ login {player}, logout {player},
 say {player} {text}, kill {player},
 broadcast {message}, error {message},
 restart-warnings, restart-empty
+load {processors} {seconds}
 '''
 
 _LOG_FILTER = mc.ServerProcess.FILTER_ALL_LINES

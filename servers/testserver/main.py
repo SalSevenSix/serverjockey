@@ -2,7 +2,9 @@ import sys
 import os
 import signal
 import threading
+import multiprocessing
 import time
+import math
 import json
 from random import randint
 # ALLOW NONE
@@ -37,19 +39,23 @@ class CrashAfterDelay:
             os.kill(os.getpid(), signal.SIGTERM)
 
 
+def dummy_load(seconds: float):
+    end = seconds + time.time()
+    while time.time() < end:
+        for i in range(100000):
+            math.pow(2, 10)
+
+
 def parse_config() -> dict:
     p('Launch args...')
-    config = {
-        'players': sys.argv[1],
-        'start_speed_modifier': int(sys.argv[2]),
-        'crash_on_start_seconds': float(sys.argv[3]),
-        'ingametime_interval_seconds': float(sys.argv[4])
-    }
+    config = dict(
+        players=sys.argv[1], start_speed_modifier=int(sys.argv[2]),
+        crash_on_start_seconds=float(sys.argv[3]), ingametime_interval_seconds=float(sys.argv[4]))
     p(json.dumps(config))
     return config
 
 
-def main() -> int:
+def initialise() -> list:
     p('### Initialising')
     config = parse_config()
     start_speed_modifier = config['start_speed_modifier']
@@ -67,7 +73,11 @@ def main() -> int:
         p('### Player {} has joined the server'.format(player))
         p("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
     threading.Thread(target=InGameTime(config['ingametime_interval_seconds']).run, daemon=True).start()
+    return players
 
+
+def main() -> int:
+    players = initialise()
     running = True
     while running:
         line = sys.stdin.readline()
@@ -107,6 +117,12 @@ def main() -> int:
             p('### server restart after warnings')
         elif line == 'restart-empty':
             p('### server restart on empty')
+        elif line.startswith('load'):
+            time.sleep(0.25)
+            parts = line.split(' ')
+            size, seconds = int(parts[1]), float(parts[2])
+            with multiprocessing.Pool(size) as process:
+                process.map(dummy_load, [seconds] * size)
         elif line == 'quit':
             p('### shutting down')
             p('### messaging players')
