@@ -212,13 +212,17 @@ export function compactPlayers(players, limit=10) {
 }
 
 export async function queryEvents(instance, atfrom, atto) {
-  let url = '/store/player/event?atfrom=' + atfrom + '&atto=' + atto;
+  let url = '/store/player/event';
+  url += '?atfrom=' + atfrom + '&atto=' + atto;
   if (instance) { url += '&instance=' + instance; }
+  url += '&events=LOGIN,LOGOUT';
   return await queryFetch(url, 'Failed to query player events.');
 }
 
 export async function queryLastEvent(instance, atfrom) {
-  let url = '/store/player/event?atgroup=max&atto=' + atfrom;
+  let url = '/store/player/event';
+  url += '?atgroup=max&atto=' + atfrom;
   if (instance) { url += '&instance=' + instance; }
+  url += '&events=LOGIN,LOGOUT';
   return await queryFetch(url, 'Failed to query last player event.');
 }

@@ -4,7 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 # ALLOW util.* store.storeabc, store.storeutil
-from core.util import util, dtutil
+from core.util import util, dtutil, objconv
 from core.store import storeabc, storeutil
 
 # Note that all this is blocking IO
@@ -140,11 +140,13 @@ class SelectPlayerEvent(storeabc.Transaction):
         self._data = data
 
     def execute(self, session: Session) -> typing.Any:
-        criteria = util.filter_dict(self._data, ('instance', 'atfrom', 'atto', 'atgroup', 'player', 'verbose'), True)
-        instance, at_from, at_to, at_group, player, verbose = util.unpack_dict(criteria)
+        criteria = util.filter_dict(
+            self._data, ('instance', 'atfrom', 'atto', 'events', 'player', 'atgroup', 'verbose'), True)
+        instance, at_from, at_to, events, player, at_group, verbose = util.unpack_dict(criteria)
         columns = ['at', 'instance', 'player', 'event']
         entities = [storeabc.PlayerEvent.at, storeabc.Instance.name, storeabc.Player.name, storeabc.PlayerEvent.name]
-        if verbose is not None:
+        verbose = objconv.to_bool(True if verbose == '' else verbose)
+        if verbose:
             columns.append('steamid')
             entities.append(storeabc.Player.steamid)
         statement = select(*entities).join(storeabc.Instance.players).join(storeabc.Player.events)
@@ -163,7 +165,10 @@ class SelectPlayerEvent(storeabc.Transaction):
                 statement = statement.where(storeabc.PlayerEvent.at < dtutil.to_seconds(at_to))
             else:
                 statement = statement.where(storeabc.PlayerEvent.at <= dtutil.to_seconds(at_to))
+        if events:
+            statement = statement.where(storeabc.PlayerEvent.name.in_(str(events).upper().split(',')))
         if player:
+            player = util.urlsafe_b64decode(player)
             regex, flags = storeutil.to_regex(player)
             if regex:
                 statement = statement.where(storeabc.Player.name.regexp_match(regex, flags))
@@ -177,7 +182,7 @@ class SelectPlayerEvent(storeabc.Transaction):
             statement = statement.having(
                 func.max(storeabc.PlayerEvent.at) if at_group == 'max' else func.min(storeabc.PlayerEvent.at))
         statement = statement.order_by(storeabc.PlayerEvent.at)
-        criteria['atfrom'], criteria['atto'] = at_from, at_to
+        criteria['atfrom'], criteria['atto'], criteria['player'], criteria['verbose'] = at_from, at_to, player, verbose
         return storeutil.execute_query(session, statement, criteria, *columns)
 
 
@@ -199,6 +204,7 @@ class SelectPlayerChat(storeabc.Transaction):
             at_to = int(at_to)
             statement = statement.where(storeabc.PlayerChat.at <= dtutil.to_seconds(at_to))
         if player:
+            player = util.urlsafe_b64decode(player)
             regex, flags = storeutil.to_regex(player)
             if regex:
                 statement = statement.where(storeabc.Player.name.regexp_match(regex, flags))
@@ -206,5 +212,5 @@ class SelectPlayerChat(storeabc.Transaction):
                 # noinspection PyTypeChecker
                 statement = statement.where(storeabc.Player.name == util.script_escape(player))
         statement = statement.order_by(storeabc.PlayerChat.at)
-        criteria['atfrom'], criteria['atto'] = at_from, at_to
+        criteria['atfrom'], criteria['atto'], criteria['player'] = at_from, at_to, player
         return storeutil.execute_query(session, statement, criteria, 'at', 'player', 'text')

@@ -99,6 +99,10 @@ class _InstancePlayerRouting(msgabc.AbcSubscriber):
                 self._identity, player_name, data['text']))
             return None
         steamid = data['player']['steamid']
+        if event_name == sc.DEATH:
+            storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(
+                self._identity, sc.DEATH, player_name, steamid))
+            return None
         if event_name == sc.LOGIN:
             self._player_names.add(player_name)
             storeabc.execute(self._mailer, source, storetxn.InsertPlayerEvent(

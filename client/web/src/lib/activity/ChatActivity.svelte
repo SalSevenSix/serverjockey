@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
-  import { shortISODateTimeString, humanDuration, ObjectUrls } from '$lib/util/util';
+  import { shortISODateTimeString, humanDuration, urlSafeB64encode, ObjectUrls } from '$lib/util/util';
   import { newGetRequest } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
   import { queryFetch } from '$lib/activity/common';
@@ -8,6 +8,10 @@
 
   const query = getContext('query');
   const objectUrls = new ObjectUrls();
+  const eventsMap = {
+    'LOGIN': 'fa fa-right-to-bracket',
+    'DEATH': 'fa fa-skull',
+    'LOGOUT': 'fa fa-right-to-bracket rotate-180'};
 
   let processing = true;
   let results = null;
@@ -16,17 +20,20 @@
   $: query.blocker.notify('ChatActivityProcessing', processing);
 
   async function querySessions(instance, atrange, player) {
-    let url = '/store/player/event?instance=' + instance;
-    url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
-    if (player) { url += '&player=' + player; }
+    let url = '/store/player/event';
+    url += '?atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
+    url += '&instance=' + instance;
+    if (player) { url += '&player=' + urlSafeB64encode(player); }
+    url += '&events=' + Object.keys(eventsMap).join(',');
     url += '&verbose';
     return await queryFetch(url, 'Failed to query player events.');
   }
 
   async function queryChats(instance, atrange, player) {
-    let url = '/store/player/chat?instance=' + instance;
-    url += '&atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
-    if (player) { url += '&player=' + player; }
+    let url = '/store/player/chat';
+    url += '?atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
+    url += '&instance=' + instance;
+    if (player) { url += '&player=' + urlSafeB64encode(player); }
     return await queryFetch(url, 'Failed to query chat logs.');
   }
 
@@ -143,13 +150,7 @@
               <td class="notranslate">{entry.player}</td>
               {#if entry.event}
                 <td>
-                  <span class="white-space-nowrap">
-                    {#if entry.event === 'LOGIN'}
-                      <i class="fa fa-right-to-bracket"></i>&nbsp; LOGIN
-                    {:else}
-                      <i class="fa fa-right-to-bracket rotate-180"></i>&nbsp; LOGOUT
-                    {/if}
-                  </span>
+                  <i class={eventsMap[entry.event]}></i>&nbsp;&nbsp;{entry.event}
                   {#if entry.text}&nbsp;({entry.text}){/if}
                 </td>
               {:else}

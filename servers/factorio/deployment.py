@@ -176,7 +176,6 @@ class Deployment:
         url = 'https://factorio.com/get-download/' + version + '/headless/linux64'
         install_package = self._home_dir + '/factorio.tar.xz'
         unpack_dir = self._home_dir + '/factorio'
-        chunk_size = io.DEFAULT_CHUNK_SIZE
         try:
             self._mailer.post(self, msg.DEPLOYMENT_START)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'START Install')
@@ -184,15 +183,15 @@ class Deployment:
             await io.delete_directory(unpack_dir)
             await io.delete_directory(self._runtime_dir)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + url)
-            connector = aiohttp.TCPConnector(family=socket.AF_INET)  # Force IPv4
+            connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
             async with aiohttp.ClientSession(connector=connector) as session:
-                async with session.get(url, read_bufsize=chunk_size) as response:
+                async with session.get(url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
                     assert response.status == 200
                     tracker, content_length = None, response.headers.get('Content-Length')
                     if content_length:
                         tracker = msglog.PercentTracker(self._mailer, int(content_length), prefix='downloaded')
                     await io.stream_write_file(
-                        install_package, io.WrapReader(response.content), chunk_size, self._tempdir, tracker)
+                        install_package, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INSTALLING Factorio server')
@@ -232,7 +231,7 @@ class Deployment:
                 await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
             return
         self._mailer.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
-        baseurl, mod_files, chunk_size = 'https://mods.factorio.com', [], io.DEFAULT_CHUNK_SIZE
+        baseurl, mod_files = 'https://mods.factorio.com', []
         connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
         timeout = aiohttp.ClientTimeout(total=8.0)
         credentials = '?username=' + util.get('username', settings) + '&token=' + util.get('token', settings)
@@ -240,9 +239,9 @@ class Deployment:
             for mod in [m for m in mods if m['name'] not in _BASE_MOD_NAMES]:
                 mod_list.append(dict(name=mod['name'], enabled=mod['enabled']))
                 mod_meta_url = baseurl + '/api/mods/' + mod['name']
-                async with session.get(mod_meta_url, timeout=timeout) as meta_response:
-                    assert meta_response.status == 200
-                    meta = await meta_response.json()
+                async with session.get(mod_meta_url, timeout=timeout) as meta_resp:
+                    assert meta_resp.status == 200
+                    meta = await meta_resp.json()
                     if not util.get('version', mod):
                         mod['version'] = meta['releases'][-1]['version']
                 mod_version_found = False
@@ -254,15 +253,15 @@ class Deployment:
                         if not await io.file_exists(filename):
                             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
                             download_url = baseurl + release['download_url'] + credentials
-                            async with session.get(download_url, read_bufsize=chunk_size) as modfile_response:
-                                assert modfile_response.status == 200
-                                tracker, content_length = None, modfile_response.headers.get('Content-Length')
+                            async with session.get(download_url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as modfile_resp:
+                                assert modfile_resp.status == 200
+                                tracker, content_length = None, modfile_resp.headers.get('Content-Length')
                                 if content_length:
                                     tracker = msglog.PercentTracker(
                                         self._mailer, int(content_length), notifications=5, prefix='downloaded')
                                 await io.stream_write_file(
-                                    filename, io.WrapReader(modfile_response.content),
-                                    chunk_size, self._tempdir, tracker)
+                                    filename, io.WrapReader(modfile_resp.content),
+                                    io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
                 if not mod_version_found:
                     self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
                                       + mod['version'] + ' not found, see ' + mod_meta_url)
