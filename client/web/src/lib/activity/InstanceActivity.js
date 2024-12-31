@@ -94,8 +94,8 @@ export async function queryEvents(instance, atfrom, atto) {
 
 export async function queryLastEvent(instance, atfrom) {
   let url = '/store/instance/event';
-  url += '?atgroup=max&atto=' + atfrom;
+  url += '?atto=' + atfrom;
   if (instance) { url += '&instance=' + instance; }
-  url += '&events=STARTED,STOPPED,EXCEPTION';
+  url += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max';
   return await queryFetch(url, 'Failed to query last instance event.');
 }

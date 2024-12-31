@@ -221,8 +221,8 @@ export async function queryEvents(instance, atfrom, atto) {
 
 export async function queryLastEvent(instance, atfrom) {
   let url = '/store/player/event';
-  url += '?atgroup=max&atto=' + atfrom;
+  url += '?atfrom=' + (parseInt(atfrom) - 2592000000) + '&atto=' + atfrom;
   if (instance) { url += '&instance=' + instance; }
-  url += '&events=LOGIN,LOGOUT';
+  url += '&events=LOGIN,LOGOUT&atgroup=max';
   return await queryFetch(url, 'Failed to query last player event.');
 }
