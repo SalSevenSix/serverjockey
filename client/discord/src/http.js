@@ -119,4 +119,4 @@ exports.MessageHttpTool = class MessageHttpTool {
     });
   }
 
-}
+};

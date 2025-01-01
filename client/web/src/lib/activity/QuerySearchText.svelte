@@ -17,7 +17,7 @@
 
   query.criteria[key] = function() {
     return { text: text };
-  }
+  };
 </script>
 
 

@@ -24,7 +24,7 @@ exports.startServerEventLogging = function(context, channels, instance, url) {
     channels.server.send('`' + instance + '` 📡 ' + json.state);
     return true;
   });
-}
+};
 
 exports.startAllEventLogging = function(context, channels, instance, url) {
   exports.startServerEventLogging(context, channels, instance, url);
@@ -47,7 +47,7 @@ exports.startAllEventLogging = function(context, channels, instance, url) {
     channels.login.send(result);
     return true;
   });
-}
+};
 
 exports.sendHelp = function($, helpText) {
   const channel = $.message.channel;
@@ -72,7 +72,7 @@ exports.sendHelp = function($, helpText) {
   } else {
     channel.send(helpText[query].join('\n'));
   }
-}
+};
 
 exports.server = function($) {
   if ($.data.length === 0) {
@@ -143,7 +143,7 @@ exports.server = function($) {
       return true;
     });
   });
-}
+};
 
 exports.auto = function($) {
   if ($.data.length > 0) {
@@ -157,7 +157,7 @@ exports.auto = function($) {
     result += ' (' + desc[body.auto] + ')\n```';
     return result;
   });
-}
+};
 
 exports.log = function($) {
   $.httptool.doGet('/log/tail', function(body) {
@@ -173,7 +173,7 @@ exports.log = function($) {
         .finally(function() { fs.unlink(fpath, logger.error); });
     });
   });
-}
+};
 
 exports.getconfig = function($) {
   if ($.data.length === 0) {
@@ -189,7 +189,7 @@ exports.getconfig = function($) {
         .finally(function() { fs.unlink(fpath, logger.error); });
     });
   });
-}
+};
 
 exports.setconfig = function($) {
   const attachment = $.message.attachments.first();
@@ -212,7 +212,7 @@ exports.setconfig = function($) {
     .catch(function(error) {
       $.httptool.error(error, $.message);
     });
-}
+};
 
 exports.deployment = function($) {
   let data = [...$.data];
@@ -237,7 +237,7 @@ exports.deployment = function($) {
     if (data.length > 0) { body.beta = data[0]; }
   }
   $.httptool.doPostToFile('/deployment/' + cmd, body);
-}
+};
 
 exports.send = function($) {
   if ($.data.length === 0) {
@@ -253,7 +253,7 @@ exports.send = function($) {
       $.message.react('✅');
     }
   });
-}
+};
 
 exports.say = function($) {
   if ($.data.length === 0) {
@@ -268,7 +268,7 @@ exports.say = function($) {
     '/console/say', { player: name, text: data },
     function(x) { $.message.react('💬'); },
     $.context.config.PLAYER_ROLE);
-}
+};
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
@@ -308,4 +308,4 @@ exports.players = function($) {
     }
     return result;
   });
-}
+};

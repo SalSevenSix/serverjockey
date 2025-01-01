@@ -37,7 +37,7 @@
     for (let i = 0; i < 27; i++) {
        actions.push(...generateSchedule(i));
     }
-    actions.sort(function(a, b) { return a.schedule - b.schedule });
+    actions.sort(function(a, b) { return a.schedule - b.schedule; });
     return actions;
   }
 

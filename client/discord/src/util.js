@@ -2,18 +2,18 @@
 
 exports.sleep = function(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
-}
+};
 
 exports.isString = function(value) {
   return (value != null && typeof value === 'string');
-}
+};
 
 exports.getFirstKey = function(value) {
   if (value == null) return null;
   let keys = Object.keys(value);
   if (keys.length === 0) return null;
   return keys[0];
-}
+};
 
 exports.commandLineToList = function(line) {
   const regexp = /[^\s"]+|"([^"]*)"/gi;
@@ -26,12 +26,12 @@ exports.commandLineToList = function(line) {
     }
   } while (match != null);
   return result;
-}
+};
 
 exports.shortISODateTimeString = function(dateobj) {
   if (!dateobj) { dateobj = new Date(); }
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
-}
+};
 
 exports.humanDuration = function(millis, parts=3) {
   if (!millis) { millis = 0; }
@@ -51,7 +51,7 @@ exports.humanDuration = function(millis, parts=3) {
   if (hours > -1) { result += hours + 'h '; }
   result += minutes + 'm';
   return result;
-}
+};
 
 exports.humanFileSize = function(bytes, si=false, dp=1) {
   if (bytes === 0) return '0 B';
@@ -70,12 +70,12 @@ exports.humanFileSize = function(bytes, si=false, dp=1) {
     ++u;
   } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
   return bytes.toFixed(dp) + ' ' + units[u];
-}
+};
 
 exports.urlSafeB64encode = function(value) {
   const data = btoa(unescape(encodeURIComponent(value)));
   return data.replaceAll('+', '-').replaceAll('/', '_');
-}
+};
 
 exports.newGetRequest = function(secret) {
   return {
@@ -84,7 +84,7 @@ exports.newGetRequest = function(secret) {
       'X-Secret': secret
     }
   };
-}
+};
 
 exports.newPostRequest = function(ct, secret) {
   return {
@@ -94,7 +94,7 @@ exports.newPostRequest = function(ct, secret) {
       'X-Secret': secret
     }
   };
-}
+};
 
 exports.listifyRoles = function(line) {
   const roles = [];
@@ -104,7 +104,7 @@ exports.listifyRoles = function(line) {
     if (role) { roles.push(role); }
   });
   return roles;
-}
+};
 
 exports.checkHasRole = function(message, roles) {
   let hasRole = roles.includes('everyone');
@@ -116,4 +116,4 @@ exports.checkHasRole = function(message, roles) {
   if (hasRole) return true;
   message.react('🔒');
   return false;
-}
+};

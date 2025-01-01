@@ -1,18 +1,21 @@
 {
   "name": "extension",
+  "type": "module",
   "version": "0.16.0",
   "private": true,
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "preview": "vite preview"
+    "lint": "eslint src"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.12.1",
     "sveltekit-adapter-chrome-extension": "^2.0.1",
     "@sveltejs/adapter-static": "^3.0.6",
     "@sveltejs/kit": "^2.9.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-svelte": "^2.46.1",
     "svelte": "^4.2.19",
     "vite": "^5.4.11"
-  },
-  "type": "module"
+  }
 }

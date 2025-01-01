@@ -8,7 +8,7 @@
 
   query.criteria.chat = function() {
     return { type: type };
-  }
+  };
 </script>
 
 

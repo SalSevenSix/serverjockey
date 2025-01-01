@@ -21,6 +21,7 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
 fi
 
 echo "Webapp build"
+$JS_PKGMGR run lint || exit 1
 $JS_PKGMGR run build || exit 1
 touch build/__init__.py
 mv build ../../web || exit 1

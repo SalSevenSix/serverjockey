@@ -26,7 +26,7 @@ const helpText = {
 
 
 exports.startup = commons.startServerEventLogging;
-exports.help = function($) { commons.sendHelp($, helpText); }
+exports.help = function($) { commons.sendHelp($, helpText); };
 exports.server = commons.server;
 exports.auto = commons.auto;
 exports.log = commons.log;
@@ -39,4 +39,4 @@ exports.players = function($) {
   $.httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
     $.message.channel.send('```\n' + text + '\n```');
   });
-}
+};

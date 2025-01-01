@@ -11,7 +11,7 @@
 
   query.criteria.instance = function() {
     return { identity: getIdentity };
-  }
+  };
 </script>
 
 

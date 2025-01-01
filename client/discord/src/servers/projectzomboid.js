@@ -96,7 +96,7 @@ const helpText = {
 
 
 exports.startup = commons.startAllEventLogging;
-exports.help = function($) { commons.sendHelp($, helpText); }
+exports.help = function($) { commons.sendHelp($, helpText); };
 exports.server = commons.server;
 exports.auto = commons.auto;
 exports.log = commons.log;
@@ -117,7 +117,7 @@ exports.world = function($) {
     body = { message: data.join(' ') };
   }
   $.httptool.doPost('/world/' + cmd, body);
-}
+};
 
 exports.player = function($) {
   const data = [...$.data];
@@ -147,7 +147,7 @@ exports.player = function($) {
     }
   }
   $.httptool.doPost('/players/' + name + '/' + cmd, body);
-}
+};
 
 exports.whitelist = function($) {
   const data = [...$.data];
@@ -195,7 +195,7 @@ exports.whitelist = function($) {
   } else {
     $.message.react('❓');
   }
-}
+};
 
 exports.banlist = function($) {
   const data = [...$.data];
@@ -206,4 +206,4 @@ exports.banlist = function($) {
   const cmd = data.shift() + '-id';
   const body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);
-}
+};

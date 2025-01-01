@@ -1,6 +1,6 @@
 <script>
   import { getContext, tick } from 'svelte';
-  import { DateInput } from 'date-picker-svelte'  // https://date-picker-svelte.kasper.space/docs
+  import { DateInput } from 'date-picker-svelte';  // https://date-picker-svelte.kasper.space/docs
 
   const query = getContext('query');
   const minDate = new Date(946684800000);  // 2000-01-01 00:00:00
@@ -86,12 +86,12 @@
     [attoPreset, atfromMillis] = [attoOptions[0], '0'];
     [atto, atfrom] = [to, from];
     tick().then(function() { updating = false; });
-  }
+  };
 
   query.criteria.atrange = function() {
     const millis = resolveRange();
     return { atfrom: millis.atfrom.toString(), atto: millis.atto.toString() };
-  }
+  };
 </script>
 
 

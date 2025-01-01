@@ -4,7 +4,7 @@ const util = require('./util.js');
 
 exports.raw = function(value) {
   console.log(value);
-}
+};
 
 exports.dump = function(obj) {
   if (obj == null) return;
@@ -17,11 +17,11 @@ exports.dump = function(obj) {
     }
   }
   console.log(JSON.stringify(clone, null, 2).split('\n').slice(1, -1).join('\n'));
-}
+};
 
 exports.info = function(value) {
   console.log(util.shortISODateTimeString() + ' INFO ' + value);
-}
+};
 
 exports.error = function(value) {
   if (value == null) return null;
@@ -36,4 +36,4 @@ exports.error = function(value) {
   console.error(util.shortISODateTimeString() + ' ERROR');
   console.error(value);
   return null;
-}
+};

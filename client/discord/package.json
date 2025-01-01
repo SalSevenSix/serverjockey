@@ -1,4 +1,12 @@
 {
+  "name": "serverlink",
+  "type": "module",
+  "version": "0.16.0",
+  "private": true,
+  "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.12.1",
+    "eslint": "^9.17.0"
+  },
   "dependencies": {
     "discord.js": "^14.16.3"
   }

@@ -16,7 +16,7 @@ const helpText = {
 };
 
 
-exports.help = function($) { commons.sendHelp($, helpText); }
+exports.help = function($) { commons.sendHelp($, helpText); };
 
 exports.about = function($) {
   let result = '**ServerJockey** is a game server management system for Project Zomboid and other supported games. ';
@@ -31,7 +31,7 @@ exports.about = function($) {
   result += '**ServerJockey on GitHub**\n';
   result += ' <https://github.com/SalSevenSix/serverjockey>';
   $.message.channel.send(result);
-}
+};
 
 exports.system = function($) {
   $.httptool.doGet('/system/info', function(info) {
@@ -48,7 +48,7 @@ exports.system = function($) {
     result += 'IPv4    : ' + info.net.local + ' ' + info.net.public;
     return result + '\n```';
   });
-}
+};
 
 exports.modules = function($) {
   $.httptool.doGet('/modules', function(body) {
@@ -58,13 +58,13 @@ exports.modules = function($) {
     }
     return result + '```';
   });
-}
+};
 
 exports.instances = function($) {
   if (!util.checkHasRole($.message, $.context.config.PLAYER_ROLE)) return;
   let result = $.context.instancesService.getInstancesText();
   $.message.channel.send(result);
-}
+};
 
 exports.use = function($) {
   if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
@@ -78,7 +78,7 @@ exports.use = function($) {
   } else {
     $.message.react('⛔');
   }
-}
+};
 
 exports.create = function($) {
   if ($.data.length < 2) {
@@ -93,8 +93,8 @@ exports.create = function($) {
     $.context.instancesService.setInstance(body.identity);
     $.message.react('✅');
   });
-}
+};
 
 exports.shutdown = function($) {
   $.httptool.doPost('/system/shutdown');
-}
+};
