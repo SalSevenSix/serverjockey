@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import anchorme from 'anchorme/dist/browser/anchorme.min.js';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
-  import { capitalizeKebabCase, urlSafeB64encode } from '$lib/util/util';
+  import { hasProp, capitalizeKebabCase, urlSafeB64encode } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import InputText from '$lib/widget/InputText.svelte';
   import InputRadio from '$lib/widget/InputRadio.svelte';
@@ -25,7 +25,7 @@
     args = [null, null, null, null, null, null, null, null, null, null];
     if (!current) return;
     commands[command][action].forEach(function(value, index) {
-      if (value.hasOwnProperty('defval')) { args[index] = value.defval; }
+      if (hasProp(value, 'defval')) { args[index] = value.defval; }
     });
   }
 
@@ -107,7 +107,7 @@
                class="pre is-size-7 notranslate">{@html args[commands[command][action].indexOf(arg)]}</pre>
         {:else if arg.input === 'text' || arg.input === 'text>'}
           <InputText id="commandBuilderI{arg.name}"
-                     label={arg.hasOwnProperty('label') ? arg.label : capitalizeKebabCase(arg.name)}
+                     label={hasProp(arg, 'label') ? arg.label : capitalizeKebabCase(arg.name)}
                      bind:value={args[commands[command][action].indexOf(arg)]}
                      autofocus={arg.input === 'text>'} onKeypress={arg.input === 'text>' ? kpSend : null} />
         {:else if arg.input === 'radio'}

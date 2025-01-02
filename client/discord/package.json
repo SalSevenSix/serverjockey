@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.16.0",
   "private": true,
+  "scripts": {
+    "lint": "eslint src"
+  },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.12.1",
     "eslint": "^9.17.0"

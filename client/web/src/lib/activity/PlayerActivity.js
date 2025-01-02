@@ -1,3 +1,4 @@
+import { hasProp } from '$lib/util/util';
 import { queryFetch } from '$lib/activity/common';
 
 const hourMillis = 60 * 60 * 1000;
@@ -132,7 +133,7 @@ export function extractActivity(queryResults) {
   });
   data.records.forEach(function(record) {  // Process event records to calculate uptime and session count
     const [at, instance, player, event] = record;
-    if (entries[instance].hasOwnProperty(player)) {
+    if (hasProp(entries[instance], player)) {
       entry = entries[instance][player];
     } else {
       entry = { at: at, event: event, sessions: 0, uptime: 0 };

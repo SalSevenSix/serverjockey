@@ -45,6 +45,10 @@ export function sleep(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
 }
 
+export function hasProp(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
 export function toCamelCase(value) {
   if (!isString(value)) return '';
   return value.split(' ').map(capitalize).join('');

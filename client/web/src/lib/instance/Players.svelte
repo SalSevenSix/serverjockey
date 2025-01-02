@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { humanDuration, chunkArray } from '$lib/util/util';
+  import { hasProp, humanDuration, chunkArray } from '$lib/util/util';
   import { notifyError } from '$lib/util/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
@@ -20,7 +20,7 @@
     const currentPlayers = players;
     const updatedPlayers = [];
     currentPlayers.forEach(function(player) {
-      if (player.hasOwnProperty('uptime')) {
+      if (hasProp(player, 'uptime')) {
         player.uptime += 10000;
       }
       updatedPlayers.push(player);
@@ -114,7 +114,7 @@
                 {/if}
                 <td class="word-break-all player-column notranslate">{player.name}</td>
                 <td class="white-space-nowrap online-column notranslate">
-                  {player.hasOwnProperty('uptime') ? humanDuration(player.uptime, 2) : ''}</td>
+                  {hasProp(player, 'uptime') ? humanDuration(player.uptime, 2) : ''}</td>
               </tr>
             {/each}
           </tbody>

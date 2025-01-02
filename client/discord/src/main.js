@@ -56,15 +56,15 @@ function startup() {
       if (channels[index]) { channelsMap[channels[index].id] = channels[index]; }
     }
     const startupArgs = { server: null, login: null, chat: null };
-    if (configChannels.server && channelsMap.hasOwnProperty(configChannels.server)) {
+    if (configChannels.server && util.hasProp(channelsMap, configChannels.server)) {
       startupArgs.server = channelsMap[configChannels.server];
       logger.info('Publishing server events to ' + startupArgs.server.name + ' (' + startupArgs.server.id + ')');
     }
-    if (configChannels.login && channelsMap.hasOwnProperty(configChannels.login)) {
+    if (configChannels.login && util.hasProp(channelsMap, configChannels.login)) {
       startupArgs.login = channelsMap[configChannels.login];
       logger.info('Publishing login events to ' + startupArgs.login.name + ' (' + startupArgs.login.id + ')');
     }
-    if (configChannels.chat && channelsMap.hasOwnProperty(configChannels.chat)) {
+    if (configChannels.chat && util.hasProp(channelsMap, configChannels.chat)) {
       startupArgs.chat = channelsMap[configChannels.chat];
       logger.info('Publishing chat events to ' + startupArgs.chat.name + ' (' + startupArgs.chat.id + ')');
     }
@@ -96,7 +96,7 @@ function handleMessage(message) {
   }
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);
-  if (instanceData && instanceData.server && instanceData.server.hasOwnProperty(command)) {
+  if (instanceData && instanceData.server && util.hasProp(instanceData.server, command)) {
     if (command === 'help' && data.length === 0) {
       system.help(args);
       /* demo mode
@@ -106,7 +106,7 @@ function handleMessage(message) {
     instanceData.server[command](args);
     return;
   }
-  if (system.hasOwnProperty(command)) {
+  if (util.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
     system[command](args);
     return;

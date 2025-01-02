@@ -55,7 +55,7 @@ exports.sendHelp = function($, helpText) {
     const cmd = $.context.config.CMD_PREFIX;
     let header = '```\n' + helpText.title + '\n' + cmd;
     let index = 1;
-    while (helpText.hasOwnProperty('help' + index)) {
+    while (util.hasProp(helpText, 'help' + index)) {
       channel.send(header + helpText['help' + index].join('\n' + cmd) + '\n```');
       if (index === 1) { header = '```\n' + cmd; }
       index += 1;
@@ -63,7 +63,7 @@ exports.sendHelp = function($, helpText) {
     return;
   }
   const query = $.data.join('').replaceAll('-', '');
-  if (!helpText.hasOwnProperty(query)) {
+  if (!util.hasProp(helpText, query)) {
     channel.send('No more help available.');
     return;
   }
@@ -266,7 +266,7 @@ exports.say = function($) {
   data = data.slice(data.indexOf(' ')).trim();
   $.httptool.doPost(
     '/console/say', { player: name, text: data },
-    function(x) { $.message.react('💬'); },
+    function() { $.message.react('💬'); },
     $.context.config.PLAYER_ROLE);
 };
 
@@ -290,7 +290,7 @@ exports.players = function($) {
           line = (body[i].steamid === '') ? nosteamid : body[i].steamid + ' ';
           line += body[i].name;
         }
-        if (body[i].hasOwnProperty('uptime')) {
+        if (util.hasProp(body[i], 'uptime')) {
           line = line.padEnd(maxlength + 3);
           line += util.humanDuration(body[i].uptime, 2);
         }

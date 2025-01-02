@@ -39,12 +39,13 @@ exports.MessageHttpTool = class MessageHttpTool {
         return response.json();
       })
       .then(function(data) {
-        let result = dataHandler(data);
+        const result = dataHandler(data);
         if (!result) return;
-        if (!!!result.forEach) { result = [result]; }
-        result.forEach(function(text) {
-          message.channel.send(text);
-        });
+        if (util.isString(result)) {
+          message.channel.send(result);
+        } else {
+          result.forEach(function(text) { message.channel.send(text); });
+        }
       })
       .catch(function(error) {
         self.error(error, message);
@@ -94,7 +95,7 @@ exports.MessageHttpTool = class MessageHttpTool {
     const context = this.#context;
     const message = this.#message;
     this.doPost(path, body, function(json) {
-      if (json == null || !json.hasOwnProperty('url')) {
+      if (json == null || !util.hasProp(json, 'url')) {
         message.react('✅');
         return;
       }

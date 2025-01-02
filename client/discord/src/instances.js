@@ -70,14 +70,14 @@ exports.Service = class Service {
   }
 
   useInstance(instance) {
-    if (!this.#instances.hasOwnProperty(instance)) return false;
+    if (!util.hasProp(this.#instances, instance)) return false;
     this.setInstance(instance);
     return true;
   }
 
   getData(instance) {
     if (instance == null) return null;
-    if (!this.#instances.hasOwnProperty(instance)) return null;
+    if (!util.hasProp(this.#instances, instance)) return null;
     return this.#instances[instance];
   }
 

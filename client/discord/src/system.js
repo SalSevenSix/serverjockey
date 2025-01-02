@@ -89,7 +89,7 @@ exports.create = function($) {
   util.sleep(250).then(function() { $.message.react('✅'); });
   return; */
   const body = { identity: $.data[0], module: $.data[1] };
-  $.httptool.doPost('/instances', body, function(json) {
+  $.httptool.doPost('/instances', body, function() {
     $.context.instancesService.setInstance(body.identity);
     $.message.react('✅');
   });

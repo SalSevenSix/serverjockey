@@ -4,6 +4,10 @@ exports.sleep = function(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
 };
 
+exports.hasProp = function(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+};
+
 exports.isString = function(value) {
   return (value != null && typeof value === 'string');
 };
