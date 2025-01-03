@@ -107,10 +107,7 @@ exports.players = commons.players;
 
 exports.world = function($) {
   const data = [...$.data];
-  if (data.length === 0) {
-    $.message.react('❓');
-    return;
-  }
+  if (data.length === 0) return util.reactUnknown($.message);
   const cmd = data.shift();
   let body = null;
   if (data.length > 0 && cmd === 'broadcast') {
@@ -121,10 +118,7 @@ exports.world = function($) {
 
 exports.player = function($) {
   const data = [...$.data];
-  if (data.length < 2) {
-    $.message.react('❓');
-    return;
-  }
+  if (data.length < 2) return util.reactUnknown($.message);
   const name = util.urlSafeB64encode(data.shift());
   const cmd = data.shift();
   let body = null;
@@ -151,19 +145,13 @@ exports.player = function($) {
 
 exports.whitelist = function($) {
   const data = [...$.data];
-  if (data.length < 2) {
-    $.message.react('❓');
-    return;
-  }
+  if (data.length < 2) return util.reactUnknown($.message);
   const cmd = data.shift();
   if (data[0].length > 3 && data[0].startsWith('<@') && data[0].endsWith('>')) {
     data[0] = data[0].slice(2, -1);
   }
   if (cmd === 'add-name') {
-    if (data.length < 2) {
-      $.message.react('❓');
-      return;
-    }
+    if (data.length < 2) return util.reactUnknown($.message);
     $.httptool.doPost('/whitelist/add', { player: data[0], password: data[1] });
   } else if (cmd === 'remove-name') {
     $.httptool.doPost('/whitelist/remove', { player: data[0] });
@@ -175,12 +163,12 @@ exports.whitelist = function($) {
         logger.info('Whitelist add-id: ' + data[0] + ' ' + name);
         $.httptool.doPost('/whitelist/add', { player: name, password: pwd }, function() {
           user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
-            .then(function() { $.message.react('✅'); })
-            .catch(function(error) { $.httptool.error(error, $.message); });
+            .then(function() { util.reactSuccess($.message); })
+            .catch(function(error) { logger.error(error, $.message); });
         });
       })
       .catch(function(error) {
-        $.httptool.error(error, $.message);
+        logger.error(error, $.message);
       });
   } else if (cmd === 'remove-id') {
     $.context.client.users.fetch(data[0], true, true)
@@ -190,19 +178,16 @@ exports.whitelist = function($) {
         $.httptool.doPost('/whitelist/remove', { player: name });
       })
       .catch(function(error) {
-        $.httptool.error(error, $.message);
+        logger.error(error, $.message);
       });
   } else {
-    $.message.react('❓');
+    util.reactUnknown($.message);
   }
 };
 
 exports.banlist = function($) {
   const data = [...$.data];
-  if (data.length < 2) {
-    $.message.react('❓');
-    return;
-  }
+  if (data.length < 2) return util.reactUnknown($.message);
   const cmd = data.shift() + '-id';
   const body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);

@@ -78,10 +78,7 @@ exports.server = function($) {
   if ($.data.length === 0) {
     $.httptool.doGet('/server', function(body) {
       let result = '```\nServer ' + $.instance + ' is ';
-      if (!body.running) {
-        result += 'DOWN\n```';
-        return result;
-      }
+      if (!body.running) return result + 'DOWN\n```';
       result += body.state;
       if (body.uptime) { result += ' (' + util.humanDuration(body.uptime) + ')'; }
       result += '\n';
@@ -96,50 +93,25 @@ exports.server = function($) {
     return;
   }
   const signals = ['start', 'restart-immediately', 'restart-after-warnings', 'restart-on-empty', 'stop'];
+  const upStates = ['START', 'STARTING', 'STARTED', 'STOPPING'];
+  const downStates = ['READY', 'STOPPED', 'EXCEPTION'];
   let cmd = $.data[0].toLowerCase();
   if (cmd === 'restart') { cmd = signals[1]; }
-  if (!signals.includes(cmd)) {
-    $.message.react('❓');
-    return;
-  }
-  /* demo mode
-  $.message.react('⌛');
-  util.sleep(1200).then(function() {
-    $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
-  });
-  return; */
+  if (!signals.includes(cmd)) return util.reactUnknown($.message);
   $.httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
-    let currentState = json.current.state;
+    let state = json.current.state;
     let targetUp = cmd === signals[0];
-    if (targetUp && ['START', 'STARTING', 'STARTED', 'STOPPING'].includes(currentState)) {
-      $.message.react('⛔');
-      return;
-    }
-    if (!targetUp && ['READY', 'STOPPED', 'EXCEPTION'].includes(currentState)) {
-      $.message.react('⛔');
-      return;
-    }
-    if ([signals[2], signals[3]].includes(cmd)) {
-      $.message.react('✅');
-      return;
-    }
-    $.message.react('⌛');
+    if (targetUp && upStates.includes(state)) return util.reactError($.message);
+    if (!targetUp && downStates.includes(state)) return util.reactError($.message);
+    if ([signals[2], signals[3]].includes(cmd)) return util.reactSuccess($.message);
+    util.reactWait($.message);
     targetUp = targetUp || cmd === signals[1];
     new subs.Helper($.context).poll(json.url, function(data) {
-      if (data.state === currentState) return true;
-      currentState = data.state;
-      if (currentState === 'EXCEPTION') {
-        $.message.reactions.removeAll().then(function() { $.message.react('⛔'); }).catch(logger.error);
-        return false;
-      }
-      if (targetUp && currentState === 'STARTED') {
-        $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
-        return false;
-      }
-      if (!targetUp && currentState === 'STOPPED') {
-        $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
-        return false;
-      }
+      if (state === data.state) return true;
+      state = data.state;
+      if (state === downStates[2]) return util.rmReacts($.message, util.reactError, logger.error, false);
+      if (targetUp && state === upStates[2]) return util.rmReacts($.message, util.reactSuccess, logger.error, false);
+      if (!targetUp && state === downStates[1]) return util.rmReacts($.message, util.reactSuccess, logger.error, false);
       return true;
     });
   });
@@ -176,10 +148,7 @@ exports.log = function($) {
 };
 
 exports.getconfig = function($) {
-  if ($.data.length === 0) {
-    $.message.react('❓');
-    return;
-  }
+  if ($.data.length === 0) return util.reactUnknown($.message);
   $.httptool.doGet('/config/' + $.data[0], function(body) {
     const fname = $.data[0] + '-' + $.message.id + '.text';
     const fpath = '/tmp/' + fname;
@@ -193,13 +162,7 @@ exports.getconfig = function($) {
 
 exports.setconfig = function($) {
   const attachment = $.message.attachments.first();
-  if ($.data.length === 0 || !attachment) {
-    $.message.react('❓');
-    return;
-  }
-  /* demo mode
-  util.sleep(250).then(function() { $.message.react('✅'); });
-  return; */
+  if ($.data.length === 0 || !attachment) return util.reactUnknown($.message);
   fetch(attachment.url)
     .then(function(response) {
       if (!response.ok) throw new Error('Status: ' + response.status);
@@ -210,29 +173,19 @@ exports.setconfig = function($) {
       $.httptool.doPost('/config/' + $.data[0], body);
     })
     .catch(function(error) {
-      $.httptool.error(error, $.message);
+      logger.error(error, $.message);
     });
 };
 
 exports.deployment = function($) {
   let data = [...$.data];
-  if (data.length === 0) {
-    $.message.react('❓');
-    return;
-  }
+  if (data.length === 0) return util.reactUnknown($.message);
   let cmd = data.shift();
   let body = null;
   if (cmd === 'backup-runtime' || cmd === 'backup-world') {
     if (data.length > 0) { body = { prunehours: data[0] }; }
   }
   if (cmd === 'install-runtime') {
-    /* demo mode
-    $.message.react('⌛');
-    util.sleep(3000).then(function() {
-      $.message.reactions.removeAll().then(function() { $.message.react('✅'); }).catch(logger.error);
-      $.message.channel.send({ files: [{ attachment: '/tmp/demo.log', name: $.message.id + '.text' }] });
-    });
-    return; */
     body = { wipe: false, validate: true };
     if (data.length > 0) { body.beta = data[0]; }
   }
@@ -240,26 +193,17 @@ exports.deployment = function($) {
 };
 
 exports.send = function($) {
-  if ($.data.length === 0) {
-    $.message.react('❓');
-    return;
-  }
+  if ($.data.length === 0) return util.reactUnknown($.message);
   let data = $.message.content;
   data = data.slice(data.indexOf(' ')).trim();
   $.httptool.doPost('/console/send', { line: data }, function(text) {
-    if (text) {
-      $.message.channel.send('```\n' + text + '\n```');
-    } else {
-      $.message.react('✅');
-    }
+    if (!text) return util.reactSuccess($.message);
+    $.message.channel.send('```\n' + text + '\n```');
   });
 };
 
 exports.say = function($) {
-  if ($.data.length === 0) {
-    $.message.react('❓');
-    return;
-  }
+  if ($.data.length === 0) return util.reactUnknown($.message);
   let name = $.message.member.user.tag;
   name = '@' + name.split('#')[0];
   let data = $.message.content;

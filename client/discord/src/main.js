@@ -74,15 +74,11 @@ function startup() {
 }
 
 function handleMessage(message) {
-  //if (message.author.bot) return;
   if (!message.content.startsWith(context.config.CMD_PREFIX)) return;
   if (!message.member || !message.member.user) return;  // broken message
   logger.info(message.member.user.tag + ' ' + message.content);
   const data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
-  if (data.length === 0) {
-    message.react('❓');
-    return;
-  }
+  if (data.length === 0) return util.reactUnknown(message);
   let command = data.shift().toLowerCase();
   let instance = context.instancesService.currentInstance();
   const parts = command.split('.');
@@ -90,18 +86,11 @@ function handleMessage(message) {
     command = parts[1];
     instance = parts[0];
   }
-  if (command === 'startup') {
-    message.react('❓');
-    return;
-  }
+  if (command === 'startup') return util.reactUnknown(message);
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && util.hasProp(instanceData.server, command)) {
-    if (command === 'help' && data.length === 0) {
-      system.help(args);
-      /* demo mode
-      return; */
-    }
+    if (command === 'help' && data.length === 0) { system.help(args); }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
     instanceData.server[command](args);
     return;
@@ -111,7 +100,7 @@ function handleMessage(message) {
     system[command](args);
     return;
   }
-  message.react('❓');
+  util.reactUnknown(message);
 }
 
 function shutdown() {

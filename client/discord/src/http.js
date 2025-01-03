@@ -21,11 +21,6 @@ exports.MessageHttpTool = class MessageHttpTool {
     return this.#baseurl;
   }
 
-  error(value, message) {
-    logger.error(value);
-    message.react('⛔');
-  }
-
   doGet(path, dataHandler) {
     const self = this;
     const context = this.#context;
@@ -74,11 +69,8 @@ exports.MessageHttpTool = class MessageHttpTool {
         return response.json();
       })
       .then(function(data) {
-        if (dataHandler == null) {
-          message.react('✅');
-        } else {
-          dataHandler(data);
-        }
+        if (!dataHandler) return util.reactSuccess(message);
+        dataHandler(data);
       })
       .catch(function(error) {
         self.error(error, message);
@@ -95,11 +87,8 @@ exports.MessageHttpTool = class MessageHttpTool {
     const context = this.#context;
     const message = this.#message;
     this.doPost(path, body, function(json) {
-      if (json == null || !util.hasProp(json, 'url')) {
-        message.react('✅');
-        return;
-      }
-      message.react('⌛');
+      if (json == null || !util.hasProp(json, 'url')) return util.reactSuccess(message);
+      util.reactWait(message);
       const fname = message.id + '.text';
       const fpath = '/tmp/' + fname;
       const fstream = fs.createWriteStream(fpath);
@@ -111,9 +100,7 @@ exports.MessageHttpTool = class MessageHttpTool {
       })
       .then(function() {
         fstream.end();
-        message.reactions.removeAll()
-          .then(function() { message.react('✅'); })
-          .catch(logger.error);
+        util.rmReacts(message, util.reactSuccess, logger.error);
         message.channel.send({ files: [{ attachment: fpath, name: fname }] })
           .finally(function() { fs.unlink(fpath, logger.error); });
       });

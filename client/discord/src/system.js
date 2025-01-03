@@ -68,30 +68,17 @@ exports.instances = function($) {
 
 exports.use = function($) {
   if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
-  if ($.data.length === 0) {
-    $.message.react('❓');
-    return;
-  }
-  if ($.context.instancesService.useInstance($.data[0])) {
-    let result = $.context.instancesService.getInstancesText();
-    $.message.channel.send(result);
-  } else {
-    $.message.react('⛔');
-  }
+  if ($.data.length === 0) return util.reactUnknown($.message);
+  if (!$.context.instancesService.useInstance($.data[0])) return util.reactError($.message);
+  $.message.channel.send($.context.instancesService.getInstancesText());
 };
 
 exports.create = function($) {
-  if ($.data.length < 2) {
-    $.message.react('❓');
-    return;
-  }
-  /* demo mode
-  util.sleep(250).then(function() { $.message.react('✅'); });
-  return; */
+  if ($.data.length < 2) return util.reactUnknown($.message);
   const body = { identity: $.data[0], module: $.data[1] };
   $.httptool.doPost('/instances', body, function() {
     $.context.instancesService.setInstance(body.identity);
-    $.message.react('✅');
+    util.reactSuccess($.message);
   });
 };
 

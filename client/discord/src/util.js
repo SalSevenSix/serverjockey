@@ -32,12 +32,12 @@ exports.commandLineToList = function(line) {
   return result;
 };
 
-exports.shortISODateTimeString = function(dateobj) {
+exports.shortISODateTimeString = function(dateobj = null) {
   if (!dateobj) { dateobj = new Date(); }
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
 };
 
-exports.humanDuration = function(millis, parts=3) {
+exports.humanDuration = function(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;
   if (parts > 2) {
@@ -57,7 +57,7 @@ exports.humanDuration = function(millis, parts=3) {
   return result;
 };
 
-exports.humanFileSize = function(bytes, si=false, dp=1) {
+exports.humanFileSize = function(bytes, si = false, dp = 1) {
   if (bytes === 0) return '0 B';
   if (!bytes) return '';
   const thresh = si ? 1000 : 1024;
@@ -118,6 +118,33 @@ exports.checkHasRole = function(message, roles) {
     });
   }
   if (hasRole) return true;
-  message.react('🔒');
-  return false;
+  return reactTo(message, '🔒', false);
 };
+
+exports.rmReacts = function(message, thenHandler, errorHandler, retval = null) {
+  message.reactions.removeAll()
+    .then(function() { thenHandler(message); })
+    .catch(errorHandler);
+  return retval;
+};
+
+exports.reactUnknown = function(message) {
+  return reactTo(message, '❓');
+};
+
+exports.reactWait = function(message) {
+  return reactTo(message, '⌛');
+};
+
+exports.reactError = function(message) {
+  return reactTo(message, '⛔');
+};
+
+exports.reactSuccess = function(message) {
+  return reactTo(message, '✅');
+};
+
+function reactTo(message, emoji, retval = null) {
+  if (message) { message.react(emoji); }
+  return retval;
+}
