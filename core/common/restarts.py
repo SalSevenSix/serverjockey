@@ -40,6 +40,9 @@ class RestartAfterWarningsSubscriber(msgabc.AbcSubscriber):
             return True if message is msgabc.STOP else None
         if self._next_warning is None:
             if RestartAfterWarningsSubscriber._RESTART_FILTER.accepts(message):
+                status = await svrsvc.ServerStatus.get_status(self._mailer, self)
+                if status['state'] != sc.STARTED:
+                    return None
                 warninger = message.data()
                 if not warninger and self._warninger_builder:
                     warninger = self._warninger_builder.create_warninger()
@@ -75,17 +78,20 @@ class RestartOnEmptySubscriber(msgabc.AbcSubscriber):
     def signal_restart(mailer: msgabc.Mailer, source: any):
         mailer.post(source, RestartOnEmptySubscriber._RESTART)
 
-    def __init__(self, mailer: msgabc.Mailer):
+    def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(mc.PlayerStore.EVENT_FILTER, RestartOnEmptySubscriber._RESTART_FILTER))
         self._mailer = mailer
         self._player_names, self._waiting = set(), False
 
-    def handle(self, message):
+    async def handle(self, message):
         if RestartOnEmptySubscriber._RESTART_FILTER.accepts(message):
-            if len(self._player_names) == 0:
-                svrsvc.ServerService.signal_restart(self._mailer, self)
-            else:
-                self._waiting = True
+            if not self._waiting:
+                status = await svrsvc.ServerStatus.get_status(self._mailer, self)
+                if status['state'] == sc.STARTED:
+                    if len(self._player_names) == 0:
+                        svrsvc.ServerService.signal_restart(self._mailer, self)
+                    else:
+                        self._waiting = True
             return None
         data = message.data().asdict()
         event_name = data['event']

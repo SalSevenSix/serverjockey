@@ -185,8 +185,7 @@ class ServerStatus(msgabc.AbcSubscriber):
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.NameIn((
             mc.ServerStatus.REQUEST, mc.ServerStatus.NOTIFY_RUNNING, mc.ServerStatus.NOTIFY_STATUS)))
-        self._context = context
-        self._status = _Status(context)
+        self._context, self._status = context, _Status(context)
 
     def handle(self, message):
         action = message.name()

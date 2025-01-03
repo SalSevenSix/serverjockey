@@ -35,6 +35,8 @@ commands:
   server            | Show the server status
   server:start      | Start the server
   server:restart    | Stop then immediately start the server
+  server:restart-after-warnings  | Restart after warnings, if supported
+  server:restart-on-empty        | Restart on empty, if supported
   server:stop       | Stop the server
   auto:<mode>       | Set auto mode 0=Off, 1=Auto Start, 2=Auto Restart, 4=Both
   players           | List the players currently in-game
