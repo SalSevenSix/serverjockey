@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = require('./logger.js');
 const util = require('./util.js');
 const fetch = require('node-fetch');
@@ -18,11 +16,12 @@ exports.Helper = class Helper {
     while (context.running && url == null) {
       while (context.running && url == null) {
         url = await this.subscribe(subscribeUrl);
-        // if (url) { logger.info(subscribeUrl + ' => ' + url); }
-        counter = 60;
-        while (context.running && url == null && counter > 0) {
-          await util.sleep(200);
-          counter -= 1;
+        if (url == null) {
+          counter = 60;
+          while (context.running && counter > 0) {
+            await util.sleep(200);
+            counter -= 1;
+          }
         }
       }
       if (context.running && url) {
@@ -43,7 +42,7 @@ exports.Helper = class Helper {
         if (json === false) return false;
         return json.url;
       })
-      .catch(logger.error);  // return null
+      .catch(logger.error);
   }
 
   async poll(url, dataHandler) {

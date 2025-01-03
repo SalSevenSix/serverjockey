@@ -46,7 +46,7 @@ export function sleep(millis) {
 }
 
 export function hasProp(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
+  return Object.hasOwn(obj, prop);
 }
 
 export function toCamelCase(value) {
@@ -64,18 +64,18 @@ export function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export function floatToPercent(value, rounding=1, suffix='%') {
+export function floatToPercent(value, rounding = 1, suffix = '%') {
   const result = (value * 100.0).toFixed(rounding);
   return suffix ? result + suffix : result;
 }
 
-export function shortISODateTimeString(millis, utc=false) {
+export function shortISODateTimeString(millis, utc = false) {
   let dateobj = new Date(millis);
   if (!utc) { dateobj = new Date(dateobj.getTime() + dateobj.getTimezoneOffset() * -60000); }
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
 }
 
-export function chunkArray(arr, rows=20, columns=3) {
+export function chunkArray(arr, rows = 20, columns = 3) {
   if (arr.length > rows * columns) {
     rows = Math.ceil(arr.length / columns);
   }
@@ -86,7 +86,7 @@ export function chunkArray(arr, rows=20, columns=3) {
   return result;
 }
 
-export function humanDuration(millis, parts=3) {
+export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;
   if (parts > 2) {
@@ -106,7 +106,7 @@ export function humanDuration(millis, parts=3) {
   return result;
 }
 
-export function humanFileSize(bytes, si=false, dp=1) {
+export function humanFileSize(bytes, dp = 1, si = false) {
   if (bytes === 0) return '0 B';
   if (!bytes) return '';
   const thresh = si ? 1000 : 1024;
@@ -118,7 +118,7 @@ export function humanFileSize(bytes, si=false, dp=1) {
   let u = -1;
   do {
     bytes /= thresh;
-    ++u;
+    u += 1;
   } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
   return bytes.toFixed(dp) + ' ' + units[u];
 }
@@ -133,7 +133,7 @@ export class RollingLog {
   #lines;
   #limit;
 
-  constructor(limit=200) {
+  constructor(limit = 200) {
     this.#limit = limit;
     this.#lines = [];
   }

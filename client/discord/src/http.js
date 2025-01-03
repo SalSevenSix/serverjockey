@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = require('./logger.js');
 const util = require('./util.js');
 const subs = require('./subs.js');

@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = require('../logger.js');
 const util = require('../util.js');
 const commons = require('../commons.js');
@@ -193,8 +191,7 @@ function whitelistAddName($, player, password, dataHandler = null) {
 }
 
 function whitelistRemoveId($, snowflake, dataHandler = null) {
-  snowflake = cleanSnowflake(snowflake);
-  $.context.client.users.fetch(snowflake, true, true)
+  $.context.client.users.fetch(cleanSnowflake(snowflake), true, true)
     .then(function(user) {
       const player = user.tag.replaceAll('#', '');
       whitelistRemoveName($, player, dataHandler);
@@ -205,8 +202,7 @@ function whitelistRemoveId($, snowflake, dataHandler = null) {
 }
 
 function whitelistAddId($, snowflake, player = null) {
-  snowflake = cleanSnowflake(snowflake);
-  $.context.client.users.fetch(snowflake, true, true)
+  $.context.client.users.fetch(cleanSnowflake(snowflake), true, true)
     .then(function(user) {
       const password = Math.random().toString(16).substr(2, 8);
       if (!player) { player = user.tag.replaceAll('#', ''); }

@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = require('./logger.js');
 const util = require('./util.js');
 const subs = require('./subs.js');
@@ -11,14 +9,14 @@ exports.startServerEventLogging = function(context, channels, instance, url) {
   let lastState = 'READY';
   let restartRequired = false;
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
-    if (!json.state) return true;  // ignore no state
-    if (json.state === 'START') return true;  // ignore transient state
+    if (!json.state) return true;  // Ignore no state
+    if (json.state === 'START') return true;  // Ignore transient state
     if (!restartRequired && json.details.restart) {
       channels.server.send('`' + instance + '` 🔄 restart required');
       restartRequired = true;
       return true;
     }
-    if (json.state === lastState) return true;  // ignore duplicates
+    if (json.state === lastState) return true;  // Ignore duplicates
     if (json.state === 'STARTED') { restartRequired = false; }
     lastState = json.state;
     channels.server.send('`' + instance + '` 📡 ' + json.state);
@@ -105,7 +103,7 @@ exports.server = function($) {
     if (!targetUp && downStates.includes(state)) return util.reactError($.message);
     if ([signals[2], signals[3]].includes(cmd)) return util.reactSuccess($.message);
     util.reactWait($.message);
-    targetUp = targetUp || cmd === signals[1];
+    targetUp ||= cmd === signals[1];
     new subs.Helper($.context).poll(json.url, function(data) {
       if (state === data.state) return true;
       state = data.state;
@@ -178,9 +176,9 @@ exports.setconfig = function($) {
 };
 
 exports.deployment = function($) {
-  let data = [...$.data];
+  const data = [...$.data];
   if (data.length === 0) return util.reactUnknown($.message);
-  let cmd = data.shift();
+  const cmd = data.shift();
   let body = null;
   if (cmd === 'backup-runtime' || cmd === 'backup-world') {
     if (data.length > 0) { body = { prunehours: data[0] }; }
@@ -216,11 +214,11 @@ exports.say = function($) {
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
+    const result = [];
     const nosteamid = 'CONNECTED         ';
     let line = $.instance + ' players online: ' + body.length;
     let chars = line.length;
     let chunk = [line];
-    let result = [];
     let maxlength = 0;
     if (body.length > 0) {
       for (let i = 0; i < body.length; i++) {

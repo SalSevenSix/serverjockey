@@ -1,5 +1,3 @@
-'use strict';
-
 const util = require('./util.js');
 const commons = require('./commons.js');
 const helpText = {
@@ -53,7 +51,7 @@ exports.system = function($) {
 exports.modules = function($) {
   $.httptool.doGet('/modules', function(body) {
     let result = '```\n';
-    for (let module in body) {
+    for (const module in body) {
       result += body[module] + '\n';
     }
     return result + '```';
@@ -62,8 +60,7 @@ exports.modules = function($) {
 
 exports.instances = function($) {
   if (!util.checkHasRole($.message, $.context.config.PLAYER_ROLE)) return;
-  let result = $.context.instancesService.getInstancesText();
-  $.message.channel.send(result);
+  $.message.channel.send($.context.instancesService.getInstancesText());
 };
 
 exports.use = function($) {

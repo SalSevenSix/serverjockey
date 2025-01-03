@@ -1,5 +1,3 @@
-'use strict';
-
 function initialise() {
   const metarg = process.argv.length > 2 ? process.argv[2] : null;
   if (metarg == null || metarg === '-h' || metarg === '--help') {
@@ -22,15 +20,15 @@ function initialise() {
   logger.info('*** START ServerLink Bot ***');
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
   config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);
-  const tls_key = 'NODE_TLS_REJECT_UNAUTHORIZED';
-  if (process.env[tls_key] != 0 && config.SERVER_URL.startsWith('https')) {
-    process.env[tls_key] = 0;
+  const tlsKey = 'NODE_TLS_REJECT_UNAUTHORIZED';
+  if (process.env[tlsKey] != 0 && config.SERVER_URL.startsWith('https')) {
+    process.env[tlsKey] = 0;
   }
   logger.info('Version: ' + version);
   logger.info('Executable: ' + process.argv[0]);
   logger.info('JS Runtime: ' + process.version);
   logger.info('discord.js: ' + require('../node_modules/discord.js/package.json').version);
-  logger.info(tls_key + ': ' + process.env[tls_key]);
+  logger.info(tlsKey + ': ' + process.env[tlsKey]);
   logger.info('Initialised with config...');
   logger.dump(config);
   return config;
@@ -45,14 +43,14 @@ function startup() {
   if (configChannels.login) { channelIds.add(configChannels.login); }
   if (configChannels.chat) { channelIds.add(configChannels.chat); }
   const promises = [];
-  for (let channelId of channelIds.values()) {
+  for (const channelId of channelIds.values()) {
     promises.push(context.client.channels.fetch(channelId)
       .then(function(channel) { return channel; })
       .catch(logger.error));
   }
   Promise.all(promises).then(function(channels) {
     const channelsMap = {};
-    for (let index in channels) {
+    for (const index in channels) {
       if (channels[index]) { channelsMap[channels[index].id] = channels[index]; }
     }
     const startupArgs = { server: null, login: null, chat: null };
@@ -75,17 +73,14 @@ function startup() {
 
 function handleMessage(message) {
   if (!message.content.startsWith(context.config.CMD_PREFIX)) return;
-  if (!message.member || !message.member.user) return;  // broken message
+  if (!message.member || !message.member.user) return;  // Broken message
   logger.info(message.member.user.tag + ' ' + message.content);
   const data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
   if (data.length === 0) return util.reactUnknown(message);
   let command = data.shift().toLowerCase();
   let instance = context.instancesService.currentInstance();
   const parts = command.split('.');
-  if (parts.length > 1) {
-    command = parts[1];
-    instance = parts[0];
-  }
+  if (parts.length === 2) { [instance, command] = parts; }
   if (command === 'startup') return util.reactUnknown(message);
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);

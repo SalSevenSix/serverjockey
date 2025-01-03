@@ -1,5 +1,3 @@
-'use strict';
-
 const util = require('./util.js');
 
 exports.raw = function(value) {
@@ -13,7 +11,7 @@ exports.info = function(value) {
 exports.dump = function(value) {
   if (!value) return;
   const clone = {};
-  for (let key in value) {
+  for (const key in value) {
     if (value[key] && key.toUpperCase().endsWith('TOKEN') && util.isString(value[key])) {
       clone[key] = '*'.repeat(value[key].length);
     } else {

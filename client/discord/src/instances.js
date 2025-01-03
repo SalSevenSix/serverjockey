@@ -1,5 +1,3 @@
-'use strict';
-
 const fetch = require('node-fetch');
 const logger = require('./logger.js');
 const util = require('./util.js');
@@ -28,7 +26,7 @@ exports.Service = class Service {
     const self = this;
     const context = this.#context;
     const baseurl = context.config.SERVER_URL;
-    let instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
+    const instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
@@ -39,7 +37,7 @@ exports.Service = class Service {
       .catch(logger.error);
     this.#instances = instances;
     this.setInstance(util.getFirstKey(instances));
-    for (let instance in instances) {
+    for (const instance in instances) {
       instances[instance].server = servers[instances[instance].module];
       instances[instance].server.startup(context, channels, instance, instances[instance].url);
     }
@@ -86,7 +84,7 @@ exports.Service = class Service {
       return '```\nNo instances found.\n```';
     }
     let result = '```\n';
-    for (let [identity, data] of Object.entries(this.#instances)) {
+    for (const [identity, data] of Object.entries(this.#instances)) {
       if (identity === this.#context.instancesService.currentInstance()) {
         result += '=> ';
       } else {

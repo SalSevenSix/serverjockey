@@ -1,5 +1,3 @@
-'use strict';
-
 const commons = require('../commons.js');
 const helpText = {
   title: 'TEST SERVER COMMANDS',
