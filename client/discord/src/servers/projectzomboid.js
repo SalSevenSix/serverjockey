@@ -35,10 +35,12 @@ const helpText = {
     'player "{name}" spawn-horde {count}      : Spawn zombies',
     'player "{name}" lightning           : Trigger lightning',
     'player "{name}" thunder             : Trigger thunder',
-    'whitelist add-name "{name}" "{pwd}" : Add player by name',
-    'whitelist remove-name "{name}"      : Remove player by name',
     'whitelist add-id {discordid}        : Add player by discord id',
     'whitelist remove-id {discordid}     : Remove player by discord id',
+    'whitelist add-for {discordid} "{name}" : Add player for discord id',
+    'whitelist add-name "{name}" "{pwd}" : Add player by name',
+    'whitelist remove-name "{name}"      : Remove player by name',
+    'whitelist reset-password {discordid} "{name}" : experimental',
     'banlist add {steamid}     : Add player SteamID to banlist',
     'banlist remove {steamid}  : Remove player SteamID from banlist'
   ],
@@ -143,48 +145,6 @@ exports.player = function($) {
   $.httptool.doPost('/players/' + name + '/' + cmd, body);
 };
 
-exports.whitelist = function($) {
-  const data = [...$.data];
-  if (data.length < 2) return util.reactUnknown($.message);
-  const cmd = data.shift();
-  if (data[0].length > 3 && data[0].startsWith('<@') && data[0].endsWith('>')) {
-    data[0] = data[0].slice(2, -1);
-  }
-  if (cmd === 'add-name') {
-    if (data.length < 2) return util.reactUnknown($.message);
-    $.httptool.doPost('/whitelist/add', { player: data[0], password: data[1] });
-  } else if (cmd === 'remove-name') {
-    $.httptool.doPost('/whitelist/remove', { player: data[0] });
-  } else if (cmd === 'add-id') {
-    $.context.client.users.fetch(data[0], true, true)
-      .then(function(user) {
-        const name = user.tag.replaceAll('#', '');
-        const pwd = Math.random().toString(16).substr(2, 8);
-        logger.info('Whitelist add-id: ' + data[0] + ' ' + name);
-        $.httptool.doPost('/whitelist/add', { player: name, password: pwd }, function() {
-          user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
-            .then(function() { util.reactSuccess($.message); })
-            .catch(function(error) { logger.error(error, $.message); });
-        });
-      })
-      .catch(function(error) {
-        logger.error(error, $.message);
-      });
-  } else if (cmd === 'remove-id') {
-    $.context.client.users.fetch(data[0], true, true)
-      .then(function(user) {
-        const name = user.tag.replaceAll('#', '');
-        logger.info('Whitelist remove-id: ' + data[0] + ' ' + name);
-        $.httptool.doPost('/whitelist/remove', { player: name });
-      })
-      .catch(function(error) {
-        logger.error(error, $.message);
-      });
-  } else {
-    util.reactUnknown($.message);
-  }
-};
-
 exports.banlist = function($) {
   const data = [...$.data];
   if (data.length < 2) return util.reactUnknown($.message);
@@ -192,3 +152,77 @@ exports.banlist = function($) {
   const body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);
 };
+
+exports.whitelist = function($) {
+  const data = [...$.data];
+  if (data.length < 2) return util.reactUnknown($.message);
+  const cmd = data.shift();
+  if (cmd === 'add-id') {
+    whitelistAddId($, data[0]);
+  } else if (cmd === 'add-for') {
+    if (data.length < 2) return util.reactUnknown($.message);
+    whitelistAddId($, data[0], data[1]);
+  } else if (cmd === 'add-name') {
+    if (data.length < 2) return util.reactUnknown($.message);
+    whitelistAddName($, data[0], data[1]);
+  } else if (cmd === 'remove-id') {
+    whitelistRemoveId($, data[0]);
+  } else if (cmd === 'remove-name') {
+    whitelistRemoveName($, data[0]);
+  } else if (cmd === 'reset-password') {
+    if (data.length < 2) {
+      whitelistRemoveId($, data[0], function() {
+        util.sleep(500).then(function() { whitelistAddId($, data[0]); });
+      });
+    } else {
+      whitelistRemoveName($, data[1], function() {
+        util.sleep(500).then(function() { whitelistAddId($, data[0], data[1]); });
+      });
+    }
+  } else {
+    util.reactUnknown($.message);
+  }
+};
+
+function whitelistRemoveName($, player, dataHandler = null) {
+  $.httptool.doPost('/whitelist/remove', { player: player }, dataHandler);
+}
+
+function whitelistAddName($, player, password, dataHandler = null) {
+  $.httptool.doPost('/whitelist/add', { player: player, password: password }, dataHandler);
+}
+
+function whitelistRemoveId($, snowflake, dataHandler = null) {
+  snowflake = cleanSnowflake(snowflake);
+  $.context.client.users.fetch(snowflake, true, true)
+    .then(function(user) {
+      const player = user.tag.replaceAll('#', '');
+      whitelistRemoveName($, player, dataHandler);
+    })
+    .catch(function(error) {
+      logger.error(error, $.message);
+    });
+}
+
+function whitelistAddId($, snowflake, player = null) {
+  snowflake = cleanSnowflake(snowflake);
+  $.context.client.users.fetch(snowflake, true, true)
+    .then(function(user) {
+      const password = Math.random().toString(16).substr(2, 8);
+      if (!player) { player = user.tag.replaceAll('#', ''); }
+      whitelistAddName($, player, password, function() {
+        user.send($.context.config.WHITELIST_DM.replace('${user}', player).replace('${pass}', password))
+          .then(function() { util.reactSuccess($.message); })
+          .catch(function(error) { logger.error(error, $.message); });
+      });
+    })
+    .catch(function(error) {
+      logger.error(error, $.message);
+    });
+}
+
+function cleanSnowflake(snowflake) {
+  if (!snowflake || snowflake.length < 4) return snowflake;
+  if (snowflake.startsWith('<@') && snowflake.endsWith('>')) return snowflake.slice(2, -1);
+  return snowflake;
+}
