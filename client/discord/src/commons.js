@@ -48,27 +48,24 @@ exports.startAllEventLogging = function(context, channels, instance, url) {
 };
 
 exports.sendHelp = function($, helpText) {
-  const channel = $.message.channel;
   if ($.data.length === 0) {
     const cmd = $.context.config.CMD_PREFIX;
     let header = '```\n' + helpText.title + '\n' + cmd;
     let index = 1;
     while (util.hasProp(helpText, 'help' + index)) {
-      channel.send(header + helpText['help' + index].join('\n' + cmd) + '\n```');
+      $.message.channel.send(header + helpText['help' + index].join('\n' + cmd) + '\n```');
       if (index === 1) { header = '```\n' + cmd; }
       index += 1;
     }
     return;
   }
   const query = $.data.join('').replaceAll('-', '');
-  if (!util.hasProp(helpText, query)) {
-    channel.send('No more help available.');
-    return;
-  }
-  if (util.isString(helpText[query])) {
+  if (query === 'title' || !util.hasProp(helpText, query)) {
+    $.message.channel.send('No more help available.');
+  } else if (util.isString(helpText[query])) {
     $.httptool.doGet(helpText[query], function(body) { return '```\n' + body + '\n```'; });
   } else {
-    channel.send(helpText[query].join('\n'));
+    $.message.channel.send(helpText[query].join('\n'));
   }
 };
 
@@ -182,8 +179,7 @@ exports.deployment = function($) {
   let body = null;
   if (cmd === 'backup-runtime' || cmd === 'backup-world') {
     if (data.length > 0) { body = { prunehours: data[0] }; }
-  }
-  if (cmd === 'install-runtime') {
+  } else if (cmd === 'install-runtime') {
     body = { wipe: false, validate: true };
     if (data.length > 0) { body.beta = data[0]; }
   }
@@ -209,7 +205,8 @@ exports.say = function($) {
   $.httptool.doPost(
     '/console/say', { player: name, text: data },
     function() { $.message.react('💬'); },
-    $.context.config.PLAYER_ROLE);
+    $.context.config.PLAYER_ROLE
+  );
 };
 
 exports.players = function($) {
@@ -229,7 +226,7 @@ exports.players = function($) {
         if (body[i].steamid == null) {
           line = body[i].name;
         } else {
-          line = (body[i].steamid === '') ? nosteamid : body[i].steamid + ' ';
+          line = body[i].steamid === '' ? nosteamid : body[i].steamid + ' ';
           line += body[i].name;
         }
         if (util.hasProp(body[i], 'uptime')) {

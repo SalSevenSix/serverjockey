@@ -1,3 +1,12 @@
+require('events').EventEmitter.defaultMaxListeners = 24;
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const util = require('./util.js');
+const logger = require('./logger.js');
+const http = require('./http.js');
+const system = require('./system.js');
+const instances = require('./instances.js');
+const context = { running: false };
+
 function initialise() {
   const metarg = process.argv.length > 2 ? process.argv[2] : null;
   if (metarg == null || metarg === '-h' || metarg === '--help') {
@@ -109,23 +118,16 @@ function shutdown() {
 
 
 // MAIN
-require('events').EventEmitter.defaultMaxListeners = 20;
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
-const logger = require('./logger.js');
-const util = require('./util.js');
-const http = require('./http.js');
-const system = require('./system.js');
-const instances = require('./instances.js');
-
-const context = { running: false };
 context.config = initialise();
 context.controller = new AbortController();
 context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);
 context.client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
-  partials: [Partials.Channel] });
+  intents: [
+    GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
+  partials: [Partials.Channel]
+});
 
 context.client.once('ready', startup);
 context.client.on('messageCreate', handleMessage);

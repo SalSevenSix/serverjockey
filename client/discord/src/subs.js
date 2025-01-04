@@ -46,8 +46,8 @@ exports.Helper = class Helper {
   }
 
   async poll(url, dataHandler) {
-    const signal = this.#context.signal;
-    let polling = (url != null);
+    const { signal } = this.#context;
+    let polling = url != null;
     while (this.#context.running && polling) {
       polling = await fetch(url, { signal })
         .then(function(response) {
@@ -69,5 +69,4 @@ exports.Helper = class Helper {
         });
     }
   }
-
 };

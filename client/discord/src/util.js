@@ -1,3 +1,8 @@
+function reactTo(message, emoji, retval = null) {
+  if (message) { message.react(emoji); }
+  return retval;
+}
+
 exports.sleep = function(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
 };
@@ -7,7 +12,7 @@ exports.hasProp = function(obj, prop) {
 };
 
 exports.isString = function(value) {
-  return (value != null && typeof value === 'string');
+  return value != null && typeof value === 'string';
 };
 
 exports.getFirstKey = function(value) {
@@ -63,7 +68,7 @@ exports.humanFileSize = function(bytes, dp = 1, si = false) {
   const units = si
     ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-  const r = 10**dp;
+  const r = 10 ** dp;
   let u = -1;
   do {
     bytes /= thresh;
@@ -139,8 +144,3 @@ exports.reactError = function(message) {
 exports.reactSuccess = function(message) {
   return reactTo(message, '✅');
 };
-
-function reactTo(message, emoji, retval = null) {
-  if (message) { message.react(emoji); }
-  return retval;
-}

@@ -6,7 +6,9 @@ const fetch = require('node-fetch');
 
 exports.MessageHttpTool = class MessageHttpTool {
   #context;
+
   #message;
+
   #baseurl;
 
   constructor(context, message, baseurl) {
@@ -95,8 +97,7 @@ exports.MessageHttpTool = class MessageHttpTool {
         fstream.write(data);
         fstream.write('\n');
         return true;
-      })
-      .then(function() {
+      }).then(function() {
         fstream.end();
         util.rmReacts(message, util.reactSuccess, logger.error);
         message.channel.send({ files: [{ attachment: fpath, name: fname }] })
@@ -104,5 +105,4 @@ exports.MessageHttpTool = class MessageHttpTool {
       });
     });
   }
-
 };

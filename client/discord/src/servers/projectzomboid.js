@@ -132,10 +132,13 @@ exports.player = function($) {
     } else if (cmd === 'spawn-horde') {
       body = { count: data[0] };
     } else if (cmd === 'spawn-vehicle') {
+      if (data.length < 2) return util.reactUnknown($.message);
       body = { module: data[0], item: data[1] };
     } else if (cmd === 'give-xp') {
+      if (data.length < 2) return util.reactUnknown($.message);
       body = { skill: data[0], xp: data[1] };
     } else if (cmd === 'give-item') {
+      if (data.length < 2) return util.reactUnknown($.message);
       body = { module: data[0], item: data[1] };
       if (data.length > 2) { body.count = data[2]; }
     }
@@ -151,36 +154,11 @@ exports.banlist = function($) {
   $.httptool.doPost('/banlist/' + cmd, body);
 };
 
-exports.whitelist = function($) {
-  const data = [...$.data];
-  if (data.length < 2) return util.reactUnknown($.message);
-  const cmd = data.shift();
-  if (cmd === 'add-id') {
-    whitelistAddId($, data[0]);
-  } else if (cmd === 'add-for') {
-    if (data.length < 2) return util.reactUnknown($.message);
-    whitelistAddId($, data[0], data[1]);
-  } else if (cmd === 'add-name') {
-    if (data.length < 2) return util.reactUnknown($.message);
-    whitelistAddName($, data[0], data[1]);
-  } else if (cmd === 'remove-id') {
-    whitelistRemoveId($, data[0]);
-  } else if (cmd === 'remove-name') {
-    whitelistRemoveName($, data[0]);
-  } else if (cmd === 'reset-password') {
-    if (data.length < 2) {
-      whitelistRemoveId($, data[0], function() {
-        util.sleep(500).then(function() { whitelistAddId($, data[0]); });
-      });
-    } else {
-      whitelistRemoveName($, data[1], function() {
-        util.sleep(500).then(function() { whitelistAddId($, data[0], data[1]); });
-      });
-    }
-  } else {
-    util.reactUnknown($.message);
-  }
-};
+function cleanSnowflake(snowflake) {
+  if (!snowflake || snowflake.length < 4) return snowflake;
+  if (snowflake.startsWith('<@') && snowflake.endsWith('>')) return snowflake.slice(2, -1);
+  return snowflake;
+}
 
 function whitelistRemoveName($, player, dataHandler = null) {
   $.httptool.doPost('/whitelist/remove', { player: player }, dataHandler);
@@ -217,8 +195,33 @@ function whitelistAddId($, snowflake, player = null) {
     });
 }
 
-function cleanSnowflake(snowflake) {
-  if (!snowflake || snowflake.length < 4) return snowflake;
-  if (snowflake.startsWith('<@') && snowflake.endsWith('>')) return snowflake.slice(2, -1);
-  return snowflake;
-}
+exports.whitelist = function($) {
+  const data = [...$.data];
+  if (data.length < 2) return util.reactUnknown($.message);
+  const cmd = data.shift();
+  if (cmd === 'add-id') {
+    whitelistAddId($, data[0]);
+  } else if (cmd === 'add-for') {
+    if (data.length < 2) return util.reactUnknown($.message);
+    whitelistAddId($, data[0], data[1]);
+  } else if (cmd === 'add-name') {
+    if (data.length < 2) return util.reactUnknown($.message);
+    whitelistAddName($, data[0], data[1]);
+  } else if (cmd === 'remove-id') {
+    whitelistRemoveId($, data[0]);
+  } else if (cmd === 'remove-name') {
+    whitelistRemoveName($, data[0]);
+  } else if (cmd === 'reset-password') {
+    if (data.length < 2) {
+      whitelistRemoveId($, data[0], function() {
+        util.sleep(500).then(function() { whitelistAddId($, data[0]); });
+      });
+    } else {
+      whitelistRemoveName($, data[1], function() {
+        util.sleep(500).then(function() { whitelistAddId($, data[0], data[1]); });
+      });
+    }
+  } else {
+    util.reactUnknown($.message);
+  }
+};

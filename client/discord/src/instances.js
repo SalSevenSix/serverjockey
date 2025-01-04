@@ -15,7 +15,9 @@ const servers = {
 
 exports.Service = class Service {
   #context;
+
   #current = null;
+
   #instances = {};
 
   constructor(context) {
@@ -94,5 +96,4 @@ exports.Service = class Service {
     }
     return result + '```';
   }
-
 };
