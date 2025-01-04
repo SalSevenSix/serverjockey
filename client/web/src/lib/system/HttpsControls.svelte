@@ -23,7 +23,7 @@
           httpsInfo.enabled = !httpsInfo.enabled;
           notifyInfo('Successfully ' + change + 'd HTTPS.');
         })
-        .catch(function(error) { notifyError('Failed to ' + change + ' HTTPS.'); })
+        .catch(function() { notifyError('Failed to ' + change + ' HTTPS.'); })
         .finally(function() { processing = false; });
     });
   }
@@ -35,7 +35,7 @@
         return response.json();
       })
       .then(function(json) { httpsInfo = json; })
-      .catch(function(error) { notifyError('Failed to load HTTPS info.'); });
+      .catch(function() { notifyError('Failed to load HTTPS info.'); });
   });
 </script>
 

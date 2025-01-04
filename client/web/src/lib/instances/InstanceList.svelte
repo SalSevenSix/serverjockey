@@ -22,7 +22,7 @@
       deleting = true;
       fetch(surl('/instances/' + selected.identity + '/server/delete'), newPostRequest())
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(function(error) { notifyError('Failed to delete ' + selected.identity); });
+        .catch(function() { notifyError('Failed to delete ' + selected.identity); });
     });
   }
 
@@ -55,7 +55,7 @@
         });
         subs.start('/instances/subscribe', handleInstanceEvent);
       })
-      .catch(function(error) { notifyError('Failed to load instances.'); })
+      .catch(function() { notifyError('Failed to load instances.'); })
       .finally(function() { loading = false; });
   });
 

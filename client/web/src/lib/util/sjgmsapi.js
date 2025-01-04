@@ -73,7 +73,7 @@ export class SubscriptionHelper {
         if (json === false) return false;
         return json.url;
       })
-      .catch(function(error) {
+      .catch(function() {
         return notifyError('Communication error. Check connection and server. Refresh page.');
       });
   }
@@ -99,7 +99,7 @@ export class SubscriptionHelper {
           failcount = 5;
           return true;
         })
-        .catch(function(error) {
+        .catch(function() {
           return null;
         });
       if (this.#running && polling == null && failcount > 0) {

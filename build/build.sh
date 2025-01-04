@@ -96,10 +96,10 @@ echo "Running tests and linting"
 python3 -m unittest discover -t . -s test/unit -p "*.py" || exit 1
 python3 -m unittest discover -t . -s test/system -p "*.py" -f || exit 1
 python3 -m pipenv sync -d || exit 1
-python3 -m pipenv run python3 -m pylint core servers test  # no exit 1 until cleaned
+python3 -m pipenv run python3 -m pylint core servers test --rcfile pylint.rc || exit 1
 
 echo "Removing ServerJockey junk"
-rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1
+rm -rf .venv venv build client test *.sh *.text *.rc .git .gitignore .idea > /dev/null 2>&1
 find . -name "__pycache__" -type d | while read file; do
   rm -rf $file > /dev/null 2>&1
 done

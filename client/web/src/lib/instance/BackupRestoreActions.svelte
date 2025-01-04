@@ -34,7 +34,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyText = 'Backup completed. Please check log output for details.';
       })
-      .catch(function(error) {
+      .catch(function() {
         cannotBackup = false;
         notifyError('Failed to create Backup.');
       });
@@ -50,7 +50,7 @@
           if (!response.ok) throw new Error('Status: ' + response.status);
           callbacks.started('Restored backup. Please check console log output.');
         })
-        .catch(function(error) {
+        .catch(function() {
           cannotBackup = callbacks.error('Failed to restore ' + path);
         });
     });

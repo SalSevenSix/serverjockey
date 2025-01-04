@@ -43,7 +43,7 @@
       .then(function(text) {
         args[index] = anchorme({ input: text, options: { attributes: { target: '_blank' }}});
       })
-      .catch(function(error) {
+      .catch(function() {
         args[index] = ':(';
         notifyError('Failed to load display text for ' + name);
       });
@@ -81,7 +81,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(capitalizeKebabCase(command) + ' command sent.');
       })
-      .catch(function(error) { notifyError('Failed to send command to server.'); })
+      .catch(function() { notifyError('Failed to send command to server.'); })
       .finally(function() { sending = false; });
   }
 </script>

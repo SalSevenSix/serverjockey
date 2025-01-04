@@ -16,7 +16,7 @@
           if (!response.ok) throw new Error('Status: ' + response.status);
           callbacks.started('Autosave restore complete. Please check console log output.');
         })
-        .catch(function(error) {
+        .catch(function() {
           callbacks.error('Failed to restore ' + path);
         });
     });

@@ -25,7 +25,7 @@
     }
   }
 
-  $: selectedOptionUpdated(selectedOption); function selectedOptionUpdated(dummy) {
+  $: selectedOptionUpdated(selectedOption); function selectedOptionUpdated() {
     if (!selectedOption || currentOption === selectedOption) return;
     const originalOption = currentOption;
     currentOption = selectedOption;  // lock it in now to block another trigger
@@ -35,7 +35,7 @@
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
       })
-      .catch(function(error) {
+      .catch(function() {
         currentOption = originalOption;  // safe rollback
         selectedOption = originalOption;
         notifyError('Failed to update Auto mode.');

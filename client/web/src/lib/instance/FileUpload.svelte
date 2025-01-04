@@ -11,7 +11,7 @@
   export let idPrefix;
   export let rootPath;
   export let filenameHelp = 'Please choose a valid filename.';
-  export let validateFilename = function(filename) { return true; };
+  export let validateFilename = function() { return true; };
   export let onCompleted = function() {};
 
   let uploading = false;
@@ -33,7 +33,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(filename + ' uploaded successfully.');
       })
-      .catch(function(error) {
+      .catch(function() {
         notifyError('Failed to upload ' + filename);
       })
       .finally(function() {

@@ -12,8 +12,6 @@
   let identities = [];
   let identity = null;
 
-  $: disabled = loading || !instances;
-
   $: updateInstance(identity); function updateInstance(selected) {
     if (!selected) return;
     $instance = { identity: selected, module: instances[selected].module, url: instances[selected].url };

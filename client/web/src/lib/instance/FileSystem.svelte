@@ -76,7 +76,7 @@
         paths = json.slice(0, hardLimit);
         pwdUrl = url;
       })
-      .catch(function(error) {
+      .catch(function() {
         if (url === rootUrl()) {
           loadingError = true;
           pwdUrl = rootUrl();
@@ -137,7 +137,7 @@
   function deleteUrl(url) {
     fetch(url, newPostRequest())
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { notifyError('Failed to delete ' + urlToPath(url)); })
+      .catch(function() { notifyError('Failed to delete ' + urlToPath(url)); })
       .finally(reload);
   }
 

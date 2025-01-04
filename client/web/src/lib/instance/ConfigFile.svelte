@@ -42,7 +42,7 @@
         originalText = text;
         configText = text;
       })
-      .catch(function(error) { notifyError('Failed to load ' + name); })
+      .catch(function() { notifyError('Failed to load ' + name); })
       .finally(function() { processing = false; });
   }
 
@@ -67,7 +67,7 @@
         originalText = configText;
         notifyInfo(name + ' saved.');
       })
-      .catch(function(error) { notifyError('Failed to update ' + name); })
+      .catch(function() { notifyError('Failed to update ' + name); })
       .finally(function() { processing = false; });
   }
 

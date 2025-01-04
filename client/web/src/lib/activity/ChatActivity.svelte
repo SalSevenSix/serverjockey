@@ -1,8 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
   import { shortISODateTimeString, humanDuration, urlSafeB64encode, ObjectUrls } from '$lib/util/util';
-  import { newGetRequest } from '$lib/util/sjgmsapi';
-  import { notifyError } from '$lib/util/notifications';
   import { queryFetch } from '$lib/activity/common';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 

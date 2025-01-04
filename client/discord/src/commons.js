@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 
 exports.startServerEventLogging = function(context, channels, instance, url) {
   if (!channels.server) return;
-  let lastState = 'READY';
+  let state = 'READY';
   let restartRequired = false;
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // Ignore no state
@@ -16,10 +16,10 @@ exports.startServerEventLogging = function(context, channels, instance, url) {
       restartRequired = true;
       return true;
     }
-    if (json.state === lastState) return true;  // Ignore duplicates
-    if (json.state === 'STARTED') { restartRequired = false; }
-    lastState = json.state;
-    channels.server.send('`' + instance + '` 📡 ' + json.state);
+    if (state === json.state) return true;  // Ignore no state change
+    state = json.state;
+    if (state === 'STARTED') { restartRequired = false; }
+    channels.server.send('`' + instance + '` 📡 ' + state);
     return true;
   });
 };

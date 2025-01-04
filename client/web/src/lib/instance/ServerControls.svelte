@@ -22,7 +22,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         if (successMessage) { notifyInfo(successMessage); }
       })
-      .catch(function(error) { notifyError('Failed to send server command.'); });
+      .catch(function() { notifyError('Failed to send server command.'); });
   }
 
   let restartOptions = null;

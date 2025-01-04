@@ -58,7 +58,7 @@
         players = json;
         subs.start(instance.url('/players/subscribe'), handlePlayerEvent);
       })
-      .catch(function(error) {
+      .catch(function() {
         notifyError('Failed to load Player list.');
       })
       .finally(function() {

@@ -29,7 +29,7 @@
       .then(function(blob) {
         objectUrls.openBlob(blob);
       })
-      .catch(function(error) {
+      .catch(function() {
         notifyWarning('Meta not found. No runtime installed.');
       });
   }
@@ -42,7 +42,7 @@
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo('Delete runtime completed.');
         })
-        .catch(function(error) { notifyError('Delete Runtime failed.'); })
+        .catch(function() { notifyError('Delete Runtime failed.'); })
         .finally(function() { cannotProcess = false; });
     });
   }
@@ -92,7 +92,7 @@
           cannotProcess = false;
         }
       })
-      .catch(function(error) {
+      .catch(function() {
         notifyError('Failed to Install Runtime.');
         cannotProcess = false;
       });

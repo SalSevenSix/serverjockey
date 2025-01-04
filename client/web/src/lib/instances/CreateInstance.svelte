@@ -24,7 +24,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         serverForm.identity = null;
       })
-      .catch(function(error) { notifyError('Failed to create new instance.'); })
+      .catch(function() { notifyError('Failed to create new instance.'); })
       .finally(function() { processing = false; });
   }
 
@@ -37,7 +37,7 @@
       .then(function(json) {
         modules = json;
       })
-      .catch(function(error) { notifyError('Failed to load module list.'); })
+      .catch(function() { notifyError('Failed to load module list.'); })
       .finally(function() { processing = false; });
   });
 </script>

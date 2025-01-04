@@ -15,7 +15,7 @@
           if (!response.ok) throw new Error('Status: ' + response.status);
           notifyInfo(actionTitle + ' completed.');
         })
-        .catch(function(error) { notifyError(actionTitle + ' failed.'); })
+        .catch(function() { notifyError(actionTitle + ' failed.'); })
         .finally(function() { processing = false; });
     });
   }

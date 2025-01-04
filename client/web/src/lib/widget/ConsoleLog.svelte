@@ -78,7 +78,7 @@
           return true;
         });
       })
-      .catch(function(error) { notifyError('Failed to load Console Log.'); })
+      .catch(function() { notifyError('Failed to load Console Log.'); })
       .finally(function() { loading = false; });
   });
 

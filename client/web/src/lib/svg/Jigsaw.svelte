@@ -39,7 +39,7 @@
     <clipPath id="clipPath680">
       <path
           id="path682"
-          d="m3752.3 753.38h-13.46v12.73l13.46-0.007v-12.72"/>
+          d="m3752.3 753.38h-13.46v12.73l13.46-0.007v-12.72" />
     </clipPath>
     <clipPath id="clipPath204">
       <path

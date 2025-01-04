@@ -9,5 +9,5 @@ export async function queryFetch(url, errorMessage) {
       return response.json();
     })
     .then(function(json) { return json; })
-    .catch(function(error) { notifyError(errorMessage); });
+    .catch(function() { notifyError(errorMessage); });
 }

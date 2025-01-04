@@ -66,7 +66,7 @@
         })
         .finally(function() { stage = 0; });
       })
-      .catch(function(error) {
+      .catch(function() {
         notifyError('Failed to login to Steam.');
         stage = 0;
       });
@@ -85,7 +85,7 @@
     request.body = JSON.stringify({ value: steamPassword });
     fetch(instance.url('/steamcmd/input'), request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { notifyError('Failed to send password.'); });
+      .catch(function() { notifyError('Failed to send password.'); });
   }
 
   function kpEnterCode(event) {
@@ -101,7 +101,7 @@
     request.body = JSON.stringify({ value: steamCode });
     fetch(instance.url('/steamcmd/input'), request)
       .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-      .catch(function(error) { notifyError('Failed to send code.'); });
+      .catch(function() { notifyError('Failed to send code.'); });
   }
 
   onDestroy(function() {

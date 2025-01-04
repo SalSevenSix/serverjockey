@@ -85,7 +85,7 @@
           return true;
         });
       })
-      .catch(function(error) {
+      .catch(function() {
         notifyError('Failed to load Server Status.');
       });
   });

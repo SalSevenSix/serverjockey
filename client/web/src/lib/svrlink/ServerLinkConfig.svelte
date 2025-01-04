@@ -27,7 +27,7 @@
         loadedData = JSON.parse(JSON.stringify(formData));
         notifyInfo('ServerLink Config saved.');
       })
-      .catch(function(error) { notifyError('Failed to save ServerLink Config.'); })
+      .catch(function() { notifyError('Failed to save ServerLink Config.'); })
       .finally(function() { processing = false; });
   }
 
@@ -41,7 +41,7 @@
         loadedData = json;
         formData = JSON.parse(JSON.stringify(json));
       })
-      .catch(function(error) { notifyError('Failed to load ServerLink Config.'); })
+      .catch(function() { notifyError('Failed to load ServerLink Config.'); })
       .finally(function() { processing = false; });
   });
 </script>

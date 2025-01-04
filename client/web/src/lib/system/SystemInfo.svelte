@@ -28,7 +28,7 @@
           info = json;
           errordown = 0;
         })
-        .catch(function(error) {
+        .catch(function() {
           if (!running) return;
           if (errordown === 0) {
             notifyError('Failed to load System Info.');
