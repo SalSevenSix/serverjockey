@@ -85,16 +85,18 @@ python3 -m pipenv sync || exit 1
 for VENV_LIBDIR in lib lib64; do
   LIBDIR="$SERVERJOCKEY_DIR/.venv/$VENV_LIBDIR/$PYTHON_LIBDIR/site-packages"
   if [ -d "$LIBDIR" ]; then
-    [ -d "$LIBDIR/selenium" ] && exit 1
+    [ -d "$LIBDIR/selenium" ] && exit 1  # nope out if dev dependency included
     rm -rf $LIBDIR/pip* $LIBDIR/test* $LIBDIR/greenlet* $LIBDIR/*virtualenv* > /dev/null 2>&1
     echo " merging $LIBDIR"
     cp -r $LIBDIR/* "$SERVERJOCKEY_DIR" || exit 1
   fi
 done
 
-echo "Running tests"
+echo "Running tests and linting"
 python3 -m unittest discover -t . -s test/unit -p "*.py" || exit 1
 python3 -m unittest discover -t . -s test/system -p "*.py" -f || exit 1
+python3 -m pipenv sync -d || exit 1
+python3 -m pipenv run python3 -m pylint core servers test  # no exit 1 until cleaned
 
 echo "Removing ServerJockey junk"
 rm -rf .venv venv build client test *.sh *.text .git .gitignore .idea > /dev/null 2>&1

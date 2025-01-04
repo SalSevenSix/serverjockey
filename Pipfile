@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 selenium = "*"                # https://pypi.org/project/selenium/
+pylint = "*"                  # https://pypi.org/project/pylint/
 
 [packages]
 async-timeout = "4.0.3"       # backward compatability for python < 3.11
