@@ -12,7 +12,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
-    <figure class="image max-300"><Jigsaw /></figure>
+    <figure class="image max-200"><Jigsaw /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Browser Extension</h2>

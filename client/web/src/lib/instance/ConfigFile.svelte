@@ -101,3 +101,10 @@
     </div>
   </div>
 </div>
+
+
+<style>
+  .button {
+    min-width: 7em;
+  }
+</style>

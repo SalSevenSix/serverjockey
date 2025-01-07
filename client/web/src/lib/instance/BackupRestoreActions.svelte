@@ -82,3 +82,10 @@
           disabled={cannotBackup} on:click={createBackup}>
     <i class="fa fa-file-archive fa-lg"></i>&nbsp;&nbsp;Backup World</button>
 </div>
+
+
+<style>
+  .button {
+    min-width: 12em;
+  }
+</style>

@@ -10,7 +10,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0 pb-0">
-    <figure class="image mt-3 max-300"><VirtualBoxIcon /></figure>
+    <figure class="image mt-3 max-200"><VirtualBoxIcon /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2 notranslate">VirtualBox</h2>

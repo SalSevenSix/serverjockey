@@ -11,7 +11,7 @@
   const eventDown = getContext('eventDown');
   const eventStarted = getContext('eventStarted');
   const eventEndMaint = getContext('eventEndMaint');
-  const [softLimit, hardLimit] = [50, 300];
+  const [softLimit, hardLimit] = [30, 300];
 
   export let rootPath;
   export let allowDelete = 0;  // 0=Never 1=!RunOrMaint 2=!Maint 3=Always

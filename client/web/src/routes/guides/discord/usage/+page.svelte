@@ -9,7 +9,7 @@
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0">
-    <figure class="image ml-5 mr-5 mt-3 max-300"><Clyde /></figure>
+    <figure class="image mt-2 max-200"><Clyde /></figure>
   </div>
   <div class="column is-three-quarters content">
     <h2 class="title is-3 mt-2">Discord Bot Usage</h2>
