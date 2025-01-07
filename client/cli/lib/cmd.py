@@ -32,9 +32,9 @@ class CommandProcessor:
             if hasattr(CommandProcessor, method_name):
                 method = getattr(CommandProcessor, method_name)
                 if callable(method):
-                    entry = {'name': command, 'method': method}
+                    entry = dict(name=command, method=method)
                     if len(inspect.signature(method).parameters.keys()) > 1:
-                        entry.update({'argument': argument})
+                        entry['argument'] = argument
                     self._commands.append(entry)
             else:
                 raise Exception(f'Command {command} not found')
@@ -118,8 +118,8 @@ class CommandProcessor:
             logging.error('Module not found. No more commands will be processed.')
             return False
         logging.info('Creating instance: ' + instance + ' (' + module + ')')
-        self._connection.post('/instances', {'module': module, 'identity': instance})
-        self._instances[instance] = {'module': module}
+        self._connection.post('/instances', dict(module=module, identity=instance))
+        self._instances[instance] = dict(module=module)
         self._use(instance)
         return True
 
@@ -130,9 +130,9 @@ class CommandProcessor:
         return _dump_to_log(self._connection.get(self._instance_path('/deployment/world-meta')))
 
     def _install_runtime(self, argument: str | None) -> bool:
-        body = {'wipe': False, 'validate': True}
+        body = dict(wipe=False, validate=True)
         if argument:
-            body.update({'beta': argument})
+            body['beta'] = argument
         result = self._connection.post(self._instance_path('/deployment/install-runtime'), body)
         if result:
             self._connection.drain(result)
@@ -267,7 +267,7 @@ class CommandProcessor:
         return _dump_to_log(self._connection.get(self._instance_path('/server')))
 
     def _auto(self, argument: str | None) -> bool:
-        self._connection.post(self._instance_path(), {'auto': util.to_int(argument, -1)})
+        self._connection.post(self._instance_path(), dict(auto=util.to_int(argument, -1)))
         return True
 
     def _players(self) -> bool:
@@ -325,27 +325,27 @@ class CommandProcessor:
         return _dump_to_log(self._connection.get(self._instance_path('/console/help')))
 
     def _console_send(self, argument: str) -> bool:
-        result = self._connection.post(self._instance_path('/console/send'), {'line': str(argument)})
+        result = self._connection.post(self._instance_path('/console/send'), dict(line=str(argument)))
         if not result:
             return True
         result = util.repr_dict(result) if isinstance(result, dict) else str(result)
         return _dump_to_log(result.strip())
 
     def _world_broadcast(self, argument: str) -> bool:
-        self._connection.post(self._instance_path('/world/broadcast'), {'message': str(argument)})
+        self._connection.post(self._instance_path('/world/broadcast'), dict(message=str(argument)))
         return True
 
     def _backup_world(self, argument: str | None) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-world'),
-            {'prunehours': util.to_int(argument, 0)})
+            dict(prunehours=util.to_int(argument, 0)))
         self._connection.drain(result)
         return True
 
     def _backup_runtime(self, argument: str | None) -> bool:
         result = self._connection.post(
             self._instance_path('/deployment/backup-runtime'),
-            {'prunehours': util.to_int(argument, 0)})
+            dict(prunehours=util.to_int(argument, 0)))
         self._connection.drain(result)
         return True
 
@@ -359,7 +359,7 @@ class CommandProcessor:
         if enabled is None:
             logging.error('Invalid argument, use https:true or https:false')
             return False
-        self._connection.post('/ssl', {'enabled': enabled})
+        self._connection.post('/ssl', dict(enabled=enabled))
         return True
 
     def _shutdown(self) -> bool:

@@ -29,7 +29,7 @@ def update_pork(provider, apikey, secretapikey, domain):
         raise Exception('apikey, secretapikey and domain required')
     ipv4, ipv6 = _get_public_ips()
     host, path = 'api.porkbun.com', '/api/json/v3/dns/retrieve/' + domain
-    credentials = {'secretapikey': secretapikey, 'apikey': apikey}
+    credentials = dict(secretapikey=secretapikey, apikey=apikey)
     records = json.loads(_http_request(host, path, credentials, timeout=12.0))
     assert records.get('status') == 'SUCCESS'
     for record in records['records']:

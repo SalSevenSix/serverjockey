@@ -47,9 +47,9 @@ class TaskProcessor:
             if hasattr(TaskProcessor, method_name):
                 method = getattr(TaskProcessor, method_name)
                 if callable(method):
-                    entry = {'name': task, 'method': method}
+                    entry = dict(name=task, method=method)
                     if len(inspect.signature(method).parameters.keys()) > 1:
-                        entry.update({'argument': argument})
+                        entry['argument'] = argument
                     self._tasks.append(entry)
             else:
                 raise Exception(f'Task {task} not found')
