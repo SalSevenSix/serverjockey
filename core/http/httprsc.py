@@ -21,7 +21,7 @@ class ResourceBuilder:
         return self
 
     def psh(self, signature: str,
-            handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:
+            handler: typing.Optional[httpabc.AbcHandler] = None, ikeys: str = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
         resource = self._current.child(name)
         if resource is None:
@@ -39,14 +39,14 @@ class ResourceBuilder:
         return self
 
     def put(self, signature: str,
-            handler: typing.Optional[httpabc.ABC_HANDLER] = None, ikeys: str = None) -> ResourceBuilder:
+            handler: typing.Optional[httpabc.AbcHandler] = None, ikeys: str = None) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
         resource = WebResource(name, kind, self._wrap(ikeys, handler))
         self._current.append(resource)
         ResourceBuilder._log_binding(resource, handler)
         return self
 
-    def _wrap(self, ikeys: str, handler: typing.Optional[httpabc.ABC_HANDLER]) -> typing.Optional[httpabc.ABC_HANDLER]:
+    def _wrap(self, ikeys: str, handler: typing.Optional[httpabc.AbcHandler]) -> typing.Optional[httpabc.AbcHandler]:
         if not handler or not ikeys:
             return handler
         for key in ikeys[::-1]:
@@ -69,7 +69,7 @@ class ResourceBuilder:
         return signature, httpabc.ResourceKind.PATH
 
     @staticmethod
-    def _log_binding(resource: httpabc.Resource, handler: typing.Optional[httpabc.ABC_HANDLER]):
+    def _log_binding(resource: httpabc.Resource, handler: typing.Optional[httpabc.AbcHandler]):
         if handler is None:
             return
         allows = ''
@@ -78,14 +78,14 @@ class ResourceBuilder:
         if resource.allows(httpabc.Method.POST):
             allows += '|' if allows else ''
             allows += httpabc.Method.POST.value
-        logging.debug('trs> BIND {} {} => {}'.format(resource.path(), allows, objconv.obj_to_str(handler)))
+        logging.debug('trs> BIND %s %s => %s', resource.path(), allows, objconv.obj_to_str(handler))
 
 
 class WebResource(httpabc.Resource):
 
     def __init__(self, name: str = '',
                  kind: httpabc.ResourceKind = httpabc.ResourceKind.PATH,
-                 handler: typing.Optional[httpabc.ABC_HANDLER] = None):
+                 handler: typing.Optional[httpabc.AbcHandler] = None):
         self._name, self._kind, self._handler = name, kind, handler
         self._parent: typing.Optional[httpabc.Resource] = None
         self._children: typing.List[httpabc.Resource] = []
@@ -137,7 +137,7 @@ class WebResource(httpabc.Resource):
     def allows(self, method: httpabc.Method) -> bool:
         return httpabc.AllowMethod.call(method, self._handler)
 
-    async def handle_get(self, url: URL, secure: bool, subpath: str = '') -> httpabc.ABC_RESPONSE:
+    async def handle_get(self, url: URL, secure: bool, subpath: str = '') -> httpabc.AbcResponse:
         data = PathProcessor.extract_args_query(url)
         data.update(PathProcessor(self).extract_args_url(url))
         data['baseurl'] = util.build_url(url.scheme, url.host, url.port, subpath)
@@ -145,8 +145,8 @@ class WebResource(httpabc.Resource):
         return await httpabc.GetHandler.call(self._handler, self, data)
 
     async def handle_post(self, url: URL,
-                          body: typing.Union[str, httpabc.ABC_DATA_GET, io.Readable],
-                          subpath: str = '') -> httpabc.ABC_RESPONSE:
+                          body: typing.Union[str, httpabc.AbcDataGet, io.Readable],
+                          subpath: str = '') -> httpabc.AbcResponse:
         data = PathProcessor(self).extract_args_url(url)
         if isinstance(body, dict):
             data.update(body)
@@ -198,16 +198,16 @@ class PathProcessor:
         return '/'.join(path)
 
     @staticmethod
-    def extract_args_query(url: URL) -> httpabc.ABC_DATA_GET:
+    def extract_args_query(url: URL) -> httpabc.AbcDataGet:
         data = {}
         for key, value in url.query.items():
             data[str(key).strip().lower()] = str(value)
         return data
 
-    def extract_args_url(self, url: URL) -> httpabc.ABC_DATA_GET:
+    def extract_args_url(self, url: URL) -> httpabc.AbcDataGet:
         return self.extract_args_path(url.path)
 
-    def extract_args_path(self, path: str) -> httpabc.ABC_DATA_GET:
+    def extract_args_path(self, path: str) -> httpabc.AbcDataGet:
         path, current, data = PathProcessor._split(path), self._resource, {}
         if self._resource.kind() is httpabc.ResourceKind.ARG_TAIL:
             depth = -2

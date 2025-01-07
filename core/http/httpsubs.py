@@ -83,7 +83,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         if name is HttpSubscriptionService.UNSUBSCRIBE:
             if not message.data():
                 return None
-            identity = str(message.data()).split('/')[-1]
+            identity = str(message.data()).rsplit('/', maxsplit=1)[-1]
             subscriber = self.lookup(identity)
             if subscriber:
                 del self._subscriptions[identity]
@@ -136,7 +136,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         self._running = False
         util.clear_queue(self._queue)
 
-    async def get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
+    async def get(self) -> typing.Union[httpabc.AbcResponse, msgabc.STOP, None]:
         self._time_last_activity = -1.0
         try:
             result = await self._get()
@@ -147,7 +147,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         finally:
             self._time_last_activity = time.time()
 
-    async def _get(self) -> typing.Union[httpabc.ABC_RESPONSE, msgabc.STOP, None]:
+    async def _get(self) -> typing.Union[httpabc.AbcResponse, msgabc.STOP, None]:
         if self._aggregator is None:
             message = await self._get_one()
             if message is None or message is msgabc.STOP:

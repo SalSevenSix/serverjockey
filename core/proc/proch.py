@@ -162,7 +162,7 @@ class ServerProcess:
                 env=self._env, cwd=self._cwd)
             pid, rc = self._process.pid, self._process.returncode
             if rc is not None:  # I don't think this can happen but to be sure
-                raise Exception('PID {} exit after START, rc={}'.format(pid, rc))
+                raise Exception(f'PID {pid} exit after START, rc={rc}')
             stderr = prcprd.PipeOutLineProducer(
                 self._mailer, self, mc.ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
             stdout = prcprd.PipeOutLineProducer(
@@ -172,12 +172,12 @@ class ServerProcess:
                 PipeInLineService(self._mailer, self._process.stdin)
             self._mailer.post(self, mc.ServerProcess.STATE_STARTING, self._process)
             if self._started_catcher:
-                tasks.task_fork(self._wait_for_started(), 'wait_for_started({})'.format(pid))
+                tasks.task_fork(self._wait_for_started(), f'wait_for_started({pid})')
             else:
                 self._mailer.post(self, mc.ServerProcess.STATE_STARTED, self._process)
             rc = await self._process.wait()
             if rc not in self._success_rcs:
-                raise Exception('PID {} non-zero exit after STARTED, rc={}'.format(pid, rc))
+                raise Exception(f'PID {pid} non-zero exit after STARTED, rc={rc}')
             self._mailer.post(self, mc.ServerProcess.STATE_STOPPED, self._process)
         except Exception as e:
             self._mailer.post(self, mc.ServerProcess.STATE_EXCEPTION, e)
@@ -203,5 +203,5 @@ class ServerProcess:
             if rc is not None:
                 return
             # Zombie process
-            logging.error('Timeout on PID {} waiting for STARTED, killing now'.format(pid))
+            logging.error('Timeout on PID %s waiting for STARTED, killing now', pid)
             await signals.silently_kill_tree(pid)

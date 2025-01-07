@@ -1,8 +1,8 @@
 import unittest
 import time
+from test.web import webcontext
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from test.web import webcontext
 from core.util import idutil, sysutil
 
 

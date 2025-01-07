@@ -48,7 +48,7 @@ class ServerCommandHandler(httpabc.PostHandler):
 
 class CheckServerStateInterceptor(httpabc.InterceptorHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, delegate: httpabc.ABC_HANDLER,
+    def __init__(self, mailer: msgabc.MulticastMailer, delegate: httpabc.AbcHandler,
                  running: bool = None, states: tuple = None):
         self._mailer, self._delegate, self._running = mailer, delegate, running
         self._states = states if states else ()

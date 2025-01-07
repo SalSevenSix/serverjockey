@@ -1,6 +1,6 @@
 import unittest
-from core.util import objconv
 from test.system import systemcontext
+from core.util import objconv
 
 
 class TestSystem(unittest.IsolatedAsyncioTestCase):

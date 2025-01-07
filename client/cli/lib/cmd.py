@@ -37,7 +37,7 @@ class CommandProcessor:
                         entry.update({'argument': argument})
                     self._commands.append(entry)
             else:
-                raise Exception('Command {} not found'.format(command))
+                raise Exception(f'Command {command} not found')
 
     def process(self):
         counter = 0

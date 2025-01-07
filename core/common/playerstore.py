@@ -115,7 +115,7 @@ class _Players:
 
     def get(self, canonical: typing.Optional[typing.Collection[Player]]) -> tuple:
         if canonical is None:
-            return tuple([o.asdict() for o in self._players])
+            return tuple(o.asdict() for o in self._players)
         if len(canonical) == 0:
             return ()
         keyed, players = self._keyed(), []

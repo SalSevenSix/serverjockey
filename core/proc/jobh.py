@@ -90,7 +90,7 @@ class JobProcess(msgabc.AbcSubscriber):
             replied = self._mailer.post(command.source(), JobProcess.STATE_STARTED, process, message)
             rc = await process.wait()
             if rc != 0:
-                raise Exception('Process {} non-zero exit after STARTED, rc={}'.format(process, rc))
+                raise Exception(f'Process {process} non-zero exit after STARTED, rc={rc}')
             self._mailer.post(command.source(), JobProcess.STATE_COMPLETE, process)
         except Exception as e:
             self._mailer.post(command.source(), JobProcess.STATE_EXCEPTION, e, None if replied else message)

@@ -32,7 +32,7 @@ class HttpConnection:
                 return result
             if on_404 and response.status == 404:
                 return on_404
-            raise Exception('HTTP GET Status: {} Reason: {}'.format(response.status, response.reason))
+            raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
         finally:
             response.close()
 
@@ -48,7 +48,7 @@ class HttpConnection:
                 if response.getheader('Content-Type') == 'application/json':
                     return json.loads(result)
                 return result
-            raise Exception('HTTP POST Status: {} Reason: {}'.format(response.status, response.reason))
+            raise Exception(f'HTTP POST Status: {response.status} Reason: {response.reason}')
         finally:
             response.close()
 
@@ -64,7 +64,7 @@ class HttpConnection:
                 elif response.status == 404:
                     return
                 elif response.status != 204:
-                    raise Exception('HTTP GET Status: {} Reason: {}'.format(response.status, response.reason))
+                    raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
             finally:
                 response.close()
 

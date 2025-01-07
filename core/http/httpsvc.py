@@ -42,11 +42,13 @@ class HttpService:
             access_log=access_logger, ssl_context=ssl_context, shutdown_timeout=100.0)
 
     # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
     async def _initialise(self, app: web.Application):
         self._resources = await self._callbacks.initialise()
         self._context.post(self, mc.WebResource.READY)
 
     # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
     async def _shutdown(self, app: web.Application):
         self._resources = None
         await self._callbacks.shutdown()
@@ -74,6 +76,7 @@ class _RequestHandler:
         self._headers = httpcnt.HeadersTool(request)
         self._resource = resource
 
+    # pylint: disable=too-many-branches
     async def handle(self) -> web.Response:
         # Check method allowed
         if self._method is not httpabc.Method.OPTIONS and not self._resource.allows(self._method):
@@ -130,7 +133,7 @@ class _RequestHandler:
             subpath = subpath.strip('/')
         return subpath if subpath else ''
 
-    async def _build_response(self, body: httpabc.ABC_RESPONSE) -> web.Response:
+    async def _build_response(self, body: httpabc.AbcResponse) -> web.Response:
         if body in httpabc.ResponseBody.ERRORS:
             # noinspection PyCallingNonCallable
             response = body()  # it will be callable, trust me bro

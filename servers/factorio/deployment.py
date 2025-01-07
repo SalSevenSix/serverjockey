@@ -1,5 +1,5 @@
-import aiohttp
 import socket
+import aiohttp
 # ALLOW core.* factorio.messaging
 from core.util import gc, util, idutil, tasks, io, pack, aggtrf, funcutil, objconv
 from core.msg import msgabc, msgext, msgftr, msglog
@@ -215,6 +215,7 @@ class Deployment:
         if not await io.symlink_exists(autosave_dir):
             await io.create_symlink(autosave_dir, self._save_dir)
 
+    # pylint: disable=too-many-locals,too-many-branches
     async def _sync_mods(self):
         mods = util.get('mods', objconv.json_to_dict(await io.read_file(self._mods_list)))
         if not mods:

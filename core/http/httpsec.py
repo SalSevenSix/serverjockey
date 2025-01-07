@@ -8,14 +8,14 @@ _SECURE = '_SECURE'
 _COOKIE_NAME = 'secret'
 
 
-def make_secure(data: httpabc.ABC_DATA_GET, secure: bool):
+def make_secure(data: httpabc.AbcDataGet, secure: bool):
     if _SECURE in data:
         del data[_SECURE]
     if secure:
         data[_SECURE] = True
 
 
-def is_secure(data: httpabc.ABC_DATA_GET) -> bool:
+def is_secure(data: httpabc.AbcDataGet) -> bool:
     return util.get(_SECURE, data, False) is True
 
 

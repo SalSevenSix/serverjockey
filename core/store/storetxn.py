@@ -139,6 +139,7 @@ class SelectPlayerEvent(storeabc.Transaction):
     def __init__(self, data: dict):
         self._data = data
 
+    # pylint: disable=too-many-branches
     def execute(self, session: Session) -> typing.Any:
         criteria = util.filter_dict(
             self._data, ('instance', 'atfrom', 'atto', 'events', 'player', 'atgroup', 'verbose'), True)

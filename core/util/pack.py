@@ -66,7 +66,7 @@ async def archive_directory(
 async def unpack_directory(
         archive: str, unpack_dir: str, wipe: bool = True,
         tempdir: str = '/tmp', logger=logutil.NullLogger()):
-    working_dir, progress_logger = None, _ProgressLogger(logger)
+    working_dir, progress_logger = None, ProgressLogger(logger)
     try:
         logger.info('START Unpack Directory')
         assert await io.file_exists(archive)
@@ -101,7 +101,7 @@ async def unpack_directory(
             await funcutil.silently_call(io.delete_directory(working_dir))
 
 
-class _ProgressLogger:
+class ProgressLogger:
 
     def __init__(self, logger):
         self._logger = logger
@@ -134,7 +134,7 @@ class _ProgressLogger:
     async def _run(self):
         try:
             self._logger.info('unpacking... enjoy some ascii art while you wait!')
-            lines = await _ProgressLogger._load_lines()
+            lines = await ProgressLogger._load_lines()
             index, end = 0, len(lines) - 1
             while self._running:
                 self._logger.info(lines[index])

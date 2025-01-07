@@ -27,6 +27,7 @@ class LoggingPublisher:
         self._mailer, self._source = mailer, source
 
     # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
     def log(self, level, msg, *args, **kwargs):
         self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args if args else msg)
 

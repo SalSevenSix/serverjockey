@@ -1,7 +1,7 @@
 import logging
-import vdf
 import asyncio
 from asyncio import subprocess
+import vdf
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import steamutil, aggtrf, util, io, tasks
 from core.msg import msgabc, msgftr

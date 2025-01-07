@@ -70,25 +70,25 @@ def initialise() -> list:
     players = config['players'].split(',')
     for player in players:
         time.sleep(0.2 * start_speed_modifier)
-        p('### Player {} has joined the server'.format(player))
-        p("znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{}' id={}".format(player, randint(1, 1000)))
+        p(f'### Player {player} has joined the server')
+        p(f"znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{player}' id={randint(1, 1000)}")
     threading.Thread(target=InGameTime(config['ingametime_interval_seconds']).run, daemon=True).start()
     return players
 
 
+# pylint: disable=too-many-branches,too-many-statements
 def main() -> int:
-    players = initialise()
-    running = True
-    while running:
+    rc, players = -1, initialise()
+    while rc == -1:
         line = sys.stdin.readline()
         line = line.strip()
-        p('### Received STDIN: {}'.format(line))
+        p(f'### Received STDIN: {line}')
         if line == 'players':
             p('### some garbage')
             p('### more garbage')
-            p('Players connected ({}):'.format(len(players)))
+            p(f'Players connected ({len(players)}):')
             for player in players:
-                p('-{}'.format(player))
+                p(f'-{player}')
                 time.sleep(0.2)
             p('')
             p('### some more junk')
@@ -104,7 +104,7 @@ def main() -> int:
         elif line.startswith('login'):
             player = line.split(' ')[-1]
             players.append(player)
-            p('### Player {} has joined the server'.format(player))
+            p(f'### Player {player} has joined the server')
         elif line.startswith('logout'):
             found = None
             for player in players:
@@ -112,7 +112,7 @@ def main() -> int:
                     found = player
             if found:
                 players.remove(found)
-                p('### Player {} has left the server'.format(found))
+                p(f'### Player {found} has left the server')
         elif line == 'restart-warnings':
             p('### server restart after warnings')
         elif line == 'restart-empty':
@@ -128,19 +128,20 @@ def main() -> int:
             p('### messaging players')
             time.sleep(0.3)
             if len(players) > 0:
-                p('### Player {} has left the server'.format(players.pop()))
+                p(f'### Player {players.pop()} has left the server')
             time.sleep(0.5)
             if len(players) > 0:
-                p('### Player {} has left the server'.format(players.pop()))
+                p(f'### Player {players.pop()} has left the server')
             time.sleep(0.2)
             p('### goodbye')
-            return 0
+            rc = 0
         elif line == 'crash':
             p('### FATAL shutting down')
             time.sleep(0.1)
-            return 1
+            rc = 1
         else:
             p('### NOOP')
+    return rc
 
 
 if __name__ == '__main__':

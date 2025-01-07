@@ -2,9 +2,9 @@ import unittest
 import random
 import time
 import re
-from core.util import util, dtutil
 from test.web import webcontext
 from selenium.webdriver.support.ui import Select
+from core.util import util, dtutil
 
 
 class TestPlaying(unittest.TestCase):

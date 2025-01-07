@@ -52,7 +52,7 @@ class TaskProcessor:
                         entry.update({'argument': argument})
                     self._tasks.append(entry)
             else:
-                raise Exception('Task {} not found'.format(task))
+                raise Exception(f'Task {task} not found')
 
     def process(self):
         for task in self._tasks:

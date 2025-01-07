@@ -18,7 +18,7 @@ class LoginHandler(httpabc.PostHandler):
 class MessengerHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, name: str,
-                 data: typing.Optional[httpabc.ABC_DATA_GET] = None,
+                 data: typing.Optional[httpabc.AbcDataGet] = None,
                  selector: typing.Optional[httpsubs.Selector] = None):
         self._mailer, self._name = mailer, name
         self._data, self._selector = data, selector
@@ -54,7 +54,7 @@ class MessengerHandler(httpabc.PostHandler):
 
 class StaticHandler(httpabc.GetHandler):
 
-    def __init__(self, response: httpabc.ABC_RESPONSE, protected: bool = True):
+    def __init__(self, response: httpabc.AbcResponse, protected: bool = True):
         self._response, self._protected = response, protected
 
     def handle_get(self, resource, data):
@@ -254,10 +254,10 @@ class _FileByteStream(httpabc.ByteStream):
             self._task = tasks.task_start(self._run(), 'FileByteStream(' + self._name + ')')
         try:
             return await asyncio.wait_for(self._queue.get(), 20.0)
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as e:
             if self._task:
                 self._task.cancel()
-            raise Exception('Timeout waiting for file read ' + self._filename)
+            raise Exception('Timeout waiting for file read ' + self._filename) from e
 
     async def _run(self):
         pumping = True

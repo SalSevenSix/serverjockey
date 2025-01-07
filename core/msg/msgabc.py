@@ -105,7 +105,7 @@ class AbcSubscriber(Subscriber):
         return self._msg_filter.accepts(message)
 
     async def handle(self, message):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 async def try_handle(handler: Handler, message: Message) -> typing.Any:

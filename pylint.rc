@@ -1,52 +1,20 @@
+[FORMAT]
+
+ignore-long-lines=^#.*$
+
+max-line-length=120
+
+
 [MESSAGES CONTROL]
 
-disable=raw-checker-failed,
-        bad-inline-option,
-        locally-disabled,
-        file-ignored,
-        suppressed-message,
-        useless-suppression,
-        deprecated-pragma,
-        use-symbolic-message-instead,
-        use-implicit-booleaness-not-comparison-to-string,
-        use-implicit-booleaness-not-comparison-to-zero,
-        missing-function-docstring,
-        missing-module-docstring,
-        missing-class-docstring,
-        use-dict-literal,
-        wrong-import-order,
-        line-too-long,
-        too-many-arguments,
-        too-few-public-methods,
-        too-many-positional-arguments,
-        unused-argument,
-        protected-access,
-        broad-exception-raised,
-        broad-exception-caught,
-        duplicate-code,
-        invalid-overridden-method,
-        too-many-instance-attributes,
-        consider-using-f-string,
-        useless-return,
-        too-many-locals,
-        too-many-branches,
-        logging-not-lazy,
-        unused-variable,
-        inconsistent-return-statements,
-        unbalanced-tuple-unpacking,
-        too-many-statements,
-        notimplemented-raised,
-        not-callable,
-        trailing-comma-tuple,
-        simplifiable-if-expression,
-        arguments-renamed,
-        unidiomatic-typecheck,
-        logging-format-interpolation,
-        unspecified-encoding,
-        too-many-return-statements,
-        use-maxsplit-arg,
-        invalid-name,
-        useless-parent-delegation,
-        no-member,
-        consider-using-generator,
-        raise-missing-from
+disable=raw-checker-failed,bad-inline-option,locally-disabled,file-ignored,suppressed-message,useless-suppression,
+  deprecated-pragma,use-symbolic-message-instead,use-implicit-booleaness-not-comparison-to-string,
+  use-implicit-booleaness-not-comparison-to-zero, # DEFAULTS END HERE
+  missing-module-docstring,missing-class-docstring,missing-function-docstring,
+  too-many-arguments,too-many-positional-arguments,too-many-instance-attributes,too-few-public-methods,
+  too-many-return-statements,useless-return,
+  broad-exception-raised,broad-exception-caught,
+  use-dict-literal,protected-access,duplicate-code,unused-variable,
+  invalid-overridden-method,unbalanced-tuple-unpacking,unspecified-encoding,
+  logging-not-lazy,  # TODO fix this
+  no-member  # TODO maybe fix this

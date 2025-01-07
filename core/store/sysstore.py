@@ -144,36 +144,20 @@ class _AbstractQueryHandler(httpabc.GetHandler):
 
 
 class _QueryInstanceHandler(_AbstractQueryHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(mailer)
-
     def get_query(self, data):
         return storetxn.SelectInstance(data)
 
 
 class _QueryInstanceEventHandler(_AbstractQueryHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(mailer)
-
     def get_query(self, data):
         return storetxn.SelectInstanceEvent(data)
 
 
 class _QueryPlayerEventHandler(_AbstractQueryHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(mailer)
-
     def get_query(self, data):
         return storetxn.SelectPlayerEvent(data)
 
 
 class _QueryPlayerChatHandler(_AbstractQueryHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(mailer)
-
     def get_query(self, data):
         return storetxn.SelectPlayerChat(data)

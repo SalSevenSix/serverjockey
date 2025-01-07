@@ -98,15 +98,15 @@ class ByteStream(io.Readable, metaclass=abc.ABCMeta):
         pass
 
 
-ABC_DATA_GET = typing.Dict[str, typing.Union[str, int, float, bool]]
-ABC_DATA_POST = typing.Dict[str, typing.Union[ABC_DATA_GET, str, int, float, bool, tuple, list, ByteStream]]
-ABC_RESPONSE = typing.Union[dict, tuple, list, str, bytes, ByteStream, ResponseBody, we.HTTPException]
+AbcDataGet = typing.Dict[str, typing.Union[str, int, float, bool]]
+AbcDataPost = typing.Dict[str, typing.Union[AbcDataGet, str, int, float, bool, tuple, list, ByteStream]]
+AbcResponse = typing.Union[dict, tuple, list, str, bytes, ByteStream, ResponseBody, we.HTTPException]
 
 
 class AllowMethod(metaclass=abc.ABCMeta):
 
     @staticmethod
-    def call(method: Method, handler: typing.Optional[ABC_HANDLER]) -> bool:
+    def call(method: Method, handler: typing.Optional[AbcHandler]) -> bool:
         if handler is None:
             return False
         if isinstance(handler, AllowMethod):
@@ -161,42 +161,42 @@ class Resource(AllowMethod, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    async def handle_get(self, url: URL, secure: bool, subpath: str = '') -> ABC_RESPONSE:
+    async def handle_get(self, url: URL, secure: bool, subpath: str = '') -> AbcResponse:
         pass
 
     @abc.abstractmethod
     async def handle_post(self, url: URL,
-                          body: typing.Union[str, ABC_DATA_GET, ByteStream], subpath: str = '') -> ABC_RESPONSE:
+                          body: typing.Union[str, AbcDataGet, ByteStream], subpath: str = '') -> AbcResponse:
         pass
 
 
 class GetHandler(metaclass=abc.ABCMeta):
 
     @staticmethod
-    async def call(handler: GetHandler, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
+    async def call(handler: GetHandler, resource: Resource, data: AbcDataGet) -> AbcResponse:
         if inspect.iscoroutinefunction(handler.handle_get):
             return await handler.handle_get(resource, data)
         return handler.handle_get(resource, data)
 
     @abc.abstractmethod
-    def handle_get(self, resource: Resource, data: ABC_DATA_GET) -> ABC_RESPONSE:
+    def handle_get(self, resource: Resource, data: AbcDataGet) -> AbcResponse:
         pass
 
 
 class PostHandler(metaclass=abc.ABCMeta):
 
     @staticmethod
-    async def call(handler: PostHandler, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
+    async def call(handler: PostHandler, resource: Resource, data: AbcDataPost) -> AbcResponse:
         if inspect.iscoroutinefunction(handler.handle_post):
             return await handler.handle_post(resource, data)
         return handler.handle_post(resource, data)
 
     @abc.abstractmethod
-    def handle_post(self, resource: Resource, data: ABC_DATA_POST) -> ABC_RESPONSE:
+    def handle_post(self, resource: Resource, data: AbcDataPost) -> AbcResponse:
         pass
 
 
-ABC_HANDLER = typing.Union[GetHandler, PostHandler]
+AbcHandler = typing.Union[GetHandler, PostHandler]
 
 
 class InterceptorHandler(AllowMethod, GetHandler, PostHandler, metaclass=abc.ABCMeta):
@@ -206,5 +206,5 @@ class InterceptorHandler(AllowMethod, GetHandler, PostHandler, metaclass=abc.ABC
 class InterceptorBuilder(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def wrap(self, handler: ABC_HANDLER) -> ABC_HANDLER:
+    def wrap(self, handler: AbcHandler) -> AbcHandler:
         pass

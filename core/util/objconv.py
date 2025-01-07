@@ -40,7 +40,7 @@ def obj_to_dict(obj: typing.Any) -> typing.Optional[dict]:
         return obj.asdict()
     if hasattr(obj, '__dict__'):
         return obj.__dict__
-    raise Exception('obj_to_dict() failed converting {} to dict'.format(obj))
+    raise Exception(f'obj_to_dict() failed converting {obj} to dict')
 
 
 def obj_to_json(obj: typing.Any, pretty: bool = False) -> typing.Optional[str]:
@@ -68,7 +68,7 @@ def json_to_dict(text: str) -> typing.Optional[dict]:
 
 class _JsonEncoder(json.JSONEncoder):
 
-    def default(self, obj):
-        if obj is None or type(obj) in (str, tuple, list, dict):
-            return obj
-        return obj_to_str(obj)
+    def default(self, o):
+        if o is None or type(o) in (str, tuple, list, dict):
+            return o
+        return obj_to_str(o)

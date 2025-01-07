@@ -1,12 +1,12 @@
 import os
 import time
-from core.util import util
 from selenium import webdriver as drivers
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from core.util import util
 
 
 def _de_increment_wait(wait: float) -> float:

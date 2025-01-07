@@ -7,6 +7,7 @@ from core.http import httpabc
 class Server(metaclass=abc.ABCMeta):
 
     # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
     @abc.abstractmethod
     def __init__(self, context: contextsvc.Context):
         pass

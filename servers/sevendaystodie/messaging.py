@@ -73,7 +73,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # 2024-11-29T23:49:36 252.509 INF GMSG: Player 'Apollo' died
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     JOIN_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' joined the game$')
-    SPAWN_FILTER = msgftr.DataMatches(r'.*INF PlayerSpawnedInWorld \(reason.*OwnerID=\'.*PlayerName=\'.*\', ClientNumber=.*')
+    SPAWN_FILTER = msgftr.DataMatches(
+        r'.*INF PlayerSpawnedInWorld \(reason.*OwnerID=\'.*PlayerName=\'.*\', ClientNumber=.*')
     CHAT_FILTER = msgftr.DataMatches(r'.*INF Chat \(from \'.*\', to \'Global\'\):.*')
     LEAVE_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' left the game$')
     DEATH_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' died$')

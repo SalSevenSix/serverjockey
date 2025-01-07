@@ -84,7 +84,7 @@ def _http_request(host: str, path: str, request_body: dict = None,
         if response.status == 200:
             response_body = response.read()
             return response_body.decode().strip() if response_body else ''
-        raise Exception('HTTP {} Status: {} Reason: {}'.format(method, response.status, response.reason))
+        raise Exception(f'HTTP {method} Status: {response.status} Reason: {response.reason}')
     finally:
         if response:
             response.close()

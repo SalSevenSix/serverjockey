@@ -12,12 +12,12 @@ class _Tasker:
     def task_start(self, coro: typing.Coroutine, name: str) -> asyncio.Task:
         task = asyncio.create_task(coro, name=name)
         self._tasks.append(task)
-        logging.debug('tsk> START ({}) : {}'.format(len(self._tasks), task))
+        logging.debug('tsk> START (%s) : %s', len(self._tasks), task)
         return task
 
     def task_end(self, task: asyncio.Task):
         self._tasks.remove(task)
-        logging.debug('tsk> END   ({}) : {}'.format(len(self._tasks), task))
+        logging.debug('tsk> END   (%s) : %s', len(self._tasks), task)
 
     def dump(self):
         for task in self._tasks:
@@ -39,7 +39,7 @@ def task_start(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
 
 def task_fork(coro: typing.Coroutine, name: typing.Any) -> asyncio.Task:
     task = asyncio.create_task(coro, name=_str_name(name))
-    logging.debug('tsk> FORK       : {}'.format(task))
+    logging.debug('tsk> FORK       : %s', task)
     return task
 
 

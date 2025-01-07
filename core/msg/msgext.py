@@ -136,8 +136,8 @@ class Publisher:
 
 
 class SyncReply(enum.Enum):
-    AT_START = enum.auto(),
-    AT_END = enum.auto(),
+    AT_START = enum.auto()
+    AT_END = enum.auto()
     NEVER = enum.auto()
 
 

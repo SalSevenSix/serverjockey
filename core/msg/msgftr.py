@@ -101,6 +101,7 @@ class NameEquals(msgabc.Filter):
 
 class HasData(msgabc.Filter):
 
+    # pylint: disable=simplifiable-if-expression
     def accepts(self, message):
         return True if message.data() else False
 
