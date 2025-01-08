@@ -48,7 +48,7 @@ class StoreService(msgabc.AbcSubscriber):
             else:
                 await _execute(self._session, storesvctxn.IntegrityChecks(self._context))
         except Exception as e:
-            logging.error('Error initialising database: ' + repr(e))
+            logging.error('Error initialising database: %s', repr(e))
             await _close_session(self._session)
             self._session = None
             if create_database:
@@ -61,7 +61,7 @@ class StoreService(msgabc.AbcSubscriber):
             await _reset_activity(self._session)
             await _execute(self._session, storesvctxn.StoreResetEvent())
         except Exception as e:
-            logging.error('Reset activity error: ' + repr(e))
+            logging.error('Reset activity error: %s', repr(e))
 
     async def _transaction(self, message):
         result = None
@@ -73,7 +73,7 @@ class StoreService(msgabc.AbcSubscriber):
             result = await _execute(self._session, message.data())
         except Exception as e:
             result = e
-            logging.error('Transaction error: ' + repr(e))
+            logging.error('Transaction error: %s', repr(e))
         finally:
             self._context.post(message.source(), storeabc.TRANSACTION_RESPONSE, result, message)
 
@@ -82,7 +82,7 @@ def _sync_create_session(database_path: str, create_database: bool) -> Session:
     engine = create_engine('sqlite:///' + database_path)
     if create_database:
         storeabc.Base.metadata.create_all(engine)
-        logging.debug('Created database: ' + database_path)
+        logging.debug('Created database: %s', database_path)
     return Session(engine)
 
 
@@ -112,7 +112,7 @@ def _sync_close_session(session: Session):
     try:
         session.close()
     except Exception as e:
-        logging.debug('Error closing session: ' + repr(e))
+        logging.debug('Error closing session: %s', repr(e))
 
 
 _create_session = funcutil.to_async(_sync_create_session)

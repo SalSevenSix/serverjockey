@@ -21,7 +21,7 @@ class _Tasker:
 
     def dump(self):
         for task in self._tasks:
-            logging.debug('tsk> REMAINING ' + repr(task))
+            logging.debug('tsk> REMAINING %s', repr(task))
 
 
 _TASKER = _Tasker()

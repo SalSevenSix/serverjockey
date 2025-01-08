@@ -17,7 +17,7 @@ class _ProcessCollector(registry.Collector):
         try:
             result.extend(self._collect_io_metrics())
         except Exception as e:
-            logging.debug('collect_io_metrics() ' + str(e))
+            logging.debug('mtxproc.collect_io_metrics() %s', repr(e))
         return result
 
     def _collect_io_metrics(self) -> list:
@@ -51,7 +51,7 @@ def _sync_create_process_collector(
         a_registry.register(collector)
         return collector
     except Exception as e:
-        logging.debug('mtxproc.create_process_collector() ' + str(e))
+        logging.debug('mtxproc.create_process_collector() %s', repr(e))
     return None
 
 

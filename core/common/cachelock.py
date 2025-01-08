@@ -77,7 +77,7 @@ class _CacheLock:
         except Exception as e:
             e_repr = repr(e)
             self._mailer.post(self, NOTIFICATION, '[CacheLock] EXCEPTION starting ' + e_repr)
-            logging.warning('Error starting vmtouch ' + e_repr)
+            logging.warning('Error starting vmtouch %s', e_repr)
         return False
 
     async def _run(self):
@@ -85,11 +85,11 @@ class _CacheLock:
             self._mailer.post(self, NOTIFICATION, '[CacheLock] STARTED ' + self._path)
             rc = await self._process.wait()
             self._mailer.post(self, NOTIFICATION, '[CacheLock] STOPPED ' + self._path)
-            logging.debug('vmtouch exit code: ' + str(rc))
+            logging.debug('vmtouch exit code: %s', rc)
         except Exception as e:
             e_repr = repr(e)
             self._mailer.post(self, NOTIFICATION, '[CacheLock] EXCEPTION ' + self._path + ' ' + e_repr)
-            logging.warning('Error waiting vmtouch ' + e_repr)
+            logging.warning('Error waiting vmtouch %s', e_repr)
         finally:
             tasks.task_end(self._task)
 
@@ -99,4 +99,4 @@ class _CacheLock:
         try:
             self._process.terminate()
         except Exception as e:
-            logging.warning('Error killing vmtouch ' + repr(e))
+            logging.warning('Error killing vmtouch %s', repr(e))

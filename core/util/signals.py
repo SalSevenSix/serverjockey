@@ -26,7 +26,7 @@ async def silently_kill_tree(pid: int):
     try:
         await kill_tree(pid)
     except Exception as e:
-        logging.debug('silent_kill_tree() ' + repr(e))
+        logging.debug('silent_kill_tree() %s', repr(e))
 
 
 async def get_leaf(pid: int) -> int | None:
@@ -36,7 +36,7 @@ async def get_leaf(pid: int) -> int | None:
     try:
         return int(await shellutil.run_script(script))
     except Exception as e:
-        logging.debug('get_leaf_pid() ' + repr(e))
+        logging.debug('get_leaf_pid() %s', repr(e))
     return None
 
 

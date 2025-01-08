@@ -20,6 +20,11 @@ echo "Running SteamCMD, log output may be delayed..."
 '''
 
 
+# pylint: disable=logging-not-lazy
+def _dump_script(script: str):
+    logging.debug('SCRIPT\n' + script)
+
+
 class SteamCmdInstallHandler(httpabc.PostHandler):
 
     def __init__(self, context: contextsvc.Context, path: str, app_id: int | str, anon: bool = True):
@@ -47,7 +52,7 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         if util.get('validate', data):
             script += ' validate'
         script += ' +quit'
-        logging.debug('SCRIPT\n' + script)
+        _dump_script(script)
         data['command'], data['pty'] = script, True
         if not self._anon:
             self._mailer.register(_KillSteamOnSolicitPassword())
@@ -72,7 +77,7 @@ class SteamCmdLoginHandler(httpabc.PostHandler):
         script += '$(find_steamcmd)'
         script += ' +login ' + util.script_escape(login)
         script += ' +quit'
-        logging.debug('SCRIPT\n' + script)
+        _dump_script(script)
         data['command'], data['pty'] = script, True
         self._mailer.register(_KillSteamOnNoHeartbeat())
         return await self._handler.handle_post(resource, data)
@@ -169,7 +174,7 @@ class _SteamConfig:
             steamer = util.get('Steam', valve, util.get('steam', valve))
             return config_path, root, steamer
         except Exception as e:
-            logging.warning('Problem loading or parsing Steam config: ' + repr(e))
+            logging.warning('Problem loading or parsing Steam config: %s', repr(e))
         return None, None, None
 
     async def get_login(self) -> str | None:

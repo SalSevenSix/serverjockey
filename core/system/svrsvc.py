@@ -64,19 +64,19 @@ class ServerService(msgabc.AbcSubscriber):
                 self._running = controller.call_run()
                 self._queue.task_done()
             if self._running:
-                logging.debug(sc.STARTING + ' instance ' + identity)
+                logging.debug('%s instance %s', sc.STARTING, identity)
                 ServerStatus.notify_running(self._context, self, self._running)
                 start = dtutil.now_millis()
                 try:
                     await self._server.run()
                 except Exception as e:
                     ServerStatus.notify_status(self._context, self, sc.EXCEPTION, dict(error=str(e)))
-                    logging.warning(sc.EXCEPTION + ' instance ' + identity + ' [' + repr(e) + ']')
+                    logging.warning('%s instance %s [%s]', sc.EXCEPTION, identity, repr(e))
                 finally:
                     self._running = False
                     controller.check_uptime(dtutil.now_millis() - start)
                     ServerStatus.notify_running(self._context, self, self._running)
-                    logging.debug(sc.STOPPED + ' instance ' + identity)
+                    logging.debug('%s instance %s', sc.STOPPED, identity)
 
     async def handle(self, message):
         action = message.name()

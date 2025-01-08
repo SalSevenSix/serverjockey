@@ -16,5 +16,4 @@ disable=raw-checker-failed,bad-inline-option,locally-disabled,file-ignored,suppr
   broad-exception-raised,broad-exception-caught,
   use-dict-literal,protected-access,duplicate-code,unused-variable,
   invalid-overridden-method,unbalanced-tuple-unpacking,unspecified-encoding,
-  logging-not-lazy,  # TODO fix this
   no-member  # TODO maybe fix this

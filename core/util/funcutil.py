@@ -35,7 +35,7 @@ async def silently_call(invokable: typing.Union[typing.Callable, typing.Coroutin
         try:
             await invokable
         except Exception as e:
-            logging.debug('silently_call(coroutine) ' + repr(e))
+            logging.debug('silently_call(coroutine) %s', repr(e))
         return
     if not callable(invokable):
         return
@@ -45,4 +45,4 @@ async def silently_call(invokable: typing.Union[typing.Callable, typing.Coroutin
         else:
             invokable()
     except Exception as e:
-        logging.debug('silently_call(callable) ' + repr(e))
+        logging.debug('silently_call(callable) %s', repr(e))

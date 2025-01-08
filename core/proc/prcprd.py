@@ -23,9 +23,9 @@ class PipeOutLineProducer(msgabc.Producer):
         try:
             line = await self._pipe.readline()
             if io.end_of_stream(line):
-                logging.debug('EOF read from PipeOut: ' + repr(self._pipe))
+                logging.debug('EOF read from PipeOut: %s', repr(self._pipe))
                 return None
             return msgabc.Message(self._source, self._name, self._decoder.decode(line))
         except Exception as e:
-            logging.error('Pipe read line failed: ' + repr(e))
+            logging.error('Pipe read line failed: %s', repr(e))
         return None

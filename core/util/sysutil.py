@@ -71,7 +71,7 @@ class _PublicIp:
         for url in ('https://api.ipify.org', 'https://ipv4.seeip.org', 'https://ipinfo.io/ip'):
             result = await _fetch_text(url)
             if result:
-                logging.debug('Public IP sourced from ' + url)
+                logging.debug('Public IP sourced from %s', url)
                 return result
         return 'UNAVAILABLE'
 

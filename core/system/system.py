@@ -121,7 +121,7 @@ class SystemService:
         if await io.directory_exists(home_dir):
             raise Exception('Unable to create instance. Directory already exists.')
         try:
-            logging.debug('CREATING instance ' + identity)
+            logging.debug('CREATING instance %s', identity)
             await io.create_directory(home_dir)
             await io.write_file(home_dir + '/instance.json', objconv.obj_to_json(configuration))
             configuration.update(dict(identity=identity, home=home_dir))
@@ -136,7 +136,7 @@ class SystemService:
         await self._context.destroy_subcontext(subcontext)
         await io.delete_directory(home_dir)
         self._context.post(self, mc.SystemService.SERVER_DELETED, subcontext)
-        logging.debug('DELETED instance ' + identity)
+        logging.debug('DELETED instance %s', identity)
 
     async def _initialise_instance(self, configuration: dict) -> contextsvc.Context:
         subcontext = self._context.create_subcontext(configuration)

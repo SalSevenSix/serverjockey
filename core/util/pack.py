@@ -45,19 +45,19 @@ async def archive_directory(
         assert archive_tmp.endswith('.zip')
         archive_path = archives_dir + '/' + archive_name + '.zip'
         await io.move_path(archive_tmp, archive_path)
-        logger.info('Created ' + archive_path)
+        logger.info(f'Created {archive_path}')
         if prune_hours > 0:
-            logger.info('Pruning archives older than ' + str(prune_hours) + ' hours')
+            logger.info(f'Pruning archives older than {prune_hours} hours')
             prune_time = now - float(prune_hours * 60 * 60)
             files = [o for o in await io.directory_list(archives_dir) if o['type'] == 'file']
             files = [o for o in files if o['name'].startswith(archive_kind) and o['mtime'] < prune_time]
             for file in [o['name'] for o in files]:
-                logger.info('Deleting ' + file)
+                logger.info(f'Deleting {file}')
                 await io.delete_file(archives_dir + '/' + file)
         logger.info('END Archive Directory')
         return archive_path
     except Exception as e:
-        logger.error('ERROR archiving ' + unpacked_dir + ' ' + repr(e))
+        logger.error(f'ERROR archiving {unpacked_dir} {repr(e)}')
         raise e
     finally:
         await funcutil.silently_call(io.delete_directory(working_dir))
@@ -72,7 +72,7 @@ async def unpack_directory(
         assert await io.file_exists(archive)
         if unpack_dir[-1] == '/':
             unpack_dir = unpack_dir[:-1]
-        logger.info(archive + ' => ' + unpack_dir)
+        logger.info(f'{archive} => {unpack_dir}')
         if await io.file_size(archive) > 104857600:  # 100Mb
             progress_logger.start()
         working_dir = unpack_dir
@@ -93,7 +93,7 @@ async def unpack_directory(
                 await io.move_path(source_path, target_path)
         logger.info('END Unpack Directory')
     except Exception as e:
-        logger.error('ERROR unpacking ' + archive + ' ' + repr(e))
+        logger.error(f'ERROR unpacking {archive} {repr(e)}')
         raise e
     finally:
         progress_logger.stop()

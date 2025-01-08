@@ -56,15 +56,15 @@ async def link_steamclient_to_sdk(home_dir: str):
 async def ensure_steamcmd(home_dir: str):
     steamcmd_dir = await get_steamcmd_dir(home_dir)
     if steamcmd_dir:
-        logging.info('SteamCMD: ' + steamcmd_dir)
+        logging.info('SteamCMD: %s', steamcmd_dir)
         return
     steamcmd_exe = '/usr/games/steamcmd'
     if not await io.file_exists(steamcmd_exe):
-        logging.warning(steamcmd_exe + ' not found, unable to install SteamCMD for user')
+        logging.warning('%s not found, unable to install SteamCMD for user', steamcmd_exe)
         return
-    logging.info('Installing SteamCMD into ' + home_dir)
+    logging.info('Installing SteamCMD into %s', home_dir)
     try:
         await shellutil.run_script(steamcmd_exe + ' +quit >/dev/null 2>&1')
         logging.info('SteamCMD install completed')
     except Exception as e:
-        logging.warning('Exception installing SteamCMD: ' + repr(e))
+        logging.warning('Exception installing SteamCMD: %s', repr(e))

@@ -30,16 +30,16 @@ X_SECRET = 'X-Secret'
 
 
 def dump_request(request: aiohttp.abc.Request):
-    logging.debug('    REQ method     : ' + str(request.method))
-    logging.debug('    REQ host       : ' + str(request.host))
-    logging.debug('    REQ url        : ' + str(request.url))
-    logging.debug('    REQ rel_url    : ' + str(request.rel_url))
-    logging.debug('    REQ raw_path   : ' + str(request.raw_path))
-    logging.debug('    REQ remote     : ' + str(request.remote))
-    logging.debug('    REQ forwarded  : ' + str(request.forwarded))
-    logging.debug('    REQ keep_alive : ' + str(request.keep_alive))
+    logging.debug('    REQ method     : %s', str(request.method))
+    logging.debug('    REQ host       : %s', str(request.host))
+    logging.debug('    REQ url        : %s', str(request.url))
+    logging.debug('    REQ rel_url    : %s', str(request.rel_url))
+    logging.debug('    REQ raw_path   : %s', str(request.raw_path))
+    logging.debug('    REQ remote     : %s', str(request.remote))
+    logging.debug('    REQ forwarded  : %s', str(request.forwarded))
+    logging.debug('    REQ keep_alive : %s', str(request.keep_alive))
     for key in request.headers.keys():
-        logging.debug('    HDR ' + key + ' : ' + request.headers.getone(key))
+        logging.debug('    HDR %s : %s', str(key), str(request.headers.getone(key)))
 
 
 class ContentTypeImpl(httpabc.ContentType):

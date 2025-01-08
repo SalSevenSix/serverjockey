@@ -146,7 +146,7 @@ class _CheckModsNeedUpdateTask:
                 if running and self._running:
                     await proch.PipeInLineService.request(self._mailer, self, 'checkModsNeedUpdate')
         except Exception as e:
-            logging.debug('CheckModsNeedUpdateTask.run() ' + repr(e))
+            logging.debug('CheckModsNeedUpdateTask.run() %s', repr(e))
         finally:
             self._running = False
             util.clear_queue(self._queue)

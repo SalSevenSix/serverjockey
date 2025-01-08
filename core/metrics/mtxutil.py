@@ -38,7 +38,7 @@ def _sync_create_process_collector(
         instance_registry.register(collector)
         return collector
     except Exception as e:
-        logging.debug('mtxutil.create_process_collector() ' + str(e))
+        logging.debug('mtxutil.create_process_collector() %s', repr(e))
     return None
 
 
@@ -54,7 +54,7 @@ def _sync_unregister_collector(a_registry: registry.CollectorRegistry, collector
     try:
         a_registry.unregister(collector)
     except Exception as e:
-        logging.warning('_unregister_collector()' + str(e))
+        logging.warning('mtxutil.unregister_collector() %s', repr(e))
 
 
 def _sync_create_gauge(a_registry: registry.CollectorRegistry, name: str,

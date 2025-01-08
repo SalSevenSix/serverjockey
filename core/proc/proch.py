@@ -35,10 +35,10 @@ class _PipeInLineHandler(msgabc.Handler):
             response = await command.catcher.get() if command.catcher else None
             self._mailer.post(self, PipeInLineService.RESPONSE, response, message)
         except asyncio.TimeoutError as e:
-            logging.warning('Timeout on cmdline into pipein. raised: ' + repr(e))
+            logging.warning('Timeout on cmdline into pipein.')
             self._mailer.post(self, PipeInLineService.EXCEPTION, e, message)
         except Exception as e:
-            logging.error('Failed pass cmdline into pipein. raised: ' + repr(e))
+            logging.error('Failed pass cmdline into pipein: %s', repr(e))
             self._mailer.post(self, PipeInLineService.EXCEPTION, e, message)
         return None
 

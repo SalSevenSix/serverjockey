@@ -136,10 +136,10 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
     async def _log_system_info(self):
         cpu_info, os_name, local_ip, public_ip = await asyncio.gather(
             sysutil.cpu_info(), sysutil.os_name(), sysutil.local_ip(), sysutil.public_ip())
-        logging.info('CPU: ' + cpu_info['arch'] + ' | ' + cpu_info['vendor'] + ' | ' + cpu_info['modelname'])
-        logging.info('OS Name: ' + os_name)
-        logging.info('Local IPv4: ' + local_ip)
-        logging.info('Public IPv4: ' + public_ip)
+        logging.info('CPU: %s | %s | %s', cpu_info['arch'], cpu_info['vendor'], cpu_info['modelname'])
+        logging.info('OS Name: %s', os_name)
+        logging.info('Local IPv4: %s', local_ip)
+        logging.info('Public IPv4: %s', public_ip)
         if self._context.is_debug() or self._context.config('showtoken'):
             print('URL   : ' + contextext.RootUrl(self._context).build(local_ip), flush=True)
             print('TOKEN : ' + self._context.config('secret'), flush=True)
@@ -154,11 +154,11 @@ def main() -> int:
     _setup_logging(context)
     try:
         logging.info('*** START ServerJockey ***')
-        logging.info('Version: ' + sysutil.system_version())
-        logging.info('Python3: ' + sys.version)
-        logging.info('PID: ' + str(os.getpid()))
-        logging.info('Home: ' + context.config('home'))
-        logging.info('Paths: ' + str(sys.path))
+        logging.info('Version: %s', sysutil.system_version())
+        logging.info('Python3: %s', sys.version)
+        logging.info('PID: %s', os.getpid())
+        logging.info('Home: %s', context.config('home'))
+        logging.info('Paths: %s', str(sys.path))
         httpsvc.HttpService(context, _Callbacks(context)).run()
         return 0
     except Exception as e:

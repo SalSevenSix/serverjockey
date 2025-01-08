@@ -27,7 +27,7 @@ class Statics:
             body = await resource.uncompressed()
         length = len(body)
         if length > 524288:  # Half a Megabyte
-            logging.warning('Large static file ' + request.path + ' (' + str(length) + ' bytes)')
+            logging.warning('Large static file %s (%s bytes)', request.path, length)
         response.headers.add(httpcnt.CONTENT_LENGTH, str(length))
         response.body = body
         return response

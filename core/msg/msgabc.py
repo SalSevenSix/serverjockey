@@ -115,6 +115,6 @@ async def try_handle(handler: Handler, message: Message) -> typing.Any:
         else:
             result = handler.handle(message)
     except Exception as e:
-        logging.error('try_handle() ' + repr(e))
+        logging.error('try_handle() %s', repr(e))
         result = e
     return result

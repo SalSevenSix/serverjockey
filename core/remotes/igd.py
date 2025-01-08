@@ -96,18 +96,18 @@ def _sync_get_mapping_service():
         devices.sort(key=_sort_device)
         for device in devices:
             device_repr = repr(device)
-            logging.debug('net> discovered device: ' + device_repr)
+            logging.debug('net> discovered device: %s', device_repr)
             for service in device.get_services():
                 service_repr = repr(service)
-                logging.debug('net>  discovered service: ' + service_repr)
+                logging.debug('net>  discovered service: %s', service_repr)
                 for action in service.get_actions():
-                    logging.debug('net>   discovered action: ' + repr(action))
+                    logging.debug('net>   discovered action: %s', repr(action))
                     if action.name == 'AddPortMapping':
-                        logging.info('Found port mapping service: ' + device_repr + ' ' + service_repr)
+                        logging.info('Found port mapping service: %s %s', device_repr, service_repr)
                         return service
         logging.info('No IGD port mapping service found')
     except Exception as e:
-        logging.error('UPnP discovery error: ' + repr(e))
+        logging.error('UPnP discovery error: %s', repr(e))
     return None
 
 
@@ -124,15 +124,15 @@ def _sync_add_port_mapping(service, local_ip: str, port: int, protocal: str, des
             NewPortMappingDescription=description,
             NewLeaseDuration=0)
     except Exception as e:
-        logging.error('Add port mapping error: ' + repr(e))
+        logging.error('Add port mapping error: %s', repr(e))
 
 
 def _sync_delete_port_mapping(service, port: int, protocal: str):
     try:
-        logging.debug('Closing port ' + str(port) + ' for ' + protocal)
+        logging.debug('Closing port %s for %s', port, protocal)
         service.DeletePortMapping(NewRemoteHost='', NewExternalPort=port, NewProtocol=protocal)
     except Exception as e:
-        logging.error('Delete port mapping error: ' + repr(e))
+        logging.error('Delete port mapping error: %s', repr(e))
 
 
 _get_mapping_service = funcutil.to_async(_sync_get_mapping_service)
