@@ -235,7 +235,7 @@ class _FileByteStream(httpabc.ByteStream):
 
     def __init__(self, filename: str, content_length: int | None, tracker: io.BytesTracker = io.NullBytesTracker()):
         self._filename, self._content_length, self._tracker = filename, content_length, tracker
-        self._name, self._content_type = filename.split('/')[-1], httpcnt.ContentTypeImpl.lookup(filename)
+        self._name, self._content_type = util.fname(filename), httpcnt.ContentTypeImpl.lookup(filename)
         self._queue = asyncio.Queue(maxsize=2)
         self._task, self._length = None, -1
 

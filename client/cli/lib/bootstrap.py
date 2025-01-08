@@ -71,7 +71,7 @@ def main() -> int:
     except Exception as e:
         if not context or context.is_debug():
             raise e
-        logging.error(str(e))
+        logging.error(repr(e))
         return 1
     finally:
         if connection:

@@ -160,6 +160,12 @@ def full_path(base: str | None, path: str | None) -> str | None:
     return start + base + sep + path
 
 
+def fname(path: str | None) -> str | None:
+    if not path:
+        return path
+    return path.rsplit('/', maxsplit=1)[-1]
+
+
 def clear_queue(queue: asyncio.Queue):
     if not queue:
         return

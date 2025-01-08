@@ -6,7 +6,7 @@ import pathlib
 import aiofiles
 from aiofiles import os as aioos
 # ALLOW util.*
-from core.util import dtutil, idutil, funcutil
+from core.util import util, dtutil, idutil, funcutil
 
 DEFAULT_CHUNK_SIZE = 65536  # 64Kb
 
@@ -203,7 +203,7 @@ async def stream_write_file(
     working_dir = tempdir + '/' + idutil.generate_id()
     try:
         await create_directory(working_dir)
-        tempfile = working_dir + '/' + filename.split('/')[-1]
+        tempfile = working_dir + '/' + util.fname(filename)
         async with aiofiles.open(tempfile, mode='wb') as file:
             await copy_bytes(stream, file, chunk_size, tracker)
         await delete_file(filename)

@@ -97,7 +97,7 @@ class CommandProcessor:
                 self._instance = argument
                 logging.info('Instance set to: ' + self._instance)
                 return True
-            logging.error('Instance ' + argument + ' does not exist. No more commands will be processed.')
+            logging.error('Instance %s does not exist. No more commands will be processed.', argument)
             return False
         if len(self._instances) > 0:
             self._instance = list(self._instances.keys())[0]
@@ -210,7 +210,7 @@ class CommandProcessor:
         if seconds > 0:
             time.sleep(seconds)
         else:
-            logging.warning('Invalid argument for sleep command, must be a number > 0, was: ' + str(argument))
+            logging.warning('Invalid argument for sleep command, must be a number > 0, was: %s', argument)
         return True
 
     # noinspection PyMethodMayBeStatic

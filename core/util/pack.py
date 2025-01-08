@@ -7,7 +7,7 @@ import time
 import random
 import itertools
 # ALLOW util.*
-from core.util import dtutil, idutil, funcutil, io, logutil, tasks, pkg
+from core.util import util, dtutil, idutil, funcutil, io, logutil, tasks, pkg
 
 
 def _sync_unpack_tarxz(file_path: str, target_directory: str):
@@ -39,7 +39,7 @@ async def archive_directory(
             archives_dir = archives_dir[:-1]
         assert await io.directory_exists(archives_dir)
         await io.create_directory(working_dir)
-        now, archive_kind = time.time(), unpacked_dir.split('/')[-1]
+        now, archive_kind = time.time(), util.fname(unpacked_dir)
         archive_name = archive_kind + '-' + dtutil.format_time('%Y%m%d', now) + '-' + dtutil.format_time('%H%M%S', now)
         archive_tmp = await _make_archive(working_dir + '/' + archive_name, 'zip', root_dir=unpacked_dir, logger=logger)
         assert archive_tmp.endswith('.zip')

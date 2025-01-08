@@ -222,7 +222,7 @@ class Unpacker(msgabc.AbcSubscriber):
         if not filename:
             raise Exception('No filename')
         archive = backups_dir + ('' if filename[0] == '/' else '/') + filename
-        unpack_dir = root_dir if util.get('to_root', data) else root_dir + '/' + filename.split('/')[-1].split('-')[0]
+        unpack_dir = root_dir if util.get('to_root', data) else root_dir + '/' + util.fname(filename).split('-')[0]
         wipe = util.get('wipe', data, True)
         logger = msglog.LoggingPublisher(self._mailer, source)
         await pack.unpack_directory(archive, unpack_dir, wipe, self._tempdir, logger)

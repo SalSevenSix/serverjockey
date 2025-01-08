@@ -40,7 +40,7 @@ def update_pork(provider, apikey, secretapikey, domain):
                 body['type'], body['content'] = record_type, content
                 if name != domain:
                     body['name'] = name[0:len(name) - len(domain) - 1]
-                logging.info('updating ' + record_type + ' for ' + name + ' to ' + content)
+                logging.info('updating %s for %s to %s', record_type, name, content)
                 body = _http_request(host, path, body, timeout=12.0)
                 body = json.loads(body) if body else None
                 if not body or body.get('status') != 'SUCCESS':
@@ -59,10 +59,10 @@ def _get_public_ipv4() -> str | None:
         try:
             result = _http_request(host, path, ipv4=True)
             if result:
-                logging.info('sourced ' + result + ' from ' + host)
+                logging.info('sourced %s from %s', result, host)
                 return result
         except Exception as e:
-            logging.warning('failed sourcing IPv4 from ' + host + ' : ' + str(e))
+            logging.warning('failed sourcing IPv4 from %s : %s', host, repr(e))
     return None
 
 
@@ -104,5 +104,4 @@ class _HTTPSConnection(client.HTTPSConnection):
         except OSError as e:
             if e.errno != errno.ENOPROTOOPT:
                 raise
-        # logging.info('Socket {} {} {}'.format(self.host, self.port, self.timeout))
         self.sock = self._context.wrap_socket(self.sock, server_hostname=self.host)

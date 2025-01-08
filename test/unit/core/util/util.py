@@ -123,3 +123,15 @@ class TestCoreUtilUtil(unittest.TestCase):
         result = util.extract_hostname_ips('192.168.156.76')
         self.assertEqual(('192.168.156.76',), result[0])
         self.assertEqual(0, len(result[1]))
+
+    def test_fname(self):
+        self.assertEqual(None, util.fname(None))
+        self.assertEqual('', util.fname(''))
+        self.assertEqual('', util.fname('/'))
+        self.assertEqual('', util.fname('///'))
+        self.assertEqual('', util.fname('/aaa/bbb/ccc/'))
+        self.assertEqual('aaa', util.fname('aaa'))
+        self.assertEqual('aaa', util.fname('/aaa'))
+        self.assertEqual('ccc', util.fname('aaa/bbb/ccc'))
+        self.assertEqual('ccc', util.fname('/aaa/bbb/ccc'))
+        self.assertEqual('aa-bb-cc', util.fname('http://foo/bar/aa-bb-cc'))

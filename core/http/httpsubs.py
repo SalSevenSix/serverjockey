@@ -83,7 +83,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         if name is HttpSubscriptionService.UNSUBSCRIBE:
             if not message.data():
                 return None
-            identity = str(message.data()).rsplit('/', maxsplit=1)[-1]
+            identity = util.fname(str(message.data()))
             subscriber = self.lookup(identity)
             if subscriber:
                 del self._subscriptions[identity]
