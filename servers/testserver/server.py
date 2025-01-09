@@ -27,7 +27,7 @@ _MAINTENANCE_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_START, msgext.Unpac
 _READY_STATE_FILTER = msgftr.Or(msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
-def _default_config():
+def default_config():
     return {
         'players': 'MrGoober,StabMasterArson,YouMadNow',
         'start_speed_modifier': 1,
@@ -150,7 +150,7 @@ class Server(svrabc.Server):
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._log_dir)
         if not await io.file_exists(self._config_file):
-            await io.write_file(self._config_file, objconv.obj_to_json(_default_config(), pretty=True))
+            await io.write_file(self._config_file, objconv.obj_to_json(default_config(), pretty=True))
 
 
 class _InstallRuntimeHandler(httpabc.PostHandler):

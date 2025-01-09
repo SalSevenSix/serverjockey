@@ -33,19 +33,23 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
 
     @staticmethod
     def event_login(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):
-        mailer.post(source, mc.PlayerStore.EVENT, _EventLogin(name, steamid))
+        if name:
+            mailer.post(source, mc.PlayerStore.EVENT, _EventLogin(name, steamid))
 
     @staticmethod
     def event_logout(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):
-        mailer.post(source, mc.PlayerStore.EVENT, _EventLogout(name, steamid))
+        if name:
+            mailer.post(source, mc.PlayerStore.EVENT, _EventLogout(name, steamid))
 
     @staticmethod
     def event_chat(mailer: msgabc.Mailer, source: typing.Any, name: str, text: str):
-        mailer.post(source, mc.PlayerStore.EVENT, _EventChat(name, text))
+        if name and text:
+            mailer.post(source, mc.PlayerStore.EVENT, _EventChat(name, text))
 
     @staticmethod
     def event_death(mailer: msgabc.Mailer, source: typing.Any, name: str, text: str | None = None):
-        mailer.post(source, mc.PlayerStore.EVENT, _EventDeath(name, text))
+        if name:
+            mailer.post(source, mc.PlayerStore.EVENT, _EventDeath(name, text))
 
     @staticmethod
     async def get(mailer: msgabc.MulticastMailer, source: typing.Any,

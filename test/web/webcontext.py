@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from core.util import util
+from core.msgc import sc
 
 
 def _de_increment_wait(wait: float) -> float:
@@ -34,34 +35,34 @@ class _WebTestContext:
         login_button.click()
         return self.find_element('systemInfoNetPublic', exists=3.0).get_attribute('innerText')
 
-    def _clear_notification(self):
+    def clear_notification(self):
         if self.has_element('notificationsText0'):
             self.find_element('notificationsText0').click()
             time.sleep(1.0)
 
     def goto_home(self):
-        self._clear_notification()
+        self.clear_notification()
         self.find_element('navbarHome').click()
         assert self.find_element('systemInfoVersion', exists=3.0)
 
     def goto_instances(self):
-        self._clear_notification()
+        self.clear_notification()
         self.find_element('navbarInstances').click()
         time.sleep(1.0)  # for instances to load
 
     def goto_instance(self, identity: str, module: str):
-        self._clear_notification()
+        self.clear_notification()
         self.find_element('navbarInstances').click()
         self.find_element('instanceListViewI' + identity, by=By.NAME, exists=3.0).click()
         instance_header = self.find_element('instanceHeader', exists=2.0).get_attribute('innerText')
         assert instance_header == identity + ' \xA0\xA0 ' + module
 
     def goto_guides(self):
-        self._clear_notification()
+        self.clear_notification()
         self.find_element('navbarGuides').click()
 
     def goto_about(self):
-        self._clear_notification()
+        self.clear_notification()
         self.find_element('navbarAbout').click()
 
     def scroll_to_top(self):
@@ -112,15 +113,14 @@ class _WebTestContext:
     def get_instance_loglastline(self) -> str:
         return self.get_instance_log().split('\n')[-1]
 
-    def wait_for_instance_state(self, success: str, error: str = 'EXCEPTION', wait: float = 2.0):
+    def wait_for_instance_state(self, success: str, error: str = sc.EXCEPTION, wait: float = 2.0):
         state = self.find_element('serverStatusState')
-        success, error = success.upper(), error.upper() if error else None
         while True:
             value = self.get_instance_state(state)
             if value == success:
                 return
             if value == error:
-                raise Exception('wait for state ended in ' + error)
+                raise Exception(f'wait for state ended in {error}')
             wait = _de_increment_wait(wait)
 
     def backup_path(self, instance: str, filename: str = ''):

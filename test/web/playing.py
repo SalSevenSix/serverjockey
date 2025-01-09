@@ -5,6 +5,7 @@ import re
 from test.web import webcontext
 from selenium.webdriver.support.ui import Select
 from core.util import util, dtutil
+from core.msgc import sc
 
 
 class TestPlaying(unittest.TestCase):
@@ -13,10 +14,10 @@ class TestPlaying(unittest.TestCase):
         # open instance page
         context = webcontext.get()
         context.goto_instance(identity, module)
-        self.assertTrue(context.get_instance_state() in ('READY', 'STOPPED'))
+        self.assertTrue(context.get_instance_state() in (sc.READY, sc.STOPPED))
         # start server
         context.find_element('serverControlsStart').click()
-        context.wait_for_instance_state('STARTED', wait=200.0)
+        context.wait_for_instance_state(sc.STARTED, wait=200.0)
 
     def _start_server_and_wait_for_login(self, identity: str, module: str) -> str:
         context = webcontext.get()
@@ -45,11 +46,11 @@ class TestPlaying(unittest.TestCase):
         self.assertIsNotNone(context.find_element('chatActivityChatLogList', exists=3.0))
         # check expected player activity
         self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', 2, 2))
-        self.assertEqual('LOGIN', util.rchop(context.get_cell_text('chatActivityChatLogList', 2, 3), '('))
+        self.assertEqual(sc.LOGIN, util.rchop(context.get_cell_text('chatActivityChatLogList', 2, 3), '('))
         self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', 3, 2))
         self.assertEqual('hello from game', context.get_cell_text('chatActivityChatLogList', 3, 3))
         self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', 4, 2))
-        self.assertEqual('LOGOUT', util.rchop(context.get_cell_text('chatActivityChatLogList', 4, 3), '('))
+        self.assertEqual(sc.LOGOUT, util.rchop(context.get_cell_text('chatActivityChatLogList', 4, 3), '('))
         self._stop_server()
 
     # noinspection PyMethodMayBeStatic
@@ -57,7 +58,7 @@ class TestPlaying(unittest.TestCase):
         context = webcontext.get()
         context.scroll_to_top()
         context.find_element('serverControlsStop').click()
-        context.wait_for_instance_state('STOPPED', wait=20.0)
+        context.wait_for_instance_state(sc.STOPPED, wait=20.0)
 
     def _send_console_command(self, wait: float = 2.0):
         context = webcontext.get()

@@ -69,9 +69,10 @@ def initialise() -> list:
     p('### *** SERVER STARTED ***')
     players = config['players'].split(',')
     for player in players:
-        time.sleep(0.2 * start_speed_modifier)
-        p(f'### Player {player} has joined the server')
-        p(f"znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{player}' id={randint(1, 1000)}")
+        if player:
+            time.sleep(0.2 * start_speed_modifier)
+            p(f'### Player {player} has joined the server')
+            p(f"znet: Java_zombie_core_znet_SteamGameServer_BUpdateUserData '{player}' id={randint(1, 1000)}")
     threading.Thread(target=InGameTime(config['ingametime_interval_seconds']).run, daemon=True).start()
     return players
 

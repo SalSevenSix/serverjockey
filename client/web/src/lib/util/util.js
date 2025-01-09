@@ -172,7 +172,7 @@ export class ObjectUrls {
   #urls = [];
 
   openBlob(blob) {
-    const url = window.URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     this.#urls.push(url);
     window.open(url).focus();
   }
@@ -186,5 +186,6 @@ export class ObjectUrls {
     this.#urls.forEach(function(url) {
       URL.revokeObjectURL(url);
     });
+    this.#urls.length = 0;
   }
 }

@@ -2,7 +2,7 @@ import unittest
 import os
 from test.web import webcontext
 from selenium.webdriver.common.by import By
-
+from core.msgc import sc
 from servers.projectzomboid.deployment import APPID as APPID_PROJECTZOMBOID
 from servers.sevendaystodie.deployment import APPID as APPID_SEVENDAYSTODIE
 from servers.unturned.deployment import APPID as APPID_UNTURNED
@@ -18,40 +18,40 @@ class TestRefreshRuntime(unittest.TestCase):
         # open instance page
         context = webcontext.get()
         context.goto_instance(identity, module)
-        self.assertTrue(context.get_instance_state() in ('READY', 'STOPPED'))
+        self.assertTrue(context.get_instance_state() in (sc.READY, sc.STOPPED))
         context.find_element('collapsibleDeployment').click()
         if appid is None:
             # update runtime not steam
             context.find_element('runtimeControlsInstall', enabled=2.0).click()
             context.find_element('confirmModalConfirm').click()
-            context.wait_for_instance_state('MAINTENANCE')
+            context.wait_for_instance_state(sc.MAINTENANCE)
             context.scroll_to_top()
-            context.wait_for_instance_state('READY', wait=100.0 * weight)
+            context.wait_for_instance_state(sc.READY, wait=100.0 * weight)
             self.assertEqual('END Install', context.get_instance_loglastline())
             return
         # restore last runtime backup
         context.find_element('collapsibleBackups').click()
         context.find_element('fileSystemBackupsActionE' + TEST_BACKUP, by=By.NAME, exists=3.0).click()
         context.find_element('confirmModalConfirm').click()
-        context.wait_for_instance_state('MAINTENANCE')
+        context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
-        context.wait_for_instance_state('READY', wait=100.0 * weight)
+        context.wait_for_instance_state(sc.READY, wait=100.0 * weight)
         self.assertEqual('END Unpack Directory', context.get_instance_loglastline())
         # update runtime steam
         context.find_element('runtimeControlsInstall', enabled=2.0).click()
         context.find_element('confirmModalConfirm').click()
-        context.wait_for_instance_state('MAINTENANCE')
+        context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
-        context.wait_for_instance_state('READY', wait=300.0 * weight)
+        context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
         self.assertTrue(context.check_instance_log(
             6, 'Success! App \'' + appid + '\' fully installed.',
             'Error! App \'' + appid + '\' state is 0x10C after update job.',
             'Error! App \'' + appid + '\' state is 0x6 after update job.'))
         # refresh last runtime backup
         context.find_element('backupRestoreActionsBackupRuntime').click()
-        context.wait_for_instance_state('MAINTENANCE')
+        context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
-        context.wait_for_instance_state('READY', wait=300.0 * weight)
+        context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
         self.assertEqual('END Archive Directory', context.get_instance_loglastline())
         old_backup = context.backup_path(identity, TEST_BACKUP)
         self.assertTrue(os.path.isfile(old_backup))
