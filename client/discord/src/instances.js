@@ -76,15 +76,13 @@ exports.Service = class Service {
   }
 
   getData(instance) {
-    if (instance == null) return null;
+    if (!instance) return null;
     if (!util.hasProp(this.#instances, instance)) return null;
     return this.#instances[instance];
   }
 
   getInstancesText() {
-    if (Object.keys(this.#instances).length === 0) {
-      return '```\nNo instances found.\n```';
-    }
+    if (Object.keys(this.#instances).length === 0) return '```\nNo instances found.\n```';
     let result = '```\n';
     for (const [identity, data] of Object.entries(this.#instances)) {
       if (identity === this.#context.instancesService.currentInstance()) {

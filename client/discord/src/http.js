@@ -22,7 +22,6 @@ exports.MessageHttpTool = class MessageHttpTool {
   }
 
   doGet(path, dataHandler) {
-    const self = this;
     const context = this.#context;
     const message = this.#message;
     if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
@@ -43,12 +42,11 @@ exports.MessageHttpTool = class MessageHttpTool {
         }
       })
       .catch(function(error) {
-        self.error(error, message);
+        logger.error(error, message);
       });
   }
 
   doPost(path, body = null, dataHandler = null, allowRoles = null) {
-    const self = this;
     const context = this.#context;
     const message = this.#message;
     if (allowRoles && !util.checkHasRole(message, allowRoles)) return;
@@ -69,11 +67,14 @@ exports.MessageHttpTool = class MessageHttpTool {
         return response.json();
       })
       .then(function(data) {
-        if (!dataHandler) return util.reactSuccess(message);
-        dataHandler(data);
+        if (dataHandler) {
+          dataHandler(data);
+        } else {
+          util.reactSuccess(message);
+        }
       })
       .catch(function(error) {
-        self.error(error, message);
+        logger.error(error, message);
       })
       .finally(function() {
         if (message.content === context.config.CMD_PREFIX + 'shutdown') {

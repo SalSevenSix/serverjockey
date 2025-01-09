@@ -223,7 +223,7 @@ class Deployment:
             return
         live_mod_list, mod_list = self._mods_dir + '/mod-list.json', []
         for mod in [m for m in mods if m['name'] in _BASE_MOD_NAMES]:
-            mod_list.append(dict(name=mod['name'], enabled=mod['enabled']))
+            mod_list.append(util.filter_dict(mod, ('name', 'enabled')))
         settings = objconv.json_to_dict(await io.read_file(self._server_settings))
         if not util.get('username', settings) or not util.get('token', settings):
             self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
@@ -238,7 +238,7 @@ class Deployment:
         credentials = '?username=' + util.get('username', settings) + '&token=' + util.get('token', settings)
         async with aiohttp.ClientSession(connector=connector) as session:
             for mod in [m for m in mods if m['name'] not in _BASE_MOD_NAMES]:
-                mod_list.append(dict(name=mod['name'], enabled=mod['enabled']))
+                mod_list.append(util.filter_dict(mod, ('name', 'enabled')))
                 mod_meta_url = baseurl + '/api/mods/' + mod['name']
                 async with session.get(mod_meta_url, timeout=timeout) as meta_resp:
                     assert meta_resp.status == 200

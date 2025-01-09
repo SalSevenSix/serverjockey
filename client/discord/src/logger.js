@@ -23,7 +23,7 @@ exports.dump = function(value) {
 
 exports.error = function(value, message = null) {
   if (!value) return util.reactError(message);
-  if (Object.prototype.toString.call(value) === '[object String]') {
+  if (util.isString(value)) {
     console.error(util.shortISODateTimeString() + ' ERROR ' + value);
   } else {
     if (value.name === 'AbortError') return null;

@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Fri Dec 20 2024 Bowden Salis <bsalis76@gmail.com> - 0.16.0
-- Feature release v0.16.0
+* Sat Jan 11 2024 Bowden Salis <bsalis76@gmail.com> - 0.16.0
+- Small features and library upgrades release
 * Thu Dec 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.15.0
 - Small improvements and library upgrades release
 * Mon Oct 28 2024 Bowden Salis <bsalis76@gmail.com> - 0.14.0

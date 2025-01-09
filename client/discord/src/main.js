@@ -97,14 +97,12 @@ function handleMessage(message) {
     if (command === 'help' && data.length === 0) { system.help(args); }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
     instanceData.server[command](args);
-    return;
-  }
-  if (util.hasProp(system, command)) {
+  } else if (util.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
     system[command](args);
-    return;
+  } else {
+    util.reactUnknown(message);
   }
-  util.reactUnknown(message);
 }
 
 function shutdown() {
