@@ -9,7 +9,7 @@ pylint = "*"                  # https://pypi.org/project/pylint/
 
 [packages]
 async-timeout = "4.0.3"       # backward compatability for python < 3.11
-aiohttp = "3.11.10"           # https://pypi.org/project/aiohttp/
+aiohttp = "3.11.11"           # https://pypi.org/project/aiohttp/
 aiofiles = "24.1.0"           # https://pypi.org/project/aiofiles/
 sqlalchemy = "2.0.36"         # https://pypi.org/project/sqlalchemy/
 vdf = "3.4"                   # https://pypi.org/project/vdf/
