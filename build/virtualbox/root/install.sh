@@ -35,7 +35,7 @@ until grep "SteamCMD install completed" $SJGMS_LOG > /dev/null; do
 done
 
 echo "Waiting for UPnP discovery completed"
-LOOP_RETRY=15
+LOOP_RETRY=20
 until grep -E "No IGD port mapping service found|Found port mapping service" $SJGMS_LOG > /dev/null; do
   echo " retry $LOOP_RETRY"
   [ $LOOP_RETRY -eq 0 ] && exit 1
