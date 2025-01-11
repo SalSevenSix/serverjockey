@@ -54,7 +54,7 @@ class IgdService(msgabc.AbcSubscriber):
         try:
             return await self._handle(action, data)
         except Exception as e:
-            logging.error('Error handling ' + action + ': ' + repr(e))
+            logging.error('Error handling %s : %s', action, repr(e))
         return False
 
     async def _handle(self, action, data):
@@ -113,7 +113,7 @@ def _sync_get_mapping_service():
 
 def _sync_add_port_mapping(service, local_ip: str, port: int, protocal: str, description: str):
     try:
-        logging.debug('Opening port ' + local_ip + ':' + str(port) + ' for ' + protocal)
+        logging.debug('Opening port %s:%s for %s', local_ip, port, protocal)
         service.AddPortMapping(
             NewRemoteHost='',
             NewExternalPort=port,

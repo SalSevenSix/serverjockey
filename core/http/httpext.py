@@ -270,7 +270,7 @@ class _FileByteStream(httpabc.ByteStream):
                     if pumping:
                         self._tracker.processed(chunk)
         except Exception as e:
-            logging.error('Error reading ' + self._filename + ': ' + repr(e))
+            logging.error('Error reading %s : %s', self._filename, repr(e))
         finally:
             self._tracker.processed(None)
             tasks.task_end(self._task)
