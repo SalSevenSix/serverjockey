@@ -42,9 +42,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         if _SERVER_VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _SERVER_VERSION_KEY)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), ':')
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
-            return None
         return None

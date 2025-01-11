@@ -78,8 +78,6 @@ class MaintenanceStateSubscriber(msgabc.AbcSubscriber):
     def handle(self, message):
         if self._maintenance_filter.accepts(message):
             svrsvc.ServerStatus.notify_state(self._mailer, self, sc.MAINTENANCE)
-            return None
-        if self._ready_filter.accepts(message):
+        elif self._ready_filter.accepts(message):
             svrsvc.ServerStatus.notify_state(self._mailer, self, sc.READY)
-            return None
         return None

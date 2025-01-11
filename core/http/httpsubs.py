@@ -71,23 +71,22 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         return util.get(identity, self._subscriptions)
 
     def handle(self, message):
-        name = message.name()
+        name, data = message.name(), message.data()
         if name is HttpSubscriptionService.SUBSCRIBE:
             identity = str(uuid.uuid4())
             path = self._subscriptions_path + '/' + identity
             logging.debug('Http subscription created at %s', path)
-            subscriber = _Subscriber(self._mailer, identity, message.data())
+            subscriber = _Subscriber(self._mailer, identity, data)
             self._subscriptions[identity] = subscriber
             self._mailer.register(subscriber)
             self._mailer.post(self, HttpSubscriptionService.SUBSCRIBE_RESPONSE, path, message)
-        if name is HttpSubscriptionService.UNSUBSCRIBE:
-            if not message.data():
-                return None
-            identity = util.fname(str(message.data()))
-            subscriber = self.lookup(identity)
-            if subscriber:
-                del self._subscriptions[identity]
-                subscriber.close()
+        elif name is HttpSubscriptionService.UNSUBSCRIBE:
+            if data:
+                identity = util.fname(str(data))
+                subscriber = self.lookup(identity)
+                if subscriber:
+                    del self._subscriptions[identity]
+                    subscriber.close()
         return None
 
     def subscriptions_handler(self, name: str) -> _SubscriptionsHandler:

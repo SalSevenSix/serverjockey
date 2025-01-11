@@ -55,16 +55,13 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         if _ServerDetailsSubscriber.MAP_FILTER.accepts(message):
             value = util.lchop(message.data(), '(')[:-1]
             svrsvc.ServerStatus.notify_details(self._mailer, self, {'map': value})
-            return None
-        if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), 'server version')
             value = util.rchop(value, ',')
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), 'port')
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
-            return None
         return None
 
 
@@ -102,10 +99,8 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             value = util.lchop(message.data(), ' "')
             value = util.rchop(value, '" connected')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
-            return None
-        if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
             value = util.lchop(message.data(), 'Dropped client \'')
             value = util.rchop(value, '\' from server')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
-            return None
         return None

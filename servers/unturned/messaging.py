@@ -59,14 +59,11 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
             self._port = DEFAULT_PORT  # reset to default every start
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
             self._port = value[:-1]
-            return None
-        if _STARTED_FILTER.accepts(message):
+        elif _STARTED_FILTER.accepts(message):
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=self._port))
-            return None
         return None
 
 
@@ -108,27 +105,22 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.rchop(name, ']')
             text = util.lchop(value, ']: "')[:-1]
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
-            return None
-        if _PlayerEventSubscriber.KICK_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.KICK_FILTER.accepts(message):
             value = util.lchop(message.data(), _PlayerEventSubscriber.KICK)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value[:-1])
-            return None
-        if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             value = util.lchop(message.data(), _PlayerEventSubscriber.NAME)
             value = util.rchop(value, _PlayerEventSubscriber.CHARACTER)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
-            return None
-        if _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
             value = util.lchop(message.data(), _PlayerEventSubscriber.NAME)
             value = util.rchop(value, _PlayerEventSubscriber.CHARACTER)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
-            return None
-        if _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
             value = message.data()
             name = util.rchop(value, '[')
             prefix = name + ' [' + name + ']'
             if value != prefix and value.startswith(prefix):
                 text = value[len(prefix) + 1:-1]
                 playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
-            return None
         return None

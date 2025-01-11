@@ -71,24 +71,19 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=value))
-            return None
-        if SERVER_RESTART_REQUIRED_FILTER.accepts(message):
+        elif SERVER_RESTART_REQUIRED_FILTER.accepts(message):
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(restart=dtutil.to_millis(message.created())))
-            return None
-        if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
             value = util.rchop(value, 'demo=')
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
-            return None
-        if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value))
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
             value = util.rchop(value, 'port for connections')
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=objconv.to_int(value)))
-            return None
         return None
 
 
@@ -116,13 +111,11 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.lchop(message.data(), 'username="')
             name = util.rchop(name, '" connection-type=')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
-            return None
-        if _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
             parts = util.lchop(message.data(), _PlayerEventSubscriber.LOGOUT).split(' ')
             steamid, name = parts[-1], ' '.join(parts[:-1])
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
-            return None
-        if _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
             data = objconv.json_to_dict(util.lchop(message.data(), 'PlayerDeath'))
             name = util.get('player', data)
             if name:
@@ -134,7 +127,6 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
                 text += str(util.get('y', position, 0)) + ','
                 text += str(util.get('z', position, 0))
                 playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
-            return None
         return None
 
 
@@ -163,8 +155,7 @@ class _ProvideAdminPasswordSubscriber(msgabc.AbcSubscriber):
             CONSOLE_OUTPUT_FILTER,
             msgftr.Or(msgftr.DataStrContains('Enter new administrator password'),
                       msgftr.DataStrContains('Confirm the password'))))
-        self._mailer = mailer
-        self._pwd = pwd
+        self._mailer, self._pwd = mailer, pwd
 
     async def handle(self, message):
         await proch.PipeInLineService.request(self._mailer, self, self._pwd, force=True)

@@ -50,15 +50,12 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
             value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
-            return None
-        if _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(cport=value))
-            return None
         return None
 
 
@@ -102,28 +99,23 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.rchop(value, ':')[1:-1]
             text = util.lchop(value, ':')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
-            return None
-        if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
             name = util.lchop(value, 'INF GMSG: Player \'')
             name = util.rchop(name, '\' joined the game')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
-            return None
-        if _PlayerEventSubscriber.SPAWN_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.SPAWN_FILTER.accepts(message):
             playerid = util.lchop(value, ', OwnerID=\'')
             playerid = util.rchop(playerid, '\', PlayerName=')
             name = util.lchop(value, ', PlayerName=\'')
             name = util.rchop(name, '\', ClientNumber=')
             self._idmap[playerid] = name
-            return None
-        if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
             name = util.lchop(value, 'INF GMSG: Player \'')
             name = util.rchop(name, '\' left the game')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
             self._idmap = util.delete_dict_by_value(self._idmap, name)
-            return None
-        if _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
             name = util.lchop(value, 'INF GMSG: Player \'')
             name = util.rchop(name, '\' died')
             playerstore.PlayersSubscriber.event_death(self._mailer, self, name)
-            return None
         return None

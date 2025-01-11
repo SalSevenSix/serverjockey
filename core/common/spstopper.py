@@ -51,10 +51,9 @@ class _ServerProcessSubscriber(msgabc.AbcSubscriber):
         return self._process
 
     def handle(self, message):
-        if mc.ServerProcess.FILTER_STATES_UP.accepts(message) and isinstance(message.data(), subprocess.Process):
-            self._process = message.data()
-            return None
-        if mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
+        if mc.ServerProcess.FILTER_STATES_UP.accepts(message):
+            if isinstance(message.data(), subprocess.Process):
+                self._process = message.data()
+        elif mc.ServerProcess.FILTER_STATES_DOWN.accepts(message):
             self._process = None
-            return None
         return None

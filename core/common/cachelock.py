@@ -51,12 +51,10 @@ class _CachLockService(msgabc.AbcSubscriber):
         if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             if self._cachelock and not await self._cachelock.start():
                 self._cachelock = None
-            return None
-        if _CachLockService.CACHE_PATH_FILTER.accepts(message):
+        elif _CachLockService.CACHE_PATH_FILTER.accepts(message):
             if self._cachelock:
                 self._cachelock.stop()
             self._cachelock = _CacheLock(self._mailer, self._executable, message.data())
-            return None
         return None
 
 

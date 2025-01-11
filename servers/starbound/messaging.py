@@ -53,12 +53,10 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
             value = util.rchop(value, '(')
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = message.data()
             value = value[value.rfind(':') + 1:]
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
-            return None
         return None
 
 
@@ -93,8 +91,6 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         value = util.rchop(value, "' ")
         if _PlayerEventSubscriber.CONNECT_FILTER.accepts(message):
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
-            return None
-        if _PlayerEventSubscriber.DISCONNECT_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.DISCONNECT_FILTER.accepts(message):
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
-            return None
         return None

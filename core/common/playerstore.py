@@ -64,14 +64,11 @@ class PlayersSubscriber(msgabc.AbcSubscriber):
                 self._players.login_or_logout(event)
             elif isinstance(event, _EventClear):
                 self._players.clear()
-            return None
-        if mc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
+        elif mc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             self._mailer.post(self, mc.PlayerStore.EVENT, _EventClear())
-            return None
-        if PlayersSubscriber.GET_FILTER.accepts(message):
+        elif PlayersSubscriber.GET_FILTER.accepts(message):
             data = self._players.get(message.data())
             self._mailer.post(self, PlayersSubscriber.GET_RESPONSE, data, message)
-            return None
         return None
 
 

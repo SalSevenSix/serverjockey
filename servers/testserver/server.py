@@ -205,19 +205,15 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=value))
-            return None
-        if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
-            return None
-        if _ServerDetailsSubscriber.IP_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.IP_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value))
-            return None
-        if _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
+        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
             value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=value))
-            return None
         return None
 
 
@@ -241,21 +237,17 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             name = util.rchop(name, ':')
             text = util.lchop(message.data(), ':')
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
-            return None
-        if _PlayerEventSubscriber.KILL_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.KILL_FILTER.accepts(message):
             name = util.lchop(message.data(), _PlayerEventSubscriber.KILL)
             playerstore.PlayersSubscriber.event_death(self._mailer, self, name, 'was killed by admin command')
-            return None
-        if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
             value = util.lchop(message.data(), _PlayerEventSubscriber.PLAYER)
             value = util.rchop(value, _PlayerEventSubscriber.JOIN)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
-            return None
-        if _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
+        elif _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
             value = util.lchop(message.data(), _PlayerEventSubscriber.PLAYER)
             value = util.rchop(value, _PlayerEventSubscriber.LEAVE)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
-            return None
         return None
 
 
@@ -274,10 +266,8 @@ class _AutomaticRestartsSubscriber(msgabc.AbcSubscriber):
     def handle(self, message):
         if _AutomaticRestartsSubscriber.AFTER_WARNINGS_RESTART_FILTER.accepts(message):
             restarts.RestartAfterWarningsSubscriber.signal_restart(self._mailer, self)
-            return None
-        if _AutomaticRestartsSubscriber.ON_EMPTY_RESTART_FILTER.accepts(message):
+        elif _AutomaticRestartsSubscriber.ON_EMPTY_RESTART_FILTER.accepts(message):
             restarts.RestartOnEmptySubscriber.signal_restart(self._mailer, self)
-            return None
         return None
 
 

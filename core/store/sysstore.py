@@ -52,10 +52,8 @@ class _SystemRouting(msgabc.AbcSubscriber):
         identity, module = subcontext.config('identity'), subcontext.config('module')
         if name is mc.SystemService.SERVER_INITIALISED:
             storeabc.execute(self._mailer, source, storetxn.InsertInstance(identity, module))
-            return None
-        if name is mc.SystemService.SERVER_DELETED:
+        elif name is mc.SystemService.SERVER_DELETED:
             storeabc.execute(self._mailer, source, storetxn.DeleteInstance(identity))
-            return None
         return None
 
 

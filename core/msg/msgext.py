@@ -293,8 +293,6 @@ class SetGetSubscriber(msgabc.AbcSubscriber):
         action = message.name()
         if action is self._name_get:
             self._mailer.post(message.source(), self._name_response, self._value, message)
-            return None
-        if action is self._name_set:
+        elif action is self._name_set:
             self._value = message.data()
-            return None
         return None

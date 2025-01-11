@@ -32,11 +32,9 @@ class PortMapperService(msgabc.AbcSubscriber):
         if mc.ServerStatus.RUNNING_FALSE_FILTER.accepts(message):
             self._trash.extend(self._active)
             self._active = []
-            return None
-        if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+        elif mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             self._delete_trash()
-            return None
-        if PortMapperService.MAP_PORT_FILTER.accepts(message):
+        elif PortMapperService.MAP_PORT_FILTER.accepts(message):
             data = message.data()
             port, protocal = util.get('port', data), util.get('protocal', data)
             signature = dict(port=port, protocal=protocal)
@@ -46,7 +44,6 @@ class PortMapperService(msgabc.AbcSubscriber):
             else:
                 description = util.get('description', data)
                 igd.add_port_mapping(self._root_context, message.source(), port, protocal, description)
-            return None
         return None
 
     def _delete_trash(self):
