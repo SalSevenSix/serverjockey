@@ -1,4 +1,5 @@
 import time
+import math
 # ALLOW NONE
 
 
@@ -21,3 +22,21 @@ def format_time(ft: str, seconds: float, local: bool = True) -> str:
 
 def format_time_standard(seconds: float, local: bool = True) -> str:
     return format_time('%Y-%m-%d %H:%M:%S', seconds, local)
+
+
+def human_duration(seconds: float, parts: int = 3) -> str:
+    value = seconds if seconds and seconds > 0.0 else 0.0
+    days, hours = -1, -1
+    if parts > 2:
+        days = math.floor(value / 86400.0)
+        value -= days * 86400.0
+    if parts > 1:
+        hours = math.floor(value / 3600.0)
+        value -= hours * 3600.0
+    result = ''
+    if days > -1:
+        result += str(days) + 'd '
+    if hours > -1:
+        result += str(hours) + 'h '
+    result += str(math.floor(value / 60.0)) + 'm'
+    return result

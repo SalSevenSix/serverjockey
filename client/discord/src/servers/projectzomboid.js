@@ -110,7 +110,8 @@ exports.world = function($) {
   if (data.length === 0) return util.reactUnknown($.message);
   const cmd = data.shift();
   let body = null;
-  if (data.length > 0 && cmd === 'broadcast') {
+  if (cmd === 'broadcast') {
+    if (data.length === 0) return util.reactUnknown($.message);
     body = { message: data.join(' ') };
   }
   $.httptool.doPost('/world/' + cmd, body);

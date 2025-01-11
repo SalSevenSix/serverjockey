@@ -23,7 +23,7 @@ exports.about = function($) {
   result += '**Join the ServerJockey Discord**\n';
   result += ' https://discord.gg/TEuurWAhHn\n';
   result += '**ServerJockey on Ko-fi**\n';
-  result += ' <https://ko-fi.com/D1D4E4ZYZ>\n';
+  result += ' <https://ko-fi.com/serverjockey>\n';
   result += '**ServerJockey on YouTube**\n';
   result += ' <https://www.youtube.com/@BSALIS76>\n';
   result += '**ServerJockey on GitHub**\n';
@@ -65,9 +65,16 @@ exports.instances = function($) {
 
 exports.use = function($) {
   if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
-  if ($.data.length === 0) return util.reactUnknown($.message);
-  if (!$.context.instancesService.useInstance($.data[0])) return util.reactError($.message);
-  $.message.channel.send($.context.instancesService.getInstancesText());
+  if ($.data.length === 0) {
+    if ($.context.instancesService.currentInstance()) {
+      $.message.channel.send('```\ndefault => ' + $.context.instancesService.currentInstance() + '\n```');
+    } else {
+      $.message.channel.send('```\nNo default instance set\n```');
+    }
+  } else {
+    if (!$.context.instancesService.useInstance($.data[0])) return util.reactError($.message);
+    $.message.channel.send($.context.instancesService.getInstancesText());
+  }
 };
 
 exports.create = function($) {
