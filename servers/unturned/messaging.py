@@ -37,7 +37,7 @@ async def initialise(mailer: msgabc.MulticastMailer):
 
 
 # \x1b[?1h\x1b=\x1b[6n\x1b[H\x1b[2J\x1b]0;Unturned\x07\x1b37mGame version: 3.22.19.4 Engine version: 2020.3.38f1
-# [2024-09-02 01:52:46] Successfully set port to 27027!
+# [YYYY-MM-DD 01:52:46] Successfully set port to 27027!
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_PREFIX, VERSION_SUFFIX = 'Game version:', 'Engine version:'
     VERSION_FILTER = msgftr.DataMatches('.*' + VERSION_PREFIX + '.*' + VERSION_SUFFIX + '.*')

@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { notifyError } from '$lib/util/notifications';
   import { sleep, humanFileSize, humanDuration } from '$lib/util/util';
   import { surl, newGetRequest } from '$lib/util/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
   import RubiksCube from '$lib/svg/RubiksCube.svelte';
   import HealthSymbol from '$lib/widget/HealthSymbol.svelte';
   import SpinnerOverlay from '$lib/widget/SpinnerOverlay.svelte';
@@ -129,3 +129,10 @@
     {/if}
   </div>
 </div>
+
+
+<style>
+  td:first-child {
+    width: 6em;
+  }
+</style>

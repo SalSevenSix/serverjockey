@@ -60,12 +60,18 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 
 # 2024-08-14T19:39:28 236.252 INF GMSG: Player 'Apollo' joined the game
-# 2024-08-14T19:39:28 236.260 INF PlayerSpawnedInWorld (reason: EnterMultiplayer, position: -1280, 61, 209): EntityID=171, PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085', PlayerName='Apollo', ClientNumber='1'
-# 2024-08-15T14:19:33 291.194 INF PlayerSpawnedInWorld (reason: JoinMultiplayer, position: -1274, 61, 213): EntityID=171, PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085', PlayerName='Apollo', ClientNumber='1'
+# 2024-08-14T19:39:28 236.260 INF PlayerSpawnedInWorld (reason: EnterMultiplayer, position: -1280, 61, 209): EntityID=17
+#  1, PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_7656119796898908
+#  5', PlayerName='Apollo', ClientNumber='1'
+# 2024-08-15T14:19:33 291.194 INF PlayerSpawnedInWorld (reason: JoinMultiplayer, position: -1274, 61, 213): EntityID=171
+#  , PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085
+#  ', PlayerName='Apollo', ClientNumber='1'
 # 2024-08-14T19:39:41 249.091 INF Chat (from 'Steam_76561197968989085', entity id '171', to 'Global'): hello all old
-# 2024-12-18T11:50:33 369.738 INF Chat (from 'Steam_76561197968989085', entity id '171', to 'Global'): 'Apollo': hello from game new
+# 2024-12-18T11:50:33 369.738 INF Chat (from 'Steam_76561197968989085', entity id '171', to 'Global'): 'Apollo': hello f
+#  rom game new
 # 2024-08-14T19:39:45 253.185 INF Player Apollo disconnected after 0.4 minutes
-# 2024-08-14T19:39:45 253.479 INF Player disconnected: EntityID=171, PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085', PlayerName='Apollo', ClientNumber='1'
+# 2024-08-14T19:39:45 253.479 INF Player disconnected: EntityID=171, PltfmId='Steam_76561197968989085', CrossId='EOS_000
+#  23f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085', PlayerName='Apollo', ClientNumber='1'
 # 2024-08-14T19:39:45 253.490 INF GMSG: Player 'Apollo' left the game
 # 2024-11-29T23:49:36 252.509 INF GMSG: Player 'Apollo' died
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):

@@ -87,9 +87,12 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-# LOG  : Network     , 1732903690678> 21,508,632> [30-11-24 01:08:10.678] > ConnectionManager: [fully-connected] "" connection: guid=1139410826453420400 ip=192.168.1.4 steam-id=76561197968989085 access= username="Sal" connection-type="UDPRakNet"
+# LOG  : Network     , 1732903690678> 21,508,632> [30-11-24 01:08:10.678] > ConnectionManager: [fully-connected] "" conn
+#  ection: guid=1139410826453420400 ip=192.168.1.4 steam-id=76561197968989085 access= username="Sal" connection-type="UD
+#  PRakNet"
 # LOG  : Network     , 1732903874607> 21,692,562> Disconnected player "Sal" 76561197968989085
-# LOG  : General     , 1732956822901> 7,128,548> PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "x": 10897, "y": 10126, "z": 0 }}
+# LOG  : General     , 1732956822901> 7,128,548> PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "
+#  x": 10897, "y": 10126, "z": 0 }}
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN, LOGOUT = '> ConnectionManager: [fully-connected]', '> Disconnected player'
     LOGIN_FILTER, LOGOUT_FILTER = msgftr.DataStrContains(LOGIN), msgftr.DataStrContains(LOGOUT)
