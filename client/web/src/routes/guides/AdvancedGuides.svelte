@@ -1,6 +1,5 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
-  import ExtLink from '$lib/widget/ExtLink.svelte';
 </script>
 
 
@@ -92,7 +91,7 @@
 
 
 <style>
-  .fa, .fa-brands {
+  .fa {
     width: 1.2em;
   }
 </style>

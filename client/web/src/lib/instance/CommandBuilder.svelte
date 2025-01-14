@@ -64,11 +64,11 @@
     let path = '/' + command;
     commands[command][action].forEach(function(value, index) {
       if (!value.type) {
-        // pass
+        // Pass
       } else if (value.type === 'item') {
         path += '/' + urlSafeB64encode(args[index]);
       } else if (value.type === 'number') {
-        body[value.name] = parseInt(args[index]);
+        body[value.name] = parseInt(args[index], 10);
       } else {
         body[value.name] = args[index];
       }

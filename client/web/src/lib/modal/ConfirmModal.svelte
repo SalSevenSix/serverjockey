@@ -1,5 +1,6 @@
 <script>
   import { closeModal } from 'svelte-modals';
+  import { fNoop } from '$lib/util/util';
   import InputText from '$lib/widget/InputText.svelte';
 
   export let isOpen;
@@ -17,7 +18,7 @@
 
 
 <div class="modal" class:is-active={isOpen}>
-  <div class="modal-background" on:click={closeModal} role="button" tabindex="0" on:keypress={function() {}}></div>
+  <div class="modal-background" on:click={closeModal} role="button" tabindex="0" on:keypress={fNoop}></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Confirm action</p>

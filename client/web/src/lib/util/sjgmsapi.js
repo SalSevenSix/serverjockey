@@ -38,13 +38,13 @@ export class SubscriptionHelper {
     while (this.#running) {
       url = null;
       while (this.#running && url == null) {
-        url = await this.#subscribe(subscribeUrl);
+        url = await SubscriptionHelper.#subscribe(subscribeUrl);
         if (this.#running && url == null) {
           await sleep(12000);
         }
       }
       if (url === false) {
-        this.#running = false;  // exit loop
+        this.#running = false;  // Exit loop
       }
       if (this.#running) {
         await this.#doPoll(url, this.#controller.signal, dataHandler);
@@ -62,7 +62,7 @@ export class SubscriptionHelper {
     this.#controller.abort();
   }
 
-  async #subscribe(subscribeUrl) {
+  static async #subscribe(subscribeUrl) {
     return await fetch(surl(subscribeUrl), newPostRequest())
       .then(function(response) {
         if (response.status === 404) return false;
@@ -94,14 +94,13 @@ export class SubscriptionHelper {
         .then(function(data) {
           if (data === false) return false;
           if (data === true) return true;
-          let result = dataHandler(data);
-          if (!result) return false;
-          failcount = 5;
-          return true;
+          if (dataHandler(data)) return true;
+          return false;
         })
         .catch(function() {
           return null;
         });
+      if (polling === true) { failcount = 5; }
       if (this.#running && polling == null && failcount > 0) {
         failcount -= 1;
         await sleep(1200);

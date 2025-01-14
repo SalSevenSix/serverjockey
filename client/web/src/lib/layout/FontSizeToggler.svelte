@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte';
-  import { noStorage } from '$lib/util/util';
+  import { fNoop, noStorage } from '$lib/util/util';
 
-  export let onAfterToggle = function() {};
+  export let onAfterToggle = fNoop;
 
   const fontSizes = ['base-font-size-default', 'base-font-size-big', 'base-font-size-huge'];
 
@@ -30,7 +30,7 @@
   onMount(function() {
     if (!noStorage) {
       const storedFontSizeIndex = localStorage.getItem('sjgmsFontSizeIndex');
-      fontSizeIndex = storedFontSizeIndex ? parseInt(storedFontSizeIndex) : 0;
+      fontSizeIndex = storedFontSizeIndex ? parseInt(storedFontSizeIndex, 10) : 0;
     }
     setFontSize(null, fontSizes[fontSizeIndex]);
   });

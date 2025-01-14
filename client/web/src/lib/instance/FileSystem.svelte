@@ -108,7 +108,7 @@
   function customAction(url) {
     customMeta.action(
       urlToPath(url),
-      { // callbacks
+      { // Callbacks
         start: function() {
           isMaint = true;
           return true;

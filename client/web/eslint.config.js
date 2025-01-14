@@ -35,13 +35,46 @@ export default [
       'svelte/shorthand-directive': 0,
       'svelte/shorthand-attribute': 0,
       'svelte/prefer-style-directive' : 0,
-      'svelte/no-goto-without-base': 0
+      'svelte/no-goto-without-base': 0,
+      'svelte/no-at-html-tags': 0
     }
   },
-  js.configs.recommended,
+  js.configs.all,
   {
     rules: {
-      'no-self-assign': 0
+      'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
+      'no-self-assign': 0,
+      'prefer-const': 0,
+      'no-new': 0,
+      'one-var': 0,
+      'func-style': 0,
+      'func-names': 0,
+      'id-length': 0,
+      'no-eq-null': 0,
+      'eqeqeq': 0,
+      'curly': 0,
+      'no-magic-numbers': 0,
+      'no-inline-comments': 0,
+      'no-param-reassign': 0,
+      'sort-keys': 0,
+      'max-lines': 0,
+      'max-statements': 0,
+      'prefer-template': 0,
+      'prefer-arrow-callback': 0,
+      'no-ternary': 0,
+      'no-await-in-loop': 0,
+      'no-invalid-this': 0,
+      'object-shorthand': 0,
+      'no-useless-assignment': 0,
+      'init-declarations': 0,
+      'no-use-before-define': 0,
+      'max-lines-per-function': 0,
+      'prefer-destructuring': 0,
+      'require-unicode-regexp': 0,
+      'max-classes-per-file': 0,
+      'no-unmodified-loop-condition': 0,
+      'consistent-return': 0,
+      'sort-imports': 0
     }
   },
   {
@@ -49,8 +82,7 @@ export default [
       '@stylistic/js': stylisticJs
     },
     rules: {
-      '@stylistic/js/semi': [2, 'always'],
-      'svelte/no-at-html-tags': 1
+      '@stylistic/js/semi': [2, 'always']
     }
   }
 ];

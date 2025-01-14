@@ -8,7 +8,7 @@
   function copyToClipboard() {
     if (!navigatorClipboard || !codeElement) return;
     let text = codeElement.textContent;
-    text = text.replace(/\xA0/g, ' ');  // fix non-breaking whitespace
+    text = text.replace(/\xA0/g, ' ');  // Fix non-breaking whitespace
     navigatorClipboard.writeText(text);
   }
 </script>

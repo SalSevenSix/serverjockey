@@ -12,19 +12,15 @@
     let actions = [];
     let clock = 0;
     let current = false;
-    let on_low = 20;
-    let on_high = 100;
-    let off_low = 40;
-    let off_high = 500;
+    let [onLow, onHigh, offLow, offHigh] = [20, 100, 40, 500];
     while (clock < 2800 || !current) {
       if (current) {
-        clock = clock + on_low + Math.floor(Math.random() * on_high);
-        //on_low = on_low + 20;
-        on_high = Math.floor(on_high * 1.6);
+        clock = clock + onLow + Math.floor(Math.random() * onHigh);
+        onHigh = Math.floor(onHigh * 1.6);
       } else {
-        clock = clock + off_low + Math.floor(Math.random() * off_high);
-        if (off_low > 10) { off_low = off_low - 10; }
-        if (off_high > 100) { off_high = off_high - 100; }
+        clock = clock + offLow + Math.floor(Math.random() * offHigh);
+        if (offLow > 10) { offLow -= 10; }
+        if (offHigh > 100) { offHigh -= 100; }
       }
       current = !current;
       actions.push({ index: index, schedule: clock, on: current });

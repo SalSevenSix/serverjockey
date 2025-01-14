@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte';
-  import { noStorage } from '$lib/util/util';
+  import { fNoop, noStorage } from '$lib/util/util';
 
-  export let onAfterToggle = function() {};
+  export let onAfterToggle = fNoop;
 
   let themeLink;
   let theme = 'light';

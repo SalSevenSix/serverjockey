@@ -29,6 +29,14 @@ export function guessTextFile(filename) {
     return false;
 }
 
+export function fNoop() {
+  // Pass
+}
+
+export function fTrue() {
+  return true;
+}
+
 export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }

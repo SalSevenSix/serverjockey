@@ -1,4 +1,6 @@
 <script>
+  import { fNoop } from '$lib/util/util';
+
   export let showOnPx = 1000;
 
   let hidden = true;
@@ -20,8 +22,7 @@
 
 <svelte:window on:scroll={handleOnScroll} />
 
-<div id="backToTop" class="back-to-top" class:hidden role="button" tabindex="0"
-     on:click={gotoTop} on:keypress={function() {}}>
+<div id="backToTop" class="back-to-top" class:hidden role="button" tabindex="0" on:click={gotoTop} on:keypress={fNoop}>
   <i class="fa fa-circle-up fa-3x"></i>
 </div>
 

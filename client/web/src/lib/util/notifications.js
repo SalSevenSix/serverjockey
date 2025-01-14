@@ -8,7 +8,7 @@ function notify(level, message) {
   const now = Date.now();
   if (get(notifications).reduce(function(result, value) {
     if (result) return true;
-    return message === value['message'] && now - value['at'] < 500;
+    return message === value.message && now - value.at < 500;
   }, false)) return;
   const identity = generateId();
   notifications.update(function(current) {

@@ -2,7 +2,7 @@
   import { onDestroy, tick } from 'svelte';
   import { fade } from 'svelte/transition';
   import { closeModal } from 'svelte-modals';
-  import { sleep, RollingLog } from '$lib/util/util';
+  import { fNoop, sleep, RollingLog } from '$lib/util/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
   import InputText from '$lib/widget/InputText.svelte';
@@ -112,7 +112,7 @@
 
 
 <div class="modal" class:is-active={isOpen}>
-  <div class="modal-background" role="button" tabindex="0" on:click={closeModal} on:keypress={function() {}}></div>
+  <div class="modal-background" role="button" tabindex="0" on:click={closeModal} on:keypress={fNoop}></div>
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Login to Steam</p>

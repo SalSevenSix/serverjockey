@@ -1,8 +1,9 @@
 <script>
   import { getContext } from 'svelte';
   import { slide } from 'svelte/transition';
-  import { notifyInfo, notifyError } from '$lib/util/notifications';
+  import { fNoop, fTrue } from '$lib/util/util';
   import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
@@ -11,8 +12,8 @@
   export let idPrefix;
   export let rootPath;
   export let filenameHelp = 'Please choose a valid filename.';
-  export let validateFilename = function() { return true; };
-  export let onCompleted = function() {};
+  export let validateFilename = fTrue;
+  export let onCompleted = fNoop;
 
   let uploading = false;
   let uploadFiles = [];
@@ -28,7 +29,7 @@
     const request = newPostRequest(null);
     request.body = new FormData();
     request.body.append('file', uploadFiles[0]);
-    fetch(instance.url(rootPath + '/' + filename), request)  // blocks until complete
+    fetch(instance.url(rootPath + '/' + filename), request)  // Blocks until complete
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         notifyInfo(filename + ' uploaded successfully.');

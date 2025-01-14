@@ -77,7 +77,7 @@
     if (atto) { millis.atto = Math.trunc(atto.getTime() / 1000) * 1000; }
     if (hasAttoPreset) { millis.atto = attoPresetToMillis(attoPreset); }
     if (atfrom) { millis.atfrom = Math.trunc(atfrom.getTime() / 1000) * 1000; }
-    if (hasAtfromMillis) { millis.atfrom = millis.atto - parseInt(atfromMillis); }
+    if (hasAtfromMillis) { millis.atfrom = millis.atto - parseInt(atfromMillis, 10); }
     return millis;
   }
 

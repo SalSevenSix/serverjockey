@@ -28,7 +28,7 @@
   $: selectedOptionUpdated(selectedOption); function selectedOptionUpdated() {
     if (!selectedOption || currentOption === selectedOption) return;
     const originalOption = currentOption;
-    currentOption = selectedOption;  // lock it in now to block another trigger
+    currentOption = selectedOption;  // Lock it in now to block another trigger
     const request = newPostRequest();
     request.body = JSON.stringify({ auto: autoOptions.indexOf(selectedOption) });
     fetch(instance.url(), request)
@@ -36,7 +36,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
       })
       .catch(function() {
-        currentOption = originalOption;  // safe rollback
+        currentOption = originalOption;  // Safe rollback
         selectedOption = originalOption;
         notifyError('Failed to update Auto mode.');
       });

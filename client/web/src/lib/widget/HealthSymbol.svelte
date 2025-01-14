@@ -3,8 +3,12 @@
   export let amber = 0.5;
   export let value = null;
 
-  $: icon = value > red ? 'fa-circle-exclamation' : 'fa-circle';
-  $: status = value > amber ? value > red ? 'status-color-red' : 'status-color-amber' : 'status-color-green';
+  $: [icon, status] = valueUpdated(value); function valueUpdated(current) {
+    let result = ['fa-circle', 'status-color-green'];
+    if (current > amber) { result[1] = 'status-color-amber'; }
+    if (current > red) { result = ['fa-circle-exclamation', 'status-color-red']; }
+    return result;
+  }
 </script>
 
 

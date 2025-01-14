@@ -16,6 +16,22 @@
     return 'fa-' + parts[0].toLowerCase();
   }
 
+  function handleJson(json) {
+    if (!running) return;
+    info = json;
+    errordown = 0;
+  }
+
+  function handleError() {
+    if (!running) return;
+    if (errordown === 0) {
+      notifyError('Failed to load System Info.');
+      errordown = 3;
+    } else {
+      errordown -= 1;
+    }
+  }
+
   onMount(async function() {
     while (running) {
       await fetch(surl('/system/info'), newGetRequest())
@@ -23,20 +39,8 @@
           if (!response.ok) throw new Error('Status: ' + response.status);
           return response.json();
         })
-        .then(function(json) {
-          if (!running) return;
-          info = json;
-          errordown = 0;
-        })
-        .catch(function() {
-          if (!running) return;
-          if (errordown === 0) {
-            notifyError('Failed to load System Info.');
-            errordown = 3;
-          } else {
-            errordown = errordown - 1;
-          }
-        });
+        .then(handleJson)
+        .catch(handleError);
       if (running) { await sleep(12000); }
     }
   });

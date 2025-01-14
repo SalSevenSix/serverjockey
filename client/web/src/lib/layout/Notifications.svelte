@@ -1,6 +1,6 @@
 <script>
   import { fade } from 'svelte/transition';
-  import { sleep } from '$lib/util/util';
+  import { fNoop, sleep } from '$lib/util/util';
   import { notifications, removeNotification } from '$lib/util/notifications';
 
   const fadeMillis = 200;
@@ -33,7 +33,7 @@
     {#each $notifications as notification, index}
       <div id={notification.id} class="notification {notification.level}"
            role="button" tabindex={index + 1} transition:fade={{ duration: fadeMillis }}
-           on:click={deleteMessage} on:keypress={function() {}}>
+           on:click={deleteMessage} on:keypress={fNoop}>
         <i class="delete is-large mt-1 mr-1"></i>
         <i class="fa {icons[notification.level]} fa-lg"></i>&nbsp;&nbsp;
         <span id="notificationsText{index}" class="pr-3">{notification.message}</span>
