@@ -138,6 +138,6 @@
 
 <style>
   .button {
-    width: 8em;
+    min-width: 8em;
   }
 </style>

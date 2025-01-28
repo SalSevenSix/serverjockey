@@ -26,7 +26,7 @@
     First step for migration is to follow the appropriate
     <a href={surl('/guides#gameserverguides')}>game server guide</a>
     to create a new instance with game server installed and started once.
-    This will insure a new game save is created as a fresh example.
+    This will ensure a new game save is created as a fresh example.
   </p>
   <figure class="image max-1024 is-bordered">
     <img src={surl('/assets/guides/migrations/fresh_world.png')} alt="Create fresh game save world" />
