@@ -1,5 +1,6 @@
 <script>
-  import { isString, capitalizeKebabCase, toCamelCase } from '$lib/util/util';
+  import { isString } from 'common/util/util';
+  import { capitalizeKebabCase, toCamelCase } from '$lib/util/util';
 
   export let id;
   export let name;

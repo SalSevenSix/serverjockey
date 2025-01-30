@@ -1,3 +1,4 @@
+const cutil = require('common/util/util');
 const util = require('./util.js');
 
 exports.raw = function(value) {
@@ -12,7 +13,7 @@ exports.dump = function(value) {
   if (!value) return;
   const clone = {};
   for (const key in value) {
-    if (value[key] && key.toUpperCase().endsWith('TOKEN') && util.isString(value[key])) {
+    if (value[key] && key.toUpperCase().endsWith('TOKEN') && cutil.isString(value[key])) {
       clone[key] = '*'.repeat(value[key].length);
     } else {
       clone[key] = value[key];
@@ -23,7 +24,7 @@ exports.dump = function(value) {
 
 exports.error = function(value, message = null) {
   if (!value) return util.reactError(message);
-  if (util.isString(value)) {
+  if (cutil.isString(value)) {
     console.error(util.shortISODateTimeString() + ' ERROR ' + value);
   } else {
     if (value.name === 'AbortError') return null;

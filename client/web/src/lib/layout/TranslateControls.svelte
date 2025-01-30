@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { sleep, noStorage } from '$lib/util/util';
+  import { sleep } from 'common/util/util';
+  import { noStorage } from '$lib/util/util';
 
   const storageKey = 'sjgmsTranslating';
   let oldLocation = window.location.href;

@@ -1,9 +1,10 @@
 <script>
   import { getContext } from 'svelte';
   import anchorme from 'anchorme/dist/browser/anchorme.min.js';
-  import { notifyInfo, notifyError } from '$lib/util/notifications';
-  import { hasProp, capitalizeKebabCase, urlSafeB64encode } from '$lib/util/util';
+  import { hasProp, urlSafeB64encode } from 'common/util/util';
+  import { capitalizeKebabCase } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
   import InputText from '$lib/widget/InputText.svelte';
   import InputRadio from '$lib/widget/InputRadio.svelte';
 

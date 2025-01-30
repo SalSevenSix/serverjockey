@@ -1,5 +1,6 @@
-const logger = require('../logger.js');
+const cutil = require('common/util/util');
 const util = require('../util.js');
+const logger = require('../logger.js');
 const commons = require('../commons.js');
 const helpText = {
   title: 'PROJECT ZOMBOID COMMANDS',
@@ -120,7 +121,7 @@ exports.world = function($) {
 exports.player = function($) {
   const data = [...$.data];
   if (data.length < 2) return util.reactUnknown($.message);
-  const name = util.urlSafeB64encode(data.shift());
+  const name = cutil.urlSafeB64encode(data.shift());
   const cmd = data.shift();
   let body = null;
   if (data.length > 0) {
@@ -215,11 +216,11 @@ exports.whitelist = function($) {
   } else if (cmd === 'reset-password') {
     if (data.length < 2) {
       whitelistRemoveId($, data[0], function() {
-        util.sleep(500).then(function() { whitelistAddId($, data[0]); });
+        cutil.sleep(500).then(function() { whitelistAddId($, data[0]); });
       });
     } else {
       whitelistRemoveName($, data[1], function() {
-        util.sleep(500).then(function() { whitelistAddId($, data[0], data[1]); });
+        cutil.sleep(500).then(function() { whitelistAddId($, data[0], data[1]); });
       });
     }
   } else {

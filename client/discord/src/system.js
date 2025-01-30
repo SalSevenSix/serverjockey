@@ -1,3 +1,4 @@
+const cutil = require('common/util/util');
 const util = require('./util.js');
 const commons = require('./commons.js');
 const helpText = {
@@ -35,13 +36,13 @@ exports.system = function($) {
   $.httptool.doGet('/system/info', function(info) {
     let result = '```\n';
     result += 'Version : ' + info.version + '\n';
-    result += 'Uptime  : ' + util.humanDuration(info.uptime) + '\n';
+    result += 'Uptime  : ' + cutil.humanDuration(info.uptime) + '\n';
     result += 'CPU     : ' + info.cpu.percent + '%\n';
-    result += 'Memory  : ' + util.humanFileSize(info.memory.used);
-    result += ' / ' + util.humanFileSize(info.memory.total);
+    result += 'Memory  : ' + cutil.humanFileSize(info.memory.used);
+    result += ' / ' + cutil.humanFileSize(info.memory.total);
     result += ' (' + info.memory.percent + '%)\n';
-    result += 'Disk    : ' + util.humanFileSize(info.disk.used);
-    result += ' / ' + util.humanFileSize(info.disk.total);
+    result += 'Disk    : ' + cutil.humanFileSize(info.disk.used);
+    result += ' / ' + cutil.humanFileSize(info.disk.total);
     result += ' (' + info.disk.percent + '%)\n';
     result += 'IPv4    : ' + info.net.local + ' ' + info.net.public;
     return result + '\n```';

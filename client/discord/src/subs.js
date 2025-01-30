@@ -1,5 +1,6 @@
-const logger = require('./logger.js');
+const cutil = require('common/util/util');
 const util = require('./util.js');
+const logger = require('./logger.js');
 const fetch = require('node-fetch');
 
 exports.Helper = class Helper {
@@ -19,7 +20,7 @@ exports.Helper = class Helper {
         if (url == null) {
           counter = 60;
           while (context.running && counter > 0) {
-            await util.sleep(200);
+            await cutil.sleep(200);
             counter -= 1;
           }
         }

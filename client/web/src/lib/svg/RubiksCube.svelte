@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { sleep } from '$lib/util/util';
+  import { sleep } from 'common/util/util';
 
   export let size = '100%';
   export let clazz = 'rubiks';

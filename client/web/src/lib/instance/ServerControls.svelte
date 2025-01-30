@@ -1,6 +1,6 @@
 <script>
   import { getContext } from 'svelte';
-  import { isBoolean } from '$lib/util/util';
+  import { isBoolean } from 'common/util/util';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { newPostRequest } from '$lib/util/sjgmsapi';
   import DropdownButton from '$lib/widget/DropdownButton.svelte';

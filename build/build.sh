@@ -70,6 +70,8 @@ sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/src/ma
 cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
 mkdir -p $TARGET_BIN_DIR || exit 1
 
+echo "Building common lib"
+$SERVERJOCKEY_DIR/client/common/build.sh ci || exit 1
 echo "Building cli client"
 $SERVERJOCKEY_DIR/client/cli/build.sh $TARGET_BIN_DIR/${SERVERJOCKEY}_cmd.pyz || exit 1
 echo "Building discord client"

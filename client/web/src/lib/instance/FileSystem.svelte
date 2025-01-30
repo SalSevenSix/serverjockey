@@ -1,8 +1,9 @@
 <script>
   import { onMount, getContext } from 'svelte';
+  import { isString, humanFileSize } from 'common/util/util';
   import { confirmModal } from '$lib/modal/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
-  import { isString, guessTextFile, humanFileSize, toCamelCase } from '$lib/util/util';
+  import { guessTextFile, toCamelCase } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 

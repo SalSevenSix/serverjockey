@@ -1,4 +1,4 @@
-import { hasProp } from '$lib/util/util';
+import { hasProp } from 'common/util/util';
 import { queryFetch } from '$lib/activity/common';
 
 const hourMillis = 60 * 60 * 1000;

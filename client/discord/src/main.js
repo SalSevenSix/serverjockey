@@ -1,5 +1,6 @@
 require('events').EventEmitter.defaultMaxListeners = 24;
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const cutil = require('common/util/util');
 const util = require('./util.js');
 const logger = require('./logger.js');
 const http = require('./http.js');
@@ -63,15 +64,15 @@ function startup() {
       if (channels[index]) { channelsMap[channels[index].id] = channels[index]; }
     }
     const startupArgs = { server: null, login: null, chat: null };
-    if (configChannels.server && util.hasProp(channelsMap, configChannels.server)) {
+    if (configChannels.server && cutil.hasProp(channelsMap, configChannels.server)) {
       startupArgs.server = channelsMap[configChannels.server];
       logger.info('Publishing server events to ' + startupArgs.server.name + ' (' + startupArgs.server.id + ')');
     }
-    if (configChannels.login && util.hasProp(channelsMap, configChannels.login)) {
+    if (configChannels.login && cutil.hasProp(channelsMap, configChannels.login)) {
       startupArgs.login = channelsMap[configChannels.login];
       logger.info('Publishing login events to ' + startupArgs.login.name + ' (' + startupArgs.login.id + ')');
     }
-    if (configChannels.chat && util.hasProp(channelsMap, configChannels.chat)) {
+    if (configChannels.chat && cutil.hasProp(channelsMap, configChannels.chat)) {
       startupArgs.chat = channelsMap[configChannels.chat];
       logger.info('Publishing chat events to ' + startupArgs.chat.name + ' (' + startupArgs.chat.id + ')');
     }
@@ -93,11 +94,11 @@ function handleMessage(message) {
   if (command === 'startup') return util.reactUnknown(message);
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);
-  if (instanceData && instanceData.server && util.hasProp(instanceData.server, command)) {
+  if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
     if (command === 'help' && data.length === 0) { system.help(args); }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
     instanceData.server[command](args);
-  } else if (util.hasProp(system, command)) {
+  } else if (cutil.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
     system[command](args);
   } else {

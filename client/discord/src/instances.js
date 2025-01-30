@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
-const logger = require('./logger.js');
+const cutil = require('common/util/util');
 const util = require('./util.js');
+const logger = require('./logger.js');
 const subs = require('./subs.js');
 const servers = {
   testserver: require('./servers/testserver.js'),
@@ -70,14 +71,14 @@ exports.Service = class Service {
   }
 
   useInstance(instance) {
-    if (!util.hasProp(this.#instances, instance)) return false;
+    if (!cutil.hasProp(this.#instances, instance)) return false;
     this.setInstance(instance);
     return true;
   }
 
   getData(instance) {
     if (!instance) return null;
-    if (!util.hasProp(this.#instances, instance)) return null;
+    if (!cutil.hasProp(this.#instances, instance)) return null;
     return this.#instances[instance];
   }
 

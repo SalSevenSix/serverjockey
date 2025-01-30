@@ -1,7 +1,8 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
+  import { humanDuration } from 'common/util/util';
+  import { floatToPercent, shortISODateTimeString, ObjectUrls } from '$lib/util/util';
   import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/activity/InstanceActivity';
-  import { floatToPercent, humanDuration, shortISODateTimeString, ObjectUrls } from '$lib/util/util';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/widget/ChartCanvas.svelte';
 

@@ -1,6 +1,7 @@
 <script>
   import { onDestroy, getContext } from 'svelte';
-  import { capitalize, humanDuration } from '$lib/util/util';
+  import { humanDuration } from 'common/util/util';
+  import { capitalize } from '$lib/util/util';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const serverStatus = getContext('serverStatus');

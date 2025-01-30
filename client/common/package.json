@@ -1,17 +1,15 @@
 {
-  "name": "serverlink",
+  "name": "common",
   "type": "module",
   "version": "0.17.0",
-  "private": true,
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint lib"
+  },
+  "exports": {
+    "./util/util": "./lib/util/util.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.12.1",
     "eslint": "^9.17.0"
-  },
-  "dependencies": {
-    "common": "file:../common",
-    "discord.js": "^14.17.3"
   }
 }

@@ -1,6 +1,7 @@
 <script>
   import { tick } from 'svelte';
-  import { sleep, toCamelCase } from '$lib/util/util';
+  import { sleep } from 'common/util/util';
+  import { toCamelCase } from '$lib/util/util';
 
   export let id;
   export let options;

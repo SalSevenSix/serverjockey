@@ -2,7 +2,8 @@
   import { onDestroy, tick } from 'svelte';
   import { fade } from 'svelte/transition';
   import { closeModal } from 'svelte-modals';
-  import { fNoop, sleep, RollingLog } from '$lib/util/util';
+  import { sleep } from 'common/util/util';
+  import { fNoop, RollingLog } from '$lib/util/util';
   import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
   import InputText from '$lib/widget/InputText.svelte';

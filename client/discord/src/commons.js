@@ -1,5 +1,6 @@
-const logger = require('./logger.js');
+const cutil = require('common/util/util');
 const util = require('./util.js');
+const logger = require('./logger.js');
 const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
@@ -52,7 +53,7 @@ exports.sendHelp = function($, helpText) {
     const cmd = $.context.config.CMD_PREFIX;
     let header = '```\n' + helpText.title + '\n' + cmd;
     let index = 1;
-    while (util.hasProp(helpText, 'help' + index)) {
+    while (cutil.hasProp(helpText, 'help' + index)) {
       $.message.channel.send(header + helpText['help' + index].join('\n' + cmd) + '\n```');
       if (index === 1) { header = '```\n' + cmd; }
       index += 1;
@@ -60,9 +61,9 @@ exports.sendHelp = function($, helpText) {
     return;
   }
   const query = $.data.join('').replaceAll('-', '');
-  if (query === 'title' || !util.hasProp(helpText, query)) {
+  if (query === 'title' || !cutil.hasProp(helpText, query)) {
     $.message.channel.send('No more help available.');
-  } else if (util.isString(helpText[query])) {
+  } else if (cutil.isString(helpText[query])) {
     $.httptool.doGet(helpText[query], function(body) { return '```\n' + body + '\n```'; });
   } else {
     $.message.channel.send(helpText[query].join('\n'));
@@ -75,7 +76,7 @@ exports.server = function($) {
       let result = '```\nServer ' + $.instance + ' is ';
       if (!body.running) return result + 'DOWN\n```';
       result += body.state;
-      if (body.uptime) { result += ' (' + util.humanDuration(body.uptime) + ')'; }
+      if (body.uptime) { result += ' (' + cutil.humanDuration(body.uptime) + ')'; }
       result += '\n';
       const dtl = body.details;
       if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
@@ -229,9 +230,9 @@ exports.players = function($) {
           line = body[i].steamid === '' ? nosteamid : body[i].steamid + ' ';
           line += body[i].name;
         }
-        if (util.hasProp(body[i], 'uptime')) {
+        if (cutil.hasProp(body[i], 'uptime')) {
           line = line.padEnd(maxlength + 3);
-          line += util.humanDuration(body[i].uptime, 2);
+          line += cutil.humanDuration(body[i].uptime, 2);
         }
         chunk.push(line);
         chars += line.length + 1;

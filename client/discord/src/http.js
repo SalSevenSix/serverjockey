@@ -1,5 +1,6 @@
-const logger = require('./logger.js');
+const cutil = require('common/util/util');
 const util = require('./util.js');
+const logger = require('./logger.js');
 const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
@@ -35,7 +36,7 @@ exports.MessageHttpTool = class MessageHttpTool {
       .then(function(data) {
         const result = dataHandler(data);
         if (!result) return;
-        if (util.isString(result)) {
+        if (cutil.isString(result)) {
           message.channel.send(result);
         } else {
           result.forEach(function(text) { message.channel.send(text); });
@@ -52,7 +53,7 @@ exports.MessageHttpTool = class MessageHttpTool {
     if (allowRoles && !util.checkHasRole(message, allowRoles)) return;
     if (!allowRoles && !util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
     let request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
-    if (util.isString(body)) {
+    if (cutil.isString(body)) {
       request = util.newPostRequest('text/plain', context.config.SERVER_TOKEN);
       request.body = body.replace(/\r\n/g, '\n');
     } else if (body != null) {
@@ -88,7 +89,7 @@ exports.MessageHttpTool = class MessageHttpTool {
     const context = this.#context;
     const message = this.#message;
     this.doPost(path, body, function(json) {
-      if (json == null || !util.hasProp(json, 'url')) return util.reactSuccess(message);
+      if (json == null || !cutil.hasProp(json, 'url')) return util.reactSuccess(message);
       util.reactWait(message);
       const fname = message.id + '.text';
       const fpath = '/tmp/' + fname;

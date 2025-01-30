@@ -27,6 +27,7 @@
 * debian/control
 * debian/changelog
 * specs/sjgms.spec
+* common/package.json
 * discord/package.json
 * discord/src/main.js
 * extension/package.json
