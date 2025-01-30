@@ -23,28 +23,12 @@ exports.commandLineToList = function(line) {
   return result;
 };
 
-exports.shortISODateTimeString = function(dateobj = null) {
-  if (!dateobj) { dateobj = new Date(); }
-  return dateobj.toISOString().replace('T', ' ').substring(0, 19);
-};
-
 exports.newGetRequest = function(secret) {
-  return {
-    method: 'get',
-    headers: {
-      'X-Secret': secret
-    }
-  };
+  return { method: 'get', headers: { 'X-Secret': secret } };
 };
 
 exports.newPostRequest = function(ct, secret) {
-  return {
-    method: 'post',
-    headers: {
-      'Content-Type': ct,
-      'X-Secret': secret
-    }
-  };
+  return { method: 'post', headers: { 'Content-Type': ct, 'X-Secret': secret } };
 };
 
 exports.listifyRoles = function(line) {

@@ -19,6 +19,12 @@ export function urlSafeB64encode(value) {
   return data.replaceAll('+', '-').replaceAll('/', '_');
 }
 
+export function shortISODateTimeString(value, utc = false) {
+  let dateobj = value instanceof Date ? value : new Date(value);
+  if (!utc) { dateobj = new Date(dateobj.getTime() + dateobj.getTimezoneOffset() * -60000); }
+  return dateobj.toISOString().replace('T', ' ').substring(0, 19);
+}
+
 export function humanDuration(millis, parts = 3) {
   if (!millis) { millis = 0; }
   let days = -1;

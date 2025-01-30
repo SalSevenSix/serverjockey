@@ -10,14 +10,15 @@ export function surl(path) {
   if (path && path.startsWith('http')) return path;  // Assuming full urls are correct
   if (base && path) return base + path;
   if (path) return path;
-  return base ? base : '';
+  if (base) return base;
+  return '';
 }
 
 export function newGetRequest() {
   return { method: 'get', headers: { 'X-Secret': get(securityToken) }};
 }
 
-export function newPostRequest(ct='application/json') {
+export function newPostRequest(ct = 'application/json') {
   const headers = ct ? { 'Content-Type': ct, 'X-Secret': get(securityToken) } : { 'X-Secret': get(securityToken) };
   return { method: 'post', headers: headers };
 }

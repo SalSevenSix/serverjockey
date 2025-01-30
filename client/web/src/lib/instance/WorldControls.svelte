@@ -1,8 +1,9 @@
 <script>
   import { onMount, getContext } from 'svelte';
-  import { confirmModal } from '$lib/modal/modals';
-  import { shortISODateTimeString, toCamelCase } from '$lib/util/util';
+  import { shortISODateTimeString } from 'common/util/util';
+  import { toCamelCase } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { confirmModal } from '$lib/modal/modals';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 

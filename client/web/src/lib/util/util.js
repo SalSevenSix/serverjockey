@@ -63,12 +63,6 @@ export function floatToPercent(value, rounding = 1, suffix = '%') {
   return suffix ? result + suffix : result;
 }
 
-export function shortISODateTimeString(millis, utc = false) {
-  let dateobj = new Date(millis);
-  if (!utc) { dateobj = new Date(dateobj.getTime() + dateobj.getTimezoneOffset() * -60000); }
-  return dateobj.toISOString().replace('T', ' ').substring(0, 19);
-}
-
 export function chunkArray(arr, rows = 20, columns = 3) {
   if (arr.length > rows * columns) {
     rows = Math.ceil(arr.length / columns);

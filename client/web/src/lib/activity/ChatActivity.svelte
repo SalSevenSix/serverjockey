@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
-  import { urlSafeB64encode, humanDuration } from 'common/util/util';
-  import { shortISODateTimeString, ObjectUrls } from '$lib/util/util';
+  import { urlSafeB64encode, humanDuration, shortISODateTimeString } from 'common/util/util';
+  import { ObjectUrls } from '$lib/util/util';
   import { queryFetch } from '$lib/activity/common';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
