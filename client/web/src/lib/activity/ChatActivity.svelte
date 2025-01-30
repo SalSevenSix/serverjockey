@@ -1,16 +1,14 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
-  import { urlSafeB64encode, humanDuration, shortISODateTimeString } from 'common/util/util';
+  import { shortISODateTimeString, humanDuration } from 'common/util/util';
   import { ObjectUrls } from '$lib/util/util';
-  import { queryFetch } from '$lib/activity/common';
+  import { fetchJson } from '$lib/util/sjgmsapi';
+  import { eventsMap, mergeResults, extractResults, extractMeta,
+           querySessions, queryChats } from '$lib/activity/ChatActivity';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const query = getContext('query');
   const objectUrls = new ObjectUrls();
-  const eventsMap = {
-    'LOGIN': 'fa fa-right-to-bracket',
-    'DEATH': 'fa fa-skull',
-    'LOGOUT': 'fa fa-right-to-bracket rotate-180'};
 
   let processing = true;
   let results = null;
@@ -18,84 +16,15 @@
 
   $: query.blocker.notify('ChatActivityProcessing', processing);
 
-  async function querySessions(instance, atrange, player) {
-    let url = '/store/player/event';
-    url += '?atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
-    url += '&instance=' + instance;
-    if (player) { url += '&player=' + urlSafeB64encode(player); }
-    url += '&events=' + Object.keys(eventsMap).join(',');
-    url += '&verbose';
-    return await queryFetch(url, 'Failed to query player events.');
-  }
-
-  async function queryChats(instance, atrange, player) {
-    let url = '/store/player/chat';
-    url += '?atfrom=' + atrange.atfrom + '&atto=' + atrange.atto;
-    url += '&instance=' + instance;
-    if (player) { url += '&player=' + urlSafeB64encode(player); }
-    return await queryFetch(url, 'Failed to query chat logs.');
-  }
-
-  function mergeResults(data) {
-    const result = [];
-    if (data.chat) {
-      data.chat.records.forEach(function(record) {
-        result.push({ at: record[0], player: record[1], text: record[2] });
-      });
-    }
-    if (data.session) {
-      data.session.records.forEach(function(record) {
-        result.push({ at: record[0], player: record[2], steamid: record[4], event: record[3] });
-      });
-    }
-    result.sort(function(left, right) {
-      return left.at - right.at;
-    });
-    return result;
-  }
-
-  function extractResults(data) {
-    const last = { at: '', player: '' };
-    const result = [];
-    let clazz = null;
-    data.forEach(function(item) {
-      const atString = shortISODateTimeString(item.at);
-      const atSection = atString.substring(0, 13);
-      if (last.at != atSection) {
-        result.push({ clazz: 'row-hdr', ats: atString, at: atSection + 'h' });
-        last.at = atSection;
-        clazz = null;
-      }
-      if (!clazz || last.player != item.player) {
-        clazz = clazz === 'row-nrm' ? 'row-alt' : 'row-nrm';
-      }
-      last.player = item.player;
-      const entry = { clazz: clazz, ats: atString, at: atString.substring(14), player: item.player };
-      if (item.event) {
-        entry.event = item.event;
-        entry.text = item.steamid;
-      } else {
-        entry.text = item.text;
-      }
-      result.push(entry);
-    });
-    return result;
-  }
-
-  function extractMeta(data) {
-    return { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-             atrange: data.criteria.atto - data.criteria.atfrom };
-  }
-
   function queryActivity() {
     processing = true;
     const instance = query.criteria.instance().identity();
     const atrange = query.criteria.atrange();
     const player = query.criteria.search().text;
     const chatType = query.criteria.chat().type;
-    const queries = [null, null];
-    if (chatType === 'both' || chatType === 'session') { queries[0] = querySessions(instance, atrange, player); }
-    if (chatType === 'both' || chatType === 'chat') { queries[1] = queryChats(instance, atrange, player); }
+    const queries = [
+      chatType === 'both' || chatType === 'session' ? fetchJson(querySessions(instance, atrange, player)) : null,
+      chatType === 'both' || chatType === 'chat' ? fetchJson(queryChats(instance, atrange, player)) : null];
     Promise.all(queries)
       .then(function(data) {
         results = {};

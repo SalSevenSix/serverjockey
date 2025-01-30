@@ -2,6 +2,7 @@
   import { onMount, onDestroy, getContext, tick } from 'svelte';
   import { humanDuration, shortISODateTimeString } from 'common/util/util';
   import { floatToPercent, ObjectUrls } from '$lib/util/util';
+  import { fetchJson } from '$lib/util/sjgmsapi';
   import { queryInstance, queryEvents, queryLastEvent, extractActivity } from '$lib/activity/InstanceActivity';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import ChartCanvas from '$lib/widget/ChartCanvas.svelte';
@@ -34,9 +35,9 @@
   function queryActivity() {
     processing = true;
     const [instance, atrange] = [query.criteria.instance().identity(), query.criteria.atrange()];
-    Promise.all([queryInstance(instance),
-                 queryLastEvent(instance, atrange.atfrom),
-                 queryEvents(instance, atrange.atfrom, atrange.atto)])
+    Promise.all([fetchJson(queryInstance(instance)),
+                 fetchJson(queryLastEvent(instance, atrange.atfrom)),
+                 fetchJson(queryEvents(instance, atrange.atfrom, atrange.atto))])
       .then(function(data) {
         results = {};
         [results.instances, results.lastevent, results.events] = data;

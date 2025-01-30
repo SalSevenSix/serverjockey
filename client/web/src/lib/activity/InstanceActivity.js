@@ -1,6 +1,3 @@
-import { queryFetch } from '$lib/activity/common';
-
-
 function toInstanceCreatedMap(data) {
   const result = {};
   data.records.forEach(function(record) {
@@ -78,24 +75,24 @@ export function extractActivity(queryResults) {
            atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
 }
 
-export async function queryInstance(instance) {
+export function queryInstance(instance) {
   let url = '/store/instance';
   if (instance) { url += '?instance=' + instance; }
-  return await queryFetch(url, 'Failed to query instance.');
+  return { url: url, error: 'Failed to query instance.' };
 }
 
-export async function queryEvents(instance, atfrom, atto) {
+export function queryEvents(instance, atfrom, atto) {
   let url = '/store/instance/event';
   url += '?atfrom=' + atfrom + '&atto=' + atto;
   if (instance) { url += '&instance=' + instance; }
   url += '&events=STARTED,STOPPED,EXCEPTION';
-  return await queryFetch(url, 'Failed to query instance events.');
+  return { url: url, error: 'Failed to query instance events.' };
 }
 
-export async function queryLastEvent(instance, atfrom) {
+export function queryLastEvent(instance, atfrom) {
   let url = '/store/instance/event';
   url += '?atto=' + atfrom;
   if (instance) { url += '&instance=' + instance; }
   url += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max';
-  return await queryFetch(url, 'Failed to query last instance event.');
+  return { url: url, error: 'Failed to query last instance event.' };
 }

@@ -4,7 +4,6 @@ import { generateId } from '$lib/util/util';
 
 export const notifications = writable([]);
 
-
 function notify(level, message) {
   const now = Date.now();
   if (get(notifications).reduce(function(result, value) {

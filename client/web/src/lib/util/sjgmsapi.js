@@ -23,6 +23,17 @@ export function newPostRequest(ct = 'application/json') {
   return { method: 'post', headers: headers };
 }
 
+export async function fetchJson(data) {
+  const { url, error } = data;
+  return await fetch(surl(url), newGetRequest())
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      return response.json();
+    })
+    .then(function(json) { return json; })
+    .catch(function() { return notifyError(error ? error : 'Error'); });
+}
+
 
 export class SubscriptionHelper {
   #controller;

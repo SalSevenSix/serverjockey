@@ -1,5 +1,4 @@
 import { hasProp } from 'common/util/util';
-import { queryFetch } from '$lib/activity/common';
 
 const hourMillis = 60 * 60 * 1000;
 const dayMillis = 24 * hourMillis;
@@ -212,18 +211,18 @@ export function compactPlayers(players, limit=10) {
   return result;
 }
 
-export async function queryEvents(instance, atfrom, atto) {
+export function queryEvents(instance, atfrom, atto) {
   let url = '/store/player/event';
   url += '?atfrom=' + atfrom + '&atto=' + atto;
   if (instance) { url += '&instance=' + instance; }
   url += '&events=LOGIN,LOGOUT';
-  return await queryFetch(url, 'Failed to query player events.');
+  return { url: url, error: 'Failed to query player events.' };
 }
 
-export async function queryLastEvent(instance, atfrom) {
+export function queryLastEvent(instance, atfrom) {
   let url = '/store/player/event';
   url += '?atfrom=' + (parseInt(atfrom, 10) - 2592000000) + '&atto=' + atfrom;
   if (instance) { url += '&instance=' + instance; }
   url += '&events=LOGIN,LOGOUT&atgroup=max';
-  return await queryFetch(url, 'Failed to query last player event.');
+  return { url: url, error: 'Failed to query last player event.' };
 }
