@@ -1,10 +1,10 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
   import { shortISODateTimeString, humanDuration } from 'common/util/util';
+  import { eventsMap, mergeResults, extractResults, extractMeta,
+           querySessions, queryChats } from 'common/activity/chat';
   import { ObjectUrls } from '$lib/util/util';
   import { fetchJson } from '$lib/util/sjgmsapi';
-  import { eventsMap, mergeResults, extractResults, extractMeta,
-           querySessions, queryChats } from '$lib/activity/ChatActivity';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const query = getContext('query');

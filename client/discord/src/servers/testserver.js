@@ -31,3 +31,4 @@ exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
+exports.stats = commons.stats;

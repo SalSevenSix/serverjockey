@@ -105,6 +105,7 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
+exports.stats = commons.stats;
 
 exports.world = function($) {
   const data = [...$.data];

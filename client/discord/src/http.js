@@ -22,9 +22,21 @@ exports.MessageHttpTool = class MessageHttpTool {
     return this.#baseurl;
   }
 
+  async getJson(path, baseurlOverride = null) {
+    const [context, message] = [this.#context, this.#message];
+    const aBaseurl = baseurlOverride ? baseurlOverride : this.#baseurl;
+    const aPath = path.url ? path.url : path;
+    return await fetch(aBaseurl + aPath, util.newGetRequest(context.config.SERVER_TOKEN))
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(data) { return data; })
+      .catch(function(error) { return logger.error(error, message); });
+  }
+
   doGet(path, dataHandler) {
-    const context = this.#context;
-    const message = this.#message;
+    const [context, message] = [this.#context, this.#message];
     if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
     fetch(this.#baseurl + path, util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
@@ -48,8 +60,7 @@ exports.MessageHttpTool = class MessageHttpTool {
   }
 
   doPost(path, body = null, dataHandler = null, allowRoles = null) {
-    const context = this.#context;
-    const message = this.#message;
+    const [context, message] = [this.#context, this.#message];
     if (allowRoles && !util.checkHasRole(message, allowRoles)) return;
     if (!allowRoles && !util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
     let request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
@@ -86,8 +97,7 @@ exports.MessageHttpTool = class MessageHttpTool {
   }
 
   doPostToFile(path, body = null) {
-    const context = this.#context;
-    const message = this.#message;
+    const [context, message] = [this.#context, this.#message];
     this.doPost(path, body, function(json) {
       if (json == null || !cutil.hasProp(json, 'url')) return util.reactSuccess(message);
       util.reactWait(message);

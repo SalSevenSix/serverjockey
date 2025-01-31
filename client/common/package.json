@@ -6,7 +6,10 @@
     "lint": "eslint lib"
   },
   "exports": {
-    "./util/util": "./lib/util/util.js"
+    "./util/util": "./lib/util/util.js",
+    "./activity/chat": "./lib/activity/chat.js",
+    "./activity/instance": "./lib/activity/instance.js",
+    "./activity/player": "./lib/activity/player.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.12.1",

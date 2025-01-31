@@ -1,9 +1,9 @@
 import { shortISODateTimeString, urlSafeB64encode } from 'common/util/util';
 
 export const eventsMap = {
-    'LOGIN': 'fa fa-right-to-bracket',
-    'DEATH': 'fa fa-skull',
-    'LOGOUT': 'fa fa-right-to-bracket rotate-180'};
+  'LOGIN': 'fa fa-right-to-bracket',
+  'DEATH': 'fa fa-skull',
+  'LOGOUT': 'fa fa-right-to-bracket rotate-180' };
 
 export function mergeResults(data) {
   const result = [];
@@ -53,7 +53,7 @@ export function extractResults(data) {
 
 export function extractMeta(data) {
   return { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-           atrange: data.criteria.atto - data.criteria.atfrom };
+    atrange: data.criteria.atto - data.criteria.atfrom };
 }
 
 export function querySessions(instance, atrange, player) {

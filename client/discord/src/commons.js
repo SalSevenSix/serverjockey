@@ -1,4 +1,5 @@
 const cutil = require('common/util/util');
+const pstats = require('common/activity/player');
 const util = require('./util.js');
 const logger = require('./logger.js');
 const subs = require('./subs.js');
@@ -248,4 +249,37 @@ exports.players = function($) {
     }
     return result;
   });
+};
+
+exports.stats = function($) {
+  const [httptool, baseurl, instance, message] = [$.httptool, $.context.config.SERVER_URL, $.instance, $.message];
+  let [atto, atfrom, player, limit, format] = [null, null, null, 11, 'text'];
+  $.data.forEach(function(arg) {
+    if (arg.startsWith('to=')) { atto = util.parseUTCMillis(arg.substring(3)); }
+    else if (arg.startsWith('from=')) { atfrom = util.parseUTCMillis(arg.substring(5)); }
+    else if (arg.startsWith('player=')) { player = arg.substring(7); }
+    else if (arg.startsWith('limit=')) { limit = parseInt(arg.substring(6), 10); }
+    else if (arg.startsWith('format=')) { format = arg.substring(7); }
+  });
+  if (!atto) { atto = Date.now(); }
+  if (!atfrom) { atfrom = parseInt(atto, 10) - 2592000000; }
+  Promise.all([httptool.getJson(pstats.queryLastEvent(instance, atfrom, player), baseurl),
+    httptool.getJson(pstats.queryEvents(instance, atfrom, atto, player), baseurl)])
+    .then(function(data) {
+      let results = {};
+      [results.lastevent, results.events] = data;
+      results = pstats.extractActivity(results);
+      results = results.results[instance].players;
+      if (limit && !player) { results = pstats.compactPlayers(results, limit); }
+      if (format === 'text') {
+        results = results.map(function(record) {
+          return record.player + ', ' + record.sessions + ', ' + record.uptime;
+        });
+      } else if (format === 'json') {
+        results = [JSON.stringify(results)];
+      } else {
+        results = ['invalid format'];
+      }
+      message.channel.send('```\n' + results.join('\n') + '\n```');
+    });
 };

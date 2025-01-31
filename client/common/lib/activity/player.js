@@ -1,4 +1,4 @@
-import { hasProp } from 'common/util/util';
+import { hasProp, urlSafeB64encode } from 'common/util/util';
 
 const hourMillis = 60 * 60 * 1000;
 const dayMillis = 24 * hourMillis;
@@ -191,7 +191,7 @@ export function extractActivity(queryResults) {
            atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
 }
 
-export function compactPlayers(players, limit=10) {
+export function compactPlayers(players, limit = 10) {
   if (limit >= players.length) return players;
   const result = [];
   let counter = limit - 1;
@@ -211,18 +211,20 @@ export function compactPlayers(players, limit=10) {
   return result;
 }
 
-export function queryEvents(instance, atfrom, atto) {
+export function queryEvents(instance, atfrom, atto, player = null) {
   let url = '/store/player/event';
   url += '?atfrom=' + atfrom + '&atto=' + atto;
   if (instance) { url += '&instance=' + instance; }
+  if (player) { url += '&player=' + urlSafeB64encode(player); }
   url += '&events=LOGIN,LOGOUT';
   return { url: url, error: 'Failed to query player events.' };
 }
 
-export function queryLastEvent(instance, atfrom) {
+export function queryLastEvent(instance, atfrom, player = null) {
   let url = '/store/player/event';
   url += '?atfrom=' + (parseInt(atfrom, 10) - 2592000000) + '&atto=' + atfrom;
   if (instance) { url += '&instance=' + instance; }
+  if (player) { url += '&player=' + urlSafeB64encode(player); }
   url += '&events=LOGIN,LOGOUT&atgroup=max';
   return { url: url, error: 'Failed to query last player event.' };
 }

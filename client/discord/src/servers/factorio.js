@@ -46,3 +46,4 @@ exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
 exports.say = commons.say;
+exports.stats = commons.stats;
