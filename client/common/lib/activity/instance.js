@@ -17,6 +17,7 @@ function toLastEventMap(instances, data) {
   return result;
 }
 
+/* eslint-disable max-lines-per-function */
 export function extractActivity(queryResults) {
   const now = Date.now();
   const data = queryResults.events;
@@ -72,8 +73,9 @@ export function extractActivity(queryResults) {
     results.push(instanceResult);
   });
   return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-           atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
+    atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
 }
+/* eslint-enable max-lines-per-function */
 
 export function queryInstance(instance) {
   let url = '/store/instance';

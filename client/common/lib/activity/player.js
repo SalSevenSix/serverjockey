@@ -43,6 +43,7 @@ function newOnlineTracker() {
   return self;
 }
 
+/* eslint-disable max-lines-per-function */
 function newIntervalTracker(atfrom, atto) {
   const self = {};
   const data = [];
@@ -52,7 +53,8 @@ function newIntervalTracker(atfrom, atto) {
     data.push({
       atfrom: current - intervalMillis, atto: current,
       records: [], tracker: newOnlineTracker(),
-      sessions: 0, uptime: 0 });
+      sessions: 0, uptime: 0
+    });
     current -= intervalMillis;
   }
   data.reverse();
@@ -99,9 +101,11 @@ function newIntervalTracker(atfrom, atto) {
     return {
       hours: Math.trunc(intervalMillis / hourMillis),
       data: data.map(function(interval) {
-        return { atfrom: interval.atfrom, atto: interval.atto,
-                 sessions: interval.sessions, uptime: interval.uptime,
-                 min: interval.tracker.min, max: interval.tracker.max };
+        return {
+          atfrom: interval.atfrom, atto: interval.atto,
+          sessions: interval.sessions, uptime: interval.uptime,
+          min: interval.tracker.min, max: interval.tracker.max
+        };
       })
     };
   };
@@ -188,8 +192,9 @@ export function extractActivity(queryResults) {
     }
   });
   return { meta: { created: data.created, atfrom: data.criteria.atfrom, atto: data.criteria.atto,
-           atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
+    atrange: data.criteria.atto - data.criteria.atfrom }, results: results };
 }
+/* eslint-enable max-lines-per-function */
 
 export function compactPlayers(players, limit = 10) {
   if (limit >= players.length) return players;

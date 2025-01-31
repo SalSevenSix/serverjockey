@@ -21,7 +21,10 @@ export function urlSafeB64encode(value) {
 
 export function shortISODateTimeString(value, utc = false) {
   let dateobj = value instanceof Date ? value : new Date(value);
-  if (!utc) { dateobj = new Date(dateobj.getTime() + dateobj.getTimezoneOffset() * -60000); }
+  if (!utc) {
+    const offset = dateobj.getTimezoneOffset() * -60000;
+    dateobj = new Date(dateobj.getTime() + offset);
+  }
   return dateobj.toISOString().replace('T', ' ').substring(0, 19);
 }
 

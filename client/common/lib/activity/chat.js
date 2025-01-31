@@ -1,9 +1,10 @@
 import { shortISODateTimeString, urlSafeB64encode } from 'common/util/util';
 
 export const eventsMap = {
-  'LOGIN': 'fa fa-right-to-bracket',
-  'DEATH': 'fa fa-skull',
-  'LOGOUT': 'fa fa-right-to-bracket rotate-180' };
+  LOGIN: 'fa fa-right-to-bracket',
+  DEATH: 'fa fa-skull',
+  LOGOUT: 'fa fa-right-to-bracket rotate-180'
+};
 
 export function mergeResults(data) {
   const result = [];
