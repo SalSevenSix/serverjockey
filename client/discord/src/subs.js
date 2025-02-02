@@ -18,7 +18,7 @@ exports.Helper = class Helper {
       while (context.running && url == null) {
         url = await this.subscribe(subscribeUrl);
         if (url == null) {
-          counter = 60;
+          counter = 60;  // Small sleeps in loop to allow quick exit if not running
           while (context.running && counter > 0) {
             await cutil.sleep(200);
             counter -= 1;

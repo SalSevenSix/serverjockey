@@ -38,8 +38,8 @@ exports.startAllEventLogging = function(context, channels, instance, url) {
     if (!channels.login) return true;
     let result = null;
     if (json.event === 'LOGIN') { result = ' 🟢 '; }
-    if (json.event === 'DEATH') { result = ' 💀 '; }
-    if (json.event === 'LOGOUT') { result = ' 🔴 '; }
+    else if (json.event === 'LOGOUT') { result = ' 🔴 '; }
+    else if (json.event === 'DEATH') { result = ' 💀 '; }
     if (!result) return true;
     result = '`' + instance + '`' + result + json.player.name;
     if (json.text) { result += ' [' + json.text + ']'; }
@@ -166,8 +166,7 @@ exports.setconfig = function($) {
       return response.text();
     })
     .then(function(body) {
-      if (body == null) return;
-      $.httptool.doPost('/config/' + $.data[0], body);
+      if (body) { $.httptool.doPost('/config/' + $.data[0], body); }
     })
     .catch(function(error) {
       logger.error(error, $.message);
@@ -200,9 +199,8 @@ exports.send = function($) {
 
 exports.say = function($) {
   if ($.data.length === 0) return util.reactUnknown($.message);
-  let name = $.message.member.user.tag;
+  let [name, data] = [$.message.member.user.tag, $.message.content];
   name = '@' + name.split('#')[0];
-  let data = $.message.content;
   data = data.slice(data.indexOf(' ')).trim();
   $.httptool.doPost(
     '/console/say', { player: name, text: data },
@@ -213,17 +211,12 @@ exports.say = function($) {
 
 exports.players = function($) {
   $.httptool.doGet('/players', function(body) {
-    const result = [];
-    const nosteamid = 'CONNECTED         ';
+    const [result, nosteamid] = [[], 'CONNECTED         '];
     let line = $.instance + ' players online: ' + body.length;
-    let chars = line.length;
-    let chunk = [line];
-    let maxlength = 0;
+    let [chars, chunk] = [line.length, [line]];
     if (body.length > 0) {
-      for (let i = 0; i < body.length; i++) {
-        if (body[i].name.length > maxlength) { maxlength = body[i].name.length; }
-      }
-      if (body[0].steamid != null) { maxlength += nosteamid.length; }
+      let maxlen = body.reduce(function(a, b) { return a.name.length > b.name.length ? a : b; }).name.length;
+      if (body[0].steamid != null) { maxlen += nosteamid.length; }
       for (let i = 0; i < body.length; i++) {
         if (body[i].steamid == null) {
           line = body[i].name;
@@ -232,15 +225,14 @@ exports.players = function($) {
           line += body[i].name;
         }
         if (cutil.hasProp(body[i], 'uptime')) {
-          line = line.padEnd(maxlength + 3);
+          line = line.padEnd(maxlen + 3);
           line += cutil.humanDuration(body[i].uptime, 2);
         }
         chunk.push(line);
         chars += line.length + 1;
         if (chars > 1600) {  // Discord message limit is 2000 characters
           result.push('```\n' + chunk.join('\n') + '\n```');
-          chars = 0;
-          chunk = [];
+          [chars, chunk] = [0, []];
         }
       }
     }
@@ -252,34 +244,54 @@ exports.players = function($) {
 };
 
 exports.stats = function($) {
-  const [httptool, baseurl, instance, message] = [$.httptool, $.context.config.SERVER_URL, $.instance, $.message];
-  let [atto, atfrom, player, limit, format] = [null, null, null, 11, 'text'];
+  const [httptool, instance, message] = [$.httptool, $.instance, $.message];
+  const [baseurl, now] = [$.context.config.SERVER_URL, new Date()];
+  let [value, atto, atfrom, player, limit, format] = [null, null, null, null, 11, 'text'];
   $.data.forEach(function(arg) {
-    if (arg.startsWith('to=')) { atto = util.parseUTCMillis(arg.substring(3)); }
-    else if (arg.startsWith('from=')) { atfrom = util.parseUTCMillis(arg.substring(5)); }
+    if (arg.startsWith('to=')) {
+      value = arg.substring(3);
+      if (value === 'LD') { atto = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(); }
+      else if (value === 'LM') { atto = new Date(now.getFullYear(), now.getMonth()).getTime(); }
+      else if (value === 'TM') { atto = new Date(now.getFullYear(), now.getMonth() + 1).getTime(); }
+      else { atto = util.parseUTCMillis(value); }
+    } else if (arg.startsWith('from=')) {
+      value = arg.substring(5);
+      if (value.endsWith('d') || value.endsWith('D')) { atfrom = parseInt(value.slice(0, -1), 10) * -86400000; }
+      else if (value.endsWith('h') || value.endsWith('H')) { atfrom = parseInt(value.slice(0, -1), 10) * -3600000; }
+      else { atfrom = util.parseUTCMillis(value); }
+    }
     else if (arg.startsWith('player=')) { player = arg.substring(7); }
     else if (arg.startsWith('limit=')) { limit = parseInt(arg.substring(6), 10); }
     else if (arg.startsWith('format=')) { format = arg.substring(7); }
   });
-  if (!atto) { atto = Date.now(); }
+  if (!atto) { atto = now.getTime(); }
   if (!atfrom) { atfrom = parseInt(atto, 10) - 2592000000; }
+  else if (atfrom < 0) { atfrom = atto + atfrom; }
   Promise.all([httptool.getJson(pstats.queryLastEvent(instance, atfrom, player), baseurl),
     httptool.getJson(pstats.queryEvents(instance, atfrom, atto, player), baseurl)])
     .then(function(data) {
-      let results = {};
+      let [results, text] = [{}, 'invalid format'];
       [results.lastevent, results.events] = data;
       results = pstats.extractActivity(results);
-      results = results.results[instance].players;
-      if (limit && !player) { results = pstats.compactPlayers(results, limit); }
+      results = { meta: results.meta, summary: results.results[instance].summary,
+        players: results.results[instance].players };
+      if (limit && !player) { results.players = pstats.compactPlayers(results.players, limit); }
       if (format === 'text') {
-        results = results.map(function(record) {
-          return record.player + ', ' + record.sessions + ', ' + record.uptime;
+        text = 'FROM ' + cutil.shortISODateTimeString(results.meta.atfrom);
+        text += ' TO ' + cutil.shortISODateTimeString(results.meta.atto);
+        text += ' (' + cutil.humanDuration(results.meta.atrange) + ')\n';
+        text += 'TOTAL unique:' + results.summary.unique + ' concurrent:' + results.summary.online.max + ' sessons:';
+        text += results.summary.total.sessions + ' played: ' + cutil.humanDuration(results.summary.total.uptime) + '\n';
+        const plen = Math.max(8, results.players.reduce(function(a, b) {
+          return a.player.length > b.player.length ? a : b;
+        }).player.length + 3);
+        results.players = results.players.map(function(record) {
+          return record.player.padEnd(plen) + cutil.humanDuration(record.uptime);
         });
+        text += results.players.join('\n');
       } else if (format === 'json') {
-        results = [JSON.stringify(results)];
-      } else {
-        results = ['invalid format'];
+        text = JSON.stringify(results);
       }
-      message.channel.send('```\n' + results.join('\n') + '\n```');
+      message.channel.send('```\n' + text + '\n```');
     });
 };
