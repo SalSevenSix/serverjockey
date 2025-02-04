@@ -58,11 +58,6 @@ export function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export function floatToPercent(value, rounding = 1, suffix = '%') {
-  const result = (value * 100.0).toFixed(rounding);
-  return suffix ? result + suffix : result;
-}
-
 export function chunkArray(arr, rows = 20, columns = 3) {
   if (arr.length > rows * columns) {
     rows = Math.ceil(arr.length / columns);

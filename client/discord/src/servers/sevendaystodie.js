@@ -15,12 +15,14 @@ const helpText = {
     'setconfig cmdargs  : Update launch options using attached file',
     'setconfig settings : Update settings using attached file',
     'setconfig admin    : Update admin settings using attached file',
+    'activity {query ...}         : Activity, use help for details',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime {beta} : Install game server'
-  ]
+  ],
+  activity: commons.helpText.activity
 };
 
 
@@ -33,4 +35,4 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
-exports.stats = commons.stats;
+exports.activity = commons.activity;

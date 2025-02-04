@@ -13,6 +13,7 @@ const helpText = {
     'send {line}        : Send command to server console',
     'getconfig {fileid} : Get config file as attachment',
     'setconfig {fileid} : Update config using attached file',
+    'activity {query ...}    : Activity, use help for details',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment install-runtime {version} : Install game server'
@@ -27,7 +28,8 @@ const helpText = {
     'Config fileid options for upload are:',
     '`cmdargs, server, gamemode-competitive, gamemode-wingman,`',
     '`gamemode-casual, gamemode-deathmatch, gamemode-custom`'
-  ]
+  ],
+  activity: commons.helpText.activity
 };
 
 
@@ -42,4 +44,4 @@ exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
 exports.say = commons.say;
-exports.stats = commons.stats;
+exports.activity = commons.activity;

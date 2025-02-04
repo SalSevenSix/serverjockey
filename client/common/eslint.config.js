@@ -73,7 +73,7 @@ export default [
       '@stylistic/js/no-extra-parens': 2,
       '@stylistic/js/no-extra-semi': 2,
       '@stylistic/js/no-floating-decimal': 2,
-      '@stylistic/js/no-mixed-operators': 2,
+      '@stylistic/js/no-mixed-operators': 1,
       '@stylistic/js/no-mixed-spaces-and-tabs': 2,
       '@stylistic/js/no-multi-spaces': [2, { ignoreEOLComments: true }],
       '@stylistic/js/no-multiple-empty-lines': 2,

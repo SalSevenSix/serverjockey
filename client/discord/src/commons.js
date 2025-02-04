@@ -1,10 +1,34 @@
+/* eslint-disable max-lines */
 const cutil = require('common/util/util');
+const istats = require('common/activity/instance');
 const pstats = require('common/activity/player');
 const util = require('./util.js');
 const logger = require('./logger.js');
 const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
+
+exports.helpText = {
+  activity: [
+    'Activity Reporting. Provide the following query parameters...', '```',
+    'instance        : Report instance activity instead of player activity',
+    'from={date}     : From date in ISO 8601 format YYYY-MM-DDThh:mm:ss',
+    '                  or days {n}D prior, or hours {n}H prior to date',
+    'to={date}       : To date in ISO 8601 format YYYY-MM-DDThh:mm:ss',
+    '                  or preset "LD" Last Day, "LM" Last Month, "TD" This Month',
+    'tz={timezone}   : Timezone as ±{hh} or ±{hh}:{mm} default is server tz',
+    '"player={name}" : Specify a player by name to report on',
+    'limit={rows}    : Limit number of players rows returned',
+    'format={type}   : Provide results in "TEXT" or "JSON" format',
+    '```', 'Examples...',
+    'a) get instance activity between specific dates in timezone GMT +7',
+    '`!activity instance from=2024-08-01T00:00:00 to=2024-09-01T00:00:00 tz=+7`',
+    'b) get the top 3 players from last 7 days ending yesterday',
+    '`!activity from=7D to=LD limit=4`',
+    'c) get player activity by name in json format',
+    '`!activity "player=Mr Tee" format=JSON`'
+  ]
+};
 
 exports.startServerEventLogging = function(context, channels, instance, url) {
   if (!channels.server) return;
@@ -243,55 +267,85 @@ exports.players = function($) {
   });
 };
 
-exports.stats = function($) {
+/* eslint-disable max-lines-per-function */
+exports.activity = function($) {
   const [httptool, instance, message] = [$.httptool, $.instance, $.message];
   const [baseurl, now] = [$.context.config.SERVER_URL, new Date()];
-  let [value, atto, atfrom, player, limit, format] = [null, null, null, null, 11, 'text'];
+  let [tz, atto, atfrom, player, limit, format, query] = [null, null, null, null, 11, 'TEXT', 'player'];
   $.data.forEach(function(arg) {
-    if (arg.startsWith('to=')) {
-      value = arg.substring(3);
-      if (value === 'LD') { atto = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(); }
-      else if (value === 'LM') { atto = new Date(now.getFullYear(), now.getMonth()).getTime(); }
-      else if (value === 'TM') { atto = new Date(now.getFullYear(), now.getMonth() + 1).getTime(); }
-      else { atto = util.parseUTCMillis(value); }
-    } else if (arg.startsWith('from=')) {
-      value = arg.substring(5);
-      if (value.endsWith('d') || value.endsWith('D')) { atfrom = parseInt(value.slice(0, -1), 10) * -86400000; }
-      else if (value.endsWith('h') || value.endsWith('H')) { atfrom = parseInt(value.slice(0, -1), 10) * -3600000; }
-      else { atfrom = util.parseUTCMillis(value); }
-    }
+    if (arg === 'instance') { query = arg; }
+    else if (arg.startsWith('tz=')) { tz = arg.substring(3); }
     else if (arg.startsWith('player=')) { player = arg.substring(7); }
     else if (arg.startsWith('limit=')) { limit = parseInt(arg.substring(6), 10); }
-    else if (arg.startsWith('format=')) { format = arg.substring(7); }
+    else if (arg.startsWith('format=')) { format = arg.substring(7).toUpperCase(); }
+  });
+  $.data.forEach(function(arg) {
+    if (arg.startsWith('to=')) {
+      atto = arg.substring(3);
+      if (['LH', 'LD', 'LM', 'TM'].includes(atto)) { atto = cutil.presetDate(now, atto, tz).getTime(); }
+      else { atto = cutil.parseDateToMillis(atto, tz); }
+    } else if (arg.startsWith('from=')) {
+      atfrom = arg.substring(5);
+      if (atfrom.endsWith('d') || atfrom.endsWith('D')) { atfrom = parseInt(atfrom.slice(0, -1), 10) * -86400000; }
+      else if (atfrom.endsWith('h') || atfrom.endsWith('H')) { atfrom = parseInt(atfrom.slice(0, -1), 10) * -3600000; }
+      else { atfrom = cutil.parseDateToMillis(atfrom, tz); }
+    }
   });
   if (!atto) { atto = now.getTime(); }
-  if (!atfrom) { atfrom = parseInt(atto, 10) - 2592000000; }
+  if (!atfrom) { atfrom = atto - 2592000000; }
   else if (atfrom < 0) { atfrom = atto + atfrom; }
-  Promise.all([httptool.getJson(pstats.queryLastEvent(instance, atfrom, player), baseurl),
-    httptool.getJson(pstats.queryEvents(instance, atfrom, atto, player), baseurl)])
-    .then(function(data) {
-      let [results, text] = [{}, 'invalid format'];
-      [results.lastevent, results.events] = data;
-      results = pstats.extractActivity(results);
-      results = { meta: results.meta, summary: results.results[instance].summary,
-        players: results.results[instance].players };
-      if (limit && !player) { results.players = pstats.compactPlayers(results.players, limit); }
-      if (format === 'text') {
-        text = 'FROM ' + cutil.shortISODateTimeString(results.meta.atfrom);
-        text += ' TO ' + cutil.shortISODateTimeString(results.meta.atto);
-        text += ' (' + cutil.humanDuration(results.meta.atrange) + ')\n';
-        text += 'TOTAL unique:' + results.summary.unique + ' concurrent:' + results.summary.online.max + ' sessons:';
-        text += results.summary.total.sessions + ' played: ' + cutil.humanDuration(results.summary.total.uptime) + '\n';
-        const plen = Math.max(8, results.players.reduce(function(a, b) {
-          return a.player.length > b.player.length ? a : b;
-        }).player.length + 3);
-        results.players = results.players.map(function(record) {
-          return record.player.padEnd(plen) + cutil.humanDuration(record.uptime);
-        });
-        text += results.players.join('\n');
-      } else if (format === 'json') {
-        text = JSON.stringify(results);
-      }
-      message.channel.send('```\n' + text + '\n```');
-    });
+  if (!tz) { tz = true; }
+  let [results, text] = [{}, 'invalid arguments'];
+  if (query === 'instance') {
+    Promise.all([httptool.getJson(istats.queryInstance(instance), baseurl),
+      httptool.getJson(istats.queryLastEvent(instance, atfrom), baseurl),
+      httptool.getJson(istats.queryEvents(instance, atfrom, atto), baseurl)])
+      .then(function(data) {
+        [results.instances, results.lastevent, results.events] = data;
+        results = istats.extractActivity(results);
+        results = { meta: results.meta, summary: results.results[0] };
+        if (format === 'TEXT') {
+          text = 'FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz);
+          text += ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tz);
+          text += ' (' + cutil.humanDuration(results.meta.atrange) + ')\n';
+          text += 'CREATED ' + cutil.shortISODateTimeString(results.summary.created, tz) + '\n';
+          text += 'TOTAL sessions:' + results.summary.sessions;
+          text += ' available:' + cutil.floatToPercent(results.summary.available);
+          text += ' uptime: ' + cutil.humanDuration(results.summary.uptime);
+        } else if (format === 'JSON') {
+          text = JSON.stringify(results);
+        }
+        message.channel.send('```\n' + text + '\n```');
+      });
+  } else if (query === 'player') {
+    Promise.all([httptool.getJson(pstats.queryLastEvent(instance, atfrom, player), baseurl),
+      httptool.getJson(pstats.queryEvents(instance, atfrom, atto, player), baseurl)])
+      .then(function(data) {
+        [results.lastevent, results.events] = data;
+        results = pstats.extractActivity(results);
+        results = { meta: results.meta, summary: results.results[instance].summary,
+          players: results.results[instance].players };
+        if (limit && !player) { results.players = pstats.compactPlayers(results.players, limit); }
+        if (format === 'TEXT') {
+          text = 'FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz);
+          text += ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tz);
+          text += ' (' + cutil.humanDuration(results.meta.atrange) + ')\n';
+          text += 'TOTAL unique:' + results.summary.unique + ' concurrent:' + results.summary.online.max;
+          text += ' sessons:' + results.summary.total.sessions;
+          text += ' played: ' + cutil.humanDuration(results.summary.total.uptime) + '\n';
+          const plen = Math.max(8, results.players.reduce(function(a, b) {
+            return a.player.length > b.player.length ? a : b;
+          }).player.length + 3);
+          results.players = results.players.map(function(record) {
+            return record.player.padEnd(plen) + cutil.humanDuration(record.uptime);
+          });
+          text += results.players.join('\n');
+        } else if (format === 'JSON') {
+          text = JSON.stringify(results);
+        }
+        message.channel.send('```\n' + text + '\n```');
+      });
+  }
 };
+/* eslint-enable max-lines-per-function */
+/* eslint-enable max-lines */

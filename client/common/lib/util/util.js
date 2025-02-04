@@ -19,13 +19,95 @@ export function urlSafeB64encode(value) {
   return data.replaceAll('+', '-').replaceAll('/', '_');
 }
 
-export function shortISODateTimeString(value, utc = false) {
-  let dateobj = value instanceof Date ? value : new Date(value);
-  if (!utc) {
-    const offset = dateobj.getTimezoneOffset() * -60000;
-    dateobj = new Date(dateobj.getTime() + offset);
+export function floatToPercent(value, rounding = 1, suffix = '%') {
+  const result = (value * 100.0).toFixed(rounding);
+  return suffix ? result + suffix : result;
+}
+
+function timezoneToMinutes(value) {
+  if (!value) return 0;
+  if (!isString(value)) return value;
+  if (value === 'Z' || value === 'UTC' || value === 'GMT') return 0;
+  let [result, op, hh, mm] = [null, value.substring(0, 1), 0, 0];
+  if (op === '+' || op === '-') {
+    result = value.slice(1).split(':');
+  } else {
+    result = value.split(':');
+    op = '+';
   }
-  return dateobj.toISOString().replace('T', ' ').substring(0, 19);
+  if (result.length > 1) {
+    [hh, mm] = result;
+  } else {
+    result = result[0];
+    if (result.length > 2) {
+      [hh, mm] = [result.substring(0, 2), result.slice(2)];
+    } else {
+      hh = result;
+    }
+  }
+  result = parseInt(hh, 10) * 60;
+  result += parseInt(mm, 10);
+  if (isNaN(result)) return 0;
+  return op === '-' ? 0 - result : result;
+}
+
+export function presetDate(value, preset, tz = null) {
+  if (!value) return null;
+  let result = value instanceof Date ? value : new Date(value);
+  if (!preset) return result;
+  preset = preset.toUpperCase();
+  if (tz) {
+    result = result.getTime() + 60000 * result.getTimezoneOffset();
+    result += 60000 * timezoneToMinutes(tz);
+    result = new Date(result);
+  }
+  if (preset === 'LH' || preset === 'LAST HOUR') {
+    result = new Date(result.getFullYear(), result.getMonth(), result.getDate(), result.getHours());
+  } else if (preset === 'LD' || preset === 'LAST DAY') {
+    result = new Date(result.getFullYear(), result.getMonth(), result.getDate());
+  } else if (preset === 'LM' || preset === 'LAST MONTH') {
+    result = new Date(result.getFullYear(), result.getMonth());
+  } else if (preset === 'TM' || preset === 'THIS MONTH') {
+    result = new Date(result.getFullYear(), result.getMonth() + 1);
+  }
+  if (tz) {
+    result = result.getTime() - 60000 * result.getTimezoneOffset();
+    result -= 60000 * timezoneToMinutes(tz);
+    result = new Date(result);
+  }
+  return result;
+}
+
+export function parseDateToMillis(value, tz = null) {
+  if (!value) return null;
+  let result = parseInt(value, 10);
+  if (result.toString() != value.toString()) { result = Date.parse(value); }
+  if (isNaN(result)) return null;
+  if (tz) {
+    result -= 60000 * new Date(result).getTimezoneOffset();
+    result -= 60000 * timezoneToMinutes(tz);
+  }
+  return result;
+}
+
+export function shortISODateTimeString(value, tzFlag = true) {
+  if (!value) return '';
+  let result = value instanceof Date ? value : new Date(value);
+  let offset = 0;
+  if (!tzFlag) {  // UTC
+    // Pass
+  } else if (tzFlag === true) {  // Local TZ
+    offset = 0 - result.getTimezoneOffset();
+  } else if (isString(tzFlag)) {  // Specific TZ as string
+    offset = timezoneToMinutes(tzFlag);
+  } else if (tzFlag) {  // Specific TZ as minutes
+    offset = tzFlag;
+  }
+  if (offset) {
+    offset *= 60000;
+    result = new Date(result.getTime() + offset);
+  }
+  return result.toISOString().replace('T', ' ').substring(0, 19);
 }
 
 export function humanDuration(millis, parts = 3) {

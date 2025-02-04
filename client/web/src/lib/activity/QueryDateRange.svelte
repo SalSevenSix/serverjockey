@@ -1,6 +1,7 @@
 <script>
   import { getContext, tick } from 'svelte';
   import { DateInput } from 'date-picker-svelte';  // https://date-picker-svelte.kasper.space/docs
+  import { presetDate } from 'common/util/util';
 
   const query = getContext('query');
   const minDate = new Date(946684800000);  // 2000-01-01 00:00:00
@@ -58,24 +59,10 @@
     return true;
   }
 
-  function attoPresetToMillis(selected) {
-    let dt = new Date();
-    if (selected == attoOptions[2]) {
-      dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours());
-    } else if (selected == attoOptions[3]) {
-      dt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-    } else if (selected == attoOptions[4]) {
-      dt = new Date(dt.getFullYear(), dt.getMonth());
-    } else if (selected == attoOptions[5]) {
-      dt = new Date(dt.getFullYear(), dt.getMonth() + 1);
-    }
-    return dt.getTime();
-  }
-
   function resolveRange() {
     const millis = { atfrom: null, atto: null };
     if (atto) { millis.atto = Math.trunc(atto.getTime() / 1000) * 1000; }
-    if (hasAttoPreset) { millis.atto = attoPresetToMillis(attoPreset); }
+    if (hasAttoPreset) { millis.atto = presetDate(new Date(), attoPreset).getTime(); }
     if (atfrom) { millis.atfrom = Math.trunc(atfrom.getTime() / 1000) * 1000; }
     if (hasAtfromMillis) { millis.atfrom = millis.atto - parseInt(atfromMillis, 10); }
     return millis;

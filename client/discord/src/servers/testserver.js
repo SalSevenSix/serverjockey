@@ -14,10 +14,12 @@ const helpText = {
     'send {line}       : Send command to server console',
     'getconfig cmdargs : Get cmd args as attachment',
     'setconfig cmdargs : Update cmd args using attached file',
+    'activity {query ...}  : Activity, use help for details',
     'deployment backup-runtime     : Backup server to zip file',
     'deployment install-runtime {version} : Install game server'
   ],
-  send: '/console/help'
+  send: '/console/help',
+  activity: commons.helpText.activity
 };
 
 
@@ -31,4 +33,4 @@ exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
-exports.stats = commons.stats;
+exports.activity = commons.activity;

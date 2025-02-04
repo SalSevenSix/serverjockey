@@ -25,13 +25,15 @@ const helpText = {
     'setconfig adminlist : Update adminlist using attached file',
     'setconfig whitelist : Update whitelist using attached file',
     'setconfig banlist   : Update banlist using attached file',
+    'activity {query ...}    : Activity, use help for details',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime {version} : Install game server'
   ],
-  send: '/console/help'
+  send: '/console/help',
+  activity: commons.helpText.activity
 };
 
 
@@ -46,4 +48,4 @@ exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
 exports.say = commons.say;
-exports.stats = commons.stats;
+exports.activity = commons.activity;

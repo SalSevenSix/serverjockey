@@ -3,14 +3,6 @@ function reactTo(message, emoji, retval = null) {
   return retval;
 }
 
-exports.parseUTCMillis = function(value) {
-  if (!value) return null;
-  let result = parseInt(value, 10);
-  if (result.toString() === value.toString()) return result;
-  result = Date.parse(value);
-  return isNaN(result) ? null : result;
-};
-
 exports.getFirstKey = function(value) {
   if (value == null) return null;
   const keys = Object.keys(value);

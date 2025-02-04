@@ -19,12 +19,14 @@ const helpText = {
     'setconfig commands : Update server commands using attached file',
     'setconfig settings : Update general settings using attached file',
     'setconfig workshop : Update workshop mods using attached file',
+    'activity {query ...}         : Activity, use help for details',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game map and config',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime {beta} : Install game server'
   ],
-  send: '/console/help'
+  send: '/console/help',
+  activity: commons.helpText.activity
 };
 
 
@@ -39,4 +41,4 @@ exports.deployment = commons.deployment;
 exports.players = commons.players;
 exports.send = commons.send;
 exports.say = commons.say;
-exports.stats = commons.stats;
+exports.activity = commons.activity;

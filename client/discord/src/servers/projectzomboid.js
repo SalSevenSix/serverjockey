@@ -56,6 +56,7 @@ const helpText = {
     'setconfig spawnregions : Update Spawnregions using attached file',
     'setconfig spawnpoints  : Update Spawnpoints using attached file',
     'setconfig jvm          : Update JVM config using attached file',
+    'activity {query ...}   : Activity, use help for details',
     'deployment backup-world {hours}   : Backup game world to zip file',
     'deployment wipe-world-save        : Delete only map files',
     'deployment wipe-world-playerdb    : Delete only player DB',
@@ -84,6 +85,7 @@ const helpText = {
   playerspawnvehicle: [
     'Spawn a vehicle next to player. Condition will vary.'
   ],
+  activity: commons.helpText.activity,
   deploymentbackupworld: [
     'Make a backup of the game world to a zip file.',
     'Optionally specify {hours} to prune backups older than hours.',
@@ -105,7 +107,7 @@ exports.getconfig = commons.getconfig;
 exports.setconfig = commons.setconfig;
 exports.deployment = commons.deployment;
 exports.players = commons.players;
-exports.stats = commons.stats;
+exports.activity = commons.activity;
 
 exports.world = function($) {
   const data = [...$.data];
