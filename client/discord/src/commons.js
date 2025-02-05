@@ -269,6 +269,7 @@ exports.players = function($) {
 
 /* eslint-disable max-lines-per-function */
 exports.activity = function($) {
+  if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
   const [httptool, instance, message] = [$.httptool, $.instance, $.message];
   const [baseurl, now] = [$.context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, limit, format, query] = [null, null, null, null, 11, 'TEXT', 'player'];

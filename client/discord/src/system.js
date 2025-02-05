@@ -14,7 +14,6 @@ const helpText = {
   ]
 };
 
-
 exports.help = function($) { commons.sendHelp($, helpText); };
 
 exports.about = function($) {
@@ -51,11 +50,7 @@ exports.system = function($) {
 
 exports.modules = function($) {
   $.httptool.doGet('/modules', function(body) {
-    let result = '```\n';
-    for (const module in body) {
-      result += body[module] + '\n';
-    }
-    return result + '```';
+    return '```\n' + body.join('\n') + '\n```';
   });
 };
 

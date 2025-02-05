@@ -4,10 +4,9 @@ function reactTo(message, emoji, retval = null) {
 }
 
 exports.getFirstKey = function(value) {
-  if (value == null) return null;
+  if (!value) return null;
   const keys = Object.keys(value);
-  if (keys.length === 0) return null;
-  return keys[0];
+  return keys.length === 0 ? null : keys[0];
 };
 
 exports.commandLineToList = function(line) {

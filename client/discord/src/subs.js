@@ -12,8 +12,7 @@ exports.Helper = class Helper {
 
   async daemon(subscribeUrl, dataHandler) {
     const context = this.#context;
-    let url = null;
-    let counter = 0;
+    let [url, counter] = [null, 0];
     while (context.running && url == null) {
       while (context.running && url == null) {
         url = await this.subscribe(subscribeUrl);

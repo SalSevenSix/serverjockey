@@ -26,9 +26,7 @@ exports.Service = class Service {
   }
 
   async startup(channels) {
-    const self = this;
-    const context = this.#context;
-    const baseurl = context.config.SERVER_URL;
+    const [self, context, baseurl] = [this, this.#context, this.#context.config.SERVER_URL];
     const instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -86,11 +84,7 @@ exports.Service = class Service {
     if (Object.keys(this.#instances).length === 0) return '```\nNo instances found.\n```';
     let result = '```\n';
     for (const [identity, data] of Object.entries(this.#instances)) {
-      if (identity === this.#context.instancesService.currentInstance()) {
-        result += '=> ';
-      } else {
-        result += '   ';
-      }
+      result += identity === this.#context.instancesService.currentInstance() ? '=> ' : '   ';
       result += identity + ' (' + data.module + ')\n';
     }
     return result + '```';
