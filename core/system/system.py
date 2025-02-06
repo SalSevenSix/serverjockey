@@ -255,7 +255,7 @@ class _SystemInfoHandler(httpabc.GetHandler):
         info = await sysutil.system_info()
         info['upnp'] = await igd.status(self._context, self)
         info['startmillis'] = self._startmillis
-        info['uptime'] = dtutil.now_millis() - self._startmillis
+        info['uptime'] = info['time']['millis'] - self._startmillis
         return info
 
 

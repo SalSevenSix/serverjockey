@@ -122,7 +122,7 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             data = objconv.json_to_dict(util.lchop(message.data(), 'PlayerDeath'))
             name = util.get('player', data)
             if name:
-                text = 'survived ' + dtutil.human_duration(util.get('hours', data, 0.0) * 3600.0)
+                text = 'survived ' + dtutil.duration_to_str(util.get('hours', data, 0.0) * 3600.0)
                 text += ', killed ' + str(util.get('zkills', data, 0)) + ' zombies'
                 text += ', died at '
                 position = util.get('position', data)

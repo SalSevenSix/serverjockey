@@ -56,8 +56,10 @@
   <div class="column is-one-third content position-relative">
     {#if info}
       <table class="table"><tbody>
-        <tr><td class="has-text-weight-bold" title="ServerJockey version">Version</td>
-            <td class="word-break-all notranslate" id="systemInfoVersion">{info.version}</td></tr>
+        <tr><td class="has-text-weight-bold" title="Machine time">Time</td>
+            <td class="notranslate" id="systemInfoTime">{info.time.text} {info.time.tz.text}</td></tr>
+        <tr><td title="ServerJockey uptime">Uptime</td>
+            <td class="notranslate" id="systemInfoUptime">{humanDuration(info.uptime)}</td></tr>
         <tr><td class="has-text-weight-bold" title="Operating system name">OS</td>
             <td class="notranslate" id="systemInfoOs"><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
         <tr><td class="has-text-weight-bold" title="Disk usage">Disk</td>
@@ -79,7 +81,8 @@
     {:else}
       <SpinnerOverlay />
       <table class="table"><tbody>
-        <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
+        <tr><td class="has-text-weight-bold">Time</td><td>...</td></tr>
+        <tr><td>Uptime</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">OS</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">Disk</td><td>...</td></tr>
         <tr><td>Total</td><td>...</td></tr>
@@ -94,8 +97,8 @@
   <div class="column is-one-third content position-relative">
     {#if info}
       <table class="table"><tbody>
-        <tr><td class="has-text-weight-bold" title="ServerJockey uptime">Uptime</td>
-            <td class="notranslate" id="systemInfoUptime">{humanDuration(info.uptime)}</td></tr>
+        <tr><td class="has-text-weight-bold" title="ServerJockey version">Version</td>
+            <td class="word-break-all notranslate" id="systemInfoVersion">{info.version}</td></tr>
         <tr><td class="has-text-weight-bold" title="CPU usage">CPU</td>
             <td class="notranslate" id="systemInfoCpuPercent"><HealthSymbol red={80.0} amber={50.0} value={info.cpu.percent} />
               {info.cpu.percent}%</td></tr>
@@ -120,7 +123,7 @@
     {:else}
       <SpinnerOverlay />
       <table class="table"><tbody>
-        <tr><td class="has-text-weight-bold">Uptime</td><td>...</td></tr>
+        <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
         <tr><td>Model</td><td>...</td></tr>
         <tr><td class="notranslate">A|S|C|T|P</td><td>...</td></tr>

@@ -35,6 +35,7 @@ exports.system = function($) {
   $.httptool.doGet('/system/info', function(info) {
     let result = '```\n';
     result += 'Version : ' + info.version + '\n';
+    result += 'Svrtime : ' + info.time.text + ' ' + info.time.tz.text + '\n';
     result += 'Uptime  : ' + cutil.humanDuration(info.uptime) + '\n';
     result += 'CPU     : ' + info.cpu.percent + '%\n';
     result += 'Memory  : ' + cutil.humanFileSize(info.memory.used);
@@ -44,7 +45,8 @@ exports.system = function($) {
     result += ' / ' + cutil.humanFileSize(info.disk.total);
     result += ' (' + info.disk.percent + '%)\n';
     result += 'IPv4    : ' + info.net.local + ' ' + info.net.public;
-    return result + '\n```';
+    result += '\n```';
+    return result;
   });
 };
 

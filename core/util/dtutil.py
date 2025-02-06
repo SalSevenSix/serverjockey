@@ -24,19 +24,26 @@ def format_time_standard(seconds: float, local: bool = True) -> str:
     return format_time('%Y-%m-%d %H:%M:%S', seconds, local)
 
 
-def human_duration(seconds: float, parts: int = 3) -> str:
-    value = seconds if seconds and seconds > 0.0 else 0.0
-    days, hours = -1, -1
-    if parts > 2:
-        days = math.floor(value / 86400.0)
-        value -= days * 86400.0
-    if parts > 1:
-        hours = math.floor(value / 3600.0)
-        value -= hours * 3600.0
-    result = ''
-    if days > -1:
-        result += str(days) + 'd '
-    if hours > -1:
-        result += str(hours) + 'h '
-    result += str(math.floor(value / 60.0)) + 'm'
+def format_timezone_standard(seconds: float) -> str:
+    data = duration_to_dict(seconds, 'hm')
+    hh, mm = data['h'], data['m']
+    op = '+' if hh > 0 or mm > 0 else '-'
+    hh, mm = hh if hh > 0 else 0 - hh, mm if mm > 0 else 0 - mm
+    hh, mm = str(hh).rjust(2, '0'), str(mm).rjust(2, '0')
+    return op + hh + ':' + mm
+
+
+def duration_to_dict(seconds: float, parts: str = 'dhm') -> dict:
+    result, remainder = {}, seconds if seconds else 0.0
+    for key, value in dict(d=86400.0, h=3600.0, m=60.0, s=1.0).items():
+        if parts.find(key) != -1:
+            result[key] = math.floor(remainder / value) if remainder > 0 else math.ceil(remainder / value)
+            remainder -= result[key] * value
     return result
+
+
+def duration_to_str(seconds: float, parts: str = 'dhm') -> str:
+    result = []
+    for key, value in duration_to_dict(seconds, parts).items():
+        result.append(str(value) + key)
+    return ' '.join(result)

@@ -2,10 +2,11 @@ import logging
 import shutil
 import socket
 import time
+import datetime
 import asyncio
 import aiohttp
 # ALLOW util.*
-from core.util import util, objconv, io, funcutil, shellutil, tasks
+from core.util import util, dtutil, objconv, io, funcutil, shellutil, tasks
 
 
 _disk_usage = funcutil.to_async(shutil.disk_usage)
@@ -195,6 +196,13 @@ def system_version_dict() -> dict:
     return _VERSION_DICT
 
 
+def system_time() -> dict:
+    now = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    timestamp, tz_seconds = now.timestamp(), now.utcoffset().total_seconds()
+    tz = dict(millis=int(tz_seconds) * 1000, text=dtutil.format_timezone_standard(tz_seconds))
+    return dict(millis=dtutil.to_millis(timestamp), text=dtutil.format_time_standard(timestamp), tz=tz)
+
+
 async def os_name() -> str:
     return await _OS_NAME.get()
 
@@ -228,4 +236,4 @@ async def system_info() -> dict:
     cpu, cpupct, os, disk, memory, local, public = await asyncio.gather(
         cpu_info(), cpu_percent(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
     cpu['percent'], net = cpupct, dict(local=local, public=public)
-    return dict(version=system_version(), os=os, cpu=cpu, memory=memory, disk=disk, net=net)
+    return dict(version=system_version(), time=system_time(), os=os, cpu=cpu, memory=memory, disk=disk, net=net)
