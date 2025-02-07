@@ -27,7 +27,7 @@ def format_time_standard(seconds: float, local: bool = True) -> str:
 def format_timezone_standard(seconds: float) -> str:
     data = duration_to_dict(seconds, 'hm')
     hh, mm = data['h'], data['m']
-    op = '+' if hh > 0 or mm > 0 else '-'
+    op = '-' if hh < 0 or mm < 0 else '+'
     hh, mm = hh if hh > 0 else 0 - hh, mm if mm > 0 else 0 - mm
     hh, mm = str(hh).rjust(2, '0'), str(mm).rjust(2, '0')
     return op + hh + ':' + mm

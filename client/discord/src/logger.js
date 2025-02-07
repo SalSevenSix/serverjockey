@@ -2,7 +2,7 @@ const cutil = require('common/util/util');
 const util = require('./util.js');
 
 function timestamp() {
-  return cutil.shortISODateTimeString(new Date(), false);
+  return cutil.shortISODateTimeString(new Date(), true);
 }
 
 exports.raw = function(value) {

@@ -199,7 +199,7 @@ def system_version_dict() -> dict:
 def system_time() -> dict:
     now = datetime.datetime.now(datetime.timezone.utc).astimezone()
     timestamp, tz_seconds = now.timestamp(), now.utcoffset().total_seconds()
-    tz = dict(millis=int(tz_seconds) * 1000, text=dtutil.format_timezone_standard(tz_seconds))
+    tz = dict(millis=dtutil.to_millis(tz_seconds), text=dtutil.format_timezone_standard(tz_seconds))
     return dict(millis=dtutil.to_millis(timestamp), text=dtutil.format_time_standard(timestamp), tz=tz)
 
 
