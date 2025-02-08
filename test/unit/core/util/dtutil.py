@@ -1,16 +1,18 @@
 import unittest
+import datetime
 from core.util import dtutil
 
-_TIMESTAMP = 1738910489.8691483
 _DURATION = 60.0 * 60.0 * 24.0 + 60.0 * 60.0 * 2.0 + 60.0 * 3.0 + 4
 
 
 class TestCoreUtilDtutil(unittest.TestCase):
 
     def test_format_time_standard(self):
-        self.assertEqual('2025-02-07 13:41:29', dtutil.format_time_standard(_TIMESTAMP))
-        self.assertEqual('2025-02-07 13:41:29', dtutil.format_time_standard(_TIMESTAMP, True))
-        self.assertEqual('2025-02-07 06:41:29', dtutil.format_time_standard(_TIMESTAMP, False))
+        timestamp = 1738910489.8691483
+        self.assertEqual('2025-02-07 06:41:29', dtutil.format_time_standard(timestamp, False))
+        timestamp -= datetime.datetime.now(datetime.timezone.utc).astimezone().utcoffset().total_seconds()
+        self.assertEqual('2025-02-07 06:41:29', dtutil.format_time_standard(timestamp, True))
+        self.assertEqual('2025-02-07 06:41:29', dtutil.format_time_standard(timestamp))
 
     def test_format_timezone_standard(self):
         self.assertEqual('+00:00', dtutil.format_timezone_standard(0.0))
