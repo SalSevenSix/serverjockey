@@ -3,7 +3,7 @@ const util = require('./util.js');
 const logger = require('./logger.js');
 const fetch = require('node-fetch');
 
-exports.Helper = class Helper {
+export class Helper {
   #context;
 
   constructor(context) {
@@ -69,4 +69,4 @@ exports.Helper = class Helper {
         });
     }
   }
-};
+}

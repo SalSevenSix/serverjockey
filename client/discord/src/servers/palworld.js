@@ -22,19 +22,18 @@ const helpText = {
   send: '/console/help'
 };
 
+export const startup = commons.startServerEventLogging;
+export function help($) { commons.sendHelp($, helpText); }
+export const server = commons.server;
+export const auto = commons.auto;
+export const log = commons.log;
+export const getconfig = commons.getconfig;
+export const setconfig = commons.setconfig;
+export const deployment = commons.deployment;
+export const send = commons.send;
 
-exports.startup = commons.startServerEventLogging;
-exports.help = function($) { commons.sendHelp($, helpText); };
-exports.server = commons.server;
-exports.auto = commons.auto;
-exports.log = commons.log;
-exports.getconfig = commons.getconfig;
-exports.setconfig = commons.setconfig;
-exports.deployment = commons.deployment;
-exports.send = commons.send;
-
-exports.players = function($) {
+export function players($) {
   $.httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
     $.message.channel.send('```\n' + text + '\n```');
   });
-};
+}

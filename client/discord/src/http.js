@@ -5,7 +5,7 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-exports.MessageHttpTool = class MessageHttpTool {
+export class MessageHttpTool {
   #context;
 
   #message;
@@ -117,4 +117,4 @@ exports.MessageHttpTool = class MessageHttpTool {
       });
     });
   }
-};
+}

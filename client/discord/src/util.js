@@ -3,13 +3,13 @@ function reactTo(message, emoji, retval = null) {
   return retval;
 }
 
-exports.getFirstKey = function(value) {
+export function getFirstKey(value) {
   if (!value) return null;
   const keys = Object.keys(value);
   return keys.length === 0 ? null : keys[0];
-};
+}
 
-exports.commandLineToList = function(line) {
+export function commandLineToList(line) {
   const regexp = /[^\s"]+|"([^"]*)"/gi;
   const result = [];
   let match = null;
@@ -20,17 +20,17 @@ exports.commandLineToList = function(line) {
     }
   } while (match != null);
   return result;
-};
+}
 
-exports.newGetRequest = function(secret) {
+export function newGetRequest(secret) {
   return { method: 'get', headers: { 'X-Secret': secret } };
-};
+}
 
-exports.newPostRequest = function(ct, secret) {
+export function newPostRequest(ct, secret) {
   return { method: 'post', headers: { 'Content-Type': ct, 'X-Secret': secret } };
-};
+}
 
-exports.listifyRoles = function(line) {
+export function listifyRoles(line) {
   const roles = [];
   if (!line || !line.trim()) return roles;
   line.split('@').forEach(function(role) {
@@ -38,9 +38,9 @@ exports.listifyRoles = function(line) {
     if (role) { roles.push(role); }
   });
   return roles;
-};
+}
 
-exports.checkHasRole = function(message, roles) {
+export function checkHasRole(message, roles) {
   let hasRole = roles.includes('everyone');
   if (!hasRole && roles.length > 0) {
     hasRole = message.member.roles.cache.find(function(role) {
@@ -49,27 +49,27 @@ exports.checkHasRole = function(message, roles) {
   }
   if (hasRole) return true;
   return reactTo(message, '🔒', false);
-};
+}
 
-exports.rmReacts = function(message, thenHandler, errorHandler, retval = null) {
+export function rmReacts(message, thenHandler, errorHandler, retval = null) {
   message.reactions.removeAll()
     .then(function() { thenHandler(message); })
     .catch(errorHandler);
   return retval;
-};
+}
 
-exports.reactUnknown = function(message) {
+export function reactUnknown(message) {
   return reactTo(message, '❓');
-};
+}
 
-exports.reactWait = function(message) {
+export function reactWait(message) {
   return reactTo(message, '⌛');
-};
+}
 
-exports.reactError = function(message) {
+export function reactError(message) {
   return reactTo(message, '⛔');
-};
+}
 
-exports.reactSuccess = function(message) {
+export function reactSuccess(message) {
   return reactTo(message, '✅');
-};
+}

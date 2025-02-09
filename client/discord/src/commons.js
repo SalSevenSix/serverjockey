@@ -8,29 +8,7 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-exports.helpText = {
-  activity: [
-    'Activity Reporting. Provide the following query parameters...', '```',
-    'instance        : Report instance activity instead of player activity',
-    'from={date}     : From date in ISO 8601 format YYYY-MM-DDThh:mm:ss',
-    '                  or days {n}D prior, or hours {n}H prior to date',
-    'to={date}       : To date in ISO 8601 format YYYY-MM-DDThh:mm:ss',
-    '                  or preset "LD" Last Day, "LM" Last Month, "TD" This Month',
-    'tz={timezone}   : Timezone as ±{hh} or ±{hh}:{mm} default is server tz',
-    '"player={name}" : Specify a player by name to report on',
-    'limit={rows}    : Limit number of players rows returned',
-    'format={type}   : Provide results in "TEXT" or "JSON" format',
-    '```', 'Examples...',
-    'a) get instance activity between specific dates in timezone GMT +7',
-    '`!activity instance from=2024-08-01T00:00:00 to=2024-09-01T00:00:00 tz=+7`',
-    'b) get the top 3 players from last 7 days ending yesterday',
-    '`!activity from=7D to=LD limit=4`',
-    'c) get player activity by name in json format',
-    '`!activity "player=Mr Tee" format=JSON`'
-  ]
-};
-
-exports.startServerEventLogging = function(context, channels, instance, url) {
+export function startServerEventLogging(context, channels, instance, url) {
   if (!channels.server) return;
   let state = 'READY';
   let restartRequired = false;
@@ -48,10 +26,10 @@ exports.startServerEventLogging = function(context, channels, instance, url) {
     channels.server.send('`' + instance + '` 📡 ' + state);
     return true;
   });
-};
+}
 
-exports.startAllEventLogging = function(context, channels, instance, url) {
-  exports.startServerEventLogging(context, channels, instance, url);
+export function startAllEventLogging(context, channels, instance, url) {
+  startServerEventLogging(context, channels, instance, url);
   if (!channels.login && !channels.chat) return;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     if (json.event === 'CHAT') {
@@ -71,9 +49,9 @@ exports.startAllEventLogging = function(context, channels, instance, url) {
     channels.login.send(result);
     return true;
   });
-};
+}
 
-exports.sendHelp = function($, helpText) {
+export function sendHelp($, helpText) {
   if ($.data.length === 0) {
     const cmd = $.context.config.CMD_PREFIX;
     let header = '```\n' + helpText.title + '\n' + cmd;
@@ -93,9 +71,9 @@ exports.sendHelp = function($, helpText) {
   } else {
     $.message.channel.send(helpText[query].join('\n'));
   }
-};
+}
 
-exports.server = function($) {
+export function server($) {
   if ($.data.length === 0) {
     $.httptool.doGet('/server', function(body) {
       let result = '```\nServer ' + $.instance + ' is ';
@@ -136,9 +114,9 @@ exports.server = function($) {
       return true;
     });
   });
-};
+}
 
-exports.auto = function($) {
+export function auto($) {
   if ($.data.length > 0) {
     $.httptool.doPost('', { auto: $.data[0] });
     return;
@@ -150,9 +128,9 @@ exports.auto = function($) {
     result += ' (' + desc[body.auto] + ')\n```';
     return result;
   });
-};
+}
 
-exports.log = function($) {
+export function log($) {
   $.httptool.doGet('/log/tail', function(body) {
     if (!body) {
       $.message.channel.send('```\nNo log lines found\n```');
@@ -166,9 +144,9 @@ exports.log = function($) {
         .finally(function() { fs.unlink(fpath, logger.error); });
     });
   });
-};
+}
 
-exports.getconfig = function($) {
+export function getconfig($) {
   if ($.data.length === 0) return util.reactUnknown($.message);
   $.httptool.doGet('/config/' + $.data[0], function(body) {
     const fname = $.data[0] + '-' + $.message.id + '.text';
@@ -179,9 +157,9 @@ exports.getconfig = function($) {
         .finally(function() { fs.unlink(fpath, logger.error); });
     });
   });
-};
+}
 
-exports.setconfig = function($) {
+export function setconfig($) {
   const attachment = $.message.attachments.first();
   if ($.data.length === 0 || !attachment) return util.reactUnknown($.message);
   fetch(attachment.url)
@@ -195,9 +173,9 @@ exports.setconfig = function($) {
     .catch(function(error) {
       logger.error(error, $.message);
     });
-};
+}
 
-exports.deployment = function($) {
+export function deployment($) {
   const data = [...$.data];
   if (data.length === 0) return util.reactUnknown($.message);
   const cmd = data.shift();
@@ -209,9 +187,9 @@ exports.deployment = function($) {
     if (data.length > 0) { body.beta = data[0]; }
   }
   $.httptool.doPostToFile('/deployment/' + cmd, body);
-};
+}
 
-exports.send = function($) {
+export function send($) {
   if ($.data.length === 0) return util.reactUnknown($.message);
   let data = $.message.content;
   data = data.slice(data.indexOf(' ')).trim();
@@ -219,9 +197,9 @@ exports.send = function($) {
     if (!text) return util.reactSuccess($.message);
     $.message.channel.send('```\n' + text + '\n```');
   });
-};
+}
 
-exports.say = function($) {
+export function say($) {
   if ($.data.length === 0) return util.reactUnknown($.message);
   let [name, data] = [$.message.member.user.tag, $.message.content];
   name = '@' + name.split('#')[0];
@@ -231,9 +209,9 @@ exports.say = function($) {
     function() { $.message.react('💬'); },
     $.context.config.PLAYER_ROLE
   );
-};
+}
 
-exports.players = function($) {
+export function players($) {
   $.httptool.doGet('/players', function(body) {
     const [result, nosteamid] = [[], 'CONNECTED         '];
     let line = $.instance + ' players online: ' + body.length;
@@ -265,10 +243,10 @@ exports.players = function($) {
     }
     return result;
   });
-};
+}
 
 /* eslint-disable max-lines-per-function */
-exports.activity = function($) {
+export function activity($) {
   if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
   const [httptool, instance, message] = [$.httptool, $.instance, $.message];
   const [baseurl, now] = [$.context.config.SERVER_URL, new Date()];
@@ -347,6 +325,6 @@ exports.activity = function($) {
         message.channel.send('```\n' + text + '\n```');
       });
   }
-};
+}
 /* eslint-enable max-lines-per-function */
 /* eslint-enable max-lines */

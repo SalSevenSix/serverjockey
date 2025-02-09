@@ -14,7 +14,7 @@ const servers = {
   palworld: require('./servers/palworld.js')
 };
 
-exports.Service = class Service {
+export class Service {
   #context;
 
   #current = null;
@@ -89,4 +89,4 @@ exports.Service = class Service {
     }
     return result + '```';
   }
-};
+}

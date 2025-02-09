@@ -1,22 +1,13 @@
 const cutil = require('common/util/util');
 const util = require('./util.js');
+const helptext = require('./helptext.js');
 const commons = require('./commons.js');
-const helpText = {
-  title: 'SYSTEM COMMANDS',
-  help1: [
-    'help {command} {action}    : Show help',
-    'about                      : About ServerJockey',
-    'system                     : Show system information',
-    'instances                  : Show server instances list',
-    'use {instance}             : Switch default instance',
-    'modules                    : Supported games list',
-    'create {instance} {module} : Create new instance'
-  ]
-};
 
-exports.help = function($) { commons.sendHelp($, helpText); };
+export function help($) {
+  commons.sendHelp($, helptext.systemHelpText);
+}
 
-exports.about = function($) {
+export function about($) {
   let result = '**ServerJockey** is a game server management system for Project Zomboid and other supported games. ';
   result += 'It is designed to be an easy to use self-hosting option for multiplayer servers, ';
   result += 'allowing you to create and remotely manage your servers with a webapp and discord.\n';
@@ -29,9 +20,9 @@ exports.about = function($) {
   result += '**ServerJockey on GitHub**\n';
   result += ' <https://github.com/SalSevenSix/serverjockey>';
   $.message.channel.send(result);
-};
+}
 
-exports.system = function($) {
+export function system($) {
   $.httptool.doGet('/system/info', function(info) {
     let result = '```\n';
     result += 'Version : ' + info.version + '\n';
@@ -48,20 +39,20 @@ exports.system = function($) {
     result += '\n```';
     return result;
   });
-};
+}
 
-exports.modules = function($) {
+export function modules($) {
   $.httptool.doGet('/modules', function(body) {
     return '```\n' + body.join('\n') + '\n```';
   });
-};
+}
 
-exports.instances = function($) {
+export function instances($) {
   if (!util.checkHasRole($.message, $.context.config.PLAYER_ROLE)) return;
   $.message.channel.send($.context.instancesService.getInstancesText());
-};
+}
 
-exports.use = function($) {
+export function use($) {
   if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
   if ($.data.length === 0) {
     if ($.context.instancesService.currentInstance()) {
@@ -73,17 +64,17 @@ exports.use = function($) {
     if (!$.context.instancesService.useInstance($.data[0])) return util.reactError($.message);
     $.message.channel.send($.context.instancesService.getInstancesText());
   }
-};
+}
 
-exports.create = function($) {
+export function create($) {
   if ($.data.length < 2) return util.reactUnknown($.message);
   const body = { identity: $.data[0], module: $.data[1] };
   $.httptool.doPost('/instances', body, function() {
     $.context.instancesService.setInstance(body.identity);
     util.reactSuccess($.message);
   });
-};
+}
 
-exports.shutdown = function($) {
+export function shutdown($) {
   $.httptool.doPost('/system/shutdown');
-};
+}

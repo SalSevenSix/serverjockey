@@ -1,6 +1,7 @@
 const cutil = require('common/util/util');
 const util = require('../util.js');
 const logger = require('../logger.js');
+const helptext = require('../helptext.js');
 const commons = require('../commons.js');
 const helpText = {
   title: 'PROJECT ZOMBOID COMMANDS',
@@ -85,7 +86,7 @@ const helpText = {
   playerspawnvehicle: [
     'Spawn a vehicle next to player. Condition will vary.'
   ],
-  activity: commons.helpText.activity,
+  activity: helptext.activity,
   deploymentbackupworld: [
     'Make a backup of the game world to a zip file.',
     'Optionally specify {hours} to prune backups older than hours.',
@@ -97,19 +98,18 @@ const helpText = {
   ]
 };
 
+export const startup = commons.startServerEventLogging;
+export function help($) { commons.sendHelp($, helpText); }
+export const server = commons.server;
+export const auto = commons.auto;
+export const log = commons.log;
+export const getconfig = commons.getconfig;
+export const setconfig = commons.setconfig;
+export const deployment = commons.deployment;
+export const players = commons.players;
+export const activity = commons.activity;
 
-exports.startup = commons.startAllEventLogging;
-exports.help = function($) { commons.sendHelp($, helpText); };
-exports.server = commons.server;
-exports.auto = commons.auto;
-exports.log = commons.log;
-exports.getconfig = commons.getconfig;
-exports.setconfig = commons.setconfig;
-exports.deployment = commons.deployment;
-exports.players = commons.players;
-exports.activity = commons.activity;
-
-exports.world = function($) {
+export function world($) {
   const data = [...$.data];
   if (data.length === 0) return util.reactUnknown($.message);
   const cmd = data.shift();
@@ -119,9 +119,9 @@ exports.world = function($) {
     body = { message: data.join(' ') };
   }
   $.httptool.doPost('/world/' + cmd, body);
-};
+}
 
-exports.player = function($) {
+export function player($) {
   const data = [...$.data];
   if (data.length < 2) return util.reactUnknown($.message);
   const name = cutil.urlSafeB64encode(data.shift());
@@ -149,15 +149,15 @@ exports.player = function($) {
     }
   }
   $.httptool.doPost('/players/' + name + '/' + cmd, body);
-};
+}
 
-exports.banlist = function($) {
+export function banlist($) {
   const data = [...$.data];
   if (data.length < 2) return util.reactUnknown($.message);
   const cmd = data.shift() + '-id';
   const body = { steamid: data.shift() };
   $.httptool.doPost('/banlist/' + cmd, body);
-};
+}
 
 function cleanSnowflake(snowflake) {
   if (!snowflake || snowflake.length < 4) return snowflake;
@@ -165,32 +165,31 @@ function cleanSnowflake(snowflake) {
   return snowflake;
 }
 
-function whitelistRemoveName($, player, dataHandler = null) {
-  $.httptool.doPost('/whitelist/remove', { player: player }, dataHandler);
+function whitelistRemoveName($, name, dataHandler = null) {
+  $.httptool.doPost('/whitelist/remove', { player: name }, dataHandler);
 }
 
-function whitelistAddName($, player, password, dataHandler = null) {
-  $.httptool.doPost('/whitelist/add', { player: player, password: password }, dataHandler);
+function whitelistAddName($, name, pwd, dataHandler = null) {
+  $.httptool.doPost('/whitelist/add', { player: name, password: pwd }, dataHandler);
 }
 
 function whitelistRemoveId($, snowflake, dataHandler = null) {
   $.context.client.users.fetch(cleanSnowflake(snowflake), true, true)
     .then(function(user) {
-      const player = user.tag.replaceAll('#', '');
-      whitelistRemoveName($, player, dataHandler);
+      whitelistRemoveName($, user.tag.replaceAll('#', ''), dataHandler);
     })
     .catch(function(error) {
       logger.error(error, $.message);
     });
 }
 
-function whitelistAddId($, snowflake, player = null) {
+function whitelistAddId($, snowflake, name = null) {
   $.context.client.users.fetch(cleanSnowflake(snowflake), true, true)
     .then(function(user) {
-      const password = Math.random().toString(16).substr(2, 8);
-      if (!player) { player = user.tag.replaceAll('#', ''); }
-      whitelistAddName($, player, password, function() {
-        user.send($.context.config.WHITELIST_DM.replace('${user}', player).replace('${pass}', password))
+      const pwd = Math.random().toString(16).substr(2, 8);
+      if (!name) { name = user.tag.replaceAll('#', ''); }
+      whitelistAddName($, name, pwd, function() {
+        user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
           .then(function() { util.reactSuccess($.message); })
           .catch(function(error) { logger.error(error, $.message); });
       });
@@ -200,7 +199,7 @@ function whitelistAddId($, snowflake, player = null) {
     });
 }
 
-exports.whitelist = function($) {
+export function whitelist($) {
   const data = [...$.data];
   if (data.length < 2) return util.reactUnknown($.message);
   const cmd = data.shift();
@@ -229,4 +228,4 @@ exports.whitelist = function($) {
   } else {
     util.reactUnknown($.message);
   }
-};
+}

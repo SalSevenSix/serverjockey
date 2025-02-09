@@ -5,15 +5,15 @@ function timestamp() {
   return cutil.shortISODateTimeString(new Date(), true);
 }
 
-exports.raw = function(value) {
+export function raw(value) {
   console.log(value);
-};
+}
 
-exports.info = function(value) {
+export function info(value) {
   console.log(timestamp() + ' INFO ' + value);
-};
+}
 
-exports.dump = function(value) {
+export function dump(value) {
   if (!value) return;
   const clone = {};
   for (const key in value) {
@@ -24,9 +24,9 @@ exports.dump = function(value) {
     }
   }
   console.log(JSON.stringify(clone, null, 2).split('\n').slice(1, -1).join('\n'));
-};
+}
 
-exports.error = function(value, message = null) {
+export function error(value, message = null) {
   if (!value) return util.reactError(message);
   if (cutil.isString(value)) {
     console.error(timestamp() + ' ERROR ' + value);
@@ -36,4 +36,4 @@ exports.error = function(value, message = null) {
     console.error(value);
   }
   return util.reactError(message);
-};
+}

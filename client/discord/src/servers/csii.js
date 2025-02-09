@@ -1,3 +1,4 @@
+const helptext = require('../helptext.js');
 const commons = require('../commons.js');
 const helpText = {
   title: 'CS2 COMMANDS',
@@ -29,19 +30,18 @@ const helpText = {
     '`cmdargs, server, gamemode-competitive, gamemode-wingman,`',
     '`gamemode-casual, gamemode-deathmatch, gamemode-custom`'
   ],
-  activity: commons.helpText.activity
+  activity: helptext.activity
 };
 
-
-exports.startup = commons.startAllEventLogging;
-exports.help = function($) { commons.sendHelp($, helpText); };
-exports.server = commons.server;
-exports.auto = commons.auto;
-exports.log = commons.log;
-exports.getconfig = commons.getconfig;
-exports.setconfig = commons.setconfig;
-exports.deployment = commons.deployment;
-exports.players = commons.players;
-exports.send = commons.send;
-exports.say = commons.say;
-exports.activity = commons.activity;
+export const startup = commons.startAllEventLogging;
+export function help($) { commons.sendHelp($, helpText); }
+export const server = commons.server;
+export const auto = commons.auto;
+export const log = commons.log;
+export const getconfig = commons.getconfig;
+export const setconfig = commons.setconfig;
+export const deployment = commons.deployment;
+export const players = commons.players;
+export const send = commons.send;
+export const say = commons.say;
+export const activity = commons.activity;
