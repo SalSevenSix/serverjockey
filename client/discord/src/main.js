@@ -95,7 +95,6 @@ function handleMessage(message) {
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
-    if (command === 'help' && data.length === 0) { system.help(args); }
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
     instanceData.server[command](args);
   } else if (cutil.hasProp(system, command)) {

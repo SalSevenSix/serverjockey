@@ -51,28 +51,6 @@ export function startAllEventLogging(context, channels, instance, url) {
   });
 }
 
-export function sendHelp($, helpText) {
-  if ($.data.length === 0) {
-    const cmd = $.context.config.CMD_PREFIX;
-    let header = '```\n' + helpText.title + '\n' + cmd;
-    let index = 1;
-    while (cutil.hasProp(helpText, 'help' + index)) {
-      $.message.channel.send(header + helpText['help' + index].join('\n' + cmd) + '\n```');
-      if (index === 1) { header = '```\n' + cmd; }
-      index += 1;
-    }
-    return;
-  }
-  const query = $.data.join('').replaceAll('-', '');
-  if (query === 'title' || !cutil.hasProp(helpText, query)) {
-    $.message.channel.send('No more help available.');
-  } else if (cutil.isString(helpText[query])) {
-    $.httptool.doGet(helpText[query], function(body) { return '```\n' + body + '\n```'; });
-  } else {
-    $.message.channel.send(helpText[query].join('\n'));
-  }
-}
-
 export function server($) {
   if ($.data.length === 0) {
     $.httptool.doGet('/server', function(body) {

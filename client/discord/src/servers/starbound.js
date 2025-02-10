@@ -1,6 +1,7 @@
 const helptext = require('../helptext.js');
 const commons = require('../commons.js');
-const helpText = {
+
+const helpData = [helptext.systemHelpData, {
   title: 'STARBOUND COMMANDS',
   help1: [
     'server             : Server status',
@@ -23,16 +24,8 @@ const helpText = {
   ],
   send: '/console/help',
   activity: helptext.activity
-};
+}];
 
-export const startup = commons.startAllEventLogging;
-export function help($) { commons.sendHelp($, helpText); }
-export const server = commons.server;
-export const auto = commons.auto;
-export const log = commons.log;
-export const getconfig = commons.getconfig;
-export const setconfig = commons.setconfig;
-export const deployment = commons.deployment;
-export const players = commons.players;
-export const send = commons.send;
-export const activity = commons.activity;
+export const [startup, help, server, auto, log, getconfig, setconfig, deployment, players, send, activity] = [
+  commons.startAllEventLogging, helptext.help(helpData), commons.server, commons.auto, commons.log,
+  commons.getconfig, commons.setconfig, commons.deployment, commons.players, commons.send, commons.activity];

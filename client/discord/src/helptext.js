@@ -1,4 +1,6 @@
-export const systemHelpText = {
+const cutil = require('common/util/util');
+
+export const systemHelpData = {
   title: 'SYSTEM COMMANDS',
   help1: [
     'help {command} {action}    : Show help',
@@ -8,6 +10,9 @@ export const systemHelpText = {
     'use {instance}             : Switch default instance',
     'modules                    : Supported games list',
     'create {instance} {module} : Create new instance'
+  ],
+  help: [
+    'Show help text. Use {command} and {action} for more detailed information. Both optional.'
   ]
 };
 
@@ -30,3 +35,43 @@ export const activity = [
   'c) get player activity by name in json format',
   '`!activity "player=Mr Tee" format=JSON`'
 ];
+
+function sendHelpSection($, helpSection) {
+  const cmd = $.context.config.CMD_PREFIX;
+  if ($.data.length === 0) {
+    let header = '```\n' + helpSection.title + '\n' + cmd;
+    let index = 1;
+    while (cutil.hasProp(helpSection, 'help' + index)) {
+      $.message.channel.send(header + helpSection['help' + index].join('\n' + cmd) + '\n```');
+      if (index === 1) { header = '```\n' + cmd; }
+      index += 1;
+    }
+    return null;
+  }
+  const query = $.data.join('').replaceAll('-', '');
+  if (query === 'title' || !cutil.hasProp(helpSection, query)) return false;
+  if (cutil.isString(helpSection[query])) {
+    $.httptool.doGet(helpSection[query], function(body) { return '```\n' + body + '\n```'; });
+  } else {
+    $.message.channel.send(helpSection[query].map(function(line) {
+      return line && line.slice(0, 2) === '`!' ? '`' + cmd + line.slice(2) : line;
+    }).join('\n'));
+  }
+  return true;
+}
+
+function sendHelpData($, helpData) {
+  const data = Array.isArray(helpData) ? helpData : [helpData];
+  let [index, done] = [0, false];
+  while (index < data.length && !done) {
+    done = sendHelpSection($, data[index]);
+    index += 1;
+  }
+  if (done === false) {
+    $.message.channel.send('No more help available.');
+  }
+}
+
+export function help(helpData) {
+  return function($) { sendHelpData($, helpData); };
+}

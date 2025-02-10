@@ -1,11 +1,8 @@
 const cutil = require('common/util/util');
 const util = require('./util.js');
 const helptext = require('./helptext.js');
-const commons = require('./commons.js');
 
-export function help($) {
-  commons.sendHelp($, helptext.systemHelpText);
-}
+export const help = helptext.help(helptext.systemHelpData);
 
 export function about($) {
   let result = '**ServerJockey** is a game server management system for Project Zomboid and other supported games. ';

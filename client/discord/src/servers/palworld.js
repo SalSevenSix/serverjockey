@@ -1,5 +1,7 @@
+const helptext = require('../helptext.js');
 const commons = require('../commons.js');
-const helpText = {
+
+const helpData = [helptext.systemHelpData, {
   title: 'PALWORLD COMMANDS',
   help1: [
     'server             : Server status',
@@ -20,17 +22,11 @@ const helpText = {
     'deployment install-runtime {version} : Install game server'
   ],
   send: '/console/help'
-};
+}];
 
-export const startup = commons.startServerEventLogging;
-export function help($) { commons.sendHelp($, helpText); }
-export const server = commons.server;
-export const auto = commons.auto;
-export const log = commons.log;
-export const getconfig = commons.getconfig;
-export const setconfig = commons.setconfig;
-export const deployment = commons.deployment;
-export const send = commons.send;
+export const [startup, help, server, auto, log, getconfig, setconfig, deployment, send] = [
+  commons.startServerEventLogging, helptext.help(helpData), commons.server, commons.auto, commons.log,
+  commons.getconfig, commons.setconfig, commons.deployment, commons.send];
 
 export function players($) {
   $.httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
