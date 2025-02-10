@@ -15,6 +15,7 @@ export default [
     rules: {
       'prefer-destructuring': 1,
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
+      'no-warning-comments': 0,
       'curly': 0,
       'sort-keys': 0,
       'id-length': 0,

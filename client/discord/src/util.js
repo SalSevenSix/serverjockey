@@ -51,6 +51,16 @@ export function checkHasRole(message, roles) {
   return reactTo(message, '🔒', false);
 }
 
+export function cleanSnowflake(snowflake) {
+  if (!snowflake || snowflake.length < 4) return snowflake;
+  if (snowflake.startsWith('<@') && snowflake.endsWith('>')) return snowflake.slice(2, -1);
+  return snowflake;
+}
+
+export function isSnowflake(snowflake) {
+  return (/^\d*$/).test(snowflake);
+}
+
 export function rmReacts(message, thenHandler, errorHandler, retval = null) {
   message.reactions.removeAll()
     .then(function() { thenHandler(message); })

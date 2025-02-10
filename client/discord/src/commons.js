@@ -108,6 +108,51 @@ export function auto($) {
   });
 }
 
+export function alias($) {  // TODO add help doco
+  const data = [...$.data];
+  if (data.length === 0) {
+    $.message.channel.send('```\n' + $.aliases.listText() + '\n```');
+    return;
+  }
+  if (data.length < 2) return util.reactUnknown($.message);
+  const cmd = data.shift();
+  if (cmd === 'push') {
+    if (data.length != 2) return util.reactUnknown($.message);
+    const [snowflake, name] = data;
+    $.context.client.users.fetch(util.cleanSnowflake(snowflake), true, true)
+      .then(function(user) {
+        $.aliases.push(user.tag.replaceAll('#', ''), name).save();
+        util.reactSuccess($.message);
+      })
+      .catch(function(error) { logger.error(error, $.message); });
+  } else if (cmd === 'find') {
+    if (data.length != 1) return util.reactUnknown($.message);
+    let result = $.aliases.findDiscordid(data[0]);
+    if (result) {
+      $.message.channel.send('`@' + result + '`');
+      return;
+    }
+    result = $.aliases.findName(data[0]);
+    if (result) {
+      $.message.channel.send('`' + result + '`');
+      return;
+    }
+    const snowflake = util.cleanSnowflake(data[0]);
+    if (util.isSnowflake(snowflake)) {
+      $.context.client.users.fetch(snowflake, true, true)
+        .then(function(user) {
+          result = $.aliases.findName(user.tag.replaceAll('#', ''));
+          $.message.channel.send(result ? '`' + result + '`' : 'Not Found');
+        })
+        .catch(function(error) { logger.error(error, $.message); });
+    } else {
+      $.message.channel.send('Not Found');
+    }
+  } else {
+    util.reactUnknown($.message);
+  }
+}
+
 export function log($) {
   $.httptool.doGet('/log/tail', function(body) {
     if (!body) {

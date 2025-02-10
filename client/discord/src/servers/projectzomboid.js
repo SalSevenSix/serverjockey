@@ -96,9 +96,10 @@ const helpData = [helptext.systemHelpData, {
   ]
 }];
 
-export const [startup, help, server, auto, log, getconfig, setconfig, deployment, players, activity] = [
+export const [startup, help, server, auto, log,
+  getconfig, setconfig, deployment, players, activity, alias] = [
   commons.startAllEventLogging, helptext.help(helpData), commons.server, commons.auto, commons.log,
-  commons.getconfig, commons.setconfig, commons.deployment, commons.players, commons.activity];
+  commons.getconfig, commons.setconfig, commons.deployment, commons.players, commons.activity, commons.alias];
 
 export function world($) {
   const data = [...$.data];
@@ -150,12 +151,6 @@ export function banlist($) {
   $.httptool.doPost('/banlist/' + cmd, body);
 }
 
-function cleanSnowflake(snowflake) {
-  if (!snowflake || snowflake.length < 4) return snowflake;
-  if (snowflake.startsWith('<@') && snowflake.endsWith('>')) return snowflake.slice(2, -1);
-  return snowflake;
-}
-
 function whitelistRemoveName($, name, dataHandler = null) {
   $.httptool.doPost('/whitelist/remove', { player: name }, dataHandler);
 }
@@ -165,7 +160,7 @@ function whitelistAddName($, name, pwd, dataHandler = null) {
 }
 
 function whitelistRemoveId($, snowflake, dataHandler = null) {
-  $.context.client.users.fetch(cleanSnowflake(snowflake), true, true)
+  $.context.client.users.fetch(util.cleanSnowflake(snowflake), true, true)
     .then(function(user) {
       whitelistRemoveName($, user.tag.replaceAll('#', ''), dataHandler);
     })
@@ -175,7 +170,7 @@ function whitelistRemoveId($, snowflake, dataHandler = null) {
 }
 
 function whitelistAddId($, snowflake, name = null) {
-  $.context.client.users.fetch(cleanSnowflake(snowflake), true, true)
+  $.context.client.users.fetch(util.cleanSnowflake(snowflake), true, true)
     .then(function(user) {
       const pwd = Math.random().toString(16).substr(2, 8);
       if (!name) { name = user.tag.replaceAll('#', ''); }

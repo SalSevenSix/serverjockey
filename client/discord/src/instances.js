@@ -1,3 +1,4 @@
+const fs = require('fs');
 const fetch = require('node-fetch');
 const cutil = require('common/util/util');
 const util = require('./util.js');
@@ -13,6 +14,71 @@ const servers = {
   csii: require('./servers/csii.js'),
   palworld: require('./servers/palworld.js')
 };
+
+/* eslint-disable max-lines-per-function */
+function newAliases(context, instance) {
+  const file = context.config.HOME + '/data/' + instance + '.json';
+  const data = { base: [], discordid: {}, name: {} };
+  const self = {};
+
+  const rebuild = function(base) {
+    [data.base, data.discordid, data.name] = [base, {}, {}];
+    base.forEach(function(record) {
+      const [discordid, name] = record;
+      data.discordid[discordid] = record;
+      data.name[name] = record;
+    });
+  };
+
+  self.load = function() {
+    fs.exists(file, function(exists) {
+      if (!exists) return;
+      fs.readFile(file, function(error, body) {
+        if (error) return logger.error(error);
+        rebuild(JSON.parse(body).aliases);
+      });
+    });
+    return self;
+  };
+
+  self.push = function(aDiscordid, aName) {
+    const base = data.base.filter(function(record) {
+      const [discordid, name] = record;
+      return !(discordid === aDiscordid || name === aName);
+    });
+    base.push([aDiscordid, aName]);
+    rebuild(base);
+    return self;
+  };
+
+  self.reset = function() {
+    data.base = [];
+    return self;
+  };
+
+  self.save = function() {
+    fs.writeFile(file, JSON.stringify({ aliases: data.base }), logger.error);
+  };
+
+  self.listText = function() {
+    // TODO chunking and formatting
+    return data.base.map(function(record) {
+      const [discordid, name] = record;
+      return '@' + discordid + ' <=> ' + name;
+    }).join('\n');
+  };
+
+  self.findDiscordid = function(aName) {
+    return cutil.hasProp(data.name, aName) ? data.name[aName][0] : null;
+  };
+
+  self.findName = function(aDiscordid) {
+    return cutil.hasProp(data.discordid, aDiscordid) ? data.discordid[aDiscordid][1] : null;
+  };
+
+  return self;
+}
+/* eslint-enable max-lines-per-function */
 
 export class Service {
   #context;
@@ -39,6 +105,7 @@ export class Service {
     this.#instances = instances;
     this.setInstance(util.getFirstKey(instances));
     for (const instance in instances) {
+      instances[instance].aliases = newAliases(context, instance).load();
       instances[instance].server = servers[instances[instance].module];
       instances[instance].server.startup(context, channels, instance, instances[instance].url);
     }
@@ -46,11 +113,13 @@ export class Service {
     logger.raw(self.getInstancesText().split('\n').slice(1, -1).join('\n'));
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
       if (data.event === 'created') {
+        data.instance.aliases = newAliases(context, data.instance.identity);
         data.instance.url = baseurl + '/instances/' + data.instance.identity;
         data.instance.server = servers[data.instance.module];
         instances[data.instance.identity] = data.instance;
         data.instance.server.startup(context, channels, data.instance.identity, data.instance.url);
       } else if (data.event === 'deleted') {
+        instances[data.instance.identity].aliases.reset().save();
         delete instances[data.instance.identity];
         if (data.instance.identity === self.currentInstance()) {
           self.setInstance(util.getFirstKey(instances));

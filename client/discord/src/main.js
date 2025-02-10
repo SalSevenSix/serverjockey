@@ -1,4 +1,5 @@
 require('events').EventEmitter.defaultMaxListeners = 24;
+const fs = require('fs');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const cutil = require('common/util/util');
 const util = require('./util.js');
@@ -19,14 +20,20 @@ function initialise() {
     console.log(version);
     process.exit(0);
   }
-  let config = {};
+  let config = { HOME: null };
   for (let i = 2; i < process.argv.length; i++) {
-    config = { ...config, ...require(process.argv[i]) };
+    const path = process.argv[i];
+    const parts = path.split('/');
+    if (parts[parts.length - 1] === 'serverlink.json') {
+      config.HOME = parts.length > 1 ? parts.slice(0, -1).join('/') : '.';
+    }
+    config = { ...config, ...require(path) };
   }
   if (!config.BOT_TOKEN) {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.');
     process.exit(1);
   }
+  if (!fs.existsSync(config.HOME + '/data')) { fs.mkdirSync(config.HOME + '/data'); }
   logger.info('*** START ServerLink Bot ***');
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
   config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);
@@ -96,6 +103,7 @@ function handleMessage(message) {
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
+    args.aliases = instanceData.aliases;
     instanceData.server[command](args);
   } else if (cutil.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
