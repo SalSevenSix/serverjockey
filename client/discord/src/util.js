@@ -51,14 +51,27 @@ export function checkHasRole(message, roles) {
   return reactTo(message, '🔒', false);
 }
 
-export function cleanSnowflake(snowflake) {
-  if (!snowflake || snowflake.length < 4) return snowflake;
-  if (snowflake.startsWith('<@') && snowflake.endsWith('>')) return snowflake.slice(2, -1);
-  return snowflake;
+export function chunkStringArray(value, maxchars = 1600) {
+  if (!value) return value;
+  const result = [];
+  let [chars, chunk] = [0, []];
+  value.forEach(function(line) {
+    chars += line.length + 1;
+    if (chars > maxchars) {
+      result.push(chunk);
+      [chars, chunk] = [line.length + 1, []];
+    }
+    chunk.push(line);
+  });
+  if (chunk.length > 0) { result.push(chunk); }
+  return result;
 }
 
-export function isSnowflake(snowflake) {
-  return (/^\d*$/).test(snowflake);
+export function toSnowflake(value) {
+  if (!value) return null;
+  const result = value.length > 3 && value.startsWith('<@') && value.endsWith('>') ? value.slice(2, -1) : value;
+  if (result.length < 18) return null;
+  return (/^\d*$/).test(result) ? result : null;
 }
 
 export function rmReacts(message, thenHandler, errorHandler, retval = null) {

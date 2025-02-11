@@ -50,7 +50,7 @@ export class MessageHttpTool {
         if (!result) return;
         if (cutil.isString(result)) {
           message.channel.send(result);
-        } else {
+        } else if (Array.isArray(result)) {
           result.forEach(function(text) { message.channel.send(text); });
         }
       })

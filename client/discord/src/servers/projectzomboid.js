@@ -160,7 +160,7 @@ function whitelistAddName($, name, pwd, dataHandler = null) {
 }
 
 function whitelistRemoveId($, snowflake, dataHandler = null) {
-  $.context.client.users.fetch(util.cleanSnowflake(snowflake), true, true)
+  $.context.client.users.fetch(util.toSnowflake(snowflake), true, true)
     .then(function(user) {
       whitelistRemoveName($, user.tag.replaceAll('#', ''), dataHandler);
     })
@@ -170,7 +170,7 @@ function whitelistRemoveId($, snowflake, dataHandler = null) {
 }
 
 function whitelistAddId($, snowflake, name = null) {
-  $.context.client.users.fetch(util.cleanSnowflake(snowflake), true, true)
+  $.context.client.users.fetch(util.toSnowflake(snowflake), true, true)
     .then(function(user) {
       const pwd = Math.random().toString(16).substr(2, 8);
       if (!name) { name = user.tag.replaceAll('#', ''); }

@@ -111,43 +111,38 @@ export function auto($) {
 export function alias($) {  // TODO add help doco
   const data = [...$.data];
   if (data.length === 0) {
-    $.message.channel.send('```\n' + $.aliases.listText() + '\n```');
+    util.chunkStringArray($.aliases.listText()).forEach(function(text) {
+      $.message.channel.send('```\n' + text.join('\n') + '\n```');
+    });
     return;
   }
-  if (data.length < 2) return util.reactUnknown($.message);
   const cmd = data.shift();
-  if (cmd === 'push') {
+  if (cmd === 'find') {
+    if (data.length != 1) return util.reactUnknown($.message);
+    let text = {};
+    [$.aliases.findByKey(data[0]), $.aliases.findByName(data[0])].forEach(function(record) {
+      if (record) { text[record.snowflake] = record.toString(); }
+    });
+    text = Object.values(text);
+    text = text.length > 0 ? text.join('\n') : 'No Alias Found';
+    $.message.channel.send('```\n' + text + '\n```');
+  } else if (cmd === 'add') {
     if (data.length != 2) return util.reactUnknown($.message);
-    const [snowflake, name] = data;
-    $.context.client.users.fetch(util.cleanSnowflake(snowflake), true, true)
+    const [snowflake, name] = [util.toSnowflake(data[0]), data[1]];
+    if (!snowflake) return util.reactError($.message);
+    $.context.client.users.fetch(snowflake, true, true)
       .then(function(user) {
-        $.aliases.push(user.tag.replaceAll('#', ''), name).save();
+        const discordid = user.tag.replaceAll('#', '');
+        if (!$.aliases.add(snowflake, discordid, name)) return util.reactError($.message);
+        $.aliases.save();
         util.reactSuccess($.message);
       })
       .catch(function(error) { logger.error(error, $.message); });
-  } else if (cmd === 'find') {
+  } else if (cmd === 'remove') {
     if (data.length != 1) return util.reactUnknown($.message);
-    let result = $.aliases.findDiscordid(data[0]);
-    if (result) {
-      $.message.channel.send('`@' + result + '`');
-      return;
-    }
-    result = $.aliases.findName(data[0]);
-    if (result) {
-      $.message.channel.send('`' + result + '`');
-      return;
-    }
-    const snowflake = util.cleanSnowflake(data[0]);
-    if (util.isSnowflake(snowflake)) {
-      $.context.client.users.fetch(snowflake, true, true)
-        .then(function(user) {
-          result = $.aliases.findName(user.tag.replaceAll('#', ''));
-          $.message.channel.send(result ? '`' + result + '`' : 'Not Found');
-        })
-        .catch(function(error) { logger.error(error, $.message); });
-    } else {
-      $.message.channel.send('Not Found');
-    }
+    if (!$.aliases.remove(data[0])) return util.reactError($.message);
+    $.aliases.save();
+    util.reactSuccess($.message);
   } else {
     util.reactUnknown($.message);
   }
@@ -236,34 +231,30 @@ export function say($) {
 
 export function players($) {
   $.httptool.doGet('/players', function(body) {
-    const [result, nosteamid] = [[], 'CONNECTED         '];
     let line = $.instance + ' players online: ' + body.length;
-    let [chars, chunk] = [line.length, [line]];
-    if (body.length > 0) {
-      let maxlen = body.reduce(function(a, b) { return a.name.length > b.name.length ? a : b; }).name.length;
-      if (body[0].steamid != null) { maxlen += nosteamid.length; }
-      for (let i = 0; i < body.length; i++) {
-        if (body[i].steamid == null) {
-          line = body[i].name;
-        } else {
-          line = body[i].steamid === '' ? nosteamid : body[i].steamid + ' ';
-          line += body[i].name;
-        }
-        if (cutil.hasProp(body[i], 'uptime')) {
-          line = line.padEnd(maxlen + 3);
-          line += cutil.humanDuration(body[i].uptime, 2);
-        }
-        chunk.push(line);
-        chars += line.length + 1;
-        if (chars > 1600) {  // Discord message limit is 2000 characters
-          result.push('```\n' + chunk.join('\n') + '\n```');
-          [chars, chunk] = [0, []];
-        }
+    if (body.length === 0) return '```\n' + line + '\n```';
+    const nosteamid = 'CONNECTED         ';
+    let padlen = 3 + body.reduce(function(a, b) { return a.name.length > b.name.length ? a : b; }).name.length;
+    if (body[0].steamid != null) { padlen += nosteamid.length; }
+    let result = [];
+    result.push(line);
+    body.forEach(function(entry) {
+      if (entry.steamid == null) {
+        line = entry.name;
+      } else {
+        line = entry.steamid === '' ? nosteamid : entry.steamid + ' ';
+        line += entry.name;
       }
-    }
-    if (chunk.length > 0) {
-      result.push('```\n' + chunk.join('\n') + '\n```');
-    }
+      if (cutil.hasProp(entry, 'uptime')) {
+        line = line.padEnd(padlen);
+        line += cutil.humanDuration(entry.uptime, 2);
+      }
+      result.push(line);
+    });
+    result = util.chunkStringArray(result);
+    result = result.map(function(text) {
+      return '```\n' + text.join('\n') + '\n```';
+    });
     return result;
   });
 }
