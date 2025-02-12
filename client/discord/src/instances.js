@@ -33,7 +33,7 @@ function newAliases(context, instance) {
   const rebuild = function(base) {
     [data.base, data.snowflake, data.discordid, data.name, data.maxidlen] = [base, {}, {}, {}, 0];
     data.base.sort(function(a, b) { return a[1].localeCompare(b[1]); });
-    base.forEach(function(value) {
+    data.base.forEach(function(value) {
       const record = unpack(value);
       data.snowflake[record.snowflake] = value;
       data.discordid[record.discordid] = value;
@@ -132,17 +132,19 @@ export class Service {
     for (const instance in instances) {
       instances[instance].aliases = newAliases(context, instance).load();
       instances[instance].server = servers[instances[instance].module];
-      instances[instance].server.startup(context, channels, instance, instances[instance].url);
+      instances[instance].server.startup({ context: context, channels: channels, aliases: instances[instance].aliases,
+        instance: instance, url: instances[instance].url });
     }
     logger.info('Instances...');
-    logger.raw(self.getInstancesText().split('\n').slice(1, -1).join('\n'));
+    logger.raw(self.getInstancesText().join('\n'));
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
       if (data.event === 'created') {
         data.instance.aliases = newAliases(context, data.instance.identity);
         data.instance.url = baseurl + '/instances/' + data.instance.identity;
         data.instance.server = servers[data.instance.module];
         instances[data.instance.identity] = data.instance;
-        data.instance.server.startup(context, channels, data.instance.identity, data.instance.url);
+        data.instance.server.startup({ context: context, channels: channels, aliases: data.instance.aliases,
+          instance: data.instance.identity, url: data.instance.url });
       } else if (data.event === 'deleted') {
         instances[data.instance.identity].aliases.reset().save();
         delete instances[data.instance.identity];
@@ -175,12 +177,11 @@ export class Service {
   }
 
   getInstancesText() {
-    if (Object.keys(this.#instances).length === 0) return '```\nNo instances found.\n```';
-    let result = '```\n';
+    if (Object.keys(this.#instances).length === 0) return ['No instances found'];
+    const [result, currentInstance] = [[], this.#context.instancesService.currentInstance()];
     for (const [identity, data] of Object.entries(this.#instances)) {
-      result += identity === this.#context.instancesService.currentInstance() ? '=> ' : '   ';
-      result += identity + ' (' + data.module + ')\n';
+      result.push((identity === currentInstance ? '=> ' : '   ') + identity + ' (' + data.module + ')');
     }
-    return result + '```';
+    return result;
   }
 }

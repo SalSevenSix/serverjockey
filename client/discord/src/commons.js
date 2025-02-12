@@ -8,7 +8,8 @@ const subs = require('./subs.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
 
-export function startServerEventLogging(context, channels, instance, url) {
+export function startServerEventLogging($) {
+  const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
   if (!channels.server) return;
   let state = 'READY';
   let restartRequired = false;
@@ -28,13 +29,18 @@ export function startServerEventLogging(context, channels, instance, url) {
   });
 }
 
-export function startAllEventLogging(context, channels, instance, url) {
-  startServerEventLogging(context, channels, instance, url);
+export function startAllEventLogging($) {
+  startServerEventLogging($);
+  const [context, channels, aliases, instance, url] = [$.context, $.channels, $.aliases, $.instance, $.url];
   if (!channels.login && !channels.chat) return;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
+    let playerName = json.player && json.player.name ? json.player.name : null;
+    if (!playerName) return true;
+    const playerAlias = aliases.findByName(playerName);
+    if (playerAlias) { playerName += ' `@' + playerAlias.discordid + '`'; }
     if (json.event === 'CHAT') {
       if (!channels.chat) return true;
-      channels.chat.send('`' + instance + '` 💬 ' + json.player.name + ': ' + json.text);
+      channels.chat.send('`' + instance + '` 💬 ' + playerName + ': ' + json.text);
       return true;
     }
     if (!channels.login) return true;
@@ -43,7 +49,7 @@ export function startAllEventLogging(context, channels, instance, url) {
     else if (json.event === 'LOGOUT') { result = ' 🔴 '; }
     else if (json.event === 'DEATH') { result = ' 💀 '; }
     if (!result) return true;
-    result = '`' + instance + '`' + result + json.player.name;
+    result = '`' + instance + '`' + result + playerName;
     if (json.text) { result += ' [' + json.text + ']'; }
     if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
     channels.login.send(result);
@@ -229,28 +235,23 @@ export function say($) {
 }
 
 export function players($) {
-  const [httptool, instance] = [$.httptool, $.instance];
+  const [httptool, aliases, instance] = [$.httptool, $.aliases, $.instance];
   httptool.doGet('/players', function(body) {
     let line = instance + ' players online: ' + body.length;
     if (body.length === 0) return '```\n' + line + '\n```';
-    const nosteamid = 'CONNECTED         ';
-    let padlen = Math.max(10, 2 + body.reduce(function(a, b) {
-      return a.name.length > b.name.length ? a : b;
-    }).name.length);
-    if (body[0].steamid != null) { padlen += nosteamid.length; }
     let result = [];
     result.push(line);
+    const plen = Math.max(10, 2 + body.reduce(function(a, b) {
+      return a.name.length > b.name.length ? a : b;
+    }).name.length);
     body.forEach(function(entry) {
-      if (entry.steamid == null) {
-        line = entry.name;
-      } else {
-        line = entry.steamid === '' ? nosteamid : entry.steamid + ' ';
-        line += entry.name;
-      }
-      if (cutil.hasProp(entry, 'uptime')) {
-        line = line.padEnd(padlen);
-        line += cutil.humanDuration(entry.uptime, 2);
-      }
+      line = entry.name.padEnd(plen);
+      if (entry.steamid) { line = entry.steamid + ' ' + line; }
+      else if (entry.steamid === '') { line = 'CONNECTED         ' + line; }
+      if (cutil.hasProp(entry, 'uptime')) { line += cutil.humanDuration(entry.uptime, 2).padEnd(8); }
+      else { line += '        '; }
+      const playerAlias = aliases.findByName(entry.name);
+      if (playerAlias) { line += ' @' + playerAlias.discordid; }
       result.push(line);
     });
     result = util.chunkStringArray(result);
@@ -263,7 +264,8 @@ export function players($) {
 
 /* eslint-disable max-lines-per-function */
 export function activity($) {
-  const [context, httptool, instance, message, data] = [$.context, $.httptool, $.instance, $.message, $.data];
+  const [context, httptool, aliases, instance, message, data] = [
+    $.context, $.httptool, $.aliases, $.instance, $.message, $.data];
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [baseurl, now] = [context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, limit, format, query] = [null, null, null, null, 11, 'TEXT', 'player'];
@@ -338,7 +340,10 @@ export function activity($) {
               return a.player.length > b.player.length ? a : b;
             }).player.length);
             text.push(...results.players.map(function(record) {
-              return record.player.padEnd(plen) + cutil.humanDuration(record.uptime);
+              const playerAlias = aliases.findByName(record.player);
+              return record.player.padEnd(plen) +
+                cutil.humanDuration(record.uptime).padEnd(12) +
+                (playerAlias ? ' @' + playerAlias.discordid : '');
             }));
           } else {
             text.push('No player activity found');

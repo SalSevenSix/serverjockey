@@ -47,7 +47,7 @@ export function modules($) {
 export function instances($) {
   const [context, message] = [$.context, $.message];
   if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
-  message.channel.send(context.instancesService.getInstancesText());
+  message.channel.send('```\n' + context.instancesService.getInstancesText().join('\n') + '\n```');
 }
 
 export function use($) {
@@ -61,7 +61,7 @@ export function use($) {
     }
   } else {
     if (!context.instancesService.useInstance(data[0])) return util.reactError(message);
-    message.channel.send(context.instancesService.getInstancesText());
+    message.channel.send('```\n' + context.instancesService.getInstancesText().join('\n') + '\n```');
   }
 }
 
