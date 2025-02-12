@@ -16,6 +16,23 @@ export const systemHelpData = {
   ]
 };
 
+export const alias = [
+  'Alias Management. Link discord users to player names. Commands are...', '```',
+  'list              : List all aliases for the instance (default command)',
+  'find {alias}      : Find an alias by @ID, snowflake, discordid, player name',
+  'add {id} "{name}" : Add alias linking id as @ID or snowflake to player name',
+  'remove {id}       : Remove alias by @ID, snowflake, discordid',
+  '```', 'Examples...',
+  'a) add alias linking discord user @RealMrTee to player name "Mr Tee"',
+  '`!alias add @RealMrTee "Mr Tee"`',
+  'b) find alias for discord user @RealMrTee',
+  '`!alias find @RealMrTee`',
+  'c) find alias for player name "Mr Tee"',
+  '`!alias find "Mr Tee"`',
+  'd) remove alias for discord user @RealMrTee',
+  '`!alias remove @RealMrTee`'
+];
+
 export const activity = [
   'Activity Reporting. Provide the following query parameters...', '```',
   'instance        : Report instance activity instead of player activity',
@@ -36,42 +53,45 @@ export const activity = [
   '`!activity "player=Mr Tee" format=JSON`'
 ];
 
-function sendHelpSection($, helpSection) {
-  const cmd = $.context.config.CMD_PREFIX;
-  if ($.data.length === 0) {
-    let header = '```\n' + helpSection.title + '\n' + cmd;
+function sendHelpSection(context, httptool, message, data, section) {
+  const cmd = context.config.CMD_PREFIX;
+  if (data.length === 0) {
+    let header = '```\n' + section.title + '\n' + cmd;
     let index = 1;
-    while (cutil.hasProp(helpSection, 'help' + index)) {
-      $.message.channel.send(header + helpSection['help' + index].join('\n' + cmd) + '\n```');
+    while (cutil.hasProp(section, 'help' + index)) {
+      message.channel.send(header + section['help' + index].join('\n' + cmd) + '\n```');
       if (index === 1) { header = '```\n' + cmd; }
       index += 1;
     }
     return null;
   }
-  const query = $.data.join('').replaceAll('-', '');
-  if (query === 'title' || !cutil.hasProp(helpSection, query)) return false;
-  if (cutil.isString(helpSection[query])) {
-    $.httptool.doGet(helpSection[query], function(body) { return '```\n' + body + '\n```'; });
+  const query = data.join('').replaceAll('-', '');
+  if (query === 'title' || !cutil.hasProp(section, query)) return false;
+  if (cutil.isString(section[query])) {
+    httptool.doGet(section[query], function(body) { return '```\n' + body + '\n```'; });
   } else {
-    $.message.channel.send(helpSection[query].map(function(line) {
+    message.channel.send(section[query].map(function(line) {
       return line && line.slice(0, 2) === '`!' ? '`' + cmd + line.slice(2) : line;
     }).join('\n'));
   }
   return true;
 }
 
-function sendHelpData($, helpData) {
-  const data = Array.isArray(helpData) ? helpData : [helpData];
+function sendHelpData(context, httptool, message, data, helpData) {
+  const sections = Array.isArray(helpData) ? helpData : [helpData];
   let [index, done] = [0, false];
-  while (index < data.length && !done) {
-    done = sendHelpSection($, data[index]);
+  while (index < sections.length && !done) {
+    done = sendHelpSection(context, httptool, message, data, sections[index]);
     index += 1;
   }
   if (done === false) {
-    $.message.channel.send('No more help available.');
+    message.channel.send('No more help available.');
   }
 }
 
 export function help(helpData) {
-  return function($) { sendHelpData($, helpData); };
+  return function($) {
+    const [context, httptool, message, data] = [$.context, $.httptool, $.message, $.data];
+    sendHelpData(context, httptool, message, data, helpData);
+  };
 }

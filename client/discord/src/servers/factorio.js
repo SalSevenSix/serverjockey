@@ -11,8 +11,12 @@ const helpData = [helptext.systemHelpData, {
     'auto {mode}       : Set auto mode, valid values 0,1,2,3',
     'log               : Get last 100 lines from the log',
     'players           : Show players currently online',
+    'alias {cmds ...}      : Alias management, use help for details',
+    'activity {query ...}  : Activity reporting, use help for details',
     'say {text}        : Send chat message to players',
-    'send {line}       : Send command to server console',
+    'send {line}       : Send command to server console'
+  ],
+  help2: [
     'getconfig cmdargs : Get cmd args as attachment',
     'getconfig server  : Get server settings as attachment',
     'getconfig map     : Get map settings as attachment',
@@ -27,7 +31,6 @@ const helpData = [helptext.systemHelpData, {
     'setconfig adminlist : Update adminlist using attached file',
     'setconfig whitelist : Update whitelist using attached file',
     'setconfig banlist   : Update banlist using attached file',
-    'activity {query ...}    : Activity, use help for details',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game world folder',
     'deployment wipe-world-config : Delete only config files',
@@ -35,6 +38,7 @@ const helpData = [helptext.systemHelpData, {
     'deployment install-runtime {version} : Install game server'
   ],
   send: '/console/help',
+  alias: helptext.alias,
   activity: helptext.activity
 }];
 

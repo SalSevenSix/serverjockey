@@ -15,6 +15,8 @@ const helpData = [helptext.systemHelpData, {
     'server stop               : Save world and stop server',
     'auto {mode}               : Set auto mode, valid values 0,1,2,3',
     'log                       : Get last 100 lines from the log',
+    'alias {cmds ...}          : Alias management, use help for details',
+    'activity {query ...}      : Activity reporting, use help for details',
     'world save                : Save the game world',
     'world broadcast {message} : Broadcast message to all players',
     'world chopper             : Trigger chopper event',
@@ -58,7 +60,6 @@ const helpData = [helptext.systemHelpData, {
     'setconfig spawnregions : Update Spawnregions using attached file',
     'setconfig spawnpoints  : Update Spawnpoints using attached file',
     'setconfig jvm          : Update JVM config using attached file',
-    'activity {query ...}   : Activity, use help for details',
     'deployment backup-world {hours}   : Backup game world to zip file',
     'deployment wipe-world-save        : Delete only map files',
     'deployment wipe-world-playerdb    : Delete only player DB',
@@ -66,6 +67,8 @@ const helpData = [helptext.systemHelpData, {
     'deployment wipe-world-all         : Delete game world folder',
     'deployment install-runtime {beta} : Install game server'
   ],
+  alias: helptext.alias,
+  activity: helptext.activity,
   playersetaccesslevel: [
     'Set access level for online player. Level options:', '```',
     'admin, moderator, overseer, gm, observer, none', '```'
@@ -84,7 +87,6 @@ const helpData = [helptext.systemHelpData, {
   playerspawnvehicle: [
     'Spawn a vehicle next to player. Condition will vary.'
   ],
-  activity: helptext.activity,
   deploymentbackupworld: [
     'Make a backup of the game world to a zip file.',
     'Optionally specify {hours} to prune backups older than hours.',
@@ -102,20 +104,20 @@ export const [startup, help, server, auto, log,
   commons.getconfig, commons.setconfig, commons.deployment, commons.players, commons.activity, commons.alias];
 
 export function world($) {
-  const data = [...$.data];
-  if (data.length === 0) return util.reactUnknown($.message);
+  const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
+  if (data.length === 0) return util.reactUnknown(message);
   const cmd = data.shift();
   let body = null;
   if (cmd === 'broadcast') {
-    if (data.length === 0) return util.reactUnknown($.message);
+    if (data.length === 0) return util.reactUnknown(message);
     body = { message: data.join(' ') };
   }
-  $.httptool.doPost('/world/' + cmd, body);
+  httptool.doPost('/world/' + cmd, body);
 }
 
 export function player($) {
-  const data = [...$.data];
-  if (data.length < 2) return util.reactUnknown($.message);
+  const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
+  if (data.length < 2) return util.reactUnknown(message);
   const name = cutil.urlSafeB64encode(data.shift());
   const cmd = data.shift();
   let body = null;
@@ -129,89 +131,89 @@ export function player($) {
     } else if (cmd === 'spawn-horde') {
       body = { count: data[0] };
     } else if (cmd === 'spawn-vehicle') {
-      if (data.length < 2) return util.reactUnknown($.message);
+      if (data.length < 2) return util.reactUnknown(message);
       body = { module: data[0], item: data[1] };
     } else if (cmd === 'give-xp') {
-      if (data.length < 2) return util.reactUnknown($.message);
+      if (data.length < 2) return util.reactUnknown(message);
       body = { skill: data[0], xp: data[1] };
     } else if (cmd === 'give-item') {
-      if (data.length < 2) return util.reactUnknown($.message);
+      if (data.length < 2) return util.reactUnknown(message);
       body = { module: data[0], item: data[1] };
       if (data.length > 2) { body.count = data[2]; }
     }
   }
-  $.httptool.doPost('/players/' + name + '/' + cmd, body);
+  httptool.doPost('/players/' + name + '/' + cmd, body);
 }
 
 export function banlist($) {
-  const data = [...$.data];
-  if (data.length < 2) return util.reactUnknown($.message);
+  const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
+  if (data.length < 2) return util.reactUnknown(message);
   const cmd = data.shift() + '-id';
   const body = { steamid: data.shift() };
-  $.httptool.doPost('/banlist/' + cmd, body);
+  httptool.doPost('/banlist/' + cmd, body);
 }
 
-function whitelistRemoveName($, name, dataHandler = null) {
-  $.httptool.doPost('/whitelist/remove', { player: name }, dataHandler);
+function whitelistRemoveName(httptool, name, dataHandler = null) {
+  httptool.doPost('/whitelist/remove', { player: name }, dataHandler);
 }
 
-function whitelistAddName($, name, pwd, dataHandler = null) {
-  $.httptool.doPost('/whitelist/add', { player: name, password: pwd }, dataHandler);
+function whitelistAddName(httptool, name, pwd, dataHandler = null) {
+  httptool.doPost('/whitelist/add', { player: name, password: pwd }, dataHandler);
 }
 
-function whitelistRemoveId($, snowflake, dataHandler = null) {
-  $.context.client.users.fetch(util.toSnowflake(snowflake), true, true)
+function whitelistRemoveId(context, httptool, message, snowflake, dataHandler = null) {
+  context.client.users.fetch(util.toSnowflake(snowflake), true, true)
     .then(function(user) {
-      whitelistRemoveName($, user.tag.replaceAll('#', ''), dataHandler);
+      whitelistRemoveName(httptool, user.tag.replaceAll('#', ''), dataHandler);
     })
     .catch(function(error) {
-      logger.error(error, $.message);
+      logger.error(error, message);
     });
 }
 
-function whitelistAddId($, snowflake, name = null) {
-  $.context.client.users.fetch(util.toSnowflake(snowflake), true, true)
+function whitelistAddId(context, httptool, message, snowflake, name = null) {
+  context.client.users.fetch(util.toSnowflake(snowflake), true, true)
     .then(function(user) {
       const pwd = Math.random().toString(16).substr(2, 8);
       if (!name) { name = user.tag.replaceAll('#', ''); }
-      whitelistAddName($, name, pwd, function() {
-        user.send($.context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
-          .then(function() { util.reactSuccess($.message); })
-          .catch(function(error) { logger.error(error, $.message); });
+      whitelistAddName(httptool, name, pwd, function() {
+        user.send(context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
+          .then(function() { util.reactSuccess(message); })
+          .catch(function(error) { logger.error(error, message); });
       });
     })
     .catch(function(error) {
-      logger.error(error, $.message);
+      logger.error(error, message);
     });
 }
 
 export function whitelist($) {
-  const data = [...$.data];
-  if (data.length < 2) return util.reactUnknown($.message);
+  const [context, httptool, message, data] = [$.context, $.httptool, $.message, [...$.data]];
+  if (data.length < 2) return util.reactUnknown(message);
   const cmd = data.shift();
   if (cmd === 'add-id') {
-    whitelistAddId($, data[0]);
+    whitelistAddId(context, httptool, message, data[0]);
   } else if (cmd === 'add-for') {
-    if (data.length < 2) return util.reactUnknown($.message);
-    whitelistAddId($, data[0], data[1]);
+    if (data.length < 2) return util.reactUnknown(message);
+    whitelistAddId(context, httptool, message, data[0], data[1]);
   } else if (cmd === 'add-name') {
-    if (data.length < 2) return util.reactUnknown($.message);
-    whitelistAddName($, data[0], data[1]);
+    if (data.length < 2) return util.reactUnknown(message);
+    whitelistAddName(httptool, data[0], data[1]);
   } else if (cmd === 'remove-id') {
-    whitelistRemoveId($, data[0]);
+    whitelistRemoveId(context, httptool, message, data[0]);
   } else if (cmd === 'remove-name') {
-    whitelistRemoveName($, data[0]);
+    whitelistRemoveName(httptool, data[0]);
   } else if (cmd === 'reset-password') {
     if (data.length < 2) {
-      whitelistRemoveId($, data[0], function() {
-        cutil.sleep(500).then(function() { whitelistAddId($, data[0]); });
+      whitelistRemoveId(context, httptool, message, data[0], function() {
+        cutil.sleep(500).then(function() { whitelistAddId(context, httptool, message, data[0]); });
       });
     } else {
-      whitelistRemoveName($, data[1], function() {
-        cutil.sleep(500).then(function() { whitelistAddId($, data[0], data[1]); });
+      whitelistRemoveName(httptool, data[1], function() {
+        cutil.sleep(500).then(function() { whitelistAddId(context, httptool, message, data[0], data[1]); });
       });
     }
   } else {
-    util.reactUnknown($.message);
+    util.reactUnknown(message);
   }
 }

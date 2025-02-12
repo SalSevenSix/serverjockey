@@ -11,6 +11,8 @@ const helpData = [helptext.systemHelpData, {
     'auto {mode}        : Set auto mode, valid values 0,1,2,3',
     'log                : Get last 100 lines from the log',
     'players            : Show players currently online',
+    'alias {cmds ...}      : Alias management, use help for details',
+    'activity {query ...}  : Activity reporting, use help for details',
     'say {text}         : Send chat message to players',
     'send {line}        : Send command to server console',
     'getconfig cmdargs  : Get command line args as attachment',
@@ -21,13 +23,13 @@ const helpData = [helptext.systemHelpData, {
     'setconfig commands : Update server commands using attached file',
     'setconfig settings : Update general settings using attached file',
     'setconfig workshop : Update workshop mods using attached file',
-    'activity {query ...}         : Activity, use help for details',
     'deployment backup-world      : Backup game world to zip file',
     'deployment wipe-world-all    : Delete game map and config',
     'deployment wipe-world-save   : Delete only map file',
     'deployment install-runtime {beta} : Install game server'
   ],
   send: '/console/help',
+  alias: helptext.alias,
   activity: helptext.activity
 }];
 

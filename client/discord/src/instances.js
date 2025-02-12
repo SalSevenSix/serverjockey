@@ -17,7 +17,7 @@ const servers = {
 
 /* eslint-disable max-lines-per-function */
 function newAliases(context, instance) {
-  const file = context.config.HOME + '/data/' + instance + '.json';
+  const file = context.config.HOME + '/data/' + instance + '.aliases.json';
   const data = { base: [], snowflake: {}, discordid: {}, name: {}, maxidlen: 0 };
   const self = {};
 
@@ -47,7 +47,7 @@ function newAliases(context, instance) {
       if (!exists) return;
       fs.readFile(file, function(error, body) {
         if (error) return logger.error(error);
-        rebuild(JSON.parse(body).aliases);
+        rebuild(JSON.parse(body));
       });
     });
     return self;
@@ -59,7 +59,7 @@ function newAliases(context, instance) {
   };
 
   self.save = function() {
-    fs.writeFile(file, JSON.stringify({ aliases: data.base }), logger.error);
+    fs.writeFile(file, JSON.stringify(data.base), logger.error);
   };
 
   self.add = function(snowflake, discordid, name) {

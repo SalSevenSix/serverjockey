@@ -45,30 +45,33 @@ export function modules($) {
 }
 
 export function instances($) {
-  if (!util.checkHasRole($.message, $.context.config.PLAYER_ROLE)) return;
-  $.message.channel.send($.context.instancesService.getInstancesText());
+  const [context, message] = [$.context, $.message];
+  if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
+  message.channel.send(context.instancesService.getInstancesText());
 }
 
 export function use($) {
-  if (!util.checkHasRole($.message, $.context.config.ADMIN_ROLE)) return;
-  if ($.data.length === 0) {
-    if ($.context.instancesService.currentInstance()) {
-      $.message.channel.send('```\ndefault => ' + $.context.instancesService.currentInstance() + '\n```');
+  const [context, message, data] = [$.context, $.message, $.data];
+  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (data.length === 0) {
+    if (context.instancesService.currentInstance()) {
+      message.channel.send('```\ndefault => ' + context.instancesService.currentInstance() + '\n```');
     } else {
-      $.message.channel.send('```\nNo default instance set\n```');
+      message.channel.send('```\nNo default instance set\n```');
     }
   } else {
-    if (!$.context.instancesService.useInstance($.data[0])) return util.reactError($.message);
-    $.message.channel.send($.context.instancesService.getInstancesText());
+    if (!context.instancesService.useInstance(data[0])) return util.reactError(message);
+    message.channel.send(context.instancesService.getInstancesText());
   }
 }
 
 export function create($) {
-  if ($.data.length < 2) return util.reactUnknown($.message);
-  const body = { identity: $.data[0], module: $.data[1] };
-  $.httptool.doPost('/instances', body, function() {
-    $.context.instancesService.setInstance(body.identity);
-    util.reactSuccess($.message);
+  const [context, httptool, message, data] = [$.context, $.httptool, $.message, $.data];
+  if (data.length < 2) return util.reactUnknown(message);
+  const body = { identity: data[0], module: data[1] };
+  httptool.doPost('/instances', body, function() {
+    context.instancesService.setInstance(body.identity);
+    util.reactSuccess(message);
   });
 }
 
