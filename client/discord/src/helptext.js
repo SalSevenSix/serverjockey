@@ -90,8 +90,5 @@ function sendHelpData(context, httptool, message, data, helpData) {
 }
 
 export function help(helpData) {
-  return function($) {
-    const [context, httptool, message, data] = [$.context, $.httptool, $.message, $.data];
-    sendHelpData(context, httptool, message, data, helpData);
-  };
+  return function($) { sendHelpData($.context, $.httptool, $.message, $.data, helpData); };
 }

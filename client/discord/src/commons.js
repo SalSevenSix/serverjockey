@@ -349,7 +349,7 @@ export function activity($) {
             text.push('No player activity found');
           }
         } else if (format === 'JSON') {
-          text = JSON.stringify(results);
+          text = [JSON.stringify(results)];
         }
         util.chunkStringArray(text).forEach(function(chunk) {
           message.channel.send('```\n' + chunk.join('\n') + '\n```');
