@@ -15,9 +15,10 @@ const servers = {
   palworld: require('./servers/palworld.js')
 };
 
+
 /* eslint-disable max-lines-per-function */
 function newAliases(context, instance) {
-  const file = context.config.HOME + '/data/' + instance + '.aliases.json';
+  const file = context.config.HOME + '/data/' + instance + '.alias.json';
   const data = { base: [], snowflake: {}, discordid: {}, name: {}, maxidlen: 0 };
   const self = {};
 
@@ -103,7 +104,73 @@ function newAliases(context, instance) {
 
   return self;
 }
+
+
+function newRewards(context, instance) {
+  const file = context.config.HOME + '/data/' + instance + '.reward.json';
+  const data = { base: [] };
+  const self = {};
+
+  const unpack = function(value) {
+    const record = { action: value.action, snowflake: value.snowflake, roleid: value.roleid,
+      type: value.type, threshold: value.threshold, range: value.range };
+    record.toString = function() {
+      return record.action + ' @' + record.roleid + ' ' + record.type + ' ' + record.threshold + ' ' + record.range;
+    };
+    return record;
+  };
+
+  self.load = function() {
+    fs.exists(file, function(exists) {
+      if (!exists) return;
+      fs.readFile(file, function(error, body) {
+        if (error) return logger.error(error);
+        data.base = JSON.parse(body);
+      });
+    });
+    return self;
+  };
+
+  self.reset = function() {
+    data.base = [];
+    return self;
+  };
+
+  self.save = function() {
+    fs.writeFile(file, JSON.stringify(data.base), logger.error);
+  };
+
+  self.add = function(action, snowflake, roleid, type, threshold, range) {
+    if (!snowflake || !roleid) return false;
+    if (!['give', 'take'].includes(action)) return false;
+    if (!['played', 'top'].includes(type)) return false;
+    if (!cutil.rangeCodeToMillis(threshold)) return false;
+    if (!cutil.rangeCodeToMillis(range)) return false;
+    data.base.push({ action, snowflake, roleid, type, threshold, range });
+    return true;
+  };
+
+  self.remove = function(key) {
+    if (!key) return false;
+    const index = parseInt(key, 10);
+    if (isNaN(index) || index < 0 || index >= data.base.length) return false;
+    data.base.splice(index, 1);
+    return true;
+  };
+
+  self.list = function() {
+    return data.base.map(function(value) { return unpack(value); });
+  };
+
+  self.listText = function() {
+    if (data.base.length === 0) return ['No Rewards'];
+    return data.base.map(function(value, index) { return index + ' | ' + unpack(value).toString(); });
+  };
+
+  return self;
+}
 /* eslint-enable max-lines-per-function */
+
 
 export class Service {
   #context;
@@ -131,6 +198,7 @@ export class Service {
     this.setInstance(util.getFirstKey(instances));
     for (const instance in instances) {
       instances[instance].aliases = newAliases(context, instance).load();
+      instances[instance].rewards = newRewards(context, instance).load();
       instances[instance].server = servers[instances[instance].module];
       instances[instance].server.startup({ context: context, channels: channels, aliases: instances[instance].aliases,
         instance: instance, url: instances[instance].url });
@@ -140,6 +208,7 @@ export class Service {
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
       if (data.event === 'created') {
         data.instance.aliases = newAliases(context, data.instance.identity);
+        data.instance.rewards = newRewards(context, data.instance.identity);
         data.instance.url = baseurl + '/instances/' + data.instance.identity;
         data.instance.server = servers[data.instance.module];
         instances[data.instance.identity] = data.instance;
@@ -147,6 +216,7 @@ export class Service {
           instance: data.instance.identity, url: data.instance.url });
       } else if (data.event === 'deleted') {
         instances[data.instance.identity].aliases.reset().save();
+        instances[data.instance.identity].rewards.reset().save();
         delete instances[data.instance.identity];
         if (data.instance.identity === self.currentInstance()) {
           self.setInstance(util.getFirstKey(instances));

@@ -112,45 +112,6 @@ export function auto($) {
   });
 }
 
-export function alias($) {
-  const [context, aliases, message, data] = [$.context, $.aliases, $.message, [...$.data]];
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
-  const cmd = data.length > 0 ? data.shift() : 'list';
-  if (cmd === 'list') {
-    util.chunkStringArray(aliases.listText()).forEach(function(chunk) {
-      message.channel.send('```\n' + chunk.join('\n') + '\n```');
-    });
-  } else if (cmd === 'find') {
-    if (data.length != 1) return util.reactUnknown(message);
-    let text = {};
-    [aliases.findByKey(data[0]), aliases.findByName(data[0])].forEach(function(record) {
-      if (record) { text[record.snowflake] = record.toString(); }
-    });
-    text = Object.values(text);
-    text = text.length > 0 ? text.join('\n') : 'No Alias Found';
-    message.channel.send('```\n' + text + '\n```');
-  } else if (cmd === 'add') {
-    if (data.length != 2) return util.reactUnknown(message);
-    const [snowflake, name] = [util.toSnowflake(data[0]), data[1]];
-    if (!snowflake) return util.reactError(message);
-    context.client.users.fetch(snowflake, true, true)
-      .then(function(user) {
-        const discordid = user.tag.replaceAll('#', '');
-        if (!aliases.add(snowflake, discordid, name)) return util.reactError(message);
-        aliases.save();
-        util.reactSuccess(message);
-      })
-      .catch(function(error) { logger.error(error, message); });
-  } else if (cmd === 'remove') {
-    if (data.length != 1) return util.reactUnknown(message);
-    if (!aliases.remove(data[0])) return util.reactError(message);
-    aliases.save();
-    util.reactSuccess(message);
-  } else {
-    util.reactUnknown(message);
-  }
-}
-
 export function log($) {
   const [httptool, message] = [$.httptool, $.message];
   httptool.doGet('/log/tail', function(body) {
@@ -262,6 +223,89 @@ export function players($) {
   });
 }
 
+export function alias($) {
+  const [context, aliases, message, data] = [$.context, $.aliases, $.message, [...$.data]];
+  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  const cmd = data.length > 0 ? data.shift() : 'list';
+  if (cmd === 'list') {
+    util.chunkStringArray(aliases.listText()).forEach(function(chunk) {
+      message.channel.send('```\n' + chunk.join('\n') + '\n```');
+    });
+  } else if (cmd === 'find') {
+    if (data.length != 1) return util.reactUnknown(message);
+    let text = {};
+    [aliases.findByKey(data[0]), aliases.findByName(data[0])].forEach(function(record) {
+      if (record) { text[record.snowflake] = record.toString(); }
+    });
+    text = Object.values(text);
+    text = text.length > 0 ? text.join('\n') : 'No Alias Found';
+    message.channel.send('```\n' + text + '\n```');
+  } else if (cmd === 'add') {
+    if (data.length != 2) return util.reactUnknown(message);
+    const [snowflake, name] = [util.toSnowflake(data[0]), data[1]];
+    if (!snowflake) return util.reactError(message);
+    context.client.users.fetch(snowflake)
+      .then(function(user) {
+        const discordid = user.tag.replaceAll('#', '');
+        if (!aliases.add(snowflake, discordid, name)) return util.reactError(message);
+        aliases.save();
+        util.reactSuccess(message);
+      })
+      .catch(function(error) { logger.error(error, message); });
+  } else if (cmd === 'remove') {
+    if (data.length != 1) return util.reactUnknown(message);
+    if (!aliases.remove(data[0])) return util.reactError(message);
+    aliases.save();
+    util.reactSuccess(message);
+  } else {
+    util.reactUnknown(message);
+  }
+}
+
+export async function evaluateRewards(context, httptool, rewards, instance, message) {
+  const [baseurl, now] = [context.config.SERVER_URL, Date.now()];
+  const atfrom = now - 3600000;
+  const atto = now;
+  const result = await Promise.all([
+    httptool.getJson(pstats.queryLastEvent(instance, atfrom), baseurl),
+    httptool.getJson(pstats.queryEvents(instance, atfrom, atto), baseurl)]);
+  console.log(JSON.stringify(result));
+  util.reactSuccess(message);
+}
+
+export function reward($) {
+  const [context, rewards, message, data] = [$.context, $.rewards, $.message, [...$.data]];
+  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  const cmd = data.length > 0 ? data.shift() : 'list';
+  if (cmd === 'list') {
+    util.chunkStringArray(rewards.listText()).forEach(function(chunk) {
+      message.channel.send('```\n' + chunk.join('\n') + '\n```');
+    });
+  } else if (cmd === 'add') {
+    if (data.length != 5) return util.reactUnknown(message);
+    const [action, candidate, type, threshold, range] = data;
+    const snowflake = util.toSnowflake(candidate, '<@&');
+    if (!snowflake) return util.reactError(message);
+    message.guild.roles.fetch(snowflake)
+      .then(function(role) {
+        if (!rewards.add(action, snowflake, role.name, type, threshold, range)) return util.reactError(message);
+        rewards.save();
+        util.reactSuccess(message);
+      })
+      .catch(function(error) { logger.error(error, message); });
+  } else if (cmd === 'remove') {
+    if (data.length != 1) return util.reactUnknown(message);
+    if (!rewards.remove(data[0])) return util.reactError(message);
+    rewards.save();
+    util.reactSuccess(message);
+  } else if (cmd === 'evaluate') {
+    evaluateRewards(context, $.httptool, rewards, $.instance, message)
+      .catch(function(error) { logger.error(error, message); });
+  } else {
+    util.reactUnknown(message);
+  }
+}
+
 /* eslint-disable max-lines-per-function */
 export function activity($) {
   const [context, httptool, aliases, instance, message, data] = [
@@ -279,13 +323,14 @@ export function activity($) {
   data.forEach(function(arg) {
     if (arg.startsWith('to=')) {
       atto = arg.substring(3);
-      if (['LH', 'LD', 'LM', 'TM'].includes(atto)) { atto = cutil.presetDate(now, atto, tz).getTime(); }
-      else { atto = cutil.parseDateToMillis(atto, tz); }
+      atto = ['LH', 'LD', 'LM', 'TM'].includes(atto)
+        ? atto = cutil.presetDate(now, atto, tz).getTime()
+        : atto = cutil.parseDateToMillis(atto, tz);
     } else if (arg.startsWith('from=')) {
       atfrom = arg.substring(5);
-      if (atfrom.endsWith('d') || atfrom.endsWith('D')) { atfrom = parseInt(atfrom.slice(0, -1), 10) * -86400000; }
-      else if (atfrom.endsWith('h') || atfrom.endsWith('H')) { atfrom = parseInt(atfrom.slice(0, -1), 10) * -3600000; }
-      else { atfrom = cutil.parseDateToMillis(atfrom, tz); }
+      atfrom = atfrom && ['d', 'h', 'm', 's'].includes(atfrom.slice(-1).toLowerCase())
+        ? atfrom = 0 - cutil.rangeCodeToMillis(atfrom)
+        : atfrom = cutil.parseDateToMillis(atfrom, tz);
     }
   });
   if (!atto) { atto = now.getTime(); }
@@ -294,7 +339,8 @@ export function activity($) {
   if (!tz) { tz = true; }
   let [results, text] = [{}, ['Invalid arguments']];
   if (query === 'instance') {
-    Promise.all([httptool.getJson(istats.queryInstance(instance), baseurl),
+    Promise.all([
+      httptool.getJson(istats.queryInstance(instance), baseurl),
       httptool.getJson(istats.queryLastEvent(instance, atfrom), baseurl),
       httptool.getJson(istats.queryEvents(instance, atfrom, atto), baseurl)])
       .then(function(promdata) {
@@ -316,7 +362,8 @@ export function activity($) {
         message.channel.send('```\n' + text.join('\n') + '\n```');
       });
   } else if (query === 'player') {
-    Promise.all([httptool.getJson(pstats.queryLastEvent(instance, atfrom, player), baseurl),
+    Promise.all([
+      httptool.getJson(pstats.queryLastEvent(instance, atfrom, player), baseurl),
       httptool.getJson(pstats.queryEvents(instance, atfrom, atto, player), baseurl)])
       .then(function(promdata) {
         [results.lastevent, results.events] = promdata;

@@ -51,6 +51,16 @@ function timezoneToMinutes(value) {
   return op === '-' ? 0 - result : result;
 }
 
+export function rangeCodeToMillis(value) {
+  if (!value) return null;
+  if (!isString(value)) return value;
+  const incs = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+  const idx = value.slice(-1).toLowerCase();
+  const incsidx = hasProp(incs, idx) ? incs[idx] : 1;
+  const result = parseInt(incsidx === 1 ? value : value.slice(0, -1), 10);
+  return isNaN(result) ? 0 : result * incsidx;
+}
+
 export function presetDate(value, preset, tz = null) {
   if (!value) return null;
   let result = value instanceof Date ? value : new Date(value);

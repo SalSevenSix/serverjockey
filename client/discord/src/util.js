@@ -67,9 +67,10 @@ export function chunkStringArray(value, maxchars = 1600) {
   return result;
 }
 
-export function toSnowflake(value) {
+export function toSnowflake(value, prefix = '<@') {
   if (!value) return null;
-  const result = value.length > 3 && value.startsWith('<@') && value.endsWith('>') ? value.slice(2, -1) : value;
+  const result = value.length > prefix.length + 1 && value.startsWith(prefix) && value.endsWith('>')
+    ? value.slice(prefix.length, -1) : value;
   if (result.length < 18) return null;
   return (/^\d*$/).test(result) ? result : null;
 }

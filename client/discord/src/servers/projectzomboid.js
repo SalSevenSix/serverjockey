@@ -16,6 +16,7 @@ const helpData = [helptext.systemHelpData, {
     'auto {mode}               : Set auto mode, valid values 0,1,2,3',
     'log                       : Get last 100 lines from the log',
     'alias {cmds ...}          : Alias management, use help for details',
+    'reward {cmds ...}         : Reward management, use help for details',
     'activity {query ...}      : Activity reporting, use help for details',
     'world save                : Save the game world',
     'world broadcast {message} : Broadcast message to all players',
@@ -68,6 +69,7 @@ const helpData = [helptext.systemHelpData, {
     'deployment install-runtime {beta} : Install game server'
   ],
   alias: helptext.alias,
+  reward: helptext.reward,
   activity: helptext.activity,
   playersetaccesslevel: [
     'Set access level for online player. Level options:', '```',
@@ -99,9 +101,11 @@ const helpData = [helptext.systemHelpData, {
 }];
 
 export const [startup, help, server, auto, log,
-  getconfig, setconfig, deployment, players, activity, alias] = [
+  getconfig, setconfig, deployment, players,
+  alias, reward, activity] = [
   commons.startAllEventLogging, helptext.help(helpData), commons.server, commons.auto, commons.log,
-  commons.getconfig, commons.setconfig, commons.deployment, commons.players, commons.activity, commons.alias];
+  commons.getconfig, commons.setconfig, commons.deployment, commons.players,
+  commons.alias, commons.reward, commons.activity];
 
 export function world($) {
   const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
@@ -164,7 +168,7 @@ function whitelistAddName(httptool, name, pwd, dataHandler = null) {
 function whitelistRemoveId(context, httptool, aliases, message, snowflake, dataHandler = null) {
   snowflake = util.toSnowflake(snowflake);
   if (!snowflake) return util.reactError(message);
-  context.client.users.fetch(snowflake, true, true)
+  context.client.users.fetch(snowflake)
     .then(function(user) {
       whitelistRemoveName(httptool, user.tag.replaceAll('#', ''), dataHandler);
       if (aliases && aliases.remove(snowflake)) { aliases.save(); }
@@ -177,7 +181,7 @@ function whitelistRemoveId(context, httptool, aliases, message, snowflake, dataH
 function whitelistAddId(context, httptool, aliases, message, snowflake, name = null) {
   snowflake = util.toSnowflake(snowflake);
   if (!snowflake) return util.reactError(message);
-  context.client.users.fetch(snowflake, true, true)
+  context.client.users.fetch(snowflake)
     .then(function(user) {
       const [discordid, pwd] = [user.tag.replaceAll('#', ''), Math.random().toString(16).substr(2, 8)];
       if (!name) { name = discordid; }

@@ -103,7 +103,7 @@ function handleMessage(message) {
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
-    args.aliases = instanceData.aliases;
+    [args.aliases, args.rewards] = [instanceData.aliases, instanceData.rewards];
     instanceData.server[command](args);
   } else if (cutil.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
