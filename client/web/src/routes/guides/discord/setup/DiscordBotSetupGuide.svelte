@@ -179,17 +179,19 @@
   <p><span class="step-title"></span>
     Scroll down the bot settings to find the
     <span class="has-text-weight-bold">PUBLIC BOT</span>
-    switch and turn it OFF. Scroll down further to find the
+    switch and turn it OFF. Scroll further to find the
+    <span class="has-text-weight-bold">SERVER MEMBERS INTENT</span>
+    and
     <span class="has-text-weight-bold">MESSAGE CONTENT INTENT</span>
-    switch and turn it ON. Then click
+    switches and turn both ON. Then click
     <span class="has-text-weight-bold">Save Changes</span>
     button.
   </p>
-  <figure class="image max-1028">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/make_bot_private.png')}
          alt="Make Bot Private" loading="lazy" />
   </figure>
-  <figure class="image max-1028">
+  <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/allow_receive_messages.png')}
          alt="Allow Receive Messages" loading="lazy" />
   </figure>
@@ -220,7 +222,7 @@
     <span class="has-text-weight-bold">Copy</span>
     button to copy the generated invite URL.
   </p>
-  <figure class="image max-850">
+  <figure class="image max-860">
     <img src={surl('/assets/guides/discord/setup/bot_invite_perms.png')}
          alt="Choose Bot Perms" loading="lazy" />
   </figure>
@@ -537,8 +539,8 @@
 
 
 <style>
-  figure.max-850 img {
-    max-width: 850px;
+  figure.max-860 img {
+    max-width: 860px;
   }
 
   figure.max-1028 img {

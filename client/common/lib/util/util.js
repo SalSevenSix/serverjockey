@@ -24,6 +24,19 @@ export function floatToPercent(value, rounding = 1, suffix = '%') {
   return suffix ? result + suffix : result;
 }
 
+export function moveArrayElement(value, index, positions) {
+  [index, positions] = [parseInt(index, 10), parseInt(positions, 10)];
+  if (index < 0 || index >= value.length) return value;
+  let newIndex = index + positions;
+  if (newIndex < 0) { newIndex = 0; }
+  else if (newIndex >= value.length) { newIndex = value.length - 1; }
+  if (newIndex === index) return value;
+  const result = [...value];
+  const element = result.splice(index, 1)[0];
+  result.splice(newIndex, 0, element);
+  return result;
+}
+
 function timezoneToMinutes(value) {
   if (!value) return 0;
   if (!isString(value)) return value;

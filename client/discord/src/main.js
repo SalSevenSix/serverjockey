@@ -130,7 +130,7 @@ context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);
 context.client = new Client({
   intents: [
-    GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers,
     GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
   partials: [Partials.Channel]
 });

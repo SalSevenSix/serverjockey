@@ -144,9 +144,18 @@ function newRewards(context, instance) {
     if (!snowflake || !roleid) return false;
     if (!['give', 'take'].includes(action)) return false;
     if (!['played', 'top'].includes(type)) return false;
-    if (!cutil.rangeCodeToMillis(threshold)) return false;
+    if (type === 'played' && !cutil.rangeCodeToMillis(threshold)) return false;
+    if (type === 'top' && !(/^\d*$/).test(threshold)) return false;
     if (!cutil.rangeCodeToMillis(range)) return false;
     data.base.push({ action, snowflake, roleid, type, threshold, range });
+    return true;
+  };
+
+  self.move = function(key, positions) {
+    if (!key || !positions) return false;
+    const result = cutil.moveArrayElement(data.base, key, positions);
+    if (result == data.base) return false;
+    data.base = result;
     return true;
   };
 

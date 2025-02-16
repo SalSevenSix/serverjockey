@@ -42,14 +42,15 @@ export const reward = [
   '  played|top   : Choose to reward based on time played or ranking',
   '  {threshold}  : Threshold to check for reward evaluation',
   '  {range}      : Time range for player activity query',
+  'move {id} {±#} : Move reward by id up or down list',
   'remove {id}    : Remove reward by id as shown in list',
   'evaluate       : Process players and allocate reward roles',
   '```', 'Examples...',
   'a) Give @HighAchiever role if ranked top 3 player in last 7 days',
   '`!reward add give @HighAchiever top 3 7d`',
-  'a) Give @Battler role if played more than 5 hours in last 7 days',
+  'b) Give @Battler role if played more than 5 hours in last 7 days',
   '`!reward add give @Battler played 5h 7d`',
-  'a) Take away @Battler role if played less than 1 hour in last 30 days',
+  'c) Take away @Battler role if played less than 1 hour in last 30 days',
   '`!reward add take @Battler played 1h 30d`'
 ];
 
@@ -57,7 +58,7 @@ export const activity = [
   'Activity Reporting. Provide the following query parameters...', '```',
   'instance        : Report instance activity instead of player activity',
   'from={date}     : From date in ISO 8601 format YYYY-MM-DDThh:mm:ss',
-  '                  or days {n}D prior, or hours {n}H prior to date',
+  '                  or days {#}D prior, or hours {#}H prior to date',
   'to={date}       : To date in ISO 8601 format YYYY-MM-DDThh:mm:ss',
   '                  or preset "LD" Last Day, "LM" Last Month, "TD" This Month',
   'tz={timezone}   : Timezone as ±{hh} or ±{hh}:{mm} default is server tz',

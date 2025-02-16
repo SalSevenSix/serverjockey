@@ -213,7 +213,7 @@ export function players($) {
       else { line += '        '; }
       const playerAlias = aliases.findByName(entry.name);
       if (playerAlias) { line += ' @' + playerAlias.discordid; }
-      result.push(line);
+      result.push(line.trim());
     });
     result = util.chunkStringArray(result);
     result = result.map(function(text) {
@@ -262,16 +262,98 @@ export function alias($) {
   }
 }
 
-export async function evaluateRewards(context, httptool, rewards, instance, message) {
-  const [baseurl, now] = [context.config.SERVER_URL, Date.now()];
-  const atfrom = now - 3600000;
-  const atto = now;
-  const result = await Promise.all([
-    httptool.getJson(pstats.queryLastEvent(instance, atfrom), baseurl),
-    httptool.getJson(pstats.queryEvents(instance, atfrom, atto), baseurl)]);
-  console.log(JSON.stringify(result));
-  util.reactSuccess(message);
+/* eslint-disable max-lines-per-function */
+/* eslint-disable max-depth */
+export async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
+  const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
+  let schemes = rewards.list();
+  if (schemes.length === 0) return;
+  util.reactWait(message);
+  const [membersMap, roleMap, activityMap] = [{}, {}, {}];
+  const allMembers = await message.guild.members.fetch();  // Fetch all members first to populate cache
+  allMembers.forEach(function(member) { membersMap[member.id] = member; });
+  for (const scheme of schemes) {  // Gather roles and thier members by snowflake
+    if (!cutil.hasProp(roleMap, scheme.snowflake)) {
+      await cutil.sleep(1000);
+      const role = await message.guild.roles.fetch(scheme.snowflake);
+      let schemeRole = null;
+      if (role) {
+        schemeRole = { role: role };
+        schemeRole.orig = role.members.map(function(member) { return member.id; });
+        schemeRole.members = [...schemeRole.orig];
+      } else {
+        message.channel.send(prelog + '❗ Role `@' + scheme.roleid + '` not found');
+      }
+      roleMap[scheme.snowflake] = schemeRole;
+    }
+  }
+  for (const snowflake of Object.keys(roleMap)) {  // Delete invalid roles
+    if (!roleMap[snowflake]) { delete roleMap[snowflake]; }
+  }
+  schemes = schemes.filter(function(scheme) {  // Remove schemes with invalid role
+    return Object.keys(roleMap).includes(scheme.snowflake);
+  });
+  if (schemes.length === 0) return;
+  for (const scheme of schemes) {  // Gather activity by range
+    if (!cutil.hasProp(activityMap, scheme.range)) {
+      const atfrom = now - cutil.rangeCodeToMillis(scheme.range);
+      let results = {};
+      [results.lastevent, results.events] = await Promise.all([
+        httptool.getJson(pstats.queryLastEvent(instance, atfrom), baseurl),
+        httptool.getJson(pstats.queryEvents(instance, atfrom, now), baseurl)]);
+      results = pstats.extractActivity(results);
+      activityMap[scheme.range] = cutil.hasProp(results.results, instance) ? results.results[instance].players : [];
+      activityMap[scheme.range].forEach(function(record) { record.alias = aliases.findByName(record.player); });
+    }
+  }
+  schemes.reverse();  // Schemes higher in list have precedence over lower
+  schemes.forEach(function(scheme) {  // Update role members based on reward scheme and activity
+    const [schemeRole, schemeThreshold] = [roleMap[scheme.snowflake], cutil.rangeCodeToMillis(scheme.threshold)];
+    const recordedMembers = [];
+    activityMap[scheme.range].forEach(function(record, index) {
+      if (record.alias) {
+        recordedMembers.push(record.alias.snowflake);
+        let give = scheme.type === 'top' && index < schemeThreshold;
+        give ||= scheme.type === 'played' && record.uptime >= schemeThreshold;
+        give &&= scheme.action === 'give' && !schemeRole.members.includes(record.alias.snowflake);
+        let take = scheme.type === 'top' && index >= schemeThreshold;
+        take ||= scheme.type === 'played' && record.uptime < schemeThreshold;
+        take &&= scheme.action === 'take' && schemeRole.members.includes(record.alias.snowflake);
+        if (give) {  // Add member to role if above threshold
+          schemeRole.members.push(record.alias.snowflake);
+        } else if (take) {  // Remove member from role if below threshold
+          schemeRole.members = schemeRole.members.filter(function(member) { return member != record.alias.snowflake; });
+        }
+      }
+    });
+    if (scheme.action === 'take') {  // Remove member from role if not in activity
+      schemeRole.members = schemeRole.members.filter(function(member) { return recordedMembers.includes(member); });
+    }
+  });
+  for (const schemeRole of Object.values(roleMap)) { // Apply roles based on new member list
+    schemeRole.gives = schemeRole.members.filter(function(member) { return !schemeRole.orig.includes(member); });
+    schemeRole.takes = schemeRole.orig.filter(function(member) { return !schemeRole.members.includes(member); });
+    for (const roleChange of [[false, schemeRole.takes], [true, schemeRole.gives]]) {
+      for (const member of roleChange[1]) {
+        const discordid = aliases.findByKey(member).discordid;
+        await cutil.sleep(1000);
+        if (cutil.hasProp(membersMap, member)) {
+          if (roleChange[0]) {
+            await membersMap[member].roles.add(schemeRole.role);
+            message.channel.send(prelog + '🏅 `@' + discordid + '` 👍 `@' + schemeRole.role.name + '`');
+          } else {
+            await membersMap[member].roles.remove(schemeRole.role);
+            message.channel.send(prelog + '🏅 `@' + discordid + '` 👎 `@' + schemeRole.role.name + '`');
+          }
+        } else {
+          message.channel.send(prelog + '❗ Alias `@' + discordid + '` not found');
+        }
+      }
+    }
+  }
 }
+/* eslint-enable max-depth */
+/* eslint-enable max-lines-per-function */
 
 export function reward($) {
   const [context, rewards, message, data] = [$.context, $.rewards, $.message, [...$.data]];
@@ -293,14 +375,24 @@ export function reward($) {
         util.reactSuccess(message);
       })
       .catch(function(error) { logger.error(error, message); });
+  } else if (cmd === 'move') {
+    if (data.length != 2) return util.reactUnknown(message);
+    if (!rewards.move(data[0], data[1])) return util.reactError(message);
+    rewards.save();
+    util.reactSuccess(message);
   } else if (cmd === 'remove') {
     if (data.length != 1) return util.reactUnknown(message);
     if (!rewards.remove(data[0])) return util.reactError(message);
     rewards.save();
     util.reactSuccess(message);
   } else if (cmd === 'evaluate') {
-    evaluateRewards(context, $.httptool, rewards, $.instance, message)
-      .catch(function(error) { logger.error(error, message); });
+    evaluateRewards(context, $.httptool, $.aliases, rewards, $.instance, message)
+      .then(function() {
+        util.rmReacts(message, util.reactSuccess, logger.error);
+      })
+      .catch(function(error) {
+        util.rmReacts(message, function() { logger.error(error, message); }, logger.error);
+      });
   } else {
     util.reactUnknown(message);
   }
@@ -388,9 +480,9 @@ export function activity($) {
             }).player.length);
             text.push(...results.players.map(function(record) {
               const playerAlias = aliases.findByName(record.player);
-              return record.player.padEnd(plen) +
-                cutil.humanDuration(record.uptime).padEnd(12) +
-                (playerAlias ? ' @' + playerAlias.discordid : '');
+              let line = record.player.padEnd(plen) + cutil.humanDuration(record.uptime).padEnd(12);
+              if (playerAlias) { line += ' @' + playerAlias.discordid; }
+              return line.trim();
             }));
           } else {
             text.push('No player activity found');

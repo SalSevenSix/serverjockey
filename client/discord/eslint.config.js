@@ -14,6 +14,7 @@ export default [
   {
     rules: {
       'prefer-destructuring': 1,
+      'require-atomic-updates': 1,
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
       'no-warning-comments': 0,
       'curly': 0,
