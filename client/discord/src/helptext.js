@@ -38,7 +38,7 @@ export const reward = [
   'list           : List all rewards for the instance (default command)',
   'add            : Add reward scheme, with following parameters...',
   '  give|take    : Give or take role based on >= or < than threshold',
-  '  {roleid}     : The @ID of the reward role',
+  '  {roleid}     : The @ID or snowflake of the reward role',
   '  played|top   : Choose to reward based on time played or ranking',
   '  {threshold}  : Threshold to check for reward evaluation',
   '  {range}      : Time range for player activity query',

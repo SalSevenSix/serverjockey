@@ -133,7 +133,7 @@ UPnP=false
 <div class="content pt-4" id="cacheLockingMapFiles">
   <h4 class="title is-5">Cache Locking Map Files</h4>
   <p>
-    ServerJockey has an experimental feature to boost performance on high player count servers.
+    ServerJockey has a feature to boost performance on high player count servers.
     The game map is stored in many small files which can cause disk IO to be a bottleneck.
     The Cache Lock feature will pre-cache all map files in memory, same as the OS would normally
     do when files are read. However this feature will also lock them in, preventing eviction until
@@ -178,7 +178,7 @@ UPnP=false
     configuration. Please ensure enough free memory is available when cache locking the map files.
   </p>
   <CodeBlock nocopy>
-&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running (EXPERIMENTAL)&quot;,
+&quot;_comment_cache_map_files&quot;: &quot;Force map files to be cached in memory while server is running&quot;,
 &quot;cache_map_files&quot;: true</CodeBlock>
 </div>
 
