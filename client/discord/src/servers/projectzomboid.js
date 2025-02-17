@@ -120,9 +120,9 @@ export function world($) {
 }
 
 export function player($) {
-  const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
+  const [httptool, aliases, message, data] = [$.httptool, $.aliases, $.message, [...$.data]];
   if (data.length < 2) return util.reactUnknown(message);
-  const name = cutil.urlSafeB64encode(data.shift());
+  let name = data.shift();
   const cmd = data.shift();
   let body = null;
   if (data.length > 0) {
@@ -146,6 +146,10 @@ export function player($) {
       if (data.length > 2) { body.count = data[2]; }
     }
   }
+  let member = util.toSnowflake(name);
+  if (member) { member = aliases.findByKey(member); }
+  if (member) { name = member.name; }
+  name = cutil.urlSafeB64encode(name);
   httptool.doPost('/players/' + name + '/' + cmd, body);
 }
 
