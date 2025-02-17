@@ -263,7 +263,6 @@ export function alias($) {
 }
 
 /* eslint-disable max-lines-per-function */
-/* eslint-disable max-depth */
 export async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
   const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
   let schemes = rewards.list();
@@ -335,24 +334,22 @@ export async function evaluateRewards(context, httptool, aliases, rewards, insta
     schemeRole.takes = schemeRole.orig.filter(function(member) { return !schemeRole.members.includes(member); });
     for (const roleChange of [[false, schemeRole.takes], [true, schemeRole.gives]]) {
       for (const member of roleChange[1]) {
-        const discordid = aliases.findByKey(member).discordid;
+        let memberid = aliases.findByKey(member);
+        memberid = memberid ? memberid.discordid : member;
         await cutil.sleep(1000);
-        if (cutil.hasProp(membersMap, member)) {
-          if (roleChange[0]) {
-            await membersMap[member].roles.add(schemeRole.role);
-            message.channel.send(prelog + '🏅 `@' + discordid + '` 👍 `@' + schemeRole.role.name + '`');
-          } else {
-            await membersMap[member].roles.remove(schemeRole.role);
-            message.channel.send(prelog + '🏅 `@' + discordid + '` 👎 `@' + schemeRole.role.name + '`');
-          }
+        if (!cutil.hasProp(membersMap, member)) {
+          message.channel.send(prelog + '❗ Alias `@' + memberid + '` not found');
+        } else if (roleChange[0]) {
+          await membersMap[member].roles.add(schemeRole.role);
+          message.channel.send(prelog + '🏅 `@' + memberid + '` 👍 `@' + schemeRole.role.name + '`');
         } else {
-          message.channel.send(prelog + '❗ Alias `@' + discordid + '` not found');
+          await membersMap[member].roles.remove(schemeRole.role);
+          message.channel.send(prelog + '🏅 `@' + memberid + '` 👎 `@' + schemeRole.role.name + '`');
         }
       }
     }
   }
 }
-/* eslint-enable max-depth */
 /* eslint-enable max-lines-per-function */
 
 export function reward($) {

@@ -13,17 +13,19 @@ export function info(value) {
   console.log(timestamp() + ' INFO ' + value);
 }
 
-export function dump(value) {
-  if (!value) return;
-  const clone = {};
-  for (const key in value) {
-    if (value[key] && key.toUpperCase().endsWith('TOKEN') && cutil.isString(value[key])) {
-      clone[key] = '*'.repeat(value[key].length);
+export function dump(obj) {
+  if (!obj) return;
+  let result = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value && key.toUpperCase().endsWith('TOKEN') && cutil.isString(value)) {
+      result[key] = '*'.repeat(value.length);
     } else {
-      clone[key] = value[key];
+      result[key] = value;
     }
   }
-  console.log(JSON.stringify(clone, null, 2).split('\n').slice(1, -1).join('\n'));
+  result = JSON.stringify(result, null, 2);
+  result = result.split('\n').slice(1, -1).join('\n');
+  console.log(result);
 }
 
 export function error(value, message = null) {

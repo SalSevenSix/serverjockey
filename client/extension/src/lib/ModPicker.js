@@ -67,7 +67,7 @@ const workshopCache = {
   uncached: function(workshops, limit=10) {
     const result = [];
     if (workshops.length === 0 || limit < 1) return result;
-    for (let i = 0; i < workshops.length; i++) {
+    for (let i = 0; i < workshops.length; i++) {  // TODO change to for..of
       const item = workshopCache.get(workshops[i]);
       if (!item) { result.push(workshops[i]); }
       if (result.length >= limit) return result;

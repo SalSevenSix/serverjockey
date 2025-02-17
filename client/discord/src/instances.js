@@ -199,35 +199,35 @@ export class Service {
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .then(function(json) {
-        return json;
-      })
+      .then(function(json) { return json; })
       .catch(logger.error);
     this.#instances = instances;
     this.setInstance(util.getFirstKey(instances));
-    for (const instance in instances) {
-      instances[instance].aliases = newAliases(context, instance).load();
-      instances[instance].rewards = newRewards(context, instance).load();
-      instances[instance].server = servers[instances[instance].module];
-      instances[instance].server.startup({ context: context, channels: channels, aliases: instances[instance].aliases,
-        instance: instance, url: instances[instance].url });
+    for (const [identity, instance] of Object.entries(instances)) {
+      instance.aliases = newAliases(context, identity).load();
+      instance.rewards = newRewards(context, identity).load();
+      instance.server = servers[instance.module];
+      instance.server.startup({ context: context, channels: channels,
+        aliases: instance.aliases, instance: identity, url: instance.url });
     }
     logger.info('Instances...');
     logger.raw(self.getInstancesText().join('\n'));
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
+      const identity = data.instance.identity;
       if (data.event === 'created') {
-        data.instance.aliases = newAliases(context, data.instance.identity);
-        data.instance.rewards = newRewards(context, data.instance.identity);
-        data.instance.url = baseurl + '/instances/' + data.instance.identity;
-        data.instance.server = servers[data.instance.module];
-        instances[data.instance.identity] = data.instance;
-        data.instance.server.startup({ context: context, channels: channels, aliases: data.instance.aliases,
-          instance: data.instance.identity, url: data.instance.url });
-      } else if (data.event === 'deleted') {
-        instances[data.instance.identity].aliases.reset().save();
-        instances[data.instance.identity].rewards.reset().save();
-        delete instances[data.instance.identity];
-        if (data.instance.identity === self.currentInstance()) {
+        const instance = data.instance;
+        instance.url = baseurl + '/instances/' + identity;
+        instance.aliases = newAliases(context, identity);
+        instance.rewards = newRewards(context, identity);
+        instance.server = servers[instance.module];
+        instances[identity] = instance;
+        instance.server.startup({ context: context, channels: channels,
+          aliases: instance.aliases, instance: identity, url: instance.url });
+      } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {
+        instances[identity].aliases.reset().save();
+        instances[identity].rewards.reset().save();
+        delete instances[identity];
+        if (identity === self.currentInstance()) {
           self.setInstance(util.getFirstKey(instances));
         }
       }

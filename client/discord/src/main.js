@@ -21,8 +21,7 @@ function initialise() {
     process.exit(0);
   }
   let config = { HOME: null };
-  for (let i = 2; i < process.argv.length; i++) {
-    const path = process.argv[i];
+  for (const path of process.argv.slice(2)) {
     const parts = path.split('/');
     if (parts[parts.length - 1] === 'serverlink.json') {
       config.HOME = parts.length > 1 ? parts.slice(0, -1).join('/') : '.';
@@ -54,37 +53,32 @@ function initialise() {
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  const configChannels = context.config.EVENT_CHANNELS;
-  const channelIds = new Set();
-  if (configChannels.server) { channelIds.add(configChannels.server); }
-  if (configChannels.login) { channelIds.add(configChannels.login); }
-  if (configChannels.chat) { channelIds.add(configChannels.chat); }
-  const promises = [];
-  for (const channelId of channelIds.values()) {
-    promises.push(context.client.channels.fetch(channelId)
-      .then(function(channel) { return channel; })
-      .catch(logger.error));
-  }
-  Promise.all(promises).then(function(channels) {
-    const channelsMap = {};
-    for (const index in channels) {
-      if (channels[index]) { channelsMap[channels[index].id] = channels[index]; }
+  const channelConfig = context.config.EVENT_CHANNELS;
+  const channels = { server: null, login: null, chat: null };
+  Object.keys(channels).forEach(function(channelType) {
+    if (cutil.hasProp(channelConfig, channelType) && channelConfig[channelType]) {
+      channels[channelType] = channelConfig[channelType];
     }
-    const startupArgs = { server: null, login: null, chat: null };
-    if (configChannels.server && cutil.hasProp(channelsMap, configChannels.server)) {
-      startupArgs.server = channelsMap[configChannels.server];
-      logger.info('Publishing server events to ' + startupArgs.server.name + ' (' + startupArgs.server.id + ')');
-    }
-    if (configChannels.login && cutil.hasProp(channelsMap, configChannels.login)) {
-      startupArgs.login = channelsMap[configChannels.login];
-      logger.info('Publishing login events to ' + startupArgs.login.name + ' (' + startupArgs.login.id + ')');
-    }
-    if (configChannels.chat && cutil.hasProp(channelsMap, configChannels.chat)) {
-      startupArgs.chat = channelsMap[configChannels.chat];
-      logger.info('Publishing chat events to ' + startupArgs.chat.name + ' (' + startupArgs.chat.id + ')');
-    }
-    context.instancesService.startup(startupArgs)
-      .then(function() { logger.info('ServerLink Bot has STARTED'); });
+  });
+  let promises = [...new Set(Object.values(channels))];
+  promises = promises.filter(function(channelId) { return channelId; });
+  promises = promises.map(function(channelId) {
+    return context.client.channels.fetch(channelId).then(function(channel) { return channel; }).catch(logger.error);
+  });
+  Promise.all(promises).then(function(results) {
+    const channelMap = {};
+    results.forEach(function(channel) {
+      if (channel) { channelMap[channel.id] = channel; }
+    });
+    Object.keys(channels).forEach(function(channelType) {
+      const channelId = channels[channelType];
+      channels[channelType] = null;
+      if (channelId && cutil.hasProp(channelMap, channelId)) {
+        channels[channelType] = channelMap[channelId];
+        logger.info('Publishing ' + channelType + ' events to ' + channels[channelType].name + ' (' + channelId + ')');
+      }
+    });
+    context.instancesService.startup(channels).then(function() { logger.info('ServerLink Bot has STARTED'); });
   });
 }
 
@@ -130,7 +124,7 @@ context.signal = context.controller.signal;
 context.instancesService = new instances.Service(context);
 context.client = new Client({
   intents: [
-    GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
   partials: [Partials.Channel]
 });

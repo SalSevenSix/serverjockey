@@ -40,11 +40,10 @@
   onMount(async function() {
     if (!dazzle) return;
     let clock = 0;
-    let actions = generateSchedules();
-    for (let i = 0; i < actions.length; i++) {
-      await sleep(actions[i].schedule - clock);
-      clock = actions[i].schedule;
-      colours = colours.fill(actions[i].on ? 'currentColor' : '#000000', actions[i].index, actions[i].index + 1);
+    for (const action of generateSchedules()) {
+      await sleep(action.schedule - clock);
+      clock = action.schedule;
+      colours = colours.fill(action.on ? 'currentColor' : '#000000', action.index, action.index + 1);
     }
   });
 </script>
