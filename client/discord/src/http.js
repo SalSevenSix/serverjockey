@@ -99,7 +99,7 @@ export class MessageHttpTool {
   doPostToFile(path, body = null) {
     const [context, message] = [this.#context, this.#message];
     this.doPost(path, body, function(json) {
-      if (json == null || !cutil.hasProp(json, 'url')) return util.reactSuccess(message);
+      if (!json || !cutil.hasProp(json, 'url')) return util.reactSuccess(message);
       util.reactWait(message);
       const fname = message.id + '.text';
       const fpath = '/tmp/' + fname;
@@ -110,10 +110,11 @@ export class MessageHttpTool {
         fstream.write('\n');
         return true;
       }).then(function() {
-        fstream.end();
-        util.rmReacts(message, util.reactSuccess, logger.error);
-        message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-          .finally(function() { fs.unlink(fpath, logger.error); });
+        fstream.end(function() {
+          util.rmReacts(message, util.reactSuccess, logger.error);
+          message.channel.send({ files: [{ attachment: fpath, name: fname }] })
+            .finally(function() { fs.unlink(fpath, logger.error); });
+        });
       });
     });
   }

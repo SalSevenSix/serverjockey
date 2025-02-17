@@ -47,8 +47,7 @@ export function checkHasRole(message, roles) {
       return roles.includes(role.name);
     });
   }
-  if (hasRole) return true;
-  return reactTo(message, '🔒', false);
+  return hasRole ? true : reactTo(message, '🔒', false);
 }
 
 export function chunkStringArray(value, maxchars = 1600) {

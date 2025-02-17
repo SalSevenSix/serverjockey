@@ -263,7 +263,7 @@ export function alias($) {
 }
 
 /* eslint-disable max-lines-per-function */
-export async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
+async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
   const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
   let schemes = rewards.list();
   if (schemes.length === 0) return;
@@ -413,13 +413,13 @@ export function activity($) {
     if (arg.startsWith('to=')) {
       atto = arg.substring(3);
       atto = ['LH', 'LD', 'LM', 'TM'].includes(atto)
-        ? atto = cutil.presetDate(now, atto, tz).getTime()
-        : atto = cutil.parseDateToMillis(atto, tz);
+        ? cutil.presetDate(now, atto, tz).getTime()
+        : cutil.parseDateToMillis(atto, tz);
     } else if (arg.startsWith('from=')) {
       atfrom = arg.substring(5);
       atfrom = atfrom && ['d', 'h', 'm', 's'].includes(atfrom.slice(-1).toLowerCase())
-        ? atfrom = 0 - cutil.rangeCodeToMillis(atfrom)
-        : atfrom = cutil.parseDateToMillis(atfrom, tz);
+        ? 0 - cutil.rangeCodeToMillis(atfrom)
+        : cutil.parseDateToMillis(atfrom, tz);
     }
   });
   if (!atto) { atto = now.getTime(); }
