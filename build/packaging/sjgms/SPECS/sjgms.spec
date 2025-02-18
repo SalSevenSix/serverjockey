@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Sun Jan 12 2024 Bowden Salis <bsalis76@gmail.com> - 0.17.0
-- Feature release v0.17.0
+* Wed Feb 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.17.0
+- ServerLink enhancements, aliases, rewards and activity
 * Sat Jan 11 2024 Bowden Salis <bsalis76@gmail.com> - 0.16.0
 - Small features and library upgrades release
 * Thu Dec 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.15.0

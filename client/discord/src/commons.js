@@ -332,14 +332,14 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
   for (const schemeRole of Object.values(roleMap)) { // Apply roles based on new member list
     schemeRole.gives = schemeRole.members.filter(function(member) { return !schemeRole.orig.includes(member); });
     schemeRole.takes = schemeRole.orig.filter(function(member) { return !schemeRole.members.includes(member); });
-    for (const roleChange of [[false, schemeRole.takes], [true, schemeRole.gives]]) {
-      for (const member of roleChange[1]) {
+    for (const [give, members] of [[false, schemeRole.takes], [true, schemeRole.gives]]) {
+      for (const member of members) {
         let memberid = aliases.findByKey(member);
         memberid = memberid ? memberid.discordid : member;
         await cutil.sleep(1000);
         if (!cutil.hasProp(membersMap, member)) {
           message.channel.send(prelog + '❗ Alias `@' + memberid + '` not found');
-        } else if (roleChange[0]) {
+        } else if (give) {
           await membersMap[member].roles.add(schemeRole.role);
           message.channel.send(prelog + '🏅 `@' + memberid + '` 👍 `@' + schemeRole.role.name + '`');
         } else {
