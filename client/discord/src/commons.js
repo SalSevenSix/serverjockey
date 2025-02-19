@@ -438,13 +438,13 @@ export function activity($) {
         results = { meta: results.meta, summary: results.results[0] };
         if (format === 'TEXT') {
           text = [];
-          text.push('FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz) +
-            ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tz) +
-            ' (' + cutil.humanDuration(results.meta.atrange) + ')');
+          text.push(['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz),
+            ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tz),
+            ' (' + cutil.humanDuration(results.meta.atrange) + ')'].join(''));
           text.push('CREATED ' + cutil.shortISODateTimeString(results.summary.created, tz));
-          text.push('TOTAL sessions:' + results.summary.sessions +
-            ' available:' + cutil.floatToPercent(results.summary.available) +
-            ' uptime:' + cutil.humanDuration(results.summary.uptime));
+          text.push(['TOTAL sessions:' + results.summary.sessions,
+            ' available:' + cutil.floatToPercent(results.summary.available),
+            ' uptime:' + cutil.humanDuration(results.summary.uptime)].join(''));
         } else if (format === 'JSON') {
           text = [JSON.stringify(results)];
         }
@@ -463,14 +463,14 @@ export function activity($) {
           players: instanceResults ? instanceResults.players : null };
         if (format === 'TEXT') {
           text = [];
-          text.push('FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz) +
-            ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tz) +
-            ' (' + cutil.humanDuration(results.meta.atrange) + ')');
+          text.push(['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz),
+            ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tz),
+            ' (' + cutil.humanDuration(results.meta.atrange) + ')'].join(''));
           if (instanceResults) {
-            text.push('TOTAL unique:' + results.summary.unique +
+            text.push(['TOTAL unique:' + results.summary.unique +
               ' concurrent:' + results.summary.online.max +
               ' sessons:' + results.summary.total.sessions +
-              ' played:' + cutil.humanDuration(results.summary.total.uptime));
+              ' played:' + cutil.humanDuration(results.summary.total.uptime)].join(''));
             if (limit && !player) { results.players = pstats.compactPlayers(results.players, limit); }
             const plen = Math.max(10, 2 + results.players.reduce(function(a, b) {
               return a.player.length > b.player.length ? a : b;

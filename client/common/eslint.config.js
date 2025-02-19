@@ -14,8 +14,8 @@ export default [
   js.configs.all,
   {
     rules: {
-      'prefer-destructuring': 1,
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
+      'prefer-destructuring': 0,
       'curly': 0,
       'sort-keys': 0,
       'id-length': 0,

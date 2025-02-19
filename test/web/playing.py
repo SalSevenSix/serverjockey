@@ -162,5 +162,6 @@ class TestPlaying(unittest.TestCase):
         context.find_element('collapsibleConsoleCommands').click()
         context.find_element('commandBuilderIline').send_keys('Broadcast Welcome_to_PW')
         self._send_console_command()
+        time.sleep(2.0)
         self.assertEqual('Broadcasted: Welcome_to_PW', context.get_instance_loglastline())
         self._stop_server()
