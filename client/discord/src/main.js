@@ -15,7 +15,7 @@ function initialise() {
     console.log('usage: serverlink [-h|--help] [-v|--version] [config1.json config2.json ...]');
     process.exit(metarg == null ? 1 : 0);
   }
-  const version = '0.17.0 ({timestamp})';
+  const version = '0.18.0 ({timestamp})';
   if (metarg === '-v' || metarg === '--version') {
     console.log(version);
     process.exit(0);
