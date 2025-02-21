@@ -1,7 +1,8 @@
 <script>
   import { onDestroy, getContext } from 'svelte';
   import { openModal } from 'svelte-modals';
-  import { RollingLog, ObjectUrls } from '$lib/util/util';
+  import { RollingLog } from '$lib/util/util';
+  import { ObjectUrls } from '$lib/util/browserutil';
   import { SubscriptionHelper, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';

@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
-  import { fNoop, noStorage } from '$lib/util/util';
+  import { fNoop } from '$lib/util/util';
+  import { noStorage } from '$lib/util/browserutil';
 
   export let onAfterToggle = fNoop;
 

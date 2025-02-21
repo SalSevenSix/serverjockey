@@ -1,5 +1,5 @@
 <script>
-  import { browserName } from '$lib/util/util';
+  import { browserName } from '$lib/util/browserutil';
   import { surl } from '$lib/util/sjgmsapi';
   import Jigsaw from '$lib/svg/Jigsaw.svelte';
   import BackToTop from '$lib/widget/BackToTop.svelte';

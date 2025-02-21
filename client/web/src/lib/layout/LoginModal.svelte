@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { closeModal } from 'svelte-modals';
-  import { noStorage } from '$lib/util/util';
+  import { noStorage } from '$lib/util/browserutil';
   import { notifyError } from '$lib/util/notifications';
   import { surl, securityToken } from '$lib/util/sjgmsapi';
   import InputText from '$lib/widget/InputText.svelte';

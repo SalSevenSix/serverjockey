@@ -3,7 +3,7 @@
   import { shortISODateTimeString, humanDuration } from 'common/util/util';
   import { eventsMap, mergeResults, extractResults, extractMeta,
            querySessions, queryChats } from 'common/activity/chat';
-  import { ObjectUrls } from '$lib/util/util';
+  import { ObjectUrls } from '$lib/util/browserutil';
   import { fetchJson } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 

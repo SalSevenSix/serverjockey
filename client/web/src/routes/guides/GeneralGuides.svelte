@@ -1,5 +1,5 @@
 <script>
-  import { browserName } from '$lib/util/util';
+  import { browserName } from '$lib/util/browserutil';
   import { surl } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 

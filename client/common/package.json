@@ -3,7 +3,8 @@
   "type": "module",
   "version": "0.18.0",
   "scripts": {
-    "lint": "eslint lib"
+    "lint": "eslint lib",
+    "test": "mocha"
   },
   "exports": {
     "./util/util": "./lib/util/util.js",
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint": "^9.20.1"
+    "eslint": "^9.20.1",
+    "mocha": "^11.1.0"
   }
 }
