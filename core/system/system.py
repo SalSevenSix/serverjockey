@@ -115,7 +115,7 @@ class SystemService:
 
     async def create_instance(self, configuration: dict) -> contextsvc.Context:
         assert util.get('identity', configuration)
-        assert self._modules.valid(util.get('module', configuration))
+        assert self._modules.supported(util.get('module', configuration))
         identity = configuration.pop('identity')
         home_dir = self._home_dir + '/' + identity
         if await io.directory_exists(home_dir):
@@ -206,7 +206,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     async def handle_post(self, resource, data):
         module, identity = util.get('module', data), util.get('identity', data)
-        if not identity or not self._modules.valid(module):
+        if not identity or not self._modules.can_create(module):
             return httpabc.ResponseBody.BAD_REQUEST
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):

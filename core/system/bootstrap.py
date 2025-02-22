@@ -48,6 +48,7 @@ def _argument_parser() -> argparse.ArgumentParser:
     p.add_argument('--tempdir', type=str, help='Directory to use for temporary files, default is .tmp under home')
     p.add_argument('--host', type=str, help='Comma delimited IPs to bind http service, default is all')
     p.add_argument('--port', type=int, help='Port for http service, default is 6164')
+    p.add_argument('--modules', type=str, help='Restrict available modules to comma delimited list')
     p.add_argument('--showtoken', action='store_true', help='Print the login token to stdout')
     p.add_argument('--noupnp', action='store_true', help='Do not enable UPnP services')
     p.add_argument('--nostore', action='store_true', help='Do not use database to store activity')
@@ -71,6 +72,9 @@ def _create_context() -> contextsvc.Context | None:
     host = args.host if args.host else util.get('host', cfg)
     host = tuple(host.split(',')) if host else None
     port = args.port if args.port else util.get('port', cfg, 6164)
+    modules = args.modules if args.modules else util.get('modules', cfg)
+    modules = modules.split(',') if modules and isinstance(modules, str) else modules
+    modules = tuple(modules) if modules and len(modules) > 0 else None
     showtoken = True if args.showtoken else objconv.to_bool(util.get('showtoken', cfg))
     noupnp = True if args.noupnp else objconv.to_bool(util.get('noupnp', cfg))
     nostore = True if args.nostore else objconv.to_bool(util.get('nostore', cfg))
@@ -79,7 +83,7 @@ def _create_context() -> contextsvc.Context | None:
     trace = True if args.trace else objconv.to_bool(util.get('trace', cfg))
     secret = util.get('secret', cfg, idutil.generate_token(10, True))
     return contextsvc.Context(dict(
-        home=home, logfile=logfile, tempdir=tempdir, host=host, port=port, showtoken=showtoken,
+        home=home, logfile=logfile, tempdir=tempdir, host=host, port=port, modules=modules, showtoken=showtoken,
         noupnp=noupnp, dbfile=dbfile, debug=debug, trace=trace, secret=secret, python=sys.executable,
         stime=_stime(home), scheme=httpssl.sync_get_scheme(home), env=os.environ.copy()))
 
