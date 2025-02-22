@@ -158,7 +158,7 @@
               {#each entryColumn as entry}
                 <tr title="{entry.sessions} sessions">
                   <td class="word-break-all player-column notranslate">{entry.player}</td>
-                  <td class="white-space-nowrap online-column notranslate">{humanDuration(entry.uptime, 2)}</td>
+                  <td class="white-space-nowrap online-column notranslate">{humanDuration(entry.uptime, 'hm')}</td>
                 </tr>
               {/each}
             </tbody></table>

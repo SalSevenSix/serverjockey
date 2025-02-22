@@ -115,7 +115,7 @@
                 {/if}
                 <td class="word-break-all player-column notranslate">{player.name}</td>
                 <td class="white-space-nowrap online-column notranslate">
-                  {hasProp(player, 'uptime') ? humanDuration(player.uptime, 2) : ''}</td>
+                  {hasProp(player, 'uptime') ? humanDuration(player.uptime, 'hm') : ''}</td>
               </tr>
             {/each}
           </tbody>

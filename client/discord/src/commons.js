@@ -209,7 +209,7 @@ export function players($) {
       line = entry.name.padEnd(plen);
       if (entry.steamid) { line = entry.steamid + ' ' + line; }
       else if (entry.steamid === '') { line = 'CONNECTED         ' + line; }
-      if (cutil.hasProp(entry, 'uptime')) { line += cutil.humanDuration(entry.uptime, 2).padEnd(8); }
+      if (cutil.hasProp(entry, 'uptime')) { line += cutil.humanDuration(entry.uptime, 'hm').padEnd(8); }
       else { line += '        '; }
       const playerAlias = aliases.findByName(entry.name);
       if (playerAlias) { line += ' @' + playerAlias.discordid; }
@@ -477,7 +477,7 @@ export function activity($) {
             }).player.length);
             text.push(...results.players.map(function(record) {
               const playerAlias = aliases.findByName(record.player);
-              let line = record.player.padEnd(plen) + cutil.humanDuration(record.uptime).padEnd(12);
+              let line = record.player.padEnd(plen) + cutil.humanDuration(record.uptime, 'hm').padEnd(9);
               if (playerAlias) { line += ' @' + playerAlias.discordid; }
               return line.trim();
             }));

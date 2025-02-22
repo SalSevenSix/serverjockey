@@ -25,6 +25,7 @@ export function floatToPercent(value, rounding = 1, suffix = '%') {
 }
 
 export function moveArrayElement(value, index, positions) {
+  if (!value) return value;
   [index, positions] = [parseInt(index, 10), parseInt(positions, 10)];
   if (index < 0 || index >= value.length) return value;
   let newIndex = index + positions;
@@ -133,24 +134,20 @@ export function shortISODateTimeString(value, tzFlag = true) {
   return result.toISOString().replace('T', ' ').substring(0, 19);
 }
 
-export function humanDuration(millis, parts = 3) {
-  if (!millis) { millis = 0; }
-  let days = -1;
-  if (parts > 2) {
-    days = Math.floor(millis / 86400000);
-    millis -= days * 86400000;
+export function humanDuration(millis, parts = 'dhm') {
+  if (millis == null) return '';
+  let remainder = millis ? millis : 0;
+  const [data, result] = [{}, []];
+  for (const [key, value] of Object.entries({ d: 86400000, h: 3600000, m: 60000, s: 1.0 })) {
+    if (parts.indexOf(key) != -1) {
+      data[key] = remainder > 0 ? Math.floor(remainder / value) : Math.ceil(remainder / value);
+      remainder -= data[key] * value;
+    }
   }
-  let hours = -1;
-  if (parts > 1) {
-    hours = Math.floor(millis / 3600000);
-    millis -= hours * 3600000;
+  for (const [key, value] of Object.entries(data)) {
+    result.push(value + key);
   }
-  const minutes = Math.floor(millis / 60000);
-  let result = '';
-  if (days > -1) { result += days + 'd '; }
-  if (hours > -1) { result += hours + 'h '; }
-  result += minutes + 'm';
-  return result;
+  return result.length > 0 ? result.join(' ') : '';
 }
 
 export function humanFileSize(bytes, dp = 1, si = false) {
