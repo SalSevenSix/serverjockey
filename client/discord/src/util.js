@@ -10,6 +10,7 @@ export function getFirstKey(value) {
 }
 
 export function commandLineToList(line) {
+  if (!line) return [];
   const regexp = /[^\s"]+|"([^"]*)"/gi;
   const result = [];
   let match = null;

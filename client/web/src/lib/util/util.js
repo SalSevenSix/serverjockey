@@ -4,6 +4,7 @@ const textExtensions = ['txt', 'text', 'log'];
 const stampExtRegex = /^[0-9_-]+$/;
 
 export function guessTextFile(filename) {
+    if (!filename) return false;
     const parts = filename.split('.');
     if (parts.length < 2) return false;
     const extension = parts[parts.length - 1].toLowerCase();
@@ -29,6 +30,11 @@ export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }
 
+export function capitalize(value) {
+  if (!isString(value)) return '';
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 export function toCamelCase(value) {
   if (!isString(value)) return '';
   return value.split(' ').map(capitalize).join('');
@@ -39,18 +45,14 @@ export function capitalizeKebabCase(value) {
   return value.split('-').map(capitalize).join(' ');
 }
 
-export function capitalize(value) {
-  if (!isString(value)) return '';
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-export function chunkArray(arr, rows = 20, columns = 3) {
-  if (arr.length > rows * columns) {
-    rows = Math.ceil(arr.length / columns);
+export function chunkArray(value, rows = 20, columns = 3) {
+  if (!value) return [];
+  if (value.length > rows * columns) {
+    rows = Math.ceil(value.length / columns);
   }
   const result = [];
   for (let i = 0; i < columns; i++) {
-    result.push(arr.slice(i * rows, i * rows + rows));
+    result.push(value.slice(i * rows, i * rows + rows));
   }
   return result;
 }
