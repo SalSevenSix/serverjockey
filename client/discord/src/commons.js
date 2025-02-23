@@ -475,12 +475,15 @@ export function activity($) {
             const plen = Math.max(10, 2 + results.players.reduce(function(a, b) {
               return a.player.length > b.player.length ? a : b;
             }).player.length);
-            text.push(...results.players.map(function(record) {
+            results = results.players.map(function(record, index) {
               const playerAlias = aliases.findByName(record.player);
-              let line = record.player.padEnd(plen) + cutil.humanDuration(record.uptime, 'hm').padEnd(9);
+              let line = (index + 1).toString().padStart(2, '0');
+              line += ' ' + record.player.padEnd(plen);
+              line += cutil.humanDuration(record.uptime, 'hm').padEnd(9);
               if (playerAlias) { line += ' @' + playerAlias.discordid; }
               return line.trim();
-            }));
+            });
+            text.push(...results);
           } else {
             text.push('No player activity found');
           }

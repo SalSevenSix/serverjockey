@@ -51,7 +51,7 @@ export function checkHasRole(message, roles) {
   return hasRole ? true : reactTo(message, '🔒', false);
 }
 
-export function chunkStringArray(value, maxchars = 1600) {
+export function chunkStringArray(value, maxchars = 1600) {  // Discord limit is 2000 chars
   if (!value) return value;
   const result = [];
   let [chars, chunk] = [0, []];

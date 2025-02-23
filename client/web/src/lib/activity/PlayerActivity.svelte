@@ -151,12 +151,13 @@
         {/if}
       </div>
       <div class="columns is-gapless mt-1">
-        {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn}
+        {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn, colindex}
           <div class="column is-one-third">
             <table class="table is-narrow"><tbody>
-              <tr><td></td><td></td></tr>
-              {#each entryColumn as entry}
+              <tr><td></td><td></td><td></td></tr>
+              {#each entryColumn as entry, rowindex}
                 <tr title="{entry.sessions} sessions">
+                  <td>{colindex * 15 + rowindex + 1}</td>
                   <td class="word-break-all player-column notranslate">{entry.player}</td>
                   <td class="white-space-nowrap online-column notranslate">{humanDuration(entry.uptime, 'hm')}</td>
                 </tr>
