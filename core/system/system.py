@@ -61,8 +61,8 @@ class SystemService:
         await self._clientfile.write()
 
     async def _initialise_instances(self):
-        autos, ls = [], await io.directory_list(self._home_dir)
-        for identity in [str(o['name']) for o in ls if o['type'] == 'directory']:
+        single_instance, single_found, autos = self._context.config('single'), False, []
+        for identity in [str(o['name']) for o in await io.directory_list(self._home_dir) if o['type'] == 'directory']:
             home_dir = self._home_dir + '/' + identity
             config_file = home_dir + '/instance.json'
             if await io.file_exists(config_file):
@@ -71,6 +71,9 @@ class SystemService:
                 subcontext = await self._initialise_instance(configuration)
                 if subcontext.config('auto'):
                     autos.append(subcontext)
+                single_found = single_found or single_instance == identity
+        if single_instance and not single_found:
+            await self.create_instance(dict(module=self._modules.default_name(), identity=single_instance))
         self._context.post(self, _AutoStartsSubscriber.AUTOS, autos)
 
     def resources(self) -> httprsc.WebResource:

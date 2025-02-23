@@ -24,9 +24,9 @@ class _SystemTestContext:
         tempdir = home + '/.tmp'
         os.makedirs(tempdir)
         self._context = contextsvc.Context(dict(
-            home=home, logfile=None, tempdir=tempdir, host=None, port=None, modules=None, showtoken=False,
-            noupnp=True, dbfile=None, debug=True, trace=False, secret='token', python=sys.executable,
-            stime=None, scheme=_SCHEME, env=os.environ.copy()))
+            home=home, logfile=None, tempdir=tempdir, host=None, port=None, modules=None, single=None,
+            showtoken=False, noupnp=True, dbfile=None, debug=True, trace=False, secret='token',
+            python=sys.executable, stime=None, scheme=_SCHEME, env=os.environ.copy()))
 
     async def initialise(self):
         if self._resources:

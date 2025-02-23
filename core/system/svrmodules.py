@@ -12,18 +12,27 @@ _MODULES = 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starboun
 class Modules:
 
     def __init__(self, context: contextsvc.Context):
-        all_modules, public_modules = [_MODULE_TESTSERVER, _MODULE_SERVERLINK], []
-        all_modules.extend(_MODULES)
-        if context.is_debug():
-            public_modules.append(_MODULE_TESTSERVER)
-        allowed_modules = context.config('modules')
+        allowed_modules, single_instance = context.config('modules'), context.config('single')
         allowed_modules = [m for m in allowed_modules if m in _MODULES] if allowed_modules else _MODULES
-        public_modules.extend(allowed_modules)
+        all_modules, public_modules = [], []
+        if single_instance:
+            all_modules.extend(allowed_modules)
+            all_modules.extend([m for m in _MODULES if m not in allowed_modules])
+        else:
+            all_modules.extend(_MODULES)
+            if context.is_debug():
+                public_modules.append(_MODULE_TESTSERVER)
+            public_modules.extend(allowed_modules)
+        all_modules.append(_MODULE_TESTSERVER)
+        all_modules.append(_MODULE_SERVERLINK)
         self._all_modules, self._public_modules = tuple(all_modules), tuple(public_modules)
         self._cache = {}
 
     def names(self) -> tuple:
         return self._public_modules
+
+    def default_name(self) -> str:
+        return self._all_modules[0]
 
     def supported(self, module_name: str) -> bool:
         return module_name and module_name in self._all_modules
