@@ -38,7 +38,6 @@ else
     echo "Downloading zip from github"
     wget "https://github.com/SalSevenSix/$SERVERJOCKEY/archive/refs/heads/$BRANCH.zip" || exit 1
   fi
-  [ -f "$BRANCH.zip" ] || exit 1
   echo "Unpacking zip"
   unzip "$BRANCH.zip" > /dev/null || exit 1
   [ -d "${SERVERJOCKEY}-${BRANCH}" ] || exit 1

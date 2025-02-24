@@ -45,8 +45,7 @@ function newOnlineTracker() {
 
 /* eslint-disable max-lines-per-function */
 function newIntervalTracker(atfrom, atto) {
-  const self = {};
-  const data = [];
+  const [self, data] = [{}, []];
   const intervalMillis = atto - atfrom > dayMillis ? dayMillis : hourMillis;
   let current = atto;
   while (current > atfrom) {
@@ -113,14 +112,11 @@ function newIntervalTracker(atfrom, atto) {
 }
 
 export function extractActivity(queryResults) {
-  const now = Date.now();
-  const data = queryResults.events;
+  const [now, data] = [Date.now(), queryResults.events];
   const uptimeAtto = data.criteria.atto > now ? now : data.criteria.atto;
   const instances = extractInstances(queryResults);
   const lastEventMap = toLastEventMap(instances, queryResults.lastevent);
-  const intervalTrackers = {};
-  const onlineTrackers = {};
-  const entries = {};
+  const [intervalTrackers, onlineTrackers, entries] = [{}, {}, {}];
   let entry = null;
   instances.forEach(function(instance) {  // Initialise entries
     entries[instance] = {};

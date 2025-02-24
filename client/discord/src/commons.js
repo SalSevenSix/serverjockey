@@ -458,9 +458,15 @@ export function activity($) {
         [results.lastevent, results.events] = promdata;
         results = pstats.extractActivity(results);
         const instanceResults = cutil.hasProp(results.results, instance) ? results.results[instance] : null;
-        results = { meta: results.meta,
-          summary: instanceResults ? instanceResults.summary : null,
-          players: instanceResults ? instanceResults.players : null };
+        results = { meta: results.meta, summary: null, players: null };
+        if (instanceResults) {
+          results.summary = instanceResults.summary;
+          results.players = instanceResults.players.map(function(record) {
+            const playerAlias = aliases.findByName(record.player);
+            record.discordid = playerAlias ? playerAlias.discordid : null;
+            return record;
+          });
+        }
         if (format === 'TEXT') {
           text = [];
           text.push(['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tz),
@@ -476,11 +482,10 @@ export function activity($) {
               return a.player.length > b.player.length ? a : b;
             }).player.length);
             results = results.players.map(function(record, index) {
-              const playerAlias = aliases.findByName(record.player);
               let line = (index + 1).toString().padStart(2, '0');
               line += ' ' + record.player.padEnd(plen);
               line += cutil.humanDuration(record.uptime, 'hm').padEnd(9);
-              if (playerAlias) { line += ' @' + playerAlias.discordid; }
+              if (record.discordid) { line += ' @' + record.discordid; }
               return line.trim();
             });
             text.push(...results);

@@ -8,7 +8,8 @@
   let serverForm = {};
   let processing = true;
 
-  $: cannotCreate = processing || !serverForm.module || !serverForm.identity;
+  $: cannotEdit = processing || modules.length === 0;
+  $: cannotCreate = cannotEdit || !serverForm.module || !serverForm.identity;
 
   function kpCreate(event) {
     if (event.key === 'Enter') { create(); }
@@ -34,9 +35,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .then(function(json) {
-        modules = json;
-      })
+      .then(function(json) { modules = json; })
       .catch(function() { notifyError('Failed to load module list.'); })
       .finally(function() { processing = false; });
   });
@@ -49,7 +48,7 @@
     <label for="createInstanceModule" class="label" title="Module (game server)">Module</label>
     <p class="control has-icons-left">
       <span class="select is-fullwidth">
-        <select id="createInstanceModule" disabled={processing} bind:value={serverForm.module}>
+        <select id="createInstanceModule" disabled={cannotEdit} bind:value={serverForm.module}>
           {#each modules as module}
             <option class="notranslate">{module}</option>
           {/each}
@@ -59,7 +58,7 @@
     </p>
   </div>
   <InputText id="createInstanceIdentity" label="Name"
-             bind:value={serverForm.identity} onKeypress={kpCreate} disabled={processing}
+             bind:value={serverForm.identity} onKeypress={kpCreate} disabled={cannotEdit}
              title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores." />
   <div class="block buttons">
     <button id="createInstanceCreate" title="Create" class="button is-primary is-fullwidth"

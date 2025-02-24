@@ -58,6 +58,7 @@ def _argument_parser() -> argparse.ArgumentParser:
     return p
 
 
+# pylint: disable=too-many-locals
 def _create_context() -> contextsvc.Context | None:
     args = _argument_parser().parse_args(sys.argv[1:])
     if args.version:

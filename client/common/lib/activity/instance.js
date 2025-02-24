@@ -19,8 +19,7 @@ function toLastEventMap(instances, data) {
 
 /* eslint-disable max-lines-per-function */
 export function extractActivity(queryResults) {
-  const now = Date.now();
-  const data = queryResults.events;
+  const [now, data] = [Date.now(), queryResults.events];
   const uptimeAtto = data.criteria.atto > now ? now : data.criteria.atto;
   const createdMap = toInstanceCreatedMap(queryResults.instances);
   const instances = Object.keys(createdMap);
