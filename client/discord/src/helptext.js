@@ -1,4 +1,4 @@
-const cutil = require('common/util/util');
+import * as cutil from 'common/util/util';
 
 export const systemHelpData = {
   title: 'SYSTEM COMMANDS',

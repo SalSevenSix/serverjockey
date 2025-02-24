@@ -1,7 +1,7 @@
-const cutil = require('common/util/util');
-const util = require('./util.js');
-const logger = require('./logger.js');
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
+import * as cutil from 'common/util/util';
+import * as util from './util.js';
+import * as logger from './logger.js';
 
 export class Helper {
   #context;

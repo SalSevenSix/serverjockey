@@ -1,12 +1,12 @@
 /* eslint-disable max-lines */
-const cutil = require('common/util/util');
-const istats = require('common/activity/instance');
-const pstats = require('common/activity/player');
-const util = require('./util.js');
-const logger = require('./logger.js');
-const subs = require('./subs.js');
-const fs = require('fs');
-const fetch = require('node-fetch');
+import fs from 'fs';
+import fetch from 'node-fetch';
+import * as cutil from 'common/util/util';
+import * as istats from 'common/activity/instance';
+import * as pstats from 'common/activity/player';
+import * as util from './util.js';
+import * as logger from './logger.js';
+import * as subs from './subs.js';
 
 export function startServerEventLogging($) {
   const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];

@@ -1,5 +1,5 @@
-const cutil = require('common/util/util');
-const util = require('./util.js');
+import * as cutil from 'common/util/util';
+import * as util from './util.js';
 
 function timestamp() {
   return cutil.shortISODateTimeString(new Date(), true);

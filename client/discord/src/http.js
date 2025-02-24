@@ -1,9 +1,9 @@
-const cutil = require('common/util/util');
-const util = require('./util.js');
-const logger = require('./logger.js');
-const subs = require('./subs.js');
-const fs = require('fs');
-const fetch = require('node-fetch');
+import fs from 'fs';
+import fetch from 'node-fetch';
+import * as cutil from 'common/util/util';
+import * as util from './util.js';
+import * as logger from './logger.js';
+import * as subs from './subs.js';
 
 export class MessageHttpTool {
   #context;

@@ -1,20 +1,10 @@
-const fs = require('fs');
-const fetch = require('node-fetch');
-const cutil = require('common/util/util');
-const util = require('./util.js');
-const logger = require('./logger.js');
-const subs = require('./subs.js');
-const servers = {
-  testserver: require('./servers/testserver.js'),
-  projectzomboid: require('./servers/projectzomboid.js'),
-  factorio: require('./servers/factorio.js'),
-  sevendaystodie: require('./servers/sevendaystodie.js'),
-  unturned: require('./servers/unturned.js'),
-  starbound: require('./servers/starbound.js'),
-  csii: require('./servers/csii.js'),
-  palworld: require('./servers/palworld.js')
-};
-
+import fs from 'fs';
+import fetch from 'node-fetch';
+import * as cutil from 'common/util/util';
+import * as util from './util.js';
+import * as logger from './logger.js';
+import * as subs from './subs.js';
+import * as servers from './servers.js';
 
 /* eslint-disable max-lines-per-function */
 function newAliases(context, instance) {

@@ -1,5 +1,5 @@
-const helptext = require('../helptext.js');
-const commons = require('../commons.js');
+import * as helptext from '../helptext.js';
+import * as commons from '../commons.js';
 
 const helpData = [helptext.systemHelpData, {
   title: 'STARBOUND COMMANDS',

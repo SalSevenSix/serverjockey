@@ -1,8 +1,8 @@
-const cutil = require('common/util/util');
-const util = require('../util.js');
-const logger = require('../logger.js');
-const helptext = require('../helptext.js');
-const commons = require('../commons.js');
+import * as cutil from 'common/util/util';
+import * as util from '../util.js';
+import * as logger from '../logger.js';
+import * as helptext from '../helptext.js';
+import * as commons from '../commons.js';
 
 const helpData = [helptext.systemHelpData, {
   title: 'PROJECT ZOMBOID COMMANDS',

@@ -1,12 +1,13 @@
-require('events').EventEmitter.defaultMaxListeners = 24;
-const fs = require('fs');
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
-const cutil = require('common/util/util');
-const util = require('./util.js');
-const logger = require('./logger.js');
-const http = require('./http.js');
-const system = require('./system.js');
-const instances = require('./instances.js');
+import EventEmitter from 'events'; EventEmitter.defaultMaxListeners = 24;
+import fs from 'fs';
+import { Client, GatewayIntentBits, Partials, version as djsver } from 'discord.js';
+import * as cutil from 'common/util/util';
+import * as util from './util.js';
+import * as logger from './logger.js';
+import * as http from './http.js';
+import * as system from './system.js';
+import * as instances from './instances.js';
+
 const context = { running: false };
 
 function initialise() {
@@ -26,7 +27,7 @@ function initialise() {
     if (parts[parts.length - 1] === 'serverlink.json') {
       config.HOME = parts.length > 1 ? parts.slice(0, -1).join('/') : '.';
     }
-    config = { ...config, ...require(path) };
+    config = { ...config, ...JSON.parse(fs.readFileSync(path)) };
   }
   if (!config.BOT_TOKEN) {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.');
@@ -43,7 +44,7 @@ function initialise() {
   logger.info('Version: ' + version);
   logger.info('Executable: ' + process.argv[0]);
   logger.info('JS Runtime: ' + process.version);
-  logger.info('discord.js: ' + require('../node_modules/discord.js/package.json').version);
+  logger.info('discord.js: ' + djsver);
   logger.info(tlsKey + ': ' + process.env[tlsKey]);
   logger.info('Initialised with config...');
   logger.dump(config);
@@ -116,23 +117,21 @@ function shutdown() {
   logger.info('*** END ServerLink Bot ***');
 }
 
-
-// MAIN
-context.config = initialise();
-context.controller = new AbortController();
-context.signal = context.controller.signal;
-context.instancesService = new instances.Service(context);
-context.client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
-  partials: [Partials.Channel]
-});
-
-context.client.once('ready', startup);
-context.client.on('messageCreate', handleMessage);
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
-context.shutdown = shutdown;
-
-context.client.login(context.config.BOT_TOKEN);
+export function main() {
+  context.config = initialise();
+  context.controller = new AbortController();
+  context.signal = context.controller.signal;
+  context.instancesService = new instances.Service(context);
+  context.client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
+    partials: [Partials.Channel]
+  });
+  context.client.once('ready', startup);
+  context.client.on('messageCreate', handleMessage);
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+  context.shutdown = shutdown;
+  context.client.login(context.config.BOT_TOKEN);
+}
