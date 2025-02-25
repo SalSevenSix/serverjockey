@@ -25,8 +25,8 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
 fi
 
 echo "Discord bot build"
-$JS_PKGMGR lint || exit 1
-$JS_PKGMGR test || exit 1
+$JS_PKGMGR run lint || exit 1
+$JS_PKGMGR run test || exit 1
 if [ "$JS_PKGMGR" = "npm" ]; then
   PYTHON_EXE=$(which python3)
   NODE_OUT_DIR=~/.nexe/$(node --version | cut -c2-)/out/Release

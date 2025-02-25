@@ -19,8 +19,8 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
 fi
 
 echo "Common lib lint and test"
-$JS_PKGMGR lint || exit 1
-$JS_PKGMGR test || exit 1
+$JS_PKGMGR run lint || exit 1
+$JS_PKGMGR run test || exit 1
 
 echo "Done common lib build"
 exit 0

@@ -97,7 +97,9 @@ describe('presetDate()', function() {
   it('last day', function() { assert.deepEqual(presetDate(sample, 'LD'), new Date(2025, 1, 23)); });
   it('last month', function() { assert.deepEqual(presetDate(sample, 'LM'), new Date(2025, 1)); });
   it('this month', function() { assert.deepEqual(presetDate(sample, 'TM'), new Date(2025, 2)); });
-  it('specific tz', function() { assert.deepEqual(presetDate(sample, 'LD', '+7'), new Date(2025, 1, 22, 17)); });
+  it('specific tz', function() {
+    assert.deepEqual(presetDate(sample, 'LD', '+7'), new Date('2025-02-22T17:00:00.000Z'));
+  });
 });
 
 describe('rangeCodeToMillis()', function() {

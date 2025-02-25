@@ -21,7 +21,7 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
 fi
 
 echo "Extension build"
-$JS_PKGMGR lint || exit 1
+$JS_PKGMGR run lint || exit 1
 $JS_PKGMGR run build || exit 1
 
 if [ -d ../../web ]; then

@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { fTrue, generateId, guessTextFile, chunkArray,
-         capitalize, toCamelCase, capitalizeKebabCase } from '../../../src/lib/util/util';
+         capitalize, toCamelCase, capitalizeKebabCase } from '../../../src/lib/util/util.js';
 
 describe('fTrue()', function() {
   it('return true', function() { assert.strictEqual(fTrue(), true); });

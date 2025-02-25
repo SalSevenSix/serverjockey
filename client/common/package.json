@@ -4,7 +4,7 @@
   "version": "0.18.0",
   "scripts": {
     "lint": "eslint lib",
-    "test": "mocha"
+    "test": "mocha test/*"
   },
   "exports": {
     "./util/util": "./lib/util/util.js",

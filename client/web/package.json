@@ -7,7 +7,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "lint": "eslint src",
-    "test": "mocha"
+    "test": "mocha test/*/*"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.13.0",
