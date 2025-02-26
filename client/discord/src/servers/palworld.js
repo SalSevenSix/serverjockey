@@ -25,7 +25,7 @@ const helpData = [helptext.systemHelpData, {
 }];
 
 export const [startup, help, server, auto, log, getconfig, setconfig, deployment, send] = [
-  commons.startServerEventLogging, helptext.help(helpData), commons.server, commons.auto, commons.log,
+  commons.startupServerOnly, helptext.help(helpData), commons.server, commons.auto, commons.log,
   commons.getconfig, commons.setconfig, commons.deployment, commons.send];
 
 export function players($) {
