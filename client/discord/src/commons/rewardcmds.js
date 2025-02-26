@@ -1,7 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as pstats from 'common/activity/player';
-import * as util from '../util.js';
-import * as logger from '../logger.js';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
 
 /* eslint-disable max-lines-per-function */
 async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {

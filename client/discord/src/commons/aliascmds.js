@@ -1,5 +1,5 @@
-import * as util from '../util.js';
-import * as logger from '../logger.js';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
 
 export function alias($) {
   const [context, aliases, message, data] = [$.context, $.aliases, $.message, [...$.data]];

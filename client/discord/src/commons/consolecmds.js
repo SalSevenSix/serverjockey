@@ -1,5 +1,5 @@
 import * as cutil from 'common/util/util';
-import * as util from '../util.js';
+import * as util from '../util/util.js';
 
 export function send($) {
   const [httptool, message, data] = [$.httptool, $.message, $.data];

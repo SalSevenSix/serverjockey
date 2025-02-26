@@ -2,9 +2,9 @@ import EventEmitter from 'events'; EventEmitter.defaultMaxListeners = 24;
 import fs from 'fs';
 import { Client, GatewayIntentBits, Partials, version as djsver } from 'discord.js';
 import * as cutil from 'common/util/util';
-import * as util from './util.js';
-import * as logger from './logger.js';
-import * as http from './http.js';
+import * as util from './util/util.js';
+import * as logger from './util/logger.js';
+import * as http from './util/http.js';
 import * as system from './system.js';
 import * as instances from './instances.js';
 

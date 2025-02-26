@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { getFirstKey, commandLineToList, listifyRoles } from '../src/util.js';
+import { getFirstKey, commandLineToList, listifyRoles } from '../src/util/util.js';
 
 describe('getFirstKey()', function() {
   const obj = { 'aaa': 3, 'bbb': 2, 'ccc': 1 };

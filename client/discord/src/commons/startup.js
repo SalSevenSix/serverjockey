@@ -1,4 +1,4 @@
-import * as subs from '../subs.js';
+import * as subs from '../util/subs.js';
 
 function startServerEvents($) {
   const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];

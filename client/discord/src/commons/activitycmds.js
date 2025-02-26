@@ -1,7 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as istats from 'common/activity/instance';
 import * as pstats from 'common/activity/player';
-import * as util from '../util.js';
+import * as util from '../util/util.js';
 
 /* eslint-disable max-lines-per-function */
 export function activity($) {

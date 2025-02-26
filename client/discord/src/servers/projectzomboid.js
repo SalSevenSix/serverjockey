@@ -1,6 +1,6 @@
 import * as cutil from 'common/util/util';
-import * as util from '../util.js';
-import * as logger from '../logger.js';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
 import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 

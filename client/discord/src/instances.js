@@ -1,9 +1,9 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
 import * as cutil from 'common/util/util';
-import * as util from './util.js';
-import * as logger from './logger.js';
-import * as subs from './subs.js';
+import * as util from './util/util.js';
+import * as logger from './util/logger.js';
+import * as subs from './util/subs.js';
 import * as servers from './servers.js';
 
 /* eslint-disable max-lines-per-function */

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
-import * as util from '../util.js';
-import * as logger from '../logger.js';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
 
 export function getconfig($) {
   const [httptool, message, data] = [$.httptool, $.message, $.data];

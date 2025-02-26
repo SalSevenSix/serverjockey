@@ -1,5 +1,5 @@
 import * as cutil from 'common/util/util';
-import * as util from './util.js';
+import * as util from './util/util.js';
 import * as helptext from './helptext.js';
 
 export const help = helptext.help(helptext.systemHelpData);
