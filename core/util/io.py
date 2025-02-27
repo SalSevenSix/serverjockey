@@ -46,6 +46,15 @@ def _touch_file(filename: str):
     pathlib.Path(filename).touch()
 
 
+def _find_files(path: str, search: str) -> tuple:
+    result = []
+    for current_dir_path, subdir_names, file_names in os.walk(path):
+        for file_name in file_names:
+            if search == file_name:
+                result.append(os.path.join(current_dir_path, file_name))
+    return tuple(result)
+
+
 def _auto_chmod(path: str):
     for current_dir_path, subdir_names, file_names in os.walk(path):
         for file_name in file_names:
@@ -55,6 +64,7 @@ def _auto_chmod(path: str):
 
 
 touch_file = funcutil.to_async(_touch_file)
+find_files = funcutil.to_async(_find_files)
 auto_chmod = funcutil.to_async(_auto_chmod)
 chmod = funcutil.to_async(os.chmod)
 

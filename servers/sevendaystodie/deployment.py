@@ -1,6 +1,6 @@
 from xml.dom import minidom
 # ALLOW core.* sevendaystodie.messaging
-from core.util import gc, util, objconv, io
+from core.util import gc, util, objconv, io, pack, idutil
 from core.msg import msgftr, msgtrf, msglog, msgext
 from core.msgc import mc
 from core.context import contextsvc
@@ -177,7 +177,54 @@ class Deployment:
             portmapper.map_port(self._mailer, self, telnet_port, gc.TCP, '7D2D telnet')
 
     async def _sync_live_mods(self):
-        pass
+        tracking_file, data, modfiles = self._mods_src_dir + '/mods.json', {}, []
+        if await io.file_exists(tracking_file):
+            data = objconv.json_to_dict(await io.read_file(tracking_file))
+            data = data if data else {}
+        for file in [o for o in await io.directory_list(self._mods_src_dir) if _is_modfile(o)]:
+            name, file_mtime = file['name'], file['mtime']
+            entry = util.get(name, data, dict(mtime=None, livedir=None, synced=False))
+            entry_mtime, livedir, synced = entry['mtime'], entry['livedir'], entry['synced']
+            synced = synced and livedir and entry_mtime and entry_mtime == file_mtime
+            synced = synced and await io.directory_exists(self._mods_live_dir + '/' + livedir)
+            data[name] = dict(mtime=file_mtime, livedir=livedir, synced=synced)
+            modfiles.append(name)
+        for name in data.keys():
+            if name not in modfiles:
+                data[name]['synced'] = False
+        await io.write_file(tracking_file, objconv.obj_to_json(data, True))
+        for name, entry in data.copy().items():
+            mtime, livedir, synced = entry['mtime'], entry['livedir'], entry['synced']
+            if not synced:
+                livedir = await self._sync_live_mod(name, livedir)
+                if livedir:
+                    data[name] = dict(mtime=mtime, livedir=livedir, synced=True)
+                else:
+                    del data[name]
+                await io.write_file(tracking_file, objconv.obj_to_json(data))
+        await io.write_file(tracking_file, objconv.obj_to_json(data, True))
+
+    async def _sync_live_mod(self, name: str, livedir: str) -> str | None:
+        modinfo = 'ModInfo.xml'
+        working_dir, modfile = self._tempdir + '/' + idutil.generate_id(), self._mods_src_dir + '/' + name
+        try:
+            if livedir:
+                await io.delete_any(self._mods_live_dir + '/' + livedir)
+            if not await io.file_exists(modfile):
+                return None
+            await io.create_directory(working_dir)
+            await pack.unpack_archive(modfile, working_dir)
+            source = await io.find_files(working_dir, modinfo)
+            if len(source) == 0:
+                return None
+            source = source[0][0:-1 - len(modinfo)]
+            livedir = name[0:-4] if source == working_dir else util.fname(source)
+            target = self._mods_live_dir + '/' + livedir
+            await io.delete_any(target)
+            await io.move_path(source, target)
+            return livedir
+        finally:
+            await io.delete_directory(working_dir)
 
 
 def _is_modfile(entry) -> bool:
