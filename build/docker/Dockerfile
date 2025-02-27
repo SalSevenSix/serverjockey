@@ -13,6 +13,7 @@ RUN { echo steam steam/license note ''; \
 COPY ./sjgms.deb ./sjgms.deb
 ARG SJGMS_USER="container"
 RUN apt -y install ./sjgms.deb && rm ./sjgms.deb
+RUN apt clean && apt autoclean && apt -y autoremove --purge
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
