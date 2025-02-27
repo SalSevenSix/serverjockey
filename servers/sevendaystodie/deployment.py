@@ -32,10 +32,12 @@ class Deployment:
         self._runtime_dir = self._home_dir + '/runtime'
         self._settings_def_file = self._runtime_dir + '/serverconfig.xml'
         self._executable = self._runtime_dir + '/7DaysToDieServer.x86_64'
+        self._mods_live_dir = self._runtime_dir + '/Mods'
         self._world_dir = self._home_dir + '/world'
         self._config_dir = self._world_dir + '/config'
         self._save_dir = self._world_dir + '/save'
         self._log_dir = self._world_dir + '/logs'
+        self._mods_src_dir = self._world_dir + '/mods'
         self._cmdargs_file = self._config_dir + '/cmdargs.json'
         self._settings_file = self._config_dir + '/serverconfig.xml'
         self._live_file = self._config_dir + '/serverconfig-live.xml'
@@ -88,11 +90,15 @@ class Deployment:
             self._backups_dir, 'path', tempdir=self._tempdir,
             read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
+        r.pop()
+        r.psh('modfiles', httpext.FileSystemHandler(self._mods_src_dir, ls_filter=_is_modfile))
+        r.put('*{path}', httpext.FileSystemHandler(self._mods_src_dir, 'path', tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('7D2D game server not installed. Please Install Runtime first.')
         config = await self._build_live_config()
+        await self._sync_live_mods()
         await self._map_ports(config)
         return proch.ServerProcess(self._mailer, self._executable) \
             .use_env(self._env) \
@@ -104,9 +110,11 @@ class Deployment:
             .append_arg('-configfile=' + self._live_file)
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir, self._world_dir, self._config_dir, self._save_dir, self._log_dir)
+        await io.create_directory(self._backups_dir, self._world_dir, self._config_dir,
+                                  self._save_dir, self._log_dir, self._mods_src_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
+        await io.create_directory(self._mods_live_dir)
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
         if not await io.file_exists(self._settings_file):
@@ -167,3 +175,10 @@ class Deployment:
         if util.get('telnet_upnp', cmdargs, False) and objconv.to_bool(util.get('TelnetEnabled', config)):
             telnet_port = int(util.get('TelnetPort', config, 8081))
             portmapper.map_port(self._mailer, self, telnet_port, gc.TCP, '7D2D telnet')
+
+    async def _sync_live_mods(self):
+        pass
+
+
+def _is_modfile(entry) -> bool:
+    return entry['type'] == 'file' and entry['name'].endswith('.zip')

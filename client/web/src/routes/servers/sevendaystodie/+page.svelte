@@ -10,6 +10,7 @@
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
+  import FileCollection from '$lib/instance/FileCollection.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
@@ -61,6 +62,10 @@
           <p>Note that &quot;Folder and file locations&quot; settings will be ignored.</p>
         </ConfigFile>
         <ConfigFile name="Admin" path="/config/admin" />
+      </Collapsible>
+      <Collapsible icon="fa-puzzle-piece" title="Mod Files">
+        <FileCollection path="/modfiles" filenameHelp="Only zip files are accepted."
+                        validateFilename={function(filename) { return filename.endsWith('.zip'); }} />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

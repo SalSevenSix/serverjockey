@@ -46,7 +46,7 @@
   function actionUpload() {
     if (cannotUpload) return;
     for (const file of selectedFiles) {
-      if (!validateFilename(file.name)) return notifyError(filenameHelp);
+      if (!file.name || !validateFilename(file.name)) return notifyError(filenameHelp);
     }
     uploading = true;
     uploadFiles().finally(function() {

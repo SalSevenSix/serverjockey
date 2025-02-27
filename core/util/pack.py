@@ -20,8 +20,8 @@ unpack_tarxz = funcutil.to_async(_sync_unpack_tarxz)
 gzip_compress = funcutil.to_async(gzip.compress)
 gzip_decompress = funcutil.to_async(gzip.decompress)
 
-_make_archive = funcutil.to_async(shutil.make_archive)
-_unpack_archive = funcutil.to_async(shutil.unpack_archive)
+make_archive = funcutil.to_async(shutil.make_archive)
+unpack_archive = funcutil.to_async(shutil.unpack_archive)
 
 
 async def archive_directory(
@@ -41,7 +41,7 @@ async def archive_directory(
         await io.create_directory(working_dir)
         now, archive_kind = time.time(), util.fname(unpacked_dir)
         archive_name = archive_kind + '-' + dtutil.format_time('%Y%m%d', now) + '-' + dtutil.format_time('%H%M%S', now)
-        archive_tmp = await _make_archive(working_dir + '/' + archive_name, 'zip', root_dir=unpacked_dir, logger=logger)
+        archive_tmp = await make_archive(working_dir + '/' + archive_name, 'zip', root_dir=unpacked_dir, logger=logger)
         assert archive_tmp.endswith('.zip')
         archive_path = archives_dir + '/' + archive_name + '.zip'
         await io.move_path(archive_tmp, archive_path)
@@ -81,7 +81,7 @@ async def unpack_directory(
         else:
             working_dir = tempdir + '/' + idutil.generate_id()
         await io.create_directory(working_dir)
-        await _unpack_archive(archive, working_dir)
+        await unpack_archive(archive, working_dir)
         progress_logger.stop()
         logger.info('SET file permissions')
         await io.auto_chmod(working_dir)
