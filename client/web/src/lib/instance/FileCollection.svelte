@@ -4,7 +4,7 @@
   import FileUpload from '$lib/instance/FileUpload.svelte';
 
   export let path;
-  export let idPrefix = "fileCollection";
+  export let idPrefix = 'fileCollection';
   export let filenameHelp = 'Please choose a valid filename.';
   export let validateFilename = fTrue;
 
