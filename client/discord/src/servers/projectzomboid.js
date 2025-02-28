@@ -62,8 +62,6 @@ const helpData = [helptext.systemHelpData, {
     'setconfig jvm          : Update JVM config using attached file',
     'deployment backup-world {hours}   : Backup game world to zip file',
     'deployment wipe-world-save        : Delete only map files',
-    'deployment wipe-world-playerdb    : Delete only player DB',
-    'deployment wipe-world-config      : Delete only config files',
     'deployment wipe-world-all         : Delete game world folder',
     'deployment install-runtime {beta} : Install game server'
   ],
