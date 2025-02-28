@@ -166,6 +166,12 @@ def fname(path: str | None) -> str | None:
     return path.rsplit('/', maxsplit=1)[-1]
 
 
+def fext(path: str | None) -> str | None:
+    if not path:
+        return path
+    return path.rsplit('.', maxsplit=1)[-1]
+
+
 def clear_queue(queue: asyncio.Queue):
     if not queue:
         return

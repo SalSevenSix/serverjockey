@@ -64,8 +64,8 @@
         <ConfigFile name="Admin" path="/config/admin" />
       </Collapsible>
       <Collapsible icon="fa-puzzle-piece" title="Mod Files">
-        <FileCollection path="/modfiles" filenameHelp="Only zip files are accepted."
-                        validateFilename={function(filename) { return filename.endsWith('.zip'); }} />
+        <FileCollection path="/modfiles" filenameHelp="Only zip and 7z files are accepted."
+                        validateFilename={function(fn) { return fn.endsWith('.zip') || fn.endsWith('.7z'); }} />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

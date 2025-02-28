@@ -218,7 +218,7 @@ class Deployment:
             if len(source) == 0:
                 return None
             source = source[0][0:-1 - len(modinfo)]
-            livedir = name[0:-4] if source == working_dir else util.fname(source)
+            livedir = name[0:-1 - len(util.fext(name))] if source == working_dir else util.fname(source)
             target = self._mods_live_dir + '/' + livedir
             await io.delete_any(target)
             await io.move_path(source, target)
@@ -228,4 +228,5 @@ class Deployment:
 
 
 def _is_modfile(entry) -> bool:
-    return entry['type'] == 'file' and entry['name'].endswith('.zip')
+    ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
+    return ftype == 'file' and fname != fext and fext in ('zip', '7z')
