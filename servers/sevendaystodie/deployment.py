@@ -235,4 +235,4 @@ class Deployment:
 
 def _is_modfile(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
-    return ftype == 'file' and fname != fext and fext in ('zip', '7z')
+    return ftype == 'file' and fname != fext and fext == 'zip'

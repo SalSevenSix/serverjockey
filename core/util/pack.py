@@ -6,11 +6,8 @@ import asyncio
 import time
 import random
 import itertools
-import py7zr
 # ALLOW util.*
 from core.util import util, dtutil, idutil, funcutil, io, logutil, tasks, pkg
-
-shutil.register_unpack_format('7zip', ['.7z'], py7zr.unpack_7zarchive)
 
 
 def _sync_unpack_tarxz(file_path: str, target_directory: str):
@@ -22,7 +19,6 @@ def _sync_unpack_tarxz(file_path: str, target_directory: str):
 unpack_tarxz = funcutil.to_async(_sync_unpack_tarxz)
 gzip_compress = funcutil.to_async(gzip.compress)
 gzip_decompress = funcutil.to_async(gzip.decompress)
-
 make_archive = funcutil.to_async(shutil.make_archive)
 unpack_archive = funcutil.to_async(shutil.unpack_archive)
 

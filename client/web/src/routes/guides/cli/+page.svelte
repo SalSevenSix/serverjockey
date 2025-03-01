@@ -75,7 +75,7 @@
     <li>If the server is not running, then stop processing commands and exit</li>
     <li>Broadcast a 5 minute warning message to all players, then wait 4 minutes</li>
     <li>Broadcast a 1 minute warning message to all players, then wait 1 minute</li>
-    <li>Stop the server then wait 10 seconds for that to happen</li>
+    <li>Stop the server then wait 15 seconds for that to happen</li>
     <li>Backup the game world save and delete all backups older than 168 hours</li>
     <li>Start up the server</li>
   </ol>
@@ -84,7 +84,7 @@ serverjockey_cmd.pyz -c \
   use:myserver exit-down \
   world-broadcast:"Server shutdown in 5 minutes. Please logout." sleep:240 \
   world-broadcast:"Server shutdown in 1 minute. Please logout." sleep:60 \
-  server:stop sleep:10 \
+  server:stop sleep:15 \
   backup-world:168 \
   server:start</CodeBlock>
 </div>

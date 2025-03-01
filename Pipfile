@@ -16,7 +16,6 @@ vdf = "3.4"                   # https://pypi.org/project/vdf/
 rcon = "2.4.9"                # https://pypi.org/project/rcon/
 upnpy = "1.1.8"               # https://pypi.org/project/upnpy/
 prometheus-client = "0.21.1"  # https://pypi.org/project/prometheus-client/
-py7zr = "0.22.0"              # https://pypi.org/project/py7zr/
 
 [requires]
 python_version = "3.12"
