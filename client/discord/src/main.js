@@ -21,11 +21,12 @@ function initialise() {
     console.log(version);
     process.exit(0);
   }
-  let config = { HOME: null };
+  let config = { HOME: null, DATA: null };
   for (const path of process.argv.slice(2)) {
     const parts = path.split('/');
     if (parts[parts.length - 1] === 'serverlink.json') {
       config.HOME = parts.length > 1 ? parts.slice(0, -1).join('/') : '.';
+      config.DATA = config.HOME + '/data';
     }
     config = { ...config, ...JSON.parse(fs.readFileSync(path)) };
   }
@@ -33,7 +34,7 @@ function initialise() {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.');
     process.exit(1);
   }
-  if (!fs.existsSync(config.HOME + '/data')) { fs.mkdirSync(config.HOME + '/data'); }
+  if (!fs.existsSync(config.DATA)) { fs.mkdirSync(config.DATA); }
   logger.info('*** START ServerLink Bot ***');
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
   config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);

@@ -51,18 +51,17 @@ export function instances($) {
 }
 
 export function use($) {
-  const [context, message, data] = [$.context, $.message, $.data];
+  const [context, instancesService, message, data] = [$.context, $.context.instancesService, $.message, $.data];
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  let text = instancesService.currentInstance();
   if (data.length === 0) {
-    if (context.instancesService.currentInstance()) {
-      message.channel.send('```\ndefault => ' + context.instancesService.currentInstance() + '\n```');
-    } else {
-      message.channel.send('```\nNo default instance set\n```');
-    }
+    if (text) { text = 'default => ' + text; }
+    else { text = 'No default instance'; }
   } else {
-    if (!context.instancesService.useInstance(data[0])) return util.reactError(message);
-    message.channel.send('```\n' + context.instancesService.getInstancesText().join('\n') + '\n```');
+    if (!instancesService.useInstance(data[0])) return util.reactError(message);
+    text = instancesService.getInstancesText().join('\n');
   }
+  message.channel.send('```\n' + text + '\n```');
 }
 
 export function create($) {
@@ -70,7 +69,7 @@ export function create($) {
   if (data.length < 2) return util.reactUnknown(message);
   const body = { identity: data[0], module: data[1] };
   httptool.doPost('/instances', body, function() {
-    context.instancesService.setInstance(body.identity);
+    context.instancesService.useInstance(body.identity, true);
     util.reactSuccess(message);
   });
 }

@@ -8,7 +8,7 @@ import * as servers from './servers.js';
 
 /* eslint-disable max-lines-per-function */
 function newAliases(context, instance) {
-  const file = context.config.HOME + '/data/' + instance + '.alias.json';
+  const file = context.config.DATA + '/' + instance + '.alias.json';
   const data = { base: [], snowflake: {}, discordid: {}, name: {}, maxidlen: 0 };
   const self = {};
 
@@ -97,7 +97,7 @@ function newAliases(context, instance) {
 
 
 function newRewards(context, instance) {
-  const file = context.config.HOME + '/data/' + instance + '.reward.json';
+  const file = context.config.DATA + '/' + instance + '.reward.json';
   const data = { base: [] };
   const self = {};
 
@@ -183,7 +183,8 @@ export class Service {
   }
 
   async startup(channels) {
-    const [self, context, baseurl] = [this, this.#context, this.#context.config.SERVER_URL];
+    const [self, context] = [this, this.#context];
+    const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATA + '/current.json'];
     const instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -191,8 +192,11 @@ export class Service {
       })
       .then(function(json) { return json; })
       .catch(logger.error);
-    this.#instances = instances;
-    this.setInstance(util.getFirstKey(instances));
+    [this.#instances, this.#current] = [instances, util.getFirstKey(instances)];
+    if (fs.existsSync(currentFile)) {
+      const currentData = JSON.parse(fs.readFileSync(currentFile));
+      if (currentData && cutil.hasProp(instances, currentData.instance)) { this.#current = currentData.instance; }
+    }
     for (const [identity, instance] of Object.entries(instances)) {
       instance.aliases = newAliases(context, identity).load();
       instance.rewards = newRewards(context, identity).load();
@@ -217,9 +221,7 @@ export class Service {
         instances[identity].aliases.reset().save();
         instances[identity].rewards.reset().save();
         delete instances[identity];
-        if (identity === self.currentInstance()) {
-          self.setInstance(util.getFirstKey(instances));
-        }
+        if (identity === self.currentInstance()) { self.useInstance(util.getFirstKey(instances), true); }
       }
       return true;
     });
@@ -229,13 +231,12 @@ export class Service {
     return this.#current;
   }
 
-  setInstance(instance) {
+  useInstance(instance, force = false) {
+    if (!force && !cutil.hasProp(this.#instances, instance)) return false;
+    if (this.#current === instance) return true;
     this.#current = instance;
-  }
-
-  useInstance(instance) {
-    if (!cutil.hasProp(this.#instances, instance)) return false;
-    this.setInstance(instance);
+    const [currentFile, currentData] = [this.#context.config.DATA + '/current.json', { instance: instance }];
+    fs.writeFile(currentFile, JSON.stringify(currentData), logger.error);
     return true;
   }
 
