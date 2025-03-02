@@ -8,7 +8,7 @@ import * as servers from './servers.js';
 
 /* eslint-disable max-lines-per-function */
 function newAliases(context, instance) {
-  const file = context.config.DATA + '/' + instance + '.alias.json';
+  const file = context.config.DATADIR + '/' + instance + '.alias.json';
   const data = { base: [], snowflake: {}, discordid: {}, name: {}, maxidlen: 0 };
   const self = {};
 
@@ -97,7 +97,7 @@ function newAliases(context, instance) {
 
 
 function newRewards(context, instance) {
-  const file = context.config.DATA + '/' + instance + '.reward.json';
+  const file = context.config.DATADIR + '/' + instance + '.reward.json';
   const data = { base: [] };
   const self = {};
 
@@ -184,7 +184,7 @@ export class Service {
 
   async startup(channels) {
     const [self, context] = [this, this.#context];
-    const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATA + '/current.json'];
+    const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATADIR + '/current.json'];
     const instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -235,7 +235,7 @@ export class Service {
     if (!force && !cutil.hasProp(this.#instances, instance)) return false;
     if (this.#current === instance) return true;
     this.#current = instance;
-    const [currentFile, currentData] = [this.#context.config.DATA + '/current.json', { instance: instance }];
+    const [currentFile, currentData] = [this.#context.config.DATADIR + '/current.json', { instance: instance }];
     fs.writeFile(currentFile, JSON.stringify(currentData), logger.error);
     return true;
   }

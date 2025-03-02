@@ -21,20 +21,25 @@ function initialise() {
     console.log(version);
     process.exit(0);
   }
-  let config = { HOME: null, DATA: null };
+  let [config, homedir] = [{}, null];
   for (const path of process.argv.slice(2)) {
-    const parts = path.split('/');
-    if (parts[parts.length - 1] === 'serverlink.json') {
-      config.HOME = parts.length > 1 ? parts.slice(0, -1).join('/') : '.';
-      config.DATA = config.HOME + '/data';
-    }
     config = { ...config, ...JSON.parse(fs.readFileSync(path)) };
+    if (path.endsWith('serverlink.json')) { homedir = path; }
   }
   if (!config.BOT_TOKEN) {
     logger.error('Failed to start ServerLink. Discord token not set. Please update configuration.');
     process.exit(1);
   }
-  if (!fs.existsSync(config.DATA)) { fs.mkdirSync(config.DATA); }
+  if (!config.DATADIR) {
+    if (homedir) {
+      homedir = homedir.substring(0, homedir.lastIndexOf('/'));
+      config.DATADIR = (homedir ? homedir : '.') + '/data';
+    } else {
+      logger.error('Failed to start ServerLink. No DATADIR is provided or can be found.');
+      process.exit(1);
+    }
+  }
+  if (!fs.existsSync(config.DATADIR)) { fs.mkdirSync(config.DATADIR); }
   logger.info('*** START ServerLink Bot ***');
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
   config.PLAYER_ROLE = util.listifyRoles(config.PLAYER_ROLE);
