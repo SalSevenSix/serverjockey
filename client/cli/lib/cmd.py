@@ -142,13 +142,20 @@ class CommandProcessor:
         self._connection.post(self._instance_path('/deployment/wipe-runtime'))
         return True
 
-    def _wipe_world_all(self) -> bool:
-        self._connection.post(self._instance_path('/deployment/wipe-world-all'))
+    def _wipe_world(self, argument: str | None) -> bool:
+        if not argument:
+            logging.error('wipe-world requires an argument e.g. wipe-world:all')
+            return False
+        self._connection.post(self._instance_path('/deployment/wipe-world-' + argument.lower()))
         return True
 
+    def _wipe_world_all(self) -> bool:
+        logging.warning('depricated: use wipe-world:all')
+        return self._wipe_world('all')
+
     def _wipe_world_save(self) -> bool:
-        self._connection.post(self._instance_path('/deployment/wipe-world-save'))
-        return True
+        logging.warning('depricated: use wipe-world:save')
+        return self._wipe_world('save')
 
     def _delete(self) -> bool:
         if not self._instance:
