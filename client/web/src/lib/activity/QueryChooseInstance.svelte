@@ -5,8 +5,7 @@
   const instance = getContext('instance');
 
   function getIdentity() {
-    if (instance) return instance.identity();
-    return null;
+    return instance ? instance.identity() : null;
   }
 
   query.criteria.instance = function() {

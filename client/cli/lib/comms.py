@@ -32,53 +32,76 @@ class HttpConnection:
         self._connection = None
 
     def post(self, path: str, body: dict = None) -> str | dict | None:
-        connection, payload = self._init_connection(), json.dumps(body) if body else None
-        connection.request(util.POST, path, headers=self._headers_post, body=payload)
-        response = connection.getresponse()
+        payload = json.dumps(body) if body else None
+        connection = self._init_connection()
         try:
-            if response.status == 204:
-                return None
-            if response.status == 200:
-                result = '\n'.join([line.decode().strip() for line in response.readlines()])
-                if response.getheader('Content-Type') == 'application/json':
-                    return json.loads(result)
-                return result
-            raise Exception(f'HTTP POST Status: {response.status} Reason: {response.reason}')
+            connection.request(util.POST, path, headers=self._headers_post, body=payload)
+            return _handle_post(connection.getresponse())
         finally:
-            response.close()
             self.close()
 
-    def get(self, path: str, on_404: str = None) -> str | list | dict | None:
+    def get(self, path: str, on_404: str = None) -> str | dict | list | None:
         connection = self._init_connection()
-        connection.request(util.GET, path, headers=self._headers_get)
-        response = connection.getresponse()
         try:
-            if response.status == 204:
-                return None
-            if response.status == 200:
-                result = '\n'.join([line.decode().strip() for line in response.readlines()])
-                if response.getheader('Content-Type') == 'application/json':
-                    return json.loads(result)
-                return result
-            if on_404 and response.status == 404:
-                return on_404
-            raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
+            connection.request(util.GET, path, headers=self._headers_get)
+            return _handle_get(connection.getresponse(), on_404)
         finally:
-            response.close()  # Only closing response to allow connection reuse
+            if on_404:
+                self.close()
 
     def drain(self, url_dict: dict):
-        connection, path = self._init_connection(), '/' + '/'.join(url_dict['url'].split('/')[3:])
-        while True:
-            connection.request(util.GET, path, headers=self._headers_get)
-            response = connection.getresponse()
-            try:
-                if response.status == 200:
-                    for line in response.readlines():
-                        logging.info(util.OUT + line.decode().strip())
-                elif response.status == 404:
-                    return
-                elif response.status != 204:
-                    raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
-            finally:
-                response.close()
-                self.close()
+        path = '/' + '/'.join(url_dict['url'].split('/')[3:])
+        connection = self._init_connection()
+        try:
+            draining = True
+            while draining:
+                connection.request(util.GET, path, headers=self._headers_get)
+                draining = _handle_drain(connection.getresponse())
+        finally:
+            self.close()
+
+
+def _handle_post(response) -> str | dict | None:
+    try:
+        if response.status == 204:
+            return None
+        if response.status == 200:
+            return _to_result(response)
+        raise Exception(f'HTTP POST Status: {response.status} Reason: {response.reason}')
+    finally:
+        response.close()
+
+
+def _handle_get(response, on_404: str | None) -> str | dict | list | None:
+    try:
+        if response.status == 204:
+            return None
+        if response.status == 200:
+            return _to_result(response)
+        if on_404 and response.status == 404:
+            return on_404
+        raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
+    finally:
+        response.close()
+
+
+def _handle_drain(response) -> bool:
+    try:
+        if response.status == 204:
+            return True
+        if response.status == 200:
+            for line in response.readlines():
+                logging.info(util.OUT + line.decode().strip())
+            return True
+        if response.status == 404:
+            return False
+        raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
+    finally:
+        response.close()
+
+
+def _to_result(response):
+    result = '\n'.join([line.decode().strip() for line in response.readlines()])
+    if response.getheader('Content-Type') == 'application/json':
+        return json.loads(result)
+    return result
