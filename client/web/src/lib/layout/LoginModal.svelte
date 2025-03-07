@@ -5,6 +5,7 @@
   import { notifyError } from '$lib/util/notifications';
   import { surl, securityToken } from '$lib/util/sjgmsapi';
   import InputText from '$lib/widget/InputText.svelte';
+  import InputCheckbox from '$lib/widget/InputCheckbox.svelte';
 
   class LoginFailed extends Error {
     constructor() {
@@ -70,13 +71,7 @@
     <div class="box">
       <InputText id="loginModalToken" label="Login Token" bind:value={token}
                  onKeypress={kpLogin} noautocomplete autofocus />
-      <div class="field">
-        <div class="control">
-          <label class="checkbox">
-            <input id="loginModalRemember" type="checkbox" bind:checked={remember}>&nbsp; Remember Token
-          </label>
-        </div>
-      </div>
+      <InputCheckbox id="loginModalRemember" label="Remember Token" bind:checked={remember} />
       <div class="field">
         <div class="control">
           <button id="loginModalLogin" title="Login" class="button is-primary is-fullwidth"
