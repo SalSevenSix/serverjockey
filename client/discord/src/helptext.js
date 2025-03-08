@@ -40,7 +40,7 @@ export const reward = [
   '  give|take    : Give or take role based on >= or < than threshold',
   '  {roleid}     : The @ID or snowflake of the reward role',
   '  played|top   : Choose to reward based on time played or ranking',
-  '  {threshold}  : Threshold to check for reward evaluation',
+  '  {threshold}  : Threshold to evaluate, negative value to invert',
   '  {range}      : Time range for player activity query',
   'move {id} {±#} : Move reward by id up or down list',
   'remove {id}    : Remove reward by id as shown in list',
@@ -51,7 +51,9 @@ export const reward = [
   'b) Give @Battler role if played more than 5 hours in last 7 days',
   '`!reward add give @Battler played 5h 7d`',
   'c) Take away @Battler role if played less than 1 hour in last 30 days',
-  '`!reward add take @Battler played 1h 30d`'
+  '`!reward add take @Battler played 1h 30d`',
+  'd) Take away @Slacker role if played more than 7 hours in last 14 days',
+  '`!reward add take @Slacker played -7h 14d`'
 ];
 
 export const activity = [
@@ -86,7 +88,7 @@ function sendHelpSection(context, httptool, message, data, section) {
     }
     return null;
   }
-  const query = data.join('').replaceAll('-', '');
+  const query = data.join('').replaceAll('-', '');  // TODO change to full kebab instead
   if (query === 'title' || !cutil.hasProp(section, query)) return false;
   if (cutil.isString(section[query])) {
     httptool.doGet(section[query], function(body) { return '```\n' + body + '\n```'; });

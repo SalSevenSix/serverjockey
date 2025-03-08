@@ -48,15 +48,21 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
   }
   schemes.reverse();  // Schemes higher in list have precedence over lower
   schemes.forEach(function(scheme) {  // Update role members based on reward scheme and activity
-    const [schemeRole, schemeThreshold] = [roleMap[scheme.snowflake], cutil.rangeCodeToMillis(scheme.threshold)];
-    const recordedMembers = [];
+    const [recordedMembers, schemeRole] = [[], roleMap[scheme.snowflake]];
+    const [schemeTop, schemePlayed] = [scheme.type === 'top', scheme.type === 'played'];
+    let [inverted, schemeThreshold] = [false, cutil.rangeCodeToMillis(scheme.threshold)];
+    if (schemeThreshold < 0) { [inverted, schemeThreshold] = [true, 0 - schemeThreshold]; }
     activityMap[scheme.range].forEach(function(record, index) {
       if (record.alias) {
-        let give = scheme.type === 'top' && index < schemeThreshold;
-        give ||= scheme.type === 'played' && record.uptime >= schemeThreshold;
+        let give = !inverted && schemeTop && index < schemeThreshold;
+        give ||= inverted && schemeTop && index >= schemeThreshold;
+        give ||= !inverted && schemePlayed && record.uptime >= schemeThreshold;
+        give ||= inverted && schemePlayed && record.uptime < schemeThreshold;
         give &&= scheme.action === 'give' && !schemeRole.members.includes(record.alias.snowflake);
-        let take = scheme.type === 'top' && index >= schemeThreshold;
-        take ||= scheme.type === 'played' && record.uptime < schemeThreshold;
+        let take = !inverted && schemeTop && index >= schemeThreshold;
+        take ||= inverted && schemeTop && index < schemeThreshold;
+        take ||= !inverted && schemePlayed && record.uptime < schemeThreshold;
+        take ||= inverted && schemePlayed && record.uptime >= schemeThreshold;
         take &&= scheme.action === 'take' && schemeRole.members.includes(record.alias.snowflake);
         if (give) {  // Add member to role if above threshold
           schemeRole.members.push(record.alias.snowflake);

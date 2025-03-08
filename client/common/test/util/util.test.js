@@ -106,11 +106,16 @@ describe('presetDate()', function() {
 describe('rangeCodeToMillis()', function() {
   const sample = new Date(2025, 1, 23, 15, 42, 51, 876);
   it('null value', function() { assert.strictEqual(rangeCodeToMillis(null), null); });
+  it('zero value', function() { assert.strictEqual(rangeCodeToMillis(0), 0); });
   it('int value', function() { assert.strictEqual(rangeCodeToMillis(123), 123); });
+  it('neg int value', function() { assert.strictEqual(rangeCodeToMillis(-123), -123); });
+  it('zero str', function() { assert.strictEqual(rangeCodeToMillis('0'), 0); });
   it('millis', function() { assert.strictEqual(rangeCodeToMillis('123'), 123); });
+  it('neg millis', function() { assert.strictEqual(rangeCodeToMillis('-123'), -123); });
   it('seconds', function() { assert.strictEqual(rangeCodeToMillis('123s'), 123000); });
   it('minutes', function() { assert.strictEqual(rangeCodeToMillis('123m'), 7380000); });
   it('hours', function() { assert.strictEqual(rangeCodeToMillis('123h'), 442800000); });
+  it('neg hours', function() { assert.strictEqual(rangeCodeToMillis('-123h'), -442800000); });
   it('days', function() { assert.strictEqual(rangeCodeToMillis('123d'), 10627200000); });
 });
 
