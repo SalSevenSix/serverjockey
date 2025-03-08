@@ -166,3 +166,16 @@ export function humanFileSize(bytes, dp = 1, si = false) {
   } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
   return bytes.toFixed(dp) + ' ' + units[u];
 }
+
+export function newArrayBuilder() {  // TODO unused
+  const [self, data] = [{}, []];
+  self.push = function(value) {
+    if (Array.isArray(value)) { data.push(...value); }
+    else { data.push(value); }
+    return self;
+  };
+  self.build = function() {
+    return [...data];
+  };
+  return self;
+}

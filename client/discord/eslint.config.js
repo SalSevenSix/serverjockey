@@ -13,11 +13,11 @@ export default [
   js.configs.all,
   {
     rules: {
+      'no-warning-comments': 1,
       'require-atomic-updates': 1,
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
       'sort-imports': 0,
       'prefer-destructuring': 0,
-      'no-warning-comments': 0,
       'curly': 0,
       'sort-keys': 0,
       'id-length': 0,
