@@ -52,7 +52,6 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
     const recordedMembers = [];
     activityMap[scheme.range].forEach(function(record, index) {
       if (record.alias) {
-        recordedMembers.push(record.alias.snowflake);
         let give = scheme.type === 'top' && index < schemeThreshold;
         give ||= scheme.type === 'played' && record.uptime >= schemeThreshold;
         give &&= scheme.action === 'give' && !schemeRole.members.includes(record.alias.snowflake);
@@ -64,13 +63,14 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
         } else if (take) {  // Remove member from role if below threshold
           schemeRole.members = schemeRole.members.filter(function(member) { return member != record.alias.snowflake; });
         }
+        recordedMembers.push(record.alias.snowflake);
       }
     });
     if (scheme.action === 'take') {  // Remove member from role if not in activity
       schemeRole.members = schemeRole.members.filter(function(member) { return recordedMembers.includes(member); });
     }
   });
-  for (const schemeRole of Object.values(roleMap)) { // Apply roles based on new member list
+  for (const schemeRole of Object.values(roleMap)) {  // Apply roles based on new member list
     schemeRole.gives = schemeRole.members.filter(function(member) { return !schemeRole.orig.includes(member); });
     schemeRole.takes = schemeRole.orig.filter(function(member) { return !schemeRole.members.includes(member); });
     for (const [give, members] of [[false, schemeRole.takes], [true, schemeRole.gives]]) {
