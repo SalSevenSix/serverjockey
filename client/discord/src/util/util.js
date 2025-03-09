@@ -15,11 +15,27 @@ export function commandLineToList(line) {
   const result = [];
   let match = null;
   do {
-    match = regexp.exec(line);
+    match = regexp.exec(line.replaceAll('\n', ' '));
     if (match != null) {
       result.push(match[1] ? match[1] : match[0]);
     }
   } while (match != null);
+  return result;
+}
+
+export function clobCommandLine(data) {
+  const result = [];
+  let hold = null;
+  data.forEach(function(value) {
+    if (hold) {
+      result.push(hold + value);
+      hold = null;
+    } else if (value.endsWith('=')) {
+      hold = value;
+    } else {
+      result.push(value);
+    }
+  });
   return result;
 }
 

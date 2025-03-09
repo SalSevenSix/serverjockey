@@ -56,6 +56,31 @@ export const reward = [
   '`!reward add take @Slacker played -7h 14d`'
 ];
 
+export const trigger = [
+  'Trigger Management. Trigger actions on player events. Commands are...', '```',
+  'list           : List all triggers for the instance (default command)',
+  'add            : Add trigger with following parameters...',
+  '  on-login                : Trigger on player login',
+  '  on-logout               : Trigger on player logout',
+  '  on-death                : Trigger on player death',
+  '  rq-role={roleid}        : Player must have this role for action',
+  '  rq-not-role={roleid}    : Player must not have this role for action',
+  '  cx-channel={channelid}  : Channel to use for any actions',
+  '  cx-delay={seconds}      : Delay between trigger event and actions',
+  '  do-add-role={roleid}    : Action add role to player',
+  '  do-remove-role={roleid} : Action remove role from player',
+  '  "do-message={line}"     : Action send message, can be command with subs;',
+  '  {!} for command prefix, {instance} for instance, {player} for "name"',
+  'remove {id}    : Remove trigger by id as shown in list',
+  '```', 'Examples...',
+  'a) Give PZ player an Axe on login if has @AxemanKit role, also remove role',
+  '```', '!trigger add on-login rq-role=@AxemanKit do-remove-role=@AxemanKit',
+  '"do-message={!}{instance}.player {player} give-item Base Axe"', '```',
+  'b) Give @Zombie role to player on death and announce it on #general channel',
+  '```', '!trigger add on-death cx-channel=#general',
+  'do-add-role=@Zombie "do-message={member} Died!"', '```'
+];
+
 export const activity = [
   'Activity Reporting. Provide the following query parameters...', '```',
   'instance        : Report instance activity instead of player activity',

@@ -3,6 +3,7 @@ import * as pstats from 'common/activity/player';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 
+/* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
   const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
@@ -72,7 +73,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
         recordedMembers.push(record.alias.snowflake);
       }
     });
-    if (scheme.action === 'take') {  // Remove member from role if not in activity
+    if (!inverted && scheme.action === 'take') {  // Remove member from role if not in activity
       schemeRole.members = schemeRole.members.filter(function(member) { return recordedMembers.includes(member); });
     }
   });
@@ -98,6 +99,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
   }
 }
 /* eslint-enable max-lines-per-function */
+/* eslint-enable complexity */
 
 export function reward($) {
   const [context, rewards, message, data] = [$.context, $.rewards, $.message, [...$.data]];

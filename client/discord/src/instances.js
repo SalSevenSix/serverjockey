@@ -6,6 +6,7 @@ import * as logger from './util/logger.js';
 import * as subs from './util/subs.js';
 import * as aliassvc from './instances/aliassvc.js';
 import * as rewardsvc from './instances/rewardsvc.js';
+import * as triggersvc from './instances/triggersvc.js';
 import * as servers from './servers.js';
 
 export class Service {
@@ -37,9 +38,10 @@ export class Service {
     for (const [identity, instance] of Object.entries(instances)) {
       instance.aliases = aliassvc.newAliases(context, identity).load();
       instance.rewards = rewardsvc.newRewards(context, identity).load();
+      instance.triggers = triggersvc.newTriggers(context, identity).load();
       instance.server = servers[instance.module];
-      instance.server.startup({ context: context, channels: channels,
-        aliases: instance.aliases, instance: identity, url: instance.url });
+      instance.server.startup({ context: context, channels: channels, instance: identity, url: instance.url,
+        aliases: instance.aliases, triggers: instance.triggers });
     }
     logger.info('Instances...');
     logger.raw(self.getInstancesText().join('\n'));
@@ -50,13 +52,15 @@ export class Service {
         instance.url = baseurl + '/instances/' + identity;
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
+        instance.triggers = triggersvc.newTriggers(context, identity);
         instance.server = servers[instance.module];
         instances[identity] = instance;
-        instance.server.startup({ context: context, channels: channels,
-          aliases: instance.aliases, instance: identity, url: instance.url });
+        instance.server.startup({ context: context, channels: channels, instance: identity, url: instance.url,
+          aliases: instance.aliases, triggers: instance.triggers });
       } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {
         instances[identity].aliases.reset().save();
         instances[identity].rewards.reset().save();
+        instances[identity].triggers.reset().save();
         delete instances[identity];
         if (identity === self.currentInstance()) { self.useInstance(util.getFirstKey(instances), true); }
       }

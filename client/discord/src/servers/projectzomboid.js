@@ -17,6 +17,7 @@ const helpData = [helptext.systemHelpData, {
     'log                       : Get last 100 lines from the log',
     'alias {cmds ...}          : Alias management, use help for details',
     'reward {cmds ...}         : Reward management, use help for details',
+    'trigger {cmds ...}        : Trigger management, use help for details',
     'activity {query ...}      : Activity reporting, use help for details',
     'world save                : Save the game world',
     'world broadcast {message} : Broadcast message to all players',
@@ -67,6 +68,7 @@ const helpData = [helptext.systemHelpData, {
   ],
   alias: helptext.alias,
   reward: helptext.reward,
+  trigger: helptext.trigger,
   activity: helptext.activity,
   playersetaccesslevel: [
     'Set access level for online player. Level options:', '```',
@@ -99,10 +101,10 @@ const helpData = [helptext.systemHelpData, {
 
 export const [startup, help, server, auto, log,
   getconfig, setconfig, deployment, players,
-  alias, reward, activity] = [
+  alias, reward, trigger, activity] = [
   commons.startupAll, helptext.help(helpData), commons.server, commons.auto, commons.log,
   commons.getconfig, commons.setconfig, commons.deployment, commons.players,
-  commons.alias, commons.reward, commons.activity];
+  commons.alias, commons.reward, commons.trigger, commons.activity];
 
 export function world($) {
   const [httptool, message, data] = [$.httptool, $.message, [...$.data]];

@@ -51,6 +51,7 @@ export default [
       '@stylistic/js': stylisticJs
     },
     rules: {
+      '@stylistic/js/no-mixed-operators': 1,
       '@stylistic/js/array-bracket-spacing': 2,
       '@stylistic/js/block-spacing': 2,
       '@stylistic/js/comma-dangle': 2,
@@ -75,7 +76,6 @@ export default [
       '@stylistic/js/no-extra-parens': 2,
       '@stylistic/js/no-extra-semi': 2,
       '@stylistic/js/no-floating-decimal': 2,
-      '@stylistic/js/no-mixed-operators': 2,
       '@stylistic/js/no-mixed-spaces-and-tabs': 2,
       '@stylistic/js/no-multi-spaces': [2, { ignoreEOLComments: true }],
       '@stylistic/js/no-multiple-empty-lines': 2,

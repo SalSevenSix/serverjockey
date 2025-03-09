@@ -4,7 +4,8 @@ import { getconfig, setconfig, deployment } from './commons/deploymentcmds.js';
 import { send, say, players } from './commons/consolecmds.js';
 import { alias } from './commons/aliascmds.js';
 import { reward } from './commons/rewardcmds.js';
+import { trigger } from './commons/triggercmds.js';
 import { activity } from './commons/activitycmds.js';
 
 export { startupAll, startupServerOnly, server, auto, log, getconfig, setconfig, deployment,
-  send, say, players, alias, reward, activity };
+  send, say, players, alias, reward, trigger, activity };

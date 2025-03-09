@@ -13,6 +13,7 @@ const helpData = [helptext.systemHelpData, {
     'players            : Show players currently online',
     'alias {cmds ...}      : Alias management, use help for details',
     'reward {cmds ...}     : Reward management, use help for details',
+    'trigger {cmds ...}    : Trigger management, use help for details',
     'activity {query ...}  : Activity reporting, use help for details',
     'getconfig cmdargs  : Get launch options as attachment',
     'getconfig settings : Get settings as attachment',
@@ -28,12 +29,13 @@ const helpData = [helptext.systemHelpData, {
   ],
   alias: helptext.alias,
   reward: helptext.reward,
+  trigger: helptext.trigger,
   activity: helptext.activity
 }];
 
 export const [startup, help, server, auto, log,
   getconfig, setconfig, deployment, players,
-  alias, reward, activity] = [
+  alias, reward, trigger, activity] = [
   commons.startupAll, helptext.help(helpData), commons.server, commons.auto, commons.log,
   commons.getconfig, commons.setconfig, commons.deployment, commons.players,
-  commons.alias, commons.reward, commons.activity];
+  commons.alias, commons.reward, commons.trigger, commons.activity];
