@@ -4,6 +4,7 @@ import * as subs from '../util/subs.js';
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 function newTriggerHandler(context, channel, instance, triggers) {
+  const prelog = '`' + instance + '` 🔔 ';
   const cache = { channel: {}, role: {}, member: {} };
   const get = async function(fetcher, entity, snowflake) {
     if (cutil.hasProp(cache[entity], snowflake)) return cache[entity][snowflake];
@@ -15,10 +16,10 @@ function newTriggerHandler(context, channel, instance, triggers) {
   const getChannel = async function(snowflake) { return await get(context.client.channels, 'channel', snowflake); };
   const getRole = async function(snowflake) { return await get(channel.guild.roles, 'role', snowflake); };
   const getMember = async function(snowflake) { return await get(channel.guild.members, 'member', snowflake); };
-  const handle = async function(trigger, data, alias) {
-    if (data.event === 'LOGIN' && !cutil.hasProp(trigger, 'on-login')) return;
-    if (data.event === 'LOGOUT' && !cutil.hasProp(trigger, 'on-logout')) return;
-    if (data.event === 'DEATH' && !cutil.hasProp(trigger, 'on-death')) return;
+  const handle = async function(trigger, event, alias) {
+    if (event === 'LOGIN' && !cutil.hasProp(trigger, 'on-login')) return;
+    if (event === 'LOGOUT' && !cutil.hasProp(trigger, 'on-logout')) return;
+    if (event === 'DEATH' && !cutil.hasProp(trigger, 'on-death')) return;
     const member = await getMember(alias.snowflake);
     if (!member) return;
     for (const [isReq, rqRole] of [[true, 'rq-role'], [false, 'rq-not-role']]) {
@@ -40,6 +41,7 @@ function newTriggerHandler(context, channel, instance, triggers) {
         await cutil.sleep(1000);
         if (isAdd) { member.roles.add(role); }
         else { member.roles.remove(role); }
+        actionChannel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
       }
     }
     if (cutil.hasProp(trigger, 'do-message')) {
@@ -48,16 +50,17 @@ function newTriggerHandler(context, channel, instance, triggers) {
       text = text.replaceAll('{!}', context.config.CMD_PREFIX);
       text = text.replaceAll('{instance}', instance);
       text = text.replaceAll('{channel}', actionChannel.name);
+      text = text.replaceAll('{event}', event.toLowerCase());
       text = text.replaceAll('{member}', alias.discordid);
       text = text.replaceAll('{playername}', alias.name);
       text = text.replaceAll('{player}', '"' + alias.name + '"');
       actionChannel.send(text);
     }
   };
-  return async function(data, alias) {
-    for (const trigger of triggers.list()) {
-      await handle(trigger, data, alias);
-    }
+  return async function(event, alias) {
+    if (event === 'CLEAR') { [cache.channel, cache.role, cache.member] = [{}, {}, {}]; }
+    if (!alias) return;
+    for (const trigger of triggers.list()) { await handle(trigger, event, alias); }
   };
 }
 /* eslint-enable max-lines-per-function */
@@ -68,6 +71,10 @@ function startPlayerEvents($) {
   if (!channels.login && !channels.chat) return;
   const triggerHandler = channels.login ? newTriggerHandler(context, channels.login, instance, $.triggers) : null;
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
+    if (json.event === 'CLEAR') {
+      if (triggerHandler) { triggerHandler(json.event, null); }
+      return true;
+    }
     let playerName = json.player && json.player.name ? json.player.name : null;
     if (!playerName) return true;
     const playerAlias = aliases.findByName(playerName);
@@ -87,7 +94,7 @@ function startPlayerEvents($) {
     if (json.text) { result += ' [' + json.text + ']'; }
     if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
     channels.login.send(result);
-    if (triggerHandler && playerAlias) { triggerHandler(json, playerAlias); }
+    if (triggerHandler && playerAlias) { triggerHandler(json.event, playerAlias); }
     return true;
   });
 }
