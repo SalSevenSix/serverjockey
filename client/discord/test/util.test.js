@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { getFirstKey, commandLineToList, listifyRoles } from '../src/util/util.js';
+import { getFirstKey, commandLineToList, clobCommandLine, listifyRoles } from '../src/util/util.js';
 
 describe('getFirstKey()', function() {
   const obj = { 'aaa': 3, 'bbb': 2, 'ccc': 1 };
@@ -12,9 +12,16 @@ describe('commandLineToList()', function() {
   it('null value', function() { assert.deepEqual(commandLineToList(null), []); });
   it('empty value', function() { assert.deepEqual(commandLineToList(''), []); });
   it('simple', function() { assert.deepEqual(commandLineToList('aaa bbb ccc'), ['aaa', 'bbb', 'ccc']); });
+  it('lines', function() { assert.deepEqual(commandLineToList('aaa\nbbb\nccc'), ['aaa', 'bbb', 'ccc']); });
   it('double q', function() { assert.deepEqual(commandLineToList('aaa "bb cc" ddd'), ['aaa', 'bb cc', 'ddd']); });
   it('single q', function() { assert.deepEqual(commandLineToList("aaa 'bb cc' ddd"), ['aaa', "'bb", "cc'", 'ddd']); });
   it('numbers', function() { assert.deepEqual(commandLineToList('12 34 56'), ['12', '34', '56']); });
+});
+
+describe('clobCommandLine()', function() {
+  it('empty value', function() { assert.deepEqual(clobCommandLine([]), []); });
+  it('no clob', function() { assert.deepEqual(clobCommandLine(['a', 'b=c', 'd=e']), ['a', 'b=c', 'd=e']); });
+  it('clobbing', function() { assert.deepEqual(clobCommandLine(['a', 'b=', 'c', 'd=e']), ['a', 'b=c', 'd=e']); });
 });
 
 describe('listifyRoles()', function() {

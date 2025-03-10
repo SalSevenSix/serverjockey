@@ -9,13 +9,13 @@ export function getFirstKey(value) {
   return keys.length === 0 ? null : keys[0];
 }
 
-export function commandLineToList(line) {
-  if (!line) return [];
+export function commandLineToList(value) {
+  if (!value) return [];
   const regexp = /[^\s"]+|"([^"]*)"/gi;
-  const result = [];
+  const [result, line] = [[], value.replaceAll('\n', ' ')];
   let match = null;
   do {
-    match = regexp.exec(line.replaceAll('\n', ' '));
+    match = regexp.exec(line);
     if (match != null) {
       result.push(match[1] ? match[1] : match[0]);
     }

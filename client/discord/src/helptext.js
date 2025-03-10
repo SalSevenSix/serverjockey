@@ -113,7 +113,7 @@ function sendHelpSection(context, httptool, message, data, section) {
     }
     return null;
   }
-  const query = data.join('').replaceAll('-', '');  // TODO change to full kebab instead
+  const query = data.join('').replaceAll('-', '');
   if (query === 'title' || !cutil.hasProp(section, query)) return false;
   if (cutil.isString(section[query])) {
     httptool.doGet(section[query], function(body) { return '```\n' + body + '\n```'; });
