@@ -64,6 +64,7 @@
         <ConfigFile name="Admin" path="/config/admin" />
       </Collapsible>
       <Collapsible icon="fa-puzzle-piece" title="Mod Files">
+        <div class="content"><p>Only zip files accepted. Mods will be unpacked as needed when server starts.</p></div>
         <FileCollection path="/modfiles" filenameHelp="Only zip files are accepted."
                         validateFilename={function(fn) { return fn.endsWith('.zip'); }} />
       </Collapsible>

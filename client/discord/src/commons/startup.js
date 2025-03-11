@@ -39,14 +39,15 @@ function newTriggerHandler(context, channel, instance, triggers) {
         const role = await getRole(trigger[doRole].snowflake);
         if (!role) return;
         await cutil.sleep(1000);
-        if (isAdd) { member.roles.add(role); }
-        else { member.roles.remove(role); }
+        if (isAdd) { await member.roles.add(role); }
+        else { await member.roles.remove(role); }
         actionChannel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
       }
     }
     if (cutil.hasProp(trigger, 'do-message')) {
       await cutil.sleep(1000);
       let text = trigger['do-message'];
+      text = text.replaceAll('{n}', '\n');
       text = text.replaceAll('{!}', context.config.CMD_PREFIX);
       text = text.replaceAll('{instance}', instance);
       text = text.replaceAll('{channel}', actionChannel.name);

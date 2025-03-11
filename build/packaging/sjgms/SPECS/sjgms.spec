@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Thu Feb 20 2024 Bowden Salis <bsalis76@gmail.com> - 0.18.0
-- Feature release v0.18.0
+* Thu Mar 13 2024 Bowden Salis <bsalis76@gmail.com> - 0.18.0
+- Mod uploads and Triggers features
 * Wed Feb 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.17.0
 - ServerLink enhancements, aliases, rewards and activity
 * Sat Jan 11 2024 Bowden Salis <bsalis76@gmail.com> - 0.16.0
