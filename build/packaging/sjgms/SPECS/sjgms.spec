@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.18.0
+Version:        0.19.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -53,6 +53,8 @@ exit 0
 
 
 %changelog
+* Fri Mar 14 2024 Bowden Salis <bsalis76@gmail.com> - 0.19.0
+- Feature release v0.19.0
 * Thu Mar 13 2024 Bowden Salis <bsalis76@gmail.com> - 0.18.0
 - Mod uploads and Triggers features
 * Wed Feb 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.17.0
