@@ -55,7 +55,7 @@
     section on the left panel, then the
     <span class="has-text-weight-bold">Motherboard</span>
     tab. The ServerJockey appliance has 10Gb of memory allocated.
-    You can change this value as needed. It should less than how much free memory your real machine has,
+    You can change this value as needed. It should be less than how much free memory your real machine has,
     but enough to support the game server you are running with 2Gb spare.
   </p>
   <figure class="image max-825">
