@@ -2,35 +2,27 @@
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
-from core.system import svrsvc, svrext
-from core.proc import jobh, prcext
-from core.common import rconsvc, playerstore
+from core.context import contextsvc
+from core.system import svrsvc
+from core.proc import jobh
+from core.common import rconsvc, playerstore, svrhelpers
+
+_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 SERVER_STARTED_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataStrContains('[Info] Root: Writing runtime configuration to'))
+    mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('[Info] Root: Writing runtime configuration to'))
 DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_LOG_FILTER = msgftr.Or(
-    mc.ServerProcess.FILTER_ALL_LINES,
-    msgftr.NameIs(DEPLOYMENT_MSG),
-    rconsvc.RconService.FILTER_OUTPUT,
-    jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS)
-CONSOLE_LOG_ERROR_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_ALL_LINES,
-    msgftr.DataStrStartsWith('[Error]'))
-MAINTENANCE_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+    mc.ServerProcess.FILTER_ALL_LINES, msgftr.NameIs(DEPLOYMENT_MSG), rconsvc.RconService.FILTER_OUTPUT,
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataStrStartsWith('[Error]'))
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(prcext.ServerStateSubscriber(mailer))
-    mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
-    mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.public_ip()))
-    mailer.register(_PlayerEventSubscriber(mailer))
+async def initialise(context: contextsvc.Context):
+    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
+    context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
+    context.register(_PlayerEventSubscriber(context))
 
 
 # [Info] Server Version 1.4.4 (linux x86_64) Source ID: 8cbe6faf22282659828a194e06a08999f213769e Protocol: 747

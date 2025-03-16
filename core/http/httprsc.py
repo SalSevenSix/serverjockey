@@ -72,13 +72,15 @@ class ResourceBuilder:
     def _log_binding(resource: httpabc.Resource, handler: typing.Optional[httpabc.AbcHandler]):
         if handler is None:
             return
-        allows = ''
+        allows, path = '', resource.path()
         if resource.allows(httpabc.Method.GET):
             allows += httpabc.Method.GET.value
         if resource.allows(httpabc.Method.POST):
             allows += '|' if allows else ''
             allows += httpabc.Method.POST.value
-        logging.debug('trs> BIND %s %s => %s', resource.path(), allows, objconv.obj_to_str(handler))
+        if resource.kind() == httpabc.ResourceKind.ARG_TAIL:
+            path += '/*'
+        logging.debug('trs> BIND %s %s => %s', path, allows, objconv.obj_to_str(handler))
 
 
 class WebResource(httpabc.Resource):

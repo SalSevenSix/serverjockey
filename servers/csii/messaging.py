@@ -2,41 +2,34 @@
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
-from core.system import svrsvc, svrext
-from core.proc import jobh, prcext
-from core.common import rconsvc, playerstore
+from core.context import contextsvc
+from core.system import svrsvc
+from core.proc import jobh
+from core.common import rconsvc, playerstore, svrhelpers
 
 _SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(.*):' \
         r' Assertion Failed: usecElapsed >= 0$'
+_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 SERVER_STARTED_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataMatches(r'^SV: .* player server started$'))
+    mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataMatches(r'^SV: .* player server started$'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.HasData(), msgftr.Not(msgftr.Or(
         msgftr.DataStrContains('UNEXPECTED LONG FRAME DETECTED'), msgftr.DataMatches(_SPAM)))),
-    rconsvc.RconService.FILTER_OUTPUT,
-    jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS)
-MAINTENANCE_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+    rconsvc.RconService.FILTER_OUTPUT, jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(prcext.ServerStateSubscriber(mailer))
-    mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
-    mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.public_ip()))
-    mailer.register(_PlayerEventSubscriber(mailer))
+async def initialise(context: contextsvc.Context):
+    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
+    context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
+    context.register(_PlayerEventSubscriber(context))
 
 
 # GC Connection established for server version 2000166, instance idx 1
 # Network socket 'server' opened on port 27015
 # Host activate: Loading (de_dust2)
 # Host activate: Changelevel (de_inferno)
-
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     MAP_FILTER = msgftr.DataMatches(r'^Host activate: (Loading|Changelevel) \(.*\)$')
     VERSION_FILTER = msgftr.DataMatches(r'^GC Connection established for server version .*, instance idx.*')
@@ -68,10 +61,8 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # [All Chat][Apollo (8723357)]: Hello from Game
 # say Hello from console
 # [All Chat][Console (0)]: @sjgms: Hello from Discord
-
 # Client #2 "Apollo" connected @ 192.168.0.104:63939
 # SV:  Dropped client 'Apollo' from server(2): NETWORK_DISCONNECT_DISCONNECT_BY_USER
-
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     CHAT_FILTER = msgftr.DataMatches(r'^\[All Chat\]\[.* \(.*\)\]: .*')
     JOIN_FILTER = msgftr.DataMatches(r'^Client .* ".*" connected @ .*')

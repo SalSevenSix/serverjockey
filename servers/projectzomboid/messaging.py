@@ -3,19 +3,16 @@ from core.util import util, dtutil, objconv
 from core.msg import msgabc, msglog, msgftr, msgext
 from core.msgc import mc
 from core.context import contextsvc
-from core.system import svrsvc, svrext
-from core.proc import proch, jobh, prcext
-from core.common import cachelock, playerstore
+from core.system import svrsvc
+from core.proc import proch, jobh
+from core.common import cachelock, playerstore, svrhelpers
 
 _CHAT_KEY_STRING = 'New message \'ChatMessage{chat=General'
-_MAINTENANCE_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-_READY_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 SERVER_STARTED_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataStrContains('*** SERVER STARTED ***'))
+    mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('*** SERVER STARTED ***'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(
         mc.ServerProcess.FILTER_ALL_LINES,
@@ -23,23 +20,18 @@ CONSOLE_LOG_FILTER = msgftr.Or(
             msgftr.DataStrContains('password', True),
             msgftr.DataStrContains('token', True),
             msgftr.DataStrContains('command entered via server console', True)))),
-    jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS,
-    cachelock.FILTER_NOTIFICATIONS)
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS, cachelock.FILTER_NOTIFICATIONS)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_ALL_LINES,
     msgftr.Or(msgftr.DataStrStartsWith('ERROR:'), msgftr.DataStrStartsWith('SEVERE:')))
 CONSOLE_OUTPUT_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
+    mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
 SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 
 
 def initialise(context: contextsvc.Context):
-    context.register(prcext.ServerStateSubscriber(context))
-    context.register(svrext.MaintenanceStateSubscriber(context, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
-    context.register(playerstore.PlayersSubscriber(context))
+    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
     context.register(_ServerDetailsSubscriber(context))
     context.register(_PlayerEventSubscriber(context))
     context.register(_PlayerChatSubscriber(context))

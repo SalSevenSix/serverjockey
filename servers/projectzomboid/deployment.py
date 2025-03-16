@@ -1,10 +1,9 @@
 # ALLOW core.* projectzomboid.messaging
 from core.util import util, io, objconv
-from core.msg import msgext, msgftr, msglog
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext
-from core.proc import proch, jobh
-from core.common import steam, interceptors, cachelock
+from core.http import httpabc, httpext
+from core.proc import proch
+from core.common import svrhelpers, cachelock
 from servers.projectzomboid import modcheck as mck
 
 APPID = '380870'
@@ -27,8 +26,7 @@ def _default_cmdargs() -> dict:
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
-        self._world_name = _WORLD_NAME_DEF
+        self._context, self._world_name = context, _WORLD_NAME_DEF
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
@@ -46,61 +44,33 @@ class Deployment:
     async def initialise(self):
         self._world_name = await self._get_world_name()
         await self.build_world()
-        await cachelock.initialise(self._mailer)
-        self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
-            self.build_world))
-        self._mailer.register(jobh.JobProcess(self._mailer))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
+        await cachelock.initialise(self._context)
+        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper.init_jobs().init_archiving(self._tempdir).done()
 
     def resources(self, resource: httpabc.Resource):
-        r = httprsc.ResourceBuilder(resource)
-        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
-        r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
-        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.MtimeHandler().check(self._multiplayer_dir).file(self._log_file))
-        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
-        r.put('wipe-world-playerdb', httpext.WipeHandler(self._mailer, self._player_dir), 'r')
-        r.put('wipe-world-logs', httpext.WipeHandler(self._mailer, self._logs_dir), 'r')
-        r.put('wipe-world-lua', httpext.WipeHandler(self._mailer, self._lua_dir), 'r')
-        r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
-        r.put('wipe-world-autobackups', httpext.WipeHandler(self._mailer, self._autobackups_dir), 'r')
-        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
-        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
-        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
-        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
-        r.put('restore-autobackup', httpext.UnpackerHandler(
-            self._mailer, self._autobackups_dir, self._world_dir, to_root=True, wipe=False), 'r')
-        r.pop()
-        r.put('log', httpext.FileSystemHandler(self._log_file))
-        r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'), 'r')
-        r.pop()
-        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tempdir=self._tempdir,
-            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
-            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
-        r.pop()
-        r.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_autobackups))
-        r.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_autobackups), 'r')
-        r.pop()
-        r.psh('config')
-        r.put('db', httpext.FileSystemHandler(self._player_dir + '/' + self._world_name + '.db'), 'r')
-        r.put('jvm', httpext.FileSystemHandler(self._runtime_dir + '/ProjectZomboid64.json'), 'm')
-        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
+        builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
+        builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
+                         httpext.MtimeHandler().check(self._multiplayer_dir).file(self._log_file))
+        builder.put_installer_steam(self._runtime_dir, APPID)
+        builder.put_wipes(self._runtime_dir, dict(
+            save=self._save_dir, playerdb=self._player_dir, logs=self._logs_dir, lua=self._lua_dir,
+            config=self._config_dir, autobackups=self._autobackups_dir, all=self._world_dir))
+        builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
+        builder.put('restore-autobackup', httpext.UnpackerHandler(
+                    self._context, self._autobackups_dir, self._world_dir, to_root=True, wipe=False), 'r')
+        builder.pop()
+        builder.put_log(self._log_file).put_logs(self._logs_dir)
+        builder.put_backups(self._tempdir, self._backups_dir)
+        builder.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_autobackups))
+        builder.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_autobackups), 'r')
+        builder.pop()
         config_pre = self._config_dir + '/' + self._world_name
-        r.put('ini', httpext.FileSystemHandler(config_pre + '.ini'), 'm')
-        r.put('sandbox', httpext.FileSystemHandler(config_pre + '_SandboxVars.lua'), 'm')
-        r.put('spawnpoints', httpext.FileSystemHandler(config_pre + '_spawnpoints.lua'), 'm')
-        r.put('spawnregions', httpext.FileSystemHandler(config_pre + '_spawnregions.lua'), 'm')
-        r.put('shop', httpext.FileSystemHandler(self._lua_dir + '/ServerPointsListings.ini'), 'm')
+        builder.put_config(dict(
+            db=self._player_dir + '/' + self._world_name + '.db', jvm=self._runtime_dir + '/ProjectZomboid64.json',
+            cmdargs=self._cmdargs_file, ini=config_pre + '.ini', sandbox=config_pre + '_SandboxVars.lua',
+            spawnpoints=config_pre + '_spawnpoints.lua', spawnregions=config_pre + '_spawnregions.lua',
+            shop=self._lua_dir + '/ServerPointsListings.ini'))
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/start-server.sh'
@@ -111,9 +81,9 @@ class Deployment:
             raise Exception('Server Name missmatch, ServerJockey needs to be restarted.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('cache_map_files', cmdargs, False):
-            cachelock.set_path(self._mailer, self, self._save_dir)
-        mck.apply_config(self._mailer, self, cmdargs)
-        server = proch.ServerProcess(self._mailer, executable)
+            cachelock.set_path(self._context, self, self._save_dir)
+        mck.apply_config(self._context, self, cmdargs)
+        server = proch.ServerProcess(self._context, executable)
         server.append_arg('-cachedir=' + self._world_dir)
         if world_name != _WORLD_NAME_DEF:
             server.append_arg('-servername').append_arg(world_name)

@@ -2,17 +2,16 @@ import socket
 import aiohttp
 # ALLOW core.* factorio.messaging
 from core.util import gc, util, idutil, tasks, io, pack, aggtrf, funcutil, objconv
-from core.msg import msgabc, msgext, msgftr, msglog
+from core.msg import msgabc, msglog
 from core.msgc import sc
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext, httpsubs
+from core.http import httpabc, httpext, httpsubs
 from core.system import svrsvc
 from core.proc import proch, jobh
-from core.common import interceptors, rconsvc, portmapper
+from core.common import rconsvc, portmapper, svrhelpers
 from servers.factorio import messaging as msg
 
-_MAP, _ZIP = 'map', '.zip'
-_AUTOSAVE_PREFIX = '_autosave'
+_MAP, _ZIP, _AUTOSAVE_PREFIX = 'map', '.zip', '_autosave'
 _BASE_MOD_NAMES = 'base', 'elevated-rails', 'quality', 'space-age'
 
 
@@ -46,7 +45,7 @@ def _default_mods_list() -> dict:
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
+        self._context = context
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
@@ -67,78 +66,51 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
-        self._mailer.register(portmapper.PortMapperService(self._mailer))
-        self._mailer.register(jobh.JobProcess(self._mailer))
-        self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE), self.build_world))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
+        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper.init_ports().init_jobs(no_rebuild=True).init_archiving(self._tempdir).done()
 
     def resources(self, resource: httpabc.Resource):
-        r = httprsc.ResourceBuilder(resource)
-        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
-        r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.put('log', httpext.FileSystemHandler(self._runtime_dir + '/factorio-current.log'))
-        r.psh('logs', httpext.FileSystemHandler(self._runtime_dir, ls_filter=_logfiles))
-        r.put('*{path}', httpext.FileSystemHandler(self._runtime_dir, 'path'), 'r')
-        r.pop()
-        r.psh('config')
-        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_settings), 'm')
-        r.put('server', httpext.FileSystemHandler(self._server_settings), 'm')
-        r.put('map', httpext.FileSystemHandler(self._map_settings), 'm')
-        r.put('mapgen', httpext.FileSystemHandler(self._map_gen_settings), 'm')
-        r.put('modslist', httpext.FileSystemHandler(self._mods_list), 'm')
-        r.put('adminlist', httpext.FileSystemHandler(self._server_adminlist), 'm')
-        r.put('whitelist', httpext.FileSystemHandler(self._server_whitelist), 'm')
-        r.put('banlist', httpext.FileSystemHandler(self._server_banlist), 'm')
-        r.pop()
-        r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/data/changelog.txt'))
-        r.put('install-runtime', _InstallRuntimeHandler(self, self._mailer), 'r')
-        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.MtimeHandler().check(self._map_file).dir(self._save_dir))
-        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
-        r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
-        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._map_file), 'r')
-        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
-        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
-        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
-        r.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
-        r.pop()
-        r.psh('autosaves', httpext.FileSystemHandler(self._save_dir, ls_filter=_autosaves))
-        r.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
-        r.pop()
-        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tempdir=self._tempdir,
-            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
-            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
+        builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
+        builder.put_meta(self._runtime_dir + '/data/changelog.txt',
+                         httpext.MtimeHandler().check(self._map_file).dir(self._save_dir))
+        builder.put_installer(_InstallRuntimeHandler(self, self._context))
+        builder.put_wipes(self._runtime_dir, dict(save=self._map_file, config=self._config_dir, all=self._world_dir))
+        builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
+        builder.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
+        builder.pop()
+        builder.put_log(self._runtime_dir + '/factorio-current.log').put_logs(self._runtime_dir, ls_filter=_logfiles)
+        builder.put_backups(self._tempdir, self._backups_dir)
+        builder.psh('autosaves', httpext.FileSystemHandler(self._save_dir, ls_filter=_autosaves))
+        builder.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
+        builder.pop()
+        builder.put_config(dict(
+            cmdargs=self._cmdargs_settings, server=self._server_settings, map=self._map_settings,
+            mapgen=self._map_gen_settings, modslist=self._mods_list, adminlist=self._server_adminlist,
+            whitelist=self._server_whitelist, banlist=self._server_banlist))
 
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('Factorio game server not installed. Please Install Runtime first.')
-        svrsvc.ServerStatus.notify_state(self._mailer, self, sc.START)  # pushing early because slow pre-start tasks
+        svrsvc.ServerStatus.notify_state(self._context, self, sc.START)  # pushing early because slow pre-start tasks
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_settings))
         await self._sync_mods()
         await self._ensure_map()
-        server = proch.ServerProcess(self._mailer, self._executable)
+        server = proch.ServerProcess(self._context, self._executable)
         port = util.get('port', cmdargs)
         if port:
             server.append_arg('--port').append_arg(port)
         port = port if port else 34197
         if util.get('server-upnp', cmdargs, True):
-            portmapper.map_port(self._mailer, self, port, gc.UDP, 'Factorio server')
+            portmapper.map_port(self._context, self, port, gc.UDP, 'Factorio server')
         rcon_port = util.get('rcon-port', cmdargs)
         rcon_port = rcon_port if rcon_port else port + 1
         server.append_arg('--rcon-port').append_arg(rcon_port)
         rcon_password = util.get('rcon-password', cmdargs)
         rcon_password = rcon_password if rcon_password else idutil.generate_token(10)
         server.append_arg('--rcon-password').append_arg(rcon_password)
-        rconsvc.RconService.set_config(self._mailer, self, rcon_port, rcon_password)
+        rconsvc.RconService.set_config(self._context, self, rcon_port, rcon_password)
         if util.get('rcon-upnp', cmdargs, False):
-            portmapper.map_port(self._mailer, self, rcon_port, gc.TCP, 'Factorio rcon')
+            portmapper.map_port(self._context, self, rcon_port, gc.TCP, 'Factorio rcon')
         if cmdargs['use-authserver-bans']:
             server.append_arg('--use-authserver-bans')
         if cmdargs['use-server-whitelist']:
@@ -177,36 +149,36 @@ class Deployment:
         install_package = self._home_dir + '/factorio.tar.xz'
         unpack_dir = self._home_dir + '/factorio'
         try:
-            self._mailer.post(self, msg.DEPLOYMENT_START)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'START Install')
+            self._context.post(self, msg.DEPLOYMENT_START)
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'START Install')
             await io.delete_file(install_package)
             await io.delete_directory(unpack_dir)
             await io.delete_directory(self._runtime_dir)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + url)
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + url)
             connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
                     assert response.status == 200
                     tracker, content_length = None, response.headers.get('Content-Length')
                     if content_length:
-                        tracker = msglog.PercentTracker(self._mailer, int(content_length), prefix='downloaded')
+                        tracker = msglog.PercentTracker(self._context, int(content_length), prefix='downloaded')
                     await io.stream_write_file(
                         install_package, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'INSTALLING Factorio server')
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'INSTALLING Factorio server')
             await io.rename_path(unpack_dir, self._runtime_dir)
             await io.delete_file(install_package)
             await self.build_world()
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'END Install')
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'END Install')
         except Exception as e:
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, repr(e))
+            self._context.post(self, msg.DEPLOYMENT_MSG, repr(e))
         finally:
-            self._mailer.post(self, msg.DEPLOYMENT_DONE)
+            self._context.post(self, msg.DEPLOYMENT_DONE)
 
     async def _ensure_map(self):
         if not await io.file_exists(self._map_file):
-            await jobh.JobProcess.run_job(self._mailer, self, (
+            await jobh.JobProcess.run_job(self._context, self, (
                 self._executable,
                 '--create', self._map_file,
                 '--map-gen-settings', self._map_gen_settings,
@@ -219,19 +191,19 @@ class Deployment:
     async def _sync_mods(self):
         mods = util.get('mods', objconv.json_to_dict(await io.read_file(self._mods_list)))
         if not mods:
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
             return
         live_mod_list, mod_list = self._mods_dir + '/mod-list.json', []
         for mod in [m for m in mods if m['name'] in _BASE_MOD_NAMES]:
             mod_list.append(util.filter_dict(mod, ('name', 'enabled')))
         settings = objconv.json_to_dict(await io.read_file(self._server_settings))
         if not util.get('username', settings) or not util.get('token', settings):
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
             if len(mods) == len(mod_list):
-                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game only')
+                self._context.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game only')
                 await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
             return
-        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
+        self._context.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
         baseurl, mod_files = 'https://mods.factorio.com', []
         connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
         timeout = aiohttp.ClientTimeout(total=8.0)
@@ -252,38 +224,38 @@ class Deployment:
                         mod_files.append(release['file_name'])
                         filename = self._mods_dir + '/' + release['file_name']
                         if not await io.file_exists(filename):
-                            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
+                            self._context.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
                             download_url = baseurl + release['download_url'] + credentials
                             async with session.get(download_url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as modfile_resp:
                                 assert modfile_resp.status == 200
                                 tracker, content_length = None, modfile_resp.headers.get('Content-Length')
                                 if content_length:
                                     tracker = msglog.PercentTracker(
-                                        self._mailer, int(content_length), notifications=5, prefix='downloaded')
+                                        self._context, int(content_length), notifications=5, prefix='downloaded')
                                 await io.stream_write_file(
                                     filename, io.WrapReader(modfile_resp.content),
                                     io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
                 if not mod_version_found:
-                    self._mailer.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
-                                      + mod['version'] + ' not found, see ' + mod_meta_url)
+                    self._context.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
+                                       + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith(_ZIP) and file['name'] not in mod_files:
-                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Deleting unused mod file ' + file['name'])
+                self._context.post(self, msg.DEPLOYMENT_MSG, 'Deleting unused mod file ' + file['name'])
                 await io.delete_file(self._mods_dir + '/' + file['name'])
-        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game and mods')
+        self._context.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game and mods')
         await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
 
     async def restore_autosave(self, filename: str):
         map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP
         try:
-            self._mailer.post(self, msg.DEPLOYMENT_START)
+            self._context.post(self, msg.DEPLOYMENT_START)
             filename = filename[1:] if filename[0] == '/' else filename
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'RESTORING ' + filename)
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'RESTORING ' + filename)
             autosave_file = self._save_dir + '/' + filename
             if not await io.file_exists(autosave_file):
                 raise FileNotFoundError(autosave_file)
             autosave_size = await io.file_size(autosave_file)
-            tracker = msglog.PercentTracker(self._mailer, autosave_size, notifications=4)
+            tracker = msglog.PercentTracker(self._context, autosave_size, notifications=4)
             if await io.file_exists(self._map_file):
                 if map_backup == autosave_file:
                     await io.delete_file(self._map_file)
@@ -291,19 +263,18 @@ class Deployment:
                     await io.delete_file(map_backup)
                     await io.rename_path(self._map_file, map_backup)
             await io.stream_copy_file(autosave_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, self._tempdir, tracker)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'Autosave ' + filename + ' restored')
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'Autosave ' + filename + ' restored')
             await funcutil.silently_call(io.delete_file(map_backup))
         except Exception as e:
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, repr(e))
+            self._context.post(self, msg.DEPLOYMENT_MSG, repr(e))
         finally:
-            self._mailer.post(self, msg.DEPLOYMENT_DONE)
+            self._context.post(self, msg.DEPLOYMENT_DONE)
 
 
 class _InstallRuntimeHandler(httpabc.PostHandler):
 
     def __init__(self, deployment: Deployment, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-        self._deployment = deployment
+        self._mailer, self._deployment = mailer, deployment
 
     async def handle_post(self, resource, data):
         subscription_path = await httpsubs.HttpSubscriptionService.subscribe(

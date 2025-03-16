@@ -1,11 +1,9 @@
 # ALLOW core.* csii.messaging
 from core.util import gc, util, idutil, io, objconv, steamutil
-from core.msg import msgext, msgftr, msglog, msgtrf
-from core.msgc import mc
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext
-from core.proc import proch, jobh, wrapper
-from core.common import steam, interceptors, portmapper, rconsvc
+from core.http import httpabc, httpext
+from core.proc import proch, wrapper
+from core.common import portmapper, rconsvc, svrhelpers
 from servers.csii import messaging as msg
 
 APPID = '730'
@@ -44,7 +42,7 @@ def _init_config_files(runtime_path: str, world_path: str) -> tuple:
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
+        self._context = context
         self._python, self._wrapper = context.config('python'), None
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
@@ -57,53 +55,26 @@ class Deployment:
 
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
-        await steamutil.link_steamclient_to_sdk(self._mailer.env('HOME'))
+        await steamutil.link_steamclient_to_sdk(self._context.env('HOME'))
         await self.build_world()
-        self._mailer.register(portmapper.PortMapperService(self._mailer))
-        self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
-            self.build_world))
-        self._mailer.register(jobh.JobProcess(self._mailer))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        roll_filter = msgftr.Or(mc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
-            httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._logs_dir, invert=True)))
-        self._mailer.register(msglog.LogfileSubscriber(
-            self._logs_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER, roll_filter, msgtrf.GetData()))
+        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper.init_ports().init_jobs().init_archiving(self._tempdir)
+        helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
     def resources(self, resource: httpabc.Resource):
-        r = httprsc.ResourceBuilder(resource)
-        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
-        r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/VERSIONS.txt'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID, anon=False), 'r')
-        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.MtimeHandler().dir(self._logs_dir))
-        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
-        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
-        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
-        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
-        r.pop()
-        r.psh('steamcmd')
-        r.put('login', steam.SteamCmdLoginHandler(self._mailer))
-        r.put('input', steam.SteamCmdInputHandler(self._mailer))
-        r.pop()
-        r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'), 'r')
-        r.pop()
-        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tempdir=self._tempdir,
-            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
-            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
-        r.pop()
-        r.psh('config')
-        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
+        builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
+        builder.put_meta(self._runtime_dir + '/VERSIONS.txt', httpext.MtimeHandler().dir(self._logs_dir))
+        builder.put_installer_steam(self._runtime_dir, APPID, anon=False)
+        builder.put_wipes(self._runtime_dir, dict(all=self._world_dir))
+        builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
+        builder.pop()
+        builder.put_steamcmd()
+        builder.put_logs(self._logs_dir)
+        builder.put_backups(self._tempdir, self._backups_dir)
+        configs = dict(cmdargs=self._cmdargs_file)
         for config_file in self._config_files:
-            r.put(config_file.identity(), httpext.FileSystemHandler(config_file.world_path()), 'm')
+            configs[config_file.identity()] = config_file.world_path()
+        builder.put_config(configs)
 
     async def new_server_process(self) -> proch.ServerProcess:
         bin_dir = self._runtime_dir + '/game/bin/linuxsteamrt64'
@@ -113,10 +84,10 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         server_port = util.get('-port', cmdargs, 27015)
         if util.get('upnp', cmdargs, True):
-            portmapper.map_port(self._mailer, self, server_port, gc.TCP, 'CS2 TCP server')
-            portmapper.map_port(self._mailer, self, server_port, gc.UDP, 'CS2 UDP server')
-        rconsvc.RconService.set_config(self._mailer, self, server_port, util.get('+rcon_password', cmdargs))
-        server = proch.ServerProcess(self._mailer, self._python).use_cwd(bin_dir)
+            portmapper.map_port(self._context, self, server_port, gc.TCP, 'CS2 TCP server')
+            portmapper.map_port(self._context, self, server_port, gc.UDP, 'CS2 UDP server')
+        rconsvc.RconService.set_config(self._context, self, server_port, util.get('+rcon_password', cmdargs))
+        server = proch.ServerProcess(self._context, self._python).use_cwd(bin_dir)
         server.append_arg(self._wrapper).append_arg(executable).append_arg('-dedicated')
         for key, value in cmdargs.items():
             if key != 'upnp' and key != '-dedicated' and not key.startswith('_'):

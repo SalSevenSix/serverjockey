@@ -2,29 +2,26 @@
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
-from core.system import svrext, svrsvc
-from core.proc import jobh, prcext
-from core.common import rconsvc
+from core.context import contextsvc
+from core.system import svrsvc
+from core.proc import jobh
+from core.common import rconsvc, svrhelpers
 
 
 _SERVER_VERSION_KEY = 'Game version is'
 _SERVER_VERSION_FILTER = msgftr.DataStrStartsWith(_SERVER_VERSION_KEY)
+_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+
 SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, _SERVER_VERSION_FILTER)
 CONSOLE_LOG_FILTER = msgftr.Or(
-    mc.ServerProcess.FILTER_ALL_LINES,
-    rconsvc.RconService.FILTER_OUTPUT,
-    jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS)
-_MAINTENANCE_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-_READY_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+    mc.ServerProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(prcext.ServerStateSubscriber(mailer))
-    mailer.register(svrext.MaintenanceStateSubscriber(mailer, _MAINTENANCE_STATE_FILTER, _READY_STATE_FILTER))
-    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.public_ip()))
+async def initialise(context: contextsvc.Context):
+    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER)
+    context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
 
 
 # Game version is v0.3.10.61027

@@ -1,10 +1,9 @@
 # ALLOW core.* unturned.messaging
 from core.util import gc, util, io, objconv
-from core.msg import msgftr, msgext, msglog
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext
-from core.proc import proch, jobh, prcenc, wrapper
-from core.common import steam, interceptors, portmapper
+from core.http import httpabc, httpext
+from core.proc import proch, prcenc, wrapper
+from core.common import portmapper, svrhelpers
 from servers.unturned import messaging as msg
 
 APPID = '1110390'
@@ -24,12 +23,11 @@ def _default_cmdargs():
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
+        self._context = context
         self._python, self._wrapper = context.config('python'), None
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
-        self._executable = self._runtime_dir + '/Unturned_Headless.x86_64'
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
         self._save_dir = self._world_dir + '/save'
@@ -46,58 +44,36 @@ class Deployment:
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
         await self.build_world()
-        self._mailer.register(portmapper.PortMapperService(self._mailer))
-        self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
-            self.build_world))
-        self._mailer.register(jobh.JobProcess(self._mailer))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
+        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper.init_ports().init_jobs().init_archiving(self._tempdir).done()
 
     def resources(self, resource: httpabc.Resource):
-        r = httprsc.ResourceBuilder(resource)
-        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
-        r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.psh('logs', httpext.FileSystemHandler(self._logs_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._logs_dir, 'path'), 'r')
-        r.pop()
-        r.psh('config')
-        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
-        r.put('commands', httpext.FileSystemHandler(self._commands_file), 'm')
-        r.put('settings', httpext.FileSystemHandler(self._settings_file), 'm')
-        r.put('workshop', httpext.FileSystemHandler(self._workshop_file), 'm')
-        r.pop()
-        r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
-        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.MtimeHandler().check(self._map_dir).dir(self._logs_dir))
-        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
-        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._map_dir), 'r')
-        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
-        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
-        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
-        r.pop()
-        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tempdir=self._tempdir,
-            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
-            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
+        builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
+        builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
+                         httpext.MtimeHandler().check(self._map_dir).dir(self._logs_dir))
+        builder.put_installer_steam(self._runtime_dir, APPID)
+        builder.put_wipes(self._runtime_dir, dict(save=self._map_dir, all=self._world_dir))
+        builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
+        builder.pop()
+        builder.put_logs(self._logs_dir)
+        builder.put_backups(self._tempdir, self._backups_dir)
+        builder.put_config(dict(
+            cmdargs=self._cmdargs_file, commands=self._commands_file,
+            settings=self._settings_file, workshop=self._workshop_file))
 
     async def new_server_process(self) -> proch.ServerProcess:
-        if not await io.file_exists(self._executable):
+        executable = self._runtime_dir + '/Unturned_Headless.x86_64'
+        if not await io.file_exists(executable):
             raise FileNotFoundError('Unturned game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('upnp', cmdargs, True):
             await self._map_ports()
-        return proch.ServerProcess(self._mailer, self._python) \
-            .use_env(self._env) \
-            .use_out_decoder(prcenc.PtyLineDecoder()) \
-            .append_arg(self._wrapper).append_arg(self._executable) \
-            .append_arg('-batchmode').append_arg('-nographics') \
-            .append_arg('+' + util.get('scope', cmdargs, 'InternetServer') + '/Save')
+        server = proch.ServerProcess(self._context, self._python)
+        server.use_env(self._env).use_out_decoder(prcenc.PtyLineDecoder())
+        server.append_arg(self._wrapper).append_arg(executable)
+        server.append_arg('-batchmode').append_arg('-nographics')
+        server.append_arg('+' + util.get('scope', cmdargs, 'InternetServer') + '/Save')
+        return server
 
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._save_dir, self._savesvr_dir)
@@ -121,5 +97,5 @@ class Deployment:
             for line in commands.split('\n'):
                 if line and line.lower().startswith(port_key):
                     port = int(util.lchop(line.lower(), port_key))
-        portmapper.map_port(self._mailer, self, port, gc.UDP, 'Unturned query')
-        portmapper.map_port(self._mailer, self, port + 1, gc.UDP, 'Unturned server')
+        portmapper.map_port(self._context, self, port, gc.UDP, 'Unturned query')
+        portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Unturned server')

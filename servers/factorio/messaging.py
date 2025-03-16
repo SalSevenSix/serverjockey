@@ -2,9 +2,10 @@
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
-from core.system import svrsvc, svrext
-from core.proc import jobh, prcext
-from core.common import playerstore, rconsvc
+from core.context import contextsvc
+from core.system import svrsvc
+from core.proc import jobh
+from core.common import playerstore, rconsvc, svrhelpers
 
 SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE,
@@ -15,26 +16,17 @@ FILTER_DEPLOYMENT_MSG = msgftr.NameIs(DEPLOYMENT_MSG)
 FILTER_DEPLOYMENT_START = msgftr.NameIs(DEPLOYMENT_START)
 FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(
-    mc.ServerProcess.FILTER_ALL_LINES,
-    jobh.JobProcess.FILTER_ALL_LINES,
-    rconsvc.RconService.FILTER_OUTPUT,
-    msglog.FILTER_ALL_LEVELS,
-    FILTER_DEPLOYMENT_MSG)
-CONSOLE_LOG_ERROR_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_ALL_LINES,
-    msgftr.DataMatches(r'^\d*\.\d* Error .*'))
-MAINTENANCE_STATE_FILTER = msgftr.Or(
-    FILTER_DEPLOYMENT_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(
-    FILTER_DEPLOYMENT_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+    mc.ServerProcess.FILTER_ALL_LINES, jobh.JobProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
+    msglog.FILTER_ALL_LEVELS, FILTER_DEPLOYMENT_MSG)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataMatches(r'^\d*\.\d* Error .*'))
+_MAINT_FILTER = msgftr.Or(FILTER_DEPLOYMENT_START, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_FILTER = msgftr.Or(FILTER_DEPLOYMENT_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(prcext.ServerStateSubscriber(mailer))
-    mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
-    mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.local_ip()))
-    mailer.register(_PlayerEventSubscriber(mailer))
+async def initialise(context: contextsvc.Context):
+    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
+    context.register(_ServerDetailsSubscriber(context, await sysutil.local_ip()))
+    context.register(_PlayerEventSubscriber(context))
 
 
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):

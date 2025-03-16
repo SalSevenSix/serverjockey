@@ -1,13 +1,12 @@
 from xml.dom import minidom
 # ALLOW core.* sevendaystodie.messaging
 from core.util import gc, util, objconv, io, pack, idutil
-from core.msg import msgftr, msgtrf, msglog, msgext
-from core.msgc import mc, sc
+from core.msgc import sc
 from core.context import contextsvc
-from core.http import httpabc, httprsc, httpext
+from core.http import httpabc, httpext
 from core.system import svrsvc
-from core.proc import proch, jobh
-from core.common import steam, interceptors, portmapper
+from core.proc import proch
+from core.common import portmapper, svrhelpers
 from servers.sevendaystodie import messaging as msg
 
 APPID = '294420'
@@ -27,7 +26,7 @@ def _default_cmdargs():
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
-        self._mailer = context
+        self._context = context
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
@@ -37,7 +36,7 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._config_dir = self._world_dir + '/config'
         self._save_dir = self._world_dir + '/save'
-        self._log_dir = self._world_dir + '/logs'
+        self._logs_dir = self._world_dir + '/logs'
         self._mods_src_dir = self._world_dir + '/mods'
         self._cmdargs_file = self._config_dir + '/cmdargs.json'
         self._settings_file = self._config_dir + '/serverconfig.xml'
@@ -48,72 +47,40 @@ class Deployment:
 
     async def initialise(self):
         await self.build_world()
-        self._mailer.register(portmapper.PortMapperService(self._mailer))
-        self._mailer.register(jobh.JobProcess(self._mailer))
-        self._mailer.register(msgext.CallableSubscriber(
-            msgftr.Or(httpext.WipeHandler.FILTER_DONE, msgext.Unpacker.FILTER_DONE, jobh.JobProcess.FILTER_DONE),
-            self.build_world))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Archiver(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        self._mailer.register(
-            msgext.SyncWrapper(self._mailer, msgext.Unpacker(self._mailer, self._tempdir), msgext.SyncReply.AT_START))
-        roll_filter = msgftr.Or(mc.ServerStatus.RUNNING_FALSE_FILTER, msgftr.And(
-            httpext.WipeHandler.FILTER_DONE, msgftr.DataStrStartsWith(self._log_dir, invert=True)))
-        self._mailer.register(msglog.LogfileSubscriber(
-            self._log_dir + '/%Y%m%d-%H%M%S.log', msg.CONSOLE_LOG_FILTER, roll_filter, msgtrf.GetData()))
+        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper.init_ports().init_jobs().init_archiving(self._tempdir)
+        helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
     def resources(self, resource: httpabc.Resource):
-        r = httprsc.ResourceBuilder(resource)
-        r.reg('r', interceptors.block_running_or_maintenance(self._mailer))
-        r.reg('m', interceptors.block_maintenance_only(self._mailer))
-        r.psh('logs', httpext.FileSystemHandler(self._log_dir))
-        r.put('*{path}', httpext.FileSystemHandler(self._log_dir, 'path'), 'r')
-        r.pop()
-        r.psh('config')
-        r.put('cmdargs', httpext.FileSystemHandler(self._cmdargs_file), 'm')
-        r.put('settings', httpext.FileSystemHandler(self._settings_file), 'm')
-        r.put('admin', httpext.FileSystemHandler(self._admin_file), 'm')
-        r.pop()
-        r.psh('deployment')
-        r.put('runtime-meta', httpext.FileSystemHandler(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf'))
-        r.put('install-runtime', steam.SteamCmdInstallHandler(self._mailer, self._runtime_dir, APPID), 'r')
-        r.put('wipe-runtime', httpext.WipeHandler(self._mailer, self._runtime_dir), 'r')
-        r.put('world-meta', httpext.MtimeHandler().check(self._save_dir + '/Saves').dir(self._log_dir))
-        r.put('wipe-world-all', httpext.WipeHandler(self._mailer, self._world_dir), 'r')
-        r.put('wipe-world-config', httpext.WipeHandler(self._mailer, self._config_dir), 'r')
-        r.put('wipe-world-save', httpext.WipeHandler(self._mailer, self._save_dir), 'r')
-        r.put('backup-runtime', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._runtime_dir), 'r')
-        r.put('backup-world', httpext.ArchiveHandler(self._mailer, self._backups_dir, self._world_dir), 'r')
-        r.put('restore-backup', httpext.UnpackerHandler(self._mailer, self._backups_dir, self._home_dir), 'r')
-        r.pop()
-        r.psh('backups', httpext.FileSystemHandler(self._backups_dir))
-        r.put('*{path}', httpext.FileSystemHandler(
-            self._backups_dir, 'path', tempdir=self._tempdir,
-            read_tracker=msglog.IntervalTracker(self._mailer, initial_message='SENDING data...', prefix='sent'),
-            write_tracker=msglog.IntervalTracker(self._mailer)), 'm')
-        r.pop()
-        r.psh('modfiles', httpext.FileSystemHandler(self._mods_src_dir, ls_filter=_is_modfile))
-        r.put('*{path}', httpext.FileSystemHandler(self._mods_src_dir, 'path', tempdir=self._tempdir), 'm')
+        builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
+        builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
+                         httpext.MtimeHandler().check(self._save_dir + '/Saves').dir(self._logs_dir))
+        builder.put_installer_steam(self._runtime_dir, APPID)
+        builder.put_wipes(self._runtime_dir, dict(save=self._save_dir, config=self._config_dir, all=self._world_dir))
+        builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
+        builder.pop()
+        builder.put_logs(self._logs_dir)
+        builder.put_backups(self._tempdir, self._backups_dir)
+        builder.put_config(dict(cmdargs=self._cmdargs_file, settings=self._settings_file, admin=self._admin_file))
+        builder.psh('modfiles', httpext.FileSystemHandler(self._mods_src_dir, ls_filter=_is_modfile))
+        builder.put('*{path}', httpext.FileSystemHandler(self._mods_src_dir, 'path', tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('7D2D game server not installed. Please Install Runtime first.')
-        svrsvc.ServerStatus.notify_state(self._mailer, self, sc.START)  # pushing early because slow pre-start tasks
+        svrsvc.ServerStatus.notify_state(self._context, self, sc.START)  # pushing early because slow pre-start tasks
         config = await self._build_live_config()
         await self._sync_mods()
         await self._map_ports(config)
-        return proch.ServerProcess(self._mailer, self._executable) \
-            .use_env(self._env) \
-            .use_cwd(self._runtime_dir) \
-            .append_arg('-quit') \
-            .append_arg('-batchmode') \
-            .append_arg('-nographics') \
-            .append_arg('-dedicated') \
-            .append_arg('-configfile=' + self._live_file)
+        server = proch.ServerProcess(self._context, self._executable)
+        server.use_env(self._env).use_cwd(self._runtime_dir)
+        server.append_arg('-quit').append_arg('-batchmode').append_arg('-nographics')
+        server.append_arg('-dedicated').append_arg('-configfile=' + self._live_file)
+        return server
 
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._config_dir,
-                                  self._save_dir, self._log_dir, self._mods_src_dir)
+                                  self._save_dir, self._logs_dir, self._mods_src_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         await io.create_directory(self._mods_live_dir)
@@ -166,20 +133,20 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('server_upnp', cmdargs, True):
             server_port = int(util.get('ServerPort', config, 26900))
-            portmapper.map_port(self._mailer, self, server_port, gc.TCP, '7D2D TCP server')
-            portmapper.map_port(self._mailer, self, server_port, gc.UDP, '7D2D UDP server')
-            portmapper.map_port(self._mailer, self, server_port + 1, gc.UDP, '7D2D aux1')
-            portmapper.map_port(self._mailer, self, server_port + 2, gc.UDP, '7D2D aux2')
-            portmapper.map_port(self._mailer, self, server_port + 3, gc.UDP, '7D2D aux3')
+            portmapper.map_port(self._context, self, server_port, gc.TCP, '7D2D TCP server')
+            portmapper.map_port(self._context, self, server_port, gc.UDP, '7D2D UDP server')
+            portmapper.map_port(self._context, self, server_port + 1, gc.UDP, '7D2D aux1')
+            portmapper.map_port(self._context, self, server_port + 2, gc.UDP, '7D2D aux2')
+            portmapper.map_port(self._context, self, server_port + 3, gc.UDP, '7D2D aux3')
         if util.get('console_upnp', cmdargs, False) and objconv.to_bool(util.get('WebDashboardEnabled', config)):
             console_port = int(util.get('WebDashboardPort', config, 8080))
-            portmapper.map_port(self._mailer, self, console_port, gc.TCP, '7D2D web console')
+            portmapper.map_port(self._context, self, console_port, gc.TCP, '7D2D web console')
         if util.get('telnet_upnp', cmdargs, False) and objconv.to_bool(util.get('TelnetEnabled', config)):
             telnet_port = int(util.get('TelnetPort', config, 8081))
-            portmapper.map_port(self._mailer, self, telnet_port, gc.TCP, '7D2D telnet')
+            portmapper.map_port(self._context, self, telnet_port, gc.TCP, '7D2D telnet')
 
     async def _sync_mods(self):
-        self._mailer.post(self, msg.DEPLOYMENT_MSG, 'MOD syncing...')
+        self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD syncing...')
         tracking_file, data, modfiles = self._mods_src_dir + '/mods.json', {}, []
         if await io.file_exists(tracking_file):
             data = objconv.json_to_dict(await io.read_file(tracking_file))
@@ -213,21 +180,21 @@ class Deployment:
             if livedir:
                 await io.delete_any(self._mods_live_dir + '/' + livedir)
             if not await io.file_exists(modfile):
-                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' not found, removed from server.')
+                self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' not found, removed from server.')
                 return None
             working_dir = self._tempdir + '/' + idutil.generate_id()
             await io.create_directory(working_dir)
             await pack.unpack_archive(modfile, working_dir)
             source = await io.find_files(working_dir, modinfo)
             if len(source) == 0:
-                self._mailer.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' has no ' + modinfo)
+                self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' has no ' + modinfo)
                 return None
             source = source[0][0:-1 - len(modinfo)]
             livedir = name[0:-1 - len(util.fext(name))] if source == working_dir else util.fname(source)
             target = self._mods_live_dir + '/' + livedir
             await io.delete_any(target)
             await io.move_path(source, target)
-            self._mailer.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' installed successfully.')
+            self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' installed successfully.')
             return livedir
         finally:
             await io.delete_directory(working_dir)

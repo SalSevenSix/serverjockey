@@ -2,38 +2,28 @@
 from core.util import util, sysutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
-from core.system import svrsvc, svrext
-from core.proc import jobh, prcext
-from core.common import playerstore
+from core.context import contextsvc
+from core.system import svrsvc
+from core.proc import jobh
+from core.common import playerstore, svrhelpers
+
+_SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp (.*) : usecElapsed >= 0$'
+_STARTED_FILTER = msgftr.DataEquals('Loading level: 100%')
+_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
+_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
 
 DEFAULT_PORT = 27015
-_STARTED_FILTER = msgftr.DataEquals('Loading level: 100%')
-_SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp (.*) : usecElapsed >= 0$'
-
-SERVER_STARTED_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    _STARTED_FILTER)
+SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, _STARTED_FILTER)
 CONSOLE_LOG_FILTER = msgftr.Or(
-    msgftr.And(
-        mc.ServerProcess.FILTER_ALL_LINES,
-        msgftr.Not(msgftr.DataMatches(_SPAM))),
-    jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS)
-CONSOLE_LOG_ERROR_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_ALL_LINES,
-    msgftr.DataStrContains(' k_EResult'))
-MAINTENANCE_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-READY_STATE_FILTER = msgftr.Or(
-    jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
+    msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.Not(msgftr.DataMatches(_SPAM))),
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataStrContains(' k_EResult'))
 
 
-async def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(prcext.ServerStateSubscriber(mailer))
-    mailer.register(svrext.MaintenanceStateSubscriber(mailer, MAINTENANCE_STATE_FILTER, READY_STATE_FILTER))
-    mailer.register(playerstore.PlayersSubscriber(mailer))
-    mailer.register(_ServerDetailsSubscriber(mailer, await sysutil.public_ip()))
-    mailer.register(_PlayerEventSubscriber(mailer))
+async def initialise(context: contextsvc.Context):
+    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
+    context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
+    context.register(_PlayerEventSubscriber(context))
 
 
 # \x1b[?1h\x1b=\x1b[6n\x1b[H\x1b[2J\x1b]0;Unturned\x07\x1b37mGame version: 3.22.19.4 Engine version: 2020.3.38f1
