@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from core.util import idutil, objconv, sysutil, dtutil
 from core.msgc import sc
-from servers.testserver.server import default_config as testserver_default_config
+from servers.testserver.deployment import default_config as testserver_default_config
 
 
 class TestBasics(unittest.TestCase):
