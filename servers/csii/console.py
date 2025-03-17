@@ -1,9 +1,12 @@
 # ALLOW core.* csii.messaging
-from core.util import util
 from core.msg import msgabc
-from core.http import httpabc, httprsc, httpext
-from core.proc import proch
-from core.common import interceptors, rconsvc
+from core.http import httpabc
+from core.common import rconsvc, svrhelpers
+
+_HELP_TEXT = '''CS2 CONSOLE HELP
+Help on commands can be found on the Total CS:GO site.
+  https://totalcsgo.com/commands
+'''
 
 
 def initialise(mailer: msgabc.MulticastMailer):
@@ -11,33 +14,5 @@ def initialise(mailer: msgabc.MulticastMailer):
 
 
 def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
-    r = httprsc.ResourceBuilder(resource)
-    r.reg('s', interceptors.block_not_started(mailer))
-    r.psh('console')
-    r.put('help', httpext.StaticHandler(HELP_TEXT))
-    r.put('send', rconsvc.RconHandler(mailer), 's')
-    r.put('say', _SayHandler(mailer), 's')
-
-
-class _SayHandler(httpabc.PostHandler):
-
-    def __init__(self, mailer: msgabc.MulticastMailer):
-        self._mailer = mailer
-
-    async def handle_post(self, resource, data):
-        player, text = util.get('player', data), util.get('text', data)
-        if not text or not player:
-            return httpabc.ResponseBody.BAD_REQUEST
-        lines = util.split_lines(text, lines_limit=5, total_char_limit=280)
-        if not lines:
-            return httpabc.ResponseBody.BAD_REQUEST
-        for line in lines:
-            if line:
-                await proch.PipeInLineService.request(self._mailer, self, 'say ' + player + ': ' + line)
-        return httpabc.ResponseBody.NO_CONTENT
-
-
-HELP_TEXT = '''CS2 CONSOLE HELP
-Help on commands can be found on the Total CS:GO site.
-  https://totalcsgo.com/commands
-'''
+    builder = svrhelpers.ConsoleResourceBuilder(mailer, resource).psh_console()
+    builder.put_help(_HELP_TEXT).put_send_rcon().put_say_pipein('say {player}: {line}')

@@ -32,3 +32,21 @@ class ConsoleCommandHandler(httpabc.PostHandler):
             return httpabc.ResponseBody.BAD_REQUEST
         await proch.PipeInLineService.request(self._mailer, self, cmdline.build())
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class SayHandler(httpabc.PostHandler):
+
+    def __init__(self, mailer: msgabc.MulticastMailer, template: str):
+        self._mailer, self._template = mailer, template
+
+    async def handle_post(self, resource, data):
+        player, text = util.get('player', data), util.get('text', data)
+        player, text = player.strip() if player else player, text.strip() if text else text
+        if not text or not player:
+            return httpabc.ResponseBody.BAD_REQUEST
+        lines = util.split_lines(text, lines_limit=5, total_char_limit=280)
+        if not lines:
+            return httpabc.ResponseBody.BAD_REQUEST
+        for line in [o.strip() for o in lines if o]:
+            await proch.PipeInLineService.request(self._mailer, self, self._template.format(player=player, line=line))
+        return httpabc.ResponseBody.NO_CONTENT

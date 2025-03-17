@@ -1,22 +1,9 @@
 # ALLOW core.* starbound.messaging
 from core.msg import msgabc
-from core.http import httpabc, httprsc, httpext
-from core.common import rconsvc, interceptors
+from core.http import httpabc
+from core.common import rconsvc, svrhelpers
 
-
-def initialise(mailer: msgabc.MulticastMailer):
-    mailer.register(rconsvc.RconService(mailer, '[rcon] '))
-
-
-def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
-    r = httprsc.ResourceBuilder(resource)
-    r.reg('s', interceptors.block_not_started(mailer))
-    r.psh('console')
-    r.put('help', httpext.StaticHandler(HELP_TEXT))
-    r.put('send', rconsvc.RconHandler(mailer), 's')
-
-
-HELP_TEXT = '''STARBOUND CONSOLE HELP
+_HELP_TEXT = '''STARBOUND CONSOLE HELP
 help, ban, clearstagehand, disablespawning, enablespawning,
 kick, list, placedungeon, resetuniverseflags, serverreload,
 setspawnpoint, settileprotection, setuniverseflag, spawnitem,
@@ -26,3 +13,12 @@ spawnvehicle, timewarp, unbanip, unbanuuiud, warp, whereis
 Use help {command} to get detailed information.
 Command output will be shown in the console log.
 '''
+
+
+def initialise(mailer: msgabc.MulticastMailer):
+    mailer.register(rconsvc.RconService(mailer, '[rcon] '))
+
+
+def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+    builder = svrhelpers.ConsoleResourceBuilder(mailer, resource).psh_console()
+    builder.put_help(_HELP_TEXT).put_send_rcon()

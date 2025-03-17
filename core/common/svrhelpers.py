@@ -1,14 +1,16 @@
 from __future__ import annotations
 import typing
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
-from core.util import aggtrf
+from core.util import aggtrf, cmdutil
 from core.msg import msgabc, msglog, msgftr, msgtrf, msgext
 from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.system import svrext
 from core.proc import jobh, prcext
-from core.common import steam, playerstore, interceptors, portmapper
+from core.common import steam, playerstore, interceptors, portmapper, rconsvc
+
+_SEND_COMMAND = cmdutil.CommandLines(dict(send='{line}'))
 
 
 class MessagingInitHelper:
@@ -16,9 +18,15 @@ class MessagingInitHelper:
     def __init__(self, context: contextsvc.Context):
         self._context = context
 
-    def init_state(self, maintenance_filter: msgabc.Filter, ready_filter: msgabc.Filter) -> MessagingInitHelper:
+    def init_state(self, job_start_filter: msgabc.Filter = None,
+                   job_done_filter: msgabc.Filter = None) -> MessagingInitHelper:
         self._context.register(prcext.ServerStateSubscriber(self._context))
-        self._context.register(svrext.MaintenanceStateSubscriber(self._context, maintenance_filter, ready_filter))
+        self._context.register(svrext.MaintenanceStateSubscriber(
+            self._context,
+            msgftr.Or(job_start_filter if job_start_filter else jobh.JobProcess.FILTER_STARTED,
+                      msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START),
+            msgftr.Or(job_done_filter if job_done_filter else jobh.JobProcess.FILTER_DONE,
+                      msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)))
         return self
 
     def init_players(self) -> MessagingInitHelper:
@@ -179,3 +187,33 @@ class DeploymentResourceBuilder:
         self.put('login', steam.SteamCmdLoginHandler(self._context))
         self.put('input', steam.SteamCmdInputHandler(self._context))
         return self.pop()
+
+
+class ConsoleResourceBuilder:
+
+    def __init__(self, mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+        self._mailer, self._builder = mailer, httprsc.ResourceBuilder(resource)
+        self._builder.reg('s', interceptors.block_not_started(mailer))
+
+    def psh(self, signature, handler=None, ikeys=None) -> ConsoleResourceBuilder:
+        self._builder.psh(signature, handler, ikeys)
+        return self
+
+    def put(self, signature, handler=None, ikeys=None) -> ConsoleResourceBuilder:
+        self._builder.put(signature, handler, ikeys)
+        return self
+
+    def psh_console(self) -> ConsoleResourceBuilder:
+        return self.psh('console')
+
+    def put_help(self, text: str) -> ConsoleResourceBuilder:
+        return self.put('help', httpext.StaticHandler(text))
+
+    def put_send_rcon(self) -> ConsoleResourceBuilder:
+        return self.put('send', rconsvc.RconHandler(self._mailer), 's')
+
+    def put_send_pipein(self) -> ConsoleResourceBuilder:
+        return self.put('{command}', prcext.ConsoleCommandHandler(self._mailer, _SEND_COMMAND), 's')
+
+    def put_say_pipein(self, template: str) -> ConsoleResourceBuilder:
+        return self.put('say', prcext.SayHandler(self._mailer, template), 's')

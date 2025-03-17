@@ -1,6 +1,6 @@
 # ALLOW core.*
 from core.util import util, sysutil
-from core.msg import msgabc, msgftr, msglog, msgext
+from core.msg import msgabc, msgftr, msglog
 from core.msgc import mc
 from core.context import contextsvc
 from core.system import svrsvc
@@ -10,9 +10,6 @@ from core.common import rconsvc, svrhelpers
 
 _SERVER_VERSION_KEY = 'Game version is'
 _SERVER_VERSION_FILTER = msgftr.DataStrStartsWith(_SERVER_VERSION_KEY)
-_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
-
 SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, _SERVER_VERSION_FILTER)
 CONSOLE_LOG_FILTER = msgftr.Or(
     mc.ServerProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
@@ -20,7 +17,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
 
 
 async def initialise(context: contextsvc.Context):
-    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER)
+    svrhelpers.MessagingInitHelper(context).init_state()
     context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
 
 

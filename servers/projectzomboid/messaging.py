@@ -1,6 +1,6 @@
 # ALLOW core.*
 from core.util import util, dtutil, objconv
-from core.msg import msgabc, msglog, msgftr, msgext
+from core.msg import msgabc, msglog, msgftr
 from core.msgc import mc
 from core.context import contextsvc
 from core.system import svrsvc
@@ -8,9 +8,6 @@ from core.proc import proch, jobh
 from core.common import cachelock, playerstore, svrhelpers
 
 _CHAT_KEY_STRING = 'New message \'ChatMessage{chat=General'
-_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
-
 SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('*** SERVER STARTED ***'))
 CONSOLE_LOG_FILTER = msgftr.Or(
@@ -31,7 +28,7 @@ SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 
 
 def initialise(context: contextsvc.Context):
-    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
+    svrhelpers.MessagingInitHelper(context).init_state().init_players()
     context.register(_ServerDetailsSubscriber(context))
     context.register(_PlayerEventSubscriber(context))
     context.register(_PlayerChatSubscriber(context))

@@ -1,6 +1,6 @@
 # ALLOW core.*
 from core.util import util, sysutil
-from core.msg import msgabc, msgftr, msglog, msgext
+from core.msg import msgabc, msgftr, msglog
 from core.msgc import mc
 from core.context import contextsvc
 from core.system import svrsvc
@@ -9,9 +9,6 @@ from core.common import rconsvc, playerstore, svrhelpers
 
 _SPAM = r'^src/steamnetworkingsockets/clientlib/steamnetworkingsockets_lowlevel.cpp(.*):' \
         r' Assertion Failed: usecElapsed >= 0$'
-_MAINT_FILTER = msgftr.Or(jobh.JobProcess.FILTER_STARTED, msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START)
-_READY_FILTER = msgftr.Or(jobh.JobProcess.FILTER_DONE, msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)
-
 SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataMatches(r'^SV: .* player server started$'))
 CONSOLE_LOG_FILTER = msgftr.Or(
@@ -21,7 +18,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
 
 
 async def initialise(context: contextsvc.Context):
-    svrhelpers.MessagingInitHelper(context).init_state(_MAINT_FILTER, _READY_FILTER).init_players()
+    svrhelpers.MessagingInitHelper(context).init_state().init_players()
     context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
     context.register(_PlayerEventSubscriber(context))
 
