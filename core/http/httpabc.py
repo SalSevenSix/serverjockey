@@ -125,14 +125,6 @@ class AllowMethod(metaclass=abc.ABCMeta):
 class Resource(AllowMethod, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def append(self, resource: Resource) -> Resource:
-        pass
-
-    @abc.abstractmethod
-    def remove(self, name: str) -> typing.Optional[Resource]:
-        pass
-
-    @abc.abstractmethod
     def kind(self) -> ResourceKind:
         pass
 

@@ -1,7 +1,7 @@
 # ALLOW core.* projectzomboid.messaging
 from core.util import util, io, objconv
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httprsc, httpext
 from core.proc import proch
 from core.common import svrhelpers, cachelock
 from servers.projectzomboid import modcheck as mck
@@ -48,7 +48,7 @@ class Deployment:
         helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
         helper.init_jobs().init_archiving(self._tempdir).done()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
                          httpext.MtimeHandler().check(self._multiplayer_dir).file(self._log_file))

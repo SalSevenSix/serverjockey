@@ -1,6 +1,6 @@
 # ALLOW core.* projectzomboid.*
 from core.context import contextsvc
-from core.http import httpabc
+from core.http import httprsc
 from core.metrics import mtxinstance
 from core.system import svrabc
 from core.proc import proch
@@ -22,11 +22,11 @@ class Server(svrabc.Server):
         mck.initialise(self._context)
         await self._deployment.initialise()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         self._deployment.resources(resource)
         con.resources(self._context, resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)
-        builder.put_server(restarts.COMMANDS).put_players().put_log(msg.CONSOLE_LOG_FILTER).put_subs()
+        builder.put_server(restarts.COMMANDS).put_players(no_list=True).put_log(msg.CONSOLE_LOG_FILTER).put_subs()
 
     async def run(self):
         server = await self._deployment.new_server_process()

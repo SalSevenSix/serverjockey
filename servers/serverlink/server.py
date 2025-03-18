@@ -3,7 +3,7 @@ from core.util import gc, util, logutil, io, aggtrf, objconv
 from core.msg import msgtrf, msgftr, msglog
 from core.msgc import mc
 from core.context import contextsvc, contextext
-from core.http import httpabc, httpsubs, httprsc, httpext
+from core.http import httpsubs, httprsc, httpext
 from core.metrics import mtxinstance
 from core.system import svrabc, svrext
 from core.proc import proch, prcext
@@ -52,19 +52,20 @@ class Server(svrabc.Server):
             self._context.register(msglog.LogfileSubscriber(
                 self._log_file, msg_filter=_LOG_FILTER, transformer=msgtrf.GetData()))
 
-    def resources(self, resource: httpabc.Resource):
-        r = httprsc.ResourceBuilder(resource)
-        r.psh('server', svrext.ServerStatusHandler(self._context))
-        r.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
-        r.put('{command}', svrext.ServerCommandHandler(self._context))
-        r.pop()
-        r.put('config', httpext.FileSystemHandler(self._config))
-        r.psh('log', httpext.FileSystemHandler(self._log_file) if self._log_file else httpext.StaticHandler(_NO_LOG))
-        r.put('tail', httpext.RollingLogHandler(self._context, _LOG_FILTER))
-        r.put('subscribe', self._httpsubs.handler(_LOG_FILTER, aggtrf.StrJoin('\n')))
-        r.pop()
-        r.psh(self._httpsubs.resource(resource, 'subscriptions'))
-        r.put('{identity}', self._httpsubs.subscriptions_handler('identity'))
+    def resources(self, resource: httprsc.WebResource):
+        builder = httprsc.ResourceBuilder(resource)
+        builder.psh('server', svrext.ServerStatusHandler(self._context))
+        builder.put('subscribe', self._httpsubs.handler(mc.ServerStatus.UPDATED_FILTER))
+        builder.put('{command}', svrext.ServerCommandHandler(self._context))
+        builder.pop()
+        log_handler = httpext.FileSystemHandler(self._log_file) if self._log_file else httpext.StaticHandler(_NO_LOG)
+        builder.psh('log', log_handler)
+        builder.put('tail', httpext.RollingLogHandler(self._context, _LOG_FILTER))
+        builder.put('subscribe', self._httpsubs.handler(_LOG_FILTER, aggtrf.StrJoin('\n')))
+        builder.pop()
+        builder.put('config', httpext.FileSystemHandler(self._config))
+        builder.psh(self._httpsubs.resource(resource, 'subscriptions'))
+        builder.put('{identity}', self._httpsubs.subscriptions_handler('identity'))
 
     async def run(self):
         await self._clientfile.write()

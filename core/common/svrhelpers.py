@@ -71,7 +71,7 @@ class DeploymentInitHelper:
 
 class ServerResourceBuilder:
 
-    def __init__(self, context: contextsvc.Context, resource: httpabc.Resource):
+    def __init__(self, context: contextsvc.Context, resource: httprsc.WebResource):
         self._context, self._resource = context, resource
         self._httpsubs, self._builder = httpsubs.HttpSubscriptionService(context), httprsc.ResourceBuilder(resource)
         self._builder.reg('m', interceptors.block_maintenance_only(context))
@@ -94,8 +94,8 @@ class ServerResourceBuilder:
         self.put('{command}', svrext.ServerCommandHandler(self._context, additional_commands), 'm')
         return self.pop()
 
-    def put_players(self) -> ServerResourceBuilder:
-        self.psh('players')
+    def put_players(self, no_list: bool = False) -> ServerResourceBuilder:
+        self.psh('players', None if no_list else playerstore.PlayersHandler(self._context))
         self.put('subscribe', self._httpsubs.handler(mc.PlayerStore.EVENT_FILTER, mc.PlayerStore.EVENT_TRF))
         return self.pop()
 
@@ -113,7 +113,7 @@ class ServerResourceBuilder:
 
 class DeploymentResourceBuilder:
 
-    def __init__(self, context: contextsvc.Context, resource: httpabc.Resource):
+    def __init__(self, context: contextsvc.Context, resource: httprsc.WebResource):
         self._context, self._builder = context, httprsc.ResourceBuilder(resource)
         self._builder.reg('r', interceptors.block_running_or_maintenance(context))
         self._builder.reg('m', interceptors.block_maintenance_only(context))
@@ -139,12 +139,10 @@ class DeploymentResourceBuilder:
         return self
 
     def put_installer(self, handler: httpabc.PostHandler) -> DeploymentResourceBuilder:
-        self.put('install-runtime', handler, 'r')
-        return self
+        return self.put('install-runtime', handler, 'r')
 
     def put_installer_steam(self, runtime_dir: str, app_id: str, anon: bool = True) -> DeploymentResourceBuilder:
-        self.put_installer(steam.SteamCmdInstallHandler(self._context, runtime_dir, app_id, anon))
-        return self
+        return self.put_installer(steam.SteamCmdInstallHandler(self._context, runtime_dir, app_id, anon))
 
     def put_wipes(self, runtime_dir: str, world_dirs: dict) -> DeploymentResourceBuilder:
         self.put('wipe-runtime', httpext.WipeHandler(self._context, runtime_dir), 'r')
@@ -160,8 +158,7 @@ class DeploymentResourceBuilder:
         return self
 
     def put_log(self, log_file: str) -> DeploymentResourceBuilder:
-        self.put('log', httpext.FileSystemHandler(log_file))
-        return self
+        return self.put('log', httpext.FileSystemHandler(log_file))
 
     def put_logs(self, logs_dir: str, ls_filter: typing.Callable = None) -> DeploymentResourceBuilder:
         self.psh('logs', httpext.FileSystemHandler(logs_dir, ls_filter=ls_filter))
@@ -191,7 +188,7 @@ class DeploymentResourceBuilder:
 
 class ConsoleResourceBuilder:
 
-    def __init__(self, mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+    def __init__(self, mailer: msgabc.MulticastMailer, resource: httprsc.WebResource):
         self._mailer, self._builder = mailer, httprsc.ResourceBuilder(resource)
         self._builder.reg('s', interceptors.block_not_started(mailer))
 

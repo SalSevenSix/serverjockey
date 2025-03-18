@@ -1,6 +1,6 @@
 # ALLOW core.* factorio.*
 from core.context import contextsvc
-from core.http import httpabc
+from core.http import httprsc
 from core.metrics import mtxinstance
 from core.system import svrabc
 from core.proc import proch
@@ -22,7 +22,7 @@ class Server(svrabc.Server):
         await msg.initialise(self._context)
         await self._deployment.initialise()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         con.resources(self._context, resource)
         self._deployment.resources(resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)

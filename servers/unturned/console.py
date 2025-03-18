@@ -1,6 +1,6 @@
 # ALLOW core.* unturned.messaging
 from core.msg import msgabc
-from core.http import httpabc
+from core.http import httprsc
 from core.common import svrhelpers
 
 _HELP_TEXT = '''UNTURNED CONSOLE HELP
@@ -12,6 +12,6 @@ More help on commands can be found on the wiki.
 '''
 
 
-def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+def resources(mailer: msgabc.MulticastMailer, resource: httprsc.WebResource):
     builder = svrhelpers.ConsoleResourceBuilder(mailer, resource).psh_console()
     builder.put_help(_HELP_TEXT).put_send_pipein().put_say_pipein('Say {player}: {line}')

@@ -1,7 +1,7 @@
 import abc
 # ALLOW util.* msg*.* context.* http.*
 from core.context import contextsvc
-from core.http import httpabc
+from core.http import httprsc
 
 
 class Server(metaclass=abc.ABCMeta):
@@ -17,7 +17,7 @@ class Server(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         pass
 
     @abc.abstractmethod

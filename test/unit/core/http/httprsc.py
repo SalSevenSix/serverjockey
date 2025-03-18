@@ -1,6 +1,13 @@
 import unittest
+
 from yarl import URL
-from core.http import httprsc
+from core.http import httpabc, httprsc
+from core.http.httpabc import Resource, AbcDataGet, AbcResponse
+
+
+class TestHandler(httpabc.GetHandler):
+    def handle_get(self, resource: Resource, data: AbcDataGet) -> AbcResponse:
+        pass
 
 
 class TestCoreHttpHttpRsc(unittest.TestCase):
@@ -27,6 +34,13 @@ class TestCoreHttpHttpRsc(unittest.TestCase):
         processor = httprsc.PathProcessor(resource)
         data = processor.extract_args_url(url)
         self.assertEqual('value', data['key'])
+
+    def test_only_one_handler_allowed(self):
+        builder = httprsc.ResourceBuilder(httprsc.WebResource())
+        builder.psh('a').put('b', TestHandler())
+        builder.put('b')
+        with self.assertRaises(Exception):
+            builder.put('b', TestHandler())
 
     def test_tail_path_cannot_psh_children(self):
         builder = httprsc.ResourceBuilder(httprsc.WebResource())

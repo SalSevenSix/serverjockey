@@ -5,9 +5,9 @@ from core.http import httpabc, httpcnt, httpsec, httprsc
 
 
 def resources(resource: httprsc.WebResource):
-    r = httprsc.ResourceBuilder(resource)
-    r.psh('steamapi')
-    r.put('published-file-details', _GetPublishedFileDetailsHandler())
+    buidler = httprsc.ResourceBuilder(resource)
+    buidler.psh('steamapi')
+    buidler.put('published-file-details', _GetPublishedFileDetailsHandler())
 
 
 class _GetPublishedFileDetailsHandler(httpabc.GetHandler):

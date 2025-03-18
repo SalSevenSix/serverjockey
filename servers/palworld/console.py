@@ -1,6 +1,6 @@
 # ALLOW core.* palworld.messaging
 from core.msg import msgabc
-from core.http import httpabc
+from core.http import httprsc
 from core.common import rconsvc, svrhelpers
 
 # https://tech.palworldgame.com/settings-and-operation/commands/
@@ -18,6 +18,6 @@ def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(rconsvc.RconService(mailer, enforce_id=False))
 
 
-def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+def resources(mailer: msgabc.MulticastMailer, resource: httprsc.WebResource):
     builder = svrhelpers.ConsoleResourceBuilder(mailer, resource).psh_console()
     builder.put_help(_HELP_TEXT).put_send_rcon()

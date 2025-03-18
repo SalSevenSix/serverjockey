@@ -5,7 +5,7 @@ from core.util import gc, util, idutil, tasks, io, pack, aggtrf, funcutil, objco
 from core.msg import msgabc, msglog
 from core.msgc import sc
 from core.context import contextsvc
-from core.http import httpabc, httpext, httpsubs
+from core.http import httpabc, httprsc, httpext, httpsubs
 from core.system import svrsvc
 from core.proc import proch, jobh
 from core.common import rconsvc, portmapper, svrhelpers
@@ -69,7 +69,7 @@ class Deployment:
         helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
         helper.init_ports().init_jobs(no_rebuild=True).init_archiving(self._tempdir).done()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_dir + '/data/changelog.txt',
                          httpext.MtimeHandler().check(self._map_file).dir(self._save_dir))

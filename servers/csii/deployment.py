@@ -1,7 +1,7 @@
 # ALLOW core.* csii.messaging
 from core.util import gc, util, idutil, io, objconv, steamutil
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httprsc, httpext
 from core.proc import proch, wrapper
 from core.common import portmapper, rconsvc, svrhelpers
 from servers.csii import messaging as msg
@@ -61,7 +61,7 @@ class Deployment:
         helper.init_ports().init_jobs().init_archiving(self._tempdir)
         helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_dir + '/VERSIONS.txt', httpext.MtimeHandler().dir(self._logs_dir))
         builder.put_installer_steam(self._runtime_dir, APPID, anon=False)

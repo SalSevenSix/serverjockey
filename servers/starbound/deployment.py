@@ -1,7 +1,7 @@
 # ALLOW core.* starbound.messaging
 from core.util import gc, util, idutil, io, objconv
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httprsc, httpext
 from core.proc import proch
 from core.common import rconsvc, portmapper, svrhelpers
 from servers.starbound import messaging as msg
@@ -37,7 +37,7 @@ class Deployment:
         helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
         helper.init_ports().init_jobs().init_archiving(self._tempdir).done()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
                          httpext.MtimeHandler().check(self._save_dir).file(self._log_file))

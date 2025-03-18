@@ -3,7 +3,7 @@ from xml.dom import minidom
 from core.util import gc, util, objconv, io, pack, idutil
 from core.msgc import sc
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httprsc, httpext
 from core.system import svrsvc
 from core.proc import proch
 from core.common import portmapper, svrhelpers
@@ -51,7 +51,7 @@ class Deployment:
         helper.init_ports().init_jobs().init_archiving(self._tempdir)
         helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
                          httpext.MtimeHandler().check(self._save_dir + '/Saves').dir(self._logs_dir))

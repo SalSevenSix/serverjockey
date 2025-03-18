@@ -30,15 +30,15 @@ class SystemStoreService:
     def resources(self, resource: httprsc.WebResource):
         if not self._dbfile:
             return
-        r = httprsc.ResourceBuilder(resource)
-        r.psh('store', httpext.StaticHandler(self._dbfile))
-        r.put('reset', _StoreResetHandler(self._context))
-        r.psh('instance', _QueryInstanceHandler(self._context))
-        r.put('event', _QueryInstanceEventHandler(self._context))
-        r.pop()
-        r.psh('player')
-        r.put('event', _QueryPlayerEventHandler(self._context))
-        r.put('chat', _QueryPlayerChatHandler(self._context))
+        buidler = httprsc.ResourceBuilder(resource)
+        buidler.psh('store', httpext.StaticHandler(self._dbfile))
+        buidler.put('reset', _StoreResetHandler(self._context))
+        buidler.psh('instance', _QueryInstanceHandler(self._context))
+        buidler.put('event', _QueryInstanceEventHandler(self._context))
+        buidler.pop()
+        buidler.psh('player')
+        buidler.put('event', _QueryPlayerEventHandler(self._context))
+        buidler.put('chat', _QueryPlayerChatHandler(self._context))
 
 
 class _SystemRouting(msgabc.AbcSubscriber):

@@ -1,6 +1,6 @@
 # ALLOW core.* starbound.messaging
 from core.msg import msgabc
-from core.http import httpabc
+from core.http import httprsc
 from core.common import rconsvc, svrhelpers
 
 _HELP_TEXT = '''STARBOUND CONSOLE HELP
@@ -19,6 +19,6 @@ def initialise(mailer: msgabc.MulticastMailer):
     mailer.register(rconsvc.RconService(mailer, '[rcon] '))
 
 
-def resources(mailer: msgabc.MulticastMailer, resource: httpabc.Resource):
+def resources(mailer: msgabc.MulticastMailer, resource: httprsc.WebResource):
     builder = svrhelpers.ConsoleResourceBuilder(mailer, resource).psh_console()
     builder.put_help(_HELP_TEXT).put_send_rcon()

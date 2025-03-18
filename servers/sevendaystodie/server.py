@@ -1,6 +1,6 @@
 # ALLOW core.* sevendaystodie.*
 from core.context import contextsvc
-from core.http import httpabc
+from core.http import httprsc
 from core.metrics import mtxinstance
 from core.system import svrabc
 from core.common import spstopper, svrhelpers
@@ -19,7 +19,7 @@ class Server(svrabc.Server):
         await msg.initialise(self._context)
         await self._deployment.initialise()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         self._deployment.resources(resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)
         builder.put_server().put_players().put_log(msg.CONSOLE_LOG_FILTER).put_subs()

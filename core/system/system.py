@@ -33,22 +33,22 @@ class SystemService:
         resource = httprsc.WebResource()
         self._sysstoresvc.resources(resource)
         steamapi.resources(resource)
-        r = httprsc.ResourceBuilder(resource)
-        r.put('login', httpext.LoginHandler())
-        r.put('modules', httpext.StaticHandler(self._modules.names()))
-        r.put('ssl', httpssl.SslHandler(self._context))
-        r.put('metrics', mtxhandler.MetricsHandler())
-        r.put('mprof', mprof.MemoryProfilingHandler())
-        r.psh('system')
-        r.put('info', _SystemInfoHandler(self._context))
-        r.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
-        r.put('shutdown', _ShutdownHandler())
-        r.pop()
-        r.psh('instances', _InstancesHandler(self, self._modules))
-        r.put('subscribe', subs.handler(SystemService._INSTANCE_EVENT_FILTER, _InstanceEventTransformer()))
-        r.pop()
-        r.psh(subs.resource(resource, 'subscriptions'))
-        r.put('{identity}', subs.subscriptions_handler('identity'))
+        buidler = httprsc.ResourceBuilder(resource)
+        buidler.put('login', httpext.LoginHandler())
+        buidler.put('modules', httpext.StaticHandler(self._modules.names()))
+        buidler.put('ssl', httpssl.SslHandler(self._context))
+        buidler.put('metrics', mtxhandler.MetricsHandler())
+        buidler.put('mprof', mprof.MemoryProfilingHandler())
+        buidler.psh('system')
+        buidler.put('info', _SystemInfoHandler(self._context))
+        buidler.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
+        buidler.put('shutdown', _ShutdownHandler())
+        buidler.pop()
+        buidler.psh('instances', _InstancesHandler(self, self._modules))
+        buidler.put('subscribe', subs.handler(SystemService._INSTANCE_EVENT_FILTER, _InstanceEventTransformer()))
+        buidler.pop()
+        buidler.psh(subs.resource(resource, 'subscriptions'))
+        buidler.put('{identity}', subs.subscriptions_handler('identity'))
         return resource
 
     async def initialise(self):
@@ -214,7 +214,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         identity = identity.replace(' ', '_').lower()
         if _InstancesHandler.VALIDATOR.search(identity):
             return httpabc.ResponseBody.BAD_REQUEST
-        if identity in ('sjgms', 'serverjockey', 'serverlink'):
+        if identity in ('sjgms', 'serverjockey', 'serverlink', 'subscribe'):
             return httpabc.ResponseBody.BAD_REQUEST
         subcontext = await self._system.create_instance(dict(module=module, identity=identity))
         url = util.get('baseurl', data, '') + '/instances/' + subcontext.config('identity')

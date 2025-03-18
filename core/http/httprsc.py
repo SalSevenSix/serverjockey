@@ -11,25 +11,21 @@ ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc
 
 class ResourceBuilder:
 
-    def __init__(self, resource: httpabc.Resource):
-        self._interceptors = {}
-        self._current = resource
+    def __init__(self, resource: WebResource):
+        self._current, self._interceptors = resource, {}
 
     def reg(self, key: str, builder: httpabc.InterceptorBuilder) -> ResourceBuilder:
         assert key and len(key) == 1
         self._interceptors[key] = builder
         return self
 
-    def psh(self, signature: str,
-            handler: typing.Optional[httpabc.AbcHandler] = None, ikeys: str = None) -> ResourceBuilder:
-        name, kind = ResourceBuilder._unpack(signature)
-        resource = self._current.child(name)
-        if resource is None:
-            resource = WebResource(name, kind, self._wrap(ikeys, handler))
-        self._current.append(resource)
-        self._current = resource
-        ResourceBuilder._log_binding(resource, handler)
-        return self
+    def psh(self, signature: str, handler: typing.Optional[httpabc.AbcHandler] = None,
+            ikeys: str = None) -> ResourceBuilder:
+        return self._put(signature, handler, ikeys, True)
+
+    def put(self, signature: str, handler: typing.Optional[httpabc.AbcHandler] = None,
+            ikeys: str = None) -> ResourceBuilder:
+        return self._put(signature, handler, ikeys, False)
 
     def pop(self) -> ResourceBuilder:
         parent = self._current.parent()
@@ -38,11 +34,17 @@ class ResourceBuilder:
         self._current = parent
         return self
 
-    def put(self, signature: str,
-            handler: typing.Optional[httpabc.AbcHandler] = None, ikeys: str = None) -> ResourceBuilder:
+    def _put(self, signature: str, handler: typing.Optional[httpabc.AbcHandler],
+             ikeys: typing.Optional[str], push: bool) -> ResourceBuilder:
         name, kind = ResourceBuilder._unpack(signature)
-        resource = WebResource(name, kind, self._wrap(ikeys, handler))
-        self._current.append(resource)
+        resource = self._current.child(name)
+        if resource:
+            resource.handler(self._wrap(ikeys, handler))
+        else:
+            resource = WebResource(name, kind, self._wrap(ikeys, handler))
+            self._current.append(resource)
+        if push:
+            self._current = resource
         ResourceBuilder._log_binding(resource, handler)
         return self
 
@@ -54,7 +56,7 @@ class ResourceBuilder:
             if builder:
                 handler = builder.wrap(handler)
             else:
-                raise Exception('ERROR HTTP Interceptor with key "' + key + '" not registered.')
+                raise Exception(f'ERROR HTTP Interceptor with key "{key}" not registered.')
         return handler
 
     @staticmethod
@@ -89,24 +91,31 @@ class WebResource(httpabc.Resource):
                  kind: httpabc.ResourceKind = httpabc.ResourceKind.PATH,
                  handler: typing.Optional[httpabc.AbcHandler] = None):
         self._name, self._kind, self._handler = name, kind, handler
-        self._parent: typing.Optional[httpabc.Resource] = None
-        self._children: typing.List[httpabc.Resource] = []
+        self._parent: typing.Optional[WebResource] = None
+        self._children: typing.List[WebResource] = []
 
-    def append(self, resource: httpabc.Resource) -> httpabc.Resource:
+    def append(self, resource: WebResource):
+        name = resource.name()
+        if self.child(name):
+            raise Exception(f'Resource "{name}" already exists')
         if self.kind() is httpabc.ResourceKind.ARG_TAIL:
-            raise Exception('ARG_TAIL resource cannot have children')
+            raise Exception(f'Resource "{name}" type ARG_TAIL cannot have children')
         if resource.kind().is_arg() and len(self.children(*ARG_KINDS)) > 0:
-            raise Exception('Only one ARG kind allowed')
+            raise Exception(f'Resource "{name}" type ARG must be singular')
         resource._parent = self
         self._children.append(resource)
-        return self
 
-    def remove(self, name: str) -> typing.Optional[httpabc.Resource]:
+    def handler(self, handler: typing.Optional[httpabc.AbcHandler] = None) -> typing.Optional[httpabc.AbcHandler]:
+        if handler:
+            if self._handler:
+                raise Exception(f'Resource {self.path()} already has handler')
+            self._handler = handler
+        return self._handler
+
+    def remove(self, name: str):
         resource = self.child(name)
-        if resource is None:
-            return None
-        self._children.remove(resource)
-        return resource
+        if resource:
+            self._children.remove(resource)
 
     def kind(self) -> httpabc.ResourceKind:
         return self._kind
@@ -117,18 +126,18 @@ class WebResource(httpabc.Resource):
     def path(self, args: typing.Optional[typing.Dict[str, str]] = None) -> str:
         return PathProcessor(self).build_path(args)
 
-    def lookup(self, path: str) -> typing.Optional[httpabc.Resource]:
+    def lookup(self, path: str) -> typing.Optional[WebResource]:
         return PathProcessor(self).lookup_resource(path)
 
-    def parent(self) -> typing.Optional[httpabc.Resource]:
+    def parent(self) -> typing.Optional[WebResource]:
         return self._parent
 
-    def child(self, name: str) -> typing.Optional[httpabc.Resource]:
+    def child(self, name: str) -> typing.Optional[WebResource]:
         if name is None:
             return None
         return util.single([c for c in self._children if c.name() == name])
 
-    def children(self, *kinds: httpabc.ResourceKind) -> typing.List[httpabc.Resource]:
+    def children(self, *kinds: httpabc.ResourceKind) -> typing.List[WebResource]:
         if len(kinds) == 0:
             return self._children.copy()
         results = []

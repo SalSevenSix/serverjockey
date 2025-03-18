@@ -1,7 +1,7 @@
 # ALLOW core.* testserver.messaging
 from core.util import util, io, objconv, pkg, dtutil
 from core.context import contextsvc
-from core.http import httpabc, httpext
+from core.http import httpabc, httprsc, httpext
 from core.proc import proch
 from core.common import svrhelpers
 from servers.testserver import messaging as msg
@@ -35,7 +35,7 @@ class Deployment:
         helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
         helper.init_archiving(self._tempdir).init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
-    def resources(self, resource: httpabc.Resource):
+    def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_metafile, httpext.MtimeHandler().dir(self._logs_dir))
         builder.put_installer(_InstallRuntimeHandler(self))
