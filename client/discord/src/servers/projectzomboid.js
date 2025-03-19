@@ -42,11 +42,11 @@ const helpData = [helptext.systemHelpData, {
     'player "{name}" thunder                  : Trigger thunder',
     'whitelist add-name "{name}" "{pwd}" : Add player by name',
     'whitelist remove-name "{name}"      : Remove player by name',
-    'whitelist add-id {id}     : Add player by @ID, alias required',
-    'whitelist remove-id {id}  : Remove player by @ID, alias required',
+    'whitelist add-id {id} "{name}" : Add player by @ID, name or alias req,
+    'whitelist remove-id {id}       : Remove player by @ID, alias required',
     'whitelist reset-password {id}  : experimental, alias required',
-    'banlist add {steamid}     : Add player SteamID to banlist',
-    'banlist remove {steamid}  : Remove player SteamID from banlist'
+    'banlist add {steamid}          : Add player SteamID to banlist',
+    'banlist remove {steamid}       : Remove player SteamID from banlist'
   ],
   help3: [
     'getconfig cmdargs      : Get launch options as attachment',
@@ -174,14 +174,29 @@ function whitelistRemoveId(httptool, aliases, message, snowflake, dataHandler = 
   whitelistRemoveName(httptool, record.name, dataHandler);
 }
 
-function whitelistAddId(context, httptool, aliases, message, snowflake) {
-  const record = aliases.findByKey(snowflake);
-  if (!record) return util.reactError(message);
-  context.client.users.fetch(record.snowflake)
+function whitelistAddId(context, httptool, aliases, message, snowflake, name = null) {
+  let record = aliases.findByKey(snowflake);
+  if (name) {
+    snowflake = record ? record.snowflake : util.toSnowflake(snowflake);
+    if (!snowflake) return util.reactError(message);
+    if (record && record.name != name) {
+      if (aliases.findByName(name)) return util.reactError(message);  // Someone else has name
+      record = null;  // Force add alias again with changed name
+    }
+  } else {
+    if (!record) return util.reactError(message);  // Need alias if no name given
+    [snowflake, name] = [record.snowflake, record.name];
+  }
+  context.client.users.fetch(snowflake)
     .then(function(user) {
+      if (!record) {
+        const discordid = user.tag.replaceAll('#', '');
+        if (!aliases.add(snowflake, discordid, name)) return util.reactError(message);
+        aliases.save();
+      }
       const pwd = Math.random().toString(16).substr(2, 8);
-      whitelistAddName(httptool, record.name, pwd, function() {
-        user.send(context.config.WHITELIST_DM.replace('${user}', record.name).replace('${pass}', pwd))
+      whitelistAddName(httptool, name, pwd, function() {
+        user.send(context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
           .then(function() { util.reactSuccess(message); })
           .catch(function(error) { logger.error(error, message); });
       });
@@ -199,7 +214,7 @@ export function whitelist($) {
   } else if (cmd === 'remove-name') {
     whitelistRemoveName(httptool, data[0]);
   } else if (cmd === 'add-id') {
-    whitelistAddId(context, httptool, aliases, message, data[0]);
+    whitelistAddId(context, httptool, aliases, message, data[0], data.length > 1 ? data[1] : null);
   } else if (cmd === 'remove-id') {
     whitelistRemoveId(httptool, aliases, message, data[0]);
   } else if (cmd === 'reset-password') {
