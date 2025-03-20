@@ -2,7 +2,7 @@ import * as cutil from 'common/util/util';
 import * as util from './util/util.js';
 import * as helptext from './helptext.js';
 
-export const help = helptext.help(helptext.systemHelpData);
+export const help = helptext.systemHelp;
 
 export function about($) {
   let result = '**ServerJockey** is a game server management system for Project Zomboid and other supported games. ';

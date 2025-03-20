@@ -4,21 +4,15 @@ import * as logger from '../util/logger.js';
 import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 
-const helpData = [helptext.systemHelpData, {
-  title: 'PROJECT ZOMBOID COMMANDS',
-  help1: [
-    'server                    : Server status',
-    'server start              : Start server',
-    'server restart            : Save world and restart server',
-    'server restart-after-warnings : Warnings then restart server',
-    'server restart-on-empty       : Restart when server is empty',
-    'server stop               : Save world and stop server',
-    'auto {mode}               : Set auto mode, valid values 0,1,2,3',
-    'log                       : Get last 100 lines from the log',
-    'alias {cmds ...}          : Alias management, use help for details',
-    'reward {cmds ...}         : Reward management, use help for details',
-    'trigger {cmds ...}        : Trigger management, use help for details',
-    'activity {query ...}      : Activity reporting, use help for details',
+export const startup = commons.startupAll;
+export const { server, auto, log, getconfig, setconfig, deployment, players,
+  alias, reward, trigger, activity } = commons;
+
+export const help = helptext.newServerHelpBuilder()
+  .title('PROJECT ZOMBOID COMMANDS')
+  .addServer(true, true)
+  .addAlias().addReward().addTrigger().addActivity()
+  .add([
     'world save                : Save the game world',
     'world broadcast {message} : Broadcast message to all players',
     'world chopper             : Trigger chopper event',
@@ -26,10 +20,10 @@ const helpData = [helptext.systemHelpData, {
     'world start-storm         : Start a storm',
     'world stop-weather        : Stop current weather',
     'world start-rain          : Start rain',
-    'world stop-rain           : Stop rain'
-  ],
-  help2: [
-    'players                   : Show players currently online',
+    'world stop-rain           : Stop rain'])
+  .next()
+  .addPlayers()
+  .add([
     'player "{name}" kick      : Kick from server',
     'player "{name}" set-access-level {level} : Set access level',
     'player "{name}" tele-to "{toplayer}"     : Teleport to player',
@@ -46,62 +40,25 @@ const helpData = [helptext.systemHelpData, {
     'whitelist remove-id {id}       : Remove player by @ID, alias required',
     'whitelist reset-password {id}  : experimental, alias required',
     'banlist add {steamid}          : Add player SteamID to banlist',
-    'banlist remove {steamid}       : Remove player SteamID from banlist'
-  ],
-  help3: [
-    'getconfig cmdargs      : Get launch options as attachment',
-    'getconfig ini          : Get INI config as attachment',
-    'getconfig sandbox      : Get Sandbox config as attachment',
-    'getconfig spawnregions : Get Spawnregions config as attachment',
-    'getconfig spawnpoints  : Get Spawnpoints config as attachment',
-    'getconfig jvm          : Get JVM config as attachment',
-    'setconfig cmdargs      : Update launch options using attached file',
-    'setconfig ini          : Update INI using attached file',
-    'setconfig sandbox      : Update Sandbox using attached file',
-    'setconfig spawnregions : Update Spawnregions using attached file',
-    'setconfig spawnpoints  : Update Spawnpoints using attached file',
-    'setconfig jvm          : Update JVM config using attached file',
-    'deployment backup-world {hours}   : Backup game world to zip file',
-    'deployment wipe-world-save        : Delete only map files',
-    'deployment wipe-world-all         : Delete game world folder',
-    'deployment install-runtime {beta} : Install game server'
-  ],
-  alias: helptext.alias,
-  reward: helptext.reward,
-  trigger: helptext.trigger,
-  activity: helptext.activity,
-  playersetaccesslevel: [
+    'banlist remove {steamid}       : Remove player SteamID from banlist'])
+  .next()
+  .addConfig(['cmdargs', 'INI', 'Sandbox', 'Spawnregions', 'Spawnpoints', 'JVM'])
+  .addDeployment()
+  .addHelp('player set-access-level', [
     'Set access level for online player. Level options:', '```',
-    'admin, moderator, overseer, gm, observer, none', '```'
-  ],
-  playergivexp: [
+    'admin, moderator, overseer, gm, observer, none', '```'])
+  .addHelp('player give-xp', [
     'Give XP to online player. Skill options:', '```',
     'Sprinting, Lightfoot, Nimble, Sneak, Aiming, Reloading,',
     'Axe, SmallBlunt, Blunt, Spear, SmallBlade, LongBlade, Combat,',
     'Woodwork, Cooking, Farming, Doctor, Electricity, MetalWelding,',
     'Tailoring, Mechanics, FlintKnapping, Carving, Masonry, Pottery,',
-    'Fishing, Trapping, PlantScavenging, Fitness, Strength', '```'
-  ],
-  playergiveitem: [
-    'Give item to player, {count} is optional.'
-  ],
-  playerspawnvehicle: [
-    'Spawn a vehicle next to player. Condition will vary.'
-  ],
-  deploymentbackupworld: [
-    'Make a backup of the game world to a zip file.',
-    'Optionally specify {hours} to prune backups older than hours.',
-    'Log output will be attached as a file.'
-  ],
-  deploymentinstallruntime: [
-    'Install game server, {beta} optional.',
-    'Log output will be attached as a file.'
-  ]
-}];
-
-export const [startup, help] = [commons.startupAll, helptext.help(helpData)];
-export const { server, auto, log, getconfig, setconfig, deployment, players,
-  alias, reward, trigger, activity } = commons;
+    'Fishing, Trapping, PlantScavenging, Fitness, Strength', '```'])
+  .addHelp('player give-item', [
+    'Give item to player, {count} is optional.'])
+  .addHelp('player spawn-vehicle', [
+    'Spawn a vehicle next to player. Condition will vary.'])
+  .build();
 
 export function world($) {
   const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
