@@ -24,9 +24,8 @@ const helpData = [helptext.systemHelpData, {
   send: '/console/help'
 }];
 
-export const [startup, help, server, auto, log, getconfig, setconfig, deployment, send] = [
-  commons.startupServerOnly, helptext.help(helpData), commons.server, commons.auto, commons.log,
-  commons.getconfig, commons.setconfig, commons.deployment, commons.send];
+export const [startup, help] = [commons.startupServerOnly, helptext.help(helpData)];
+export const { server, auto, log, getconfig, setconfig, deployment, send } = commons;
 
 export function players($) {
   $.httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {

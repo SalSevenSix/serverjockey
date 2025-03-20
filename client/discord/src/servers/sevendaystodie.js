@@ -33,9 +33,6 @@ const helpData = [helptext.systemHelpData, {
   activity: helptext.activity
 }];
 
-export const [startup, help, server, auto, log,
-  getconfig, setconfig, deployment, players,
-  alias, reward, trigger, activity] = [
-  commons.startupAll, helptext.help(helpData), commons.server, commons.auto, commons.log,
-  commons.getconfig, commons.setconfig, commons.deployment, commons.players,
-  commons.alias, commons.reward, commons.trigger, commons.activity];
+export const [startup, help] = [commons.startupAll, helptext.help(helpData)];
+export const { server, auto, log, getconfig, setconfig, deployment, players,
+  alias, reward, trigger, activity } = commons;

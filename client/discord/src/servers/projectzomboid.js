@@ -42,7 +42,7 @@ const helpData = [helptext.systemHelpData, {
     'player "{name}" thunder                  : Trigger thunder',
     'whitelist add-name "{name}" "{pwd}" : Add player by name',
     'whitelist remove-name "{name}"      : Remove player by name',
-    'whitelist add-id {id} "{name}" : Add player by @ID, name or alias req,
+    'whitelist add-id {id} "{name}" : Add player by @ID, name or alias req',
     'whitelist remove-id {id}       : Remove player by @ID, alias required',
     'whitelist reset-password {id}  : experimental, alias required',
     'banlist add {steamid}          : Add player SteamID to banlist',
@@ -99,12 +99,9 @@ const helpData = [helptext.systemHelpData, {
   ]
 }];
 
-export const [startup, help, server, auto, log,
-  getconfig, setconfig, deployment, players,
-  alias, reward, trigger, activity] = [
-  commons.startupAll, helptext.help(helpData), commons.server, commons.auto, commons.log,
-  commons.getconfig, commons.setconfig, commons.deployment, commons.players,
-  commons.alias, commons.reward, commons.trigger, commons.activity];
+export const [startup, help] = [commons.startupAll, helptext.help(helpData)];
+export const { server, auto, log, getconfig, setconfig, deployment, players,
+  alias, reward, trigger, activity } = commons;
 
 export function world($) {
   const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
