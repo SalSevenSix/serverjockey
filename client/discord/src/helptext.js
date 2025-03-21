@@ -107,8 +107,12 @@ const serverHelp = [
   'auto {mode}        : Set auto mode, valid values 0,1,2,3',
   'log                : Get last 100 lines from the log'];
 const helpServerAuto = [
-  'TODO',
-  'TODO'];
+  'Show the auto mode if {mode} not provided.',
+  'Set auto behaviour with {mode} option...', '```',
+  '0 : No automatic actions',
+  '1 : Automatically start the game server when ServerJockey starts',
+  '2 : Automatically restart the game server if it crashes',
+  '3 : Both automatic Start and Restart actions', '```'];
 
 const playersHelp = 'players            : Show players currently online';
 
