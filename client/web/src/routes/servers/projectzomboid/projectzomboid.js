@@ -4,14 +4,14 @@ export const worldActions = [
     'desc': 'Reset the game world save only. This is the map and player characters.' },
   { 'key': 'wipe-world-playerdb', 'name': 'Reset Player DB',
     'desc': 'Reset the player database only. This is logins, whitelist, banlist.' },
-  { 'key': 'wipe-world-logs', 'name': 'Reset Logs',
-    'desc': 'Reset the log files only.' },
+  { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
+    'desc': 'Delete the log files only.' },
   { 'key': 'wipe-world-lua', 'name': 'Reset Lua',
     'desc': 'Reset lua folder. Often used by mods to store data.' },
   { 'key': 'wipe-world-config', 'name': 'Reset Config',
     'desc': 'Reset the configuration files only. INI, Sandbox and Spawn config files.' },
-  { 'key': 'wipe-world-autobackups', 'name': 'Reset Autobackups',
-    'desc': 'Reset the automatic server created backups.' },
+  { 'key': 'wipe-world-autobackups', 'name': 'Delete Autobackups',
+    'desc': 'Delete the automatic server created backups.' },
   { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
     'desc': 'Reset all of the above.' }];
 

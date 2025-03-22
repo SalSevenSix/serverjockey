@@ -110,7 +110,7 @@ UPnP=false
     Project Zomboid mods are available to integrate with ServerJockey.
     They provide additional features. Using these mods are optional.
   </p>
-  <table class="table is-thinner">
+  <div class="integration-mods-container"><table class="table is-thinner">
     <thead>
       <tr>
         <th>Workshop ID</th>
@@ -127,7 +127,7 @@ UPnP=false
             Also player death event messages are sent to discord.</td>
       </tr>
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <div class="content pt-4" id="cacheLockingMapFiles">
@@ -204,3 +204,14 @@ BackupsOnVersionChange=false</CodeBlock>
 </div>
 
 <BackToTop />
+
+
+<style>
+  .integration-mods-container {
+    overflow-x: auto;
+  }
+
+  .integration-mods-container .table {
+    min-width: 26em;
+  }
+</style>

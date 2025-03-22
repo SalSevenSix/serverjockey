@@ -128,7 +128,7 @@ function whitelistRemoveId(httptool, aliases, message, snowflake, dataHandler = 
   whitelistRemoveName(httptool, record.name, dataHandler);
 }
 
-function whitelistAddId(context, httptool, aliases, message, snowflake, name = null) {
+function whitelistAddId(context, httptool, instance, aliases, message, snowflake, name = null) {
   let record = aliases.findByKey(snowflake);
   if (name) {
     snowflake = record ? record.snowflake : util.toSnowflake(snowflake);
@@ -150,7 +150,10 @@ function whitelistAddId(context, httptool, aliases, message, snowflake, name = n
       }
       const pwd = Math.random().toString(16).substr(2, 8);
       whitelistAddName(httptool, name, pwd, function() {
-        user.send(context.config.WHITELIST_DM.replace('${user}', name).replace('${pass}', pwd))
+        let text = context.config.WHITELIST_DM;
+        text = text.replaceAll('${user}', name).replaceAll('${pass}', pwd);  // Legacy substitutes
+        text = text.replaceAll('{instance}', instance).replaceAll('{user}', name).replaceAll('{pass}', pwd);
+        user.send(text)
           .then(function() { util.reactSuccess(message); })
           .catch(function(error) { logger.error(error, message); });
       });
@@ -159,7 +162,8 @@ function whitelistAddId(context, httptool, aliases, message, snowflake, name = n
 }
 
 export function whitelist($) {
-  const [context, httptool, aliases, message, data] = [$.context, $.httptool, $.aliases, $.message, [...$.data]];
+  const [context, httptool, instance, aliases, message, data] = [
+    $.context, $.httptool, $.instance, $.aliases, $.message, [...$.data]];
   if (data.length < 2) return util.reactUnknown(message);
   const cmd = data.shift();
   if (cmd === 'add-name') {
@@ -168,12 +172,12 @@ export function whitelist($) {
   } else if (cmd === 'remove-name') {
     whitelistRemoveName(httptool, data[0]);
   } else if (cmd === 'add-id') {
-    whitelistAddId(context, httptool, aliases, message, data[0], data.length > 1 ? data[1] : null);
+    whitelistAddId(context, httptool, instance, aliases, message, data[0], data.length > 1 ? data[1] : null);
   } else if (cmd === 'remove-id') {
     whitelistRemoveId(httptool, aliases, message, data[0]);
   } else if (cmd === 'reset-password') {
     whitelistRemoveId(httptool, aliases, message, data[0], function() {
-      cutil.sleep(500).then(function() { whitelistAddId(context, httptool, aliases, message, data[0]); });
+      cutil.sleep(500).then(function() { whitelistAddId(context, httptool, instance, aliases, message, data[0]); });
     });
   } else {
     util.reactUnknown(message);

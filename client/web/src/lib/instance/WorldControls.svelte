@@ -66,7 +66,7 @@
       <span class="is-italic">unavailable</span>
     {/if}
   </p>
-  <table class="table"><tbody>
+  <div class="control-container"><table class="table"><tbody>
     {#each actions as action}
       <tr>
         <td class="button-column">
@@ -77,11 +77,19 @@
         <td>{action.desc}</td>
       </tr>
     {/each}
-  </tbody></table>
+  </tbody></table></div>
 </div>
 
 
 <style>
+  .control-container {
+    overflow-x: auto;
+  }
+
+  .control-container .table {
+    min-width: 24em;
+  }
+
   .button-column {
     width: 20%;
   }

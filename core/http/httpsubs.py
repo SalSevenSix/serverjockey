@@ -234,8 +234,7 @@ class _InactivityCheck(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.AcceptAll())
-        self._mailer = mailer
-        self._last_check = time.time()
+        self._mailer, self._last_check = mailer, time.time()
 
     def handle(self, message):
         now = message.created()

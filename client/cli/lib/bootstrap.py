@@ -2,7 +2,6 @@ import logging
 import sys
 import argparse
 import signal
-
 # ALLOW lib.*
 from . import util, cxt, comms, tsk, cmd
 

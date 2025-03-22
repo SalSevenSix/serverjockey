@@ -60,7 +60,7 @@
   <InputText id="createInstanceIdentity" label="Name"
              bind:value={serverForm.identity} onKeypress={kpCreate} disabled={cannotEdit}
              title="Name for new Instance. Must be lower case letters and numbers, no spaces or special characters except dashes and underscores." />
-  <div class="block buttons">
+  <div class="block buttons mt-4">
     <button id="createInstanceCreate" title="Create" class="button is-primary is-fullwidth"
             disabled={cannotCreate} on:click={create}>
       <i class="fa-solid fa-square-plus fa-lg"></i>&nbsp;&nbsp;Create</button>

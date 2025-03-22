@@ -70,7 +70,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
             return None
         try:
             if self._file is None:
-                filename = dtutil.format_time(self._filename, time.time())
+                filename = dtutil.format_time(self._filename, message.created())
                 self._file = await aiofiles.open(filename, mode='w')
             await self._file.write(self._transformer.transform(message))
             await self._file.write('\n')

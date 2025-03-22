@@ -24,7 +24,7 @@ def _default_config() -> dict:
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',
         'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
-        'WHITELIST_DM': 'Welcome to our server.\nYour login is ${user} and password is ${pass}'
+        'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`'
     }
 
 
