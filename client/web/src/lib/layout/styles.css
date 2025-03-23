@@ -63,6 +63,22 @@ a[target="_blank"] {
   border: 1px solid var(--color-standard-light-bwg);
 }
 
+.input, .textarea, .select select {
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.input:disabled, .textarea:disabled, .select select:disabled {
+  transition: none;
+}
+
+.button {
+  transition: opacity 0.2s;
+}
+
+.button:disabled {
+  transition: none;
+}
+
 .table {
   background-color: transparent;
   line-height: 1;

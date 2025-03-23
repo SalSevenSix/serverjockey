@@ -37,7 +37,7 @@
 </script>
 
 
-<div class="block">
+<div class="block status-container">
   <table class="table">
     <tbody>
       <tr><td class="has-text-weight-bold">State</td><td id="serverStatusState">
@@ -67,3 +67,10 @@
     </tbody>
   </table>
 </div>
+
+
+<style>
+  .status-container {
+    min-height: 8.5em;
+  }
+</style>
