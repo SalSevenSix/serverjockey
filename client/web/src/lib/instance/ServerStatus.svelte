@@ -37,7 +37,7 @@
 </script>
 
 
-<div class="block status-container">
+<div class="block" class:full-size-status={!stateOnly}>
   <table class="table">
     <tbody>
       <tr><td class="has-text-weight-bold">State</td><td id="serverStatusState">
@@ -70,7 +70,7 @@
 
 
 <style>
-  .status-container {
+  .full-size-status {
     min-height: 8.5em;
   }
 </style>

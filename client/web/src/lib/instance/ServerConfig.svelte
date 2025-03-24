@@ -11,7 +11,7 @@
   let currentOption = null;
   let selectedOption = null;
 
-  $: cannotChange = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';
+  $: cannotChange = $serverStatus.running != false || $serverStatus.state === 'MAINTENANCE';
 
   $: if ($eventDown) {
     currentOption = autoOptions[$serverStatus.auto];
