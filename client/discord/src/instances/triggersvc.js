@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as cutil from 'common/util/util';
 import * as logger from '../util/logger.js';
 
 function getArgValue(key, arg) {
@@ -12,12 +13,35 @@ export function newTriggers(context, instance) {
   const data = { base: [] };
   const self = {};
 
+  const migration = function(loadedData) {
+    if (!loadedData || loadedData.length === 0) return loadedData;
+    if (cutil.hasProp(loadedData[0], 'on-event')) return loadedData;
+    const records = loadedData.map(function(loaded) {
+      const record = {};
+      record['on-event'] = Object.keys(loaded).filter(function(key) {  // Convert events
+        return ['on-login', 'on-logout', 'on-death'].includes(key);
+      });
+      ['rq-not-role', 'rq-role'].forEach(function(key) {  // Convert conditions
+        if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
+      });
+      ['cx-channel', 'cx-delay'].forEach(function(key) {  // Convert context
+        if (cutil.hasProp(loaded, key)) { record[key] = loaded[key]; }
+      });
+      ['do-remove-role', 'do-add-role', 'do-message'].forEach(function(key) {  // Convert actions
+        if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
+      });
+      return record;
+    });
+    fs.writeFile(file, JSON.stringify(records), logger.error);
+    return records;
+  };
+
   self.load = function() {
     fs.exists(file, function(exists) {
       if (!exists) return;
       fs.readFile(file, function(error, body) {
         if (error) return logger.error(error);
-        data.base = JSON.parse(body);
+        data.base = migration(JSON.parse(body));
       });
     });
     return self;
@@ -35,18 +59,18 @@ export function newTriggers(context, instance) {
   self.add = function(args) {
     if (!args) return false;
     const record = {};
-    let [counter, value] = [0, null];
-    args.forEach(function(arg) {  // Capture trigger events
-      if (['on-login', 'on-logout', 'on-death'].includes(arg)) {
-        record[arg] = null;
-        counter += 1;
-      }
+    record['on-event'] = args.filter(function(arg) {  // Capture events
+      return ['on-login', 'on-logout', 'on-death'].includes(arg);
     });
-    if (counter === 0) return false;  // At least one event required
-    args.forEach(function(arg) {  // Capture trigger conditions
-      ['rq-role', 'rq-not-role'].forEach(function(key) {
+    if (record['on-event'].length === 0) return false;  // At least one event required
+    let [actions, value] = [0, null];
+    ['rq-not-role', 'rq-role'].forEach(function(key) {  // Capture conditions
+      args.forEach(function(arg) {
         value = getArgValue(key, arg);
-        if (value) { record[key] = JSON.parse(value); }
+        if (value) {
+          if (!cutil.hasProp(record, key)) { record[key] = []; }
+          record[key].push(JSON.parse(value));
+        }
       });
     });
     args.forEach(function(arg) {  // Capture context values
@@ -56,22 +80,17 @@ export function newTriggers(context, instance) {
       if (value) { value = parseInt(value, 10); }
       if (value && !isNaN(value) && value > 1) { record['cx-delay'] = value; }
     });
-    counter = 0;
-    args.forEach(function(arg) {  // Capture actions
-      ['do-add-role', 'do-remove-role'].forEach(function(key) {
+    ['do-remove-role', 'do-add-role', 'do-message'].forEach(function(key) {  // Capture actions
+      args.forEach(function(arg) {
         value = getArgValue(key, arg);
         if (value) {
-          record[key] = JSON.parse(value);
-          counter += 1;
+          if (!cutil.hasProp(record, key)) { record[key] = []; }
+          record[key].push(key === 'do-message' ? value : JSON.parse(value));
+          actions += 1;
         }
       });
-      value = getArgValue('do-message', arg);
-      if (value) {
-        record['do-message'] = value;
-        counter += 1;
-      }
     });
-    if (counter === 0) return false;  // At least one action required
+    if (actions === 0) return false;  // At least one action required
     data.base.push(record);
     return true;
   };
@@ -88,22 +107,24 @@ export function newTriggers(context, instance) {
     if (data.base.length === 0) return ['No Triggers'];
     return data.base.map(function(record, index) {
       const result = [];
-      let current = [index.toString(), '|'];
-      for (const [key, value] of Object.entries(record)) {
-        if (result.length === 0 && key.startsWith('do-') || key === 'do-message') {
-          result.push(current.join(' '));
-          current = ['  >'];
+      let line = [index.toString(), '|'];
+      for (const [key, values] of Object.entries(record)) {
+        if (result.length === 0 && key.startsWith('do-')) {
+          result.push(line.join(' '));
+          line = ['  >'];
         }
-        if (value) {
-          let valueStr = value;
-          if (key.includes('channel') && value.name) { valueStr = '#' + value.name; }
-          else if (key.includes('role') && value.name) { valueStr = '@' + value.name; }
-          current.push(key + '=' + valueStr.toString());
-        } else {
-          current.push(key);
+        for (const value of Array.isArray(values) ? values : [values]) {
+          if (line.length > 1 && key === 'do-message') {
+            result.push(line.join(' '));
+            line = ['  >'];
+          }
+          let displayValue = value;
+          if (key.includes('channel') && value.name) { displayValue = '#' + value.name; }
+          else if (key.includes('role') && value.name) { displayValue = '@' + value.name; }
+          line.push(key === 'on-event' ? displayValue.toString() : key + '=' + displayValue.toString());
         }
       }
-      result.push(current.join(' '));
+      result.push(line.join(' '));
       return result.join('\n');
     });
   };

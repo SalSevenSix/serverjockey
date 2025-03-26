@@ -57,7 +57,7 @@
     {#if info}
       <table class="table"><tbody>
         <tr><td class="has-text-weight-bold" title="Machine time">Time</td>
-            <td class="notranslate" id="systemInfoTime">{info.time.text.slice(0, -3)} {info.time.tz.text}</td></tr>
+            <td class="notranslate" id="systemInfoTime">{info.time.text.slice(0, -3)} {info.time.tz.text.endsWith(':00') ? info.time.tz.text.slice(0, -3) : info.time.tz.text}</td></tr>
         <tr><td title="ServerJockey uptime">Uptime</td>
             <td class="notranslate" id="systemInfoUptime">{humanDuration(info.uptime)}</td></tr>
         <tr><td class="has-text-weight-bold" title="Operating system name">OS</td>
