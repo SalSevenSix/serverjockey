@@ -183,6 +183,8 @@ const helpTrigger = [
   '  on-login                : Trigger on player login',
   '  on-logout               : Trigger on player logout',
   '  on-death                : Trigger on player death',
+  '  on-started              : Trigger on server started',
+  '  on-stopped              : Trigger on server stopped',
   '  rq-role={roleid}        : Player must have this role for action',
   '  rq-not-role={roleid}    : Player must not have this role for action',
   '  cx-channel={channelid}  : Channel to use for any actions',

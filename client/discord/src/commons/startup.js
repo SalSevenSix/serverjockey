@@ -1,27 +1,76 @@
 import * as cutil from 'common/util/util';
 import * as subs from '../util/subs.js';
 
+const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
 
 /* eslint-disable max-depth */
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
-function newTriggerHandler(context, channel, instance, triggers) {
+function newTriggerHandler(context, channels, instance, triggers) {
   const prelog = '`' + instance + '` 🔔 ';
-  const cache = { channel: {}, role: {}, member: {} };
-  const get = async function(fetcher, entity, snowflake) {
+  const cache = {};
+
+  const resetCache = function() {
+    [cache.guild, cache.channel, cache.role, cache.member] = [null, {}, {}, {}];
+    Object.values(channels).forEach(function(channel) {
+      if (!channel) return;
+      if (!cache.guild) { cache.guild = channel.guild; }
+      cache.channel[channel.id] = channel;
+    });
+  };
+
+  const get = async function(fetcher, entity, snowflake, fallback = null) {
     if (cutil.hasProp(cache[entity], snowflake)) return cache[entity][snowflake];
-    const fallback = entity === 'channel' ? channel : null;
     const result = await fetcher.fetch(snowflake);
     cache[entity][snowflake] = result ? result : fallback;
     return cache[entity][snowflake];
   };
-  const getChannel = async function(snowflake) { return await get(context.client.channels, 'channel', snowflake); };
-  const getRole = async function(snowflake) { return await get(channel.guild.roles, 'role', snowflake); };
-  const getMember = async function(snowflake) { return await get(channel.guild.members, 'member', snowflake); };
+
+  const getRole = async function(snowflake) {
+    return await get(cache.guild.roles, 'role', snowflake);
+  };
+
+  const subsText = function(value, channel, event, alias = null) {
+    let result = value.replaceAll('{n}', '\n');
+    result = result.replaceAll('{!}', context.config.CMD_PREFIX);
+    result = result.replaceAll('{instance}', instance);
+    result = result.replaceAll('{channel}', channel.name);
+    result = result.replaceAll('{event}', event.toLowerCase());
+    if (alias && alias.name) {
+      result = result.replaceAll('{playername}', alias.name);
+      result = result.replaceAll('{player}', '"' + alias.name + '"');
+    }
+    if (alias && alias.discordid) {
+      result = result.replaceAll('{member}', alias.discordid);
+    }
+    return result;
+  };
+
+  const processTriggerContext = async function(trigger, channel) {
+    let result = channel;
+    if (cutil.hasProp(trigger, 'cx-channel')) {
+      result = await get(context.client.channels, 'channel', trigger['cx-channel'].snowflake, channel);
+    }
+    if (cutil.hasProp(trigger, 'cx-delay')) {
+      await cutil.sleep(trigger['cx-delay'] * 1000 - 1000);
+    }
+    return result;
+  };
+
+  const handleServerEvent = async function(trigger, event) {
+    if (!trigger['on-event'].includes(serverEventMap[event])) return;  // Check applicable event
+    if (!cutil.hasProp(trigger, 'do-message')) return;  // Nothing to do
+    const channel = await processTriggerContext(trigger, channels.server);  // Process context values
+    for (const triggerMessage of trigger['do-message']) {  // Process message actions
+      await cutil.sleep(1000);
+      channel.send(subsText(triggerMessage, channel, event));
+    }
+  };
+
   const handlePlayerEvent = async function(trigger, event, alias) {
     if (!trigger['on-event'].includes(playerEventMap[event])) return;  // Check applicable event
-    const member = alias && alias.snowflake ? await getMember(alias.snowflake) : null;
+    const member = alias && alias.snowflake ? await get(cache.guild.members, 'member', alias.snowflake) : null;
     if (cutil.hasProp(trigger, 'rq-not-role')) {  // Member cannot have any of these roles
       if (!member) return;
       for (const triggerRole of trigger['rq-not-role']) {
@@ -43,9 +92,7 @@ function newTriggerHandler(context, channel, instance, triggers) {
       }
       if (!found) return;
     }
-    let actionChannel = channel;  // Get context values
-    if (cutil.hasProp(trigger, 'cx-channel')) { actionChannel = await getChannel(trigger['cx-channel'].snowflake); }
-    if (cutil.hasProp(trigger, 'cx-delay')) { await cutil.sleep(trigger['cx-delay'] * 1000 - 1000); }
+    const channel = await processTriggerContext(trigger, channels.login);  // Process context values
     for (const [isAdd, doRole] of [[false, 'do-remove-role'], [true, 'do-add-role']]) {  // Process role actions
       if (member && alias && alias.discordid && cutil.hasProp(trigger, doRole)) {
         for (const triggerRole of trigger[doRole]) {
@@ -56,7 +103,7 @@ function newTriggerHandler(context, channel, instance, triggers) {
             await cutil.sleep(1000);
             if (isAdd) { await member.roles.add(role); }
             else { await member.roles.remove(role); }
-            actionChannel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
+            channel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
           }
         }
       }
@@ -64,41 +111,27 @@ function newTriggerHandler(context, channel, instance, triggers) {
     if (cutil.hasProp(trigger, 'do-message')) {  // Process message actions
       for (const triggerMessage of trigger['do-message']) {
         await cutil.sleep(1000);
-        let text = triggerMessage;
-        text = text.replaceAll('{n}', '\n');
-        text = text.replaceAll('{!}', context.config.CMD_PREFIX);
-        text = text.replaceAll('{instance}', instance);
-        text = text.replaceAll('{channel}', actionChannel.name);
-        text = text.replaceAll('{event}', event.toLowerCase());
-        if (alias && alias.name) {
-          text = text.replaceAll('{playername}', alias.name);
-          text = text.replaceAll('{player}', '"' + alias.name + '"');
-        }
-        if (alias && alias.discordid) {
-          text = text.replaceAll('{member}', alias.discordid);
-        }
-        actionChannel.send(text);
+        channel.send(subsText(triggerMessage, channel, event, alias));
       }
     }
   };
+
+  resetCache();
   return async function(event, alias = null) {
-    if (event === 'CLEAR') {
-      [cache.channel, cache.role, cache.member] = [{}, {}, {}];
-      return;
-    }
     if (cutil.hasProp(playerEventMap, event)) {
       for (const trigger of triggers.list()) { await handlePlayerEvent(trigger, event, alias); }
+    } else if (cutil.hasProp(serverEventMap, event)) {
+      for (const trigger of triggers.list()) { await handleServerEvent(trigger, event); }
     }
+    if (event === 'CLEAR') { resetCache(); }
   };
 }
 /* eslint-enable max-lines-per-function */
 /* eslint-enable complexity */
 /* eslint-enable max-depth */
 
-function startPlayerEvents($) {
-  const [context, channels, aliases, instance, url] = [$.context, $.channels, $.aliases, $.instance, $.url];
-  if (!channels.login && !channels.chat) return;
-  const triggerHandler = channels.login ? newTriggerHandler(context, channels.login, instance, $.triggers) : null;
+
+function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler) {
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     if (json.event === 'CLEAR') {
       if (triggerHandler) { triggerHandler(json.event); }
@@ -128,9 +161,7 @@ function startPlayerEvents($) {
   });
 }
 
-function startServerEvents($) {
-  const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
-  if (!channels.server) return;
+function startServerEvents(context, channels, instance, url, triggerHandler) {
   let [state, restartRequired] = ['READY', false];
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // Ignore no state
@@ -144,15 +175,27 @@ function startServerEvents($) {
     state = json.state;
     if (state === 'STARTED') { restartRequired = false; }
     channels.server.send('`' + instance + '` 📡 ' + state);
+    if (triggerHandler) { triggerHandler(state); }
     return true;
   });
 }
 
 export function startupServerOnly($) {
-  startServerEvents($);
+  const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
+  if (!channels.server) return;
+  const triggerHandler = newTriggerHandler(context, channels, instance, $.triggers);
+  startServerEvents(context, channels, instance, url, triggerHandler);
 }
 
 export function startupAll($) {
-  startServerEvents($);
-  startPlayerEvents($);
+  const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
+  if (!channels.server || !channels.login || !channels.chat) return;
+  const triggerHandler = channels.server || channels.login
+    ? newTriggerHandler(context, channels, instance, $.triggers) : null;
+  if (channels.server) {
+    startServerEvents(context, channels, instance, url, triggerHandler);
+  }
+  if (channels.login || channels.chat) {
+    startPlayerEvents(context, channels, instance, url, $.aliases, triggerHandler);
+  }
 }

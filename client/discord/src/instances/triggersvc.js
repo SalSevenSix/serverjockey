@@ -60,7 +60,7 @@ export function newTriggers(context, instance) {
     if (!args) return false;
     const record = {};
     record['on-event'] = args.filter(function(arg) {  // Capture events
-      return ['on-login', 'on-logout', 'on-death'].includes(arg);
+      return ['on-login', 'on-logout', 'on-death', 'on-started', 'on-stopped'].includes(arg);
     });
     if (record['on-event'].length === 0) return false;  // At least one event required
     let [actions, value] = [0, null];

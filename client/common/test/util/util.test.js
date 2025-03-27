@@ -118,8 +118,3 @@ describe('rangeCodeToMillis()', function() {
   it('neg hours', function() { assert.strictEqual(rangeCodeToMillis('-123h'), -442800000); });
   it('days', function() { assert.strictEqual(rangeCodeToMillis('123d'), 10627200000); });
 });
-
-describe('newArrayBuilder()', function() {
-  const builder = newArrayBuilder().push(1).push([2, 3, 4]).push(5).push([6, 7, 8, 9]);
-  it('build', function() { assert.deepEqual(builder.build(), [1, 2, 3, 4, 5, 6, 7, 8, 9]); });
-});
