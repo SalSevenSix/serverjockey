@@ -5,7 +5,7 @@ import typing
 import aiofiles
 # ALLOW util.* msg*.* context.* http.*
 from core.util import util, io, tasks, aggtrf, objconv, dtutil
-from core.msg import msgabc, msgext, msgftr, msgtrf, msglog
+from core.msg import msgabc, msgext, msgftr, msgtrf, msglog, msgpack
 from core.http import httpabc, httpcnt, httpsec, httpsubs
 
 
@@ -67,11 +67,11 @@ class ArchiveHandler(httpabc.PostHandler):
 
     def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, source_dir: str):
         self._handler = MessengerHandler(
-            mailer, msgext.Archiver.REQUEST,
+            mailer, msgpack.Archiver.REQUEST,
             dict(backups_dir=backups_dir, source_dir=source_dir),
             httpsubs.Selector(
                 msg_filter=msglog.FILTER_ALL_LEVELS,
-                completed_filter=msgext.Archiver.FILTER_DONE,
+                completed_filter=msgpack.Archiver.FILTER_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):
@@ -83,11 +83,11 @@ class UnpackerHandler(httpabc.PostHandler):
     def __init__(self, mailer: msgabc.MulticastMailer, backups_dir: str, root_dir: str,
                  to_root: bool = False, wipe: bool = True):
         self._handler = MessengerHandler(
-            mailer, msgext.Unpacker.REQUEST,
+            mailer, msgpack.Unpacker.REQUEST,
             dict(backups_dir=backups_dir, root_dir=root_dir, to_root=to_root, wipe=wipe),
             httpsubs.Selector(
                 msg_filter=msglog.FILTER_ALL_LEVELS,
-                completed_filter=msgext.Unpacker.FILTER_DONE,
+                completed_filter=msgpack.Unpacker.FILTER_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 
     async def handle_post(self, resource, data):

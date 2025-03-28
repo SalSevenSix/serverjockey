@@ -1,8 +1,8 @@
 # ALLOW core.* unturned.messaging
-from core.util import gc, util, io, objconv
+from core.util import gc, util, io, objconv, linenc
 from core.context import contextsvc
 from core.http import httprsc, httpext
-from core.proc import proch, prcenc, wrapper
+from core.proc import proch, wrapper
 from core.common import portmapper, svrhelpers
 from servers.unturned import messaging as msg
 
@@ -69,7 +69,7 @@ class Deployment:
         if util.get('upnp', cmdargs, True):
             await self._map_ports()
         server = proch.ServerProcess(self._context, self._python)
-        server.use_env(self._env).use_out_decoder(prcenc.PtyLineDecoder())
+        server.use_env(self._env).use_out_decoder(linenc.PtyLineDecoder())
         server.append_arg(self._wrapper).append_arg(executable)
         server.append_arg('-batchmode').append_arg('-nographics')
         server.append_arg('+' + util.get('scope', cmdargs, 'InternetServer') + '/Save')

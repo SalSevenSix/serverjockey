@@ -2,17 +2,15 @@ import logging
 import typing
 from asyncio import streams
 # ALLOW util.* msg*.* context.* proc.prcenc
-from core.util import funcutil, io
+from core.util import funcutil, io, linenc
 from core.msg import msgabc, msgext
-from core.proc import prcenc
 
 
 class PipeOutLineProducer(msgabc.Producer):
 
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any, name: str,
-                 pipe: streams.StreamReader, decoder: prcenc.LineDecoder = prcenc.DefaultLineDecoder()):
-        self._source, self._name = source, name
-        self._pipe, self._decoder = pipe, decoder
+                 pipe: streams.StreamReader, decoder: linenc.LineDecoder = linenc.DefaultLineDecoder()):
+        self._source, self._name, self._pipe, self._decoder = source, name, pipe, decoder
         self._publisher = msgext.Publisher(mailer, self)
 
     async def close(self):

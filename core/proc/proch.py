@@ -4,10 +4,9 @@ import typing
 import asyncio
 from asyncio import streams
 # ALLOW util.* msg*.* context.* proc.prcenc proc.prcprd
-from core.util import signals, cmdutil, funcutil, tasks
-from core.msg import msgabc, msgext, msgftr
+from core.util import signals, cmdutil, funcutil, tasks, linenc
+from core.msg import msgabc, msgext, msgftr, msgpipe
 from core.msgc import mc
-from core.proc import prcenc, prcprd
 
 
 class _PipeInLineCommand:
@@ -114,7 +113,7 @@ class ServerProcess:
     def __init__(self, mailer: msgabc.MulticastMailer, executable: str):
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
-        self._out_decoder = prcenc.DefaultLineDecoder()
+        self._out_decoder = linenc.DefaultLineDecoder()
         self._success_rcs = {0}
         self._pipeinsvc, self._started_catcher = None, None
         self._process, self._env, self._cwd = None, None, None
@@ -131,7 +130,7 @@ class ServerProcess:
         self._pipeinsvc = pipeinsvc
         return self
 
-    def use_out_decoder(self, line_decoder: prcenc.LineDecoder) -> ServerProcess:
+    def use_out_decoder(self, line_decoder: linenc.LineDecoder) -> ServerProcess:
         self._out_decoder = line_decoder
         return self
 
@@ -163,9 +162,9 @@ class ServerProcess:
             pid, rc = self._process.pid, self._process.returncode
             if rc is not None:  # I don't think this can happen but to be sure
                 raise Exception(f'PID {pid} exit after START, rc={rc}')
-            stderr = prcprd.PipeOutLineProducer(
+            stderr = msgpipe.PipeOutLineProducer(
                 self._mailer, self, mc.ServerProcess.STDERR_LINE, self._process.stderr, self._out_decoder)
-            stdout = prcprd.PipeOutLineProducer(
+            stdout = msgpipe.PipeOutLineProducer(
                 self._mailer, self, mc.ServerProcess.STDOUT_LINE, self._process.stdout, self._out_decoder)
             self._mailer.post(self, PipeInLineService.PIPE_NEW, self._process.stdin)
             if not self._pipeinsvc:

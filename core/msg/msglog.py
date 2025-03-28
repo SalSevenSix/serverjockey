@@ -26,6 +26,12 @@ class LoggingPublisher:
     def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
         self._mailer, self._source = mailer, source
 
+    def mailer(self):
+        return self._mailer
+
+    def source(self):
+        return self._source
+
     # noinspection PyUnusedLocal
     # pylint: disable=unused-argument
     def log(self, level, msg, *args, **kwargs):

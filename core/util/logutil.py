@@ -35,6 +35,12 @@ def get_formatter() -> logging.Formatter | None:
 
 class NullLogger:
 
+    def mailer(self):
+        pass
+
+    def source(self):
+        pass
+
     def log(self, level, msg, *args, **kwargs):
         pass
 

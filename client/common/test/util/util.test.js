@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { isBoolean, isString, urlSafeB64encode, floatToPercent, moveArrayElement, humanDuration, humanFileSize,
-         shortISODateTimeString, parseDateToMillis, presetDate, rangeCodeToMillis,
-         newArrayBuilder } from 'common/util/util';
+         shortISODateTimeString, parseDateToMillis, presetDate, rangeCodeToMillis } from 'common/util/util';
 
 describe('isBoolean()', function() {
   it('true if actually true', function() { assert.strictEqual(isBoolean(true), true); });

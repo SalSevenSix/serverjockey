@@ -2,7 +2,7 @@ from __future__ import annotations
 import typing
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import aggtrf, cmdutil
-from core.msg import msgabc, msglog, msgftr, msgtrf, msgext
+from core.msg import msgabc, msglog, msgftr, msgtrf, msgext, msgpack
 from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -24,9 +24,9 @@ class MessagingInitHelper:
         self._context.register(svrext.MaintenanceStateSubscriber(
             self._context,
             msgftr.Or(job_start_filter if job_start_filter else jobh.JobProcess.FILTER_STARTED,
-                      msgext.Archiver.FILTER_START, msgext.Unpacker.FILTER_START),
+                      msgpack.Archiver.FILTER_START, msgpack.Unpacker.FILTER_START),
             msgftr.Or(job_done_filter if job_done_filter else jobh.JobProcess.FILTER_DONE,
-                      msgext.Archiver.FILTER_DONE, msgext.Unpacker.FILTER_DONE)))
+                      msgpack.Archiver.FILTER_DONE, msgpack.Unpacker.FILTER_DONE)))
         return self
 
     def init_players(self) -> MessagingInitHelper:
@@ -52,10 +52,10 @@ class DeploymentInitHelper:
 
     def init_archiving(self, tempdir: str) -> DeploymentInitHelper:
         self._context.register(
-            msgext.SyncWrapper(self._context, msgext.Archiver(self._context, tempdir), msgext.SyncReply.AT_START))
+            msgext.SyncWrapper(self._context, msgpack.Archiver(self._context, tempdir), msgext.SyncReply.AT_START))
         self._context.register(
-            msgext.SyncWrapper(self._context, msgext.Unpacker(self._context, tempdir), msgext.SyncReply.AT_START))
-        self._rebuild_filters.append(msgext.Unpacker.FILTER_DONE)
+            msgext.SyncWrapper(self._context, msgpack.Unpacker(self._context, tempdir), msgext.SyncReply.AT_START))
+        self._rebuild_filters.append(msgpack.Unpacker.FILTER_DONE)
         return self
 
     def init_logging(self, logs_dir: str, log_filter: msgabc.Filter) -> DeploymentInitHelper:

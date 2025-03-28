@@ -1,5 +1,5 @@
 import unittest
-from core.proc import prcenc
+from core.util import linenc
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
@@ -18,7 +18,7 @@ from core.proc import prcenc
 class TestCoreProcPtyLineDecoder(unittest.TestCase):
 
     def test_ansi_control_characters_are_removed(self):
-        d = prcenc.PtyLineDecoder()
+        d = linenc.PtyLineDecoder()
         self.assertEqual('', d.decode(b''))
         self.assertEqual('Just Plain Text', d.decode(b'Just Plain Text'))
         self.assertEqual('bold text reset all', d.decode(b'\x1B[1mbold text reset all\x1B[0m'))

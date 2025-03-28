@@ -2,10 +2,10 @@ import typing
 import asyncio
 from asyncio import subprocess, streams
 # ALLOW util.* msg*.* context.* proc.prcenc proc.prcprd
-from core.util import util, idutil, funcutil, io
-from core.msg import msgabc, msgext, msgftr
+from core.util import util, idutil, funcutil, io, linenc
+from core.msg import msgabc, msgext, msgftr, msgpipe
 from core.context import contextsvc
-from core.proc import prcenc, prcprd, wrapper
+from core.proc import wrapper
 
 
 class JobPipeInLineService(msgabc.AbcSubscriber):
@@ -82,9 +82,9 @@ class JobProcess(msgabc.AbcSubscriber):
                 process = await asyncio.create_subprocess_exec(
                     command.command()[0], *command.command()[1:],
                     stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = prcprd.PipeOutLineProducer(
+            stderr = msgpipe.PipeOutLineProducer(
                 self._mailer, command.source(), JobProcess.STDERR_LINE, process.stderr, command.decoder())
-            stdout = prcprd.PipeOutLineProducer(
+            stdout = msgpipe.PipeOutLineProducer(
                 self._mailer, command.source(), JobProcess.STDOUT_LINE, process.stdout, command.decoder())
             stdin = JobPipeInLineService(self._mailer, process.stdin)
             replied = self._mailer.post(command.source(), JobProcess.STATE_STARTED, process, message)
@@ -136,8 +136,8 @@ class _CommandHelper:
     def command(self) -> typing.Union[str, typing.Collection[str]]:
         return self._command
 
-    def decoder(self) -> prcenc.LineDecoder:
-        return prcenc.PtyLineDecoder() if self._pty else prcenc.DefaultLineDecoder()
+    def decoder(self) -> linenc.LineDecoder:
+        return linenc.PtyLineDecoder() if self._pty else linenc.DefaultLineDecoder()
 
     async def cleanup(self):
         await io.delete_directory(self._work_dir)
