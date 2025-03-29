@@ -160,6 +160,12 @@ def full_path(base: str | None, path: str | None) -> str | None:
     return start + base + sep + path
 
 
+def strip_path(path: str | None) -> str | None:
+    if not path:
+        return path
+    return path[:-1] if path[-1] == '/' else path
+
+
 def fname(path: str | None) -> str | None:
     if not path:
         return path

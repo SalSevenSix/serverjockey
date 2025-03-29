@@ -144,10 +144,7 @@ class SyncReply(enum.Enum):
 class SyncWrapper(msgabc.AbcSubscriber):
     START, END = 'SyncWrapper.Start', 'SyncWrapper.End'
 
-    def __init__(self,
-                 mailer: msgabc.Mailer,
-                 delegate: msgabc.Subscriber,
-                 reply: SyncReply = SyncReply.NEVER):
+    def __init__(self, mailer: msgabc.Mailer, delegate: msgabc.Subscriber, reply: SyncReply = SyncReply.NEVER):
         super().__init__(delegate)
         self._mailer, self._delegate, self._reply = mailer, delegate, reply
 

@@ -182,6 +182,13 @@ async def directory_list(path: str, baseurl: str = None) -> typing.List[typing.D
     return result
 
 
+async def move_directory(source: str, target: str):
+    for name in [o['name'] for o in await directory_list(source)]:
+        source_path, target_path = source + '/' + name, target + '/' + name
+        await delete_any(target_path)
+        await move_path(source_path, target_path)
+
+
 async def read_file(filename: str, text: bool = True) -> typing.Union[str, bytes]:
     # noinspection PyTypeChecker
     async with aiofiles.open(file=filename, mode='r' if text else 'rb') as file:

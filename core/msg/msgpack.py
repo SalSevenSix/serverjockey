@@ -56,24 +56,20 @@ async def _prune_archives(logger: msglog.LogPublisher, now: float, prune_hours: 
 
 async def _archive_directory(logger: msglog.LogPublisher, unpacked_dir: str, archives_dir: str,
                              prune_hours: int = 0, tempdir: str = '/tmp') -> str | None:
-    working_dir = tempdir + '/' + idutil.generate_id()
+    unpacked_dir, archives_dir = util.strip_path(unpacked_dir), util.strip_path(archives_dir)
+    now, archive_kind = time.time(), util.fname(unpacked_dir)
+    archive_name = archive_kind + '-' + dtutil.format_time('%Y%m%d', now) + '-' + dtutil.format_time('%H%M%S', now)
+    working_dir, archive_path = tempdir + '/' + idutil.generate_id(), archives_dir + '/' + archive_name + '.zip'
+    script_file, archive_tmp = working_dir + '/make_archive.py', working_dir + '/' + archive_name
     try:
-        if unpacked_dir[-1] == '/':
-            unpacked_dir = unpacked_dir[:-1]
         if not await io.directory_exists(unpacked_dir):
             logger.log('WARNING No directory to archive')
             return None
         logger.log('START Archive Directory')
-        if archives_dir[-1] == '/':
-            archives_dir = archives_dir[:-1]
         assert await io.directory_exists(archives_dir)
         await io.create_directory(working_dir)
-        now, archive_kind = time.time(), util.fname(unpacked_dir)
-        archive_name = archive_kind + '-' + dtutil.format_time('%Y%m%d', now) + '-' + dtutil.format_time('%H%M%S', now)
-        script_file, archive_tmp = working_dir + '/make_archive.py', working_dir + '/' + archive_name
         await io.write_file(script_file, _make_archive_script(archive_tmp, unpacked_dir))
         await _run_script(logger, script_file)
-        archive_path = archives_dir + '/' + archive_name + '.zip'
         await io.move_path(archive_tmp + '.zip', archive_path)
         logger.log(f'Created {archive_path}')
         await _prune_archives(logger, now, prune_hours, archive_kind, archives_dir)
@@ -88,23 +84,20 @@ async def _archive_directory(logger: msglog.LogPublisher, unpacked_dir: str, arc
 
 async def _unpack_directory(logger: msglog.LogPublisher, archive: str, unpack_dir: str,
                             wipe: bool = True, tempdir: str = '/tmp'):
-    progress_logger = _ProgressLogger(logger)
-    working_dir, target_dir = tempdir + '/' + idutil.generate_id(), None
+    progress_logger, unpack_dir = _ProgressLogger(logger), util.strip_path(unpack_dir)
+    working_dir, target_dir = tempdir + '/' + idutil.generate_id(), unpack_dir
+    script_file = working_dir + '/unpack_archive.py'
     try:
         logger.log('START Unpack Directory')
         assert await io.file_exists(archive)
-        if unpack_dir[-1] == '/':
-            unpack_dir = unpack_dir[:-1]
         logger.log(f'{archive} => {unpack_dir}')
         if await io.file_size(archive) > 104857600:  # 100Mb
             progress_logger.start()
-        target_dir = unpack_dir
         if wipe:
             await io.delete_directory(target_dir)
         else:
             target_dir = tempdir + '/' + idutil.generate_id()
         await io.create_directory(working_dir, target_dir)
-        script_file = working_dir + '/unpack_archive.py'
         await io.write_file(script_file, _unpack_archive_script(archive, target_dir))
         await _run_script(logger, script_file)
         progress_logger.stop()
@@ -112,10 +105,7 @@ async def _unpack_directory(logger: msglog.LogPublisher, archive: str, unpack_di
         await io.auto_chmod(target_dir)
         if not wipe:
             logger.log('MOVING files')
-            for name in [o['name'] for o in await io.directory_list(target_dir)]:
-                source_path, target_path = target_dir + '/' + name, unpack_dir + '/' + name
-                await io.delete_any(target_path)
-                await io.move_path(source_path, target_path)
+            await io.move_directory(target_dir, unpack_dir)
         logger.log('END Unpack Directory')
     except Exception as e:
         logger.log(f'ERROR unpacking {archive} {repr(e)}')
