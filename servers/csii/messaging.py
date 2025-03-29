@@ -14,7 +14,7 @@ SERVER_STARTED_FILTER = msgftr.And(
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.HasData(), msgftr.Not(msgftr.Or(
         msgftr.DataStrContains('UNEXPECTED LONG FRAME DETECTED'), msgftr.DataMatches(_SPAM)))),
-    rconsvc.RconService.FILTER_OUTPUT, jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
+    rconsvc.RconService.FILTER_OUTPUT, jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 
 
 async def initialise(context: contextsvc.Context):

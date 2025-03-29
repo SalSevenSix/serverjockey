@@ -1,10 +1,10 @@
 # ALLOW core.* starbound.messaging
 from core.util import gc, util, idutil, io, objconv
+from core.msg import msglog
 from core.context import contextsvc
 from core.http import httprsc, httpext
 from core.proc import proch
 from core.common import rconsvc, portmapper, svrhelpers
-from servers.starbound import messaging as msg
 
 # STARBOUND https://starbounder.org/Guide:LinuxServerSetup
 APPID = '211820'
@@ -94,7 +94,8 @@ class Deployment:
             portmapper.map_port(self._context, self, rcon_port, gc.TCP, 'Starbound rcon')
 
     async def _link_mods(self):
-        self._context.post(self, msg.DEPLOYMENT_MSG, 'INFO  Including subscribed workshop mods...')
+        logger = msglog.LogPublisher(self._context, self)
+        logger.log('INFO  Including subscribed workshop mods...')
         workshop_files, workshop_dir = [], self._runtime_dir + '/steamapps/workshop/content/' + APPID
         if await io.directory_exists(workshop_dir):
             workshop_files = await io.directory_list(workshop_dir)
@@ -102,16 +103,15 @@ class Deployment:
         for workshop_item in [str(o['name']) for o in workshop_files if o['type'] == 'directory']:
             pack_file = workshop_dir + '/' + workshop_item + '/contents.pak'
             if await io.file_exists(pack_file):
-                self._context.post(self, msg.DEPLOYMENT_MSG, 'INFO  Adding   ' + workshop_item)
+                logger.log('INFO  Adding   ' + workshop_item)
                 workshop_items.append(workshop_item + '.pak')
                 link_file = mods_dir + '/' + workshop_item + '.pak'
                 if not await io.symlink_exists(link_file):
                     await io.create_symlink(link_file, pack_file)
             else:
-                self._context.post(self, msg.DEPLOYMENT_MSG,
-                                   'ERROR Adding   ' + workshop_item + ' because contents.pak not found')
+                logger.log('ERROR Adding   ' + workshop_item + ' because contents.pak not found')
         for mod_file in [o['name'] for o in await io.directory_list(mods_dir) if o['name'] not in workshop_items]:
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'INFO  Removing ' + mod_file[:-4])
+            logger.log('INFO  Removing ' + mod_file[:-4])
             await io.delete_file(mods_dir + '/' + mod_file)
 
 

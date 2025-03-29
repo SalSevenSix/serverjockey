@@ -8,10 +8,8 @@ from core.proc import jobh
 from core.common import playerstore, svrhelpers
 
 SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('INF StartGame done'))
-DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_LOG_FILTER = msgftr.Or(
-    mc.ServerProcess.FILTER_ALL_LINES, jobh.JobProcess.FILTER_ALL_LINES,
-    msglog.FILTER_ALL_LEVELS, msgftr.NameIs(DEPLOYMENT_MSG))
+    mc.ServerProcess.FILTER_ALL_LINES, jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_ALL_LINES,
     msgftr.DataMatches(r'^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d \d*\.\d* ERR .*'))

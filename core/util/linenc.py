@@ -1,6 +1,6 @@
 import abc
 import re
-# ALLOW util.* msg.* context.*
+# ALLOW util.util
 
 
 class LineDecoder(metaclass=abc.ABCMeta):

@@ -9,10 +9,9 @@ from core.common import rconsvc, playerstore, svrhelpers
 
 SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('[Info] Root: Writing runtime configuration to'))
-DEPLOYMENT_MSG = 'Deployment.Message'
 CONSOLE_LOG_FILTER = msgftr.Or(
-    mc.ServerProcess.FILTER_ALL_LINES, msgftr.NameIs(DEPLOYMENT_MSG), rconsvc.RconService.FILTER_OUTPUT,
-    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
+    mc.ServerProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataStrStartsWith('[Error]'))
 
 

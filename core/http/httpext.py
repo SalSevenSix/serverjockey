@@ -70,7 +70,7 @@ class ArchiveHandler(httpabc.PostHandler):
             mailer, msgpack.Archiver.REQUEST,
             dict(backups_dir=backups_dir, source_dir=source_dir),
             httpsubs.Selector(
-                msg_filter=msglog.FILTER_ALL_LEVELS,
+                msg_filter=msglog.LogPublisher.LOG_FILTER,
                 completed_filter=msgpack.Archiver.FILTER_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 
@@ -86,7 +86,7 @@ class UnpackerHandler(httpabc.PostHandler):
             mailer, msgpack.Unpacker.REQUEST,
             dict(backups_dir=backups_dir, root_dir=root_dir, to_root=to_root, wipe=wipe),
             httpsubs.Selector(
-                msg_filter=msglog.FILTER_ALL_LEVELS,
+                msg_filter=msglog.LogPublisher.LOG_FILTER,
                 completed_filter=msgpack.Unpacker.FILTER_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
 

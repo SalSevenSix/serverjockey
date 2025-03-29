@@ -11,13 +11,11 @@ SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE,
     msgftr.DataMatches(
         '.*Info CommandLineMultiplayer.*Maximum segment size.*maximum-segment-size.*minimum-segment-size.*'))
-DEPLOYMENT_MSG, DEPLOYMENT_START, DEPLOYMENT_DONE = 'Deployment.Message', 'Deployment.Start', 'Deployment.Done'
-FILTER_DEPLOYMENT_MSG = msgftr.NameIs(DEPLOYMENT_MSG)
-FILTER_DEPLOYMENT_START = msgftr.NameIs(DEPLOYMENT_START)
-FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_DONE)
+DEPLOYMENT_START, DEPLOYMENT_DONE = 'Deployment.Start', 'Deployment.Done'
+FILTER_DEPLOYMENT_START, FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_START), msgftr.NameIs(DEPLOYMENT_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(
-    mc.ServerProcess.FILTER_ALL_LINES, jobh.JobProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
-    msglog.FILTER_ALL_LEVELS, FILTER_DEPLOYMENT_MSG)
+    mc.ServerProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataMatches(r'^\d*\.\d* Error .*'))
 
 

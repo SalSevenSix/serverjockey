@@ -2,6 +2,7 @@ from xml.dom import minidom
 # ALLOW core.* sevendaystodie.messaging
 from core.util import gc, util, objconv, io, pack, idutil
 from core.msgc import sc
+from core.msg import msglog
 from core.context import contextsvc
 from core.http import httprsc, httpext
 from core.system import svrsvc
@@ -146,7 +147,8 @@ class Deployment:
             portmapper.map_port(self._context, self, telnet_port, gc.TCP, '7D2D telnet')
 
     async def _sync_mods(self):
-        self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD syncing...')
+        logger = msglog.LogPublisher(self._context, self)
+        logger.log('MOD syncing...')
         tracking_file, data, modfiles = self._mods_src_dir + '/mods.json', {}, []
         if await io.file_exists(tracking_file):
             data = objconv.json_to_dict(await io.read_file(tracking_file))
@@ -166,7 +168,7 @@ class Deployment:
         for name, entry in data.copy().items():
             mtime, livedir, synced = entry['mtime'], entry['livedir'], entry['synced']
             if not synced:
-                livedir = await self._sync_mod(name, livedir)
+                livedir = await self._sync_mod(logger, name, livedir)
                 if livedir:
                     data[name] = dict(mtime=mtime, livedir=livedir, synced=True)
                 else:
@@ -174,27 +176,27 @@ class Deployment:
                 await io.write_file(tracking_file, objconv.obj_to_json(data))
         await io.write_file(tracking_file, objconv.obj_to_json(data, True))
 
-    async def _sync_mod(self, name: str, livedir: str) -> str | None:
+    async def _sync_mod(self, logger: msglog.LogPublisher, name: str, livedir: str) -> str | None:
         working_dir, modinfo, modfile = None, 'ModInfo.xml', self._mods_src_dir + '/' + name
         try:
             if livedir:
                 await io.delete_any(self._mods_live_dir + '/' + livedir)
             if not await io.file_exists(modfile):
-                self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' not found, removed from server.')
+                logger.log('MOD ' + name + ' not found, removed from server.')
                 return None
             working_dir = self._tempdir + '/' + idutil.generate_id()
             await io.create_directory(working_dir)
             await pack.unpack_archive(modfile, working_dir)
             source = await io.find_files(working_dir, modinfo)
             if len(source) == 0:
-                self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' has no ' + modinfo)
+                logger.log('MOD ' + name + ' has no ' + modinfo)
                 return None
             source = source[0][0:-1 - len(modinfo)]
             livedir = name[0:-1 - len(util.fext(name))] if source == working_dir else util.fname(source)
             target = self._mods_live_dir + '/' + livedir
             await io.delete_any(target)
             await io.move_path(source, target)
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'MOD ' + name + ' installed successfully.')
+            logger.log('MOD ' + name + ' installed successfully.')
             return livedir
         finally:
             await io.delete_directory(working_dir)

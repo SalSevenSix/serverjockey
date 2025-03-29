@@ -15,8 +15,7 @@ class Message:
             return vargs[0]
         return Message(*vargs)
 
-    def __init__(self, source: typing.Any, name: str,
-                 data: typing.Any = None,
+    def __init__(self, source: typing.Any, name: str, data: typing.Any = None,
                  reply_to: typing.Optional[Message] = None):
         self._created = time.time()
         self._source = source

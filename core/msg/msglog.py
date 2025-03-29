@@ -6,25 +6,15 @@ import aiofiles
 from core.util import util, dtutil, io, funcutil
 from core.msg import msgabc, msgftr, msgtrf
 
-CRITICAL = 'MessageLogging.CRITICAL'
-ERROR = 'MessageLogging.ERROR'
-WARNING = 'MessageLogging.WARNING'
-INFO = 'MessageLogging.INFO'
-DEBUG = 'MessageLogging.DEBUG'
-FILTER_ALL_LEVELS = msgftr.NameIn((DEBUG, INFO, WARNING, ERROR, CRITICAL))
 
+class LogPublisher:
+    LOG = 'LogPublisher.Log'
+    LOG_FILTER = msgftr.NameIs(LOG)
 
-class LoggingPublisher:
-    _LEVEL_MAP = {
-        logging.CRITICAL: CRITICAL,
-        logging.ERROR: ERROR,
-        logging.WARNING: WARNING,
-        logging.INFO: INFO,
-        logging.DEBUG: DEBUG
-    }
-
-    def __init__(self, mailer: msgabc.Mailer, source: typing.Any):
-        self._mailer, self._source = mailer, source
+    def __init__(self, mailer: msgabc.Mailer, source: typing.Any = None, name: str = None):
+        self._mailer = mailer
+        self._source = source if source else self
+        self._name = name if name else LogPublisher.LOG
 
     def mailer(self):
         return self._mailer
@@ -32,28 +22,11 @@ class LoggingPublisher:
     def source(self):
         return self._source
 
-    # noinspection PyUnusedLocal
-    # pylint: disable=unused-argument
-    def log(self, level, msg, *args, **kwargs):
-        self._mailer.post(self._source, LoggingPublisher._LEVEL_MAP[level], msg % args if args else msg)
+    def name(self):
+        return self._name
 
-    def debug(self, msg, *args, **kwargs):
-        self.log(logging.DEBUG, msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        self.log(logging.INFO, msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        self.log(logging.WARNING, msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        self.log(logging.ERROR, msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        self.log(logging.CRITICAL, msg, *args, **kwargs)
-
-    def fatal(self, msg, *args, **kwargs):
-        self.critical(msg, *args, **kwargs)
+    def log(self, msg: str, name: str = None, source: typing.Any = None):
+        self._mailer.post(source if source else self._source, name if name else self._name, msg)
 
 
 class LogfileSubscriber(msgabc.AbcSubscriber):
@@ -118,7 +91,7 @@ class PrintSubscriber(msgabc.AbcSubscriber):
 class PercentTracker(io.BytesTracker):
 
     def __init__(self, mailer: msgabc.Mailer, expected: int, notifications: int = 10,
-                 prefix: str = 'progress', msg_name: str = INFO):
+                 prefix: str = 'progress', msg_name: str = LogPublisher.LOG):
         self._mailer, self._expected = mailer, expected
         self._prefix, self._msg_name = prefix, msg_name
         self._increment = int(expected / notifications)
@@ -141,7 +114,7 @@ class PercentTracker(io.BytesTracker):
 
 class IntervalTracker(io.BytesTracker):
 
-    def __init__(self, mailer: msgabc.Mailer, interval: float = 1.0, msg_name: str = INFO,
+    def __init__(self, mailer: msgabc.Mailer, interval: float = 1.0, msg_name: str = LogPublisher.LOG,
                  initial_message: str = 'RECEIVING data...', prefix: str = 'received'):
         self._mailer, self._interval, self._msg_name = mailer, interval, msg_name
         self._initial_message, self._prefix = initial_message, prefix

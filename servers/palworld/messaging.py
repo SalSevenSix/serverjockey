@@ -13,7 +13,7 @@ _SERVER_VERSION_FILTER = msgftr.DataStrStartsWith(_SERVER_VERSION_KEY)
 SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, _SERVER_VERSION_FILTER)
 CONSOLE_LOG_FILTER = msgftr.Or(
     mc.ServerProcess.FILTER_ALL_LINES, rconsvc.RconService.FILTER_OUTPUT,
-    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 
 
 async def initialise(context: contextsvc.Context):

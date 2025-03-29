@@ -13,7 +13,7 @@ DEFAULT_PORT = 27015
 SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, _STARTED_FILTER)
 CONSOLE_LOG_FILTER = msgftr.Or(
     msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.Not(msgftr.DataMatches(_SPAM))),
-    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS)
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataStrContains(' k_EResult'))
 
 

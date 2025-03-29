@@ -17,7 +17,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(
             msgftr.DataStrContains('password', True),
             msgftr.DataStrContains('token', True),
             msgftr.DataStrContains('command entered via server console', True)))),
-    jobh.JobProcess.FILTER_ALL_LINES, msglog.FILTER_ALL_LEVELS, cachelock.FILTER_NOTIFICATIONS)
+    jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER, cachelock.FILTER_NOTIFICATIONS)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_ALL_LINES,
     msgftr.Or(msgftr.DataStrStartsWith('ERROR:'), msgftr.DataStrStartsWith('SEVERE:')))

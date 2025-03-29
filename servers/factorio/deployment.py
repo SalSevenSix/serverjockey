@@ -145,16 +145,16 @@ class Deployment:
             await io.write_file(self._mods_list, objconv.obj_to_json(_default_mods_list(), pretty=True))
 
     async def install_runtime(self, version: str):
+        logger = msglog.LogPublisher(self._context, self)
         url = 'https://factorio.com/get-download/' + version + '/headless/linux64'
-        install_package = self._home_dir + '/factorio.tar.xz'
-        unpack_dir = self._home_dir + '/factorio'
+        install_package, unpack_dir = self._home_dir + '/factorio.tar.xz', self._home_dir + '/factorio'
         try:
             self._context.post(self, msg.DEPLOYMENT_START)
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'START Install')
+            logger.log('START Install')
             await io.delete_file(install_package)
             await io.delete_directory(unpack_dir)
             await io.delete_directory(self._runtime_dir)
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + url)
+            logger.log('DOWNLOADING ' + url)
             connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
@@ -164,15 +164,15 @@ class Deployment:
                         tracker = msglog.PercentTracker(self._context, int(content_length), prefix='downloaded')
                     await io.stream_write_file(
                         install_package, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'UNPACKING ' + install_package)
+            logger.log('UNPACKING ' + install_package)
             await pack.unpack_tarxz(install_package, self._home_dir)
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'INSTALLING Factorio server')
+            logger.log('INSTALLING Factorio server')
             await io.rename_path(unpack_dir, self._runtime_dir)
             await io.delete_file(install_package)
             await self.build_world()
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'END Install')
+            logger.log('END Install')
         except Exception as e:
-            self._context.post(self, msg.DEPLOYMENT_MSG, repr(e))
+            logger.log(repr(e))
         finally:
             self._context.post(self, msg.DEPLOYMENT_DONE)
 
@@ -189,21 +189,22 @@ class Deployment:
 
     # pylint: disable=too-many-locals,too-many-branches
     async def _sync_mods(self):
+        logger = msglog.LogPublisher(self._context, self)
         mods = util.get('mods', objconv.json_to_dict(await io.read_file(self._mods_list)))
         if not mods:
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'Mod sync disabled')
+            logger.log('Mod sync disabled')
             return
         live_mod_list, mod_list = self._mods_dir + '/mod-list.json', []
         for mod in [m for m in mods if m['name'] in _BASE_MOD_NAMES]:
             mod_list.append(util.filter_dict(mod, ('name', 'enabled')))
         settings = objconv.json_to_dict(await io.read_file(self._server_settings))
         if not util.get('username', settings) or not util.get('token', settings):
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'Unable to sync mods, credentials unavailable')
+            logger.log('Unable to sync mods, credentials unavailable')
             if len(mods) == len(mod_list):
-                self._context.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game only')
+                logger.log('Writing live mod config, base game only')
                 await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
             return
-        self._context.post(self, msg.DEPLOYMENT_MSG, 'SYNCING mods...')
+        logger.log('SYNCING mods...')
         baseurl, mod_files = 'https://mods.factorio.com', []
         connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
         timeout = aiohttp.ClientTimeout(total=8.0)
@@ -224,7 +225,7 @@ class Deployment:
                         mod_files.append(release['file_name'])
                         filename = self._mods_dir + '/' + release['file_name']
                         if not await io.file_exists(filename):
-                            self._context.post(self, msg.DEPLOYMENT_MSG, 'DOWNLOADING ' + release['file_name'])
+                            logger.log('DOWNLOADING ' + release['file_name'])
                             download_url = baseurl + release['download_url'] + credentials
                             async with session.get(download_url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as modfile_resp:
                                 assert modfile_resp.status == 200
@@ -236,21 +237,22 @@ class Deployment:
                                     filename, io.WrapReader(modfile_resp.content),
                                     io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
                 if not mod_version_found:
-                    self._context.post(self, msg.DEPLOYMENT_MSG, 'ERROR Mod ' + mod['name'] + ' version '
-                                       + mod['version'] + ' not found, see ' + mod_meta_url)
+                    logger.log(
+                        'ERROR Mod ' + mod['name'] + ' version ' + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
             if file['type'] == 'file' and file['name'].endswith(_ZIP) and file['name'] not in mod_files:
-                self._context.post(self, msg.DEPLOYMENT_MSG, 'Deleting unused mod file ' + file['name'])
+                logger.log('Deleting unused mod file ' + file['name'])
                 await io.delete_file(self._mods_dir + '/' + file['name'])
-        self._context.post(self, msg.DEPLOYMENT_MSG, 'Writing live mod config, base game and mods')
+        logger.log('Writing live mod config, base game and mods')
         await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
 
     async def restore_autosave(self, filename: str):
+        logger = msglog.LogPublisher(self._context, self)
         map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP
         try:
             self._context.post(self, msg.DEPLOYMENT_START)
             filename = filename[1:] if filename[0] == '/' else filename
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'RESTORING ' + filename)
+            logger.log('RESTORING ' + filename)
             autosave_file = self._save_dir + '/' + filename
             if not await io.file_exists(autosave_file):
                 raise FileNotFoundError(autosave_file)
@@ -263,10 +265,10 @@ class Deployment:
                     await io.delete_file(map_backup)
                     await io.rename_path(self._map_file, map_backup)
             await io.stream_copy_file(autosave_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, self._tempdir, tracker)
-            self._context.post(self, msg.DEPLOYMENT_MSG, 'Autosave ' + filename + ' restored')
+            logger.log('Autosave ' + filename + ' restored')
             await funcutil.silently_call(io.delete_file(map_backup))
         except Exception as e:
-            self._context.post(self, msg.DEPLOYMENT_MSG, repr(e))
+            logger.log(repr(e))
         finally:
             self._context.post(self, msg.DEPLOYMENT_DONE)
 
@@ -279,7 +281,7 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
     async def handle_post(self, resource, data):
         subscription_path = await httpsubs.HttpSubscriptionService.subscribe(
             self._mailer, self, httpsubs.Selector(
-                msg_filter=msg.FILTER_DEPLOYMENT_MSG,
+                msg_filter=msglog.LogPublisher.LOG_FILTER,
                 completed_filter=msg.FILTER_DEPLOYMENT_DONE,
                 aggregator=aggtrf.StrJoin('\n')))
         version = util.get('beta', data, 'stable')
