@@ -2,6 +2,29 @@ import fs from 'fs';
 import * as cutil from 'common/util/util';
 import * as logger from '../util/logger.js';
 
+function migration(file, loadedData) {
+  if (!loadedData || loadedData.length === 0) return loadedData;  // Nothing to migrate
+  if (cutil.hasProp(loadedData[0], 'on-event')) return loadedData;  // Already in new format
+  const records = loadedData.map(function(loaded) {
+    const record = {};
+    record['on-event'] = Object.keys(loaded).filter(function(key) {  // Convert events
+      return ['on-login', 'on-logout', 'on-death'].includes(key);
+    });
+    ['rq-not-role', 'rq-role'].forEach(function(key) {  // Convert conditions
+      if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
+    });
+    ['cx-channel', 'cx-delay'].forEach(function(key) {  // Convert context
+      if (cutil.hasProp(loaded, key)) { record[key] = loaded[key]; }
+    });
+    ['do-remove-role', 'do-add-role', 'do-message'].forEach(function(key) {  // Convert actions
+      if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
+    });
+    return record;
+  });
+  fs.writeFile(file, JSON.stringify(records), logger.error);
+  return records;
+}
+
 function getArgValue(key, arg) {
   if (!arg || !arg.startsWith(key + '=')) return null;
   return arg.substring(key.length + 1);
@@ -13,35 +36,12 @@ export function newTriggers(context, instance) {
   const data = { base: [] };
   const self = {};
 
-  const migration = function(loadedData) {
-    if (!loadedData || loadedData.length === 0) return loadedData;
-    if (cutil.hasProp(loadedData[0], 'on-event')) return loadedData;
-    const records = loadedData.map(function(loaded) {
-      const record = {};
-      record['on-event'] = Object.keys(loaded).filter(function(key) {  // Convert events
-        return ['on-login', 'on-logout', 'on-death'].includes(key);
-      });
-      ['rq-not-role', 'rq-role'].forEach(function(key) {  // Convert conditions
-        if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
-      });
-      ['cx-channel', 'cx-delay'].forEach(function(key) {  // Convert context
-        if (cutil.hasProp(loaded, key)) { record[key] = loaded[key]; }
-      });
-      ['do-remove-role', 'do-add-role', 'do-message'].forEach(function(key) {  // Convert actions
-        if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
-      });
-      return record;
-    });
-    fs.writeFile(file, JSON.stringify(records), logger.error);
-    return records;
-  };
-
   self.load = function() {
     fs.exists(file, function(exists) {
       if (!exists) return;
       fs.readFile(file, function(error, body) {
         if (error) return logger.error(error);
-        data.base = migration(JSON.parse(body));
+        data.base = migration(file, JSON.parse(body));
       });
     });
     return self;

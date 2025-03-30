@@ -95,7 +95,7 @@ const systemHelpData = newHelpBuilder()
   ])
   .buildData();
 
-export const systemHelp = function() { return process(systemHelpData); };
+export const systemHelp = process(systemHelpData);
 
 const serverHelp = [
   'server             : Server status',
