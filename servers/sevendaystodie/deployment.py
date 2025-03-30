@@ -91,17 +91,11 @@ class Deployment:
             await io.copy_text_file(self._settings_def_file, self._settings_file)
 
     async def _build_live_config(self) -> dict:
-        live_dict = {}
-        subs = {
-            'AdminFileName': '../../config/serveradmin.xml',
-            'UserDataFolder': self._save_dir,
-            'SaveGameFolder': None
-        }
-        xml = await io.read_file(self._settings_file)
-        original = minidom.parseString(xml).firstChild
-        # noinspection PyUnresolvedReferences
-        live = minidom.Element(original.tagName)
-        doc = minidom.Document()
+        subs = {'AdminFileName': '../../config/serveradmin.xml',
+                'UserDataFolder': self._save_dir,
+                'SaveGameFolder': None}
+        original = minidom.parseString(await io.read_file(self._settings_file)).firstChild
+        result, doc, live = {}, minidom.Document(), minidom.Element(original.nodeName)
         doc.appendChild(live)
         live.ownerDocument = doc
         for node in original.childNodes:
@@ -109,26 +103,18 @@ class Deployment:
                 name = node.getAttribute('name')
                 if name in subs:
                     if subs[name] is not None:
-                        live_node = minidom.Element(node.tagName)
-                        live_node.ownerDocument = doc
-                        live_node.setAttribute('name', name)
-                        live_node.setAttribute('value', subs[name])
-                        live.appendChild(live_node)
-                        live_dict[name] = subs[name]
+                        live.appendChild(_new_element(doc, node.nodeName, name, subs[name]))
+                        result[name] = subs[name]
                     del subs[name]
                 else:
                     live.appendChild(node)
-                    live_dict[name] = node.getAttribute('value')
+                    result[name] = node.getAttribute('value')
         for name, value in subs.items():
             if value is not None:
-                live_node = minidom.Element('property')
-                live_node.ownerDocument = doc
-                live_node.setAttribute('name', name)
-                live_node.setAttribute('value', value)
-                live.appendChild(live_node)
-                live_dict[name] = value
+                live.appendChild(_new_element(doc, 'property', name, value))
+                result[name] = value
         await io.write_file(self._live_file, doc.toxml())
-        return live_dict
+        return result
 
     async def _map_ports(self, config: dict):
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
@@ -205,3 +191,11 @@ class Deployment:
 def _is_modfile(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
     return ftype == 'file' and fname != fext and fext == 'zip'
+
+
+def _new_element(doc: minidom.Document, element_name: str, name: str, value: str) -> minidom.Element:
+    node = minidom.Element(element_name)
+    node.ownerDocument = doc
+    node.setAttribute('name', name)
+    node.setAttribute('value', value)
+    return node

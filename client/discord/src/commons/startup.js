@@ -20,7 +20,7 @@ function newTriggerHandler(context, channels, instance, triggers) {
     });
   };
 
-  const get = async function(fetcher, entity, snowflake, fallback = null) {
+  const get = async function(entity, fetcher, snowflake, fallback = null) {
     if (cutil.hasProp(cache[entity], snowflake)) return cache[entity][snowflake];
     const result = await fetcher.fetch(snowflake);
     cache[entity][snowflake] = result ? result : fallback;
@@ -28,7 +28,7 @@ function newTriggerHandler(context, channels, instance, triggers) {
   };
 
   const getRole = async function(snowflake) {
-    return await get(cache.guild.roles, 'role', snowflake);
+    return await get('role', cache.guild.roles, snowflake);
   };
 
   const subsText = function(value, channel, event, alias = null) {
@@ -50,7 +50,7 @@ function newTriggerHandler(context, channels, instance, triggers) {
   const processTriggerContext = async function(trigger, channel) {
     let result = channel;
     if (cutil.hasProp(trigger, 'cx-channel')) {
-      result = await get(context.client.channels, 'channel', trigger['cx-channel'].snowflake, channel);
+      result = await get('channel', context.client.channels, trigger['cx-channel'].snowflake, channel);
     }
     if (cutil.hasProp(trigger, 'cx-delay')) {
       await cutil.sleep(trigger['cx-delay'] * 1000 - 1000);
@@ -70,7 +70,7 @@ function newTriggerHandler(context, channels, instance, triggers) {
 
   const handlePlayerEvent = async function(trigger, event, alias) {
     if (!trigger['on-event'].includes(playerEventMap[event])) return;  // Check applicable event
-    const member = alias && alias.snowflake ? await get(cache.guild.members, 'member', alias.snowflake) : null;
+    const member = alias && alias.snowflake ? await get('member', cache.guild.members, alias.snowflake) : null;
     if (cutil.hasProp(trigger, 'rq-not-role')) {  // Member cannot have any of these roles
       if (!member) return;
       for (const triggerRole of trigger['rq-not-role']) {
@@ -97,13 +97,14 @@ function newTriggerHandler(context, channels, instance, triggers) {
       if (member && alias && alias.discordid && cutil.hasProp(trigger, doRole)) {
         for (const triggerRole of trigger[doRole]) {
           const role = await getRole(triggerRole.snowflake);
-          if (!role) return;
-          const found = member.roles.cache.find(function(memberRole) { return memberRole.id === role.id; });
-          if ((isAdd && !found) || (!isAdd && found)) {
-            await cutil.sleep(1000);
-            if (isAdd) { await member.roles.add(role); }
-            else { await member.roles.remove(role); }
-            channel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
+          if (role) {
+            const found = member.roles.cache.find(function(memberRole) { return memberRole.id === role.id; });
+            if ((isAdd && !found) || (!isAdd && found)) {
+              await cutil.sleep(1000);
+              if (isAdd) { await member.roles.add(role); }
+              else { await member.roles.remove(role); }
+              channel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
+            }
           }
         }
       }
@@ -189,7 +190,6 @@ export function startupServerOnly($) {
 
 export function startupAll($) {
   const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
-  if (!channels.server || !channels.login || !channels.chat) return;
   const triggerHandler = channels.server || channels.login
     ? newTriggerHandler(context, channels, instance, $.triggers) : null;
   if (channels.server) {

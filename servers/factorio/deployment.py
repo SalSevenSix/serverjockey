@@ -187,7 +187,7 @@ class Deployment:
         if not await io.symlink_exists(autosave_dir):
             await io.create_symlink(autosave_dir, self._save_dir)
 
-    # pylint: disable=too-many-locals,too-many-branches
+    # pylint: disable=too-many-locals
     async def _sync_mods(self):
         logger = msglog.LogPublisher(self._context, self)
         mods = util.get('mods', objconv.json_to_dict(await io.read_file(self._mods_list)))
@@ -206,8 +206,7 @@ class Deployment:
             return
         logger.log('SYNCING mods...')
         baseurl, mod_files = 'https://mods.factorio.com', []
-        connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
-        timeout = aiohttp.ClientTimeout(total=8.0)
+        connector, timeout = aiohttp.TCPConnector(family=socket.AF_INET), aiohttp.ClientTimeout(total=8.0)
         credentials = '?username=' + util.get('username', settings) + '&token=' + util.get('token', settings)
         async with aiohttp.ClientSession(connector=connector) as session:
             for mod in [m for m in mods if m['name'] not in _BASE_MOD_NAMES]:
@@ -216,27 +215,25 @@ class Deployment:
                 async with session.get(mod_meta_url, timeout=timeout) as meta_resp:
                     assert meta_resp.status == 200
                     meta = await meta_resp.json()
-                    if not util.get('version', mod):
-                        mod['version'] = meta['releases'][-1]['version']
-                mod_version_found = False
-                for release in meta['releases']:
-                    if release['version'] == mod['version']:
-                        mod_version_found = True
-                        mod_files.append(release['file_name'])
-                        filename = self._mods_dir + '/' + release['file_name']
-                        if not await io.file_exists(filename):
-                            logger.log('DOWNLOADING ' + release['file_name'])
-                            download_url = baseurl + release['download_url'] + credentials
-                            async with session.get(download_url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as modfile_resp:
-                                assert modfile_resp.status == 200
-                                tracker, content_length = None, modfile_resp.headers.get('Content-Length')
-                                if content_length:
-                                    tracker = msglog.PercentTracker(
-                                        self._context, int(content_length), notifications=5, prefix='downloaded')
-                                await io.stream_write_file(
-                                    filename, io.WrapReader(modfile_resp.content),
-                                    io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
-                if not mod_version_found:
+                if not util.get('version', mod):
+                    mod['version'] = meta['releases'][-1]['version']
+                release = util.single([r for r in meta['releases'] if r['version'] == mod['version']])
+                if release:
+                    mod_files.append(release['file_name'])
+                    filename = self._mods_dir + '/' + release['file_name']
+                    if not await io.file_exists(filename):
+                        logger.log('DOWNLOADING ' + release['file_name'])
+                        download_url = baseurl + release['download_url'] + credentials
+                        async with session.get(download_url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as modfile_resp:
+                            assert modfile_resp.status == 200
+                            tracker, content_length = None, modfile_resp.headers.get('Content-Length')
+                            if content_length:
+                                tracker = msglog.PercentTracker(
+                                    self._context, int(content_length), notifications=5, prefix='downloaded')
+                            await io.stream_write_file(
+                                filename, io.WrapReader(modfile_resp.content),
+                                io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
+                else:
                     logger.log(
                         'ERROR Mod ' + mod['name'] + ' version ' + mod['version'] + ' not found, see ' + mod_meta_url)
         for file in await io.directory_list(self._mods_dir):
