@@ -25,21 +25,20 @@ async function handleAdd(triggers, message, data) {
   else { throw new Error('Failed adding new trigger'); }
 }
 
-export function trigger($) {
-  const [context, triggers, message, data] = [$.context, $.triggers, $.message, [...$.data]];
+export function trigger({ context, triggers, message, data }) {
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
-  const cmd = data.length > 0 ? data.shift() : 'list';
+  const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     util.chunkStringArray(triggers.listText()).forEach(function(chunk) {
       message.channel.send('```\n' + chunk.join('\n') + '\n```');
     });
   } else if (cmd === 'add') {
-    handleAdd(triggers, message, data)
+    handleAdd(triggers, message, data.slice(1))
       .then(function() { util.reactSuccess(message); })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'remove') {
-    if (data.length != 1) return util.reactUnknown(message);
-    if (!triggers.remove(data[0])) return util.reactError(message);
+    if (data.length < 2) return util.reactUnknown(message);
+    if (!triggers.remove(data[1])) return util.reactError(message);
     triggers.save();
     util.reactSuccess(message);
   } else {

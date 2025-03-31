@@ -101,17 +101,16 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
 /* eslint-enable max-lines-per-function */
 /* eslint-enable complexity */
 
-export function reward($) {
-  const [context, rewards, message, data] = [$.context, $.rewards, $.message, [...$.data]];
+export function reward({ context, httptool, aliases, rewards, instance, message, data }) {
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
-  const cmd = data.length > 0 ? data.shift() : 'list';
+  const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     util.chunkStringArray(rewards.listText()).forEach(function(chunk) {
       message.channel.send('```\n' + chunk.join('\n') + '\n```');
     });
   } else if (cmd === 'add') {
-    if (data.length != 5) return util.reactUnknown(message);
-    const [action, candidate, type, threshold, range] = data;
+    if (data.length < 6) return util.reactUnknown(message);
+    const [action, candidate, type, threshold, range] = data.slice(1);
     const snowflake = util.toSnowflake(candidate, '<@&');
     if (!snowflake) return util.reactError(message);
     message.guild.roles.fetch(snowflake)
@@ -122,17 +121,17 @@ export function reward($) {
       })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'move') {
-    if (data.length != 2) return util.reactUnknown(message);
-    if (!rewards.move(data[0], data[1])) return util.reactError(message);
+    if (data.length < 3) return util.reactUnknown(message);
+    if (!rewards.move(data[1], data[2])) return util.reactError(message);
     rewards.save();
     util.reactSuccess(message);
   } else if (cmd === 'remove') {
-    if (data.length != 1) return util.reactUnknown(message);
-    if (!rewards.remove(data[0])) return util.reactError(message);
+    if (data.length < 2) return util.reactUnknown(message);
+    if (!rewards.remove(data[1])) return util.reactError(message);
     rewards.save();
     util.reactSuccess(message);
   } else if (cmd === 'evaluate') {
-    evaluateRewards(context, $.httptool, $.aliases, rewards, $.instance, message)
+    evaluateRewards(context, httptool, aliases, rewards, instance, message)
       .then(function() {
         util.rmReacts(message, util.reactSuccess, logger.error);
       })

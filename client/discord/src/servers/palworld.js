@@ -10,8 +10,8 @@ export const help = helptext.newServerHelpBuilder()
   .addConfig(['cmdargs', 'Settings']).addDeployment()
   .build();
 
-export function players($) {
-  $.httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
-    $.message.channel.send('```\n' + text + '\n```');
+export function players({ httptool, message }) {
+  httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
+    message.channel.send('```\n' + text + '\n```');
   });
 }

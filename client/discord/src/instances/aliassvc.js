@@ -89,6 +89,12 @@ export function newAliases(context, instance) {
     return cutil.hasProp(data.name, value) ? unpack(data.name[value]) : null;
   };
 
+  self.resolveName = function(value) {
+    if (!util.toSnowflake(value)) return value;
+    const record = self.findByKey(value);
+    return record ? record.name : value;
+  };
+
   return self;
 }
 /* eslint-enable max-lines-per-function */

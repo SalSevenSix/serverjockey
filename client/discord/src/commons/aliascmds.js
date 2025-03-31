@@ -1,26 +1,25 @@
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 
-export function alias($) {
-  const [context, aliases, message, data] = [$.context, $.aliases, $.message, [...$.data]];
+export function alias({ context, aliases, message, data }) {
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
-  const cmd = data.length > 0 ? data.shift() : 'list';
+  const [cmd, aliasid, name] = data.length > 0 ? data : ['list'];
   if (cmd === 'list') {
     util.chunkStringArray(aliases.listText()).forEach(function(chunk) {
       message.channel.send('```\n' + chunk.join('\n') + '\n```');
     });
   } else if (cmd === 'find') {
-    if (data.length != 1) return util.reactUnknown(message);
+    if (!aliasid) return util.reactUnknown(message);
     let text = {};
-    [aliases.findByKey(data[0]), aliases.findByName(data[0])].forEach(function(record) {
+    [aliases.findByKey(aliasid), aliases.findByName(aliasid)].forEach(function(record) {
       if (record) { text[record.snowflake] = record.toString(); }
     });
     text = Object.values(text);
     text = text.length > 0 ? text.join('\n') : 'No Alias Found';
     message.channel.send('```\n' + text + '\n```');
   } else if (cmd === 'add') {
-    if (data.length != 2) return util.reactUnknown(message);
-    const [snowflake, name] = [util.toSnowflake(data[0]), data[1]];
+    if (!aliasid || !name) return util.reactUnknown(message);
+    const snowflake = util.toSnowflake(aliasid);
     if (!snowflake) return util.reactError(message);
     context.client.users.fetch(snowflake)
       .then(function(user) {
@@ -31,8 +30,8 @@ export function alias($) {
       })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'remove') {
-    if (data.length != 1) return util.reactUnknown(message);
-    if (!aliases.remove(data[0])) return util.reactError(message);
+    if (!aliasid) return util.reactUnknown(message);
+    if (!aliases.remove(aliasid)) return util.reactError(message);
     aliases.save();
     util.reactSuccess(message);
   } else {

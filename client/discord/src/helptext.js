@@ -32,13 +32,13 @@ function processData(context, httptool, message, data, helpData) {
     done = processSection(context, httptool, message, data, sections[index]);
     index += 1;
   }
-  if (done === false) {
-    message.channel.send('No more help available.');
-  }
+  if (done === false) { message.channel.send('No more help available.'); }
 }
 
 function process(helpData) {
-  return function($) { processData($.context, $.httptool, $.message, $.data, helpData); };
+  return function({ context, httptool, message, data }) {
+    processData(context, httptool, message, data, helpData);
+  };
 }
 
 function newHelpBuilder() {

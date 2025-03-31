@@ -4,9 +4,7 @@ import * as pstats from 'common/activity/player';
 import * as util from '../util/util.js';
 
 /* eslint-disable max-lines-per-function */
-export function activity($) {
-  const [context, httptool, aliases, instance, message, data] = [
-    $.context, $.httptool, $.aliases, $.instance, $.message, $.data];
+export function activity({ context, httptool, aliases, instance, message, data }) {
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [baseurl, now] = [context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, limit, format, query] = [null, null, null, null, 11, 'TEXT', 'player'];

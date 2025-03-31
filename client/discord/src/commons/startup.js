@@ -181,21 +181,19 @@ function startServerEvents(context, channels, instance, url, triggerHandler) {
   });
 }
 
-export function startupServerOnly($) {
-  const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
+export function startupServerOnly({ context, channels, instance, url, triggers }) {
   if (!channels.server) return;
-  const triggerHandler = newTriggerHandler(context, channels, instance, $.triggers);
+  const triggerHandler = newTriggerHandler(context, channels, instance, triggers);
   startServerEvents(context, channels, instance, url, triggerHandler);
 }
 
-export function startupAll($) {
-  const [context, channels, instance, url] = [$.context, $.channels, $.instance, $.url];
+export function startupAll({ context, channels, instance, url, triggers, aliases }) {
   const triggerHandler = channels.server || channels.login
-    ? newTriggerHandler(context, channels, instance, $.triggers) : null;
+    ? newTriggerHandler(context, channels, instance, triggers) : null;
   if (channels.server) {
     startServerEvents(context, channels, instance, url, triggerHandler);
   }
   if (channels.login || channels.chat) {
-    startPlayerEvents(context, channels, instance, url, $.aliases, triggerHandler);
+    startPlayerEvents(context, channels, instance, url, aliases, triggerHandler);
   }
 }

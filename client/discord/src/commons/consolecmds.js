@@ -1,8 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
 
-export function send($) {
-  const [httptool, message, data] = [$.httptool, $.message, $.data];
+export function send({ httptool, message, data }) {
   if (data.length === 0) return util.reactUnknown(message);
   let line = message.content;
   line = line.slice(line.indexOf(' ')).trim();
@@ -12,8 +11,7 @@ export function send($) {
   });
 }
 
-export function say($) {
-  const [context, httptool, message, data] = [$.context, $.httptool, $.message, $.data];
+export function say({ context, httptool, message, data }) {
   if (data.length === 0) return util.reactUnknown(message);
   let [name, line] = [message.member.user.tag, message.content];
   name = '@' + name.split('#')[0];
@@ -25,8 +23,7 @@ export function say($) {
   );
 }
 
-export function players($) {
-  const [httptool, aliases, instance] = [$.httptool, $.aliases, $.instance];
+export function players({ httptool, aliases, instance }) {
   httptool.doGet('/players', function(body) {
     let line = instance + ' players online: ' + body.length;
     if (body.length === 0) return '```\n' + line + '\n```';

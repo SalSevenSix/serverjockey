@@ -4,8 +4,7 @@ import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 import * as subs from '../util/subs.js';
 
-export function server($) {
-  const [context, httptool, instance, message, data] = [$.context, $.httptool, $.instance, $.message, $.data];
+export function server({ context, httptool, instance, message, data }) {
   if (data.length === 0) {
     return httptool.doGet('/server', function(body) {
       let result = '```\nServer ' + instance + ' is ';
@@ -47,8 +46,7 @@ export function server($) {
   });
 }
 
-export function auto($) {
-  const [httptool, instance, data] = [$.httptool, $.instance, $.data];
+export function auto({ httptool, instance, data }) {
   if (data.length > 0) return httptool.doPost('', { auto: data[0] });
   const desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
   httptool.doGet('/server', function(body) {
@@ -59,8 +57,7 @@ export function auto($) {
   });
 }
 
-export function log($) {
-  const [httptool, message] = [$.httptool, $.message];
+export function log({ httptool, message }) {
   httptool.doGet('/log/tail', function(body) {
     if (!body) return message.channel.send('```\nNo log lines found\n```');
     const fname = 'log-' + message.id + '.text';

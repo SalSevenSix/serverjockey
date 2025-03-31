@@ -60,58 +60,50 @@ export const help = helptext.newServerHelpBuilder()
     'Spawn a vehicle next to player. Condition will vary.'])
   .build();
 
-export function world($) {
-  const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
+export function world({ httptool, message, data }) {
   if (data.length === 0) return util.reactUnknown(message);
-  const cmd = data.shift();
+  const cmd = data[0];
   let body = null;
   if (cmd === 'broadcast') {
-    if (data.length === 0) return util.reactUnknown(message);
-    body = { message: data.join(' ') };
+    if (data.length < 2) return util.reactUnknown(message);
+    body = { message: data.slice(1).join(' ') };
   }
   httptool.doPost('/world/' + cmd, body);
 }
 
-export function player($) {
-  const [httptool, aliases, message, data] = [$.httptool, $.aliases, $.message, [...$.data]];
+export function player({ httptool, aliases, message, data }) {
   if (data.length < 2) return util.reactUnknown(message);
-  let name = data.shift();
-  const cmd = data.shift();
+  const cmd = data[1];
   let body = null;
-  if (data.length > 0) {
+  if (data.length > 2) {
     if (cmd === 'set-access-level') {
-      body = { level: data[0] };
+      body = { level: data[2] };
     } else if (cmd === 'tele-to') {
-      body = { toplayer: data[0] };
+      body = { toplayer: data[2] };
     } else if (cmd === 'tele-at') {
-      body = { location: data[0] };
+      body = { location: data[2] };
     } else if (cmd === 'spawn-horde') {
-      body = { count: data[0] };
+      body = { count: data[2] };
     } else if (cmd === 'spawn-vehicle') {
-      if (data.length < 2) return util.reactUnknown(message);
-      body = { module: data[0], item: data[1] };
+      if (data.length < 4) return util.reactUnknown(message);
+      body = { module: data[2], item: data[3] };
     } else if (cmd === 'give-xp') {
-      if (data.length < 2) return util.reactUnknown(message);
-      body = { skill: data[0], xp: data[1] };
+      if (data.length < 4) return util.reactUnknown(message);
+      body = { skill: data[2], xp: data[3] };
     } else if (cmd === 'give-item') {
-      if (data.length < 2) return util.reactUnknown(message);
-      body = { module: data[0], item: data[1] };
-      if (data.length > 2) { body.count = data[2]; }
+      if (data.length < 4) return util.reactUnknown(message);
+      body = { module: data[2], item: data[3] };
+      if (data.length > 4) { body.count = data[4]; }
     }
   }
-  let member = util.toSnowflake(name);
-  if (member) { member = aliases.findByKey(member); }
-  if (member) { name = member.name; }
+  let name = aliases.resolveName(data[0]);
   name = cutil.urlSafeB64encode(name);
   httptool.doPost('/players/' + name + '/' + cmd, body);
 }
 
-export function banlist($) {
-  const [httptool, message, data] = [$.httptool, $.message, [...$.data]];
+export function banlist({ httptool, message, data }) {
   if (data.length < 2) return util.reactUnknown(message);
-  const cmd = data.shift() + '-id';
-  const body = { steamid: data.shift() };
-  httptool.doPost('/banlist/' + cmd, body);
+  httptool.doPost('/banlist/' + data[0] + '-id', { steamid: data[1] });
 }
 
 function whitelistRemoveName(httptool, name, dataHandler = null) {
@@ -161,23 +153,22 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
     .catch(function(error) { logger.error(error, message); });
 }
 
-export function whitelist($) {
-  const [context, httptool, instance, aliases, message, data] = [
-    $.context, $.httptool, $.instance, $.aliases, $.message, [...$.data]];
+export function whitelist({ context, httptool, instance, aliases, message, data }) {
+  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   if (data.length < 2) return util.reactUnknown(message);
-  const cmd = data.shift();
+  const cmd = data[0];
   if (cmd === 'add-name') {
-    if (data.length < 2) return util.reactUnknown(message);
-    whitelistAddName(httptool, data[0], data[1]);
+    if (data.length < 3) return util.reactUnknown(message);
+    whitelistAddName(httptool, data[1], data[2]);
   } else if (cmd === 'remove-name') {
-    whitelistRemoveName(httptool, data[0]);
+    whitelistRemoveName(httptool, data[1]);
   } else if (cmd === 'add-id') {
-    whitelistAddId(context, httptool, instance, aliases, message, data[0], data.length > 1 ? data[1] : null);
+    whitelistAddId(context, httptool, instance, aliases, message, data[1], data.length > 2 ? data[2] : null);
   } else if (cmd === 'remove-id') {
-    whitelistRemoveId(httptool, aliases, message, data[0]);
+    whitelistRemoveId(httptool, aliases, message, data[1]);
   } else if (cmd === 'reset-password') {
-    whitelistRemoveId(httptool, aliases, message, data[0], function() {
-      cutil.sleep(500).then(function() { whitelistAddId(context, httptool, instance, aliases, message, data[0]); });
+    whitelistRemoveId(httptool, aliases, message, data[1], function() {
+      cutil.sleep(500).then(function() { whitelistAddId(context, httptool, instance, aliases, message, data[1]); });
     });
   } else {
     util.reactUnknown(message);
