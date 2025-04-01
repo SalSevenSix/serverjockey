@@ -50,8 +50,8 @@
         return response.json();
       })
       .then(function(json) {
-        Object.keys(json).forEach(function(key) {
-          instances = [...instances, { identity: key, module: json[key].module, running: json[key].running }];
+        Object.entries(json).forEach(function([identity, instance]) {
+          instances = [...instances, { identity: identity, module: instance.module, running: instance.running }];
         });
         subs.start('/instances/subscribe', handleInstanceEvent);
       })

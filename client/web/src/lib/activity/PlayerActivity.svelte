@@ -114,44 +114,44 @@
       <p><i class="fa fa-triangle-exclamation fa-lg ml-3 mr-1"></i> No player activity found</p>
     </div>
   {:else}
-    {#each Object.keys(activity.results) as instance}
+    {#each Object.values(activity.results) as instance}
       <div class="columns">
         <div class="column mt-0 pt-0">
           <table class="table is-thinner"><tbody>
             <tr><td class="label-column"></td><td></td><tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Instance for reported player activity">Instance</td>
-                <td class="notranslate">{activity.results[instance].summary.instance}</td></tr>
+                <td class="notranslate">{instance.summary.instance}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Number of unique players identified">Players</td>
-                <td class="notranslate">{activity.results[instance].summary.unique}</td></tr>
+                <td class="notranslate">{instance.summary.unique}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Maximum recorded concurrent players">Players Max</td>
-                <td class="notranslate">{activity.results[instance].summary.online.max}</td></tr>
+                <td class="notranslate">{instance.summary.online.max}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Minimum recorded concurrent players">Players Min</td>
-                <td class="notranslate">{activity.results[instance].summary.online.min}</td></tr>
+                <td class="notranslate">{instance.summary.online.min}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Sum of time played by all players">Total Time</td>
-                <td class="notranslate">{humanDuration(activity.results[instance].summary.total.uptime)}</td></tr>
+                <td class="notranslate">{humanDuration(instance.summary.total.uptime)}</td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Sum of player sessions (logins)">Total Sessions</td>
-                <td class="notranslate">{activity.results[instance].summary.total.sessions}</td></tr>
+                <td class="notranslate">{instance.summary.total.sessions}</td></tr>
           </tbody></table>
         </div>
         <div class="column chart-container-players">
           {#if !processing}
-            <div><ChartCanvas data={chartDataPlayers(activity.results[instance])} /></div>
+            <div><ChartCanvas data={chartDataPlayers(instance)} /></div>
           {/if}
         </div>
       </div>
       <div class="block chart-container-intervals">
         {#if !processing}
-          <div><ChartCanvas data={chartDataIntervals(activity.results[instance])} /></div>
+          <div><ChartCanvas data={chartDataIntervals(instance)} /></div>
         {/if}
       </div>
       <div class="columns is-gapless mt-1">
-        {#each chunkArray(compactPlayers(activity.results[instance].players, 45), 15, 3) as entryColumn, colindex}
+        {#each chunkArray(compactPlayers(instance.players, 45), 15, 3) as entryColumn, colindex}
           <div class="column is-one-third">
             <table class="table is-narrow"><tbody>
               <tr><td></td><td></td><td></td></tr>
