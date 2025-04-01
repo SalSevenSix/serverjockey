@@ -23,7 +23,7 @@
   function getConnect(details) {
     if (!details) return '';
     let result = details.ip ? details.ip : '';
-    if (details.ip && details.port) { result += '<wbr />:'; }
+    if (details.ip && details.port) { result += '<wbr>:'; }
     if (details.port) { result += details.port; }
     return result;
   }

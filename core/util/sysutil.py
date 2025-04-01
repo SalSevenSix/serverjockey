@@ -25,6 +25,17 @@ async def _get_cpu_idle() -> float:
     return result / (100.0 * (cpus if cpus else 1.0))
 
 
+async def _get_net_bytes() -> tuple:
+    bytes_rx, bytes_tx, stats = 0, 0, await io.read_file('/proc/net/dev')
+    stats = [o.strip() for o in stats.split('\n') if o and o.find('|') == -1]
+    stats = [o for o in stats if o.find(':') > -1 and not o.startswith('lo:')]
+    for line in stats:
+        data = [e for e in line.split(' ') if e]
+        bytes_rx += objconv.to_int(data[1])
+        bytes_tx += objconv.to_int(data[9])
+    return bytes_rx, bytes_tx
+
+
 async def _fetch_text(url: str) -> str | None:
     connector = aiohttp.TCPConnector(family=socket.AF_INET, force_close=True)
     timeout = aiohttp.ClientTimeout(total=4.0)
@@ -126,6 +137,29 @@ class _CpuPercent:
         return round(result * 100.0, 1)
 
 
+class _NetBytes:
+    def __init__(self, min_duration: float, max_duration: float):
+        self._min_duration, self._max_duration = min_duration, max_duration
+        self._last_time, self._last_rx, self._last_tx = 0.0, 0, 0
+
+    async def get(self) -> dict:
+        last_rx, last_tx, now = self._last_rx, self._last_tx, time.time()
+        wait, duration = 0.0, now - self._last_time
+        if duration > self._max_duration:
+            last_rx, last_tx = await _get_net_bytes()
+            wait = self._min_duration
+        elif duration < self._min_duration:
+            wait = self._min_duration - duration
+        if wait > 0.0:
+            await asyncio.sleep(wait)
+            duration, now = self._min_duration, now + wait
+        this_rx, this_tx = await _get_net_bytes()
+        rate_rx = util.human_file_size(int(round((this_rx - last_rx) / duration))) + '/s'
+        rate_tx = util.human_file_size(int(round((this_tx - last_tx) / duration))) + '/s'
+        self._last_time, self._last_rx, self._last_tx = now, this_rx, this_tx
+        return dict(rx=rate_rx, tx=rate_tx)
+
+
 class _CpuInfo:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> dict:
@@ -184,8 +218,9 @@ _LOCAL_IP = _Cacher(_LocalIp(), 31536000.0)
 _PUBLIC_IP = _Cacher(_PublicIp(), 31536000.0)
 _DISK_USAGE = _Cacher(_DiskUsage(), 120.0)
 _VIRTUAL_MEMORY = _Cacher(_VirtualMemory(), 60.0)
-_CPU_PERCENT = _Cacher(_CpuPercent(1.0, 15.0), 10.0)
 _CPU_INFO = _Cacher(_CpuInfo(), 31536000.0)
+_CPU_PERCENT = _Cacher(_CpuPercent(1.0, 15.0), 10.0)
+_NET_BYTES = _Cacher(_NetBytes(1.0, 15.0), 10.0)
 
 
 def system_version() -> str:
@@ -223,17 +258,21 @@ async def virtual_memory() -> dict:
     return await _VIRTUAL_MEMORY.get()
 
 
-async def cpu_percent() -> float:
-    return await _CPU_PERCENT.get()
-
-
 async def cpu_info() -> dict:
     return await _CPU_INFO.get()
 
 
+async def cpu_percent() -> float:
+    return await _CPU_PERCENT.get()
+
+
+async def net_bytes() -> dict:
+    return await _NET_BYTES.get()
+
+
 async def system_info() -> dict:
     # noinspection PyTypeChecker
-    cpu, cpupct, os, disk, memory, local, public = await asyncio.gather(
-        cpu_info(), cpu_percent(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
-    cpu['percent'], net = cpupct, dict(local=local, public=public)
+    cpu, cpupct, netrate, os, disk, memory, local, public = await asyncio.gather(
+        cpu_info(), cpu_percent(), net_bytes(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
+    cpu['percent'], net = cpupct, dict(rate=netrate, local=local, public=public)
     return dict(version=system_version(), time=system_time(), os=os, cpu=cpu, memory=memory, disk=disk, net=net)
