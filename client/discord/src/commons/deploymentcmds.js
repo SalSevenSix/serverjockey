@@ -9,7 +9,7 @@ export function getconfig({ httptool, message, data }) {
     const fname = data[0] + '-' + message.id + '.text';
     const fpath = '/tmp/' + fname;
     fs.writeFile(fpath, body, function(error) {
-      if (error) return logger.error(error);
+      if (error) return logger.error(error, message);
       message.channel.send({ files: [{ attachment: fpath, name: fname }] })
         .finally(function() { fs.unlink(fpath, logger.error); });
     });
