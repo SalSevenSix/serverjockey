@@ -10,7 +10,7 @@ class TestDeleteRuntime(unittest.TestCase):
         context.goto_instance(identity, module)
         context.find_element('collapsibleDeployment').click()
         # delete runtime
-        context.find_element('runtimeControlsDelete').click()
+        context.find_element('runtimeControlsDelete', enabled=3.0).click()
         context.find_element('confirmModalConfirm').click()
         self.assertEqual('Delete runtime completed.',
                          context.find_element('notificationsText0', exists=20.0).get_attribute('innerText'))

@@ -41,8 +41,7 @@ export class MessageHttpTool {
     fetch(this.#baseurl + path, util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
-        const ct = response.headers.get('Content-Type');
-        if (ct.startsWith('text/plain')) return response.text();
+        if (response.headers.get('Content-Type').startsWith('text/plain')) return response.text();
         return response.json();
       })
       .then(function(data) {
@@ -67,23 +66,19 @@ export class MessageHttpTool {
     if (cutil.isString(body)) {
       request = util.newPostRequest('text/plain', context.config.SERVER_TOKEN);
       request.body = body.replace(/\r\n/g, '\n');
-    } else if (body != null) {
+    } else if (body) {
       request.body = JSON.stringify(body);
     }
     fetch(this.#baseurl + path, request)
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
         if (response.status === 204) return null;
-        const ct = response.headers.get('Content-Type');
-        if (ct.startsWith('text/plain')) return response.text();
+        if (response.headers.get('Content-Type').startsWith('text/plain')) return response.text();
         return response.json();
       })
       .then(function(data) {
-        if (dataHandler) {
-          dataHandler(data);
-        } else {
-          util.reactSuccess(message);
-        }
+        if (dataHandler) { dataHandler(data); }
+        else { util.reactSuccess(message); }
       })
       .catch(function(error) {
         logger.error(error, message);

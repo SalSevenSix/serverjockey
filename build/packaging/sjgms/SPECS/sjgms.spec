@@ -53,8 +53,8 @@ exit 0
 
 
 %changelog
-* Fri Mar 14 2024 Bowden Salis <bsalis76@gmail.com> - 0.19.0
-- Feature release v0.19.0
+* Fri Apr 11 2024 Bowden Salis <bsalis76@gmail.com> - 0.19.0
+- Trigger improvements release
 * Thu Mar 13 2024 Bowden Salis <bsalis76@gmail.com> - 0.18.0
 - Mod uploads and Triggers features
 * Wed Feb 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.17.0

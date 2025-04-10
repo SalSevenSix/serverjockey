@@ -57,6 +57,7 @@ class TestPlaying(unittest.TestCase):
     def _stop_server(self):
         context = webcontext.get()
         context.scroll_to_top()
+        time.sleep(0.5)
         context.find_element('serverControlsStop').click()
         context.wait_for_instance_state(sc.STOPPED, wait=20.0)
 

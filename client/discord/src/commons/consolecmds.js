@@ -27,11 +27,10 @@ export function players({ httptool, aliases, instance }) {
   httptool.doGet('/players', function(body) {
     let line = instance + ' players online: ' + body.length;
     if (body.length === 0) return '```\n' + line + '\n```';
-    let result = [];
-    result.push(line);
     const plen = Math.max(10, 2 + body.reduce(function(a, b) {
       return a.name.length > b.name.length ? a : b;
     }).name.length);
+    let result = [line];
     body.forEach(function(entry) {
       line = entry.name.padEnd(plen);
       if (entry.steamid) { line = entry.steamid + ' ' + line; }

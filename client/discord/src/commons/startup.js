@@ -163,9 +163,10 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
 }
 
 function startServerEvents(context, channels, instance, url, triggerHandler) {
-  let [state, restartRequired] = ['READY', false];
+  let [state, restartRequired] = [null, false];
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // Ignore no state
+    if (!state) { state = json.state; }  // Set initial state
     if (json.state === 'START') return true;  // Ignore transient state
     if (!restartRequired && json.details.restart) {
       channels.server.send('`' + instance + '` 🔄 restart required');

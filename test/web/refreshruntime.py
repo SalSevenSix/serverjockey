@@ -30,8 +30,8 @@ class TestRefreshRuntime(unittest.TestCase):
             self.assertEqual('END Install', context.get_instance_loglastline())
             return
         # restore last runtime backup
-        context.find_element('collapsibleBackups').click()
-        context.find_element('fileSystemBackupsActionE' + TEST_BACKUP, by=By.NAME, exists=3.0).click()
+        context.find_element('collapsibleBackups', displayed=1.0).click()
+        context.find_element('fileSystemBackupsActionE' + TEST_BACKUP, by=By.NAME, exists=5.0).click()
         context.find_element('confirmModalConfirm').click()
         context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()

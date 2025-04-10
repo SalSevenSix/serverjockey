@@ -16,7 +16,7 @@
   export let instance;
   export let onSuccess;
 
-  let stage = 0;  // 0=ready 1=start 2=pass 3=code
+  let stage = 0;  // 0=ready 1=start 2=password 3=steamguard-code 4=steamguard-confirm
   let steamLogin;
   let steamPassword;
   let steamCode;
@@ -57,8 +57,9 @@
       .then(function(json) {
         subs.poll(json.url, function(data) {
           logText = logLines.append(data).toText();
-          if (data.includes('Cached credentials not found')) { stage = 2; }
-          if (data.includes('Enter the current code from your Steam Guard Mobile Authenticator app')) { stage = 3; }
+          if (data.includes('Please confirm the login in the Steam Mobile app on your phone')) { stage = 4; }
+          else if (data.includes('Enter the current code from your Steam Guard Mobile Authenticator')) { stage = 3; }
+          else if (data.includes('Cached credentials not found')) { stage = 2; }
           return true;
         })
         .then(function() {
@@ -125,7 +126,7 @@
            Please provide Steam credentials to continue.</p>
       </div>
       {#if stage < 2}
-        <div class="block">
+        <div class="stage-section">
           <InputText id="steamLoginModalLogin" label="Steam Login" bind:value={steamLogin}
                      disabled={stage > 0} onKeypress={kpStartLogin} nowrap autofocus />
           <div class="field buttons is-right">
@@ -135,7 +136,7 @@
           </div>
         </div>
       {:else if stage == 2}
-        <div class="block" in:fade={{ duration: 500 }}>
+        <div class="stage-section" in:fade={{ duration: 500 }}>
           <InputPassword id="steamLoginModalPassword" label="Enter Password" bind:value={steamPassword}
                          onKeypress={kpEnterPassword} nowrap autofocus />
           <div class="field buttons is-right">
@@ -145,13 +146,26 @@
           </div>
         </div>
       {:else if stage == 3}
-        <div class="block" in:fade={{ duration: 500 }}>
+        <div class="stage-section" in:fade={{ duration: 500 }}>
           <InputText id="steamLoginModalCode" label="Enter Steam Guard Code" bind:value={steamCode}
                      onKeypress={kpEnterCode} nowrap autofocus />
           <div class="field buttons is-right">
             <button id="steamLoginModalCodeSubmit" title="Enter Code" class="button is-primary"
                     on:click={enterCode}>
               <i class="fa fa-arrow-right fa-lg"></i>&nbsp;&nbsp;Enter</button>
+          </div>
+        </div>
+      {:else if stage == 4}
+        <div class="stage-section" in:fade={{ duration: 500 }}>
+          <h3 class="title is-6 mb-4 white-space-nowrap">Confirm with Steam Guard</h3>
+          <div class="columns is-centered">
+            <div class="column is-half white-space-nowrap">
+              <i class="fa fa-mobile-screen fa-4x theme-black-white"></i>
+              &nbsp;&nbsp;&nbsp;
+              <i class="fa fa-arrow-right fa-4x theme-black-white"></i>
+              &nbsp;&nbsp;&nbsp;
+              <i class="fa fa-square-check fa-4x theme-black-white"></i>
+            </div>
           </div>
         </div>
       {/if}
@@ -164,3 +178,11 @@
     </section>
   </div>
 </div>
+
+
+<style>
+  .stage-section {
+    min-height: 8.4em;
+    padding-bottom: 12px;
+  }
+</style>
