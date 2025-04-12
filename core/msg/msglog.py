@@ -63,8 +63,7 @@ class LogfileSubscriber(msgabc.AbcSubscriber):
 
 class LoggerSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self,
-                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+    def __init__(self, msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  transformer: msgabc.Transformer = msgtrf.ToLogLine(),
                  level: int = logging.DEBUG):
         super().__init__(msg_filter)
@@ -77,8 +76,7 @@ class LoggerSubscriber(msgabc.AbcSubscriber):
 
 class PrintSubscriber(msgabc.AbcSubscriber):
 
-    def __init__(self,
-                 msg_filter: msgabc.Filter = msgftr.AcceptAll(),
+    def __init__(self, msg_filter: msgabc.Filter = msgftr.AcceptAll(),
                  transformer: msgabc.Transformer = msgtrf.ToLogLine()):
         super().__init__(msg_filter)
         self._transformer = transformer

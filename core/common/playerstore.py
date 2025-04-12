@@ -19,17 +19,13 @@ class PlayersHandler(httpabc.GetHandler):
 
 
 class PlayersSubscriber(msgabc.AbcSubscriber):
-    GET = 'PlayersSubscriber.Get'
+    GET, GET_RESPONSE = 'PlayersSubscriber.Get', 'PlayersSubscriber.GetResponse'
     GET_FILTER = msgftr.NameIs(GET)
-    GET_RESPONSE = 'PlayersSubscriber.GetResponse'
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
-            mc.PlayerStore.EVENT_FILTER,
-            PlayersSubscriber.GET_FILTER,
-            mc.ServerStatus.RUNNING_FALSE_FILTER))
-        self._mailer = mailer
-        self._players = _Players()
+            mc.PlayerStore.EVENT_FILTER, PlayersSubscriber.GET_FILTER, mc.ServerStatus.RUNNING_FALSE_FILTER))
+        self._mailer, self._players = mailer, _Players()
 
     @staticmethod
     def event_login(mailer: msgabc.Mailer, source: typing.Any, name: str, steamid: str | None = None):

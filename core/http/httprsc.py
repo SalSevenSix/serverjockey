@@ -6,7 +6,7 @@ from yarl import URL
 from core.util import util, objconv, io
 from core.http import httpabc, httpsec
 
-ARG_KINDS = (httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL)
+ARG_KINDS = httpabc.ResourceKind.ARG, httpabc.ResourceKind.ARG_ENCODED, httpabc.ResourceKind.ARG_TAIL
 
 
 class ResourceBuilder:

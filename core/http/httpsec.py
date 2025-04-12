@@ -4,8 +4,7 @@ import base64
 from core.util import gc, util
 from core.http import httpabc, httpcnt
 
-_SECURE = '_SECURE'
-_COOKIE_NAME = 'secret'
+_SECURE, _COOKIE_NAME = '_SECURE', 'secret'
 
 
 def make_secure(data: httpabc.AbcDataGet, secure: bool):

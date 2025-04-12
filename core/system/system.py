@@ -13,10 +13,10 @@ from core.store import sysstore
 from core.system import svrmodules, svrsvc
 
 _NO_LOG = 'NO FILE LOGGING. STDOUT ONLY.'
+_INSTANCE_EVENT_FILTER = msgftr.Or(mc.SystemService.SERVER_FILTER, mc.ServerStatus.UPDATED_FILTER)
 
 
 class SystemService:
-    _INSTANCE_EVENT_FILTER = msgftr.Or(mc.SystemService.SERVER_FILTER, mc.ServerStatus.UPDATED_FILTER)
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
@@ -45,7 +45,7 @@ class SystemService:
         buidler.put('shutdown', _ShutdownHandler())
         buidler.pop()
         buidler.psh('instances', _InstancesHandler(self, self._modules))
-        buidler.put('subscribe', subs.handler(SystemService._INSTANCE_EVENT_FILTER, _InstanceEventTransformer()))
+        buidler.put('subscribe', subs.handler(_INSTANCE_EVENT_FILTER, _InstanceEventTransformer()))
         buidler.pop()
         buidler.psh(subs.resource(resource, 'subscriptions'))
         buidler.put('{identity}', subs.subscriptions_handler('identity'))

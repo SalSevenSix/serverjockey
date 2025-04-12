@@ -132,7 +132,7 @@ class _ProgressLogger:
     @staticmethod
     async def _load_lines() -> tuple:
         # https://ascii-generator.site/
-        lines = await pkg.pkg_load('core.msg', 'art.txt')
+        lines = await pkg.pkg_load('core.msgc', 'art.txt')
         lines = lines.decode().strip().split('\n')
         arts, current, divider = [], [], ''.join(list(itertools.repeat('_', 80)))
         for line in lines:

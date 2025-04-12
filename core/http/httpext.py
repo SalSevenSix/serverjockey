@@ -111,8 +111,7 @@ class WipeHandler(httpabc.PostHandler):
     FILTER_DONE = msgftr.NameIs(WIPED)
 
     def __init__(self, mailer: msgabc.Mailer, path: str):
-        self._mailer = mailer
-        self._path = path
+        self._mailer, self._path = mailer, path
 
     async def handle_post(self, resource, data):
         await io.delete_any(self._path)
@@ -140,9 +139,9 @@ class MtimeHandler(httpabc.GetHandler):
     async def handle_get(self, resource, data):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
-        timestamp = await self._find_mtime()
-        timestamp = dtutil.to_millis(timestamp) if timestamp else None
-        return dict(timestamp=timestamp)
+        result = await self._find_mtime()
+        result = dtutil.to_millis(result) if result else None
+        return dict(timestamp=result)
 
     async def _find_mtime(self) -> float | None:
         result = None

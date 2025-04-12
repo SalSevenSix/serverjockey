@@ -103,9 +103,7 @@ class _KillSteamOnSolicitPassword(msgabc.AbcSubscriber):
 
     def __init__(self):
         super().__init__(msgftr.Or(
-            jobh.JobProcess.FILTER_STDOUT_LINE,
-            jobh.JobProcess.FILTER_STARTED,
-            jobh.JobProcess.FILTER_DONE))
+            jobh.JobProcess.FILTER_STDOUT_LINE, jobh.JobProcess.FILTER_STARTED, jobh.JobProcess.FILTER_DONE))
         self._process: subprocess.Process | None = None
 
     def handle(self, message):
@@ -127,12 +125,9 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
 
     def __init__(self):
         super().__init__(msgftr.Or(
-            _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT,
-            jobh.JobProcess.FILTER_STARTED,
-            jobh.JobProcess.FILTER_DONE))
-        self._queue = asyncio.Queue()
+            _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT, jobh.JobProcess.FILTER_STARTED, jobh.JobProcess.FILTER_DONE))
+        self._queue, self._task = asyncio.Queue(), None
         self._process: subprocess.Process | None = None
-        self._task = None
 
     def handle(self, message):
         if _KillSteamOnNoHeartbeat.FILTER_HEARTBEAT.accepts(message):
@@ -149,8 +144,8 @@ class _KillSteamOnNoHeartbeat(msgabc.AbcSubscriber):
         return None
 
     async def _monitor(self):
-        looping = True
         try:
+            looping = True
             while looping:
                 looping = await asyncio.wait_for(self._queue.get(), 3.0)
                 self._queue.task_done()

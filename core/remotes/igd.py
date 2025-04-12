@@ -8,7 +8,7 @@ from core.msg import msgabc, msgftr, msgext
 from core.context import contextsvc
 
 
-_VALID_PROTOCALS = (gc.TCP, gc.UDP)
+_VALID_PROTOCALS = gc.TCP, gc.UDP
 _GET_STATUS, _SET_STATUS, _STATUS = 'IgdStatus.Get', 'IgdStatus.Set', 'IgdStatus.Status'
 
 
@@ -39,14 +39,11 @@ def delete_port_mapping(mailer: msgabc.Mailer, source: typing.Any, port: int, pr
 
 class IgdService(msgabc.AbcSubscriber):
     DISCOVER = 'IgdService.Discover'
-    ADD_PORT_MAPPING = 'IgdService.AddPortMapping'
-    DELETE_PORT_MAPPING = 'IgdService.DeletePortMapping'
+    ADD_PORT_MAPPING, DELETE_PORT_MAPPING = 'IgdService.AddPortMapping', 'IgdService.DeletePortMapping'
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.NameIn((
-            IgdService.DISCOVER,
-            IgdService.ADD_PORT_MAPPING,
-            IgdService.DELETE_PORT_MAPPING)))
+            IgdService.DISCOVER, IgdService.ADD_PORT_MAPPING, IgdService.DELETE_PORT_MAPPING)))
         self._mailer, self._service = mailer, None
 
     async def handle(self, message):

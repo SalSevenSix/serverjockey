@@ -10,8 +10,7 @@ from core.store import storeabc, storeutil, storesvctxn
 
 
 class StoreService(msgabc.AbcSubscriber):
-    INITIALISE = 'StoreService.Initialise'
-    RESET = 'StoreService.Reset'
+    INITIALISE, RESET = 'StoreService.Initialise', 'StoreService.Reset'
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(

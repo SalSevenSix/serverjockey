@@ -17,10 +17,8 @@ class PortMapperService(msgabc.AbcSubscriber):
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(
-            mc.ServerService.CLEANUP_FILTER,
-            mc.ServerStatus.RUNNING_FALSE_FILTER,
-            mc.ServerProcess.FILTER_STATE_STARTED,
-            PortMapperService.MAP_PORT_FILTER))
+            mc.ServerService.CLEANUP_FILTER, mc.ServerStatus.RUNNING_FALSE_FILTER,
+            mc.ServerProcess.FILTER_STATE_STARTED, PortMapperService.MAP_PORT_FILTER))
         self._root_context = context.root()
         self._active, self._trash = [], []
 

@@ -20,14 +20,3 @@ def is_logging_to_stream() -> bool:
         if type(handler) is logging.StreamHandler:
             return True
     return False
-
-
-def get_level() -> int:
-    return logging.getLogger().level
-
-
-def get_formatter() -> logging.Formatter | None:
-    for handler in logging.getLogger().handlers:
-        if handler.formatter:
-            return handler.formatter
-    return None

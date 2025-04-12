@@ -8,14 +8,9 @@ from core.msgc import mc
 from core.context import contextsvc
 from core.http import httpabc, httpcnt, httpsec, httpstatics, httpssl
 
-_ACCEPTED_MIME_TYPES = (
-    httpcnt.MIME_TEXT_PLAIN,
-    httpcnt.MIME_APPLICATION_JSON,
-    httpcnt.MIME_MULTIPART_FORM_DATA,
-    httpcnt.MIME_APPLICATION_BIN)
-_TEXT_MIME_TYPES = (
-    httpcnt.MIME_TEXT_PLAIN,
-    httpcnt.MIME_APPLICATION_JSON)
+_ACCEPTED_MIME_TYPES = (httpcnt.MIME_TEXT_PLAIN, httpcnt.MIME_APPLICATION_JSON,
+                        httpcnt.MIME_MULTIPART_FORM_DATA, httpcnt.MIME_APPLICATION_BIN)
+_TEXT_MIME_TYPES = (httpcnt.MIME_TEXT_PLAIN, httpcnt.MIME_APPLICATION_JSON)
 
 
 class HttpService:

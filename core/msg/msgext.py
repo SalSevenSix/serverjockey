@@ -26,14 +26,10 @@ class SynchronousMessenger:
 
 class MultiCatcher(msgabc.Catcher):
 
-    def __init__(self,
-                 catch_filter: msgabc.Filter,
-                 stop_filter: msgabc.Filter,
-                 include_stop: bool = False,
-                 start_filter: typing.Optional[msgabc.Filter] = None,
-                 include_start: bool = False,
-                 stop_only_after_start: bool = False,
-                 timeout: typing.Optional[float] = None):
+    def __init__(self, catch_filter: msgabc.Filter,
+                 stop_filter: msgabc.Filter, include_stop: bool = False,
+                 start_filter: typing.Optional[msgabc.Filter] = None, include_start: bool = False,
+                 stop_only_after_start: bool = False, timeout: typing.Optional[float] = None):
         self._catch_filter = catch_filter
         self._timeout = timeout
         self._stop_filter = stop_filter
@@ -169,8 +165,7 @@ class RelaySubscriber(msgabc.AbcSubscriber):
 
 
 class RollingLogSubscriber(msgabc.Subscriber):
-    REQUEST = 'RollingLogSubscriber.Request'
-    RESPONSE = 'RollingLogSubscriber.Response'
+    REQUEST, RESPONSE = 'RollingLogSubscriber.Request', 'RollingLogSubscriber.Response'
 
     def __init__(self, mailer: msgabc.MulticastMailer, size: int = 20,
                  msg_filter: msgabc.Filter = msgftr.AcceptAll(),

@@ -34,11 +34,8 @@ class PlayerStore:
 
 
 class ServerProcess:
-    STDERR_LINE = 'ServerProcess.StdErrLine'
-    STDOUT_LINE = 'ServerProcess.StdOutLine'
-
-    FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
-    FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
+    STDOUT_LINE, STDERR_LINE = 'ServerProcess.StdOutLine', 'ServerProcess.StdErrLine'
+    FILTER_STDOUT_LINE, FILTER_STDERR_LINE = msgftr.NameIs(STDOUT_LINE), msgftr.NameIs(STDERR_LINE)
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
 
     STATE_START = 'ServerProcess.' + sc.START

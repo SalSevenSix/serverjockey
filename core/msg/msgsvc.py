@@ -9,8 +9,7 @@ from core.msg import msgabc, msgftr
 class TaskMailer(msgabc.Mailer):
 
     def __init__(self, subscriber: msgabc.Subscriber):
-        self._subscriber = subscriber
-        self._queue = asyncio.Queue()
+        self._subscriber, self._queue = subscriber, asyncio.Queue()
         self._running, self._task = False, None
 
     def start(self) -> asyncio.Task:

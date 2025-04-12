@@ -115,12 +115,9 @@ def _setup_logging(context: contextsvc.Context):
 class _Callbacks(httpabc.HttpServiceCallbacks):
 
     def __init__(self, context: contextsvc.Context):
-        self._context = context
-        self._syssvc = None
+        self._context, self._syssvc = context, None
 
     async def initialise(self) -> httpabc.Resource:
-        # asyncio.get_running_loop().set_default_executor(concurrent.futures.ThreadPoolExecutor(
-        #     max_workers=4, thread_name_prefix='asyncio'))
         self._context.start()
         if self._context.is_trace():
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))

@@ -38,8 +38,7 @@ class DeleteInstance(storeabc.Transaction):
 class InsertInstanceEvent(storeabc.Transaction):
 
     def __init__(self, identity: str, name: str, details: str):
-        self._identity = identity
-        self._name, self._details = name, details
+        self._identity, self._name, self._details = identity, name, details
 
     def execute(self, session: Session) -> typing.Any:
         instance_id = storeutil.get_instance_id(session, self._identity)

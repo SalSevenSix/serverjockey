@@ -44,41 +44,30 @@ class _PipeInLineHandler(msgabc.Handler):
 
 class PipeInLineService(msgabc.Subscriber):
     REQUEST = 'PipeInLineService.Request'
-    RESPONSE = 'PipeInLineService.Response'
-    EXCEPTION = 'PipeInLineService.Exception'
-    SERVICE_START = 'PipeInLineService.Start'
-    SERVICE_END = 'PipeInLineService.End'
-    PIPE_NEW = 'PipeInLineService.PipeNew'
-    PIPE_CLOSE = 'PipeInLineService.PipeClose'
-    FILTER_REQUEST = msgftr.NameIs(REQUEST)
-    FILTER_PIPE_NEW = msgftr.NameIs(PIPE_NEW)
+    RESPONSE, EXCEPTION = 'PipeInLineService.Response', 'PipeInLineService.Exception'
+    SERVICE_START, SERVICE_END = 'PipeInLineService.Start', 'PipeInLineService.End'
+    PIPE_NEW, PIPE_CLOSE = 'PipeInLineService.PipeNew', 'PipeInLineService.PipeClose'
+    FILTER_REQUEST, FILTER_PIPE_NEW = msgftr.NameIs(REQUEST), msgftr.NameIs(PIPE_NEW)
 
     @staticmethod
-    async def request(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
-            cmdline: str,
-            catcher: typing.Optional[msgabc.Catcher] = None,
-            force: bool = False) -> typing.Any:
+    async def request(mailer: msgabc.MulticastMailer, source: typing.Any, cmdline: str,
+                      catcher: typing.Optional[msgabc.Catcher] = None, force: bool = False) -> typing.Any:
         response = await msgext.SynchronousMessenger(mailer).request(
             source, PipeInLineService.REQUEST,
             _PipeInLineCommand(cmdline, catcher, force))
         return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer, pipe: typing.Optional[streams.StreamWriter] = None):
-        self._mailer = mailer
-        self._enabled = False
+        self._mailer, self._enabled = mailer, False
         self._msg_filter = msgftr.Or(
             PipeInLineService.FILTER_REQUEST,
             mc.ServerProcess.FILTER_STATE_STARTED,
             mc.ServerProcess.FILTER_STATES_DOWN)
         if pipe is None:
             self._msg_filter = msgftr.Or(self._msg_filter, PipeInLineService.FILTER_PIPE_NEW)
-            self._persistent = True
-            self._handler = None
+            self._persistent, self._handler = True, None
         else:
-            self._persistent = False
-            self._handler = _PipeInLineHandler(mailer, pipe)
+            self._persistent, self._handler = False, _PipeInLineHandler(mailer, pipe)
         mailer.post(self, PipeInLineService.SERVICE_START, self)
         mailer.register(self)
 
@@ -154,10 +143,8 @@ class ServerProcess:
             self._mailer.post(self, mc.ServerProcess.STATE_START, cmdline)
             cmdlist = self._command.build_list()
             self._process = await asyncio.create_subprocess_exec(
-                cmdlist[0], *cmdlist[1:],
-                stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+                cmdlist[0], *cmdlist[1:], stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
                 env=self._env, cwd=self._cwd)
             pid, rc = self._process.pid, self._process.returncode
             if rc is not None:  # I don't think this can happen but to be sure

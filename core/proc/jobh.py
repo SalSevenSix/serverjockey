@@ -10,8 +10,7 @@ from core.proc import wrapper
 
 class JobPipeInLineService(msgabc.AbcSubscriber):
     REQUEST = 'JobPipeInLineService.Request'
-    RESPONSE = 'JobPipeInLineService.Response'
-    EXCEPTION = 'JobPipeInLineService.Exception'
+    RESPONSE, EXCEPTION = 'JobPipeInLineService.Response', 'JobPipeInLineService.Exception'
     CLOSE = 'JobPipeInLineService.Close'
 
     @staticmethod
@@ -48,17 +47,13 @@ class JobProcess(msgabc.AbcSubscriber):
     STATE_EXCEPTION = 'JobProcess.Exception'
     FILTER_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_DONE = msgftr.NameIn((STATE_EXCEPTION, STATE_COMPLETE))
-
-    STDERR_LINE = 'JobProcess.StdErrLine'
-    STDOUT_LINE = 'JobProcess.StdOutLine'
-    FILTER_STDERR_LINE = msgftr.NameIs(STDERR_LINE)
-    FILTER_STDOUT_LINE = msgftr.NameIs(STDOUT_LINE)
+    STDOUT_LINE, STDERR_LINE = 'JobProcess.StdOutLine', 'JobProcess.StdErrLine'
+    FILTER_STDOUT_LINE, FILTER_STDERR_LINE = msgftr.NameIs(STDOUT_LINE), msgftr.NameIs(STDERR_LINE)
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)
 
     @staticmethod
     async def run_job(
-            mailer: msgabc.MulticastMailer,
-            source: typing.Any,
+            mailer: msgabc.MulticastMailer, source: typing.Any,
             command: typing.Union[str, dict, typing.Collection[str]]) -> typing.Union[subprocess.Process, Exception]:
         catcher = msgext.SingleCatcher(msgftr.And(msgftr.SourceIs(source), JobProcess.FILTER_DONE))
         messenger = msgext.SynchronousMessenger(mailer, catcher=catcher)

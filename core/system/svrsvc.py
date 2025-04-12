@@ -106,7 +106,7 @@ class ServerService(msgabc.AbcSubscriber):
             return True
         return None
 
-    def _is_daemon(self):
+    def _is_daemon(self) -> bool:
         auto = self._context.config('auto')
         return auto and auto > 1
 

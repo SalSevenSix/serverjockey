@@ -4,16 +4,6 @@ from core.util import linenc
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 
-# UNTURNED
-# \x1B[37m is everywhere
-# \x1B[?1h\x1B=\x1B[6n\x1B[H\x1B[2J\x1B]0;Unturned\x07Game version: 3.24.6.1 Engine version: 2021.3.29f1
-# \x1B]0;ServerJockeyDev\x07Successfully set name to ServerJockeyDev!
-# \x1B[?1l\x1B>\x1B[39;49m
-
-# STEAMCMD
-# \x1B[1mCached credentials not found.
-# \x1B[0m
-
 
 class TestCoreProcPtyLineDecoder(unittest.TestCase):
 

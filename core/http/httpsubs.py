@@ -29,8 +29,7 @@ class Selector:
                 aggregator = arg
         return Selector(msg_filter, transformer, aggregator, completed_filter)
 
-    def __init__(self,
-                 msg_filter: typing.Optional[msgabc.Filter] = None,
+    def __init__(self, msg_filter: typing.Optional[msgabc.Filter] = None,
                  transformer: typing.Optional[msgabc.Transformer] = None,
                  aggregator: typing.Optional[aggtrf.Aggregator] = None,
                  completed_filter: typing.Optional[msgabc.Filter] = None):

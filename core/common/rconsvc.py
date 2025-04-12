@@ -22,10 +22,8 @@ class RconHandler(httpabc.PostHandler):
 
 
 class RconService(msgabc.AbcSubscriber):
-    CONFIG = 'RconService.Config'
-    REQUEST = 'RconService.Request'
-    RESPONSE = 'RconService.Response'
-    EXCEPTION = 'RconService.Exception'
+    CONFIG, REQUEST = 'RconService.Config', 'RconService.Request'
+    RESPONSE, EXCEPTION = 'RconService.Response', 'RconService.Exception'
     OUTPUT = 'RconService.Output'
     FILTER_OUTPUT = msgftr.NameIs(OUTPUT)
 

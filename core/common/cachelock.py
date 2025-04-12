@@ -35,10 +35,8 @@ class _CachLockService(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, executable: str):
         super().__init__(msgftr.Or(
-            msgftr.IsStop(),
-            mc.ServerStatus.RUNNING_FALSE_FILTER,
-            mc.ServerProcess.FILTER_STATE_STARTED,
-            _CachLockService.CACHE_PATH_FILTER))
+            msgftr.IsStop(), mc.ServerStatus.RUNNING_FALSE_FILTER,
+            mc.ServerProcess.FILTER_STATE_STARTED, _CachLockService.CACHE_PATH_FILTER))
         self._mailer, self._executable = mailer, executable
         self._cachelock = None
 
