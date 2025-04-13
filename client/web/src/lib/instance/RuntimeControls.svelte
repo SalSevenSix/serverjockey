@@ -14,9 +14,10 @@
   const objectUrls = new ObjectUrls();
   const logLines = new RollingLog();
 
-  export let qualifierName;
+  export let qualifierName = 'Beta';
+  export let qualifierDefault = null;
 
-  let qualifier = '';
+  let qualifier = qualifierDefault ? qualifierDefault : '';
   let endInstallMessage = 'Install Runtime completed. Please check console log output for details.';
 
   $: cannotProcess = $serverStatus.running || $serverStatus.state === 'MAINTENANCE';

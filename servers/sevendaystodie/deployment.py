@@ -74,7 +74,7 @@ class Deployment:
         await self._sync_mods()
         await self._map_ports(config)
         server = proch.ServerProcess(self._context, self._executable)
-        server.use_env(self._env).use_cwd(self._runtime_dir)
+        server.use_cwd(self._runtime_dir).use_env(self._env)
         server.append_arg('-quit').append_arg('-batchmode').append_arg('-nographics')
         server.append_arg('-dedicated').append_arg('-configfile=' + self._live_file)
         return server

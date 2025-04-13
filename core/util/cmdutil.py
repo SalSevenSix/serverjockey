@@ -7,8 +7,7 @@ from core.util import util
 class CommandLine:
 
     def __init__(self, command: typing.Any = None, args: typing.Optional[dict] = None):
-        self._args = args if args else {}
-        self._command = []
+        self._command, self._args = [], args if args else {}
         self.append(command)
 
     def append(self, command: typing.Any) -> CommandLine:
@@ -19,6 +18,23 @@ class CommandLine:
         else:
             self._command.append(str(command))
         return self
+
+    def append_struct(self, struct: dict, joiner: str = None) -> CommandLine:
+        self._append_struct([], struct, joiner)
+        return self
+
+    def _append_struct(self, chain: list, struct: dict, joiner: str | None):
+        for key, value in struct.items():
+            if value is not None and not key.startswith('_'):
+                if isinstance(value, dict):
+                    self._append_struct([*chain, key], value, joiner)
+                elif isinstance(value, bool):
+                    if value:
+                        self.append(chain).append(key)
+                elif joiner:
+                    self.append(''.join(chain) + str(key) + joiner + str(value))
+                else:
+                    self.append(chain).append(key).append(value)
 
     def build_list(self, args: typing.Optional[dict] = None) -> list:
         args = {**self._args, **args} if args else self._args

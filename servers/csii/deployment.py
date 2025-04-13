@@ -89,12 +89,7 @@ class Deployment:
         rconsvc.RconService.set_config(self._context, self, server_port, util.get('+rcon_password', cmdargs))
         server = proch.ServerProcess(self._context, self._python).use_cwd(bin_dir)
         server.append_arg(self._wrapper).append_arg(executable).append_arg('-dedicated')
-        for key, value in cmdargs.items():
-            if key != 'upnp' and key != '-dedicated' and not key.startswith('_'):
-                if value and isinstance(value, bool):
-                    server.append_arg(key)
-                else:
-                    server.append_arg(key).append_arg(value)
+        server.append_struct(util.delete_dict(cmdargs, ('upnp', '-dedicated')))
         return server
 
     async def build_world(self):

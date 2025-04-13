@@ -166,3 +166,6 @@ class TestPlaying(unittest.TestCase):
         time.sleep(2.0)
         self.assertEqual('Broadcasted: Welcome_to_PW', context.get_instance_loglastline())
         self._stop_server()
+
+    def test_playing_valheim(self):
+        self.fail('NOT IMPLEMENTED')

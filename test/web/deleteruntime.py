@@ -37,3 +37,6 @@ class TestDeleteRuntime(unittest.TestCase):
 
     def test_delete_palworld(self):
         self._delete('pw', 'palworld')
+
+    def test_delete_valheim(self):
+        self._delete('vh', 'valheim')

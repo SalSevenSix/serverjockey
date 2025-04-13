@@ -103,16 +103,15 @@ class ServerProcess:
         self._mailer = mailer
         self._command = cmdutil.CommandLine(executable)
         self._out_decoder = linenc.DefaultLineDecoder()
-        self._success_rcs = {0}
         self._pipeinsvc, self._started_catcher = None, None
         self._process, self._env, self._cwd = None, None, None
 
-    def add_success_rc(self, rc: int) -> ServerProcess:
-        self._success_rcs.add(rc)
+    def append_arg(self, arg: str | int | float) -> ServerProcess:
+        self._command.append(arg)
         return self
 
-    def append_arg(self, arg: typing.Any) -> ServerProcess:
-        self._command.append(arg)
+    def append_struct(self, struct: dict, joiner: str = None) -> ServerProcess:
+        self._command.append_struct(struct, joiner)
         return self
 
     def use_pipeinsvc(self, pipeinsvc: PipeInLineService) -> ServerProcess:
@@ -162,7 +161,7 @@ class ServerProcess:
             else:
                 self._mailer.post(self, mc.ServerProcess.STATE_STARTED, self._process)
             rc = await self._process.wait()
-            if rc not in self._success_rcs:
+            if rc != 0:
                 raise Exception(f'PID {pid} non-zero exit after STARTED, rc={rc}')
             self._mailer.post(self, mc.ServerProcess.STATE_STOPPED, self._process)
         except Exception as e:

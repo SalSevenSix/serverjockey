@@ -6,26 +6,16 @@
   import ServerConfig from '$lib/instance/ServerConfig.svelte';
   import ServerControls from '$lib/instance/ServerControls.svelte';
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
-  import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
-  import ConfigFile from '$lib/instance/ConfigFile.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
-  import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
+  import LogFiles from '$lib/instance/LogFiles.svelte';
+  import ConfigFile from '$lib/instance/ConfigFile.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
-      'desc': 'Reset the game world save only.' },
+      'desc': 'Reset the game world map only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
-      'desc': 'Reset config, logs and game world save.' }];
-
-  const consoleCommands = {
-    'console': {
-      'send': [
-        {name: 'help', input: 'display'},
-        {name: 'line', input: 'text>', type: 'string', label: null}
-      ]
-    }
-  };
+      'desc': 'Reset game world map and configuration.' }];
 </script>
 
 
@@ -43,19 +33,23 @@
         </div>
       </div>
       <InstanceLog />
-      <Collapsible icon="fa-keyboard" title="Console Commands">
-        <CommandBuilder commands={consoleCommands} />
-      </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
+        <div class="content">
+          <p>
+            Default list files are not generated until after first server start.
+          </p>
+        </div>
         <ConfigFile name="Launch Options" path="/config/cmdargs" />
-        <ConfigFile name="Settings" path="/config/settings" />
+        <ConfigFile name="Admin List" path="/config/adminlist" />
+        <ConfigFile name="Permitted List" path="/config/permittedlist" />
+        <ConfigFile name="Banned List" path="/config/bannedlist" />
+      </Collapsible>
+      <Collapsible icon="fa-scroll" title="Logging">
+        <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <RuntimeControls />
+        <RuntimeControls qualifierDefault="public" />
         <WorldControls actions={worldActions} />
-      </Collapsible>
-      <Collapsible icon="fa-box-archive" title="Backups">
-        <BackupRestoreActions />
       </Collapsible>
     </div>
   </div>

@@ -6,7 +6,7 @@ from core.context import contextsvc
 from core.system import svrabc
 
 _MODULE_TESTSERVER, _MODULE_SERVERLINK = 'testserver', 'serverlink'
-_MODULES = 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii', 'palworld'
+_MODULES = 'projectzomboid', 'factorio', 'sevendaystodie', 'unturned', 'starbound', 'csii', 'palworld', 'valheim'
 
 
 class Modules:

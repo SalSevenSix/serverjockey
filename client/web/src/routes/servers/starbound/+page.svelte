@@ -70,7 +70,7 @@
         <LogFiles allowDelete={1} sorter={function(a, b) { return a.name.localeCompare(b.name); }} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <RuntimeControls qualifierName="Beta" />
+        <RuntimeControls />
         <WorldControls actions={worldActions} />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">

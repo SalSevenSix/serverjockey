@@ -78,13 +78,8 @@ class Deployment:
         settings = _SettingsIni(await io.read_file(self._settings_file))
         settings = await self._rcon_config(settings)
         cmdargs = self._map_ports(cmdargs, settings)
-        server = proch.ServerProcess(self._context, executable).use_cwd(self._runtime_dir)
-        for key, value in cmdargs.items():
-            if value and not key.startswith('_'):
-                if isinstance(value, bool):
-                    server.append_arg(key)
-                else:
-                    server.append_arg(str(key) + '=' + str(value))
+        server = proch.ServerProcess(self._context, executable)
+        server.use_cwd(self._runtime_dir).append_struct(cmdargs, '=')
         return server
 
     async def build_world(self):

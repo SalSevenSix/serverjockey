@@ -8,8 +8,9 @@ from servers.sevendaystodie.deployment import APPID as APPID_SEVENDAYSTODIE
 from servers.unturned.deployment import APPID as APPID_UNTURNED
 from servers.starbound.deployment import APPID as APPID_STARBOUND
 from servers.palworld.deployment import APPID as APPID_PALWORLD
+from servers.valheim.deployment import APPID as APPID_VALHEIM
 
-TEST_BACKUP = 'runtime-webtest.zip'
+_TEST_BACKUP = 'runtime-webtest.zip'
 
 
 class TestRefreshRuntime(unittest.TestCase):
@@ -31,7 +32,7 @@ class TestRefreshRuntime(unittest.TestCase):
             return
         # restore last runtime backup
         context.find_element('collapsibleBackups', displayed=1.0).click()
-        context.find_element('fileSystemBackupsActionE' + TEST_BACKUP, by=By.NAME, exists=5.0).click()
+        context.find_element('fileSystemBackupsActionE' + _TEST_BACKUP, by=By.NAME, exists=5.0).click()
         context.find_element('confirmModalConfirm').click()
         context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
@@ -53,7 +54,7 @@ class TestRefreshRuntime(unittest.TestCase):
         context.scroll_to_top()
         context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
         self.assertEqual('END Archive Directory', context.get_instance_loglastline())
-        old_backup = context.backup_path(identity, TEST_BACKUP)
+        old_backup = context.backup_path(identity, _TEST_BACKUP)
         self.assertTrue(os.path.isfile(old_backup))
         new_backup = context.backup_path(identity, context.get_cell_text('fileSystemBackupsFiles', 1, 2))
         self.assertTrue(os.path.isfile(new_backup))
@@ -77,3 +78,6 @@ class TestRefreshRuntime(unittest.TestCase):
 
     def test_refresh_palworld(self):
         self._refresh('pw', 'palworld', APPID_PALWORLD)
+
+    def test_refresh_valheim(self):
+        self._refresh('vh', 'valheim', APPID_VALHEIM)
