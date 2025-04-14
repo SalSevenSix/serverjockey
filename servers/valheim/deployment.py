@@ -1,5 +1,5 @@
 # ALLOW core.* valheim.messaging
-from core.util import gc, util, io, objconv
+from core.util import gc, util, io, objconv, idutil
 from core.context import contextsvc
 from core.http import httprsc, httpext
 from core.proc import proch
@@ -17,14 +17,14 @@ def _default_cmdargs():
         'upnp': True,
         '_comment_name': 'Name of your server that will be visible in the server listing',
         '-name': 'My Server',
-        '_comment_password': 'REQUIRED password needed by players to join server',
-        '-password': None,
+        '_comment_password': 'Password needed by players to join server (required)',
+        '-password': idutil.generate_token(10),
         '_comment_public': 'Server visibility: 1 to show in public list, 0 for join by IP only',
         '-public': 1,
         '_comment_crossplay': 'Allow non-Steam users to join server',
         '-crossplay': False,
         '_comment_preset': 'Use world preset: "normal", "casual", "easy", "hard", "hardcore", "immersive", "hammer"',
-        '-preset': 'hard',
+        '-preset': None,
         '_comment_modifier': 'Set individual world modifiers, overrides preset',
         '-modifier': {
             '_comment_combat': 'Options: "veryeasy", "easy", "hard", "veryhard"',

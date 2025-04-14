@@ -1,34 +1,53 @@
 <script>
-  import { surl } from '$lib/util/sjgmsapi';
+  import { onMount } from 'svelte';
+  import { surl, newGetRequest } from '$lib/util/sjgmsapi';
+  import { notifyError } from '$lib/util/notifications';
+  import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
-  const games = [
-    { module: 'projectzomboid', serverName: 'Project Zomboid' },
-    { module: 'factorio', serverName: 'Factorio' },
-    { module: 'sevendaystodie', serverName: '7 Days to Die' },
-    { module: 'starbound', serverName: 'Starbound' },
-    { module: 'unturned', serverName: 'Unturned' },
-    { module: 'csii', serverName: 'Counter Strike 2' },
-    { module: 'palworld', serverName: 'Palworld' }];
+  let loading = true;
+  let modules = null;
+
+  onMount(function() {
+    fetch(surl('/modules'), newGetRequest())
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        return response.json();
+      })
+      .then(function(json) { modules = json; })
+      .catch(function() { notifyError('Failed to load module list.'); })
+      .finally(function() { loading = false; });
+  });
 </script>
 
 
-<div class="columns is-multiline">
-  {#each games as game}
-    <div class="column is-one-quarter-desktop is-one-third-tablet">
-      <a id="gameServerGuidesM{game.module}" title="{game.serverName} guide"
-         href={surl('/guides/servers/' + game.module)}>
-        <div class="card">
-          <header class="card-header card-header-title notranslate">{game.serverName}</header>
-          <div class="card-image">
-            <figure class="image">
-              <img src={surl('/assets/games/' + game.module + '-tile.jpg')} alt="{game.serverName} icon" />
-            </figure>
+{#if modules}
+  <div class="columns is-multiline">
+    {#each Object.keys(modules) as module}
+      <div class="column is-one-quarter-desktop is-one-third-tablet">
+        <a id="gameServerGuidesM{module}" title="{modules[module]} guide" href={surl('/guides/servers/' + module)}>
+          <div class="card">
+            <header class="card-header card-header-title notranslate">{modules[module]}</header>
+            <div class="card-image">
+              <figure class="image">
+                <img src={surl('/assets/games/' + module + '-tile.jpg')} alt="{modules[module]} icon" />
+              </figure>
+            </div>
           </div>
-        </div>
-      </a>
-    </div>
-  {/each}
-</div>
+        </a>
+      </div>
+    {/each}
+  </div>
+{:else}
+  <div class="content">
+    <p>
+      {#if loading}
+        <SpinnerIcon /> loading...
+      {:else}
+        <i class="fa fa-triangle-exclamation fa-lg"></i>&nbsp; Error loading game server guides
+      {/if}
+    </p>
+  </div>
+{/if}
 
 
 <style>

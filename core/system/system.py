@@ -35,7 +35,7 @@ class SystemService:
         steamapi.resources(resource)
         buidler = httprsc.ResourceBuilder(resource)
         buidler.put('login', httpext.LoginHandler())
-        buidler.put('modules', httpext.StaticHandler(self._modules.names()))
+        buidler.put('modules', httpext.StaticHandler(self._modules.modules()))
         buidler.put('ssl', httpssl.SslHandler(self._context))
         buidler.put('metrics', mtxhandler.MetricsHandler())
         buidler.put('mprof', mprof.MemoryProfilingHandler())

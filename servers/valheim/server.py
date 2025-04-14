@@ -19,13 +19,12 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
-        await mtxinstance.initialise(self._context)
+        await mtxinstance.initialise(self._context, error_filter=msg.CONSOLE_LOG_ERROR_FILTER)
         await msg.initialise(self._context)
         await self._deployment.initialise()
 
     def resources(self, resource: httprsc.WebResource):
         self._deployment.resources(resource)
-        # con.resources(self._context, resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)
         builder.put_server().put_players().put_log(msg.CONSOLE_LOG_FILTER).put_subs()
 

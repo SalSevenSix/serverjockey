@@ -12,6 +12,7 @@ DEFAULT_PORT = 2456
 SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('Opened Steam server'))
 CONSOLE_LOG_FILTER = msgftr.Or(
     mc.ServerProcess.FILTER_ALL_LINES, jobh.JobProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
+CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('Exception:'))
 
 
 async def initialise(context: contextsvc.Context):
@@ -31,6 +32,6 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
-        value = util.rchop(value, ' ')
+        value = util.rchop(util.lchop(value, 'l-'), ' ')
         svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, version=value))
         return None

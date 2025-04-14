@@ -78,7 +78,7 @@ class CommandProcessor:
         return _dump_to_log(self._connection.get('/mprof'))
 
     def _modules(self) -> bool:
-        return _dump_to_log(self._connection.get('/modules'))
+        return _dump_to_log(tuple(self._connection.get('/modules').keys()))
 
     def _instances(self) -> bool:
         identities = self._instances.keys()
@@ -114,7 +114,7 @@ class CommandProcessor:
         if instance in self._instances.keys():
             logging.error('Instance already exists. No more commands will be processed.')
             return False
-        if module not in self._connection.get('/modules'):
+        if module not in self._connection.get('/modules').keys():
             logging.error('Module not found. No more commands will be processed.')
             return False
         logging.info('Creating instance: ' + instance + ' (' + module + ')')

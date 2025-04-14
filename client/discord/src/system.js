@@ -40,7 +40,7 @@ export function system({ httptool }) {
 
 export function modules({ httptool }) {
   httptool.doGet('/modules', function(body) {
-    return '```\n' + body.join('\n') + '\n```';
+    return '```\n' + Object.keys(body).join('\n') + '\n```';
   });
 }
 

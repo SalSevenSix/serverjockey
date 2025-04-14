@@ -35,7 +35,7 @@
         if (!response.ok) throw new Error('Status: ' + response.status);
         return response.json();
       })
-      .then(function(json) { modules = json; })
+      .then(function(json) { modules = Object.keys(json); })
       .catch(function() { notifyError('Failed to load module list.'); })
       .finally(function() { processing = false; });
   });
