@@ -1,4 +1,5 @@
 <script>
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -36,7 +37,10 @@
       <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>
-            Default list files are not generated until after first server start.
+            Help on the lists can be found in the
+            <ExtLink href="https://valheim.fandom.com/wiki/Dedicated_servers#Admins,_bans,_and_whitelist">
+            Admins, Bans and Whitelist section</ExtLink>
+            on the Valheim wiki.
           </p>
         </div>
         <ConfigFile name="Launch Options" path="/config/cmdargs" />
