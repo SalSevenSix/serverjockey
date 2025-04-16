@@ -113,8 +113,9 @@ class Deployment:
 
     async def _map_ports(self, cmdargs: dict):
         upnp, port = util.get('upnp', cmdargs, True), util.get('port', cmdargs)
+        port = port if port else msg.DEFAULT_PORT
+        self._context.post(self, msg.NAME_PORT, port)
         if not upnp:
             return
-        port = port if port else msg.DEFAULT_PORT
         portmapper.map_port(self._context, self, port, gc.UDP, 'Valheim server')
         portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')
