@@ -87,7 +87,7 @@ class Deployment:
         builder.put_backups(self._tempdir, self._backups_dir)
         builder.put_config(dict(
             cmdargs=self._cmdargs_file, adminlist=self._adminlist_file,
-            bannedlist=self._bannedlist_file, permittedlist=self._permittedlist_file))
+            permittedlist=self._permittedlist_file, bannedlist=self._bannedlist_file))
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/valheim_server.x86_64'
@@ -99,7 +99,6 @@ class Deployment:
         server.use_cwd(self._runtime_dir).use_env(self._env)
         server.append_arg('-nographics').append_arg('-batchmode')
         server.append_arg('-savedir').append_arg(self._world_dir)
-        # server.append_arg('-world').append_arg('dedicated')
         server.append_struct(util.delete_dict(cmdargs, (
             'upnp', '-nographics', '-batchmode', '-savedir', '-world', '-logFile', '-instanceid')))
         return server
@@ -112,10 +111,9 @@ class Deployment:
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
 
     async def _map_ports(self, cmdargs: dict):
-        upnp, port = util.get('upnp', cmdargs, True), util.get('port', cmdargs)
+        port = util.get('port', cmdargs)
         port = port if port else msg.DEFAULT_PORT
         self._context.post(self, msg.NAME_PORT, port)
-        if not upnp:
-            return
-        portmapper.map_port(self._context, self, port, gc.UDP, 'Valheim server')
-        portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')
+        if util.get('upnp', cmdargs, True):
+            portmapper.map_port(self._context, self, port, gc.UDP, 'Valheim server')
+            portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')

@@ -6,5 +6,6 @@ import * as unturned from './servers/unturned.js';
 import * as starbound from './servers/starbound.js';
 import * as csii from './servers/csii.js';
 import * as palworld from './servers/palworld.js';
+import * as valheim from './servers/valheim.js';
 
-export { testserver, projectzomboid, factorio, sevendaystodie, unturned, starbound, csii, palworld };
+export { testserver, projectzomboid, factorio, sevendaystodie, unturned, starbound, csii, palworld, valheim };

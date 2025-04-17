@@ -6,11 +6,14 @@
   import ServerStatus from '$lib/instance/ServerStatus.svelte';
   import ServerConfig from '$lib/instance/ServerConfig.svelte';
   import ServerControls from '$lib/instance/ServerControls.svelte';
+  import Players from '$lib/instance/Players.svelte';
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
-  import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
-  import WorldControls from '$lib/instance/WorldControls.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
+  import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
+  import WorldControls from '$lib/instance/WorldControls.svelte';
+  import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
+  import StoreInstance from '$lib/instance/StoreInstance.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -34,6 +37,9 @@
         </div>
       </div>
       <InstanceLog />
+      <Collapsible icon="fa-user" title="Players">
+        <Players />
+      </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>
@@ -55,6 +61,10 @@
         <RuntimeControls qualifierDefault="public" />
         <WorldControls actions={worldActions} />
       </Collapsible>
+      <Collapsible icon="fa-box-archive" title="Backups">
+        <BackupRestoreActions />
+      </Collapsible>
+      <StoreInstance />
     </div>
   </div>
 </ServerStatusStore>
