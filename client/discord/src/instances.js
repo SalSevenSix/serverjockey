@@ -49,6 +49,7 @@ export class Service {
       const identity = data.instance.identity;
       if (data.event === 'created') {
         const instance = data.instance;
+        logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
         instance.url = baseurl + '/instances/' + identity;
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
@@ -58,6 +59,7 @@ export class Service {
         instance.server.startup({ context: context, channels: channels, instance: identity, url: instance.url,
           aliases: instance.aliases, triggers: instance.triggers });
       } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {
+        logger.info('Event delete instance: ' + identity + ' (' + instances[identity].module + ')');
         instances[identity].aliases.reset().save();
         instances[identity].rewards.reset().save();
         instances[identity].triggers.reset().save();

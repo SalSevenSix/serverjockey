@@ -1,6 +1,7 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
+  import BackToTop from '$lib/widget/BackToTop.svelte';
   import GuideBooks from '$lib/svg/GuideBooks.svelte';
   import GeneralGuides from './GeneralGuides.svelte';
   import GameServerGuides from './GameServerGuides.svelte';
@@ -49,3 +50,5 @@
   <h3 id="advancedguides" class="title is-4">Advanced Guides</h3>
 </div>
 <AdvancedGuides />
+
+<BackToTop />
