@@ -219,6 +219,10 @@ table.is-thinner {
   transform: rotate(180deg);
 }
 
+.theme-background {
+  background-color: var(--color-standard-lightest-def);
+}
+
 .theme-black-white {
   fill: black;
   color: black;

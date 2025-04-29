@@ -5,30 +5,30 @@
 
   let hidden = true;
 
-  function gotoTop() {
+  function onClick() {
     document.body.scrollIntoView();
   }
 
-  function getContainer() {
-    return document.documentElement || document.body;
-  }
-
-  function handleOnScroll() {
-    if (!getContainer()) return;
-    hidden = getContainer().scrollTop <= showOnPx;
+  function onScroll() {
+    const container = document.documentElement || document.body;
+    if (!container) return;
+    hidden = container.scrollTop <= showOnPx;
   }
 </script>
 
 
-<svelte:window on:scroll={handleOnScroll} />
+<svelte:window on:scroll={onScroll} />
 
-<div id="backToTop" class="back-to-top" class:hidden role="button" tabindex="0" on:click={gotoTop} on:keypress={fNoop}>
+<div id="backToTop" class="theme-background back-to-top" class:hidden role="button" tabindex="0"
+     on:click={onClick} on:keypress={fNoop}>
   <i class="fa fa-circle-up fa-3x"></i>
 </div>
 
 
 <style>
   .back-to-top {
+    border-radius: 50%;
+    padding: 2px;
     opacity: 1;
     transition: opacity 0.5s, visibility 0.5s;
     position: fixed;

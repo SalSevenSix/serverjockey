@@ -126,6 +126,10 @@ body.dark .modal-card-body, body.dark .modal-content .box {
   background-color: var(--color-dark-dark-def);
 }
 
+body.dark .theme-background {
+  background-color: var(--color-dark-dark-def);
+}
+
 body.dark .theme-black-white {
   fill: white;
   color: white;
