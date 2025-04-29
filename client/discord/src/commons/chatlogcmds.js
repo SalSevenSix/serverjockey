@@ -2,10 +2,10 @@ import * as cutil from 'common/util/util';
 import * as cstats from 'common/activity/chat';
 import * as util from '../util/util.js';
 
-function formatVerbose(results) {
+function formatVerbose(results, tzFlag) {
   const text = [];
-  text.push(['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, results.meta.tz),
-    ' TO ' + cutil.shortISODateTimeString(results.meta.atto, results.meta.tz),
+  text.push(['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tzFlag),
+    ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tzFlag),
     ' (' + cutil.humanDuration(results.meta.atrange) + ')'].join(''));
   results = results.chat.map(function(record) {
     if (!record.player) return '----- ' + record.at;
@@ -24,7 +24,6 @@ export function chatlog({ context, httptool, instance, message, data }) {
     else if (arg.startsWith('tz=')) { tz = arg.substring(3); }
     else if (arg.startsWith('player=')) { player = arg.substring(7); }
   });
-  if (tz) return message.channel.send('```\nTimezones not supported yet\n```');
   data.forEach(function(arg) {
     if (arg.startsWith('to=')) {
       atto = arg.substring(3);
@@ -41,14 +40,14 @@ export function chatlog({ context, httptool, instance, message, data }) {
   if (!atto) { atto = now.getTime(); }
   if (!atfrom) { atfrom = atto - 21600000; }
   else if (atfrom < 0) { atfrom = atto + atfrom; }
+  if (!tz) { tz = true; }
   httptool.getJson(cstats.queryChats(instance, { atfrom, atto }, player), baseurl)
     .then(function(chatdata) {
       let [results, text] = [{ chat: chatdata }, ['Invalid arguments']];
-      results = { meta: cstats.extractMeta(chatdata), chat: cstats.extractResults(cstats.mergeResults(results)) };
-      results.meta.tz = true;
-      if (format === 'VERBOSE') { text = formatVerbose(results); }
+      results = { meta: cstats.extractMeta(chatdata), chat: cstats.extractResults(cstats.mergeResults(results), tz) };
+      if (format === 'VERBOSE') { text = formatVerbose(results, tz); }
       else if (format === 'SUMMARY') { text = ['Chat summary not supported yet']; }
-      util.chunkStringArray(text).forEach(function(chunk) {
+      util.chunkStringArray(text).forEach(function(chunk) {  // TODO post file instead
         message.channel.send('```\n' + chunk.join('\n') + '\n```');
       });
     });

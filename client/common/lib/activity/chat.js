@@ -24,12 +24,12 @@ export function mergeResults(data) {
   return result;
 }
 
-export function extractResults(data) {
+export function extractResults(data, tzFlag = true) {
   const last = { at: '', player: '' };
   const result = [];
   let clazz = null;
   data.forEach(function(item) {
-    const atString = shortISODateTimeString(item.at);
+    const atString = shortISODateTimeString(item.at, tzFlag);
     const atSection = atString.substring(0, 13);
     if (last.at != atSection) {
       result.push({ clazz: 'row-hdr', ats: atString, at: atSection + 'h' });

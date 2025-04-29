@@ -6,12 +6,12 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { server, auto, log, getconfig, setconfig, deployment, players,
-  alias, reward, trigger, activity } = commons;
+  alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PROJECT ZOMBOID COMMANDS')
   .addServer(true, true)
-  .addAlias().addReward().addTrigger().addActivity()
+  .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .add([
     'world save                : Save the game world',
     'world broadcast {message} : Broadcast message to all players',

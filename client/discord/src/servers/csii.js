@@ -3,12 +3,12 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { server, auto, log, getconfig, setconfig, deployment, players, send, say,
-  alias, reward, trigger, activity } = commons;
+  alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('CS2 COMMANDS')
   .addServer().addPlayers().addSay().addSend()
-  .addAlias().addReward().addTrigger().addActivity()
+  .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .addConfig().addDeployment(true)
   .addHelp('getconfig', [
     'Config fileid options for download are:', '```',

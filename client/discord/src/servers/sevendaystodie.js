@@ -3,11 +3,11 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { server, auto, log, getconfig, setconfig, deployment, players,
-  alias, reward, trigger, activity } = commons;
+  alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('7 DAYS TO DIE COMMANDS')
   .addServer().addPlayers()
-  .addAlias().addReward().addTrigger().addActivity()
+  .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .addConfig(['cmdargs', 'Settings', 'Admin']).addDeployment()
   .build();

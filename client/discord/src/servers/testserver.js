@@ -8,6 +8,6 @@ export const { server, auto, log, getconfig, setconfig, deployment, players, sen
 export const help = helptext.newServerHelpBuilder()
   .title('TEST SERVER COMMANDS')
   .addServer(true, true).addPlayers().addSend()
-  .addAlias().addReward().addTrigger().addActivity()
+  .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .addConfig(['cmdargs']).addDeployment(true)
   .build();
