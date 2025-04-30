@@ -1,6 +1,5 @@
 import * as cutil from 'common/util/util';
 import * as cstats from 'common/activity/chat';
-import * as util from '../util/util.js';
 import * as msgutil from '../util/msgutil.js';
 
 function formatVerbose(results, tzFlag) {
@@ -17,7 +16,7 @@ function formatVerbose(results, tzFlag) {
 }
 
 export function chatlog({ context, httptool, instance, message, data }) {
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [baseurl, now] = [context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, format] = [null, null, null, null, 'VERBOSE'];
   data.forEach(function(arg) {

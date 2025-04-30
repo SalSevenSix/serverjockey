@@ -1,6 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as msgutil from '../util/msgutil.js';
 import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 
@@ -61,18 +62,18 @@ export const help = helptext.newServerHelpBuilder()
   .build();
 
 export function world({ httptool, message, data }) {
-  if (data.length === 0) return util.reactUnknown(message);
+  if (data.length === 0) return msgutil.reactUnknown(message);
   const cmd = data[0];
   let body = null;
   if (cmd === 'broadcast') {
-    if (data.length < 2) return util.reactUnknown(message);
+    if (data.length < 2) return msgutil.reactUnknown(message);
     body = { message: data.slice(1).join(' ') };
   }
   httptool.doPost('/world/' + cmd, body);
 }
 
 export function player({ httptool, aliases, message, data }) {
-  if (data.length < 2) return util.reactUnknown(message);
+  if (data.length < 2) return msgutil.reactUnknown(message);
   const cmd = data[1];
   let body = null;
   if (data.length > 2) {
@@ -85,13 +86,13 @@ export function player({ httptool, aliases, message, data }) {
     } else if (cmd === 'spawn-horde') {
       body = { count: data[2] };
     } else if (cmd === 'spawn-vehicle') {
-      if (data.length < 4) return util.reactUnknown(message);
+      if (data.length < 4) return msgutil.reactUnknown(message);
       body = { module: data[2], item: data[3] };
     } else if (cmd === 'give-xp') {
-      if (data.length < 4) return util.reactUnknown(message);
+      if (data.length < 4) return msgutil.reactUnknown(message);
       body = { skill: data[2], xp: data[3] };
     } else if (cmd === 'give-item') {
-      if (data.length < 4) return util.reactUnknown(message);
+      if (data.length < 4) return msgutil.reactUnknown(message);
       body = { module: data[2], item: data[3] };
       if (data.length > 4) { body.count = data[4]; }
     }
@@ -102,7 +103,7 @@ export function player({ httptool, aliases, message, data }) {
 }
 
 export function banlist({ httptool, message, data }) {
-  if (data.length < 2) return util.reactUnknown(message);
+  if (data.length < 2) return msgutil.reactUnknown(message);
   httptool.doPost('/banlist/' + data[0] + '-id', { steamid: data[1] });
 }
 
@@ -116,7 +117,7 @@ function whitelistAddName(httptool, name, pwd, dataHandler = null) {
 
 function whitelistRemoveId(httptool, aliases, message, snowflake, dataHandler = null) {
   const record = aliases.findByKey(snowflake);
-  if (!record) return util.reactError(message);
+  if (!record) return msgutil.reactError(message);
   whitelistRemoveName(httptool, record.name, dataHandler);
 }
 
@@ -124,20 +125,20 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
   let record = aliases.findByKey(snowflake);
   if (name) {
     snowflake = record ? record.snowflake : util.toSnowflake(snowflake);
-    if (!snowflake) return util.reactError(message);
+    if (!snowflake) return msgutil.reactError(message);
     if (record && record.name != name) {
-      if (aliases.findByName(name)) return util.reactError(message);  // Someone else has name
+      if (aliases.findByName(name)) return msgutil.reactError(message);  // Someone else has name
       record = null;  // Force add alias again with changed name
     }
   } else {
-    if (!record) return util.reactError(message);  // Need alias if no name given
+    if (!record) return msgutil.reactError(message);  // Need alias if no name given
     [snowflake, name] = [record.snowflake, record.name];
   }
   context.client.users.fetch(snowflake)
     .then(function(user) {
       if (!record) {
         const discordid = user.tag.replaceAll('#', '');
-        if (!aliases.add(snowflake, discordid, name)) return util.reactError(message);
+        if (!aliases.add(snowflake, discordid, name)) return msgutil.reactError(message);
         aliases.save();
       }
       const pwd = Math.random().toString(16).substr(2, 8);
@@ -146,7 +147,7 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
         text = text.replaceAll('${user}', name).replaceAll('${pass}', pwd);  // Legacy substitutes
         text = text.replaceAll('{instance}', instance).replaceAll('{user}', name).replaceAll('{pass}', pwd);
         user.send(text)
-          .then(function() { util.reactSuccess(message); })
+          .then(function() { msgutil.reactSuccess(message); })
           .catch(function(error) { logger.error(error, message); });
       });
     })
@@ -154,11 +155,11 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
 }
 
 export function whitelist({ context, httptool, instance, aliases, message, data }) {
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
-  if (data.length < 2) return util.reactUnknown(message);
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (data.length < 2) return msgutil.reactUnknown(message);
   const cmd = data[0];
   if (cmd === 'add-name') {
-    if (data.length < 3) return util.reactUnknown(message);
+    if (data.length < 3) return msgutil.reactUnknown(message);
     whitelistAddName(httptool, data[1], data[2]);
   } else if (cmd === 'remove-name') {
     whitelistRemoveName(httptool, data[1]);
@@ -171,6 +172,6 @@ export function whitelist({ context, httptool, instance, aliases, message, data 
       cutil.sleep(500).then(function() { whitelistAddId(context, httptool, instance, aliases, message, data[1]); });
     });
   } else {
-    util.reactUnknown(message);
+    msgutil.reactUnknown(message);
   }
 }

@@ -1,8 +1,12 @@
 import * as cutil from 'common/util/util';
-import * as util from './util.js';
 
 function timestamp() {
   return cutil.shortISODateTimeString(new Date(), true);
+}
+
+function reactError(message) {
+  if (message) { message.react('⛔'); }
+  return null;
 }
 
 export function raw(value) {
@@ -29,7 +33,7 @@ export function dump(obj) {
 }
 
 export function error(value, message = null) {
-  if (!value) return util.reactError(message);
+  if (!value) return reactError(message);
   if (cutil.isString(value)) {
     console.error(timestamp() + ' ERROR ' + value);
   } else {
@@ -37,5 +41,5 @@ export function error(value, message = null) {
     console.error(timestamp() + ' ERROR');
     console.error(value);
   }
-  return util.reactError(message);
+  return reactError(message);
 }

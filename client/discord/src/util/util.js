@@ -1,10 +1,4 @@
 import * as cutil from 'common/util/util';
-// TODO move message functions to msgutil.js
-
-function reactTo(message, emoji, retval = null) {
-  if (message) { message.react(emoji); }
-  return retval;
-}
 
 export function getFirstKey(value) {
   if (!value) return null;
@@ -60,16 +54,6 @@ export function listifyRoles(line) {
   return roles;
 }
 
-export function checkHasRole(message, roles) {
-  let hasRole = roles.includes('everyone');
-  if (!hasRole && roles.length > 0) {
-    hasRole = message.member.roles.cache.find(function(role) {
-      return roles.includes(role.name);
-    });
-  }
-  return hasRole ? true : reactTo(message, '🔒', false);
-}
-
 export function textToArray(value) {
   if (Array.isArray(value)) return value;
   if (cutil.isString(value)) return value.split('\n');
@@ -111,27 +95,4 @@ export function toSnowflake(value, prefix = '<@') {
     ? value.slice(prefix.length, -1) : value;
   if (result.length < 18) return null;
   return (/^\d*$/).test(result) ? result : null;
-}
-
-export function rmReacts(message, thenHandler, errorHandler, retval = null) {
-  message.reactions.removeAll()
-    .then(function() { thenHandler(message); })
-    .catch(errorHandler);
-  return retval;
-}
-
-export function reactUnknown(message) {
-  return reactTo(message, '❓');
-}
-
-export function reactWait(message) {
-  return reactTo(message, '⌛');
-}
-
-export function reactError(message) {
-  return reactTo(message, '⛔');
-}
-
-export function reactSuccess(message) {
-  return reactTo(message, '✅');
 }

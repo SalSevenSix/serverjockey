@@ -4,6 +4,7 @@ import { Client, GatewayIntentBits, Partials, version as djsver } from 'discord.
 import * as cutil from 'common/util/util';
 import * as util from './util/util.js';
 import * as logger from './util/logger.js';
+import * as msgutil from './util/msgutil.js';
 import * as http from './util/http.js';
 import * as system from './system.js';
 import * as instances from './instances.js';
@@ -94,12 +95,12 @@ function handleMessage(message) {
   if (!message.member || !message.member.user) return;  // Broken message
   logger.info(message.member.user.tag + ' ' + message.content);
   const data = util.commandLineToList(message.content.slice(context.config.CMD_PREFIX.length));
-  if (data.length === 0) return util.reactUnknown(message);
+  if (data.length === 0) return msgutil.reactUnknown(message);
   let command = data.shift().toLowerCase();
   let instance = context.instancesService.currentInstance();
   const parts = command.split('.');
   if (parts.length === 2) { [instance, command] = parts; }
-  if (command === 'startup') return util.reactUnknown(message);
+  if (command === 'startup') return msgutil.reactUnknown(message);
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
@@ -110,7 +111,7 @@ function handleMessage(message) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
     system[command](args);
   } else {
-    util.reactUnknown(message);
+    msgutil.reactUnknown(message);
   }
 }
 

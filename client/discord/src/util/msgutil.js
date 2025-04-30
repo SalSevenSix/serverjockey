@@ -2,6 +2,44 @@ import fs from 'fs';
 import * as util from './util.js';
 import * as logger from './logger.js';
 
+function reactTo(message, emoji, retval = null) {
+  if (message) { message.react(emoji); }
+  return retval;
+}
+
+export function checkHasRole(message, roles) {
+  let hasRole = roles.includes('everyone');
+  if (!hasRole && roles.length > 0) {
+    hasRole = message.member.roles.cache.find(function(role) {
+      return roles.includes(role.name);
+    });
+  }
+  return hasRole ? true : reactTo(message, '🔒', false);
+}
+
+export function rmReacts(message, thenHandler, errorHandler, retval = null) {
+  message.reactions.removeAll()
+    .then(function() { thenHandler(message); })
+    .catch(errorHandler);
+  return retval;
+}
+
+export function reactUnknown(message) {
+  return reactTo(message, '❓');
+}
+
+export function reactWait(message) {
+  return reactTo(message, '⌛');
+}
+
+export function reactError(message) {
+  return reactTo(message, '⛔');
+}
+
+export function reactSuccess(message) {
+  return reactTo(message, '✅');
+}
+
 function sendChunked(message, value, codeblock) {
   const [start, end] = codeblock ? ['```\n', '\n```'] : ['', ''];
   value.forEach(function(chunk) {

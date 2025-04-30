@@ -27,20 +27,20 @@ async function handleAdd(triggers, message, data) {
 }
 
 export function trigger({ context, triggers, message, data }) {
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, triggers.listText());
   } else if (cmd === 'add') {
     handleAdd(triggers, message, data.slice(1))
-      .then(function() { util.reactSuccess(message); })
+      .then(function() { msgutil.reactSuccess(message); })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'remove') {
-    if (data.length < 2) return util.reactUnknown(message);
-    if (!triggers.remove(data[1])) return util.reactError(message);
+    if (data.length < 2) return msgutil.reactUnknown(message);
+    if (!triggers.remove(data[1])) return msgutil.reactError(message);
     triggers.save();
-    util.reactSuccess(message);
+    msgutil.reactSuccess(message);
   } else {
-    util.reactUnknown(message);
+    msgutil.reactUnknown(message);
   }
 }

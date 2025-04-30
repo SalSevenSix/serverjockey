@@ -10,7 +10,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
   const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
   let schemes = rewards.list();
   if (schemes.length === 0) return;
-  util.reactWait(message);
+  msgutil.reactWait(message);
   const [membersMap, roleMap, activityMap] = [{}, {}, {}];
   const allMembers = await message.guild.members.fetch();  // Fetch all members first to populate cache
   allMembers.forEach(function(member) { membersMap[member.id] = member; });
@@ -103,41 +103,41 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
 /* eslint-enable complexity */
 
 export function reward({ context, httptool, aliases, rewards, instance, message, data }) {
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, rewards.listText());
   } else if (cmd === 'add') {
-    if (data.length < 6) return util.reactUnknown(message);
+    if (data.length < 6) return msgutil.reactUnknown(message);
     const [action, candidate, type, threshold, range] = data.slice(1);
     const snowflake = util.toSnowflake(candidate, '<@&');
-    if (!snowflake) return util.reactError(message);
+    if (!snowflake) return msgutil.reactError(message);
     message.guild.roles.fetch(snowflake)
       .then(function(role) {
-        if (!rewards.add(action, snowflake, role.name, type, threshold, range)) return util.reactError(message);
+        if (!rewards.add(action, snowflake, role.name, type, threshold, range)) return msgutil.reactError(message);
         rewards.save();
-        util.reactSuccess(message);
+        msgutil.reactSuccess(message);
       })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'move') {
-    if (data.length < 3) return util.reactUnknown(message);
-    if (!rewards.move(data[1], data[2])) return util.reactError(message);
+    if (data.length < 3) return msgutil.reactUnknown(message);
+    if (!rewards.move(data[1], data[2])) return msgutil.reactError(message);
     rewards.save();
-    util.reactSuccess(message);
+    msgutil.reactSuccess(message);
   } else if (cmd === 'remove') {
-    if (data.length < 2) return util.reactUnknown(message);
-    if (!rewards.remove(data[1])) return util.reactError(message);
+    if (data.length < 2) return msgutil.reactUnknown(message);
+    if (!rewards.remove(data[1])) return msgutil.reactError(message);
     rewards.save();
-    util.reactSuccess(message);
+    msgutil.reactSuccess(message);
   } else if (cmd === 'evaluate') {
     evaluateRewards(context, httptool, aliases, rewards, instance, message)
       .then(function() {
-        util.rmReacts(message, util.reactSuccess, logger.error);
+        msgutil.rmReacts(message, msgutil.reactSuccess, logger.error);
       })
       .catch(function(error) {
-        util.rmReacts(message, function() { logger.error(error, message); }, logger.error);
+        msgutil.rmReacts(message, function() { logger.error(error, message); }, logger.error);
       });
   } else {
-    util.reactUnknown(message);
+    msgutil.reactUnknown(message);
   }
 }

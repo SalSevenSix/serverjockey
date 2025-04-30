@@ -1,5 +1,4 @@
 import * as cutil from 'common/util/util';
-import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 import * as subs from '../util/subs.js';
@@ -26,21 +25,21 @@ export function server({ context, httptool, instance, message, data }) {
   const downStates = ['READY', 'STOPPED', 'EXCEPTION'];
   let cmd = data[0].toLowerCase();
   if (cmd === 'restart') { cmd = signals[1]; }
-  if (!signals.includes(cmd)) return util.reactUnknown(message);
+  if (!signals.includes(cmd)) return msgutil.reactUnknown(message);
   httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
     let state = json.current.state;
-    let targetUp = cmd === signals[0];
-    if (targetUp && upStates.includes(state)) return util.reactError(message);
-    if (!targetUp && downStates.includes(state)) return util.reactError(message);
-    if ([signals[2], signals[3]].includes(cmd)) return util.reactSuccess(message);
-    util.reactWait(message);
-    targetUp ||= cmd === signals[1];
+    let tgt = cmd === signals[0];
+    if (tgt && upStates.includes(state)) return msgutil.reactError(message);
+    if (!tgt && downStates.includes(state)) return msgutil.reactError(message);
+    if ([signals[2], signals[3]].includes(cmd)) return msgutil.reactSuccess(message);
+    msgutil.reactWait(message);
+    tgt ||= cmd === signals[1];
     new subs.Helper(context).poll(json.url, function(polldata) {
       if (state === polldata.state) return true;
       state = polldata.state;
-      if (state === downStates[2]) return util.rmReacts(message, util.reactError, logger.error, false);
-      if (targetUp && state === upStates[2]) return util.rmReacts(message, util.reactSuccess, logger.error, false);
-      if (!targetUp && state === downStates[1]) return util.rmReacts(message, util.reactSuccess, logger.error, false);
+      if (state === downStates[2]) return msgutil.rmReacts(message, msgutil.reactError, logger.error, false);
+      if (tgt && state === upStates[2]) return msgutil.rmReacts(message, msgutil.reactSuccess, logger.error, false);
+      if (!tgt && state === downStates[1]) return msgutil.rmReacts(message, msgutil.reactSuccess, logger.error, false);
       return true;
     });
   });

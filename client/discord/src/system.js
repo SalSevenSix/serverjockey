@@ -1,5 +1,4 @@
 import * as cutil from 'common/util/util';
-import * as util from './util/util.js';
 import * as msgutil from './util/msgutil.js';
 import * as helptext from './helptext.js';
 
@@ -44,29 +43,29 @@ export function modules({ httptool }) {
 }
 
 export function instances({ context, message }) {
-  if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
+  if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
   msgutil.sendText(message, context.instancesService.getInstancesText());
 }
 
 export function use({ context, message, data }) {
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   let text = context.instancesService.currentInstance();
   if (data.length === 0) {
     if (text) { text = 'default => ' + text; }
     else { text = 'No default instance'; }
   } else {
-    if (!context.instancesService.useInstance(data[0])) return util.reactError(message);
+    if (!context.instancesService.useInstance(data[0])) return msgutil.reactError(message);
     text = context.instancesService.getInstancesText();
   }
   msgutil.sendText(message, text);
 }
 
 export function create({ context, httptool, message, data }) {
-  if (data.length < 2) return util.reactUnknown(message);
+  if (data.length < 2) return msgutil.reactUnknown(message);
   const body = { identity: data[0], module: data[1] };
   httptool.doPost('/instances', body, function() {
     context.instancesService.useInstance(body.identity, true);
-    util.reactSuccess(message);
+    msgutil.reactSuccess(message);
   });
 }
 

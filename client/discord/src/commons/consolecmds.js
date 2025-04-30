@@ -1,19 +1,18 @@
 import * as cutil from 'common/util/util';
-import * as util from '../util/util.js';
 import * as msgutil from '../util/msgutil.js';
 
 export function send({ httptool, message, data }) {
-  if (data.length === 0) return util.reactUnknown(message);
+  if (data.length === 0) return msgutil.reactUnknown(message);
   let line = message.content;
   line = line.slice(line.indexOf(' ')).trim();
   httptool.doPost('/console/send', { line: line }, function(text) {
-    if (!text) return util.reactSuccess(message);
+    if (!text) return msgutil.reactSuccess(message);
     msgutil.sendText(message, text);
   });
 }
 
 export function say({ context, httptool, message, data }) {
-  if (data.length === 0) return util.reactUnknown(message);
+  if (data.length === 0) return msgutil.reactUnknown(message);
   let [name, line] = [message.member.user.tag, message.content];
   name = '@' + name.split('#')[0];
   line = line.slice(line.indexOf(' ')).trim();

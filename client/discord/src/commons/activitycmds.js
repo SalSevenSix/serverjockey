@@ -1,12 +1,11 @@
 import * as cutil from 'common/util/util';
 import * as istats from 'common/activity/instance';
 import * as pstats from 'common/activity/player';
-import * as util from '../util/util.js';
 import * as msgutil from '../util/msgutil.js';
 
 /* eslint-disable max-lines-per-function */
 export function activity({ context, httptool, aliases, instance, message, data }) {
-  if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [baseurl, now] = [context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, limit, format, query] = [null, null, null, null, 11, 'TEXT', 'player'];
   data.forEach(function(arg) {

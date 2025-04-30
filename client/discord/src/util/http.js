@@ -34,7 +34,7 @@ export class MessageHttpTool {
 
   doGet(path, dataHandler) {
     const [context, message] = [this.#context, this.#message];
-    if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
+    if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
     fetch(this.#baseurl + path, util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -53,8 +53,8 @@ export class MessageHttpTool {
 
   doPost(path, body = null, dataHandler = null, allowRoles = null) {
     const [context, message] = [this.#context, this.#message];
-    if (allowRoles && !util.checkHasRole(message, allowRoles)) return;
-    if (!allowRoles && !util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+    if (allowRoles && !msgutil.checkHasRole(message, allowRoles)) return;
+    if (!allowRoles && !msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
     let request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
     if (cutil.isString(body)) {
       request = util.newPostRequest('text/plain', context.config.SERVER_TOKEN);
@@ -71,7 +71,7 @@ export class MessageHttpTool {
       })
       .then(function(data) {
         if (dataHandler) { dataHandler(data); }
-        else { util.reactSuccess(message); }
+        else { msgutil.reactSuccess(message); }
       })
       .catch(function(error) {
         logger.error(error, message);
@@ -87,8 +87,8 @@ export class MessageHttpTool {
   doPostToFile(path, body = null) {
     const [context, message] = [this.#context, this.#message];
     this.doPost(path, body, function(json) {
-      if (!json || !cutil.hasProp(json, 'url')) return util.reactSuccess(message);
-      util.reactWait(message);
+      if (!json || !cutil.hasProp(json, 'url')) return msgutil.reactSuccess(message);
+      msgutil.reactWait(message);
       const fname = message.id + '.text';
       const fpath = '/tmp/' + fname;
       const fstream = fs.createWriteStream(fpath);
@@ -99,7 +99,7 @@ export class MessageHttpTool {
         return true;
       }).then(function() {
         fstream.end(function() {
-          util.rmReacts(message, util.reactSuccess, logger.error);
+          msgutil.rmReacts(message, msgutil.reactSuccess, logger.error);
           message.channel.send({ files: [{ attachment: fpath, name: fname }] })
             .finally(function() { fs.unlink(fpath, logger.error); });
         });
