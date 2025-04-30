@@ -1,3 +1,4 @@
+import * as msgutil from '../util/msgutil.js';
 import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 
@@ -12,6 +13,6 @@ export const help = helptext.newServerHelpBuilder()
 
 export function players({ httptool, message }) {
   httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
-    message.channel.send('```\n' + text + '\n```');
+    msgutil.sendText(message, text ? text : 'No players online');
   });
 }

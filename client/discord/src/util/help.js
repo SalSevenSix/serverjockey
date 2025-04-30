@@ -16,7 +16,7 @@ function processSection(context, httptool, message, data, section) {
   const query = data.join('-');
   if (query === 'title' || !cutil.hasProp(section, query)) return false;
   if (cutil.isString(section[query])) {
-    httptool.doGet(section[query], function(body) { return '```\n' + body + '\n```'; });
+    httptool.doGet(section[query], function(body) { return [body]; });
   } else {
     message.channel.send(section[query].map(function(line) {
       return line && line.slice(0, 2) === '`!' ? '`' + cmd + line.slice(2) : line;

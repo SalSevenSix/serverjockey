@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { getFirstKey, commandLineToList, clobCommandLine, listifyRoles } from '../src/util/util.js';
+import { getFirstKey, commandLineToList, clobCommandLine, listifyRoles, chunkStringArray } from '../src/util/util.js';
 
 describe('getFirstKey()', function() {
   const obj = { 'aaa': 3, 'bbb': 2, 'ccc': 1 };
@@ -35,4 +35,18 @@ describe('listifyRoles()', function() {
   it('two at spaces', function() { assert.deepEqual(listifyRoles(' @foo@bar '), ['foo', 'bar']); });
   it('two odd', function() { assert.deepEqual(listifyRoles('foo @bar'), ['foo', 'bar']); });
   it('lots', function() { assert.deepEqual(listifyRoles('@aa @bb @cc @dd @ee'), ['aa', 'bb', 'cc', 'dd', 'ee']); });
+});
+
+describe('chunkStringArray()', function() {
+  it('null on null', function() { assert.deepEqual(chunkStringArray(null), null); });
+  it('null on empty', function() { assert.deepEqual(chunkStringArray(''), [['']]); });
+  it('null on zero', function() { assert.deepEqual(chunkStringArray([]), []); });
+  it('single', function() { assert.deepEqual(chunkStringArray(['123'], 8), [['123']]); });
+  it('single oversize', function() { assert.deepEqual(chunkStringArray(['123456'], 4), [['123456']]); });
+  it('first oversize', function() { assert.deepEqual(chunkStringArray(
+    ['12345', '67', '8'], 5), [['12345'], ['67', '8']]); });
+  it('simple nochunk', function() { assert.deepEqual(chunkStringArray(
+    ['123', '456', 'abc'], 3), [['123'], ['456'], ['abc']]); });
+  it('simple chunking', function() { assert.deepEqual(chunkStringArray(
+    ['123', '456', 'abc', 'def', 'xyz'], 8), [['123', '456'], ['abc', 'def'], ['xyz']]); });
 });

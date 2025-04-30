@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import * as cutil from 'common/util/util';
 import * as util from './util.js';
 import * as logger from './logger.js';
+import * as msgutil from './msgutil.js';
 import * as subs from './subs.js';
 
 export class MessageHttpTool {
@@ -16,10 +17,6 @@ export class MessageHttpTool {
     this.#context = context;
     this.#message = message;
     this.#baseurl = baseurl;
-  }
-
-  get baseurl() {
-    return this.#baseurl;
   }
 
   async getJson(path, baseurlOverride = null) {
@@ -47,11 +44,7 @@ export class MessageHttpTool {
       .then(function(data) {
         const result = dataHandler(data);
         if (!result) return;
-        if (cutil.isString(result)) {
-          message.channel.send(result);
-        } else if (Array.isArray(result)) {
-          result.forEach(function(text) { message.channel.send(text); });
-        }
+        msgutil.sendText(message, result, Array.isArray(result));
       })
       .catch(function(error) {
         logger.error(error, message);

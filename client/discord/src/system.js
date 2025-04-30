@@ -1,5 +1,6 @@
 import * as cutil from 'common/util/util';
 import * as util from './util/util.js';
+import * as msgutil from './util/msgutil.js';
 import * as helptext from './helptext.js';
 
 export const help = helptext.systemHelp;
@@ -21,8 +22,7 @@ export function about({ message }) {
 
 export function system({ httptool }) {
   httptool.doGet('/system/info', function(info) {
-    let result = '```\n';
-    result += 'Version : ' + info.version + '\n';
+    let result = 'Version : ' + info.version + '\n';
     result += 'Svrtime : ' + info.time.text + ' ' + info.time.tz.text + '\n';
     result += 'Uptime  : ' + cutil.humanDuration(info.uptime) + '\n';
     result += 'CPU     : ' + info.cpu.percent + '%\n';
@@ -33,20 +33,19 @@ export function system({ httptool }) {
     result += ' / ' + cutil.humanFileSize(info.disk.total);
     result += ' (' + info.disk.percent + '%)\n';
     result += 'IPv4    : ' + info.net.local + ' ' + info.net.public;
-    result += '\n```';
-    return result;
+    return [result];
   });
 }
 
 export function modules({ httptool }) {
   httptool.doGet('/modules', function(body) {
-    return '```\n' + Object.keys(body).join('\n') + '\n```';
+    return Object.keys(body);
   });
 }
 
 export function instances({ context, message }) {
   if (!util.checkHasRole(message, context.config.PLAYER_ROLE)) return;
-  message.channel.send('```\n' + context.instancesService.getInstancesText().join('\n') + '\n```');
+  msgutil.sendText(message, context.instancesService.getInstancesText());
 }
 
 export function use({ context, message, data }) {
@@ -57,9 +56,9 @@ export function use({ context, message, data }) {
     else { text = 'No default instance'; }
   } else {
     if (!context.instancesService.useInstance(data[0])) return util.reactError(message);
-    text = context.instancesService.getInstancesText().join('\n');
+    text = context.instancesService.getInstancesText();
   }
-  message.channel.send('```\n' + text + '\n```');
+  msgutil.sendText(message, text);
 }
 
 export function create({ context, httptool, message, data }) {

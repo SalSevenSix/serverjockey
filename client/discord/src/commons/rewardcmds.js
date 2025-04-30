@@ -2,6 +2,7 @@ import * as cutil from 'common/util/util';
 import * as pstats from 'common/activity/player';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as msgutil from '../util/msgutil.js';
 
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
@@ -105,9 +106,7 @@ export function reward({ context, httptool, aliases, rewards, instance, message,
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
-    util.chunkStringArray(rewards.listText()).forEach(function(chunk) {
-      message.channel.send('```\n' + chunk.join('\n') + '\n```');
-    });
+    msgutil.sendText(message, rewards.listText());
   } else if (cmd === 'add') {
     if (data.length < 6) return util.reactUnknown(message);
     const [action, candidate, type, threshold, range] = data.slice(1);

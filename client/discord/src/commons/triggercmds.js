@@ -1,5 +1,6 @@
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as msgutil from '../util/msgutil.js';
 
 async function handleAdd(triggers, message, data) {
   const args = [];
@@ -29,9 +30,7 @@ export function trigger({ context, triggers, message, data }) {
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
-    util.chunkStringArray(triggers.listText()).forEach(function(chunk) {
-      message.channel.send('```\n' + chunk.join('\n') + '\n```');
-    });
+    msgutil.sendText(message, triggers.listText());
   } else if (cmd === 'add') {
     handleAdd(triggers, message, data.slice(1))
       .then(function() { util.reactSuccess(message); })

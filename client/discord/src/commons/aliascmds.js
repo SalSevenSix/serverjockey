@@ -1,13 +1,12 @@
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as msgutil from '../util/msgutil.js';
 
 export function alias({ context, aliases, message, data }) {
   if (!util.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [cmd, aliasid, name] = data.length > 0 ? data : ['list'];
   if (cmd === 'list') {
-    util.chunkStringArray(aliases.listText()).forEach(function(chunk) {
-      message.channel.send('```\n' + chunk.join('\n') + '\n```');
-    });
+    msgutil.sendText(message, aliases.listText());
   } else if (cmd === 'find') {
     if (!aliasid) return util.reactUnknown(message);
     let text = {};
@@ -15,8 +14,7 @@ export function alias({ context, aliases, message, data }) {
       if (record) { text[record.snowflake] = record.toString(); }
     });
     text = Object.values(text);
-    text = text.length > 0 ? text.join('\n') : 'No Alias Found';
-    message.channel.send('```\n' + text + '\n```');
+    msgutil.sendText(message, text.length > 0 ? text : 'No Alias Found');
   } else if (cmd === 'add') {
     if (!aliasid || !name) return util.reactUnknown(message);
     const snowflake = util.toSnowflake(aliasid);

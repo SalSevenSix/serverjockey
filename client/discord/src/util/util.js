@@ -1,3 +1,6 @@
+import * as cutil from 'common/util/util';
+// TODO move message functions to msgutil.js
+
 function reactTo(message, emoji, retval = null) {
   if (message) { message.react(emoji); }
   return retval;
@@ -67,19 +70,38 @@ export function checkHasRole(message, roles) {
   return hasRole ? true : reactTo(message, '🔒', false);
 }
 
+export function textToArray(value) {
+  if (Array.isArray(value)) return value;
+  if (cutil.isString(value)) return value.split('\n');
+  return ['null'];
+}
+
+export function arrayToText(value) {
+  if (cutil.isString(value)) return value;
+  if (Array.isArray(value)) return value.join('\n');
+  return 'null';
+}
+
 export function chunkStringArray(value, maxchars = 1600) {  // Discord limit is 2000 chars
-  if (!value) return value;
+  if (value == null) return null;
   const result = [];
   let [chars, chunk] = [0, []];
-  value.forEach(function(line) {
+  textToArray(value).forEach(function(line) {
     chars += line.length + 1;
     if (chars > maxchars) {
-      result.push(chunk);
+      if (chunk.length > 0) { result.push(chunk); }
       [chars, chunk] = [line.length + 1, []];
     }
     chunk.push(line);
   });
   if (chunk.length > 0) { result.push(chunk); }
+  return result;
+}
+
+export function mergeStringArray(value) {
+  if (!value || !Array.isArray(value)) return value;
+  const result = [];
+  value.forEach(function(chunk) { result.push(...chunk); });
   return result;
 }
 

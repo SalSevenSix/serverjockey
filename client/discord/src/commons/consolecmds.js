@@ -1,5 +1,6 @@
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
+import * as msgutil from '../util/msgutil.js';
 
 export function send({ httptool, message, data }) {
   if (data.length === 0) return util.reactUnknown(message);
@@ -7,7 +8,7 @@ export function send({ httptool, message, data }) {
   line = line.slice(line.indexOf(' ')).trim();
   httptool.doPost('/console/send', { line: line }, function(text) {
     if (!text) return util.reactSuccess(message);
-    message.channel.send('```\n' + text + '\n```');
+    msgutil.sendText(message, text);
   });
 }
 
@@ -25,14 +26,13 @@ export function say({ context, httptool, message, data }) {
 
 export function players({ httptool, aliases, instance }) {
   httptool.doGet('/players', function(body) {
-    let line = instance + ' players online: ' + body.length;
-    if (body.length === 0) return '```\n' + line + '\n```';
+    const result = [instance + ' players online: ' + body.length];
+    if (body.length === 0) return result;
     const plen = Math.max(10, 2 + body.reduce(function(a, b) {
       return a.name.length > b.name.length ? a : b;
     }).name.length);
-    let result = [line];
     body.forEach(function(entry) {
-      line = entry.name.padEnd(plen);
+      let line = entry.name.padEnd(plen);
       if (entry.steamid) { line = entry.steamid + ' ' + line; }
       else if (entry.steamid === '') { line = 'CONNECTED         ' + line; }
       if (cutil.hasProp(entry, 'uptime')) { line += cutil.humanDuration(entry.uptime, 'hm').padEnd(8); }
@@ -40,10 +40,6 @@ export function players({ httptool, aliases, instance }) {
       const playerAlias = aliases.findByName(entry.name);
       if (playerAlias) { line += ' @' + playerAlias.discordid; }
       result.push(line.trim());
-    });
-    result = util.chunkStringArray(result);
-    result = result.map(function(text) {
-      return '```\n' + text.join('\n') + '\n```';
     });
     return result;
   });

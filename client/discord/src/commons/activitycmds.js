@@ -2,6 +2,7 @@ import * as cutil from 'common/util/util';
 import * as istats from 'common/activity/instance';
 import * as pstats from 'common/activity/player';
 import * as util from '../util/util.js';
+import * as msgutil from '../util/msgutil.js';
 
 /* eslint-disable max-lines-per-function */
 export function activity({ context, httptool, aliases, instance, message, data }) {
@@ -32,8 +33,8 @@ export function activity({ context, httptool, aliases, instance, message, data }
   if (!atfrom) { atfrom = atto - 2592000000; }
   else if (atfrom < 0) { atfrom = atto + atfrom; }
   if (!tz) { tz = true; }
-  let [results, text] = [{}, ['Invalid arguments']];
-  if (query === 'instance') {
+  let [results, text] = [{}, 'Invalid arguments'];
+  if (query === 'instance') {  // TODO breakup into sub functions
     Promise.all([
       httptool.getJson(istats.queryInstance(instance), baseurl),
       httptool.getJson(istats.queryLastEvent(instance, atfrom), baseurl),
@@ -52,9 +53,9 @@ export function activity({ context, httptool, aliases, instance, message, data }
             ' available:' + cutil.floatToPercent(results.summary.available),
             ' uptime:' + cutil.humanDuration(results.summary.uptime)].join(''));
         } else if (format === 'JSON') {
-          text = [JSON.stringify(results)];
+          text = JSON.stringify(results);
         }
-        message.channel.send('```\n' + text.join('\n') + '\n```');
+        msgutil.sendText(message, text);
       });
   } else if (query === 'player') {
     Promise.all([
@@ -99,11 +100,9 @@ export function activity({ context, httptool, aliases, instance, message, data }
             text.push('No player activity found');
           }
         } else if (format === 'JSON') {
-          text = [JSON.stringify(results)];
+          text = JSON.stringify(results);  // TODO send as file instead
         }
-        util.chunkStringArray(text).forEach(function(chunk) {
-          message.channel.send('```\n' + chunk.join('\n') + '\n```');
-        });
+        msgutil.sendText(message, text);
       });
   }
 }

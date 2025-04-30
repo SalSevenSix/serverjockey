@@ -1,18 +1,12 @@
-import fs from 'fs';
 import fetch from 'node-fetch';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as msgutil from '../util/msgutil.js';
 
 export function getconfig({ httptool, message, data }) {
   if (data.length === 0) return util.reactUnknown(message);
   httptool.doGet('/config/' + data[0], function(body) {
-    const fname = data[0] + '-' + message.id + '.text';
-    const fpath = '/tmp/' + fname;
-    fs.writeFile(fpath, body, function(error) {
-      if (error) return logger.error(error, message);
-      message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-        .finally(function() { fs.unlink(fpath, logger.error); });
-    });
+    return msgutil.sendFile(message, body, data[0]);
   });
 }
 

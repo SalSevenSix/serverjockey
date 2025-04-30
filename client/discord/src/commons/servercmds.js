@@ -1,14 +1,14 @@
-import fs from 'fs';
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as msgutil from '../util/msgutil.js';
 import * as subs from '../util/subs.js';
 
 export function server({ context, httptool, instance, message, data }) {
   if (data.length === 0) {
     return httptool.doGet('/server', function(body) {
-      let result = '```\nServer ' + instance + ' is ';
-      if (!body.running) return result + 'DOWN\n```';
+      let result = 'Server ' + instance + ' is ';
+      if (!body.running) return [result + 'DOWN'];
       result += body.state;
       if (body.uptime) { result += ' (' + cutil.humanDuration(body.uptime) + ')'; }
       result += '\n';
@@ -18,7 +18,7 @@ export function server({ context, httptool, instance, message, data }) {
       if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
       if (dtl.map) { result += 'Map:      ' + dtl.map + '\n'; }
       if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
-      return result + '```';
+      return [result.trim()];
     });
   }
   const signals = ['start', 'restart-immediately', 'restart-after-warnings', 'restart-on-empty', 'stop'];
@@ -50,22 +50,13 @@ export function auto({ httptool, instance, data }) {
   if (data.length > 0) return httptool.doPost('', { auto: data[0] });
   const desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
   httptool.doGet('/server', function(body) {
-    let result = '```\n' + instance;
-    result += ' auto mode: ' + body.auto;
-    result += ' (' + desc[body.auto] + ')\n```';
-    return result;
+    return [instance + ' auto mode: ' + body.auto + ' (' + desc[body.auto] + ')'];
   });
 }
 
 export function log({ httptool, message }) {
   httptool.doGet('/log/tail', function(body) {
-    if (!body) return message.channel.send('```\nNo log lines found\n```');
-    const fname = 'log-' + message.id + '.text';
-    const fpath = '/tmp/' + fname;
-    fs.writeFile(fpath, body, function(error) {
-      if (error) return logger.error(error, message);
-      message.channel.send({ files: [{ attachment: fpath, name: fname }] })
-        .finally(function() { fs.unlink(fpath, logger.error); });
-    });
+    if (!body) return ['No log lines found'];
+    return msgutil.sendFile(message, body, 'log');
   });
 }

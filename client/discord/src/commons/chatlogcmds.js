@@ -1,6 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as cstats from 'common/activity/chat';
 import * as util from '../util/util.js';
+import * as msgutil from '../util/msgutil.js';
 
 function formatVerbose(results, tzFlag) {
   const text = [];
@@ -43,12 +44,11 @@ export function chatlog({ context, httptool, instance, message, data }) {
   if (!tz) { tz = true; }
   httptool.getJson(cstats.queryChats(instance, { atfrom, atto }, player), baseurl)
     .then(function(chatdata) {
-      let [results, text] = [{ chat: chatdata }, ['Invalid arguments']];
-      results = { meta: cstats.extractMeta(chatdata), chat: cstats.extractResults(cstats.mergeResults(results), tz) };
+      const results = { meta: cstats.extractMeta(chatdata),
+        chat: cstats.extractResults(cstats.mergeResults({ chat: chatdata }), tz) };
+      let text = 'Invalid arguments';
       if (format === 'VERBOSE') { text = formatVerbose(results, tz); }
-      else if (format === 'SUMMARY') { text = ['Chat summary not supported yet']; }
-      util.chunkStringArray(text).forEach(function(chunk) {  // TODO post file instead
-        message.channel.send('```\n' + chunk.join('\n') + '\n```');
-      });
+      else if (format === 'SUMMARY') { text = 'Chat summary not supported yet'; }
+      msgutil.sendTextOrFile(message, text, 'chat');
     });
 }
