@@ -62,8 +62,8 @@ export function sendText(message, value, codeblock = true) {
   sendChunked(message, util.chunkStringArray(value), codeblock);
 }
 
-export function sendTextOrFile(message, value, prefix = 'file', threshold = 1) {
+export function sendTextOrFile(message, value, prefix = 'file', threshold = 1, codeblock = true) {
   const chunked = util.chunkStringArray(value);
-  if (chunked.length <= threshold) { sendChunked(message, chunked, true); }
+  if (chunked.length <= threshold) { sendChunked(message, chunked, codeblock); }
   else { sendFile(message, util.mergeStringArray(chunked), prefix); }
 }
