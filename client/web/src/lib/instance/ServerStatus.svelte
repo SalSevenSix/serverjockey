@@ -17,14 +17,14 @@
     return 'fa-toggle-on status-color-amber';
   }
 
-  $: version = ($serverStatus.details && $serverStatus.details.version) ? $serverStatus.details.version : '';
+  $: version = $serverStatus.details && $serverStatus.details.version ? $serverStatus.details.version : '';
 
-  $: connect = getConnect($serverStatus.details);
-  function getConnect(details) {
-    if (!details) return '';
-    let result = details.ip ? details.ip : '';
-    if (details.ip && details.port) { result += '<wbr>:'; }
-    if (details.port) { result += details.port; }
+  $: connect = getConnect($serverStatus.details); function getConnect(details) {
+    const result = { ip: '', port: '', url: null };
+    if (!details) return result;
+    if (details.ip) { result.ip = details.ip; }
+    if (details.port) { result.port = details.port; }
+    if (result.ip && result.port) { result.url = 'steam://connect/' + result.ip + ':' + result.port; }
     return result;
   }
 
@@ -54,7 +54,10 @@
         <tr><td class="has-text-weight-bold">Version</td>
             <td id="serverStatusVersion">{version}</td></tr>
         <tr><td class="has-text-weight-bold">Connect</td>
-            <td id="serverStatusConnect">{@html connect}</td></tr>
+            <td id="serverStatusConnect">
+              {#if connect.ip}{connect.ip}{/if}{#if connect.url}<wbr>:{/if}{#if connect.port}{connect.port}{/if}
+              {#if connect.url}<a href={connect.url} title="Play through Steam"><i class="fa-brands fa-steam"></i></a>{/if}
+            </td></tr>
       {/if}
       {#if $serverStatus.details}
         {#each Object.keys($serverStatus.details) as key}
