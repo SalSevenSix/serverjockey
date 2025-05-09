@@ -24,8 +24,14 @@ def _default_config() -> dict:
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',
         'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
-        'LLM_API': {'baseurl': None, 'apikey': None, 'model': None},
-        'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`'
+        'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
+        'LLM_API': {'baseurl': None, 'apikey': None, 'chatlog': {
+            'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
+                {'role': 'system', 'content': 'You are a helpful assistant that summarizes conversations concisely.'},
+                {'role': 'assistant', 'content': 'Summarize the following transcript between players in a video game.'},
+                None
+            ]
+        }}
     }
 
 
