@@ -20,6 +20,13 @@ _SERVER_STARTED_FILTER = msgftr.And(
 
 
 def _default_config() -> dict:
+    llm_system = 'You are a helpful assistant that summarizes conversations concisely.'
+    llm_user = ('Summarize the following transcript between players in a video game.'
+                ' Identify seperate conversations and provide a brief summary of each.'
+                ' Each summary should include the names of all the players involved.'
+                ' Try to keep the word count of the summaries less than the conversation itself.'
+                ' Ignore messages from players that do not have any responses from other players.'
+                ' Don\'t provide a Key Points section, just generate conversation summaries.')
     return {
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',
         'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
@@ -27,8 +34,8 @@ def _default_config() -> dict:
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
         'LLM_API': {'baseurl': None, 'apikey': None, 'chatlog': {
             'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
-                {'role': 'system', 'content': 'You are a helpful assistant that summarizes conversations concisely.'},
-                {'role': 'assistant', 'content': 'Summarize the following transcript between players in a video game.'},
+                {'role': 'system', 'content': llm_system},
+                {'role': 'user', 'content': llm_user},
                 None
             ]
         }}

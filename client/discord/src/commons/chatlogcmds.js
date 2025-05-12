@@ -1,51 +1,9 @@
-import OpenAI from 'openai';
 import * as cutil from 'common/util/util';
 import * as cstats from 'common/activity/chat';
 import * as logger from '../util/logger.js';
 import * as util from '../util/util.js';
 import * as msgutil from '../util/msgutil.js';
-
-const llm = {
-  api: null, config: null,
-
-  init: function(contextConfig) {
-    if (llm.api) return true;
-    llm.config = contextConfig.LLM_API;
-    if (!llm.config || !llm.config.baseurl || !llm.config.apikey) return false;
-    if (!llm.config.chatlog || !llm.config.chatlog.model || !llm.config.chatlog.messages) return false;
-    llm.api = new OpenAI({ baseURL: llm.config.baseurl, apiKey: llm.config.apikey });
-    return true;
-  },
-
-  summarize: async function(transcript) {
-    const messages = [];
-    llm.config.chatlog.messages.forEach(function(message) {
-      if (!message) { message = 'user'; }
-      if (cutil.isString(message)) {
-        transcript.forEach(function(line) {
-          messages.push({ role: message, content: line });
-        });
-      } else {
-        messages.push(message);
-      }
-    });
-    if (llm.config.chatlog.maxtokens) {
-      const tokens = 2 * messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
-      if (tokens > llm.config.chatlog.maxtokens) {
-        await cutil.sleep(1200);  // Allow discord to process waiting emoji first
-        return '⛔ Chat transcript too large, try a smaller time range.';
-      }
-    }
-    const request = { messages: messages, model: llm.config.chatlog.model };
-    if (llm.config.chatlog.temperature) { request.temperature = llm.config.chatlog.temperature; }
-    // TODO maybe set maxtoken in request?
-    const response = await llm.api.chat.completions.create(request);
-    let valid = response && response.choices && response.choices.length;
-    valid &&= response.choices[0].message && response.choices[0].message.content;
-    if (!valid) return '⛔ Invalid LLM response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
-    return response.choices[0].message.content;
-  }
-};
+import * as llm from '../util/llm.js';
 
 function formatHeader(results, tzFlag) {
   const text = [['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tzFlag),
@@ -56,15 +14,17 @@ function formatHeader(results, tzFlag) {
 }
 
 async function formatSummary(contextConfig, results, tzFlag) {
-  if (!llm.init(contextConfig)) return '⛔ LLM not configured for use';
   const text = formatHeader(results, tzFlag);
   if (results.chat.length === 0) return text;
+  const llmClient = llm.client(contextConfig);
+  if (!llmClient) return '⛔ LLM not configured for use';
   results = results.chat.map(function(record) {
     if (!record.player) return null;
     return record.ats + ' ' + record.player + ': ' + record.text;
   });
   results = results.filter(function(line) { return line; });
-  results = await llm.summarize(results);
+  results = results.join('\n');
+  results = await llmClient.summarize(results);
   results = util.textToArray(results);
   text.push(...results);
   return text;
