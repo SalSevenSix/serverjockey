@@ -11,8 +11,18 @@ const systemHelpData = help.newHelpBuilder()
     'modules                    : Supported games list',
     'create {instance} {module} : Create new instance'])
   .addHelp('help', [
-    'Show help text. Use {command} and {action} for more detailed information. Both optional.'
-  ])
+    'Show help text. Use {command} and {action} for more detailed information. Both optional.',
+    'e.g. `!help create` to show more help on the create command.'])
+  .addHelp('use', [
+    'Set the default {instance} for commands to be directed to.',
+    'If {instance} not provided, the current default instance is shown.',
+    'Alternatively, commands can be directed to any instance explicitly',
+    'by using the notation {instance}.{command} in place of the command...',
+    'e.g. `!myserver.server start`'])
+  .addHelp('create', [
+    'Create a new instance named {instance} for game {module}.',
+    'e.g. `!create myserver projectzomboid`',
+    'Use the `!modules` command to see the list of available games.'])
   .buildData();
 
 export const systemHelp = help.process(systemHelpData);
@@ -27,7 +37,7 @@ const serverHelp = [
   'auto {mode}        : Set auto mode, valid values 0,1,2,3',
   'log                : Get last 100 lines from the log'];
 const helpServerAuto = [
-  'Show the auto mode if {mode} not provided.',
+  'Show the current auto mode if {mode} not provided.',
   'Set auto behaviour with {mode} option...', '```',
   '0 : No automatic actions',
   '1 : Automatically start the game server when ServerJockey starts',
@@ -43,7 +53,7 @@ const helpSend = '/console/help';
 
 const deploymentHelp = [
   'deployment backup-world {hours} : Backup game world to zip file',
-  'deployment wipe-world-save      : Delete only map files',
+  'deployment wipe-world-save      : Delete only game save files',
   'deployment wipe-world-all       : Delete game world folder',
   'deployment install-runtime {version} : Install game server'];
 const helpDeploymentBackupWorld = [
@@ -51,9 +61,9 @@ const helpDeploymentBackupWorld = [
   'Optionally specify {hours} to prune backups older than hours.',
   'Log output will be attached as a file.'];
 const helpDeploymentInstallRuntime = [
-  'Install game server, {version} optional.',
+  'Install game server, {version} is optional.',
   'For Steam installs, use the beta for version.',
-  'Log output will be attached as a file.'];
+  'Console output will be attached as a file.'];
 
 const aliasHelp = 'alias {cmds ...}     : Alias management, use help for details';
 const helpAlias = [
@@ -112,7 +122,7 @@ const helpTrigger = [
   '  do-add-role={roleid}    : Action add role to player',
   '  do-remove-role={roleid} : Action remove role from player',
   '  "do-message={line}"     : Action send message, can be command with subs;',
-  '  {!} for command prefix, {instance} for instance, {player} for "name"',
+  '    {!} for command prefix, {instance} for instance, {player} for "name"',
   'remove {id}    : Remove trigger by id as shown in list',
   '```', 'Examples...',
   'a) Give PZ player an Axe on login if has @AxemanKit role, also remove role',
@@ -151,13 +161,14 @@ const helpChatlog = [
   '                  or preset "LH" Last Hour, "LD" Last Day',
   'tz={timezone}   : Timezone as ±{hh} or ±{hh}:{mm} default is server tz',
   '"player={name}" : Only chat messages for player by name',
+  'summary         : Summarize chat results (requires LLM configuration)',
   '```', 'Examples...',
   'a) get chat messages between specific times in timezone GMT +7',
   '`!chatlog from=2024-08-15T09:00:00 to=2024-08-15T21:00:00 tz=+7`',
   'b) get chat messages from last 12 hours to end of last hour',
   '`!chatlog from=12h to=LH`',
-  'c) get chat messages only for player in last 7 days to now',
-  '`!chatlog "player=Mr Tee" from=7d`'];
+  'c) generate a summary of the chat messages from the last 24 hours',
+  '`!chatlog from=24h summary`'];
 
 /* eslint-disable max-lines-per-function */
 export function newServerHelpBuilder() {

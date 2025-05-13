@@ -48,6 +48,12 @@ export const help = helptext.newServerHelpBuilder()
   .addHelp('player set-access-level', [
     'Set access level for online player. Level options:', '```',
     'admin, moderator, overseer, gm, observer, none', '```'])
+  .addHelp('player tele-to', [
+    'Teleport the player named {name} to location of player named {toplayer}',
+    'e.g. `!player "Mr Tee" tele-to "Jojo"`'])
+  .addHelp('player tele-at', [
+    'Teleport a player to the X,Y,Z location on the map.',
+    'e.g. `!player "Mr Tee" tele-at 10339,9267,0`'])
   .addHelp('player give-xp', [
     'Give XP to online player. Skill options:', '```',
     'Sprinting, Lightfoot, Nimble, Sneak, Aiming, Reloading,',

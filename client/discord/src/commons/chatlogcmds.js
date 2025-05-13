@@ -9,7 +9,7 @@ function formatHeader(results, tzFlag) {
   const text = [['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tzFlag),
     ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tzFlag),
     ' (' + cutil.humanDuration(results.meta.atrange) + ')'].join('')];
-  if (results.chat.length === 0) { text.push('No chat found'); }
+  if (results.chat.length === 0) { text.push('No chat found within time range'); }
   return text;
 }
 

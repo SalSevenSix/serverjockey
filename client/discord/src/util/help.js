@@ -18,9 +18,7 @@ function processSection(context, httptool, message, data, section) {
   if (cutil.isString(section[query])) {
     httptool.doGet(section[query], function(body) { return [body]; });
   } else {
-    message.channel.send(section[query].map(function(line) {
-      return line && line.slice(0, 2) === '`!' ? '`' + cmd + line.slice(2) : line;
-    }).join('\n'));
+    message.channel.send(section[query].join('\n').replaceAll('`!', '`' + cmd).replaceAll('`\n!', '`\n' + cmd));
   }
   return true;
 }
