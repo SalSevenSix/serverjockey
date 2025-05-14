@@ -5,6 +5,7 @@
   import { goto } from '$app/navigation';
   import { surl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
+  import ServerStateSymbol from '$lib/widget/ServerStateSymbol.svelte';
 
   const subs = new SubscriptionHelper();
 
@@ -27,13 +28,13 @@
   }
 
   function handleInstanceEvent(data) {
-    if (data.event === 'running') {
+    if (data.event === 'status') {
       instances = instances.map(function(value) {
         if (value.identity != data.instance) return value;
-        return { identity: value.identity, module: value.module, running: data.running };
+        return { identity: value.identity, module: value.module, state: data.state };
       });
     } else if (data.event === 'created') {
-      instances = [...instances, { identity: data.instance.identity, module: data.instance.module, running: false }];
+      instances = [...instances, { identity: data.instance.identity, module: data.instance.module, state: null }];
     } else if (data.event === 'deleted') {
       instances = instances.filter(function(value) {
         return value.identity != data.instance.identity;
@@ -51,7 +52,7 @@
       })
       .then(function(json) {
         Object.entries(json).forEach(function([identity, instance]) {
-          instances = [...instances, { identity: identity, module: instance.module, running: instance.running }];
+          instances = [...instances, { identity: identity, module: instance.module, state: instance.state }];
         });
         subs.start('/instances/subscribe', handleInstanceEvent);
       })
@@ -84,8 +85,7 @@
         {#each instances as instance}
           <tr>
             <td class="word-break-all notranslate">
-              <i class="fa {instance.running ? 'fa-play' : 'fa-stop'} fa-xl"></i>
-              {instance.identity}
+              <ServerStateSymbol state={instance.state} bigger />&nbsp; {instance.identity}
             </td>
             <td class="word-break-all notranslate">{instance.module}</td>
             <td class="buttons-column">
@@ -107,15 +107,6 @@
 
 
 <style>
-  .fa-play {
-    width: 1em;
-    color: var(--color-standard-success-def);
-  }
-
-  .fa-stop {
-    width: 1em;
-  }
-
   .buttons-column {
     width: 33%;
     text-align: right;

@@ -3,19 +3,12 @@
   import { humanDuration } from 'common/util/util';
   import { capitalize } from '$lib/util/util';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
+  import ServerStateSymbol from '$lib/widget/ServerStateSymbol.svelte';
 
   const serverStatus = getContext('serverStatus');
   const commonKeys = ['version', 'ip', 'port'];
 
   export let stateOnly = false;
-
-  $: statusIconClass = getStatusIconClass($serverStatus.running, $serverStatus.state);
-  function getStatusIconClass(running, state) {
-    if (state === 'MAINTENANCE') return 'fa-toggle-on status-color-red';
-    if (!running || !state) return 'fa-toggle-off';
-    if (state === 'STARTED') return 'fa-toggle-on status-color-green';
-    return 'fa-toggle-on status-color-amber';
-  }
 
   $: version = $serverStatus.details && $serverStatus.details.version ? $serverStatus.details.version : '';
 
@@ -42,7 +35,7 @@
     <tbody>
       <tr><td class="has-text-weight-bold">State</td><td id="serverStatusState">
         {#if $serverStatus.state}
-          <i class="fa {statusIconClass} fa-lg"></i>&nbsp; {$serverStatus.state}
+          <ServerStateSymbol state={$serverStatus.state} />&nbsp; {$serverStatus.state}
           {#if $serverStatus.state === 'STARTED'}
             <span class="notranslate">({humanDuration(uptime)})</span>
           {/if}

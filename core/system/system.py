@@ -94,8 +94,8 @@ class SystemService:
             subcontext = self._get_subcontext(child.name(), False)
             if subcontext and child.name() == subcontext.config('identity') and not subcontext.config('hidden'):
                 status = await svrsvc.ServerStatus.get_status(subcontext, self)
-                running, module, url = status['running'], subcontext.config('module'), baseurl + child.path()
-                result[child.name()] = dict(running=running, module=module, url=url)
+                module, url, state = subcontext.config('module'), baseurl + child.path(), status['state']
+                result[child.name()] = dict(module=module, url=url, state=state)
         return result
 
     def instance_info(self, identity: str) -> dict | None:
@@ -298,7 +298,7 @@ class _InstanceEventTransformer(msgabc.Transformer):
     def transform(self, message):
         if mc.ServerStatus.UPDATED_FILTER.accepts(message):
             status = message.data()
-            return dict(event='running', instance=status['instance'], running=status['running'])
+            return dict(event='status', instance=status['instance'], state=status['state'])
         if mc.SystemService.SERVER_FILTER.accepts(message):
             event = 'created' if message.name() is mc.SystemService.SERVER_INITIALISED else 'deleted'
             return dict(event=event, instance=objconv.obj_to_dict(message.data()))
