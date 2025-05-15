@@ -211,6 +211,20 @@ class CommandProcessor:
             return False
         return True
 
+    def _exit_inactive(self, argument: str) -> bool:
+        self._instance_path()  # Just make sure an instance is set
+        timerange = util.to_int(argument)
+        if not timerange:
+            logging.error('Seconds required. No more commands will be processed.')
+            return False
+        now, timerange, path = int(time.time() * 1000), timerange * 1000, '/store/player/event'
+        path += '?atfrom=' + str(now - timerange) + '&atto=' + str(now)
+        path += '&instance=' + self._instance + '&events=LOGIN,LOGOUT&atgroup=max'
+        if len(self._connection.get(path)['records']) == 0:
+            logging.info('exit-inactive did not find player activity, no more commands will be processed')
+            return False
+        return True
+
     # noinspection PyMethodMayBeStatic
     def _sleep(self, argument: str) -> bool:
         seconds = util.to_int(argument, 0)

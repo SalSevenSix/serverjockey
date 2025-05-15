@@ -57,12 +57,13 @@ commands:
                     | Use Ctrl-C to exit
   sleep:<seconds>   | Wait and do nothing for <seconds>
   print:"<message>" | Print <message> as output
-  exit-down         | Exit processing if server is not running
-  exit-up           | Exit processing if server is running
-  exit-ut-gt:<seconds> | Exit processing if uptime greater than <seconds>
-  exit-ut-lt:<seconds> | Exit processing if uptime less or equal to <seconds>
-  exit-pl-gt:<#>    | Exit processing if players greater than <#>
-  exit-pl-lt:<#>    | Exit processing if players less or equal to <#>
+  exit-down         | Exit if server is not running
+  exit-up           | Exit if server is running
+  exit-ut-gt:<seconds>    | Exit if uptime greater than <seconds>
+  exit-ut-lt:<seconds>    | Exit if uptime less or equal to <seconds>
+  exit-inactive:<seconds> | Exit if no player activity in previous <seconds>
+  exit-pl-gt:<#>    | Exit if players greater than <#>
+  exit-pl-lt:<#>    | Exit if players less or equal to <#>
   delete            | Delete the current instance
   https:<enabled>   | HTTPS enable https:true or disable https:false
   shutdown          | Shutdown the ServerJockey system
