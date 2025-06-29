@@ -9,12 +9,12 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint": "^9.23.0",
-    "mocha": "^11.2.0"
+    "eslint": "^9.30.0",
+    "mocha": "^11.7.1"
   },
   "dependencies": {
     "common": "file:../common",
-    "discord.js": "^14.19.2",
-    "openai": "^4.96.2"
+    "discord.js": "^14.21.0",
+    "openai": "^4.104.0"
   }
 }
