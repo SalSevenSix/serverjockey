@@ -23,9 +23,10 @@ class TestPlaying(unittest.TestCase):
         context = webcontext.get()
         self._start_server(identity, module)
         # open players, commands, and chat sections
-        context.find_element('collapsibleConsoleCommands').click()
-        context.find_element('collapsibleChatLog').click()
+        if context.has_element('collapsibleConsoleCommands'):
+            context.find_element('collapsibleConsoleCommands').click()
         context.find_element('collapsiblePlayers').click()
+        context.find_element('collapsibleChatLog').click()
         # wait for player to login
         self.assertIsNotNone(context.find_element('playersColumn0', exists=600.0))
         player_name = context.get_cell_text(
@@ -33,7 +34,7 @@ class TestPlaying(unittest.TestCase):
         time.sleep(5.0)  # grace to allow player to fully load in
         return player_name
 
-    def _wait_for_logout_and_stop_server(self, player_name: str):
+    def _wait_for_logout_and_stop_server(self, player_name: str, nochat: bool = False):
         # wait for player to logout
         context = webcontext.get()
         self.assertIsNotNone(context.find_element('playersZeroOnline', exists=600.0))
@@ -45,12 +46,16 @@ class TestPlaying(unittest.TestCase):
         context.find_element('queryExecuteChatLog').click()
         self.assertIsNotNone(context.find_element('chatActivityChatLogList', exists=3.0))
         # check expected player activity
-        self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', 2, 2))
-        self.assertEqual(sc.LOGIN, util.rchop(context.get_cell_text('chatActivityChatLogList', 2, 3), '('))
-        self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', 3, 2))
-        self.assertEqual('hello from game', context.get_cell_text('chatActivityChatLogList', 3, 3))
-        self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', 4, 2))
-        self.assertEqual(sc.LOGOUT, util.rchop(context.get_cell_text('chatActivityChatLogList', 4, 3), '('))
+        row = 2
+        self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', row, 2))
+        self.assertEqual(sc.LOGIN, util.rchop(context.get_cell_text('chatActivityChatLogList', row, 3), '('))
+        if not nochat:
+            row += 1
+            self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', row, 2))
+            self.assertEqual('hello from game', context.get_cell_text('chatActivityChatLogList', row, 3))
+        row += 1
+        self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', row, 2))
+        self.assertEqual(sc.LOGOUT, util.rchop(context.get_cell_text('chatActivityChatLogList', row, 3), '('))
         self._stop_server()
 
     # noinspection PyMethodMayBeStatic
@@ -70,13 +75,16 @@ class TestPlaying(unittest.TestCase):
         notification.click()
         time.sleep(wait / 2)
 
+    def _check_status_info(self, version_regex: str, port: int):
+        context = webcontext.get()
+        self.assertIsNotNone(re.compile(version_regex).match(
+            context.find_element('serverStatusVersion').get_attribute('innerText')))
+        self.assertEqual(context.net_public + ':' + str(port),
+                         context.find_element('serverStatusConnect').get_attribute('innerText').strip())
+
     def test_playing_projectzomboid(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('pz', 'projectzomboid')
-        # check status info
-        self.assertIsNotNone(re.compile(r'^[0-9]*\.[0-9]*\.[0-9]*$').match(
-            context.find_element('serverStatusVersion').get_attribute('innerText')))
-        self.assertEqual(context.net_public + ':16261',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+        self._check_status_info(r'^[0-9]*\.[0-9]*\.[0-9]*$', 16261)
         # send welcome message to player
         context.find_element('commandBuilderCommandWorld').click()
         context.find_element('commandBuilderActionBroadcast').click()
@@ -107,11 +115,7 @@ class TestPlaying(unittest.TestCase):
 
     def test_playing_factorio(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('ft', 'factorio')
-        # check status info
-        self.assertIsNotNone(re.compile(r'^2\.[0-9]*\.[0-9]*$').match(
-            context.find_element('serverStatusVersion').get_attribute('innerText')))
-        self.assertEqual(context.net_public + ':34197',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+        self._check_status_info(r'^2\.[0-9]*\.[0-9]*$', 34197)
         # send welcome message to player
         context.find_element('commandBuilderIline').send_keys('Welcome to FT ' + player_name)
         self._send_console_command()
@@ -119,11 +123,7 @@ class TestPlaying(unittest.TestCase):
 
     def test_playing_unturned(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('ut', 'unturned')
-        # check status info
-        self.assertIsNotNone(re.compile(r'^[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$').match(
-            context.find_element('serverStatusVersion').get_attribute('innerText')))
-        self.assertEqual(context.net_public + ':27027',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+        self._check_status_info(r'^[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$', 27027)
         # send welcome message to player
         context.find_element('commandBuilderIline').send_keys('Say Welcome to UT ' + player_name)
         self._send_console_command()
@@ -131,34 +131,28 @@ class TestPlaying(unittest.TestCase):
 
     def test_playing_sevendaystodie(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('7d2d', 'sevendaystodie')
-        # check status info
-        self.assertIsNotNone(re.compile(r'^V 1\.[0-9]* \(b[0-9]*\)$').match(
-            context.find_element('serverStatusVersion').get_attribute('innerText')))
-        self.assertEqual(context.net_public + ':26900',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+        self._check_status_info(r'^V 1\.[0-9]* \(b[0-9]*\)$', 26900)
         self.assertEqual('8080', context.find_element('serverStatusCport').get_attribute('innerText'))
         # no console feature to send welcome message
         self._wait_for_logout_and_stop_server(player_name)
 
     def test_playing_starbound(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('sb', 'starbound')
-        # check status info
-        self.assertIsNotNone(re.compile(r'^1\.[0-9]*\.[0-9]*$').match(
-            context.find_element('serverStatusVersion').get_attribute('innerText')))
-        self.assertEqual(context.net_public + ':21025',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+        self._check_status_info(r'^1\.[0-9]*\.[0-9]*$', 21025)
         # no console command to send welcome message
         self._wait_for_logout_and_stop_server(player_name)
+
+    def test_playing_valheim(self):
+        context, player_name = webcontext.get(), self._start_server_and_wait_for_login('vh', 'valheim')
+        self._check_status_info(r'^0\.[0-9]*\.[0-9]*$', 2456)
+        # no console feature to send welcome message
+        self._wait_for_logout_and_stop_server(player_name, nochat=True)
 
     def test_playing_palworld(self):
         context = webcontext.get()
         self._start_server('pw', 'palworld')
-        # check status info
         time.sleep(6.0)  # grace to allow server to fully start
-        self.assertIsNotNone(re.compile(r'^v[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$').match(
-            context.find_element('serverStatusVersion').get_attribute('innerText')))
-        self.assertEqual(context.net_public + ':8211',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+        self._check_status_info(r'^v[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$', 8211)
         # send welcome message
         context.find_element('collapsibleConsoleCommands').click()
         context.find_element('commandBuilderIline').send_keys('Broadcast Welcome_to_PW')
@@ -166,6 +160,3 @@ class TestPlaying(unittest.TestCase):
         time.sleep(2.0)
         self.assertEqual('Broadcasted: Welcome_to_PW', context.get_instance_loglastline())
         self._stop_server()
-
-    def test_playing_valheim(self):
-        self.fail('NOT IMPLEMENTED')
