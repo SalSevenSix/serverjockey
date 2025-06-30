@@ -49,7 +49,7 @@ class TestBasics(unittest.TestCase):
         time.sleep(1.0)  # just let the server run a little
         self.assertEqual('1.8.42', context.find_element('serverStatusVersion').get_attribute('innerText'))
         self.assertEqual('101.201.301.404:27001',
-                         context.find_element('serverStatusConnect').get_attribute('innerText'))
+                         context.find_element('serverStatusConnect').get_attribute('innerText').strip())
         # stop server
         context.find_element('serverControlsStop').click()
         context.wait_for_instance_state(sc.STOPPED, wait=4.0)

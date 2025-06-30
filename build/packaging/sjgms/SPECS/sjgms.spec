@@ -53,15 +53,15 @@ exit 0
 
 
 %changelog
-* Sat Apr 12 2024 Bowden Salis <bsalis76@gmail.com> - 0.20.0
-- Feature release v0.20.0
-* Fri Apr 11 2024 Bowden Salis <bsalis76@gmail.com> - 0.19.0
+* Tue Jul 01 2025 Bowden Salis <bsalis76@gmail.com> - 0.20.0
+- Support for Valheim and discord bot chatlog feature
+* Fri Apr 11 2025 Bowden Salis <bsalis76@gmail.com> - 0.19.0
 - Trigger improvements release
-* Thu Mar 13 2024 Bowden Salis <bsalis76@gmail.com> - 0.18.0
+* Thu Mar 13 2025 Bowden Salis <bsalis76@gmail.com> - 0.18.0
 - Mod uploads and Triggers features
-* Wed Feb 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.17.0
+* Wed Feb 19 2025 Bowden Salis <bsalis76@gmail.com> - 0.17.0
 - ServerLink enhancements, aliases, rewards and activity
-* Sat Jan 11 2024 Bowden Salis <bsalis76@gmail.com> - 0.16.0
+* Sat Jan 11 2025 Bowden Salis <bsalis76@gmail.com> - 0.16.0
 - Small features and library upgrades release
 * Thu Dec 19 2024 Bowden Salis <bsalis76@gmail.com> - 0.15.0
 - Small improvements and library upgrades release

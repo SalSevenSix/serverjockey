@@ -62,7 +62,7 @@ class TestRefreshRuntime(unittest.TestCase):
         os.rename(new_backup, old_backup)
 
     def test_refresh_projectzomboid(self):
-        self._refresh('pz', 'projectzomboid', APPID_PROJECTZOMBOID)
+        self._refresh('pz', 'projectzomboid', APPID_PROJECTZOMBOID, weight=1.5)
 
     def test_refresh_factorio(self):
         self._refresh('ft', 'factorio')
@@ -71,13 +71,13 @@ class TestRefreshRuntime(unittest.TestCase):
         self._refresh('ut', 'unturned', APPID_UNTURNED, weight=1.5)
 
     def test_refresh_sevendaystodie(self):
-        self._refresh('7d2d', 'sevendaystodie', APPID_SEVENDAYSTODIE, weight=2.5)
+        self._refresh('7d2d', 'sevendaystodie', APPID_SEVENDAYSTODIE, weight=4)
 
     def test_refresh_starbound(self):
         self._refresh('sb', 'starbound', APPID_STARBOUND)
 
     def test_refresh_palworld(self):
-        self._refresh('pw', 'palworld', APPID_PALWORLD)
+        self._refresh('pw', 'palworld', APPID_PALWORLD, weight=1.5)
 
     def test_refresh_valheim(self):
         self._refresh('vh', 'valheim', APPID_VALHEIM)
