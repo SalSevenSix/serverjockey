@@ -53,7 +53,7 @@ exit 0
 
 
 %changelog
-* Tue Jul 01 2025 Bowden Salis <bsalis76@gmail.com> - 0.20.0
+* Wed Jul 02 2025 Bowden Salis <bsalis76@gmail.com> - 0.20.0
 - Support for Valheim and discord bot chatlog feature
 * Fri Apr 11 2025 Bowden Salis <bsalis76@gmail.com> - 0.19.0
 - Trigger improvements release

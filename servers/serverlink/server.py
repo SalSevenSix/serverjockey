@@ -102,6 +102,9 @@ class _ServerProcessFactory:
             self._env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 
     async def initialise(self):
+        self._executable = self._context.config('home') + '/serverlink'
+        if await io.file_exists(self._executable):
+            return
         env_path = self._context.env('PATH')
         script = self._context.config('home') + '/index.js'
         if await io.file_exists(script):
@@ -115,9 +118,6 @@ class _ServerProcessFactory:
             if self._executable:
                 self._script = script
                 return
-        self._executable = self._context.config('home') + '/serverlink'
-        if await io.file_exists(self._executable):
-            return
         self._executable = await io.find_in_env_path(env_path, 'serverlink')
         if self._executable:
             return
