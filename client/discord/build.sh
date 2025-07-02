@@ -13,7 +13,7 @@ else
   echo "node version $(node --version)"
   which npm > /dev/null || exit 1
   echo "npm version $(npm --version)"
-  which nexe > /dev/null || exit
+  which nexe > /dev/null || exit 1
 fi
 
 cd "$(dirname $0)" || exit 1

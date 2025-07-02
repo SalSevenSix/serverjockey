@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.20.0
+Version:        0.21.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -53,6 +53,8 @@ exit 0
 
 
 %changelog
+* Thu Jul 03 2025 Bowden Salis <bsalis76@gmail.com> - 0.21.0
+- Feature release v0.21.0
 * Wed Jul 02 2025 Bowden Salis <bsalis76@gmail.com> - 0.20.0
 - Support for Valheim and discord bot chatlog feature
 * Fri Apr 11 2025 Bowden Salis <bsalis76@gmail.com> - 0.19.0
