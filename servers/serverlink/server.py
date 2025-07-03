@@ -22,7 +22,7 @@ _SERVER_STARTED_FILTER = msgftr.And(
 def _default_config() -> dict:
     llm_system = 'You are a helpful assistant that summarizes conversations concisely.'
     llm_user = ('Summarize the following transcript between players in a video game.'
-                ' Identify seperate conversations and provide a brief summary of each.'
+                ' Identify separate conversations and provide a brief summary of each.'
                 ' Each summary should include the names of all the players involved.'
                 ' Try to keep the word count of the summaries less than the conversation itself.'
                 ' Ignore messages from players that do not have any responses from other players.'
