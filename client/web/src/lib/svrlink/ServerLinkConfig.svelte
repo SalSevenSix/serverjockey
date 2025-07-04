@@ -10,13 +10,23 @@
 
   export let noHints = false;
 
-  let loadedData = { 'EVENT_CHANNELS': {}, 'LLM_API': { 'chatlog': { 'messages': [] }}};
+  let loadedData = normaliseData({});
   let formData = loadedData;
   let processing = true;
   let sectionIndex = 1;
 
   $: cannotSave = processing || JSON.stringify(loadedData) === JSON.stringify(formData);
   $: showHints = !noHints && !processing && !loadedData.BOT_TOKEN;
+
+  function normaliseData(data) {
+    if (!data.EVENT_CHANNELS) { data.EVENT_CHANNELS = {}; }
+    if (!data.LLM_API) { data.LLM_API = {}; }
+    if (!data.LLM_API.chatlog) { data.LLM_API.chatlog = {}; }
+    if (!data.LLM_API.chatlog.messages) {
+      data.LLM_API.chatlog.messages = [{ role: 'system' }, { role: 'user' }, null];
+    }
+    return data;
+  }
 
   function prevSection() {
     sectionIndex = sectionIndex <= 1 ? 3 : sectionIndex - 1;
@@ -47,7 +57,7 @@
         return response.json();
       })
       .then(function(json) {
-        loadedData = json;
+        loadedData = normaliseData(json);
         formData = JSON.parse(JSON.stringify(json));
       })
       .catch(function() { notifyError('Failed to load ServerLink Config.'); })
@@ -64,7 +74,7 @@
     </div>
   {/if}
   {#if !noHints}
-    <div class="block buttons is-right mb-0">
+    <div class="block buttons mb-2">
       <button id="serverLinkConfigSectionPrev" title="PREV" class="button is-dark is-small mr-0" on:click={prevSection}>
         <i class="fa fa-circle-chevron-left fa-xl"></i></button>
       <p class="mb-2 ml-3 mr-3">{sectionIndex} / 3</p>
@@ -107,19 +117,17 @@
        bind:value={formData.LLM_API.chatlog.model} disabled={processing}
        placeholder="deepseek-chat"
        title="Model to use for Chatlog AI summary feature" />
-    {#if formData.LLM_API.chatlog.messages.length > 0}
-      {#each formData.LLM_API.chatlog.messages as entry}
-        {#if entry && entry.role === 'system'}
-          <InputTextArea id="serverLinkConfigLlmApiChatlogSystemPrompt" label="AI Chatlog System Prompt"
-             bind:value={entry.content} disabled={processing}
-             title="System prompt to use for Chatlog AI summary feature" />
-        {:else if entry && entry.role === 'user'}
-          <InputTextArea id="serverLinkConfigLlmApiChatlogUserPrompt" label="AI Chatlog User Prompt"
-             bind:value={entry.content} disabled={processing}
-             title="User prompt to use for Chatlog AI summary feature" />
-        {/if}
-      {/each}
-    {/if}
+    {#each formData.LLM_API.chatlog.messages as entry}
+      {#if entry && entry.role === 'system'}
+        <InputTextArea id="serverLinkConfigLlmApiChatlogSystemPrompt" label="AI Chatlog System Prompt"
+           bind:value={entry.content} disabled={processing}
+           title="System prompt to use for Chatlog AI summary feature" />
+      {:else if entry && entry.role === 'user'}
+        <InputTextArea id="serverLinkConfigLlmApiChatlogUserPrompt" label="AI Chatlog User Prompt"
+           bind:value={entry.content} disabled={processing}
+           title="User prompt to use for Chatlog AI summary feature" />
+      {/if}
+    {/each}
   </div>
   <div class="block" class:is-hidden={sectionIndex != 3}>
     <InputTextArea id="serverLinkConfigWhitelistDM" label="Whitelist DM"
