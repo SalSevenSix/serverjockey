@@ -138,9 +138,10 @@ WantedBy=multi-user.target</CodeBlock>
 
   <p><span class="step-title"></span>
     Finally, Prometheus can now be configured to scrape metrics from both Node Exporter and ServerJockey.
-    Open the configuration file in a text editor and find the
+    <span class="has-text-weight-bold">DO NOT</span>
+    replace the entire config. Open the configuration file in a text editor and find the
     <span class="is-family-monospace notranslate">scrape_configs</span>
-    section at the end. Replace that whole section with the configuration shown below.
+    section at the end. Replace only that section with the configuration shown below.
   </p>
   <CodeBlock>sudo nano /home/prometheus/prometheus/prometheus.yml</CodeBlock>
   <CodeBlock>
