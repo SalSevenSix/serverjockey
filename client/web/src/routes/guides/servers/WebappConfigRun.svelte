@@ -32,16 +32,16 @@
     </tbody>
   </table>
   <p>
-    When ready, use the Start, Stop and Restart buttons to control your server.
+    Use the Start, Stop and Restart buttons to control your server as needed.
   </p>
-  <div class="columns">
+  <div class="columns is-gapless">
     <div class="column">
-      <figure class="image max-400 is-bordered">
+      <figure class="image max-400 is-bordered mb-2">
         <img src={surl('/assets/guides/games/set_auto.png')} alt="Set auto setting" loading="lazy" />
       </figure>
     </div>
     <div class="column">
-      <figure class="image max-400 is-bordered">
+      <figure class="image max-400 is-bordered mb-2">
         <img src={surl('/assets/guides/games/server_start.png')} alt="Start server" loading="lazy" />
       </figure>
     </div>

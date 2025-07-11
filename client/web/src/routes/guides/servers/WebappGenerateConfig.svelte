@@ -9,21 +9,21 @@
     Click the <span class="has-text-weight-bold">Start</span> button. Now wait for the server State
     to be STARTED, then click the <span class="has-text-weight-bold">Stop</span> button.
   </p>
-  <div class="columns is-gapless">
+  <div class="columns is-gapless is-desktop">
     <div class="column">
-      <figure class="image max-400 is-bordered ml-1 mr-1 mb-2">
+      <figure class="image max-400 is-bordered mb-2">
         <img src={surl('/assets/guides/games/server_ready.png')}
              alt="Run server to generate default config" loading="lazy" />
       </figure>
     </div>
     <div class="column">
-      <figure class="image max-400 is-bordered ml-1 mr-1 mb-2">
+      <figure class="image max-400 is-bordered mb-2">
         <img src={surl('/assets/guides/games/server_started.png')}
              alt="Stop started server" loading="lazy" />
       </figure>
     </div>
     <div class="column">
-      <figure class="image max-400 is-bordered ml-1 mr-1 mb-2">
+      <figure class="image max-400 is-bordered mb-2">
         <img src={surl('/assets/guides/games/server_stopped.png')}
              alt="Server stopped" loading="lazy" />
       </figure>
