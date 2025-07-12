@@ -371,8 +371,9 @@ class CommandProcessor:
         return True
 
     def _https(self, argument: str | None) -> bool:
-        argument = argument.lower() if argument else ''
-        enabled = None
+        if not argument:
+            return _dump_to_log(self._connection.get('/ssl'))
+        argument, enabled = argument.lower(), None
         if argument == 'true':
             enabled = True
         elif argument == 'false':
@@ -381,6 +382,7 @@ class CommandProcessor:
             logging.error('Invalid argument, use https:true or https:false')
             return False
         self._connection.post('/ssl', dict(enabled=enabled))
+        logging.info('Change takes effect after system restart')
         return True
 
     def _shutdown(self) -> bool:

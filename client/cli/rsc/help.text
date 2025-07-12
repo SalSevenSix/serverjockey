@@ -64,6 +64,6 @@ commands:
   exit-inactive:<seconds> | Exit if no player activity in previous <seconds>
   exit-pl-gt:<#>    | Exit if players greater than <#>
   exit-pl-lt:<#>    | Exit if players less or equal to <#>
-  delete            | Delete the current instance
   https:<enabled>   | HTTPS enable https:true or disable https:false
+  delete            | Delete the current instance
   shutdown          | Shutdown the ServerJockey system
