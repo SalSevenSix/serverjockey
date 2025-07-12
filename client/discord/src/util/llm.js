@@ -1,46 +1,59 @@
 import OpenAI from 'openai';
 import * as cutil from 'common/util/util';
+import * as logger from './logger.js';
 
-const llm = {
-  api: null, config: null,
+function staticResponse(delay, text) {
+  return async function() {
+    if (delay) { await cutil.sleep(delay); }
+    return text;
+  };
+}
 
-  summarize: async function(transcript) {
-    const messages = [];
-    llm.config.chatlog.messages.forEach(function(message) {
-      if (!message) { message = 'user'; }
-      if (cutil.isString(message)) {
-        if (cutil.isString(transcript)) { transcript = [transcript]; }
-        transcript.forEach(function(line) {
-          if (Array.isArray(line)) { line = line.join('\n'); }
-          messages.push({ role: message, content: line });
-        });
-      } else {
-        messages.push(message);
-      }
-    });
-    if (llm.config.chatlog.maxtokens) {
-      const tokens = 2 * messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
-      if (tokens > llm.config.chatlog.maxtokens) {
-        await cutil.sleep(1200);  // Allow discord to process waiting emoji first
-        return '⛔ Chat transcript too large, try a smaller time range.';
-      }
+const noApi = staticResponse(0, '⛔ LLM not configured for use');
+const noFeature = staticResponse(0, '⛔ This feature is not configured');
+const tooLarge = staticResponse(1200, '⛔ Request too large');
+
+async function requestChatCompletion(api, config, { input, gamename }) {
+  const request = { model: config.model, messages: [] };
+  config.messages.forEach(function(message) {
+    if (!message) { message = 'user'; }
+    if (cutil.isString(message)) {
+      if (cutil.isString(input)) { input = [input]; }
+      input.forEach(function(line) {
+        if (Array.isArray(line)) { line = line.join('\n'); }
+        request.messages.push({ role: message, content: line });
+      });
+    } else {
+      if (gamename) { message.content = message.content.replaceAll('{gamename}', gamename); }
+      request.messages.push(message);
     }
-    const request = { messages: messages, model: llm.config.chatlog.model };
-    if (llm.config.chatlog.temperature) { request.temperature = llm.config.chatlog.temperature; }
-    // TODO maybe set maxtoken in request?
-    const response = await llm.api.chat.completions.create(request);
-    let valid = response && response.choices && response.choices.length;
-    valid &&= response.choices[0].message && response.choices[0].message.content;
-    if (!valid) return '⛔ Invalid LLM response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
-    return response.choices[0].message.content;
+  });
+  if (config.maxtokens) {
+    const tokens = 2 * request.messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
+    if (tokens > config.maxtokens) return await tooLarge();
   }
-};
+  if (config.temperature) { request.temperature = config.temperature; }
+  // TODO maybe set maxtoken in request?
+  const response = await api.chat.completions.create(request);
+  let valid = response && response.choices && response.choices.length;
+  valid &&= response.choices[0].message && response.choices[0].message.content;
+  if (!valid) return '⛔ Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
+  return response.choices[0].message.content;
+}
 
-export function client(contextConfig) {
-  if (llm.api) return llm;
-  llm.config = contextConfig.LLM_API;
-  if (!llm.config || !llm.config.baseurl || !llm.config.apikey) return null;
-  if (!llm.config.chatlog || !llm.config.chatlog.model || !llm.config.chatlog.messages) return null;
-  llm.api = new OpenAI({ baseURL: llm.config.baseurl, apiKey: llm.config.apikey });
-  return llm;
+function buildChatCompletion(api, config) {
+  if (!config || !config.model || !config.messages) return noFeature;
+  return async function(data) { return await requestChatCompletion(api, config, data); };
+}
+
+export function newClient(config) {
+  const client = { chatlog: noApi };
+  if (config && config.baseurl && config.apikey) {
+    const api = new OpenAI({ baseURL: config.baseurl, apiKey: config.apikey });
+    logger.info('LLM API initialised using ' + config.baseurl);
+    client.chatlog = buildChatCompletion(api, config.chatlog);
+  } else {
+    logger.info('LLM API not configured');
+  }
+  return client;
 }

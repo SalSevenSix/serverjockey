@@ -13,18 +13,16 @@ function formatHeader(results, tzFlag) {
   return text;
 }
 
-async function formatSummary(contextConfig, results, tzFlag) {
+async function formatSummary(context, results, tzFlag) {
   const text = formatHeader(results, tzFlag);
   if (results.chat.length === 0) return text;
-  const llmClient = llm.client(contextConfig);
-  if (!llmClient) return '⛔ LLM not configured for use';
   results = results.chat.map(function(record) {
     if (!record.player) return null;
     return record.ats + ' ' + record.player + ': ' + record.text;
   });
   results = results.filter(function(line) { return line; });
   results = results.join('\n');
-  results = await llmClient.summarize(results);
+  results = await context.llmClient.chatlog({ input: results });
   results = util.textToArray(results);
   text.push(...results);
   return text;
@@ -75,7 +73,7 @@ export function chatlog({ context, httptool, instance, message, data }) {
         msgutil.sendTextOrFile(message, formatVerbose(results, tz), 'chat');
       } else if (format === 'SUMMARY') {
         msgutil.reactWait(message);
-        formatSummary(context.config, results, tz)
+        formatSummary(context, results, tz)
           .then(function(text) {
             msgutil.rmReacts(message, msgutil.reactSuccess, logger.error);
             msgutil.sendTextOrFile(message, text, 'chat', 3, false);

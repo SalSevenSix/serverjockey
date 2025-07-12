@@ -5,6 +5,7 @@ import * as cutil from 'common/util/util';
 import * as util from './util/util.js';
 import * as logger from './util/logger.js';
 import * as msgutil from './util/msgutil.js';
+import * as llm from './util/llm.js';
 import * as http from './util/http.js';
 import * as system from './system.js';
 import * as instances from './instances.js';
@@ -129,6 +130,7 @@ export function main() {
   context.controller = new AbortController();
   context.signal = context.controller.signal;
   context.instancesService = new instances.Service(context);
+  context.llmClient = llm.newClient(context.config.LLM_API);
   context.client = new Client({
     intents: [
       GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages,
