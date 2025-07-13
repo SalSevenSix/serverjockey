@@ -8,7 +8,7 @@ import * as commons from '../commons.js';
 export const startup = commons.startupAll;
 export const { server, auto, log, getconfig, setconfig, deployment, players,
   alias, reward, trigger, activity, chatlog } = commons;
-export const ziri = commons.chatbot('Project Zomboid');
+export const ziri = commons.chatbot;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PROJECT ZOMBOID COMMANDS')

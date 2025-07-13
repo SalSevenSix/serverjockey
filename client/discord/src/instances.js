@@ -9,12 +9,24 @@ import * as rewardsvc from './instances/rewardsvc.js';
 import * as triggersvc from './instances/triggersvc.js';
 import * as servers from './servers.js';
 
+async function fetchJson(context, url) {
+  return await fetch(url, util.newGetRequest(context.config.SERVER_TOKEN))
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      return response.json();
+    })
+    .then(function(json) { return json; })
+    .catch(logger.error);
+}
+
 export class Service {
   #context;
 
-  #current = null;
+  #modules = {};
 
   #instances = {};
+
+  #current = null;
 
   constructor(context) {
     this.#context = context;
@@ -23,14 +35,9 @@ export class Service {
   async startup(channels) {
     const [self, context] = [this, this.#context];
     const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATADIR + '/current.json'];
-    const instances = await fetch(baseurl + '/instances', util.newGetRequest(context.config.SERVER_TOKEN))
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) { return json; })
-      .catch(logger.error);
-    [this.#instances, this.#current] = [instances, util.getFirstKey(instances)];
+    const [modules, instances] = await Promise.all([
+      fetchJson(context, baseurl + '/modules'), fetchJson(context, baseurl + '/instances')]);
+    [this.#modules, this.#instances, this.#current] = [modules, instances, util.getFirstKey(instances)];
     if (fs.existsSync(currentFile)) {
       const currentData = JSON.parse(fs.readFileSync(currentFile));
       if (currentData && cutil.hasProp(instances, currentData.instance)) { this.#current = currentData.instance; }
@@ -84,14 +91,24 @@ export class Service {
   }
 
   getData(instance) {
-    if (!instance) return null;
-    if (!cutil.hasProp(this.#instances, instance)) return null;
+    if (!instance || !cutil.hasProp(this.#instances, instance)) return null;
     return this.#instances[instance];
+  }
+
+  getModule(instance) {
+    const instanceData = this.getData(instance);
+    return instanceData ? instanceData.module : null;
+  }
+
+  getModuleName(instance) {
+    const module = this.getModule(instance);
+    if (!module || !cutil.hasProp(this.#modules, module)) return null;
+    return this.#modules[module];
   }
 
   getInstancesText() {
     if (Object.keys(this.#instances).length === 0) return ['No instances found'];
-    const [result, currentInstance] = [[], this.#context.instancesService.currentInstance()];
+    const [result, currentInstance] = [[], this.currentInstance()];
     for (const [identity, data] of Object.entries(this.#instances)) {
       result.push((identity === currentInstance ? '=> ' : '   ') + identity + ' (' + data.module + ')');
     }

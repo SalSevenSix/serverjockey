@@ -5,7 +5,7 @@ import signal
 from core.util import shellutil
 
 
-def pid_self():
+def pid_self() -> int:
     return os.getpid()
 
 
