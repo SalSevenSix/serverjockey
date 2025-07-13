@@ -3,8 +3,7 @@ import * as msgutil from '../util/msgutil.js';
 
 export function send({ httptool, message, data }) {
   if (data.length === 0) return msgutil.reactUnknown(message);
-  let line = message.content;
-  line = line.slice(line.indexOf(' ')).trim();
+  const line = msgutil.extractCommandLine(message);
   httptool.doPost('/console/send', { line: line }, function(text) {
     if (!text) return msgutil.reactSuccess(message);
     msgutil.sendText(message, text);
@@ -13,9 +12,8 @@ export function send({ httptool, message, data }) {
 
 export function say({ context, httptool, message, data }) {
   if (data.length === 0) return msgutil.reactUnknown(message);
-  let [name, line] = [message.member.user.tag, message.content];
-  name = '@' + name.split('#')[0];
-  line = line.slice(line.indexOf(' ')).trim();
+  const name = msgutil.extractUserTag(message);
+  const line = msgutil.extractCommandLine(message);
   httptool.doPost(
     '/console/say', { player: name, text: line },
     function() { message.react('💬'); },

@@ -21,10 +21,10 @@
   function normaliseData(data) {
     if (!data.EVENT_CHANNELS) { data.EVENT_CHANNELS = {}; }
     if (!data.LLM_API) { data.LLM_API = {}; }
+    if (!data.LLM_API.chatbot) { data.LLM_API.chatbot = {}; }
+    if (!data.LLM_API.chatbot.messages) { data.LLM_API.chatbot.messages = [{ role: 'system' }]; }
     if (!data.LLM_API.chatlog) { data.LLM_API.chatlog = {}; }
-    if (!data.LLM_API.chatlog.messages) {
-      data.LLM_API.chatlog.messages = [{ role: 'system' }, { role: 'user' }, null];
-    }
+    if (!data.LLM_API.chatlog.messages) { data.LLM_API.chatlog.messages = [{ role: 'system' }, { role: 'user' }]; }
     return data;
   }
 
@@ -108,24 +108,32 @@
   <div class="block" class:is-hidden={sectionIndex != 2}>
     <InputText id="serverLinkConfigLlmApiBaseurl" label="AI Service URL"
        bind:value={formData.LLM_API.baseurl} disabled={processing}
-       placeholder="https://api.deepseek.com"
-       title="Service base URL to use for AI features" />
+       placeholder="https://api.deepseek.com" title="OpenAI compatible URL endpoint to use for AI features" />
     <InputPassword id="serverLinkConfigLlmApiToken" label="AI Token"
        bind:value={formData.LLM_API.apikey} disabled={processing}
        title="Login token (api key) for AI service" />
+    <InputText id="serverLinkConfigLlmApiChatbotModel" label="AI Chatbot Model"
+       bind:value={formData.LLM_API.chatbot.model} disabled={processing}
+       placeholder="deepseek-chat" title="Model to use for Chatbot AI feature" />
+    {#each formData.LLM_API.chatbot.messages as entry}
+      {#if entry && entry.role === 'system'}
+        <InputTextArea id="serverLinkConfigLlmApiChatbotSystemPrompt" label="AI Chatbot System Prompt"
+           bind:value={entry.content} disabled={processing}
+           title="System prompt to use for Chatbot AI feature" />
+      {/if}
+    {/each}
     <InputText id="serverLinkConfigLlmApiChatlogModel" label="AI Chatlog Model"
        bind:value={formData.LLM_API.chatlog.model} disabled={processing}
-       placeholder="deepseek-chat"
-       title="Model to use for Chatlog AI summary feature" />
+       placeholder="deepseek-chat" title="Model to use for Chatlog summary AI feature" />
     {#each formData.LLM_API.chatlog.messages as entry}
       {#if entry && entry.role === 'system'}
         <InputTextArea id="serverLinkConfigLlmApiChatlogSystemPrompt" label="AI Chatlog System Prompt"
            bind:value={entry.content} disabled={processing}
-           title="System prompt to use for Chatlog AI summary feature" />
+           title="System prompt to use for Chatlog summary AI feature" />
       {:else if entry && entry.role === 'user'}
         <InputTextArea id="serverLinkConfigLlmApiChatlogUserPrompt" label="AI Chatlog User Prompt"
            bind:value={entry.content} disabled={processing}
-           title="User prompt to use for Chatlog AI summary feature" />
+           title="User prompt to use for Chatlog summary AI feature" />
       {/if}
     {/each}
   </div>

@@ -111,6 +111,21 @@ def delete_dict_by_value(dictionary: dict, value: any) -> dict:
     return result
 
 
+def keyfill_dict(dictionary: dict, template: dict, deep: bool = False) -> dict:
+    result, changed = {}, False
+    for key, value in dictionary.items():
+        result[key] = value
+    for key, value in template.items():
+        if key not in result:
+            changed = True
+            result[key] = value
+        elif deep and isinstance(result[key], dict) and isinstance(value, dict):
+            value_dict = keyfill_dict(result[key], value, deep)
+            changed = value_dict is not result[key]
+            result[key] = value_dict
+    return result if changed else dictionary
+
+
 def lchop(value: str, keyword: str, strip: bool = True) -> str:
     index = value.find(keyword)
     if index == -1:

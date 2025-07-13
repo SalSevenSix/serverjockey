@@ -44,6 +44,21 @@ class TestCoreUtilUtil(unittest.TestCase):
         self.assertEqual('https://foo.bar:6164/aaa/bbb',
                          util.build_url(scheme='https', host='foo.bar', port=6164, path='/aaa/bbb'))
 
+    def test_keyfill_dict(self):
+        template = dict(numb=123, text='abc', data=dict(aaa=123, bbb='xyz'))
+        dictionary = dict(numb=456, text='xyz', data=dict(aaa=789, bbb='gjh'))
+        actual = util.keyfill_dict(dictionary, template, True)
+        self.assertIs(dictionary, actual, 'No change')
+        dictionary = dict(numb=456, data=dict(bbb='gjh'))
+        actual = util.keyfill_dict(dictionary, template, True)
+        expected = dict(numb=456, data=dict(bbb='gjh', aaa=123), text='abc')
+        self.assertIsNot(expected, actual, 'Deep copy is not')
+        self.assertEqual(expected, actual, 'Deep copy equals')
+        actual = util.keyfill_dict(dictionary, template, False)
+        expected = dict(numb=456, data=dict(bbb='gjh'), text='abc')
+        self.assertIsNot(expected, actual, 'Shallow copy is not')
+        self.assertEqual(expected, actual, 'Shallow copy equals')
+
     def test_lchop(self):
         self.assertEqual('', util.lchop('', ''))
         self.assertEqual('hey yo }) the end bit', util.lchop('Hello world ({ hey yo }) the end bit ', '({'))

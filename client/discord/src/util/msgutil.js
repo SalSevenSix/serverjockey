@@ -7,6 +7,18 @@ function reactTo(message, emoji, retval = null) {
   return retval;
 }
 
+export function extractCommandLine(message) {
+  let result = message.content;
+  result = result.slice(result.indexOf(' ')).trim();
+  return result;
+}
+
+export function extractUserTag(message) {
+  let result = message.member.user.tag;
+  result = '@' + result.split('#')[0];
+  return result;
+}
+
 export function checkHasRole(message, roles) {
   let hasRole = roles.includes('everyone');
   if (!hasRole && roles.length > 0) {

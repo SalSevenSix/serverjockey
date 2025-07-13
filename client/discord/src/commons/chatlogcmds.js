@@ -3,7 +3,6 @@ import * as cstats from 'common/activity/chat';
 import * as logger from '../util/logger.js';
 import * as util from '../util/util.js';
 import * as msgutil from '../util/msgutil.js';
-import * as llm from '../util/llm.js';
 
 function formatHeader(results, tzFlag) {
   const text = [['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tzFlag),
@@ -77,9 +76,6 @@ export function chatlog({ context, httptool, instance, message, data }) {
           .then(function(text) {
             msgutil.rmReacts(message, msgutil.reactSuccess, logger.error);
             msgutil.sendTextOrFile(message, text, 'chat', 3, false);
-          })
-          .catch(function(error) {
-            msgutil.rmReacts(message, function() { logger.error(error, message); }, logger.error);
           });
       } else {
         msgutil.sendText(message, 'Invalid arguments');

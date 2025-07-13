@@ -9,9 +9,9 @@ function staticResponse(delay, text) {
   };
 }
 
-const noApi = staticResponse(0, '⛔ LLM not configured for use');
-const noFeature = staticResponse(0, '⛔ This feature is not configured');
-const tooLarge = staticResponse(1200, '⛔ Request too large');
+const noApi = staticResponse(1000, '⛔ LLM not configured for use');
+const noFeature = staticResponse(1000, '⛔ This feature is not configured');
+const tooLarge = staticResponse(1000, '⛔ Request too large');
 
 async function requestChatCompletion(api, config, { input, gamename }) {
   const request = { model: config.model, messages: [] };
@@ -47,13 +47,14 @@ function buildChatCompletion(api, config) {
 }
 
 export function newClient(config) {
-  const client = { chatlog: noApi };
+  const client = { chatlog: noApi, chatbot: noApi };
   if (config && config.baseurl && config.apikey) {
     const api = new OpenAI({ baseURL: config.baseurl, apiKey: config.apikey });
-    logger.info('LLM API initialised using ' + config.baseurl);
+    logger.info('LLM Client initialised on endpoint ' + config.baseurl);
     client.chatlog = buildChatCompletion(api, config.chatlog);
+    client.chatbot = buildChatCompletion(api, config.chatbot);
   } else {
-    logger.info('LLM API not configured');
+    logger.info('LLM Client not configured');
   }
   return client;
 }

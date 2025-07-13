@@ -20,25 +20,30 @@ _SERVER_STARTED_FILTER = msgftr.And(
 
 
 def _default_config() -> dict:
-    llm_system = 'You are a helpful assistant that summarizes conversations concisely.'
-    llm_user = ('Summarize the following transcript between players in a video game.'
-                ' Identify separate conversations and provide a brief summary of each.'
-                ' Each summary should include the names of all the players involved.'
-                ' Try to keep the word count of the summaries less than the conversation itself.'
-                ' Ignore messages from players that do not have any responses from other players.'
-                ' Don\'t provide a Key Points section, just generate conversation summaries.')
+    clsys = 'You are a helpful assistant that summarizes conversations concisely.'
+    clusr = ('Summarize the following transcript between players in a video game.'
+             ' Identify separate conversations and provide a brief summary of each.'
+             ' Each summary should include the names of all the players involved.'
+             ' Try to keep the word count of the summaries less than the conversation itself.'
+             ' Ignore messages from players that do not have any responses from other players.'
+             ' Don\'t provide a Key Points section, just generate conversation summaries.')
+    cbsys = ('You are a helpful assistant with expert knowledge about the game \'{gamename}\'.'
+             ' You will answer questions strictly based on the game’s lore, mechanics, and world.'
+             ' If a question is outside of {gamename}, politely say you cannot help.')
     return {
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',
         'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
-        'LLM_API': {'baseurl': None, 'apikey': None, 'chatlog': {
-            'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
-                {'role': 'system', 'content': llm_system},
-                {'role': 'user', 'content': llm_user},
-                None
-            ]
-        }}
+        'LLM_API': {
+            'baseurl': None, 'apikey': None,
+            'chatlog': {'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
+                {'role': 'system', 'content': clsys}, {'role': 'user', 'content': clusr}, None
+            ]},
+            'chatbot': {'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
+                {'role': 'system', 'content': cbsys}, None
+            ]}
+        }
     }
 
 
@@ -54,7 +59,12 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        if not await io.file_exists(self._config):
+        if await io.file_exists(self._config):
+            loaded_config = objconv.json_to_dict(await io.read_file(self._config))
+            filled_config = util.keyfill_dict(loaded_config, _default_config(), True)
+            if filled_config is not loaded_config:
+                await io.write_file(self._config, objconv.obj_to_json(filled_config))
+        else:
             await io.write_file(self._config, objconv.obj_to_json(_default_config()))
         await self._server_factory.initialise()
         await mtxinstance.initialise(self._context, players=False, error_filter=_ERROR_FILTER)
