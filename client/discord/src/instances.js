@@ -106,6 +106,10 @@ export class Service {
     return this.#modules[module];
   }
 
+  getModulesText() {
+    return Object.keys(this.#modules);
+  }
+
   getInstancesText() {
     if (Object.keys(this.#instances).length === 0) return ['No instances found'];
     const [result, currentInstance] = [[], this.currentInstance()];

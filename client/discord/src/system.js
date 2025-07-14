@@ -36,10 +36,9 @@ export function system({ httptool }) {
   });
 }
 
-export function modules({ httptool }) {
-  httptool.doGet('/modules', function(body) {
-    return Object.keys(body);
-  });
+export function modules({ context, message }) {
+  if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
+  msgutil.sendText(message, context.instancesService.getModulesText());
 }
 
 export function instances({ context, message }) {
