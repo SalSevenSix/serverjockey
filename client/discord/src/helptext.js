@@ -51,6 +51,8 @@ const sayHelp = 'say {text}         : Send chat message to players';
 const sendHelp = 'send {line}        : Send command to server console';
 const helpSend = '/console/help';
 
+const chatHelp = 'chat {text}        : Chat with the AI game assistant';
+
 const deploymentHelp = [
   'deployment backup-world {hours} : Backup game world to zip file',
   'deployment wipe-world-save      : Delete only game save files',
@@ -237,6 +239,7 @@ export function newServerHelpBuilder() {
   self.addPlayers = function() { return self.add(playersHelp); };
   self.addSay = function() { return self.add(sayHelp); };
   self.addSend = function() { return self.addHelp(sendHelp, helpSend).add(sendHelp); };
+  self.addChat = function() { return self.add(chatHelp); };
   self.addAlias = function() { return self.addHelp(aliasHelp, helpAlias).add(aliasHelp); };
   self.addReward = function() { return self.addHelp(rewardHelp, helpReward).add(rewardHelp); };
   self.addTrigger = function() { return self.addHelp(triggerHelp, helpTrigger).add(triggerHelp); };

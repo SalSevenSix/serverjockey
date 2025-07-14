@@ -1,8 +1,28 @@
 import * as cutil from 'common/util/util';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
 import * as subs from '../util/subs.js';
 
 const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
+
+function newChatbotHandler(context, instance, url) {
+  // TODO locking? requests should be serial
+  const player = context.config.CMD_PREFIX.startsWith('|') ? '>' : '|';
+  const gamename = context.instancesService.getModuleName(instance);
+  return function(playerName, input) {
+    if (!input || !input.startsWith(context.config.CMD_PREFIX)) return;
+    input = input.slice(context.config.CMD_PREFIX.length).trim();
+    logger.info('AI| ' + playerName + ' (' + instance + ') : ' + input);
+    context.llmClient.chatbot({ input, gamename }).then(function(text) {
+      const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
+      request.body = JSON.stringify({ player, text });
+      fetch(url + '/console/say', request)
+        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .catch(logger.error);
+    });
+  };
+}
 
 /* eslint-disable max-depth */
 /* eslint-disable complexity */
@@ -132,7 +152,7 @@ function newTriggerHandler(context, channels, instance, triggers) {
 /* eslint-enable max-depth */
 
 
-function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler) {
+function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler) {
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     if (json.event === 'CLEAR') {
       if (triggerHandler) { triggerHandler(json.event); }
@@ -143,6 +163,7 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
     const playerAlias = aliases.findByName(playerName);
     if (playerAlias) { playerName += ' `@' + playerAlias.discordid + '`'; }
     if (json.event === 'CHAT') {
+      if (chatbotHandler) { chatbotHandler(playerName, json.text); }
       if (!channels.chat) return true;
       channels.chat.send('`' + instance + '` 💬 ' + playerName + ': ' + json.text);
       return true;
@@ -191,10 +212,11 @@ export function startupServerOnly({ context, channels, instance, url, triggers }
 export function startupAll({ context, channels, instance, url, triggers, aliases }) {
   const triggerHandler = channels.server || channels.login
     ? newTriggerHandler(context, channels, instance, triggers) : null;
+  const chatbotHandler = newChatbotHandler(context, instance, url);  // TODO consider when not supported for instance
   if (channels.server) {
     startServerEvents(context, channels, instance, url, triggerHandler);
   }
   if (channels.login || channels.chat) {
-    startPlayerEvents(context, channels, instance, url, aliases, triggerHandler);
+    startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler);
   }
 }

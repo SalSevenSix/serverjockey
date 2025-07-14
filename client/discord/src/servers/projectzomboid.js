@@ -6,13 +6,12 @@ import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
-export const { server, auto, log, getconfig, setconfig, deployment, players,
+export const { server, auto, log, getconfig, setconfig, deployment, players, chat,
   alias, reward, trigger, activity, chatlog } = commons;
-export const ziri = commons.chatbot;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PROJECT ZOMBOID COMMANDS')
-  .addServer(true, true)
+  .addServer(true, true).addChat()
   .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .add([
     'world save                : Save the game world',

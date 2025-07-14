@@ -3,11 +3,11 @@ import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 
 export const startup = commons.startupServerOnly;
-export const { server, auto, log, getconfig, setconfig, deployment, send } = commons;
+export const { server, auto, log, getconfig, setconfig, deployment, chat, send } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PALWORLD COMMANDS')
-  .addServer().addPlayers().addSend()
+  .addServer().addPlayers().addChat().addSend()
   .addConfig(['cmdargs', 'Settings']).addDeployment()
   .build();
 

@@ -24,7 +24,10 @@ async function requestChatCompletion(api, config, { input, gamename }) {
         request.messages.push({ role: message, content: line });
       });
     } else {
-      if (gamename) { message.content = message.content.replaceAll('{gamename}', gamename); }
+      if (gamename) {
+        message = JSON.parse(JSON.stringify(message));
+        message.content = message.content.replaceAll('{gamename}', gamename);
+      }
       request.messages.push(message);
     }
   });

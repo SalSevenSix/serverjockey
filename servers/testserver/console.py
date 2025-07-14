@@ -15,4 +15,4 @@ load {processors} {seconds}
 
 def resources(mailer: msgabc.MulticastMailer, resource: httprsc.WebResource):
     builder = svrhelpers.ConsoleResourceBuilder(mailer, resource).psh_console()
-    builder.put_help(_HELP_TEXT).put_send_pipein()
+    builder.put_help(_HELP_TEXT).put_send_pipein().put_say_pipein('say {player} {line}')
