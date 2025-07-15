@@ -6,20 +6,35 @@ import * as subs from '../util/subs.js';
 const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
 
-function newChatbotHandler(context, instance, url) {
-  // TODO locking? requests should be serial
-  const gamename = context.instancesService.getModuleName(instance);
+function newChatbotHandler(context, channel, instance, url) {
+  const state = { gamename: null, busy: false };
+
+  const notify = function(text) {
+    if (channel) { channel.send('`' + instance + '` *' + text + '*'); }
+  };
+
+  fetch(url + '/console/say', util.newPostRequest('application/json', context.config.SERVER_TOKEN))
+    .then(function(response) {
+      if ([200, 204, 400, 409].includes(response.status)) {  // This confirms the Say service is available
+        state.gamename = context.instancesService.getModuleName(instance);
+      }
+    })
+    .catch(logger.error);
+
   return function(playerName, input) {
-    if (!input || !input.startsWith(context.config.CMD_PREFIX)) return;
+    if (!state.gamename || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
+    if (state.busy) return notify('Chatbot is busy!');
+    state.busy = true;
     input = input.slice(context.config.CMD_PREFIX.length).trim();
-    logger.info('AI| ' + playerName + ' (' + instance + ') : ' + input);
-    context.llmClient.chatbot({ input, gamename }).then(function(text) {
-      const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
-      request.body = JSON.stringify({ player: '@', text: text });
-      fetch(url + '/console/say', request)
-        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-        .catch(logger.error);
-    });
+    context.llmClient.chatbot({ input: input, gamename: state.gamename })
+      .then(function(text) {
+        const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
+        request.body = JSON.stringify({ player: '@', text: text });
+        fetch(url + '/console/say', request)
+          .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+          .catch(logger.error);
+      })
+      .finally(function() { state.busy = false; });
   };
 }
 
@@ -211,7 +226,7 @@ export function startupServerOnly({ context, channels, instance, url, triggers }
 export function startupAll({ context, channels, instance, url, triggers, aliases }) {
   const triggerHandler = channels.server || channels.login
     ? newTriggerHandler(context, channels, instance, triggers) : null;
-  const chatbotHandler = newChatbotHandler(context, instance, url);  // TODO consider when not supported for instance
+  const chatbotHandler = newChatbotHandler(context, channels.chat, instance, url);
   if (channels.server) {
     startServerEvents(context, channels, instance, url, triggerHandler);
   }

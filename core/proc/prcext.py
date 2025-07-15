@@ -42,7 +42,9 @@ class SayHandler(httpabc.PostHandler):
     async def handle_post(self, resource, data):
         player, text = util.get('player', data), util.get('text', data)
         player, text = player.strip() if player else player, text.strip() if text else text
-        if not text or not player:
+        if not text:
+            return httpabc.ResponseBody.NO_CONTENT
+        if not player:
             return httpabc.ResponseBody.BAD_REQUEST
         lines = util.split_lines(text, lines_limit=30, total_char_limit=1000)  # Limit was 5 / 280
         if not lines:
