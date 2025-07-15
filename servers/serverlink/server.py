@@ -19,6 +19,17 @@ _SERVER_STARTED_FILTER = msgftr.And(
     msgftr.DataStrContains('ServerLink Bot has STARTED'))
 
 
+def _migrate_config(config) -> dict:
+    element = util.get('LLM_API', config)
+    if element:
+        element = util.get('chatlog', element)
+        if element:
+            element = util.get('messages', element)
+            if element:
+                del config['LLM_API']
+    return config
+
+
 def _default_config() -> dict:
     clsys = 'You are a helpful assistant that summarizes conversations concisely.'
     clusr = ('Summarize the following transcript between players in a video game.'
@@ -26,7 +37,8 @@ def _default_config() -> dict:
              ' Each summary should include the names of all the players involved.'
              ' Try to keep the word count of the summaries less than the conversation itself.'
              ' Ignore messages from players that do not have any responses from other players.'
-             ' Don\'t provide a Key Points section, just generate conversation summaries.')
+             ' Don\'t provide a Key Points section, just generate conversation summaries.'
+             '\n\n{content}')
     cbsys = ('You are a helpful assistant with expert knowledge about the game \'{gamename}\'.'
              ' You will answer questions strictly based on the game’s lore, mechanics, and world.'
              ' If a question is outside of {gamename}, politely say you cannot help.')
@@ -37,12 +49,8 @@ def _default_config() -> dict:
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
         'LLM_API': {
             'baseurl': None, 'apikey': None,
-            'chatlog': {'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
-                {'role': 'system', 'content': clsys}, {'role': 'user', 'content': clusr}, None
-            ]},
-            'chatbot': {'model': None, 'temperature': None, 'maxtokens': None, 'messages': [
-                {'role': 'system', 'content': cbsys}, None
-            ]}
+            'chatlog': {'model': None, 'temperature': None, 'maxtokens': None, 'system': clsys, 'user': clusr},
+            'chatbot': {'model': None, 'temperature': None, 'maxtokens': None, 'system': cbsys}
         }
     }
 
@@ -61,6 +69,7 @@ class Server(svrabc.Server):
     async def initialise(self):
         if await io.file_exists(self._config):
             loaded_config = objconv.json_to_dict(await io.read_file(self._config))
+            loaded_config = _migrate_config(loaded_config)  # Remove someday
             filled_config = util.keyfill_dict(loaded_config, _default_config(), True)
             if filled_config is not loaded_config:
                 await io.write_file(self._config, objconv.obj_to_json(filled_config))

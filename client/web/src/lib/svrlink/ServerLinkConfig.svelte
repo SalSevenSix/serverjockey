@@ -22,9 +22,7 @@
     if (!data.EVENT_CHANNELS) { data.EVENT_CHANNELS = {}; }
     if (!data.LLM_API) { data.LLM_API = {}; }
     if (!data.LLM_API.chatbot) { data.LLM_API.chatbot = {}; }
-    if (!data.LLM_API.chatbot.messages) { data.LLM_API.chatbot.messages = [{ role: 'system' }]; }
     if (!data.LLM_API.chatlog) { data.LLM_API.chatlog = {}; }
-    if (!data.LLM_API.chatlog.messages) { data.LLM_API.chatlog.messages = [{ role: 'system' }, { role: 'user' }]; }
     return data;
   }
 
@@ -37,6 +35,9 @@
   }
 
   function save() {
+    if (formData.CMD_PREFIX && formData.CMD_PREFIX.startsWith('@')) {
+      return notifyError('Command Prefix cannot start with "@"');
+    }
     processing = true;
     const request = newPostRequest('text/plain');
     request.body = JSON.stringify(formData);
@@ -88,7 +89,7 @@
        title="Login token for the discord bot" />
     <InputText id="serverLinkConfigCommandPrefix" label="Command Prefix"
        bind:value={formData.CMD_PREFIX} disabled={processing}
-       title="Prefix the bot will recognise as commands, more than one character is allowed" />
+       title="Prefix the bot will recognise as commands, more than one character is allowed, '@' not allowed" />
     <InputText id="serverLinkConfigAdminRoles" label="Admin Roles"
        bind:value={formData.ADMIN_ROLE} disabled={processing}
        title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
@@ -115,27 +116,18 @@
     <InputText id="serverLinkConfigLlmApiChatbotModel" label="AI Chatbot Model"
        bind:value={formData.LLM_API.chatbot.model} disabled={processing}
        placeholder="deepseek-chat" title="Model to use for Chatbot AI feature" />
-    {#each formData.LLM_API.chatbot.messages as entry}
-      {#if entry && entry.role === 'system'}
-        <InputTextArea id="serverLinkConfigLlmApiChatbotSystemPrompt" label="AI Chatbot System Prompt"
-           bind:value={entry.content} disabled={processing}
-           title="System prompt to use for Chatbot AI feature" />
-      {/if}
-    {/each}
+    <InputTextArea id="serverLinkConfigLlmApiChatbotSystemPrompt" label="AI Chatbot System Prompt"
+       bind:value={formData.LLM_API.chatbot.system} disabled={processing}
+       title="System prompt to use for Chatbot AI feature" />
     <InputText id="serverLinkConfigLlmApiChatlogModel" label="AI Chatlog Model"
        bind:value={formData.LLM_API.chatlog.model} disabled={processing}
        placeholder="deepseek-chat" title="Model to use for Chatlog summary AI feature" />
-    {#each formData.LLM_API.chatlog.messages as entry}
-      {#if entry && entry.role === 'system'}
-        <InputTextArea id="serverLinkConfigLlmApiChatlogSystemPrompt" label="AI Chatlog System Prompt"
-           bind:value={entry.content} disabled={processing}
-           title="System prompt to use for Chatlog summary AI feature" />
-      {:else if entry && entry.role === 'user'}
-        <InputTextArea id="serverLinkConfigLlmApiChatlogUserPrompt" label="AI Chatlog User Prompt"
-           bind:value={entry.content} disabled={processing}
-           title="User prompt to use for Chatlog summary AI feature" />
-      {/if}
-    {/each}
+    <InputTextArea id="serverLinkConfigLlmApiChatlogSystemPrompt" label="AI Chatlog System Prompt"
+       bind:value={formData.LLM_API.chatlog.system} disabled={processing}
+       title="System prompt to use for Chatlog summary AI feature" />
+    <InputTextArea id="serverLinkConfigLlmApiChatlogUserPrompt" label="AI Chatlog User Prompt"
+       bind:value={formData.LLM_API.chatlog.user} disabled={processing}
+       title="User prompt to use for Chatlog summary AI feature" />
   </div>
   <div class="block" class:is-hidden={sectionIndex != 3}>
     <InputTextArea id="serverLinkConfigWhitelistDM" label="Whitelist DM"

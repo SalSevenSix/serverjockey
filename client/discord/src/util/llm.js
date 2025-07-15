@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import * as cutil from 'common/util/util';
+import * as util from './util.js';
 import * as logger from './logger.js';
 
 function staticResponse(delay, text) {
@@ -15,28 +16,21 @@ const tooLarge = staticResponse(1000, '⛔ Request too large');
 
 async function requestChatCompletion(api, config, { input, gamename }) {
   const request = { model: config.model, messages: [] };
-  config.messages.forEach(function(message) {
-    if (!message) { message = 'user'; }
-    if (cutil.isString(message)) {
-      if (cutil.isString(input)) { input = [input]; }
-      input.forEach(function(line) {
-        if (Array.isArray(line)) { line = line.join('\n'); }
-        request.messages.push({ role: message, content: line });
-      });
-    } else {
-      if (gamename) {
-        message = JSON.parse(JSON.stringify(message));
-        message.content = message.content.replaceAll('{gamename}', gamename);
-      }
-      request.messages.push(message);
-    }
-  });
+  let content = null;
+  if (config.system) {
+    content = config.system.replaceAll('{gamename}', gamename);
+    request.messages.push({ role: 'system', content: content });
+  }
+  content = util.arrayToText(input);
+  if (config.user) { content = config.user.replace('{content}', content); }
+  request.messages.push({ role: 'user', content: content });
   if (config.maxtokens) {
     const tokens = 2 * request.messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
     if (tokens > config.maxtokens) return await tooLarge();
   }
   if (config.temperature) { request.temperature = config.temperature; }
   // TODO maybe set maxtoken in request?
+  console.log(request);  // TODO debug
   const response = await api.chat.completions.create(request);
   let valid = response && response.choices && response.choices.length;
   valid &&= response.choices[0].message && response.choices[0].message.content;
@@ -45,7 +39,7 @@ async function requestChatCompletion(api, config, { input, gamename }) {
 }
 
 function buildChatCompletion(api, config) {
-  if (!config || !config.model || !config.messages) return noFeature;
+  if (!config || !config.model) return noFeature;
   return async function(data) { return await requestChatCompletion(api, config, data); };
 }
 

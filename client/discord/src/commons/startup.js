@@ -8,7 +8,6 @@ const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-deat
 
 function newChatbotHandler(context, instance, url) {
   // TODO locking? requests should be serial
-  const player = context.config.CMD_PREFIX.startsWith('|') ? '>' : '|';
   const gamename = context.instancesService.getModuleName(instance);
   return function(playerName, input) {
     if (!input || !input.startsWith(context.config.CMD_PREFIX)) return;
@@ -16,7 +15,7 @@ function newChatbotHandler(context, instance, url) {
     logger.info('AI| ' + playerName + ' (' + instance + ') : ' + input);
     context.llmClient.chatbot({ input, gamename }).then(function(text) {
       const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
-      request.body = JSON.stringify({ player, text });
+      request.body = JSON.stringify({ player: '@', text: text });
       fetch(url + '/console/say', request)
         .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
         .catch(logger.error);
