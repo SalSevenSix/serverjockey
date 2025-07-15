@@ -32,15 +32,15 @@ def _migrate_config(config) -> dict:
 
 def _default_config() -> dict:
     clsys = 'You are a helpful assistant that summarizes conversations concisely.'
-    clusr = ('Summarize the following transcript between players in a video game.'
+    clusr = ('Summarize the following transcript between players in the game \'{gamename}\'.'
              ' Identify separate conversations and provide a brief summary of each.'
              ' Each summary should include the names of all the players involved.'
-             ' Try to keep the word count of the summaries less than the conversation itself.'
              ' Ignore messages from players that do not have any responses from other players.'
-             ' Don\'t provide a Key Points section, just generate conversation summaries.'
+             ' Do not include a Key Points section, just provide conversation summaries.'
              '\n\n{content}')
     cbsys = ('You are a helpful assistant with expert knowledge about the game \'{gamename}\'.'
-             ' You will answer questions strictly based on the game’s lore, mechanics, and world.'
+             ' You will answer questions strictly based on the game lore, mechanics, and world.'
+             ' Keep the responses concise unless asked otherwise.',
              ' If a question is outside of {gamename}, politely say you cannot help.')
     return {
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',

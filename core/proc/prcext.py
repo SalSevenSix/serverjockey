@@ -46,7 +46,10 @@ class SayHandler(httpabc.PostHandler):
             return httpabc.ResponseBody.NO_CONTENT
         if not player:
             return httpabc.ResponseBody.BAD_REQUEST
-        lines = util.split_lines(text, lines_limit=30, total_char_limit=1000)  # Limit was 5 / 280
+        if player == '@':  # This is the Chatbot
+            lines = text.split('\n')
+        else:
+            lines = util.split_lines(text, lines_limit=5, total_char_limit=280)
         if not lines:
             return httpabc.ResponseBody.BAD_REQUEST
         for line in [o.strip() for o in lines if o]:

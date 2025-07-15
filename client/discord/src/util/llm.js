@@ -21,8 +21,12 @@ async function requestChatCompletion(api, config, { input, gamename }) {
     content = config.system.replaceAll('{gamename}', gamename);
     request.messages.push({ role: 'system', content: content });
   }
-  content = util.arrayToText(input);
-  if (config.user) { content = config.user.replace('{content}', content); }
+  if (config.user) {
+    content = config.user.replaceAll('{gamename}', gamename);
+    content = content.replace('{content}', util.arrayToText(input));
+  } else {
+    content = util.arrayToText(input);
+  }
   request.messages.push({ role: 'user', content: content });
   if (config.maxtokens) {
     const tokens = 2 * request.messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
