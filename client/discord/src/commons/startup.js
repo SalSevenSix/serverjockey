@@ -24,6 +24,7 @@ function newChatbotHandler(context, channel, instance, url) {
   return function(playerName, input) {
     if (!data.chatbot || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
     if (data.busy) return notify('Chatbot is busy!');
+    if (input.trim() === context.config.CMD_PREFIX) return data.chatbot.reset();
     data.busy = true;
     data.chatbot.request(input.slice(context.config.CMD_PREFIX.length).trim())
       .then(function(text) {
@@ -225,10 +226,10 @@ export function startupServerOnly({ context, channels, instance, url, triggers }
 export function startupAll({ context, channels, instance, url, triggers, aliases }) {
   const triggerHandler = channels.server || channels.login
     ? newTriggerHandler(context, channels, instance, triggers) : null;
-  const chatbotHandler = newChatbotHandler(context, channels.chat, instance, url);
   if (channels.server) {
     startServerEvents(context, channels, instance, url, triggerHandler);
   }
+  const chatbotHandler = newChatbotHandler(context, channels.chat, instance, url);
   if (channels.login || channels.chat) {
     startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler);
   }

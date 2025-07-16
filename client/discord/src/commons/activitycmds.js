@@ -32,7 +32,7 @@ export function activity({ context, httptool, aliases, instance, message, data }
   if (!atfrom) { atfrom = atto - 2592000000; }
   else if (atfrom < 0) { atfrom = atto + atfrom; }
   if (!tz) { tz = true; }
-  let [results, text] = [{}, 'Invalid arguments'];
+  let [results, text] = [{}, '⛔ Invalid arguments'];
   if (query === 'instance') {  // TODO breakup into sub functions
     Promise.all([
       httptool.getJson(istats.queryInstance(instance), baseurl),

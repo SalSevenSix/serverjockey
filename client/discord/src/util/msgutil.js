@@ -9,7 +9,8 @@ function reactTo(message, emoji, retval = null) {
 
 export function extractCommandLine(message) {
   let result = message.content;
-  result = result.slice(result.indexOf(' ')).trim();
+  const index = result.indexOf(' ');
+  result = index === -1 ? '' : result.slice(index).trim();
   return result;
 }
 

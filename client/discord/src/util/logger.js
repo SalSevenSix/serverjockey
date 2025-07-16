@@ -4,6 +4,21 @@ function timestamp() {
   return cutil.shortISODateTimeString(new Date(), true);
 }
 
+function sanitize(obj) {
+  const result = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const upkey = key.toUpperCase();
+    if (value && cutil.isString(value) && (upkey.endsWith('TOKEN') || upkey.includes('APIKEY'))) {
+      result[key] = '*'.repeat(value.length);
+    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+      result[key] = sanitize(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 function reactError(message) {
   if (message) { message.react('⛔'); }
   return null;
@@ -19,14 +34,7 @@ export function info(value) {
 
 export function dump(obj) {
   if (!obj) return;
-  let result = {};
-  for (const [key, value] of Object.entries(obj)) {
-    if (value && key.toUpperCase().endsWith('TOKEN') && cutil.isString(value)) {
-      result[key] = '*'.repeat(value.length);
-    } else {
-      result[key] = value;
-    }
-  }
+  let result = sanitize(obj);
   result = JSON.stringify(result, null, 2);
   result = result.split('\n').slice(1, -1).join('\n');
   console.log(result);

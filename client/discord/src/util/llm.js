@@ -2,12 +2,11 @@ import OpenAI from 'openai';
 import * as util from './util.js';
 import * as logger from './logger.js';
 
-async function requestChatCompletion(api, config, gamename, input) {
-  const request = { model: config.model, messages: [] };
+async function requestChatCompletion(api, config, gamename, messages, input) {
   let content = null;
-  if (config.system) {
+  if (messages.length === 0 && config.system) {
     content = config.system.replaceAll('{gamename}', gamename);
-    request.messages.push({ role: 'system', content: content });
+    messages.push({ role: 'system', content: content });
   }
   if (config.user) {
     content = config.user.replaceAll('{gamename}', gamename);
@@ -15,19 +14,27 @@ async function requestChatCompletion(api, config, gamename, input) {
   } else {
     content = util.arrayToText(input);
   }
-  request.messages.push({ role: 'user', content: content });
+  messages.push({ role: 'user', content: content });
   if (config.maxtokens) {
-    const tokens = 2 * request.messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
-    if (tokens > config.maxtokens) return '⛔ Request too large';
+    const tokens = 2 * messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
+    if (tokens > config.maxtokens) {
+      messages.length = 0;
+      return '⛔ Request too large';
+    }
   }
+  const request = { model: config.model, messages: messages };
   if (config.temperature) { request.temperature = config.temperature; }
-  // TODO maybe set maxtoken in request?
   console.log(request);  // TODO debug
   const response = await api.chat.completions.create(request);
   let valid = response && response.choices && response.choices.length;
   valid &&= response.choices[0].message && response.choices[0].message.content;
-  if (!valid) return '⛔ Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
-  return response.choices[0].message.content;
+  if (!valid) {
+    messages.pop();
+    return '⛔ Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
+  }
+  content = response.choices[0].message.content;
+  messages.push({ role: 'assistant', content: content });
+  return content;
 }
 
 function nullChatCompletion(message) {
@@ -42,9 +49,16 @@ const noFeature = nullChatCompletion('⛔ This feature is not configured');
 function buildChatCompletion(api, config) {
   if (!config || !config.model) return noFeature;
   return function(gamename) {
-    const self = {};
+    const [self, messages] = [{}, []];
+    let last = 0;
+    self.reset = function() {
+      messages.length = 0;
+    };
     self.request = async function(input) {
-      return await requestChatCompletion(api, config, gamename, input);
+      if (Date.now() - last > 420000) { self.reset(); }  // 7 minute memory
+      const response = await requestChatCompletion(api, config, gamename, messages, input);
+      last = Date.now();
+      return response;
     };
     return self;
   };
