@@ -40,7 +40,7 @@ def _default_config() -> dict:
              '\n\n{content}')
     cbsys = ('You are a helpful assistant with expert knowledge about the game \'{gamename}\'.'
              ' You will answer questions strictly based on the game lore, mechanics, and world.'
-             ' Keep the responses concise unless asked otherwise.',
+             ' Keep the responses concise unless asked otherwise.'
              ' If a question is outside of {gamename}, politely say you cannot help.')
     return {
         'BOT_TOKEN': None, 'CMD_PREFIX': '!',

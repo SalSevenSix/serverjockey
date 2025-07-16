@@ -15,6 +15,7 @@ export default [
     rules: {
       'no-warning-comments': 1,
       'require-atomic-updates': 1,
+      'require-await': 1,
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
       'sort-imports': 0,
       'prefer-destructuring': 0,

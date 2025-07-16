@@ -7,7 +7,7 @@ const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
 
 function newChatbotHandler(context, channel, instance, url) {
-  const state = { gamename: null, busy: false };
+  const data = { chatbot: null, busy: false };
 
   const notify = function(text) {
     if (channel) { channel.send('`' + instance + '` *' + text + '*'); }
@@ -16,17 +16,16 @@ function newChatbotHandler(context, channel, instance, url) {
   fetch(url + '/console/say', util.newPostRequest('application/json', context.config.SERVER_TOKEN))
     .then(function(response) {
       if ([200, 204, 400, 409].includes(response.status)) {  // This confirms the Say service is available
-        state.gamename = context.instancesService.getModuleName(instance);
+        data.chatbot = context.llmClient.newChatbot(context.instancesService.getModuleName(instance));
       }
     })
     .catch(logger.error);
 
   return function(playerName, input) {
-    if (!state.gamename || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
-    if (state.busy) return notify('Chatbot is busy!');
-    state.busy = true;
-    input = input.slice(context.config.CMD_PREFIX.length).trim();
-    context.llmClient.chatbot({ input: input, gamename: state.gamename })
+    if (!data.chatbot || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
+    if (data.busy) return notify('Chatbot is busy!');
+    data.busy = true;
+    data.chatbot.request(input.slice(context.config.CMD_PREFIX.length).trim())
       .then(function(text) {
         const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
         request.body = JSON.stringify({ player: '@', text: text });
@@ -34,7 +33,7 @@ function newChatbotHandler(context, channel, instance, url) {
           .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
           .catch(logger.error);
       })
-      .finally(function() { state.busy = false; });
+      .finally(function() { data.busy = false; });
   };
 }
 

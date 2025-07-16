@@ -2,7 +2,7 @@ import { startupAll, startupServerOnly } from './commons/startup.js';
 import { server, auto, log } from './commons/servercmds.js';
 import { getconfig, setconfig, deployment } from './commons/deploymentcmds.js';
 import { send, say, players } from './commons/consolecmds.js';
-import { chat } from './commons/chatbotcmds.js';
+import { chat } from './commons/chatcmds.js';
 import { alias } from './commons/aliascmds.js';
 import { reward } from './commons/rewardcmds.js';
 import { trigger } from './commons/triggercmds.js';

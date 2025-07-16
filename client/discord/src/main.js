@@ -106,7 +106,8 @@ function handleMessage(message) {
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
-    [args.aliases, args.rewards, args.triggers] = [instanceData.aliases, instanceData.rewards, instanceData.triggers];
+    [args.chatbot, args.aliases, args.rewards, args.triggers] = [
+      instanceData.chatbot, instanceData.aliases, instanceData.rewards, instanceData.triggers];
     instanceData.server[command](args);
   } else if (cutil.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
@@ -129,8 +130,8 @@ export function main() {
   context.config = initialise();
   context.controller = new AbortController();
   context.signal = context.controller.signal;
-  context.instancesService = new instances.Service(context);
   context.llmClient = llm.newClient(context.config.LLM_API);
+  context.instancesService = new instances.Service(context);
   context.client = new Client({
     intents: [
       GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages,

@@ -13,16 +13,16 @@ function formatHeader(results, tzFlag) {
 }
 
 async function formatSummary(context, instance, results, tzFlag) {
-  const gamename = context.instancesService.getModuleName(instance);
   const text = formatHeader(results, tzFlag);
   if (results.chat.length === 0) return text;
+  const chatlogClient = context.llmClient.newChatlog(context.instancesService.getModuleName(instance));
   results = results.chat.map(function(record) {
     if (!record.player) return null;
     return record.ats + ' ' + record.player + ': ' + record.text;
   });
   results = results.filter(function(line) { return line; });
   results = results.join('\n');
-  results = await context.llmClient.chatlog({ input: results, gamename: gamename });
+  results = await chatlogClient.request(results);
   results = util.textToArray(results);
   text.push(...results);
   return text;
@@ -75,8 +75,8 @@ export function chatlog({ context, httptool, instance, message, data }) {
         msgutil.reactWait(message);
         formatSummary(context, instance, results, tz)
           .then(function(text) {
-            msgutil.rmReacts(message, msgutil.reactSuccess, logger.error);
             msgutil.sendTextOrFile(message, text, 'chat', 3, false);
+            cutil.sleep(1000).then(function() { msgutil.rmReacts(message, msgutil.reactSuccess, logger.error); });
           });
       } else {
         msgutil.sendText(message, 'Invalid arguments');

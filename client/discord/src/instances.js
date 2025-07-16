@@ -43,6 +43,7 @@ export class Service {
       if (currentData && cutil.hasProp(instances, currentData.instance)) { this.#current = currentData.instance; }
     }
     for (const [identity, instance] of Object.entries(instances)) {
+      instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
       instance.aliases = aliassvc.newAliases(context, identity).load();
       instance.rewards = rewardsvc.newRewards(context, identity).load();
       instance.triggers = triggersvc.newTriggers(context, identity).load();
@@ -58,6 +59,7 @@ export class Service {
         const instance = data.instance;
         logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
         instance.url = baseurl + '/instances/' + identity;
+        instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
         instance.triggers = triggersvc.newTriggers(context, identity);
