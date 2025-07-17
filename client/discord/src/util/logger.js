@@ -1,4 +1,5 @@
 import * as cutil from 'common/util/util';
+import { emojis } from './literals.js';
 
 function timestamp() {
   return cutil.shortISODateTimeString(new Date(), true);
@@ -20,7 +21,7 @@ function sanitize(obj) {
 }
 
 function reactError(message) {
-  if (message) { message.react('⛔'); }
+  if (message) { message.react(emojis.error); }
   return null;
 }
 

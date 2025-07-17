@@ -1,0 +1,20 @@
+export const emojis = {
+  unknown: '❓',
+  bang: '❗',
+  nohelp: '🤷',
+  wait: '⌛',
+  lock: '🔒',
+  error: '⛔',
+  success: '✅',
+  say: '💬',
+  thinking: '🤔',
+  medal: '🏅',
+  thumbsup: '👍',
+  thumbsdown: '👎',
+  greendot: '🟢',
+  reddot: '🔴',
+  skull: '💀',
+  restart: '🔄',
+  satellite: '📡',
+  bell: '🔔'
+};

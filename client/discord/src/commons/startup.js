@@ -1,4 +1,5 @@
 import * as cutil from 'common/util/util';
+import { emojis } from '../util/literals.js';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 import * as subs from '../util/subs.js';
@@ -35,7 +36,7 @@ function newChatbotHandler(context, instance, url) {
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 function newTriggerHandler(context, channels, instance, triggers) {
-  const prelog = '`' + instance + '` 🔔 ';
+  const prelog = '`' + instance + '` ' + emojis.bell + ' ';
   const cache = {};
 
   const resetCache = function() {
@@ -130,7 +131,8 @@ function newTriggerHandler(context, channels, instance, triggers) {
               await cutil.sleep(1000);
               if (isAdd) { await member.roles.add(role); }
               else { await member.roles.remove(role); }
-              channel.send(prelog + '`@' + alias.discordid + (isAdd ? '` 👍 `@' : '` 👎 `@') + role.name + '`');
+              const thumbs = isAdd ? emojis.thumbsup : emojis.thumbsdown;
+              channel.send(prelog + '`@' + alias.discordid + '` ' + thumbs + ' `@' + role.name + '`');
             }
           }
         }
@@ -172,16 +174,16 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
     if (json.event === 'CHAT') {
       if (chatbotHandler) { chatbotHandler(playerName, json.text); }
       if (!channels.chat) return true;
-      channels.chat.send('`' + instance + '` 💬 ' + playerName + ': ' + json.text);
+      channels.chat.send('`' + instance + '` ' + emojis.say + ' ' + playerName + ': ' + json.text);
       return true;
     }
     if (!channels.login) return true;
     let result = null;
-    if (json.event === 'LOGIN') { result = ' 🟢 '; }
-    else if (json.event === 'LOGOUT') { result = ' 🔴 '; }
-    else if (json.event === 'DEATH') { result = ' 💀 '; }
+    if (json.event === 'LOGIN') { result = emojis.greendot; }
+    else if (json.event === 'LOGOUT') { result = emojis.reddot; }
+    else if (json.event === 'DEATH') { result = emojis.skull; }
     if (!result) return true;
-    result = '`' + instance + '`' + result + playerName;
+    result = '`' + instance + '` ' + result + ' ' + playerName;
     if (json.text) { result += ' [' + json.text + ']'; }
     if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
     channels.login.send(result);
@@ -197,14 +199,14 @@ function startServerEvents(context, channels, instance, url, triggerHandler) {
     if (!state) { state = json.state; }  // Set initial state
     if (json.state === 'START') return true;  // Ignore transient state
     if (!restartRequired && json.details.restart) {
-      channels.server.send('`' + instance + '` 🔄 restart required');
+      channels.server.send('`' + instance + '` ' + emojis.restart + ' restart required');
       restartRequired = true;
       return true;
     }
     if (state === json.state) return true;  // Ignore no state change
     state = json.state;
     if (state === 'STARTED') { restartRequired = false; }
-    channels.server.send('`' + instance + '` 📡 ' + state);
+    channels.server.send('`' + instance + '` ' + emojis.satellite + ' ' + state);
     if (triggerHandler) { triggerHandler(state); }
     return true;
   });

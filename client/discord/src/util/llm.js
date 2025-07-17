@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { emojis } from './literals.js';
 import * as util from './util.js';
 import * as logger from './logger.js';
 
@@ -27,9 +28,9 @@ async function requestChatCompletion(api, config, gamename, messages, input) {
   if (choice && choice.finish_reason) {
     if (choice.finish_reason === 'length') { messages.length = 0; }  // Reset whole conversation
     else { messages.pop(); }  // Just remove the last input
-    return '⛔ Request refused, reason: ' + choice.finish_reason;
+    return emojis.error + ' Request refused, reason: ' + choice.finish_reason;
   }
-  return '⛔ Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
+  return emojis.error + ' Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
 }
 
 function nullChatCompletion(message) {
@@ -38,8 +39,8 @@ function nullChatCompletion(message) {
   };
 }
 
-const noApi = nullChatCompletion('⛔ AI Client not configured for use');
-const noFeature = nullChatCompletion('⛔ This AI feature is not configured');
+const noApi = nullChatCompletion(emojis.error + ' AI Client not configured for use');
+const noFeature = nullChatCompletion(emojis.error + ' This AI feature is not configured');
 
 function buildChatCompletion(api, config) {
   if (!config || !config.model) return noFeature;
@@ -50,14 +51,14 @@ function buildChatCompletion(api, config) {
       messages.length = 0;
     };
     self.request = async function(input) {
-      if (busy) return '🤔 *AI is thinking!*';
+      if (busy) return emojis.thinking + ' *AI is thinking!*';
       busy = true;
       if (Date.now() - last > 420000) { self.reset(); }  // 7 minute memory
       return await requestChatCompletion(api, config, gamename, messages, input)
         .catch(function(error) {
           logger.error(error);
           self.reset();
-          return '⛔ AI Client ' + error.toString();
+          return emojis.error + ' AI Client ' + error.toString();
         })
         .finally(function() {
           [last, busy] = [Date.now(), false];

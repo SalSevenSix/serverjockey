@@ -1,5 +1,6 @@
 import * as cutil from 'common/util/util';
 import * as cstats from 'common/activity/chat';
+import { emojis } from '../util/literals.js';
 import * as logger from '../util/logger.js';
 import * as util from '../util/util.js';
 import * as msgutil from '../util/msgutil.js';
@@ -8,7 +9,7 @@ function formatHeader(results, tzFlag) {
   const text = [['FROM ' + cutil.shortISODateTimeString(results.meta.atfrom, tzFlag),
     ' TO ' + cutil.shortISODateTimeString(results.meta.atto, tzFlag),
     ' (' + cutil.humanDuration(results.meta.atrange) + ')'].join('')];
-  if (results.chat.length === 0) { text.push('*No chat found within time range*'); }
+  if (results.chat.length === 0) { text.push(emojis.nohelp + ' No chat found within time range'); }
   return text;
 }
 
@@ -79,7 +80,7 @@ export function chatlog({ context, httptool, instance, message, data }) {
             cutil.sleep(1000).then(function() { msgutil.rmReacts(message, msgutil.reactSuccess, logger.error); });
           });
       } else {
-        msgutil.sendText(message, '⛔ Invalid arguments');
+        msgutil.sendText(message, 'Invalid arguments');
       }
     });
 }

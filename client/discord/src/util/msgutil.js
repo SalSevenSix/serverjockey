@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { emojis } from './literals.js';
 import * as util from './util.js';
 import * as logger from './logger.js';
 
@@ -27,7 +28,7 @@ export function checkHasRole(message, roles) {
       return roles.includes(role.name);
     });
   }
-  return hasRole ? true : reactTo(message, '🔒', false);
+  return hasRole ? true : reactTo(message, emojis.lock, false);
 }
 
 export function rmReacts(message, thenHandler, errorHandler, retval = null) {
@@ -38,19 +39,19 @@ export function rmReacts(message, thenHandler, errorHandler, retval = null) {
 }
 
 export function reactUnknown(message) {
-  return reactTo(message, '❓');
+  return reactTo(message, emojis.unknown);
 }
 
 export function reactWait(message) {
-  return reactTo(message, '⌛');
+  return reactTo(message, emojis.wait);
 }
 
 export function reactError(message) {
-  return reactTo(message, '⛔');
+  return reactTo(message, emojis.error);
 }
 
 export function reactSuccess(message) {
-  return reactTo(message, '✅');
+  return reactTo(message, emojis.success);
 }
 
 function sendChunked(message, value, codeblock) {

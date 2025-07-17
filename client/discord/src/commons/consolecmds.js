@@ -1,4 +1,5 @@
 import * as cutil from 'common/util/util';
+import { emojis } from '../util/literals.js';
 import * as msgutil from '../util/msgutil.js';
 
 export function send({ httptool, message, data }) {
@@ -16,7 +17,7 @@ export function say({ context, httptool, message, data }) {
   const line = msgutil.extractCommandLine(message);
   httptool.doPost(
     '/console/say', { player: name, text: line },
-    function() { message.react('💬'); },
+    function() { message.react(emojis.say); },
     context.config.PLAYER_ROLE
   );
 }

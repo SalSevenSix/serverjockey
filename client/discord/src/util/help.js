@@ -1,4 +1,5 @@
 import * as cutil from 'common/util/util';
+import { emojis } from './literals.js';
 
 function processSection(context, httptool, message, data, section) {
   const cmd = context.config.CMD_PREFIX;
@@ -30,7 +31,7 @@ function processData(context, httptool, message, data, helpData) {
     done = processSection(context, httptool, message, data, sections[index]);
     index += 1;
   }
-  if (done === false) { message.channel.send('No more help available.'); }
+  if (done === false) { message.channel.send(emojis.nohelp + ' No more help available.'); }
 }
 
 export function process(helpData) {

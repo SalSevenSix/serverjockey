@@ -1,10 +1,12 @@
 import * as cutil from 'common/util/util';
 import * as pstats from 'common/activity/player';
+import { emojis } from '../util/literals.js';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 
 /* eslint-disable complexity */
+/* eslint-disable @stylistic/js/max-len */
 /* eslint-disable max-lines-per-function */
 async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
   const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
@@ -24,7 +26,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
         schemeRole.orig = role.members.map(function(member) { return member.id; });
         schemeRole.members = [...schemeRole.orig];
       } else {
-        message.channel.send(prelog + '❗ Role `@' + scheme.roleid + '` not found');
+        message.channel.send(prelog + emojis.bang + ' Role `@' + scheme.roleid + '` not found');
       }
       roleMap[scheme.snowflake] = schemeRole;
     }
@@ -87,19 +89,20 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
         memberid = memberid ? memberid.discordid : member;
         await cutil.sleep(1000);
         if (!cutil.hasProp(membersMap, member)) {
-          message.channel.send(prelog + '❗ Alias `@' + memberid + '` not found');
+          message.channel.send(prelog + emojis.bang + ' Alias `@' + memberid + '` not found');
         } else if (give) {
           await membersMap[member].roles.add(schemeRole.role);
-          message.channel.send(prelog + '🏅 `@' + memberid + '` 👍 `@' + schemeRole.role.name + '`');
+          message.channel.send(prelog + emojis.medal + ' `@' + memberid + '` ' + emojis.thumbsup + ' `@' + schemeRole.role.name + '`');
         } else {
           await membersMap[member].roles.remove(schemeRole.role);
-          message.channel.send(prelog + '🏅 `@' + memberid + '` 👎 `@' + schemeRole.role.name + '`');
+          message.channel.send(prelog + emojis.medal + ' `@' + memberid + '` ' + emojis.thumbsdown + ' `@' + schemeRole.role.name + '`');
         }
       }
     }
   }
 }
 /* eslint-enable max-lines-per-function */
+/* eslint-enable @stylistic/js/max-len */
 /* eslint-enable complexity */
 
 export function reward({ context, httptool, aliases, rewards, instance, message, data }) {
