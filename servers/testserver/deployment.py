@@ -57,8 +57,7 @@ class Deployment:
 
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir)
-        if not await io.file_exists(self._config_file):
-            await io.write_file(self._config_file, objconv.obj_to_json(default_config(), pretty=True))
+        await io.keyfill_json_file(self._config_file, default_config())
 
     async def install_runtime(self, beta: str | None):
         await io.delete_directory(self._runtime_dir)

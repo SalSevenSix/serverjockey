@@ -46,7 +46,7 @@ const helpServerAuto = [
 
 const playersHelp = 'players            : Show players currently online';
 
-const sayHelp = 'say {text}         : Send chat message to players';
+const sayHelp = 'say {text}         : Send a message to players in-game';
 
 const sendHelp = 'send {line}        : Send command to server console';
 const helpSend = '/console/help';

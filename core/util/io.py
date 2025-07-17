@@ -6,7 +6,7 @@ import pathlib
 import aiofiles
 from aiofiles import os as aioos
 # ALLOW util.*
-from core.util import util, dtutil, idutil, funcutil
+from core.util import util, dtutil, idutil, funcutil, objconv
 
 DEFAULT_CHUNK_SIZE = 65536  # 64Kb
 
@@ -243,3 +243,18 @@ async def copy_bytes(
                 tracker.processed(chunk)
     finally:
         tracker.processed(None)
+
+
+async def keyfill_json_file(filename: str, template: dict, preprocessor: callable = None) -> bool:
+    if await file_exists(filename):
+        loaded = objconv.json_to_dict(await read_file(filename))
+        if preprocessor:
+            loaded = preprocessor(loaded)
+        filled = util.keyfill_dict(loaded, template, True)
+        updated = filled is not loaded
+        if updated:
+            await write_file(filename, objconv.obj_to_json(filled, pretty=True))
+    else:
+        updated = True
+        await write_file(filename, objconv.obj_to_json(template, pretty=True))
+    return updated

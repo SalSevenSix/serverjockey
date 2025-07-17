@@ -67,14 +67,7 @@ class Server(svrabc.Server):
         self._httpsubs = httpsubs.HttpSubscriptionService(context)
 
     async def initialise(self):
-        if await io.file_exists(self._config):
-            loaded_config = objconv.json_to_dict(await io.read_file(self._config))
-            loaded_config = _migrate_config(loaded_config)  # Remove someday
-            filled_config = util.keyfill_dict(loaded_config, _default_config(), True)
-            if filled_config is not loaded_config:
-                await io.write_file(self._config, objconv.obj_to_json(filled_config))
-        else:
-            await io.write_file(self._config, objconv.obj_to_json(_default_config()))
+        await io.keyfill_json_file(self._config, _default_config(), _migrate_config)
         await self._server_factory.initialise()
         await mtxinstance.initialise(self._context, players=False, error_filter=_ERROR_FILTER)
         self._context.register(prcext.ServerStateSubscriber(self._context))

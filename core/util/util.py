@@ -121,8 +121,9 @@ def keyfill_dict(dictionary: dict, template: dict, deep: bool = False) -> dict:
             result[key] = value
         elif deep and isinstance(result[key], dict) and isinstance(value, dict):
             value_dict = keyfill_dict(result[key], value, deep)
-            changed = value_dict is not result[key]
-            result[key] = value_dict
+            if value_dict is not result[key]:
+                changed = True
+                result[key] = value_dict
     return result if changed else dictionary
 
 

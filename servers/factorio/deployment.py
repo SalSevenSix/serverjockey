@@ -139,10 +139,8 @@ class Deployment:
             await io.write_file(self._server_banlist, '[]')
         if not await io.file_exists(self._server_adminlist):
             await io.write_file(self._server_adminlist, '[]')
-        if not await io.file_exists(self._cmdargs_settings):
-            await io.write_file(self._cmdargs_settings, objconv.obj_to_json(_default_cmdargs_settings(), pretty=True))
-        if not await io.file_exists(self._mods_list):
-            await io.write_file(self._mods_list, objconv.obj_to_json(_default_mods_list(), pretty=True))
+        await io.keyfill_json_file(self._cmdargs_settings, _default_cmdargs_settings())
+        await io.keyfill_json_file(self._mods_list, _default_mods_list())
 
     async def install_runtime(self, version: str):
         logger = msglog.LogPublisher(self._context, self)

@@ -85,8 +85,7 @@ class Deployment:
         if not await io.directory_exists(self._runtime_dir):
             return
         await io.create_directory(self._mods_live_dir)
-        if not await io.file_exists(self._cmdargs_file):
-            await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
+        await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
         if not await io.file_exists(self._settings_file):
             await io.copy_text_file(self._settings_def_file, self._settings_file)
 

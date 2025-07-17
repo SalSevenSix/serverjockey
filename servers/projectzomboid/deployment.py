@@ -94,8 +94,7 @@ class Deployment:
                                   self._player_dir, self._config_dir, self._save_dir, self._lua_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
-        if not await io.file_exists(self._cmdargs_file):
-            await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
+        await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
 
     async def _get_world_name(self) -> str:
         if await io.directory_exists(self._multiplayer_dir):

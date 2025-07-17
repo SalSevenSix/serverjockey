@@ -79,8 +79,7 @@ class Deployment:
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._save_dir, self._savesvr_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
-        if not await io.file_exists(self._cmdargs_file):
-            await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
+        await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
         logs_dir = self._runtime_dir + '/Logs'
         if not await io.symlink_exists(logs_dir):
             await io.create_symlink(logs_dir, self._logs_dir)
