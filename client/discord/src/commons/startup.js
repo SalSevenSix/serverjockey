@@ -6,12 +6,8 @@ import * as subs from '../util/subs.js';
 const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
 
-function newChatbotHandler(context, channel, instance, url) {
-  const data = { chatbot: null, busy: false };
-
-  const notify = function(text) {
-    if (channel) { channel.send('`' + instance + '` *' + text + '*'); }
-  };
+function newChatbotHandler(context, instance, url) {
+  const data = { chatbot: null };
 
   fetch(url + '/console/say', util.newPostRequest('application/json', context.config.SERVER_TOKEN))
     .then(function(response) {
@@ -23,9 +19,7 @@ function newChatbotHandler(context, channel, instance, url) {
 
   return function(playerName, input) {
     if (!data.chatbot || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
-    if (data.busy) return notify('Chatbot is busy!');
     if (input.trim() === context.config.CMD_PREFIX) return data.chatbot.reset();
-    data.busy = true;
     data.chatbot.request(input.slice(context.config.CMD_PREFIX.length).trim())
       .then(function(text) {
         const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
@@ -33,8 +27,7 @@ function newChatbotHandler(context, channel, instance, url) {
         fetch(url + '/console/say', request)
           .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
           .catch(logger.error);
-      })
-      .finally(function() { data.busy = false; });
+      });
   };
 }
 
@@ -229,7 +222,7 @@ export function startupAll({ context, channels, instance, url, triggers, aliases
   if (channels.server) {
     startServerEvents(context, channels, instance, url, triggerHandler);
   }
-  const chatbotHandler = newChatbotHandler(context, channels.chat, instance, url);
+  const chatbotHandler = newChatbotHandler(context, instance, url);
   if (channels.login || channels.chat) {
     startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler);
   }

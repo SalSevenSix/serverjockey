@@ -15,26 +15,21 @@ async function requestChatCompletion(api, config, gamename, messages, input) {
     content = util.arrayToText(input);
   }
   messages.push({ role: 'user', content: content });
-  if (config.maxtokens) {
-    const tokens = 2 * messages.reduce(function(t, m) { return t + m.content.split(' ').length; }, 0);
-    if (tokens > config.maxtokens) {
-      messages.length = 0;
-      return '⛔ Request too large';
-    }
-  }
   const request = { model: config.model, messages: messages };
-  if (config.temperature) { request.temperature = config.temperature; }
-  console.log(request);  // TODO debug
+  if (config.temperature || config.temperature == 0) { request.temperature = parseFloat(config.temperature); }
   const response = await api.chat.completions.create(request);
-  let valid = response && response.choices && response.choices.length;
-  valid &&= response.choices[0].message && response.choices[0].message.content;
-  if (!valid) {
-    messages.pop();
-    return '⛔ Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
+  const choice = response && response.choices && response.choices.length && response.choices[0].message
+    ? response.choices[0] : null;
+  if (choice && choice.message.content && (!choice.finish_reason || choice.finish_reason === 'stop')) {
+    messages.push(choice.message);
+    return choice.message.content;
   }
-  content = response.choices[0].message.content;
-  messages.push({ role: 'assistant', content: content });
-  return content;
+  if (choice && choice.finish_reason) {
+    if (choice.finish_reason === 'length') { messages.length = 0; }  // Reset whole conversation
+    else { messages.pop(); }  // Just remove the last input
+    return '⛔ Request refused, reason: ' + choice.finish_reason;
+  }
+  return '⛔ Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
 }
 
 function nullChatCompletion(message) {
@@ -43,22 +38,30 @@ function nullChatCompletion(message) {
   };
 }
 
-const noApi = nullChatCompletion('⛔ LLM not configured for use');
-const noFeature = nullChatCompletion('⛔ This feature is not configured');
+const noApi = nullChatCompletion('⛔ AI Client not configured for use');
+const noFeature = nullChatCompletion('⛔ This AI feature is not configured');
 
 function buildChatCompletion(api, config) {
   if (!config || !config.model) return noFeature;
   return function(gamename) {
     const [self, messages] = [{}, []];
-    let last = 0;
+    let [last, busy] = [0, false];
     self.reset = function() {
       messages.length = 0;
     };
     self.request = async function(input) {
+      if (busy) return '🤔 *AI is thinking!*';
+      busy = true;
       if (Date.now() - last > 420000) { self.reset(); }  // 7 minute memory
-      const response = await requestChatCompletion(api, config, gamename, messages, input);
-      last = Date.now();
-      return response;
+      return await requestChatCompletion(api, config, gamename, messages, input)
+        .catch(function(error) {
+          logger.error(error);
+          self.reset();
+          return '⛔ AI Client ' + error.toString();
+        })
+        .finally(function() {
+          [last, busy] = [Date.now(), false];
+        });
     };
     return self;
   };

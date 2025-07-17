@@ -163,7 +163,7 @@ const helpChatlog = [
   '                  or preset "LH" Last Hour, "LD" Last Day',
   'tz={timezone}   : Timezone as ±{hh} or ±{hh}:{mm} default is server tz',
   '"player={name}" : Only chat messages for player by name',
-  'summary         : Summarize chat results (requires LLM configuration)',
+  'summary         : Summarize chat results (requires AI configuration)',
   '```', 'Examples...',
   'a) get chat messages between specific times in timezone GMT +7',
   '`!chatlog from=2024-08-15T09:00:00 to=2024-08-15T21:00:00 tz=+7`',

@@ -1,5 +1,5 @@
 # ALLOW core.* serverlink.*
-from core.util import gc, util, logutil, io, aggtrf, objconv
+from core.util import gc, util, logutil, io, aggtrf
 from core.msg import msgtrf, msgftr, msglog
 from core.msgc import mc
 from core.context import contextsvc, contextext
@@ -49,8 +49,8 @@ def _default_config() -> dict:
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
         'LLM_API': {
             'baseurl': None, 'apikey': None,
-            'chatlog': {'model': None, 'temperature': None, 'maxtokens': None, 'system': clsys, 'user': clusr},
-            'chatbot': {'model': None, 'temperature': None, 'maxtokens': None, 'system': cbsys}
+            'chatlog': {'model': None, 'temperature': None, 'system': clsys, 'user': clusr},
+            'chatbot': {'model': None, 'temperature': None, 'system': cbsys}
         }
     }
 
