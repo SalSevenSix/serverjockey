@@ -19,23 +19,29 @@ async function requestChatCompletion(api, config, gamename, messages, input) {
   const request = { model: config.model, messages: messages };
   if (config.temperature || config.temperature == 0) { request.temperature = parseFloat(config.temperature); }
   const response = await api.chat.completions.create(request);
+  console.log(response);  // TODO Debug
   const choice = response && response.choices && response.choices.length && response.choices[0].message
     ? response.choices[0] : null;
-  if (choice && choice.message.content && (!choice.finish_reason || choice.finish_reason === 'stop')) {
+  if (choice && choice.message.content && (!choice.finish_reason || choice.finish_reason === 'stop')) {  // Success
     messages.push(choice.message);
-    return choice.message.content;
-  }
-  if (choice && choice.finish_reason) {
+    content = choice.message.content;
+  } else if (choice && choice.finish_reason) {  // Request refused
     if (choice.finish_reason === 'length') { messages.length = 0; }  // Reset whole conversation
     else { messages.pop(); }  // Just remove the last input
-    return emojis.error + ' Request refused, reason: ' + choice.finish_reason;
+    content = emojis.error + ' Request refused, reason: ' + choice.finish_reason;
+  } else {  // Serious error
+    messages.length = 0;
+    content = emojis.error + ' Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
   }
-  return emojis.error + ' Invalid response\n```\n' + JSON.stringify(response, null, 2) + '\n```';
+  return content;
 }
 
 function nullChatCompletion(message) {
   return function() {
-    return { request: async function() { return message; } };
+    return {
+      reset: function() {},
+      request: async function() { return message; }
+    };
   };
 }
 

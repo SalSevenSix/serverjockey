@@ -18,7 +18,7 @@ function newChatbotHandler(context, instance, url) {
     })
     .catch(logger.error);
 
-  return function(playerName, input) {
+  return function(input) {
     if (!data.chatbot || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
     if (input.trim() === context.config.CMD_PREFIX) return data.chatbot.reset();
     data.chatbot.request(input.slice(context.config.CMD_PREFIX.length).trim())
@@ -172,7 +172,7 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
     const playerAlias = aliases.findByName(playerName);
     if (playerAlias) { playerName += ' `@' + playerAlias.discordid + '`'; }
     if (json.event === 'CHAT') {
-      if (chatbotHandler) { chatbotHandler(playerName, json.text); }
+      if (chatbotHandler) { chatbotHandler(json.text); }
       if (!channels.chat) return true;
       channels.chat.send('`' + instance + '` ' + emojis.say + ' ' + playerName + ': ' + json.text);
       return true;
@@ -224,8 +224,8 @@ export function startupAll({ context, channels, instance, url, triggers, aliases
   if (channels.server) {
     startServerEvents(context, channels, instance, url, triggerHandler);
   }
-  const chatbotHandler = newChatbotHandler(context, instance, url);
   if (channels.login || channels.chat) {
+    const chatbotHandler = newChatbotHandler(context, instance, url);
     startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler);
   }
 }

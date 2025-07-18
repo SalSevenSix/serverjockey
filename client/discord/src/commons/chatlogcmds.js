@@ -22,7 +22,6 @@ async function formatSummary(context, instance, results, tzFlag) {
     return record.ats + ' ' + record.player + ': ' + record.text;
   });
   results = results.filter(function(line) { return line; });
-  results = results.join('\n');
   results = await chatlogClient.request(results);
   results = util.textToArray(results);
   text.push(...results);
