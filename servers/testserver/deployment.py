@@ -1,3 +1,4 @@
+import sys
 # ALLOW core.* testserver.messaging
 from core.util import util, io, objconv, pkg, dtutil
 from core.context import contextsvc
@@ -22,7 +23,6 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._python = context.config('python')
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir, self._world_dir = self._home_dir + '/runtime', self._home_dir + '/world'
@@ -50,7 +50,7 @@ class Deployment:
         if not await io.file_exists(self._executable):
             raise FileNotFoundError('Testserver game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._config_file))
-        server = proch.ServerProcess(self._context, self._python).append_arg(self._executable)
+        server = proch.ServerProcess(self._context, sys.executable).append_arg(self._executable)
         for key in cmdargs.keys():
             server.append_arg(cmdargs[key])
         return server

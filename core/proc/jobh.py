@@ -1,4 +1,5 @@
 import typing
+import sys
 import asyncio
 from asyncio import subprocess, streams
 # ALLOW util.* msg*.* context.* proc.wrapper
@@ -100,7 +101,7 @@ class JobProcess(msgabc.AbcSubscriber):
 class _CommandHelper:
 
     def __init__(self, context: contextsvc.Context, message: msgabc.Message):
-        self._python, self._tempdir = context.config('python'), context.config('tempdir')
+        self._tempdir = context.config('tempdir')
         self._source, self._command = message.source(), message.data()
         self._work_dir, self._pty = None, False
         if isinstance(self._command, dict):
@@ -114,7 +115,7 @@ class _CommandHelper:
             return
         self._work_dir = self._tempdir + '/' + idutil.generate_id()
         await io.create_directory(self._work_dir)
-        command = [self._python, await wrapper.write_wrapper(self._work_dir)]
+        command = [sys.executable, await wrapper.write_wrapper(self._work_dir)]
         if isinstance(self._command, str):
             command.extend(['/bin/bash', self._work_dir + '/job.sh'])
             await io.write_file(command[3], self._command)

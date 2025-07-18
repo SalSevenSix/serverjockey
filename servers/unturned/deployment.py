@@ -1,3 +1,4 @@
+import sys
 # ALLOW core.* unturned.messaging
 from core.util import gc, util, io, objconv, linenc
 from core.context import contextsvc
@@ -24,7 +25,6 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._python, self._wrapper = context.config('python'), None
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
@@ -40,6 +40,7 @@ class Deployment:
         self._env = context.env()
         self._env['TERM'] = 'xterm'
         self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
+        self._wrapper = None
 
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
@@ -68,7 +69,7 @@ class Deployment:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         if util.get('upnp', cmdargs, True):
             await self._map_ports()
-        server = proch.ServerProcess(self._context, self._python)
+        server = proch.ServerProcess(self._context, sys.executable)
         server.use_env(self._env).use_out_decoder(linenc.PtyLineDecoder())
         server.append_arg(self._wrapper).append_arg(executable)
         server.append_arg('-batchmode').append_arg('-nographics')

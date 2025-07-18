@@ -1,3 +1,4 @@
+import sys
 # ALLOW core.* csii.messaging
 from core.util import gc, util, idutil, io, objconv, steamutil
 from core.context import contextsvc
@@ -43,7 +44,6 @@ class Deployment:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._python, self._wrapper = context.config('python'), None
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
@@ -52,6 +52,7 @@ class Deployment:
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
         self._config_dir = self._world_dir + '/cfg'
         self._config_files = _init_config_files(self._runtime_dir + '/game/csgo/cfg', self._config_dir)
+        self._wrapper = None
 
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
@@ -87,7 +88,7 @@ class Deployment:
             portmapper.map_port(self._context, self, server_port, gc.TCP, 'CS2 TCP server')
             portmapper.map_port(self._context, self, server_port, gc.UDP, 'CS2 UDP server')
         rconsvc.RconService.set_config(self._context, self, server_port, util.get('+rcon_password', cmdargs))
-        server = proch.ServerProcess(self._context, self._python).use_cwd(bin_dir)
+        server = proch.ServerProcess(self._context, sys.executable).use_cwd(bin_dir)
         server.append_arg(self._wrapper).append_arg(executable).append_arg('-dedicated')
         server.append_struct(util.delete_dict(cmdargs, ('upnp', '-dedicated')))
         return server

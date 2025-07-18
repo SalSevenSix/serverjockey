@@ -20,11 +20,6 @@ class _NoTraceFilter(logging.Filter):
         return not trace
 
 
-def _stime(home: str) -> float | None:
-    file = home + '/.pid'
-    return os.stat(file).st_atime if os.path.isfile(file) else None
-
-
 def _load_cmdargs(home: str) -> dict:
     file = home + '/serverjockey.json'
     if not os.path.isfile(file):
@@ -65,6 +60,8 @@ def _create_context() -> contextsvc.Context | None:
         print(sysutil.system_version())
         return None
     home = util.full_path(os.getcwd(), args.home if args.home else '.')
+    stime = home + '/.pid'
+    stime = os.stat(stime).st_atime if os.path.isfile(stime) else None
     cfg = _load_cmdargs(home)
     logfile = args.logfile if args.logfile else util.get('logfile', cfg)
     logfile = 'serverjockey.log' if objconv.to_bool(logfile) and not isinstance(logfile, str) else logfile
@@ -88,7 +85,7 @@ def _create_context() -> contextsvc.Context | None:
     return contextsvc.Context(dict(
         home=home, logfile=logfile, tempdir=tempdir, host=host, port=port, modules=modules, single=single,
         showtoken=showtoken, noupnp=noupnp, dbfile=dbfile, debug=debug, trace=trace, secret=secret,
-        python=sys.executable, stime=_stime(home), scheme=httpssl.sync_get_scheme(home), env=os.environ.copy()))
+        stime=stime, scheme=httpssl.sync_get_scheme(home), env=os.environ.copy()))
 
 
 def _setup_logging(context: contextsvc.Context):
