@@ -27,11 +27,11 @@ if [ "$BRANCH" = "local" ]; then
   [ -d "build" ] || exit 1
   mkdir -p "$SERVERJOCKEY_DIR/build" || exit 1
   ls | while read file; do
-    [[ $file == "build" || $file == "venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
+    [[ $file == "build" || $file == "venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR" || exit 1
   done
   cd "build" || exit 1
   ls | while read file; do
-    [ $file == "dist" ] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
+    [ $file == "dist" ] || cp -r "$file" "$SERVERJOCKEY_DIR/build" || exit 1
   done
 else
   if [ ! -f "$BRANCH.zip" ]; then
@@ -108,8 +108,6 @@ done
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
 python3 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/$SERVERJOCKEY.pyz" || exit 1
-
-echo "Finishing"
 rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
 echo $TIMESTAMP > "$TARGET_DIR/build.ok"
 
