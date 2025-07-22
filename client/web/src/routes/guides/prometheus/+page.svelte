@@ -169,7 +169,7 @@ scrape_configs:
   <CodeBlock>sudo systemctl restart prometheus</CodeBlock>
 
   <p><span class="step-title"></span>
-    To confirm everything is working, open the Prometheus console in a browser using the machine IP or hostname.
+    To confirm everything is working, open the Prometheus panel in a browser using the machine IP or hostname.
     By default Prometheus uses http listening on port
     <span class="is-family-monospace">9090</span>
     without any authentication. Find the scrape targets status page in the menu under
@@ -186,7 +186,7 @@ scrape_configs:
   <hr />
   <h4 class="title is-5">So what next?</h4>
   <p>
-    Although Prometheus has a web console that allows you to query metrics and generate graphs,
+    Although Prometheus has a web panel that allows you to query metrics and generate graphs,
     its features are basic. Grafana is often paired with Prometheus to provide more comprehensive reporting.
     Read the <a href={surl('/guides/grafana')}>Grafana guide</a> for help installing and configuring Grafana.
   </p>

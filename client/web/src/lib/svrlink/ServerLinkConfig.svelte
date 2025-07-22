@@ -71,16 +71,16 @@
   {#if showHints}
     <div class="content">
       <p>For help setting up the ServerLink discord bot, please see
-         <a href={surl('/guides/discord/setup')}>the guide</a>.</p>
+         <a href={surl('/guides/discord/setup')}>the guide</a></p>
     </div>
   {/if}
   {#if !noHints}
     <div class="block buttons mb-2">
       <button id="serverLinkConfigSectionPrev" title="PREV" class="button is-dark is-small mr-0" on:click={prevSection}>
-        <i class="fa fa-circle-chevron-left fa-xl"></i></button>
+        <i class="fa fa-angle-left fa-lg"></i></button>
       <p class="mb-2 ml-3 mr-3">{sectionIndex} / 3</p>
       <button id="serverLinkConfigSectionNext" title="NEXT" class="button is-dark is-small mr-0" on:click={nextSection}>
-        <i class="fa fa-circle-chevron-right fa-xl"></i></button>
+        <i class="fa fa-angle-right fa-lg"></i></button>
     </div>
   {/if}
   <div class="block" class:is-hidden={sectionIndex != 1}>

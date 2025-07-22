@@ -19,7 +19,6 @@ async function requestChatCompletion(api, config, gamename, messages, input) {
   const request = { model: config.model, messages: messages };
   if (config.temperature || config.temperature == 0) { request.temperature = parseFloat(config.temperature); }
   const response = await api.chat.completions.create(request);
-  console.log(response);  // TODO Debug
   const choice = response && response.choices && response.choices.length && response.choices[0].message
     ? response.choices[0] : null;
   if (choice && choice.message.content && (!choice.finish_reason || choice.finish_reason === 'stop')) {  // Success
@@ -39,6 +38,7 @@ async function requestChatCompletion(api, config, gamename, messages, input) {
 function nullChatCompletion(message) {
   return function() {
     return {
+      avatar: function() { return emojis.robot; },
       reset: function() {},
       request: async function() { return message; }
     };
@@ -48,16 +48,15 @@ function nullChatCompletion(message) {
 const noApi = nullChatCompletion(emojis.error + ' AI Client not configured for use');
 const noFeature = nullChatCompletion(emojis.error + ' This AI feature is not configured');
 
-function buildChatCompletion(api, config) {
+function buildChatCompletion(api, avatarEmoji, config) {
   if (!config || !config.model) return noFeature;
   return function(gamename) {
     const [self, messages] = [{}, []];
     let [last, busy] = [0, false];
-    self.reset = function() {
-      messages.length = 0;
-    };
+    self.avatar = function() { return avatarEmoji; };
+    self.reset = function() { messages.length = 0; };
     self.request = async function(input) {
-      if (busy) return emojis.thinking + ' *AI is thinking!*';
+      if (busy) return emojis.thinking + ' *AI is busy!*';
       busy = true;
       if (Date.now() - last > 420000) { self.reset(); }  // 7 minute memory
       return await requestChatCompletion(api, config, gamename, messages, input)
@@ -74,13 +73,23 @@ function buildChatCompletion(api, config) {
   };
 }
 
+function pickAvatarEmoji(apikey) {
+  if (apikey.length < 4) return emojis.robot;
+  let result = apikey.slice(-3).split('');
+  result = result.map(function(char) { return char.charCodeAt(0); });
+  result = result[0] * result[1] + result[2];
+  result = emojis.avatars[result % emojis.avatars.length];
+  return result;
+}
+
 export function newClient(config) {
   const client = { newChatlog: noApi, newChatbot: noApi };
   if (config && config.baseurl && config.apikey) {
     const api = new OpenAI({ baseURL: config.baseurl, apiKey: config.apikey });
     logger.info('LLM Client initialised on endpoint ' + config.baseurl);
-    client.newChatlog = buildChatCompletion(api, config.chatlog);
-    client.newChatbot = buildChatCompletion(api, config.chatbot);
+    const avatarEmoji = pickAvatarEmoji(config.apikey);
+    client.newChatlog = buildChatCompletion(api, avatarEmoji, config.chatlog);
+    client.newChatbot = buildChatCompletion(api, avatarEmoji, config.chatbot);
   } else {
     logger.info('LLM Client not configured');
   }

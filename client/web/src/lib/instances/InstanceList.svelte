@@ -103,6 +103,12 @@
       {/if}
     </tbody>
   </table>
+  {#if !loading && instances.length === 0}
+    <p>
+      For help creating a new game server, see the
+      <a href={surl('/guides#gameserverguides')}>the guides</a>
+    </p>
+  {/if}
 </div>
 
 

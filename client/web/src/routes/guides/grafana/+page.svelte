@@ -33,7 +33,7 @@
     <ExtLink href="https://grafana.com/grafana/download?edition=oss&pg=get&platform=linux&plcmt=selfmanaged-box1-cta1">downloads page</ExtLink>
     to confirm the latest Grafana OSS version to install. Also see the official Grafana OSS
     <ExtLink href="https://grafana.com/docs/grafana/latest/getting-started/build-first-dashboard/?pg=oss-graf&plcmt=resources">setup guide</ExtLink>
-    for general information. If you are planning to host the Grafana web console behind Nginx, see the
+    for general information. If you are planning to host the Grafana web panel behind Nginx, see the
     <ExtLink href="https://grafana.com/tutorials/run-grafana-behind-a-proxy/">reverse proxy guide</ExtLink>
     for details. The commands in this guide are for Grafana version
     <span class="is-family-monospace notranslate">11.0.0</span>
@@ -68,7 +68,7 @@
   </figure>
 
   <p><span class="step-title"></span>
-    Now open the Grafana console in a browser using the machine IP or hostname.
+    Now open the Grafana panel in a browser using the machine IP or hostname.
     By default Grafana uses http listening on port
     <span class="is-family-monospace">3000</span>.
     Login with username

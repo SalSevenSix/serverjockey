@@ -59,12 +59,12 @@ export class Service {
         const instance = data.instance;
         logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
         instance.url = baseurl + '/instances/' + identity;
-        instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
         instance.triggers = triggersvc.newTriggers(context, identity);
         instance.server = servers[instance.module];
         instances[identity] = instance;
+        instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
         instance.server.startup({ context: context, channels: channels, instance: identity, url: instance.url,
           aliases: instance.aliases, triggers: instance.triggers });
       } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {

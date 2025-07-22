@@ -16,5 +16,7 @@ export const emojis = {
   skull: '💀',
   restart: '🔄',
   satellite: '📡',
-  bell: '🔔'
+  bell: '🔔',
+  robot: '🤖',
+  avatars: ['🧑', '👩', '👨', '👱', '🧔', '🤠', '👽']
 };

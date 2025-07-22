@@ -8,7 +8,7 @@ export function chat({ context, chatbot, message }) {
   if (input) {
     msgutil.reactWait(message);
     chatbot.request(input).then(function(text) {
-      msgutil.sendText(message, '@: ' + text, false);
+      msgutil.sendText(message, chatbot.avatar() + ' ' + text, false);
       cutil.sleep(1000).then(function() { msgutil.rmReacts(message, msgutil.reactSuccess, logger.error); });
     });
   } else {
