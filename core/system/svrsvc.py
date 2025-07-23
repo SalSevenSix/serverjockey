@@ -206,8 +206,8 @@ class _Status:
 
     def __init__(self, context: contextsvc.Context):
         self._context = context
-        self._running, self._state = False, sc.READY
-        self._details, self._startmillis = {}, 0
+        self._running, self._state, self._details = False, sc.READY, {}
+        self._startmillis, self._statemillis, self._sincelaststate = 0, dtutil.now_millis(), 0
 
     def notify_running(self, running) -> bool:
         if self._running == running:
@@ -231,6 +231,9 @@ class _Status:
         if state is None or state == self._state:
             return False
         self._state = state
+        now = dtutil.now_millis()
+        self._sincelaststate = now - self._statemillis
+        self._statemillis = now
         if state == sc.MAINTENANCE:
             self._details = {}
         return True
@@ -242,11 +245,11 @@ class _Status:
         return True
 
     def asdict(self) -> typing.Dict[str, typing.Any]:
-        status = dict(instance=self._context.config('identity'), running=self._running,
-                      state=self._state, details=self._details.copy())
-        auto = self._context.config('auto')
-        status['auto'] = auto if auto else 0
+        identity, auto = self._context.config('identity'), self._context.config('auto')
+        status = dict(instance=identity, running=self._running, state=self._state, sincelaststate=self._sincelaststate)
         if self._startmillis > 0:
             status['startmillis'] = self._startmillis
             status['uptime'] = dtutil.now_millis() - self._startmillis
+        status['auto'] = auto if auto else 0
+        status['details'] = self._details.copy()
         return status

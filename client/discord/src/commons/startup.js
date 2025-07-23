@@ -206,7 +206,15 @@ function startServerEvents(context, channels, instance, url, triggerHandler) {
     if (state === json.state) return true;  // Ignore no state change
     state = json.state;
     if (state === 'STARTED') { restartRequired = false; }
-    channels.server.send('`' + instance + '` ' + emojis.satellite + ' ' + state);
+    let text = '`' + instance + '` ' + emojis.satellite + ' ' + state;
+    if (['READY', 'STARTED', 'STOPPED'].includes(state) && json.sincelaststate) {
+      let seconds = json.sincelaststate / 1000;
+      seconds = seconds.toFixed(seconds < 10.0 ? 1 : 0);
+      text += ' in ' + seconds + ' seconds';
+    } else if (state === 'EXCEPTION' && json.details && json.details.error) {
+      text += ' (' + json.details.error + ')';
+    }
+    channels.server.send(text);
     if (triggerHandler) { triggerHandler(state); }
     return true;
   });
