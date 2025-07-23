@@ -138,6 +138,7 @@ class _RequestHandler:
             raise body
         response = web.StreamResponse() if isinstance(body, httpabc.ByteStream) else web.Response()
         response.headers.add(httpcnt.CACHE_CONTROL, httpcnt.CACHE_CONTROL_NO_STORE)
+        response.headers.add(httpcnt.ACCEPT_RANGES, httpcnt.ACCEPT_RANGES_NONE)
         self._add_allow_origin(response)
         if isinstance(body, httpsec.LoginResponse):
             self._security.set_cookie(response)

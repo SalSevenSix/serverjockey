@@ -20,6 +20,7 @@ class Statics:
         response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
         cache_control = 'private, max-age=3600' if content_type.is_text_type() else 'public, max-age=2592000'
         response.headers.add(httpcnt.CACHE_CONTROL, cache_control)
+        response.headers.add(httpcnt.ACCEPT_RANGES, httpcnt.ACCEPT_RANGES_NONE)
         if httpcnt.HeadersTool(request).accepts_encoding(gc.GZIP) and await resource.compress():
             response.headers.add(httpcnt.CONTENT_ENCODING, gc.GZIP)
             body = resource.compressed()
