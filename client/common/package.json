@@ -13,8 +13,8 @@
     "./activity/player": "./lib/activity/player.js"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint": "^9.30.0",
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "eslint": "^9.31.0",
     "mocha": "^11.7.1"
   }
 }

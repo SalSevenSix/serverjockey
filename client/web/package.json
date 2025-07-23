@@ -10,11 +10,11 @@
     "test": "mocha test/*/*"
   },
   "devDependencies": {
-    "@sveltejs/kit": "^2.22.2",
+    "@sveltejs/kit": "^2.25.1",
     "@sveltejs/adapter-static": "^3.0.8",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint": "^9.30.0",
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "eslint": "^9.31.0",
     "eslint-plugin-svelte": "^2.46.1",
     "svelte": "^4.2.20",
     "vite": "^5.4.19",
@@ -26,8 +26,8 @@
     "svelte-scrollto-next": "^1.1.0",
     "@fortawesome/fontawesome-free": "^6.6.0",
     "bulma": "^0.9.4",
-    "chart.js": "^4.4.8",
-    "date-picker-svelte": "^2.15.1",
+    "chart.js": "^4.5.0",
+    "date-picker-svelte": "^2.16.0",
     "anchorme": "^3.0.8"
   }
 }

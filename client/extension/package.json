@@ -9,14 +9,14 @@
     "lint": "eslint src"
   },
   "devDependencies": {
-    "@sveltejs/kit": "^2.19.1",
-    "sveltekit-adapter-chrome-extension": "^2.0.1",
+    "@sveltejs/kit": "^2.25.1",
     "@sveltejs/adapter-static": "^3.0.8",
+    "sveltekit-adapter-chrome-extension": "^2.0.1",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint": "^9.23.0",
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "eslint": "^9.31.0",
     "eslint-plugin-svelte": "^2.46.1",
-    "svelte": "^4.2.19",
-    "vite": "^5.4.14"
+    "svelte": "^4.2.20",
+    "vite": "^5.4.19"
   }
 }
