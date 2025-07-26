@@ -233,8 +233,8 @@ async def copy_bytes(
         source: Readable, target,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         tracker: BytesTracker = NullBytesTracker()):
-    pumping = True
     try:
+        pumping = True
         while pumping:
             chunk = await source.read(chunk_size)
             pumping = not end_of_stream(chunk)

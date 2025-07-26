@@ -259,8 +259,8 @@ class _FileByteStream(httpabc.ByteStream):
             raise Exception('Timeout waiting for file read ' + self._filename) from e
 
     async def _run(self):
-        pumping = True
         try:
+            pumping = True
             async with aiofiles.open(self._filename, mode='rb') as file:
                 while pumping:
                     chunk = await file.read(self._length)
@@ -273,4 +273,3 @@ class _FileByteStream(httpabc.ByteStream):
         finally:
             self._tracker.processed(None)
             tasks.task_end(self._task)
-            self._task = None

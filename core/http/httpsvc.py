@@ -174,6 +174,7 @@ class _RequestHandler:
                 response.headers.add(httpcnt.CONTENT_LENGTH, str(content_length))
             await response.prepare(self._request)
             await io.copy_bytes(body, response, io.DEFAULT_CHUNK_SIZE)
+            await response.write_eof()
         else:
             response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
             response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))
