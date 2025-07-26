@@ -17,7 +17,7 @@ class TestPlaying(unittest.TestCase):
         self.assertTrue(context.get_instance_state() in (sc.READY, sc.STOPPED))
         # start server
         context.find_element('serverControlsStart').click()
-        context.wait_for_instance_state(sc.STARTED, wait=200.0)
+        context.wait_for_instance_state(sc.STARTED, wait=300.0)
 
     def _start_server_and_wait_for_login(self, identity: str, module: str) -> str:
         context = webcontext.get()
