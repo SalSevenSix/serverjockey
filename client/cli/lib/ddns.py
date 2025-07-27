@@ -23,10 +23,11 @@ def update_duck(provider, token, domain):
 
 
 # https://porkbun.com/api/json/v3/documentation
-def update_pork(provider, apikey, secretapikey, domain):
+def update_pork(provider, apikey, secretapikey, domain, subdomains):
     assert provider == 'pork'
     if not apikey or not secretapikey or not domain:
         raise Exception('apikey, secretapikey and domain required')
+    subdomains = [] if subdomains is None else subdomains.split('.')
     ipv4, ipv6 = _get_public_ips()
     host, path = 'api.porkbun.com', '/api/json/v3/dns/retrieve/' + domain
     credentials = dict(secretapikey=secretapikey, apikey=apikey)
@@ -36,15 +37,17 @@ def update_pork(provider, apikey, secretapikey, domain):
         for record_type, content in (('A', ipv4), ('AAAA', ipv6)):
             if content and record['type'] == record_type and record['content'] != content:
                 name, path = record['name'], '/api/json/v3/dns/edit/' + domain + '/' + record['id']
-                body = credentials.copy()
-                body['type'], body['content'] = record_type, content
-                if name != domain:
-                    body['name'] = name[0:len(name) - len(domain) - 1]
-                logging.info('updating %s for %s to %s', record_type, name, content)
-                body = _http_request(host, path, body, timeout=12.0)
-                body = json.loads(body) if body else None
-                if not body or body.get('status') != 'SUCCESS':
-                    raise Exception(host + ' error response: ' + str(body))
+                subdom = '' if name == domain else name[0:len(name) - len(domain) - 1]
+                if len(subdomains) == 0 or subdom in subdomains:
+                    body = credentials.copy()
+                    body['type'], body['content'] = record_type, content
+                    if subdom:
+                        body['name'] = subdom
+                    logging.info('updating %s for %s to %s', record_type, name, content)
+                    body = _http_request(host, path, body, timeout=12.0)
+                    body = json.loads(body) if body else None
+                    if not body or body.get('status') != 'SUCCESS':
+                        raise Exception(host + ' error response: ' + str(body))
 
 
 def _get_public_ips() -> tuple:

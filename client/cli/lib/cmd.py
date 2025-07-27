@@ -240,19 +240,9 @@ class CommandProcessor:
         return True
 
     def _welcome(self) -> bool:
-        logging.info(util.OUT)
-        logging.info(util.OUT)
-        logging.info(util.OUT + ' ===========================================================')
-        logging.info(util.OUT + ' =                    WELCOME TO ZOMBOX                    =')
-        logging.info(util.OUT + ' ===========================================================')
-        logging.info(util.OUT)
-        logging.info(util.OUT + ' Open the webapp then login with the token.')
-        logging.info(util.OUT)
-        logging.info(util.OUT + ' Address   ' + self._url.replace('localhost', util.get_local_ip4()))
-        logging.info(util.OUT + ' Token     ' + self._token)
-        logging.info(util.OUT)
-        logging.info(util.OUT + ' (hit ENTER key to show login prompt)')
-        return True
+        text = util.get_resource('welcome.text').rstrip()
+        text = text.format(url=self._url.replace('localhost', util.get_local_ip4()), token=self._token)
+        return _dump_to_log(text)
 
     # https://blogs.oracle.com/cloud-infrastructure/post/step-by-step-instructions-to-send-email-with-oci-email-delivery
     def _emailtoken(self, argument: str | None) -> bool:

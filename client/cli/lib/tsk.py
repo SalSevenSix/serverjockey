@@ -25,14 +25,14 @@ def _extract_user_and_port(argument: str):
     return user if user else util.DEFAULT_USER, int(port) if port else util.DEFAULT_PORT
 
 
-def _dump_to_log(*data: str | bytes):
-    if not data:
-        return
-    for item in data:
-        text = item.decode() if isinstance(item, bytes) else item
-        if text:
-            for line in text.strip().split('\n'):
-                logging.info(util.OUT + line)
+def _dump_to_log(*data: str | bytes) -> bool:
+    if data:
+        for item in data:
+            text = item.decode() if isinstance(item, bytes) else item
+            if text:
+                for line in text.strip().split('\n'):
+                    logging.info(util.OUT + line)
+    return True
 
 
 class TaskProcessor:
@@ -71,8 +71,7 @@ class TaskProcessor:
     def _sysdsvc(self, argument: str) -> bool:
         assert argument
         resource = util.get_resource('serverjockey.service')
-        _dump_to_log(resource.format(user=argument))
-        return True
+        return _dump_to_log(resource.format(user=argument))
 
     # noinspection PyMethodMayBeStatic
     def _pteroegg(self, argument: str) -> bool:
@@ -80,8 +79,7 @@ class TaskProcessor:
         timestamp = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime()) + '+00:00'
         resource = util.get_resource('pteroegg.json')
         resource = resource.replace('{version}', argument).replace('{timestamp}', timestamp)
-        _dump_to_log(resource)
-        return True
+        return _dump_to_log(resource)
 
     # noinspection PyMethodMayBeStatic
     def _upgrade(self) -> bool:
@@ -168,13 +166,12 @@ class TaskProcessor:
     # noinspection PyMethodMayBeStatic
     def _ddns(self, argument: str) -> bool:
         if not argument:
-            _dump_to_log(util.get_resource('ddnshelp.text'))
-            return True
+            return _dump_to_log(util.get_resource('ddnshelp.text'))
         provider, = util.split_argument(argument, 1)
         if provider == 'duck':
             ddns.update_duck(*util.split_argument(argument, 3))
         elif provider == 'pork':
-            ddns.update_pork(*util.split_argument(argument, 4))
+            ddns.update_pork(*util.split_argument(argument, 5))
         else:
             raise Exception('Unknown DDNS Service Provider')
         return True

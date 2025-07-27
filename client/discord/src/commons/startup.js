@@ -212,7 +212,7 @@ function startServerEvents(context, channels, instance, url, triggerHandler) {
       seconds = seconds.toFixed(seconds < 10.0 ? 1 : 0);
       text += ' in ' + seconds + ' seconds';
     } else if (state === 'EXCEPTION' && json.details && json.details.error) {
-      text += ' (' + json.details.error + ')';
+      text += ' [' + json.details.error + ']';
     }
     channels.server.send(text);
     if (triggerHandler) { triggerHandler(state); }

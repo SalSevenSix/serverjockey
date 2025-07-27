@@ -1,0 +1,16 @@
+
+ ===========================================================
+ =                    WELCOME TO ZOMBOX                    =
+ ===========================================================
+
+ Open the webapp in a browser then login with the token.
+
+ Address   {url}
+ Token     {token}
+
+ If needed, login to the terminal with user zombox
+ and password zombox. Token can be displayed with
+ the following command.
+   serverjockey_cmd.pyz -nc showtoken
+
+ (hit ENTER key to show login prompt)
