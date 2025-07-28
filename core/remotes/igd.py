@@ -42,8 +42,8 @@ class IgdService(msgabc.AbcSubscriber):
     ADD_PORT_MAPPING, DELETE_PORT_MAPPING = 'IgdService.AddPortMapping', 'IgdService.DeletePortMapping'
 
     def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.NameIn((
-            IgdService.DISCOVER, IgdService.ADD_PORT_MAPPING, IgdService.DELETE_PORT_MAPPING)))
+        super().__init__(msgftr.NameIn(
+            IgdService.DISCOVER, IgdService.ADD_PORT_MAPPING, IgdService.DELETE_PORT_MAPPING))
         self._mailer, self._service = mailer, None
 
     async def handle(self, message):

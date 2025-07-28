@@ -165,7 +165,7 @@ class _ProgressLogger:
 class Archiver(msgabc.AbcSubscriber):
     REQUEST = 'Archiver.Request'
     START, COMPLETE, EXCEPTION = 'Archiver.Start', 'Archiver.Complete', 'Archiver.Exception'
-    FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn((COMPLETE, EXCEPTION))
+    FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn(COMPLETE, EXCEPTION)
 
     def __init__(self, mailer: msgabc.Mailer, tempdir: str = '/tmp'):
         super().__init__(msgftr.NameIs(Archiver.REQUEST))
@@ -197,7 +197,7 @@ class Archiver(msgabc.AbcSubscriber):
 class Unpacker(msgabc.AbcSubscriber):
     REQUEST = 'Unpacker.Request'
     START, COMPLETE, EXCEPTION = 'Unpacker.Start', 'Unpacker.Complete', 'Unpacker.Exception'
-    FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn((COMPLETE, EXCEPTION))
+    FILTER_START, FILTER_DONE = msgftr.NameIs(START), msgftr.NameIn(COMPLETE, EXCEPTION)
 
     def __init__(self, mailer: msgabc.Mailer, tempdir: str = '/tmp'):
         super().__init__(msgftr.NameIs(Unpacker.REQUEST))

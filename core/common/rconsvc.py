@@ -37,7 +37,7 @@ class RconService(msgabc.AbcSubscriber):
         mailer.post(source, RconService.CONFIG, dict(port=port, password=password))
 
     def __init__(self, mailer: msgabc.Mailer, out_prefix: str = '', enforce_id: bool = True):
-        super().__init__(msgftr.NameIn((RconService.CONFIG, RconService.REQUEST)))
+        super().__init__(msgftr.NameIn(RconService.CONFIG, RconService.REQUEST))
         self._mailer = mailer
         self._out_prefix, self._enforce_id = out_prefix, enforce_id
         self._port, self._password = None, None

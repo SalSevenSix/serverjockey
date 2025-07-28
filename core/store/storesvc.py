@@ -14,7 +14,7 @@ class StoreService(msgabc.AbcSubscriber):
 
     def __init__(self, context: contextsvc.Context):
         super().__init__(msgftr.Or(
-            msgftr.NameIn((storeabc.TRANSACTION, StoreService.INITIALISE, StoreService.RESET)),
+            msgftr.NameIn(storeabc.TRANSACTION, StoreService.INITIALISE, StoreService.RESET),
             msgftr.IsStop()))
         self._context = context
         self._session: Session | None = None

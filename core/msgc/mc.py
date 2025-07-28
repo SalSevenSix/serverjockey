@@ -6,7 +6,7 @@ from core.msgc import sc
 class SystemService:
     SERVER_INITIALISED = 'SystemService.ServerInitialised'
     SERVER_DELETED = 'SystemService.ServerDestroyed'
-    SERVER_FILTER = msgftr.NameIn((SERVER_INITIALISED, SERVER_DELETED))
+    SERVER_FILTER = msgftr.NameIn(SERVER_INITIALISED, SERVER_DELETED)
 
 
 class ServerService:
@@ -14,7 +14,7 @@ class ServerService:
     DELETE, DELETE_ME = 'ServerService.Delete', 'ServerService.DeletedMe'
     SHUTDOWN, SHUTDOWN_RESPONSE = 'ServerService.Shutdown', 'ServerService.ShutdownResponse'
     CLEANUP_NAMES = (DELETE, SHUTDOWN)
-    CLEANUP_FILTER = msgftr.NameIn(CLEANUP_NAMES)
+    CLEANUP_FILTER = msgftr.NameIn(*CLEANUP_NAMES)
 
 
 class ServerStatus:
@@ -47,8 +47,8 @@ class ServerProcess:
 
     FILTER_STATE_STARTED = msgftr.NameIs(STATE_STARTED)
     FILTER_STATE_STOPPING = msgftr.NameIs(STATE_STOPPING)
-    FILTER_STATES_UP = msgftr.NameIn((STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING))
-    FILTER_STATES_DOWN = msgftr.NameIn((STATE_STOPPED, STATE_EXCEPTION))
+    FILTER_STATES_UP = msgftr.NameIn(STATE_START, STATE_STARTING, STATE_STARTED, STATE_STOPPING)
+    FILTER_STATES_DOWN = msgftr.NameIn(STATE_STOPPED, STATE_EXCEPTION)
     FILTER_STATE_ALL = msgftr.Or(FILTER_STATES_UP, FILTER_STATES_DOWN)
 
 

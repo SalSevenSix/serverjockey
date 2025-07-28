@@ -55,7 +55,7 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
         mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
-        super().__init__(msgftr.NameIn((HttpSubscriptionService.SUBSCRIBE, HttpSubscriptionService.UNSUBSCRIBE)))
+        super().__init__(msgftr.NameIn(HttpSubscriptionService.SUBSCRIBE, HttpSubscriptionService.UNSUBSCRIBE))
         self._mailer = mailer
         self._subscriptions_path = '/subscriptions'
         self._subscriptions: typing.Dict[str, _Subscriber] = {}

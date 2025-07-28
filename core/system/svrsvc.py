@@ -34,9 +34,9 @@ class ServerService(msgabc.AbcSubscriber):
         return response.data()
 
     def __init__(self, context: contextsvc.Context, server: svrabc.Server):
-        super().__init__(msgftr.NameIn((
+        super().__init__(msgftr.NameIn(
             mc.ServerService.START, mc.ServerService.RESTART, mc.ServerService.STOP,
-            mc.ServerService.DELETE, mc.ServerService.SHUTDOWN)))
+            mc.ServerService.DELETE, mc.ServerService.SHUTDOWN))
         self._context, self._server = context, server
         self._queue = asyncio.Queue(maxsize=1)
         self._running, self._task = False, None
@@ -183,8 +183,8 @@ class ServerStatus(msgabc.AbcSubscriber):
         ServerStatus.notify_status(mailer, source, None, details)
 
     def __init__(self, context: contextsvc.Context):
-        super().__init__(msgftr.NameIn((
-            mc.ServerStatus.REQUEST, mc.ServerStatus.NOTIFY_RUNNING, mc.ServerStatus.NOTIFY_STATUS)))
+        super().__init__(msgftr.NameIn(
+            mc.ServerStatus.REQUEST, mc.ServerStatus.NOTIFY_RUNNING, mc.ServerStatus.NOTIFY_STATUS))
         self._context, self._status = context, _Status(context)
 
     def handle(self, message):

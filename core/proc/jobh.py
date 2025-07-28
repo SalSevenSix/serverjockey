@@ -21,7 +21,7 @@ class JobPipeInLineService(msgabc.AbcSubscriber):
         return response.data()
 
     def __init__(self, mailer: msgabc.MulticastMailer, pipe: streams.StreamWriter):
-        super().__init__(msgftr.NameIn((JobPipeInLineService.REQUEST, JobPipeInLineService.CLOSE)))
+        super().__init__(msgftr.NameIn(JobPipeInLineService.REQUEST, JobPipeInLineService.CLOSE))
         self._mailer, self._pipe = mailer, pipe
         mailer.register(self)
 
@@ -47,7 +47,7 @@ class JobProcess(msgabc.AbcSubscriber):
     STATE_COMPLETE = 'JobProcess.Complete'
     STATE_EXCEPTION = 'JobProcess.Exception'
     FILTER_STARTED = msgftr.NameIs(STATE_STARTED)
-    FILTER_DONE = msgftr.NameIn((STATE_EXCEPTION, STATE_COMPLETE))
+    FILTER_DONE = msgftr.NameIn(STATE_EXCEPTION, STATE_COMPLETE)
     STDOUT_LINE, STDERR_LINE = 'JobProcess.StdOutLine', 'JobProcess.StdErrLine'
     FILTER_STDOUT_LINE, FILTER_STDERR_LINE = msgftr.NameIs(STDOUT_LINE), msgftr.NameIs(STDERR_LINE)
     FILTER_ALL_LINES = msgftr.Or(FILTER_STDOUT_LINE, FILTER_STDERR_LINE)

@@ -209,7 +209,7 @@ class CallableSubscriber(msgabc.AbcSubscriber):
 class SetGetSubscriber(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.Mailer, name_get: str, name_set: str, name_response: str, value: any = None):
-        super().__init__(msgftr.NameIn((name_get, name_set)))
+        super().__init__(msgftr.NameIn(name_get, name_set))
         self._mailer, self._value = mailer, value
         self._name_get, self._name_set, self._name_response = name_get, name_set, name_response
 

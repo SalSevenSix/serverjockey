@@ -152,16 +152,13 @@ class _RequestHandler:
         if isinstance(body, str):
             content_type = httpcnt.CONTENT_TYPE_TEXT_PLAIN_UTF8
             body = body.encode(gc.UTF_8)
-        if isinstance(body, (dict, tuple, list)):
+        elif isinstance(body, (dict, tuple, list)):
             content_type = httpcnt.CONTENT_TYPE_APPLICATION_JSON
             body = objconv.obj_to_json(body)
             body = body.encode(gc.UTF_8)
-        if isinstance(body, httpabc.ResponseBody):
+        elif isinstance(body, httpabc.ResponseBody):
             content_type = body.content_type()
             body = body.body()
-        if self._headers.accepts_encoding(gc.GZIP) and isinstance(body, bytes) and len(body) > 512:
-            body = await pack.gzip_compress(body)
-            response.headers.add(httpcnt.CONTENT_ENCODING, gc.GZIP)
         if isinstance(body, httpabc.ByteStream):
             response.headers.add(httpcnt.CONTENT_DISPOSITION, 'inline; filename="' + body.name() + '"')
             response.headers.add(httpcnt.CONTENT_TYPE, body.content_type().content_type())
@@ -176,6 +173,10 @@ class _RequestHandler:
             await io.copy_bytes(body, response, io.DEFAULT_CHUNK_SIZE)
             await response.write_eof()
         else:
+            assert isinstance(body, bytes)
+            if self._headers.accepts_encoding(gc.GZIP) and len(body) > 512:
+                body = await pack.gzip_compress(body)
+                response.headers.add(httpcnt.CONTENT_ENCODING, gc.GZIP)
             response.headers.add(httpcnt.CONTENT_TYPE, content_type.content_type())
             response.headers.add(httpcnt.CONTENT_LENGTH, str(len(body)))
             response.body = body

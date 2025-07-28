@@ -33,7 +33,8 @@ class Not(msgabc.Filter):
 class And(msgabc.Filter):
 
     def __init__(self, *msg_filters: msgabc.Filter):
-        self._msg_filters = tuple(msg_filters)
+        assert len(msg_filters) > 1
+        self._msg_filters = msg_filters
 
     def accepts(self, message):
         for msg_filter in self._msg_filters:
@@ -45,7 +46,8 @@ class And(msgabc.Filter):
 class Or(msgabc.Filter):
 
     def __init__(self, *msg_filters: msgabc.Filter):
-        self._msg_filters = tuple(msg_filters)
+        assert len(msg_filters) > 1
+        self._msg_filters = msg_filters
 
     def accepts(self, message):
         for msg_filter in self._msg_filters:
@@ -83,7 +85,8 @@ class NameIs(msgabc.Filter):
 
 class NameIn(msgabc.Filter):
 
-    def __init__(self, names):
+    def __init__(self, *names):
+        assert len(names) > 1
         self._names = names
 
     def accepts(self, message):
@@ -103,15 +106,6 @@ class HasData(msgabc.Filter):
 
     def accepts(self, message):
         return bool(message.data())
-
-
-class DataIn(msgabc.Filter):
-
-    def __init__(self, values):
-        self._values = values
-
-    def accepts(self, message):
-        return message.data() in self._values
 
 
 class DataEquals(msgabc.Filter):

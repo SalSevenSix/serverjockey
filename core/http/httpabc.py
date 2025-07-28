@@ -57,10 +57,10 @@ class ResponseBody:
     def __init__(self, body: bytes, content_type: ContentType):
         self._body, self._content_type = body, content_type
 
-    def body(self):
+    def body(self) -> bytes:
         return self._body
 
-    def content_type(self):
+    def content_type(self) -> ContentType:
         return self._content_type
 
 
