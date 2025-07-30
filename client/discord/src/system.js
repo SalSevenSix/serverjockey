@@ -68,6 +68,14 @@ export function create({ context, httptool, message, data }) {
   });
 }
 
+export function token({ context, message }) {
+  if (!context.config.ALLOW_TOKEN) return msgutil.reactUnknown(message);
+  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  message.member.user.send('**Token:** `' + context.config.SERVER_TOKEN + '`')
+    .then(function() { msgutil.reactSuccess(message); })
+    .catch(function(error) { logger.error(error, message); });
+}
+
 export function shutdown({ httptool }) {
   httptool.doPost('/system/shutdown');
 }

@@ -5,6 +5,7 @@
   import InputPassword from '$lib/widget/InputPassword.svelte';
   import InputText from '$lib/widget/InputText.svelte';
   import InputTextArea from '$lib/widget/InputTextArea.svelte';
+  import InputCheckbox from '$lib/widget/InputCheckbox.svelte';
 
   const instance = getContext('instance');
 
@@ -93,6 +94,10 @@
     <InputText id="serverLinkConfigAdminRoles" label="Admin Roles"
        bind:value={formData.ADMIN_ROLE} disabled={processing}
        title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
+    {#if !noHints}
+      <InputCheckbox id="serverLinkConfigAllowToken" label="Allow admins to DM token"
+                     bind:checked={formData.ALLOW_TOKEN} />
+    {/if}
     <InputText id="serverLinkConfigPlayerRoles" label="Player Roles"
        bind:value={formData.PLAYER_ROLE} disabled={processing}
        title="Discord roles allowed to get server info and use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members" />

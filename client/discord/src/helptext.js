@@ -9,7 +9,8 @@ const systemHelpData = help.newHelpBuilder()
     'instances                  : Show server instances list',
     'use {instance}             : Switch default instance',
     'modules                    : Supported games list',
-    'create {instance} {module} : Create new instance'])
+    'create {instance} {module} : Create new instance',
+    'token                      : DM the webapp token'])
   .addHelp('help', [
     'Show help text. Use {command} and {action} for more detailed information. Both optional.',
     'e.g. `!help create` to show more help on the create command.'])

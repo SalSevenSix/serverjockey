@@ -43,7 +43,7 @@ def _default_config() -> dict:
              ' Keep the responses concise unless asked otherwise.'
              ' If a question is outside of {gamename}, politely say you cannot help.')
     return {
-        'BOT_TOKEN': None, 'CMD_PREFIX': '!',
+        'BOT_TOKEN': None, 'CMD_PREFIX': '!', 'ALLOW_TOKEN': False,
         'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
