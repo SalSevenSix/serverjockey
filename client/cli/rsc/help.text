@@ -50,7 +50,7 @@ commands:
   backup-runtime:<prunehours> | Make a backup of the runtime, optionally
                               | delete runtime backups older than <prunehours>
   wipe-runtime      | Delete the currently installed game server
-  wipe-world:<part> | Delete game world data part, all is everything
+  wipe-world:<part> | Delete game world data part, no part to see help
   log-tail:<lines>  | Get last 100 lines from log file,
                     | or <lines> if provided, up to 100
   log-tail-f        | Get last 10 lines from log then follow additional lines

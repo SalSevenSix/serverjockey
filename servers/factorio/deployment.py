@@ -74,7 +74,10 @@ class Deployment:
         builder.put_meta(self._runtime_dir + '/data/changelog.txt',
                          httpext.MtimeHandler().check(self._map_file).dir(self._save_dir))
         builder.put_installer(_InstallRuntimeHandler(self, self._context))
-        builder.put_wipes(self._runtime_dir, dict(save=self._map_file, config=self._config_dir, all=self._world_dir))
+        builder.put_wipes(self._runtime_dir, dict(
+            save=self._map_file, config=self._config_dir, all=self._world_dir,
+            logs=dict(path=self._runtime_dir, ls_filter=_logfiles),
+            autosaves=dict(path=self._save_dir, ls_filter=_autosaves)))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
         builder.pop()

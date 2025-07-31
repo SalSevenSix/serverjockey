@@ -1,0 +1,9 @@
+Choose the world part to wipe/reset/delete for instance;
+wipe-world:all         | Reset entire world
+wipe-world:save        | Reset game world save only
+wipe-world:logs        | Delete log files only
+wipe-world:config      | Reset configuration files only
+wipe-world:autosaves   | Delete automatic server created saves
+wipe-world:autobackups | Delete automatic server created backups
+wipe-world:playerdb    | Reset player database (PZ only)
+wipe-world:lua         | Reset lua folder (PZ only)

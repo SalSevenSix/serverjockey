@@ -25,7 +25,7 @@ function reactError(message) {
   return null;
 }
 
-export function raw(value) {
+export function log(value) {
   console.log(value);
 }
 

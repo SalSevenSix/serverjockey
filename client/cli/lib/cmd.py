@@ -144,8 +144,7 @@ class CommandProcessor:
 
     def _wipe_world(self, argument: str | None) -> bool:
         if not argument:
-            logging.error('wipe-world requires an argument e.g. wipe-world:all')
-            return False
+            return _dump_to_log(util.get_resource('wipeworldhelp.text').strip())
         self._connection.post(self._instance_path('/deployment/wipe-world-' + argument.lower()))
         return True
 

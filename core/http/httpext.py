@@ -110,11 +110,16 @@ class WipeHandler(httpabc.PostHandler):
     WIPED = 'WipeHandler.Wiped'
     FILTER_DONE = msgftr.NameIs(WIPED)
 
-    def __init__(self, mailer: msgabc.Mailer, path: str):
-        self._mailer, self._path = mailer, path
+    def __init__(self, mailer: msgabc.Mailer, path: str, ls_filter: typing.Callable = None):
+        self._mailer, self._path, self._ls_filter = mailer, path, ls_filter
 
     async def handle_post(self, resource, data):
-        await io.delete_any(self._path)
+        if self._ls_filter:
+            if await io.directory_exists(self._path):
+                for entry in [e for e in await io.directory_list(self._path) if self._ls_filter(e)]:
+                    await io.delete_any(self._path + '/' + entry['name'])
+        else:
+            await io.delete_any(self._path)
         self._mailer.post(self, WipeHandler.WIPED, self._path)
         return httpabc.ResponseBody.NO_CONTENT
 

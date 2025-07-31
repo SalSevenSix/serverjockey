@@ -1,5 +1,6 @@
 import * as cutil from 'common/util/util';
 import * as msgutil from './util/msgutil.js';
+import * as logger from './util/logger.js';
 import * as helptext from './helptext.js';
 
 export const help = helptext.systemHelp;

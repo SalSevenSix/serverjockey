@@ -146,8 +146,12 @@ class DeploymentResourceBuilder:
 
     def put_wipes(self, runtime_dir: str, world_dirs: dict) -> DeploymentResourceBuilder:
         self.put('wipe-runtime', httpext.WipeHandler(self._context, runtime_dir), 'r')
-        for key in world_dirs.keys():
-            self.put('wipe-world-' + key, httpext.WipeHandler(self._context, world_dirs[key]), 'r')
+        for key, value in world_dirs.items():
+            if isinstance(value, dict):
+                handler = httpext.WipeHandler(self._context, value['path'], value['ls_filter'])
+            else:
+                handler = httpext.WipeHandler(self._context, value)
+            self.put('wipe-world-' + key, handler, 'r')
         return self
 
     def put_archiving(

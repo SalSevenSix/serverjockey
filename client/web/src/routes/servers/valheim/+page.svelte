@@ -18,6 +18,8 @@
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
       'desc': 'Reset the game world map only.' },
+    { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
+      'desc': 'Delete the log files only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset game world map and configuration.' }];
 </script>

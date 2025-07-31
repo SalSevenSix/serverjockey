@@ -22,6 +22,8 @@
       'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-config', 'name': 'Reset Config',
       'desc': 'Reset the configuration files only.' },
+    { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
+      'desc': 'Delete the log files only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
 </script>

@@ -53,7 +53,7 @@ class Deployment:
         builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
                          httpext.MtimeHandler().check(self._map_dir).dir(self._logs_dir))
         builder.put_installer_steam(self._runtime_dir, APPID)
-        builder.put_wipes(self._runtime_dir, dict(save=self._map_dir, all=self._world_dir))
+        builder.put_wipes(self._runtime_dir, dict(save=self._map_dir, logs=self._logs_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.pop()
         builder.put_logs(self._logs_dir)

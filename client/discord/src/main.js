@@ -15,12 +15,12 @@ const context = { running: false };
 function initialise() {
   const metarg = process.argv.length > 2 ? process.argv[2] : null;
   if (metarg == null || metarg === '-h' || metarg === '--help') {
-    console.log('usage: serverlink [-h|--help] [-v|--version] [config1.json config2.json ...]');
+    logger.log('usage: serverlink [-h|--help] [-v|--version] [config1.json config2.json ...]');
     process.exit(metarg == null ? 1 : 0);
   }
   const version = '0.22.0 ({timestamp})';
   if (metarg === '-v' || metarg === '--version') {
-    console.log(version);
+    logger.log(version);
     process.exit(0);
   }
   let [config, homedir] = [{}, null];

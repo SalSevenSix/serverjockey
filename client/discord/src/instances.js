@@ -52,7 +52,7 @@ export class Service {
         aliases: instance.aliases, triggers: instance.triggers });
     }
     logger.info('Instances...');
-    logger.raw(self.getInstancesText().join('\n'));
+    logger.log(self.getInstancesText().join('\n'));
     new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
       const identity = data.instance.identity;
       if (data.event === 'created') {
