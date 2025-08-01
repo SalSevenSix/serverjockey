@@ -99,7 +99,7 @@ export class SubscriptionHelper {
           if (response.status === 404) return false;
           if (!response.ok) throw new Error('Status: ' + response.status);
           if (response.status === 204) return true;
-          let ct = response.headers.get('Content-Type');
+          const ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();
           return response.json();
         })

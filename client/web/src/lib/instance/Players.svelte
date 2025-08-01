@@ -11,8 +11,8 @@
 
   export let hasSteamId = false;
 
+  const columnCount = 2 + (hasSteamId ? 1 : 0);
   let loading = true;
-  let columnCount = 2 + (hasSteamId ? 1 : 0);
   let players = [];
 
   $: chunks = chunkArray(players, 15, hasSteamId ? 2 : 3);

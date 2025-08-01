@@ -9,9 +9,8 @@
   let colours = Array(27).fill(dazzle ? '#000000' : 'currentColor');
 
   function generateSchedule(index) {
-    let actions = [];
-    let clock = 0;
-    let current = false;
+    const actions = [];
+    let [clock, current] = [0, false];
     let [onLow, onHigh, offLow, offHigh] = [20, 100, 40, 500];
     while (clock < 2800 || !current) {
       if (current) {
@@ -29,7 +28,7 @@
   }
 
   function generateSchedules() {
-    let actions = [];
+    const actions = [];
     for (let i = 0; i < 27; i++) {
        actions.push(...generateSchedule(i));
     }

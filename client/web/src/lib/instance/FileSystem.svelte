@@ -22,15 +22,15 @@
   export let customMeta = null;
 
   const idPrefix = 'fileSystem' + toCamelCase(rootPath.replaceAll('/', ' '));
+  const hasActions = allowDelete > 0 || customMeta;
+  const columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
+                    + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
   let pwdUrl = null;
   let notifyText = null;
   let loading = true;
   let loadingError = false;
   let paths = [];
-  let hasActions = allowDelete > 0 || customMeta;
-  let columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
-                  + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
   $: isMaint = $serverStatus.state === 'MAINTENANCE';
   $: cannotAction = $serverStatus.running || isMaint;

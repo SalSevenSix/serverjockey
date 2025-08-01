@@ -18,7 +18,7 @@
           blocks.push(id);
           set(true);
         } else {
-          let index = blocks.indexOf(id);
+          const index = blocks.indexOf(id);
           if (index === -1) return;
           blocks.splice(index, 1);
           if (blocks.length === 0) { set(false); }

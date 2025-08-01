@@ -43,8 +43,8 @@ export default [
   {
     rules: {
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
+      'prefer-const': 1,
       'no-self-assign': 0,
-      'prefer-const': 0,
       'no-new': 0,
       'one-var': 0,
       'func-style': 0,
