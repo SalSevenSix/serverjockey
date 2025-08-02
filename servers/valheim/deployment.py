@@ -70,8 +70,7 @@ class Deployment:
         self._env['SteamAppId'] = '892970'
 
     async def initialise(self):
-        await self.build_world()
-        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_ports().init_jobs().init_archiving(self._tempdir)
         helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 

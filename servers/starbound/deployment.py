@@ -33,8 +33,7 @@ class Deployment:
         self._config_file = self._world_dir + '/starbound_server.config'
 
     async def initialise(self):
-        await self.build_world()
-        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_ports().init_jobs().init_archiving(self._tempdir).done()
 
     def resources(self, resource: httprsc.WebResource):

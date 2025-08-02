@@ -65,8 +65,7 @@ class Deployment:
         self._mods_list = self._config_dir + '/mod-list.json'
 
     async def initialise(self):
-        await self.build_world()
-        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_ports().init_jobs(no_rebuild=True).init_archiving(self._tempdir).done()
 
     def resources(self, resource: httprsc.WebResource):

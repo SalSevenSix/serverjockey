@@ -145,11 +145,11 @@ class MtimeHandler(httpabc.GetHandler):
         if not httpsec.is_secure(data):
             return httpabc.ResponseBody.UNAUTHORISED
         result = await self._find_mtime()
-        result = dtutil.to_millis(result) if result else None
+        result = dtutil.to_millis(result) if result or result == 0.0 else None
         return dict(timestamp=result)
 
     async def _find_mtime(self) -> float | None:
-        result = None
+        result = 0.0
         for item in self._items:
             mtime, itype, ipath = None, item['type'], item['path']
             if itype == 0:  # check
@@ -160,7 +160,7 @@ class MtimeHandler(httpabc.GetHandler):
                     mtime = await io.file_mtime(ipath)
             elif itype == 2:  # dir
                 mtime = await MtimeHandler._dir_mtime(ipath)
-            if result is None or (mtime and mtime > result):
+            if mtime and mtime > result:
                 result = mtime
         return result
 

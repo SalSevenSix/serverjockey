@@ -55,8 +55,7 @@ class Deployment:
         self._settings_file = self._ini_dir + '/PalWorldSettings.ini'
 
     async def initialise(self):
-        await self.build_world()
-        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_ports().init_jobs().init_archiving(self._tempdir).done()
 
     def resources(self, resource: httprsc.WebResource):

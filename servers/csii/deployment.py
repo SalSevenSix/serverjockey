@@ -57,8 +57,7 @@ class Deployment:
     async def initialise(self):
         self._wrapper = await wrapper.write_wrapper(self._home_dir)
         await steamutil.link_steamclient_to_sdk(self._context.env('HOME'))
-        await self.build_world()
-        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_ports().init_jobs().init_archiving(self._tempdir)
         helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 

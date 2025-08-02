@@ -31,8 +31,7 @@ class Deployment:
         self._logs_dir, self._config_file = self._world_dir + '/logs', self._world_dir + '/config.json'
 
     async def initialise(self):
-        await self.build_world()
-        helper = svrhelpers.DeploymentInitHelper(self._context, self.build_world)
+        helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_archiving(self._tempdir).init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
     def resources(self, resource: httprsc.WebResource):

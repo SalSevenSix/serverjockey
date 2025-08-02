@@ -40,6 +40,10 @@ class DeploymentInitHelper:
         self._context, self._build_world = context, build_world
         self._rebuild_filters = [httpext.WipeHandler.FILTER_DONE]
 
+    async def init(self) -> DeploymentInitHelper:
+        await self._build_world()
+        return self
+
     def init_ports(self) -> DeploymentInitHelper:
         self._context.register(portmapper.PortMapperService(self._context))
         return self
@@ -133,10 +137,14 @@ class DeploymentResourceBuilder:
     def psh_deployment(self) -> DeploymentResourceBuilder:
         return self.psh('deployment')
 
-    def put_meta(self, runtime_meta: str, world_meta: httpabc.GetHandler) -> DeploymentResourceBuilder:
-        self.put('runtime-meta', httpext.FileSystemHandler(runtime_meta))
-        self.put('world-meta', world_meta)
-        return self
+    def put_meta_runtime(self, path: str) -> DeploymentResourceBuilder:
+        return self.put('runtime-meta', httpext.FileSystemHandler(path))
+
+    def put_meta_world(self, handler: httpabc.GetHandler) -> DeploymentResourceBuilder:
+        return self.put('world-meta', handler)
+
+    def put_meta(self, runtime_path: str, world_handler: httpabc.GetHandler) -> DeploymentResourceBuilder:
+        return self.put_meta_runtime(runtime_path).put_meta_world(world_handler)
 
     def put_installer(self, handler: httpabc.PostHandler) -> DeploymentResourceBuilder:
         return self.put('install-runtime', handler, 'r')
