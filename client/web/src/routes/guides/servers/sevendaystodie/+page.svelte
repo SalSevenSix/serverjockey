@@ -1,7 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import ExtLink from '$lib/widget/ExtLink.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
@@ -40,5 +39,3 @@
 &quot;_comment_telnet_upnp&quot;: &quot;Try to automatically redirect telnet port on home network using UPnP&quot;,
 &quot;telnet_upnp&quot;: false
 </WebappPortForward>
-
-<BackToTop />

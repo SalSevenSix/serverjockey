@@ -2,7 +2,6 @@
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import TerminalCube from '$lib/svg/TerminalCube.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
 
@@ -88,5 +87,3 @@ serverjockey_cmd.pyz -c \
   backup-world:168 \
   server:start</CodeBlock>
 </div>
-
-<BackToTop />

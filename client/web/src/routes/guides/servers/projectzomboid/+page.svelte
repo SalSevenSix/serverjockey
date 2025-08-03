@@ -1,7 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import ExtLink from '$lib/widget/ExtLink.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
@@ -202,8 +201,6 @@ BackupsOnVersionChange=false</CodeBlock>
     Then restart the Docker container.
   </p>
 </div>
-
-<BackToTop />
 
 
 <style>

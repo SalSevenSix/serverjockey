@@ -1,7 +1,6 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
   import GrafanaIcon from '$lib/svg/GrafanaIcon.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
@@ -219,5 +218,3 @@
     <img src={surl('/assets/guides/grafana/serverjockey_dashboard.png')} alt="ServerJockey Dashboard" loading="lazy" />
   </figure>
 </div>
-
-<BackToTop />

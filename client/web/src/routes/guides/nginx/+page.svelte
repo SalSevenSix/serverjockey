@@ -2,7 +2,6 @@
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import NginxIcon from '$lib/svg/NginxIcon.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import NanoGuide from '$lib/widget/NanoGuide.svelte';
@@ -238,5 +237,3 @@ location /serverjockey/ &#123;
   </p>
   <CodeBlock>serverjockey_cmd.pyz -t ddns:duck,&lt;your_token_here&gt;,example</CodeBlock>
 </div>
-
-<BackToTop />

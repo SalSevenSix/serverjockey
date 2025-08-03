@@ -1,7 +1,6 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
 </script>
 
 
@@ -92,5 +91,3 @@
     However you only need to create a world backup, download it, then upload it to the target instance and restore it.
   </p>
 </div>
-
-<BackToTop />

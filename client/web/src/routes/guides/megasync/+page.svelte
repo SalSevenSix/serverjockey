@@ -1,7 +1,6 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
   import MegaUploadIcon from '$lib/svg/MegaUploadIcon.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import NanoGuide from '$lib/widget/NanoGuide.svelte';
@@ -171,5 +170,3 @@ WantedBy=multi-user.target</CodeBlock>
   </ul>
 
 </div>
-
-<BackToTop />

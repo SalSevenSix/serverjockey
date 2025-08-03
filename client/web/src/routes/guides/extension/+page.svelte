@@ -2,7 +2,6 @@
   import { browserName } from '$lib/util/browserutil';
   import { surl } from '$lib/util/sjgmsapi';
   import Jigsaw from '$lib/svg/Jigsaw.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const isChrome = browserName === 'Chrome';
@@ -192,5 +191,3 @@
     <img src={surl('/assets/guides/extension/mod_chinatown_workshops.jpg')} alt="Workshop list" loading="lazy" />
   </figure>
 </div>
-
-<BackToTop />

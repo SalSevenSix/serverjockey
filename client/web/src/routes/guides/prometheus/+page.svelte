@@ -1,7 +1,6 @@
 <script>
   import { surl } from '$lib/util/sjgmsapi';
   import PrometheusIcon from '$lib/svg/PrometheusIcon.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
   import NanoGuide from '$lib/widget/NanoGuide.svelte';
@@ -191,5 +190,3 @@ scrape_configs:
     Read the <a href={surl('/guides/grafana')}>Grafana guide</a> for help installing and configuring Grafana.
   </p>
 </div>
-
-<BackToTop />

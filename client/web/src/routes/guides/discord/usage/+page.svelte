@@ -2,7 +2,6 @@
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import Clyde from '$lib/svg/Clyde.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
 
@@ -212,5 +211,3 @@ ServerWelcomeMessage=Welcome to the ServerJockey guide server.</CodeBlock>
          alt="Give Item" loading="lazy" />
   </figure>
 </div>
-
-<BackToTop />

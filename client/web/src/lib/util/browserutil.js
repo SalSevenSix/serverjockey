@@ -2,6 +2,7 @@ export const noStorage = typeof(Storage) === 'undefined';
 export const browserName = getBrowserName();
 
 function getBrowserName() {
+  if (typeof(window) === 'undefined') return 'Chrome';
   const ua = window.navigator.userAgent;
   if (ua.includes('Firefox')) return 'Firefox';
   if (ua.includes('SamsungBrowser')) return 'SamsungBrowser';
@@ -9,7 +10,7 @@ function getBrowserName() {
   if (ua.includes('Edge') || ua.includes('Edg')) return 'Edge';
   if (ua.includes('Chrome')) return 'Chrome';
   if (ua.includes('Safari')) return 'Safari';
-  return null;
+  return 'Chrome';
 }
 
 export class ObjectUrls {

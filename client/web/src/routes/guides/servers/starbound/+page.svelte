@@ -1,7 +1,6 @@
 <script>
   import { scrollto } from 'svelte-scrollto-next';
   import ExtLink from '$lib/widget/ExtLink.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import WebappTitle from '../WebappTitle.svelte';
   import WebappServerInstall from '../WebappServerInstall.svelte';
   import WebappConfigRun from '../WebappConfigRun.svelte';
@@ -54,5 +53,3 @@
     <span class="has-text-weight-bold">Install Runtime</span> to update the server with mod changes.
   </p>
 </div>
-
-<BackToTop />

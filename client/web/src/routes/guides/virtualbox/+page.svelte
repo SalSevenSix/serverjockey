@@ -2,7 +2,6 @@
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import VirtualBoxIcon from '$lib/svg/VirtualBoxIcon.svelte';
-  import BackToTop from '$lib/widget/BackToTop.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
 </script>
@@ -156,8 +155,6 @@
     <img src={surl('/assets/guides/virtualbox/samba.png')} alt="Samba sharing" loading="lazy" />
   </figure>
 </div>
-
-<BackToTop />
 
 
 <style>
