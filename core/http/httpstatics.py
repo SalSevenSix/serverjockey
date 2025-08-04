@@ -55,7 +55,7 @@ class _CacheLoader:
 class _Loader:
 
     async def load(self, path: str) -> typing.Optional[_Resource]:
-        if path is None or path == '':
+        if not path:
             path = '/'
         if path[-1] == '/':
             path += 'index.html'
