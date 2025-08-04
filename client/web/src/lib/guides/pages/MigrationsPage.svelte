@@ -23,7 +23,7 @@
 <div class="content">
   <p><span class="step-title"></span>
     First step for migration is to follow the appropriate
-    <a href={surl('/guides#gameserverguides')}>game server guide</a>
+    <a href={surl('/guides')}>game server guide</a>
     to create a new instance with game server installed and started once.
     This will ensure a new game save is created as a fresh example.
   </p>

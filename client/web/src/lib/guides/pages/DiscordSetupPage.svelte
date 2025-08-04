@@ -1,4 +1,5 @@
 <script>
+  import { browser } from '$app/environment';
   import { scrollto } from 'svelte-scrollto-next';
   import { surl } from '$lib/util/sjgmsapi';
   import Clyde from '$lib/svg/Clyde.svelte';
@@ -380,7 +381,9 @@
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
     <div class="box">
-      <ServerLinkConfig noHints />
+      {#if browser}
+        <ServerLinkConfig noHints />
+      {/if}
     </div>
   </div>
 </div>
@@ -395,8 +398,10 @@
 <div class="columns is-mobile is-centered">
   <div class="column is-11">
     <div class="box">
-      <ServerStatus stateOnly />
-      <ServerControls />
+      {#if browser}
+        <ServerStatus stateOnly />
+        <ServerControls />
+      {/if}
     </div>
   </div>
 </div>
