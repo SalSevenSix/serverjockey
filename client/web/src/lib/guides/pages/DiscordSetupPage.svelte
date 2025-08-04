@@ -4,14 +4,11 @@
   import Clyde from '$lib/svg/Clyde.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
   import CodeBlock from '$lib/widget/CodeBlock.svelte';
-  import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import ServerStatus from '$lib/instance/ServerStatus.svelte';
   import ServerControls from '$lib/instance/ServerControls.svelte';
   import ServerLinkConfig from '$lib/svrlink/ServerLinkConfig.svelte';
 </script>
 
-
-<ServerStatusStore identity="serverlink">
 
 <div class="columns">
   <div class="column is-one-quarter content mb-0">
@@ -532,8 +529,6 @@
     Go to the <a href={surl('/guides/discord/usage')}>Discord bot usage guide</a>.
   </p>
 </div>
-
-</ServerStatusStore>
 
 
 <style>
