@@ -154,7 +154,7 @@ class Deployment:
             await io.delete_file(install_package)
             await io.delete_directory(unpack_dir)
             await io.delete_directory(self._runtime_dir)
-            logger.log('DOWNLOADING ' + url)
+            logger.log(f'DOWNLOADING {url}')
             connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
@@ -164,7 +164,7 @@ class Deployment:
                         tracker = msglog.PercentTracker(self._context, int(content_length), prefix='downloaded')
                     await io.stream_write_file(
                         install_package, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
-            logger.log('UNPACKING ' + install_package)
+            logger.log(f'UNPACKING {install_package}')
             await pack.unpack_tarxz(install_package, self._home_dir)
             logger.log('INSTALLING Factorio server')
             await io.rename_path(unpack_dir, self._runtime_dir)

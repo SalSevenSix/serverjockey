@@ -1,6 +1,6 @@
-from xml.dom import minidom
+from bs4 import BeautifulSoup, Comment, NavigableString
 # ALLOW core.* sevendaystodie.messaging
-from core.util import gc, util, objconv, io, pack, idutil
+from core.util import gc, util, objconv, io, pack, idutil, funcutil
 from core.msgc import sc
 from core.msg import msglog
 from core.context import contextsvc
@@ -93,26 +93,32 @@ class Deployment:
         subs = {'AdminFileName': '../../config/serveradmin.xml',
                 'UserDataFolder': self._save_dir,
                 'SaveGameFolder': None}
-        original = minidom.parseString(await io.read_file(self._settings_file)).firstChild
-        result, doc, live = {}, minidom.Document(), minidom.Element(original.nodeName)
-        doc.appendChild(live)
-        live.ownerDocument = doc
-        for node in original.childNodes:
-            if isinstance(node, minidom.Element):
-                name = node.getAttribute('name')
-                if name in subs:
-                    if subs[name] is not None:
-                        live.appendChild(_new_element(doc, node.nodeName, name, subs[name]))
-                        result[name] = subs[name]
-                    del subs[name]
-                else:
-                    live.appendChild(node)
-                    result[name] = node.getAttribute('value')
-        for name, value in subs.items():
-            if value is not None:
-                live.appendChild(_new_element(doc, 'property', name, value))
+        doc = BeautifulSoup(await io.read_file(self._settings_file), 'html.parser')
+        for element in doc.find_all(string=lambda text: isinstance(text, Comment)):
+            element.extract()  # delete comments
+        result, root, props = {}, doc.find('serversettings'), doc.find_all('property')
+        props = [p for p in props if p.has_attr('name') and p.has_attr('value')]
+        for prop in props:
+            name, value = prop['name'], prop['value']
+            if name in subs:
+                value = subs[name]
+                del subs[name]
+                if value is None:  # delete prop
+                    prop.extract()
+                else:  # set prop
+                    prop['value'] = value
+                    result[name] = value
+            else:
                 result[name] = value
-        await io.write_file(self._live_file, doc.toxml())
+        for name, value in subs.items():
+            if value is not None:  # add prop
+                root.append(doc.new_tag('property', attrs=dict(name=name, value=value)))
+                result[name] = value
+        for element in doc.find_all(string=True):
+            if isinstance(element, NavigableString) and element.strip() == '':
+                element.extract()  # remove whitespace
+        doc = str(doc).replace('serversettings>', 'ServerSettings>').replace('></property>', ' />')
+        await io.write_file(self._live_file, doc)
         return result
 
     async def _map_ports(self, config: dict):
@@ -167,34 +173,26 @@ class Deployment:
             if livedir:
                 await io.delete_any(self._mods_live_dir + '/' + livedir)
             if not await io.file_exists(modfile):
-                logger.log('MOD ' + name + ' not found, removed from server.')
+                logger.log(f'MOD {name} not found, removed from server.')
                 return None
             working_dir = self._tempdir + '/' + idutil.generate_id()
             await io.create_directory(working_dir)
             await pack.unpack_archive(modfile, working_dir)
             source = await io.find_files(working_dir, modinfo)
             if len(source) == 0:
-                logger.log('MOD ' + name + ' has no ' + modinfo)
+                logger.log(f'MOD {name} has no {modinfo}')
                 return None
             source = source[0][0:-1 - len(modinfo)]
             livedir = name[0:-1 - len(util.fext(name))] if source == working_dir else util.fname(source)
             target = self._mods_live_dir + '/' + livedir
             await io.delete_any(target)
             await io.move_path(source, target)
-            logger.log('MOD ' + name + ' installed successfully.')
+            logger.log(f'MOD {name} installed successfully.')
             return livedir
         finally:
-            await io.delete_directory(working_dir)
+            await funcutil.silently_call(io.delete_directory(working_dir))
 
 
 def _is_modfile(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
     return ftype == 'file' and fname != fext and fext == 'zip'
-
-
-def _new_element(doc: minidom.Document, element_name: str, name: str, value: str) -> minidom.Element:
-    node = minidom.Element(element_name)
-    node.ownerDocument = doc
-    node.setAttribute('name', name)
-    node.setAttribute('value', value)
-    return node

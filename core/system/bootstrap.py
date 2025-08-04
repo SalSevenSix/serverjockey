@@ -3,6 +3,8 @@ import argparse
 import asyncio
 import sys
 import os
+import warnings
+from bs4 import XMLParsedAsHTMLWarning
 # ALLOW util.* msg.* context.* http.* system.svrabc system.system
 from core.util import util, idutil, funcutil, sysutil, steamutil, logutil, io, tasks, objconv
 from core.msg import msglog
@@ -89,6 +91,7 @@ def _create_context() -> contextsvc.Context | None:
 
 
 def _setup_logging(context: contextsvc.Context):
+    warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
     logfmt, datefmt = '%(asctime)s %(levelname)05s %(message)s', '%Y-%m-%d %H:%M:%S'
     level = logging.DEBUG if context.is_debug() else logging.INFO
     filename = context.config('logfile')

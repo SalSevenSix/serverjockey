@@ -17,6 +17,7 @@ vdf = "3.4"                   # https://pypi.org/project/vdf/
 rcon = "2.4.9"                # https://pypi.org/project/rcon/
 upnpy = "1.1.8"               # https://pypi.org/project/upnpy/
 prometheus-client = "0.22.1"  # https://pypi.org/project/prometheus-client/
+beautifulsoup4 = "4.13.4"     # https://pypi.org/project/beautifulsoup4/
 
 [requires]
 python_version = "3.12"

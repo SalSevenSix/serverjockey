@@ -102,15 +102,15 @@ class Deployment:
         for workshop_item in [str(o['name']) for o in workshop_files if o['type'] == 'directory']:
             pack_file = workshop_dir + '/' + workshop_item + '/contents.pak'
             if await io.file_exists(pack_file):
-                logger.log('INFO  Adding   ' + workshop_item)
+                logger.log(f'INFO  Adding   {workshop_item}')
                 workshop_items.append(workshop_item + '.pak')
                 link_file = mods_dir + '/' + workshop_item + '.pak'
                 if not await io.symlink_exists(link_file):
                     await io.create_symlink(link_file, pack_file)
             else:
-                logger.log('ERROR Adding   ' + workshop_item + ' because contents.pak not found')
+                logger.log(f'ERROR Adding   {workshop_item} because contents.pak not found')
         for mod_file in [o['name'] for o in await io.directory_list(mods_dir) if o['name'] not in workshop_items]:
-            logger.log('INFO  Removing ' + mod_file[:-4])
+            logger.log(f'INFO  Removing {mod_file[:-4]}')
             await io.delete_file(mods_dir + '/' + mod_file)
 
 
