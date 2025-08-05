@@ -1,7 +1,7 @@
 <script>
   export let nocopy = false;
 
-  const navigatorClipboard = navigator.clipboard;
+  const navigatorClipboard = typeof(navigator) === 'undefined' ? null : navigator.clipboard;
 
   let codeElement;
 
