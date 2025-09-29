@@ -17,6 +17,11 @@
     return 'fa-' + parts[0].toLowerCase();
   }
 
+  function virtText(value) {
+    if (!value) return 'Unknown';
+    return value === 'none' ? 'No' : 'Yes (' + value + ')';
+  }
+
   function handleJson(json) {
     if (!running) return;
     info = json;
@@ -57,19 +62,18 @@
   <div class="column is-one-third content position-relative">
     {#if info}
       <table class="table"><tbody>
+        <tr><td class="has-text-weight-bold" title="ServerJockey version">Version</td>
+            <td class="word-break-all notranslate" id="systemInfoVersion">{info.version}</td></tr>
         <tr><td class="has-text-weight-bold" title="Machine time">Time</td>
             <td class="notranslate" id="systemInfoTime">{info.time.text.slice(0, -3)} {info.time.tz.text.endsWith(':00') ? info.time.tz.text.slice(0, -3) : info.time.tz.text}</td></tr>
         <tr><td title="ServerJockey uptime">Uptime</td>
             <td class="notranslate" id="systemInfoUptime">{humanDuration(info.uptime)}</td></tr>
         <tr><td class="has-text-weight-bold" title="Operating system name">OS</td>
             <td class="notranslate" id="systemInfoOs"><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
-        <tr><td class="has-text-weight-bold" title="CPU usage">CPU</td>
-            <td class="notranslate" id="systemInfoCpuPercent"><HealthSymbol red={80.0} amber={50.0} value={info.cpu.percent} />
-              {info.cpu.percent}%</td></tr>
-        <tr><td title="CPU model name">Model</td>
-            <td class="notranslate" id="systemInfoCpuName">{info.cpu.modelname}</td></tr>
-        <tr><td class="notranslate" title="CPU Architecture | Sockets | Cores-per-socket | Threads-per-core | Logical Processors">A|S|C|T|P</td>
-            <td class="notranslate" id="systemInfoCpuInfo">{info.cpu.arch} | {info.cpu.sockets} | {info.cpu.cores} | {info.cpu.threads} | {info.cpu.cpus}</td></tr>
+        <tr><td id="systemInfoVirtual" title="Is operating in a virtual machine">Virtual</td>
+            <td>{virtText(info.virt.virtual)}</td></tr>
+        <tr><td id="systemInfoContainer" title="Is operating in a container">Container</td>
+            <td>{virtText(info.virt.container)}</td></tr>
         <tr><td class="has-text-weight-bold" title="Network download and upload rate">Net</td>
             <td class="notranslate" id="systemInfoNetRate">
               <span class="white-space-nowrap"><NetRateSymbol icon="fa-circle-arrow-down" value={info.net.rate.rx} />{info.net.rate.rx}</span>&nbsp;
@@ -84,12 +88,12 @@
     {:else}
       <SpinnerOverlay />
       <table class="table"><tbody>
+        <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">Time</td><td>...</td></tr>
         <tr><td>Uptime</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">OS</td><td>...</td></tr>
-        <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
-        <tr><td>Model</td><td>...</td></tr>
-        <tr><td class="notranslate">A|S|C|T|P</td><td>...</td></tr>
+        <tr><td>Virtual</td><td>...</td></tr>
+        <tr><td>Container</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">Net</td><td>...</td></tr>
         <tr><td>Public</td><td>...</td></tr>
         <tr><td>Local</td><td>...</td></tr>
@@ -100,8 +104,13 @@
   <div class="column is-one-third content position-relative">
     {#if info}
       <table class="table"><tbody>
-        <tr><td class="has-text-weight-bold" title="ServerJockey version">Version</td>
-            <td class="word-break-all notranslate" id="systemInfoVersion">{info.version}</td></tr>
+        <tr><td class="has-text-weight-bold" title="CPU usage">CPU</td>
+            <td class="notranslate" id="systemInfoCpuPercent"><HealthSymbol red={80.0} amber={50.0} value={info.cpu.percent} />
+              {info.cpu.percent}%</td></tr>
+        <tr><td title="CPU model name">Model</td>
+            <td class="notranslate" id="systemInfoCpuName">{info.cpu.modelname}</td></tr>
+        <tr><td class="notranslate" title="CPU Architecture | Sockets | Cores-per-socket | Threads-per-core | Logical Processors">A|S|C|T|P</td>
+            <td class="notranslate" id="systemInfoCpuInfo">{info.cpu.arch} | {info.cpu.sockets} | {info.cpu.cores} | {info.cpu.threads} | {info.cpu.cpus}</td></tr>
         <tr><td class="has-text-weight-bold" title="Memory usage">Memory</td>
             <td class="notranslate" id="systemInfoMemoryPercent"><HealthSymbol red={90.0} amber={75.0} value={info.memory.percent} />
               {info.memory.percent}%</td></tr>
@@ -128,7 +137,9 @@
     {:else}
       <SpinnerOverlay />
       <table class="table"><tbody>
-        <tr><td class="has-text-weight-bold">Version</td><td>...</td></tr>
+        <tr><td class="has-text-weight-bold">CPU</td><td>...</td></tr>
+        <tr><td>Model</td><td>...</td></tr>
+        <tr><td class="notranslate">A|S|C|T|P</td><td>...</td></tr>
         <tr><td class="has-text-weight-bold">Memory</td><td>...</td></tr>
         <tr><td>Total</td><td>...</td></tr>
         <tr><td>Used</td><td>...</td></tr>

@@ -65,6 +65,18 @@ class _OsName:
         return 'UNKNOWN'
 
 
+class _VirtInfo:
+    # noinspection PyMethodMayBeStatic
+    async def get(self) -> dict:
+        try:
+            virtual = await shellutil.run_executable('systemd-detect-virt', '-v')
+            container = await shellutil.run_executable('systemd-detect-virt', '-c')
+            return dict(virtual=virtual.strip().lower(), container=container.strip().lower())
+        except Exception as e:
+            logging.error('_VirtInfo.get() failed %s', repr(e))
+            return dict(virtual=None, container=None)
+
+
 class _LocalIp:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> str:
@@ -214,6 +226,7 @@ _VERSION, _BUILDSTAMP = '0.22.0', '{timestamp}'
 _VERSION_LABEL = _VERSION + ' (' + _BUILDSTAMP + ')'
 _VERSION_DICT = dict(version=_VERSION, buildstamp=_BUILDSTAMP)
 _OS_NAME = _Cacher(_OsName(), 31536000.0)
+_VIRT_INFO = _Cacher(_VirtInfo(), 31536000.0)
 _LOCAL_IP = _Cacher(_LocalIp(), 31536000.0)
 _PUBLIC_IP = _Cacher(_PublicIp(), 31536000.0)
 _DISK_USAGE = _Cacher(_DiskUsage(), 120.0)
@@ -240,6 +253,10 @@ def system_time() -> dict:
 
 async def os_name() -> str:
     return await _OS_NAME.get()
+
+
+async def virt_info() -> str:
+    return await _VIRT_INFO.get()
 
 
 async def local_ip() -> str:
@@ -272,7 +289,9 @@ async def net_bytes() -> dict:
 
 async def system_info() -> dict:
     # noinspection PyTypeChecker
-    cpu, cpupct, netrate, os, disk, memory, local, public = await asyncio.gather(
-        cpu_info(), cpu_percent(), net_bytes(), os_name(), disk_usage(), virtual_memory(), local_ip(), public_ip())
+    cpu, cpupct, netrate, os, virt, disk, memory, local, public = await asyncio.gather(
+        cpu_info(), cpu_percent(), net_bytes(), os_name(), virt_info(), disk_usage(),
+        virtual_memory(), local_ip(), public_ip())
     cpu['percent'], net = cpupct, dict(rate=netrate, local=local, public=public)
-    return dict(version=system_version(), time=system_time(), os=os, cpu=cpu, memory=memory, disk=disk, net=net)
+    return dict(version=system_version(), time=system_time(), os=os, virt=virt, cpu=cpu,
+                memory=memory, disk=disk, net=net)
