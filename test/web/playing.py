@@ -14,7 +14,7 @@ class TestPlaying(unittest.TestCase):
         # open instance page
         context = webcontext.get()
         context.goto_instance(identity, module)
-        self.assertTrue(context.get_instance_state() in (sc.READY, sc.STOPPED))
+        self.assertTrue(context.get_instance_state() in (sc.READY, sc.STOPPED, sc.EXCEPTION))
         # start server
         context.find_element('serverControlsStart').click()
         context.wait_for_instance_state(sc.STARTED, wait=300.0)

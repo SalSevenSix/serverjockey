@@ -138,7 +138,7 @@ export function main() {
       GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages],
     partials: [Partials.Channel]
   });
-  context.client.once('ready', startup);
+  context.client.once('clientReady', startup);
   context.client.on('messageCreate', handleMessage);
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);

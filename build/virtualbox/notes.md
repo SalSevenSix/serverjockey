@@ -1,6 +1,8 @@
 # VirtualBox Build Notes
 
 ## Release Process
+* Import ZomBox ova file from previous release
+  * rename VDI disk file
 * `sudo su`
 * `serverjockey_cmd.pyz -t uninstall`
 * `apt update && apt upgrade`

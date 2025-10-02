@@ -22,7 +22,8 @@ class _WebTestContext:
 
     def __init__(self):
         self.driver = drivers.Chrome()
-        self.driver.set_window_size(1280, 720)
+        time.sleep(0.2)
+        self.driver.set_window_size(1400, 800)
         self.actions = ActionChains(self.driver)
         self.home = '/'.join(os.getcwd().split('/')[0:3]) + '/serverjockey/'
         self.net_public = self._login()
