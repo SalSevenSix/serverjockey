@@ -53,6 +53,8 @@ exit 0
 
 
 %changelog
+* Fri Oct 03 2025 Bowden Salis <bsalis76@gmail.com> - 0.23.0
+- Feature release v0.23.0
 * Thu Oct 02 2025 Bowden Salis <bsalis76@gmail.com> - 0.22.0
 - Small changes and lib updates
 * Sun Jul 27 2025 Bowden Salis <bsalis76@gmail.com> - 0.21.0
