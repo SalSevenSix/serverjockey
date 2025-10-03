@@ -29,7 +29,7 @@ const systemHelpData = help.newHelpBuilder()
 export const systemHelp = help.process(systemHelpData);
 
 const serverHelp = [
-  'server             : Server status',
+  'status             : Server status',
   'server start       : Start server',
   'server restart     : Save world and restart server',
   'server restart-after-warnings : Warnings then restart server',

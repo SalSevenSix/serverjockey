@@ -3,23 +3,25 @@ import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 import * as subs from '../util/subs.js';
 
+export function status({ httptool, instance }) {
+  httptool.doGet('/server', function(body) {
+    let result = 'Server ' + instance + ' is ';
+    if (!body.running) return [result + 'DOWN'];
+    result += body.state;
+    if (body.uptime) { result += ' (' + cutil.humanDuration(body.uptime) + ')'; }
+    result += '\n';
+    const dtl = body.details;
+    if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
+    if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
+    if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
+    if (dtl.map) { result += 'Map:      ' + dtl.map + '\n'; }
+    if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
+    return [result.trim()];
+  });
+}
+
 export function server({ context, httptool, instance, message, data }) {
-  if (data.length === 0) {
-    return httptool.doGet('/server', function(body) {
-      let result = 'Server ' + instance + ' is ';
-      if (!body.running) return [result + 'DOWN'];
-      result += body.state;
-      if (body.uptime) { result += ' (' + cutil.humanDuration(body.uptime) + ')'; }
-      result += '\n';
-      const dtl = body.details;
-      if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
-      if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
-      if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
-      if (dtl.map) { result += 'Map:      ' + dtl.map + '\n'; }
-      if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
-      return [result.trim()];
-    });
-  }
+  if (data.length === 0) return status({ httptool, instance });
   const signals = ['start', 'restart-immediately', 'restart-after-warnings', 'restart-on-empty', 'stop'];
   const upStates = ['START', 'STARTING', 'STARTED', 'STOPPING'];
   const downStates = ['READY', 'STOPPED', 'EXCEPTION'];
