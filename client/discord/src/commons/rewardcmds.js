@@ -106,7 +106,6 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
 /* eslint-enable complexity */
 
 export function reward({ context, httptool, aliases, rewards, instance, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, rewards.listText());

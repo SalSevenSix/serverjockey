@@ -20,14 +20,17 @@ _SERVER_STARTED_FILTER = msgftr.And(
 
 
 def _migrate_config(config) -> dict:
-    element = util.get('LLM_API', config)
+    keys = []
+    element = util.get('LLM_API', config)  # version 0.21.0
     if element:
         element = util.get('chatlog', element)
         if element:
             element = util.get('messages', element)
             if element:
-                del config['LLM_API']
-    return config
+                keys.append('LLM_API')
+    if util.get('PLAYER_ROLE', config):  # version 0.23.0
+        keys.append('PLAYER_ROLE')
+    return config if len(keys) == 0 else util.delete_dict(config, keys)
 
 
 def _default_config() -> dict:
@@ -44,7 +47,7 @@ def _default_config() -> dict:
              ' If a question is outside of {gamename}, politely say you cannot help.')
     return {
         'BOT_TOKEN': None, 'CMD_PREFIX': '!', 'ALLOW_TOKEN': False,
-        'ADMIN_ROLE': '@admin', 'PLAYER_ROLE': '@everyone',
+        'ADMIN_ROLE': '@admin',
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
         'LLM_API': {

@@ -34,7 +34,6 @@ export class MessageHttpTool {
 
   doGet(path, dataHandler) {
     const [context, message] = [this.#context, this.#message];
-    if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
     fetch(this.#baseurl + path, util.newGetRequest(context.config.SERVER_TOKEN))
       .then(function(response) {
         if (!response.ok) throw new Error('Status: ' + response.status);
@@ -51,10 +50,8 @@ export class MessageHttpTool {
       });
   }
 
-  doPost(path, body = null, dataHandler = null, allowRoles = null) {
+  doPost(path, body = null, dataHandler = null) {
     const [context, message] = [this.#context, this.#message];
-    if (allowRoles && !msgutil.checkHasRole(message, allowRoles)) return;
-    if (!allowRoles && !msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
     let request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
     if (cutil.isString(body)) {
       request = util.newPostRequest('text/plain', context.config.SERVER_TOKEN);

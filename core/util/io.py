@@ -247,11 +247,10 @@ async def copy_bytes(
 
 async def keyfill_json_file(filename: str, template: dict, preprocessor: callable = None) -> bool:
     if await file_exists(filename):
-        loaded = objconv.json_to_dict(await read_file(filename))
-        if preprocessor:
-            loaded = preprocessor(loaded)
+        original = objconv.json_to_dict(await read_file(filename))
+        loaded = preprocessor(original) if preprocessor else original
         filled = util.keyfill_dict(loaded, template, True)
-        updated = filled is not loaded
+        updated = (loaded is not original) or (filled is not loaded)
         if updated:
             await write_file(filename, objconv.obj_to_json(filled, pretty=True))
     else:

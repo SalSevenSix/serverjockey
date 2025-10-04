@@ -3,7 +3,6 @@ import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 
 export function alias({ context, aliases, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [cmd, aliasid, name] = data.length > 0 ? data : ['list'];
   if (cmd === 'list') {
     msgutil.sendText(message, aliases.listText());

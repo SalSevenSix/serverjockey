@@ -11,14 +11,13 @@ export function send({ httptool, message, data }) {
   });
 }
 
-export function say({ context, httptool, message, data }) {
+export function say({ httptool, message, data }) {
   if (data.length === 0) return msgutil.reactUnknown(message);
   const name = msgutil.extractUserTag(message);
   const line = msgutil.extractCommandLine(message);
   httptool.doPost(
     '/console/say', { player: name, text: line },
-    function() { message.react(emojis.say); },
-    context.config.PLAYER_ROLE
+    function() { message.react(emojis.say); }
   );
 }
 

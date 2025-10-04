@@ -5,7 +5,6 @@ import * as msgutil from '../util/msgutil.js';
 
 /* eslint-disable max-lines-per-function */
 export function activity({ context, httptool, aliases, instance, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [baseurl, now] = [context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, limit, format, query] = [null, null, null, null, 11, 'TEXT', 'player'];
   data.forEach(function(arg) {

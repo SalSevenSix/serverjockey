@@ -98,9 +98,6 @@
       <InputCheckbox id="serverLinkConfigAllowToken" label="Allow admins to DM token"
                      bind:checked={formData.ALLOW_TOKEN} />
     {/if}
-    <InputText id="serverLinkConfigPlayerRoles" label="Player Roles"
-       bind:value={formData.PLAYER_ROLE} disabled={processing}
-       title="Discord roles allowed to get server info and use chat integration. Multiple roles can be specified using '@' e.g. @PZ Player @Members" />
     <InputText id="serverLinkConfigServerEventChannelID" label="Server Event Channel ID"
        bind:value={formData.EVENT_CHANNELS.server} disabled={processing}
        title="Discord channel ID for Server events" />

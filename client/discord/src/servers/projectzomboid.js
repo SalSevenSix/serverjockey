@@ -161,7 +161,6 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
 }
 
 export function whitelist({ context, httptool, instance, aliases, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   if (data.length < 2) return msgutil.reactUnknown(message);
   const cmd = data[0];
   if (cmd === 'add-name') {

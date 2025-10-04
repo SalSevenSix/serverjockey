@@ -40,7 +40,6 @@ function formatVerbose(results, tzFlag) {
 }
 
 export function chatlog({ context, httptool, instance, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   const [baseurl, now] = [context.config.SERVER_URL, new Date()];
   let [tz, atto, atfrom, player, format] = [null, null, null, null, 'VERBOSE'];
   data.forEach(function(arg) {

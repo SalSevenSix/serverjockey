@@ -26,8 +26,7 @@ async function handleAdd(triggers, message, data) {
   else { throw new Error('Failed adding new trigger'); }
 }
 
-export function trigger({ context, triggers, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+export function trigger({ triggers, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, triggers.listText());

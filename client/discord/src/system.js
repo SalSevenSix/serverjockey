@@ -38,17 +38,14 @@ export function system({ httptool }) {
 }
 
 export function modules({ context, message }) {
-  if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
   msgutil.sendText(message, context.instancesService.getModulesText());
 }
 
 export function instances({ context, message }) {
-  if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
   msgutil.sendText(message, context.instancesService.getInstancesText());
 }
 
 export function use({ context, message, data }) {
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   let text = context.instancesService.currentInstance();
   if (data.length === 0) {
     if (text) { text = 'default => ' + text; }
@@ -71,7 +68,6 @@ export function create({ context, httptool, message, data }) {
 
 export function token({ context, message }) {
   if (!context.config.ALLOW_TOKEN) return msgutil.reactUnknown(message);
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
   message.member.user.send('**Token:** `' + context.config.SERVER_TOKEN + '`')
     .then(function() { msgutil.reactSuccess(message); })
     .catch(function(error) { logger.error(error, message); });

@@ -2,8 +2,7 @@ import * as cutil from 'common/util/util';
 import * as msgutil from '../util/msgutil.js';
 import * as logger from '../util/logger.js';
 
-export function chat({ context, chatbot, message }) {
-  if (!msgutil.checkHasRole(message, context.config.PLAYER_ROLE)) return;
+export function chat({ chatbot, message }) {
   const input = msgutil.extractCommandLine(message);
   if (input) {
     msgutil.reactWait(message);
