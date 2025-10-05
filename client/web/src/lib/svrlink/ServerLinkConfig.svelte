@@ -11,16 +11,19 @@
 
   export let noHints = false;
 
+  const sectionNames = ['General', 'Roles', 'AI', 'Other'];
+  const sectionMax = sectionNames.length;
+  let sectionIndex = 1;
+  let processing = true;
   let loadedData = normaliseData({});
   let formData = loadedData;
-  let processing = true;
-  let sectionIndex = 1;
 
   $: cannotSave = processing || JSON.stringify(loadedData) === JSON.stringify(formData);
   $: showHints = !noHints && !processing && !loadedData.BOT_TOKEN;
 
   function normaliseData(data) {
     if (!data.EVENT_CHANNELS) { data.EVENT_CHANNELS = {}; }
+    if (!data.COMMAND_ROLES) { data.COMMAND_ROLES = {}; }
     if (!data.LLM_API) { data.LLM_API = {}; }
     if (!data.LLM_API.chatbot) { data.LLM_API.chatbot = {}; }
     if (!data.LLM_API.chatlog) { data.LLM_API.chatlog = {}; }
@@ -28,11 +31,11 @@
   }
 
   function prevSection() {
-    sectionIndex = sectionIndex <= 1 ? 3 : sectionIndex - 1;
+    sectionIndex = sectionIndex <= 1 ? sectionMax : sectionIndex - 1;
   }
 
   function nextSection() {
-    sectionIndex = sectionIndex >= 3 ? 1 : sectionIndex + 1;
+    sectionIndex = sectionIndex >= sectionMax ? 1 : sectionIndex + 1;
   }
 
   function save() {
@@ -79,7 +82,8 @@
     <div class="block buttons mb-2">
       <button id="serverLinkConfigSectionPrev" title="PREV" class="button is-dark is-small mr-0" on:click={prevSection}>
         <i class="fa fa-angle-left fa-lg"></i></button>
-      <p class="mb-2 ml-3 mr-3">{sectionIndex} / 3</p>
+      <p class="config-section-title mb-2 ml-3 mr-3">
+        {sectionIndex}&nbsp;/&nbsp;{sectionMax}&nbsp; {sectionNames[sectionIndex - 1]}</p>
       <button id="serverLinkConfigSectionNext" title="NEXT" class="button is-dark is-small mr-0" on:click={nextSection}>
         <i class="fa fa-angle-right fa-lg"></i></button>
     </div>
@@ -93,7 +97,7 @@
        title="Prefix the bot will recognise as commands, more than one character is allowed, '@' not allowed" />
     <InputText id="serverLinkConfigAdminRoles" label="Admin Roles"
        bind:value={formData.ADMIN_ROLE} disabled={processing}
-       title="Discord roles allowed to run admin commands. Multiple roles can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
+       title="Discord roles allowed to run admin commands. Multiple can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
     {#if !noHints}
       <InputCheckbox id="serverLinkConfigAllowToken" label="Allow admins to DM token"
                      bind:checked={formData.ALLOW_TOKEN} />
@@ -109,6 +113,13 @@
        title="Discord channel ID for Chat integration" />
   </div>
   <div class="block" class:is-hidden={sectionIndex != 2}>
+    {#each Object.keys(formData.COMMAND_ROLES) as roleKey}
+      <InputText id="serverLinkConfigCommandRoleI{roleKey}" label={roleKey}
+         bind:value={formData.COMMAND_ROLES[roleKey]} disabled={processing}
+         title="Roles for bot command '{roleKey}'. Multiple can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
+    {/each}
+  </div>
+  <div class="block" class:is-hidden={sectionIndex != 3}>
     <InputText id="serverLinkConfigLlmApiBaseurl" label="AI Service URL"
        bind:value={formData.LLM_API.baseurl} disabled={processing}
        placeholder="https://api.deepseek.com" title="OpenAI compatible URL endpoint to use for AI features" />
@@ -131,7 +142,7 @@
        bind:value={formData.LLM_API.chatlog.user} disabled={processing}
        title="User prompt to use for Chatlog summary AI feature" />
   </div>
-  <div class="block" class:is-hidden={sectionIndex != 3}>
+  <div class="block" class:is-hidden={sectionIndex != 4}>
     <InputTextArea id="serverLinkConfigWhitelistDM" label="Whitelist DM"
        bind:value={formData.WHITELIST_DM} disabled={processing}
        title="DM message that will be sent to the user when whitelisted by Discord tag" />
@@ -142,3 +153,10 @@
       <i class="fa fa-floppy-disk fa-lg"></i>&nbsp;&nbsp;Save</button>
   </div>
 </div>
+
+
+<style>
+  .config-section-title {
+    min-width: 6.5em;
+  }
+</style>

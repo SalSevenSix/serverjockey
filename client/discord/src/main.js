@@ -44,10 +44,11 @@ function initialise() {
   if (!fs.existsSync(config.DATADIR)) { fs.mkdirSync(config.DATADIR); }
   logger.info('*** START ServerLink Bot ***');
   config.ADMIN_ROLE = util.listifyRoles(config.ADMIN_ROLE);
-  const tlsKey = 'NODE_TLS_REJECT_UNAUTHORIZED';
-  if (process.env[tlsKey] != 0 && config.SERVER_URL.startsWith('https')) {
-    process.env[tlsKey] = 0;
+  for (const [key, value] of Object.entries(config.COMMAND_ROLES)) {
+    config.COMMAND_ROLES[key] = util.listifyRoles(value);
   }
+  const tlsKey = 'NODE_TLS_REJECT_UNAUTHORIZED';
+  if (process.env[tlsKey] != 0 && config.SERVER_URL.startsWith('https')) { process.env[tlsKey] = 0; }
   logger.info('Version: ' + version);
   logger.info('Executable: ' + process.argv[0]);
   logger.info('JS Runtime: ' + process.version);
@@ -101,7 +102,7 @@ function handleMessage(message) {
   const parts = command.split('.');
   if (parts.length === 2) { [instance, command] = parts; }
   if (command === 'startup') return msgutil.reactUnknown(message);
-  if (!msgutil.checkHasRole(message, context.config.ADMIN_ROLE)) return;
+  if (!msgutil.checkHasRole(message, command, context.config.ADMIN_ROLE, context.config.COMMAND_ROLES)) return;
   const args = { context: context, instance: instance, message: message, data: data };
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {

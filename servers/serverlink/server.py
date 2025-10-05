@@ -46,8 +46,15 @@ def _default_config() -> dict:
              ' Keep the responses concise unless asked otherwise.'
              ' If a question is outside of {gamename}, politely say you cannot help.')
     return {
-        'BOT_TOKEN': None, 'CMD_PREFIX': '!', 'ALLOW_TOKEN': False,
-        'ADMIN_ROLE': '@admin',
+        'BOT_TOKEN': None, 'CMD_PREFIX': '!', 'ALLOW_TOKEN': False, 'ADMIN_ROLE': '@admin',
+        'COMMAND_ROLES': {
+            'system': None, 'create': None, 'auto': None, 'use': None,
+            'instances': None, 'status': None, 'server': None, 'log': None,
+            'say': None, 'players': None, 'chat': None, 'send': None,
+            'world': None, 'player': None, 'banlist': None, 'whitelist': None,
+            'getconfig': None, 'setconfig': None, 'deployment': None,
+            'alias': None, 'reward': None, 'trigger': None, 'activity': None, 'chatlog': None
+        },
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
         'LLM_API': {

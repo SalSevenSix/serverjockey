@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as cutil from 'common/util/util';
 import { emojis } from './literals.js';
 import * as util from './util.js';
 import * as logger from './logger.js';
@@ -21,7 +22,10 @@ export function extractUserTag(message) {
   return result;
 }
 
-export function checkHasRole(message, roles) {
+export function checkHasRole(message, command, adminRoles, commandRoles) {
+  if (['help', 'about', 'modules'].includes(command)) return true;
+  const roles = [...adminRoles];
+  if (cutil.hasProp(commandRoles, command)) { roles.push(...commandRoles[command]); }
   let hasRole = roles.includes('everyone');
   if (!hasRole && roles.length > 0) {
     hasRole = message.member.roles.cache.find(function(role) {
