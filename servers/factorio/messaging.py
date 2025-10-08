@@ -30,7 +30,7 @@ async def initialise(context: contextsvc.Context):
 # 3.804 Info ServerRouter.cpp:547: Own address is IP ADDR:({14.237.58.218:34197}) (confirmed by pingpong2)
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_FILTER = msgftr.DataMatches(r'.*Factorio (.*?) \(build.*headless.*')
-    PORT_FILTER = msgftr.DataMatches(r'.*Hosting game at IP ADDR:\(\{(.*?):(.*?)\}\)$')
+    PORT_FILTER = msgftr.DataMatches(r'.*Hosting game at IP ADDR:\(\{(.*?):(\d+)\}\)$')
     IP_FILTER = msgftr.DataMatches(r'.*Info.*Own address is IP ADDR:\(\{(.*?):.*\}\).*confirmed by pingpong.*')
 
     def __init__(self, mailer: msgabc.Mailer, local_ip: str):

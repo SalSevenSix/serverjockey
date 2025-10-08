@@ -24,10 +24,8 @@ async def initialise(context: contextsvc.Context):
 # [Info] Server Version 1.4.4 (linux x86_64) Source ID: 8cbe6faf22282659828a194e06a08999f213769e Protocol: 747
 # [Info] UniverseServer: listening for incoming TCP connections on 0000:0000:0000:0000:0000:0000:0000:0000:21025
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_PREFIX, VERSION_SUFFIX = '[Info] Server Version', 'Source ID:'
-    VERSION_FILTER = msgftr.DataMatches(
-        '.*' + VERSION_PREFIX.replace('[', r'\[').replace(']', r'\]') + '.*' + VERSION_SUFFIX + '.*')
-    PORT_FILTER = msgftr.DataStrContains('[Info] UniverseServer: listening for incoming TCP connections on')
+    VERSION_FILTER = msgftr.DataMatches(r'^\[Info\] Server Version (.*?) \(.*')
+    PORT_FILTER = msgftr.DataMatches(r'^\[Info\] UniverseServer: listening for incoming TCP connections on.*:(\d+)$')
 
     def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
@@ -37,14 +35,11 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
-            value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
-            value = util.rchop(value, '(')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
+            version = _ServerDetailsSubscriber.VERSION_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = message.data()
-            value = value[value.rfind(':') + 1:]
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
+            port = _ServerDetailsSubscriber.PORT_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=port))
         return None
 
 
@@ -53,12 +48,9 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # [Info] UniverseServer: Client 'Jazmin' <1> (0000:0000:0000:0000:0000:ffff:c0a8:0065) disconnected for reason:
 # [Info] Chat: <Wingshield> Hello Everyone
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    CHAT = '[Info] Chat: <'
-    CHAT_FILTER = msgftr.DataStrContains(CHAT)
-    PREFIX = '[Info] UniverseServer: Client'
-    REG_PREFIX = '.*' + PREFIX.replace('[', r'\[').replace(']', r'\]')
-    CONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) connected.*')
-    DISCONNECT_FILTER = msgftr.DataMatches(REG_PREFIX + r'.*\) disconnected for reason.*')
+    CHAT_FILTER = msgftr.DataMatches(r'^\[Info\] Chat: <(.*?)> (.*?)$')
+    CONNECT_FILTER = msgftr.DataMatches(r"^\[Info\] UniverseServer: Client '(.*?)' .*connected$")
+    DISCONNECT_FILTER = msgftr.DataMatches(r"^\[Info\] UniverseServer: Client '(.*?)' .*disconnected.*")
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
@@ -70,15 +62,12 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.CHAT)
-            name = util.rchop(value, '>')
-            text = util.lchop(value, '>')
+            name, text = util.fill(_PlayerEventSubscriber.CHAT_FILTER.find_all(message.data()), 2)
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
-            return None
-        value = util.lchop(message.data(), _PlayerEventSubscriber.PREFIX)[1:]
-        value = util.rchop(value, "' ")
-        if _PlayerEventSubscriber.CONNECT_FILTER.accepts(message):
-            playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
+        elif _PlayerEventSubscriber.CONNECT_FILTER.accepts(message):
+            name = _PlayerEventSubscriber.CONNECT_FILTER.find_one(message.data())
+            playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
         elif _PlayerEventSubscriber.DISCONNECT_FILTER.accepts(message):
-            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            name = _PlayerEventSubscriber.DISCONNECT_FILTER.find_one(message.data())
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
         return None
