@@ -35,9 +35,10 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         if message.name() is NAME_PORT:
             self._port = str(message.data())
             return None
-        value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
-        value = util.rchop(util.lchop(value, 'l-'), ' ')
-        svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=self._port, version=value))
+        version = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
+        version = util.rchop(util.lchop(version, 'l-'), ' ')
+        details = dict(ip=self._public_ip, port=self._port, version=version)
+        svrsvc.ServerStatus.notify_details(self._mailer, self, details)
         return None
 
 
@@ -57,9 +58,9 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.LOGIN)
-            playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
+            client_id = util.lchop(message.data(), _PlayerEventSubscriber.LOGIN)
+            playerstore.PlayersSubscriber.event_login(self._mailer, self, client_id)
         elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.LOGOUT)
-            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            client_id = util.lchop(message.data(), _PlayerEventSubscriber.LOGOUT)
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, client_id)
         return None

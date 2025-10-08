@@ -150,3 +150,17 @@ class TestCoreUtilUtil(unittest.TestCase):
         self.assertEqual('ccc', util.fname('aaa/bbb/ccc'))
         self.assertEqual('ccc', util.fname('/aaa/bbb/ccc'))
         self.assertEqual('aa-bb-cc', util.fname('http://foo/bar/aa-bb-cc'))
+
+    def test_single(self):
+        self.assertEqual(None, util.single(None))
+        self.assertEqual(None, util.single([]))
+        self.assertEqual(1, util.single([1]))
+        self.assertEqual(1, util.single([1, 2]))
+
+    def test_fill(self):
+        self.assertEqual((None, None, None), util.fill(None, 3))
+        self.assertEqual((None, None, None), util.fill([], 3))
+        self.assertEqual((1, None, None), util.fill([1], 3))
+        self.assertEqual((1, 2, None), util.fill([1, 2], 3))
+        self.assertEqual((1, 2, 3), util.fill([1, 2, 3], 3))
+        self.assertEqual((1, 2, 3, 4), util.fill([1, 2, 3, 4], 3))

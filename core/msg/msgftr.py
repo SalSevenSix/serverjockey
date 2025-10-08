@@ -1,5 +1,6 @@
 import re
 # ALLOW util.* msg.msgabc
+from core.util import util
 from core.msg import msgabc
 
 
@@ -151,3 +152,10 @@ class DataMatches(msgabc.Filter):
 
     def accepts(self, message):
         return self._pattern.match(str(message.data())) is not None
+
+    def find_all(self, value: str) -> tuple | None:
+        result = util.single(self._pattern.findall(value))
+        return (result,) if result and not isinstance(result, tuple) else result
+
+    def find_one(self, value: str) -> str | None:
+        return util.single(self.find_all(value))

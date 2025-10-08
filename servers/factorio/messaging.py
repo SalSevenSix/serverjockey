@@ -25,12 +25,13 @@ async def initialise(context: contextsvc.Context):
     context.register(_PlayerEventSubscriber(context))
 
 
+# 0.000 2025-10-07 08:22:06; Factorio 2.0.60 (build 83512, linux64, headless, space-age)
+# 2.421 Hosting game at IP ADDR:({0.0.0.0:34197})
+# 3.804 Info ServerRouter.cpp:547: Own address is IP ADDR:({14.237.58.218:34197}) (confirmed by pingpong2)
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_FILTER = msgftr.DataMatches('.*; Factorio .*build .* headless.*')
-    PORT_FILTER = msgftr.DataStrContains('Hosting game at IP ADDR:')
-    IP_FILTER = msgftr.Or(
-        msgftr.DataMatches('.*Info.*Own address is IP ADDR.*confirmed by pingpong.*'),
-        msgftr.DataMatches('.*Warning.*Determining own address has failed. Best guess: IP ADDR.*'))
+    VERSION_FILTER = msgftr.DataMatches(r'.*Factorio (.*?) \(build.*headless.*')
+    PORT_FILTER = msgftr.DataMatches(r'.*Hosting game at IP ADDR:\(\{(.*?):(.*?)\}\)$')
+    IP_FILTER = msgftr.DataMatches(r'.*Info.*Own address is IP ADDR:\(\{(.*?):.*\}\).*confirmed by pingpong.*')
 
     def __init__(self, mailer: msgabc.Mailer, local_ip: str):
         super().__init__(msgftr.And(
@@ -43,32 +44,27 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.lchop(message.data(), 'Factorio')
-            value = util.rchop(value, '(build')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
+            version = _ServerDetailsSubscriber.VERSION_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.lchop(message.data(), '({')
-            value = util.rchop(value, '})')
-            value = value.split(':')
-            if value[0] == '0.0.0.0':
-                value[0] = self._local_ip
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value[0], port=value[1]))
+            ip, port = util.fill(_ServerDetailsSubscriber.PORT_FILTER.find_all(message.data()), 2)
+            ip = self._local_ip if ip == '0.0.0.0' else ip
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=ip, port=port))
         elif _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.lchop(message.data(), '({')
-            value = util.rchop(value, '})')
-            value = value.split(':')
-            if value[0] == '0.0.0.0':
-                value[0] = self._local_ip
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value[0]))
+            ip = _ServerDetailsSubscriber.IP_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=ip))
         return None
 
 
+# 2025-10-08 08:58:34 [JOIN] bsalis joined the game
+# 2025-10-08 08:58:52 [CHAT] bsalis: hello everyone
+# 2025-10-08 08:58:55 [LEAVE] bsalis left the game
+# 2025-10-08 09:02:35 [KICK] bsalis was kicked by <server>. Reason: He is a meany.
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    CHAT, JOIN, LEAVE, KICK = '[CHAT]', '[JOIN]', '[LEAVE]', '[KICK]'
-    CHAT_FILTER = msgftr.DataStrContains(CHAT)
-    JOIN_FILTER = msgftr.DataStrContains(JOIN)
-    LEAVE_FILTER = msgftr.DataStrContains(LEAVE)
-    KICK_FILTER = msgftr.DataStrContains(KICK)
+    JOIN_FILTER = msgftr.DataMatches(r'.*\[JOIN\] (.*?) joined the game$')
+    CHAT_FILTER = msgftr.DataMatches(r'.*\[CHAT\] (.*?): (.*?)$')
+    LEAVE_FILTER = msgftr.DataMatches(r'.*\[LEAVE\] (.*?) left the game$')
+    KICK_FILTER = msgftr.DataMatches(r'.*\[KICK\] (.*?) was kicked.*')
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
@@ -81,22 +77,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.CHAT)
-            name, text = util.rchop(value, ':'), util.lchop(value, ':')
-            if name == '<server>' and text.startswith('@'):
+            name, text = util.fill(_PlayerEventSubscriber.CHAT_FILTER.find_all(message.data()), 2)
+            if name == '<server>' and text and text.startswith('@'):
                 return None  # Ignore chat messages from /console/say command
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
             return None
         if _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.JOIN)
-            value = util.rchop(value, 'joined the game')
-            playerstore.PlayersSubscriber.event_login(self._mailer, self, value)
+            name = _PlayerEventSubscriber.JOIN_FILTER.find_one(message.data())
+            playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
         elif _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.LEAVE)
-            value = util.rchop(value, 'left the game')
-            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            name = _PlayerEventSubscriber.LEAVE_FILTER.find_one(message.data())
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
         elif _PlayerEventSubscriber.KICK_FILTER.accepts(message):
-            value = util.lchop(message.data(), _PlayerEventSubscriber.KICK)
-            value = util.rchop(value, 'was kicked by')
-            playerstore.PlayersSubscriber.event_logout(self._mailer, self, value)
+            name = _PlayerEventSubscriber.KICK_FILTER.find_one(message.data())
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
         return None

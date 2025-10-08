@@ -27,8 +27,21 @@ def is_format(text: str) -> bool:
 def single(collection: typing.Optional[typing.Collection]) -> typing.Any:
     if collection is None or len(collection) == 0:
         return None
-    for item in collection:
-        return item
+    for element in collection:
+        return element
+
+
+def fill(collection: typing.Optional[typing.Collection], expected: int) -> tuple:
+    if collection is None:
+        collection = []
+    result, index = [], 0
+    for element in collection:
+        result.append(element)
+        index += 1
+    while index < expected:
+        result.append(None)
+        index += 1
+    return tuple(result)
 
 
 def urlsafe_b64encode(value: str) -> str:
