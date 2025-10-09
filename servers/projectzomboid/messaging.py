@@ -35,15 +35,15 @@ def initialise(context: contextsvc.Context):
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
+# LOG  : General     , 1759991170072> 4,495,649> version=41.78.16 demo=false
+# LOG  : Network     , 1759991173462> 4,499,040> [09-10-25 13:26:13.462] > ZNet: Public IP: 14.237.58.218
+# LOG  : Network     , 1759991199453> 4,525,030> Clients should use 16261 port for connections
+# LOG  : General     , 1759991235467> 4,561,045> IngameTime 1993-07-09 18:00
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION = '> version='
-    VERSION_FILTER = msgftr.DataStrContains(VERSION)
-    IP = 'Public IP:'
-    IP_FILTER = msgftr.DataStrContains(IP)
-    PORT = '> Clients should use'
-    PORT_FILTER = msgftr.DataStrContains(PORT)
-    INGAMETIME = '> IngameTime'
-    INGAMETIME_FILTER = msgftr.DataStrContains(INGAMETIME)
+    VERSION_FILTER = msgftr.DataMatches(r'.*> version=(.*?) demo.*')
+    IP_FILTER = msgftr.DataMatches(r'.*> ZNet: Public IP: (.*?)$')
+    PORT_FILTER = msgftr.DataMatches(r'.*> Clients should use (\d+) port for connections$')
+    INGAMETIME_FILTER = msgftr.DataMatches(r'.*> IngameTime (.*?)$')
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.Or(
@@ -58,21 +58,19 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.INGAMETIME)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=value))
+            ingametime = _ServerDetailsSubscriber.INGAMETIME_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=ingametime))
         elif SERVER_RESTART_REQUIRED_FILTER.accepts(message):
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(restart=dtutil.to_millis(message.created())))
         elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION)
-            value = util.rchop(value, 'demo=')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
+            version = _ServerDetailsSubscriber.VERSION_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
         elif _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.IP)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=value))
+            ip = _ServerDetailsSubscriber.IP_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=ip))
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT)
-            value = util.rchop(value, 'port for connections')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=objconv.to_int(value)))
+            port = _ServerDetailsSubscriber.PORT_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=port))
         return None
 
 

@@ -21,13 +21,14 @@ async def initialise(context: contextsvc.Context):
     context.register(_PlayerEventSubscriber(context))
 
 
+# 2025-10-09T09:53:19 0.001 INF Version: V 2.4 (b6) Compatibility Version: V 2.4, Build: LinuxServer 64 Bit
+# GamePref.ServerPort = 26900
+# GamePref.WebDashboardPort = 8080
+# 2025-10-09T09:55:58 159.351 INF [Web] Started Webserver on port 8080
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_PREFIX, VERSION_SUFFIX = 'INF Version:', 'Compatibility Version:'
-    VERSION_FILTER = msgftr.DataMatches('.*' + VERSION_PREFIX + '.*' + VERSION_SUFFIX + '.*')
-    PORT_PREFIX = 'GamePref.ConnectToServerPort ='
-    PORT_FILTER = msgftr.DataStrContains(PORT_PREFIX)
-    CON_PORT_PREFIX = 'GamePref.UNUSED_ControlPanelPort ='
-    CON_PORT_FILTER = msgftr.DataStrContains(CON_PORT_PREFIX)
+    VERSION_FILTER = msgftr.DataMatches(r'.*INF Version: (.*?) Compatibility Version.*')
+    PORT_FILTER = msgftr.DataMatches(r'^GamePref.ServerPort = (\d+)$')
+    CON_PORT_FILTER = msgftr.DataMatches(r'.*INF \[Web\] Started Webserver on port (\d+)$')
 
     def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.And(
@@ -40,81 +41,47 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.VERSION_PREFIX)
-            value = util.rchop(value, _ServerDetailsSubscriber.VERSION_SUFFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
+            version = _ServerDetailsSubscriber.VERSION_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.PORT_PREFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
+            port = _ServerDetailsSubscriber.PORT_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=port))
         elif _ServerDetailsSubscriber.CON_PORT_FILTER.accepts(message):
-            value = util.lchop(message.data(), _ServerDetailsSubscriber.CON_PORT_PREFIX)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(cport=value))
+            cport = _ServerDetailsSubscriber.CON_PORT_FILTER.find_one(message.data())
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(cport=cport))
         return None
 
 
 # 2024-08-14T19:39:28 236.252 INF GMSG: Player 'Apollo' joined the game
-# 2024-08-14T19:39:28 236.260 INF PlayerSpawnedInWorld (reason: EnterMultiplayer, position: -1280, 61, 209): EntityID=17
-#  1, PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_7656119796898908
-#  5', PlayerName='Apollo', ClientNumber='1'
-# 2024-08-15T14:19:33 291.194 INF PlayerSpawnedInWorld (reason: JoinMultiplayer, position: -1274, 61, 213): EntityID=171
-#  , PltfmId='Steam_76561197968989085', CrossId='EOS_00023f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085
-#  ', PlayerName='Apollo', ClientNumber='1'
-# 2024-08-14T19:39:41 249.091 INF Chat (from 'Steam_76561197968989085', entity id '171', to 'Global'): hello all old
-# 2024-12-18T11:50:33 369.738 INF Chat (from 'Steam_76561197968989085', entity id '171', to 'Global'): 'Apollo': hello f
-#  rom game new
-# 2024-08-14T19:39:45 253.185 INF Player Apollo disconnected after 0.4 minutes
-# 2024-08-14T19:39:45 253.479 INF Player disconnected: EntityID=171, PltfmId='Steam_76561197968989085', CrossId='EOS_000
-#  23f168ede4136a17c954ec0b9245d', OwnerID='Steam_76561197968989085', PlayerName='Apollo', ClientNumber='1'
+# 2024-12-18T11:50:33 369.738 INF Chat (from 'Steam_76561197968989085', entity id '171', to 'Global'): 'Apollo': hello
 # 2024-08-14T19:39:45 253.490 INF GMSG: Player 'Apollo' left the game
 # 2024-11-29T23:49:36 252.509 INF GMSG: Player 'Apollo' died
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    JOIN_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' joined the game$')
-    SPAWN_FILTER = msgftr.DataMatches(
-        r'.*INF PlayerSpawnedInWorld \(reason.*OwnerID=\'.*PlayerName=\'.*\', ClientNumber=.*')
-    CHAT_FILTER = msgftr.DataMatches(r'.*INF Chat \(from \'.*\', to \'Global\'\):.*')
-    LEAVE_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' left the game$')
-    DEATH_FILTER = msgftr.DataMatches(r'.*INF GMSG: Player \'.*\' died$')
+    CHAT_FILTER = msgftr.DataMatches(r".*INF Chat.*to 'Global'\): '(.*?)': (.*?)$")
+    JOIN_FILTER = msgftr.DataMatches(r".*INF GMSG: Player '(.*?)' joined the game$")
+    LEAVE_FILTER = msgftr.DataMatches(r".*INF GMSG: Player '(.*?)' left the game$")
+    DEATH_FILTER = msgftr.DataMatches(r".*INF GMSG: Player '(.*?)' died$")
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
             mc.ServerProcess.FILTER_STDOUT_LINE,
             msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
                       _PlayerEventSubscriber.JOIN_FILTER,
-                      _PlayerEventSubscriber.SPAWN_FILTER,
                       _PlayerEventSubscriber.LEAVE_FILTER,
                       _PlayerEventSubscriber.DEATH_FILTER)))
-        self._mailer, self._idmap = mailer, {}
+        self._mailer = mailer
 
     def handle(self, message):
-        value = message.data()
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            # playerid = util.lchop(value, 'INF Chat (from \'')
-            # playerid = util.rchop(playerid, '\', entity id')
-            # name = util.get(playerid, self._idmap)
-            # if name is None:
-            #     return None
-            # text = util.lchop(value, 'to \'Global\'):')
-            value = util.lchop(value, 'to \'Global\'):')
-            name = util.rchop(value, ':')[1:-1]
-            text = util.lchop(value, ':')
+            name, text = util.fill(_PlayerEventSubscriber.CHAT_FILTER.find_all(message.data()), 2)
             playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
         elif _PlayerEventSubscriber.JOIN_FILTER.accepts(message):
-            name = util.lchop(value, 'INF GMSG: Player \'')
-            name = util.rchop(name, '\' joined the game')
+            name = _PlayerEventSubscriber.JOIN_FILTER.find_one(message.data())
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
-        elif _PlayerEventSubscriber.SPAWN_FILTER.accepts(message):
-            playerid = util.lchop(value, ', OwnerID=\'')
-            playerid = util.rchop(playerid, '\', PlayerName=')
-            name = util.lchop(value, ', PlayerName=\'')
-            name = util.rchop(name, '\', ClientNumber=')
-            self._idmap[playerid] = name
         elif _PlayerEventSubscriber.LEAVE_FILTER.accepts(message):
-            name = util.lchop(value, 'INF GMSG: Player \'')
-            name = util.rchop(name, '\' left the game')
+            name = _PlayerEventSubscriber.LEAVE_FILTER.find_one(message.data())
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
-            self._idmap = util.delete_dict_by_value(self._idmap, name)
         elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
-            name = util.lchop(value, 'INF GMSG: Player \'')
-            name = util.rchop(name, '\' died')
+            name = _PlayerEventSubscriber.DEATH_FILTER.find_one(message.data())
             playerstore.PlayersSubscriber.event_death(self._mailer, self, name)
         return None

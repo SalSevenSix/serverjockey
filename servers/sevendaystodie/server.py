@@ -26,7 +26,7 @@ class Server(svrabc.Server):
 
     async def run(self):
         server = await self._deployment.new_server_process()
-        server.wait_for_started(msg.SERVER_STARTED_FILTER, 600)
+        server.wait_for_started(msg.SERVER_STARTED_FILTER, 720)
         await server.run()
 
     async def stop(self):

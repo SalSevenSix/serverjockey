@@ -34,9 +34,9 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _SERVER_VERSION_FILTER.accepts(message):
-            value = util.lchop(message.data(), _SERVER_VERSION_KEY)
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=value))
+            version = util.lchop(message.data(), _SERVER_VERSION_KEY)
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            value = util.lchop(message.data(), ':')
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=value))
+            port = util.lchop(message.data(), ':')
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=self._public_ip, port=port))
         return None
