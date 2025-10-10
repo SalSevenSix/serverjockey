@@ -45,26 +45,27 @@ chmod 755 build.sh || exit 1
 chown $BUILD_USER build.sh || exit 1
 chgrp $BUILD_USER build.sh || exit 1
 
-echo "CI Building"
+echo "CI Building deb"
+cd $BUILD_DIR || exit 1
 su - $BUILD_USER -c "$BUILD_DIR/build.sh $BRANCH"
 BUILD_OK_FILE="$DIST_DIR/sjgms/build.ok"
 [ -f "$BUILD_OK_FILE" ] || exit 1
 TIMESTAMP="$(head -1 $BUILD_OK_FILE)"
 
-echo "CI Packaging"
+echo "CI Packaging deb"
 $BUILD_DIR/deb.sh || exit 1
 
-echo "CI Publishing"
+echo "CI Publishing deb"
 cd $DIST_DIR || exit 1
-DEB_FILE="$(ls *.deb | tail -1)"
+PKG_FILE="$(ls *.deb | tail -1)"
 TARGET_FILE="sjgms-${BRANCH}-${TIMESTAMP}.deb"
-chown root $DEB_FILE || exit 1
-chgrp root $DEB_FILE || exit 1
-mv $DEB_FILE $WEB_DIR/$TARGET_FILE || exit 1
+chown root $PKG_FILE || exit 1
+chgrp root $PKG_FILE || exit 1
+mv $PKG_FILE $WEB_DIR/$TARGET_FILE || exit 1
 cd $WEB_DIR || exit 1
 ln -fs "$TARGET_FILE" "sjgms-${BRANCH}-latest.deb" || exit 1
 
-echo "CI Cleanup"
+echo "CI Cleanup deb"
 rm -rf "$DIST_DIR" > /dev/null 2>&1
 KEEP_COUNT=6
 ls -t sjgms-${BRANCH}-*.deb | while read file; do

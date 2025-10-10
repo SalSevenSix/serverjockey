@@ -1,14 +1,13 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.22.0
+Version:        0.23.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
 License:        Proprietary
 Source0:        %{name}-%{version}.tar.gz
 URL:            https://github.com/SalSevenSix/serverjockey
-Requires:       python3
 
 
 %description
@@ -25,8 +24,6 @@ mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 cp serverjockey.pyz $RPM_BUILD_ROOT/usr/local/bin
 cp serverjockey_cmd.pyz $RPM_BUILD_ROOT/usr/local/bin
 cp serverlink $RPM_BUILD_ROOT/usr/local/bin
-mkdir -p $RPM_BUILD_ROOT/etc/systemd/system
-cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
 
 
 %files
@@ -34,22 +31,30 @@ cp serverjockey.service $RPM_BUILD_ROOT/etc/systemd/system
 /usr/local/bin/serverjockey.pyz
 /usr/local/bin/serverjockey_cmd.pyz
 /usr/local/bin/serverlink
-%defattr(644,root,root)
-/etc/systemd/system/serverjockey.service
-
-
-%preun
-systemctl stop serverjockey > /dev/null 2>&1
-exit 0
 
 
 %pre
+[ -f /etc/systemd/system/serverjockey.service ] || exit 0
 systemctl stop serverjockey > /dev/null 2>&1
 exit 0
 
 
 %post
 /usr/local/bin/serverjockey_cmd.pyz -nt adduser
+exit $?
+
+
+%preun
+[ -f /etc/systemd/system/serverjockey.service ] || exit 0
+systemctl stop serverjockey > /dev/null 2>&1
+exit 0
+
+
+%postun
+[ -f /etc/systemd/system/serverjockey.service ] || exit 0
+rm /etc/systemd/system/serverjockey.service > /dev/null 2>&1
+systemctl daemon-reload
+exit 0
 
 
 %changelog
@@ -91,7 +96,7 @@ exit 0
 - Chrome Browser extension feature release
 * Thu Nov 30 2023 Bowden Salis <bsalis76@gmail.com> - 0.5.0
 - Activity reporting feature release
-* Wed Oct 23 2023 Bowden Salis <bsalis76@gmail.com> - 0.4.0
+* Mon Oct 23 2023 Bowden Salis <bsalis76@gmail.com> - 0.4.0
 - Feature release v0.4.0
 * Mon Aug 14 2023 Bowden Salis <bsalis76@gmail.com> - 0.3.0
 - Cachelock feature and webapp improvements

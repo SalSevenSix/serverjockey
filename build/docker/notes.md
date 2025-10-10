@@ -24,6 +24,7 @@ docket tag salsevensix/serverjockey:<tag> salsevensix/serverjockey:latest
 docker login
 docker push salsevensix/<image>:<tag>
 docker run --ulimit memlock=8589934592:8589934592 -p 6164:6164/tcp <image>:<tag>
+docker run -v <hostpath>:<containerpath>
 docker start -a <container>
 docker stop <container>
 docker exec -it <container> bash
