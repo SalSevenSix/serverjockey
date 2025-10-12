@@ -27,11 +27,11 @@ if [ "$BRANCH" = "local" ]; then
   [ -d "build" ] || exit 1
   mkdir -p "$SERVERJOCKEY_DIR/build" || exit 1
   ls | while read file; do
-    [[ $file == "build" || $file == "venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR" || exit 1
+    [[ $file == "build" || $file == "venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
   done
   cd "build" || exit 1
   ls | while read file; do
-    [ $file == "dist" ] || cp -r "$file" "$SERVERJOCKEY_DIR/build" || exit 1
+    [ $file == "dist" ] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
   done
 else
   if [ ! -f "$BRANCH.zip" ]; then

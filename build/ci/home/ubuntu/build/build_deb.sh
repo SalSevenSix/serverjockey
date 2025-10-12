@@ -79,12 +79,13 @@ for PKG in rpm deb; do
   TIMESTAMP="$(head -1 $BUILD_OK_FILE)"
 
   echo "CI Packaging $PKG"
-  [ "$PKG" = "deb" ] && $BUILD_DIR/deb.sh || exit 1
-  [ "$PKG" = "rpm" ] && docker run -v ${BUILD_DIR}:/home/rpmuser/build rpmbuilder build/rpm.sh || exit 1
+  [ "$PKG" = "deb" ] && $BUILD_DIR/deb.sh
+  [ "$PKG" = "rpm" ] && docker run -v ${BUILD_DIR}:/home/rpmuser/build rpmbuilder build/rpm.sh
 
   echo "CI Publishing $PKG"
   cd $DIST_DIR || exit 1
   PKG_FILE="$(ls *.${PKG} | tail -1)"
+  [ -f "$PKG_FILE" ] || exit 1
   TARGET_FILE="sjgms-${BRANCH}-${TIMESTAMP}.${PKG}"
   chown root $PKG_FILE || exit 1
   chgrp root $PKG_FILE || exit 1
@@ -115,14 +116,14 @@ chmod 755 build.sh || exit 1
 
 echo "CI Upgrade deb"
 cd $WEB_DIR || exit 1
-apt -y remove sjgms || exit 1
+apt -y remove sjgms
 apt -y install ./$TARGET_FILE || exit 1
 
 echo "CI Finishing"
 cd $BUILD_DIR || exit 1
 echo $TIMESTAMP > $CI_OK_FILE
 /usr/local/bin/serverjockey_cmd.pyz -t wait:20 -c emailtoken
-docker system prune > /dev/null 2>&1
+docker system prune -f > /dev/null 2>&1
 
 echo "CI Done build process"
 exit 0

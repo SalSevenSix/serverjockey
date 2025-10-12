@@ -11,7 +11,9 @@ id -u $SJGMS_USER_DEF > /dev/null 2>&1 || SERVICE_NAME="serverjockey"
 id -u $SJGMS_USER > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   rm -rf $HOME_DIR > /dev/null 2>&1
-  adduser --system --home $HOME_DIR --disabled-login --disabled-password $SJGMS_USER || exit 1
+  ADDUSER_ARGS="--system --home $HOME_DIR --disabled-login --disabled-password $SJGMS_USER"
+  which yum > /dev/null && ADDUSER_ARGS="--system --home-dir $HOME_DIR $SJGMS_USER"
+  adduser $ADDUSER_ARGS || exit 1
   [ "$SJGMS_PORT" = "$SJGMS_PORT_DEF" ] || echo "{ \"cmdargs\": { \"port\": $SJGMS_PORT }}" > $HOME_DIR/serverjockey.json
   mkdir -p $SERVERLINK_DIR
   echo '{ "module": "serverlink", "hidden": true }' > $SERVERLINK_DIR/instance.json
