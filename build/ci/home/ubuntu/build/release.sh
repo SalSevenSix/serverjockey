@@ -14,15 +14,23 @@ TIMESTAMP="$(head -1 $CI_OK_FILE)"
 
 echo "Confirming release"
 cd $WEB_DIR || exit 1
-SOURCE_FILE="sjgms-develop-${TIMESTAMP}.deb"
-[ -f $SOURCE_FILE ] || exit 1
-echo " source  deb : $SOURCE_FILE"
-OSVER="ub$(grep 'VERSION_ID=' /etc/os-release | tr '"' ' ' | tr '.' ' ' | awk '{print $2}')"
-VERSION="$(dpkg-deb -f $SOURCE_FILE Version)"
+SOURCE_FILE_DEB="sjgms-develop-${TIMESTAMP}.deb"
+[ -f $SOURCE_FILE_DEB ] || exit 1
+echo " source  deb : $SOURCE_FILE_DEB"
+VERSION="$(dpkg-deb -f $SOURCE_FILE_DEB Version)"
 [ -z $VERSION ] && exit 1
-RELEASE_FILE="sjgms-${VERSION}.${OSVER}.x86_64.deb"
-[ -f $RELEASE_FILE ] && exit 1
-echo " release deb : $RELEASE_FILE"
+OSVER_DEB="ub$(grep 'VERSION_ID=' /etc/os-release | tr '"' ' ' | tr '.' ' ' | awk '{print $2}')"
+RELEASE_FILE_DEB="sjgms-${VERSION}.${OSVER_DEB}.x86_64.deb"
+[ -f $RELEASE_FILE_DEB ] && exit 1
+echo " release deb : $RELEASE_FILE_DEB"
+SOURCE_FILE_RPM="$(readlink -f sjgms-develop-latest.rpm)"
+SOURCE_FILE_RPM="$(basename $SOURCE_FILE_RPM)"
+[ -f $SOURCE_FILE_RPM ] || exit 1
+echo " source  rpm : $SOURCE_FILE_RPM"
+OSVER_RPM="fc$(docker run rpmbuilder -c 'cat /etc/fedora-release' | awk '{print $3}')"
+RELEASE_FILE_RPM="sjgms-${VERSION}.${OSVER_RPM}.x86_64.rpm"
+[ -f $RELEASE_FILE_RPM ] && exit 1
+echo " release rpm : $RELEASE_FILE_RPM"
 ZOMBOX_FILE="ZomBox-$(echo $TIMESTAMP | cut -c1-8).ova"
 [ -f $ZOMBOX_FILE ] || exit 1
 echo " zombox  ova : $ZOMBOX_FILE"
@@ -48,9 +56,14 @@ chmod 644 $RELEASE_EGG_FILE || exit 1
 ln -fs $RELEASE_EGG_FILE egg-server-jockey-latest.json || exit 1
 
 echo "DEB package release"
-cp $SOURCE_FILE $RELEASE_FILE || exit 1
-chmod 644 $RELEASE_FILE || exit 1
-ln -fs $RELEASE_FILE sjgms-master-latest.deb || exit 1
+cp $SOURCE_FILE_DEB $RELEASE_FILE_DEB || exit 1
+chmod 644 $RELEASE_FILE_DEB || exit 1
+ln -fs $RELEASE_FILE_DEB sjgms-master-latest.deb || exit 1
+
+echo "RPM package release"
+cp $SOURCE_FILE_RPM $RELEASE_FILE_RPM || exit 1
+chmod 644 $RELEASE_FILE_RPM || exit 1
+ln -fs $RELEASE_FILE_RPM sjgms-master-latest.rpm || exit 1
 
 echo "ZomBox ova release"
 chown root $ZOMBOX_FILE || exit 1
