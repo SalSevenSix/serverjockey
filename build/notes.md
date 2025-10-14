@@ -21,7 +21,7 @@
 * Create a release for master on GitHub
 * Bump versioned files and push (see Versioned Files list below)
 * Post new release on Ko-fi
-* Post link to Ko-fi relase post on discord
+* Post link to Ko-fi release post on discord
 
 ## Versioned Files
 * debian/control

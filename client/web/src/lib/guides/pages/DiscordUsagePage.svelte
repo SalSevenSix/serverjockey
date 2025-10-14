@@ -104,7 +104,7 @@
     You can check the status of the server at any time with the following command.
     Now that the server is up, the server version and connection details are shown.
   </p>
-  <CodeBlock>!server</CodeBlock>
+  <CodeBlock>!status</CodeBlock>
   <figure class="image max-800">
     <img src={surl('/assets/guides/discord/usage/server_status_up.png')}
          alt="Server Status Up" loading="lazy" />

@@ -13,7 +13,7 @@
   <p>
     <ExtLink href="https://www.valheimgame.com" notranslate>Valheim</ExtLink>
     is a survival game set in a procedurally generated 3D open world sandbox.
-    Explore, forage, hunt, mine materials, build shelters and fight enemies to survive in the Viking themed afterlife.
+    Explore, forage, hunt, mine materials, build shelters and fight enemies to survive in a Viking themed afterlife.
   </p>
   <p>
     This guide will show you how to install, configure and run an Valheim server using this Webapp.
