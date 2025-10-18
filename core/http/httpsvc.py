@@ -67,9 +67,8 @@ class _RequestHandler:
     def __init__(self, context: contextsvc.Context, security: httpsec.SecurityService,
                  method: httpabc.Method, request: webabc.Request, resource: httpabc.Resource):
         self._context, self._security = context, security
-        self._method, self._request = method, request
+        self._method, self._request, self._resource = method, request, resource
         self._headers = httpcnt.HeadersTool(request)
-        self._resource = resource
 
     # pylint: disable=too-many-branches
     async def handle(self) -> web.Response:

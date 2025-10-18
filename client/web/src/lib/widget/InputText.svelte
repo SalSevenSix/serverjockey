@@ -10,6 +10,7 @@
   export let spellcheck = false;
   export let noautocomplete = false;
   export let autofocus = false;
+  export let notranslatelabel = false;
   export let notranslate = false;
   export let nowrap = false;
 </script>
@@ -17,7 +18,8 @@
 
 <div class="field">
   {#if label}
-    <label for={id} class="label" class:white-space-nowrap={nowrap} title={title}>{label}</label>
+    <label for={id} class="label" class:white-space-nowrap={nowrap} class:notranslate={notranslatelabel}
+           title={title}>{label}</label>
   {/if}
   <div class="control">
     <!-- svelte-ignore a11y-autofocus -->

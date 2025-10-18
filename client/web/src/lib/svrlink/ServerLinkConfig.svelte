@@ -97,7 +97,7 @@
        title="Prefix the bot will recognise as commands, more than one character is allowed, '@' not allowed" />
     <InputText id="serverLinkConfigAdminRoles" label="Admin Roles"
        bind:value={formData.ADMIN_ROLE} disabled={processing}
-       title="Discord roles allowed to run admin commands. Multiple can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
+       title="Discord roles allowed to run all commands. Multiple can be specified using '@' e.g. @Admin @Moderator" />
     {#if !noHints}
       <InputCheckbox id="serverLinkConfigAllowToken" label="Allow admins to DM token"
                      bind:checked={formData.ALLOW_TOKEN} />
@@ -114,9 +114,9 @@
   </div>
   <div class="block" class:is-hidden={sectionIndex != 2}>
     {#each Object.keys(formData.COMMAND_ROLES) as roleKey}
-      <InputText id="serverLinkConfigCommandRoleI{roleKey}" label={roleKey}
+      <InputText id="serverLinkConfigCommandRoleI{roleKey}" label={roleKey} notranslatelabel
          bind:value={formData.COMMAND_ROLES[roleKey]} disabled={processing}
-         title="Roles for bot command '{roleKey}'. Multiple can be specified using '@' e.g. @PZ Admin @PZ Moderator" />
+         title="Roles for bot command '{roleKey}'. Multiple can be specified using '@' e.g. @Moderator @Player" />
     {/each}
   </div>
   <div class="block" class:is-hidden={sectionIndex != 3}>
