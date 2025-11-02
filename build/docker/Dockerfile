@@ -15,7 +15,8 @@ ARG SJGMS_USER="container"
 RUN apt -y install ./sjgms.deb && rm ./sjgms.deb
 RUN apt clean && apt autoclean && apt -y autoremove --purge
 USER container
-ENV USER=container HOME=/home/container
+ENV USER=container
+ENV HOME=/home/container
 WORKDIR /home/container
 COPY ./entrypoint.sh /entrypoint.sh
 CMD [ "/bin/bash", "/entrypoint.sh" ]
