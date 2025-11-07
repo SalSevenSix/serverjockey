@@ -15,7 +15,8 @@ _MODULE_DATA = dict(
     starbound='Starbound',
     palworld='Palworld',
     valheim='Valheim',
-    csii='Counter Strike 2')
+    csii='Counter Strike 2',
+    teamspeak='TeamSpeak 3')
 
 
 class Modules:

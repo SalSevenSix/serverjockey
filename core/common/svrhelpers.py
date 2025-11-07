@@ -70,7 +70,8 @@ class DeploymentInitHelper:
         return self
 
     def done(self):
-        self._context.register(msgext.CallableSubscriber(msgftr.Or(*self._rebuild_filters), self._build_world))
+        msg_filter = msgftr.Or(*self._rebuild_filters) if len(self._rebuild_filters) > 1 else self._rebuild_filters[0]
+        self._context.register(msgext.CallableSubscriber(msg_filter, self._build_world))
 
 
 class ServerResourceBuilder:

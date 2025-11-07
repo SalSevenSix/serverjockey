@@ -7,7 +7,7 @@ class TestSystem(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_modules(self):
         result = await systemcontext.get('/modules')
-        self.assertEqual(9, len(result))
+        self.assertEqual(10, len(result))
         self.assertTrue('testserver' in result)
         self.assertTrue('projectzomboid' in result)
         self.assertTrue('factorio' in result)
@@ -17,6 +17,7 @@ class TestSystem(unittest.IsolatedAsyncioTestCase):
         self.assertTrue('csii' in result)
         self.assertTrue('palworld' in result)
         self.assertTrue('valheim' in result)
+        self.assertTrue('teamspeak' in result)
 
     async def test_get_instances(self):
         self.assertEqual(objconv.json_to_dict(_expected_get_instances()), await systemcontext.get('/instances'))
