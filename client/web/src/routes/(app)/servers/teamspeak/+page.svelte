@@ -1,4 +1,5 @@
 <script>
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -7,15 +8,20 @@
   import ServerControls from '$lib/instance/ServerControls.svelte';
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
+  import ConfigFile from '$lib/instance/ConfigFile.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
 
   const worldActions = [
-    { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
+    { 'key': 'wipe-world-config', 'name': 'Reset all configuration files.',
+      'desc': 'Delete the log files only.' },
+    { 'key': 'wipe-world-sqldb', 'name': 'Reset the sql database.',
+      'desc': 'Delete the log files only.' },
+    { 'key': 'wipe-world-logs', 'name': 'Delete all logs.',
       'desc': 'Delete the log files only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
-      'desc': 'Reset all.' }];
+      'desc': 'Reset all of the above.' }];
 </script>
 
 
@@ -35,6 +41,16 @@
       <InstanceLog />
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles />
+      </Collapsible>
+      <Collapsible icon="fa-file-code" title="Configuration">
+        <div class="content"><p>
+          For help on TeamSpeak configuration files, see the
+          <ExtLink href="https://tserverhq.com/clients/knowledgebase/132/How-do-I-use-the-ts3serverini-file.html">
+            knowledgebase page</ExtLink>
+        </p></div>
+        <ConfigFile name="INI Settings" path="/config/ini" />
+        <ConfigFile name="IP Whitelist" path="/config/whitelist" />
+        <ConfigFile name="IP Blacklist" path="/config/blacklist" />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Version" />

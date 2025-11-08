@@ -16,7 +16,7 @@ CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.
 
 
 async def initialise(context: contextsvc.Context):
-    svrhelpers.MessagingInitHelper(context).init_state(FILTER_DEPLOYMENT_START, FILTER_DEPLOYMENT_DONE).init_players()
+    svrhelpers.MessagingInitHelper(context).init_state(FILTER_DEPLOYMENT_START, FILTER_DEPLOYMENT_DONE)
     context.register(_ServerDetailsSubscriber(context, await sysutil.local_ip()))
 
 

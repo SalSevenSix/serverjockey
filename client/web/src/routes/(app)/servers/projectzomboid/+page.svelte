@@ -44,7 +44,7 @@
       <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content">
           <p>
-            For help understanding Project Zomboid configuration files. Please see the
+            For help understanding Project Zomboid configuration files. See the
             <ExtLink href="https://steamcommunity.com/sharedfiles/filedetails/?id=2682570605"
                      wrap>excellent guide on Steam</ExtLink>
             by Aiteron. Also, consider using
