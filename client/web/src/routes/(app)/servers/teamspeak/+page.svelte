@@ -14,11 +14,9 @@
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
 
   const worldActions = [
-    { 'key': 'wipe-world-config', 'name': 'Reset all configuration files.',
-      'desc': 'Delete the log files only.' },
-    { 'key': 'wipe-world-sqldb', 'name': 'Reset the sql database.',
-      'desc': 'Delete the log files only.' },
-    { 'key': 'wipe-world-logs', 'name': 'Delete all logs.',
+    { 'key': 'wipe-world-config', 'name': 'Reset Config',
+      'desc': 'Reset all configuration files.' },
+    { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
       'desc': 'Delete the log files only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
@@ -40,7 +38,7 @@
       </div>
       <InstanceLog />
       <Collapsible icon="fa-scroll" title="Logging">
-        <LogFiles />
+        <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
         <div class="content"><p>
@@ -49,8 +47,8 @@
             knowledgebase page</ExtLink>
         </p></div>
         <ConfigFile name="INI Settings" path="/config/ini" />
-        <ConfigFile name="IP Whitelist" path="/config/whitelist" />
-        <ConfigFile name="IP Blacklist" path="/config/blacklist" />
+        <ConfigFile name="IP Allowlist" path="/config/allowlist" />
+        <ConfigFile name="IP Denylist" path="/config/denylist" />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Version" />

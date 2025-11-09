@@ -7,6 +7,6 @@ export const { status, server, auto, log, deployment } = commons;
 export const help = helptext.newServerHelpBuilder()
   .title('TEAMSPEAK COMMANDS')
   .addServer()
-  .addConfig(['INI', 'Whitelist', 'Blacklist'])
-  .addDeployment()
+  .addConfig(['INI', 'Allowlist', 'Denylist'])
+  .addDeployment(true)
   .build();
