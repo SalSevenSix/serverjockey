@@ -15,6 +15,7 @@
   export let validateFilename = fTrue;
   export let onCompleted = fNoop;
   export let multiple = false;
+  export let nospinner = false;
 
   let uploading = false;
   let selectedFiles = [];
@@ -31,7 +32,7 @@
       const request = newPostRequest(null);
       request.body = new FormData();
       request.body.append('file', file);
-      const successful = await fetch(instance.url(rootPath + '/' + file.name), request)
+      const successful = await fetch(instance.url(filenameHelp ? rootPath + '/' + file.name : rootPath), request)
         .then(function(response) {
           if (!response.ok) throw new Error('Status: ' + response.status);
           return notifyInfo(file.name + ' uploaded successfully.', true);
@@ -45,8 +46,10 @@
 
   function actionUpload() {
     if (cannotUpload) return;
-    for (const file of selectedFiles) {
-      if (!file.name || !validateFilename(file.name)) return notifyError(filenameHelp);
+    if (validateFilename && filenameHelp) {
+      for (const file of selectedFiles) {
+        if (!file.name || !validateFilename(file.name)) return notifyError(filenameHelp);
+      }
     }
     uploading = true;
     uploadFiles().finally(function() {
@@ -57,7 +60,7 @@
 </script>
 
 
-{#if uploading}
+{#if uploading && !nospinner}
   <div transition:slide={{ delay: 250, duration: 500 }}>
     <p id="{idPrefix}Uploading" class="mb-3 has-text-weight-bold">
       <SpinnerIcon /> Please keep this section open while uploading. See console log for upload progress.

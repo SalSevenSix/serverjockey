@@ -65,6 +65,16 @@
           </p>
         </ConfigFile>
       </Collapsible>
+      <!-- Collapsible icon="fa-image" title="Server Logo">
+        <div class="content">
+          <p>
+            Upload an image to set the Logo for your server. Only
+            <span class="is-family-monospace">.jpg</span>
+            files allowed.
+          </p>
+        </div>
+        <ImageFile path="/config/logo" />
+      </Collapsible -->
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />
       </Collapsible>

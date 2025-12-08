@@ -69,7 +69,7 @@ class Deployment:
             db=self._player_dir + '/' + self._world_name + '.db', jvm=self._runtime_dir + '/ProjectZomboid64.json',
             cmdargs=self._cmdargs_file, ini=config_pre + '.ini', sandbox=config_pre + '_SandboxVars.lua',
             spawnpoints=config_pre + '_spawnpoints.lua', spawnregions=config_pre + '_spawnregions.lua',
-            shop=self._lua_dir + '/ServerPointsListings.ini'))
+            logo=config_pre + '_logo.jpg', shop=self._lua_dir + '/ServerPointsListings.ini'))
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/start-server.sh'
