@@ -9,7 +9,8 @@
 <WebappTitle module="teamspeak" serverName="TeamSpeak">
   <p>
     <ExtLink href="https://www.teamspeak.com" notranslate>TeamSpeak</ExtLink>
-    is a high quality Voice Chat server with other features. It provides a private self-hosted alternative to Discord.
+    is a high quality Voice Chat server with additional features.
+    It provides a private self-hosted alternative to Discord.
     This guide will show you how to install, configure and run a TeamSpeak server using this Webapp.
   </p>
 </WebappTitle>
