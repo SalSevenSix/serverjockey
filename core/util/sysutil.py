@@ -222,7 +222,7 @@ class _Cacher:
             self._task = None
 
 
-_VERSION, _BUILDSTAMP = '0.24.0', '{timestamp}'
+_VERSION, _BUILDSTAMP = '0.25.0', '{timestamp}'
 _VERSION_LABEL = _VERSION + ' (' + _BUILDSTAMP + ')'
 _VERSION_DICT = dict(version=_VERSION, buildstamp=_BUILDSTAMP)
 _OS_NAME = _Cacher(_OsName(), 31536000.0)

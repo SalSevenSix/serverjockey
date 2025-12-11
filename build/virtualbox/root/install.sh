@@ -27,7 +27,7 @@ until [ -f $SJGMS_LOG ]; do
 done
 
 echo "Waiting for SteamCMD install complete"
-LOOP_RETRY=6
+LOOP_RETRY=10
 until grep "SteamCMD install completed" $SJGMS_LOG > /dev/null; do
   echo " retry $LOOP_RETRY"
   [ $LOOP_RETRY -eq 0 ] && exit 1
