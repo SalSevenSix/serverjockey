@@ -36,11 +36,11 @@ async def initialise(context: contextsvc.Context):
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
-# LOG  : General     , 1759991170072> 4,495,649> version=41.78.16 demo=false
-# LOG  : General      f:0, t:1765447733234, st:1,204,895> version=42.13.0 02...76f 2025-12-11 08:13:47 (ZB) demo=false
-# LOG  : Network     , 1759991173462> 4,499,040> [09-10-25 13:26:13.462] > ZNet: Public IP: 14.237.58.218
-# LOG  : Network     , 1759991199453> 4,525,030> Clients should use 16261 port for connections
-# LOG  : General     , 1759991235467> 4,561,045> IngameTime 1993-07-09 18:00
+# LOG  : General   b41 > version=41.78.16 demo=false
+# LOG  : General   b42 > version=42.13.0 02...76f 2025-12-11 08:13:47 (ZB) demo=false
+# LOG  : Network   b41 > [09-10-25 13:26:13.462] > ZNet: Public IP: 14.237.58.218
+# LOG  : Network   b41 > Clients should use 16261 port for connections
+# LOG  : General   mod > IngameTime 1993-07-09 18:00
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     VERSION_FILTER = msgftr.DataMatches(r'.*> version=(.*?) .*')
     INGAMETIME_FILTER = msgftr.DataMatches(r'.*> IngameTime (.*?)$')
@@ -68,15 +68,16 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-# LOG  : Network     , 1732903690678> 21,508,632> [30-11-24 01:08:10.678] > ConnectionManager: [fully-connected] "" conn
-#  ection: guid=1139410826453420400 ip=192.168.1.4 steam-id=76561197968989085 access= username="Sal" connection-type="UD
-#  PRakNet"
-# LOG  : Network     , 1732903874607> 21,692,562> Disconnected player "Sal" 76561197968989085
-# LOG  : General     , 1732956822901> 7,128,548> PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "
-#  x": 10897, "y": 10126, "z": 0 }}
+# LOG  : Network   b41 > ConnectionManager: [fully-connected] "" connection: guid=1139410826453420400 ip=192.168.1.4 ste
+#   am-id=76561197968989085 access= username="Sal" connection-type="UDPRakNet"
+# b42   [12-12-25 18:31:34.628] 76561197968989085 "Apollo" fully connected (10856,9894,0).
+# LOG  : Network   b41 > Disconnected player "Sal" 76561197968989085
+# b42   [12-12-25 18:33:42.901] 76561197968989085 "Apollo" disconnected player (10856,9894,0).
+# LOG  : General   mod > PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "x": 10897, "y": 10126, "
+#   z": 0 }}
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    LOGIN, LOGOUT = '> ConnectionManager: [fully-connected]', '> Disconnected player'
-    LOGIN_FILTER, LOGOUT_FILTER = msgftr.DataStrContains(LOGIN), msgftr.DataStrContains(LOGOUT)
+    LOGIN_FILTER = msgftr.DataMatches(r'^\[.*\] (.*?) "(.*?)" fully connected \(.*\)\.$')
+    LOGOUT_FILTER = msgftr.DataMatches(r'^\[.*\] (.*?) "(.*?)" disconnected player \(.*\)\.$')
     DEATH_FILTER = msgftr.DataStrContains('> PlayerDeath { "player"')
 
     def __init__(self, mailer: msgabc.Mailer):
@@ -89,16 +90,11 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            steamid = util.lchop(message.data(), 'steam-id=')
-            steamid = util.rchop(steamid, 'access=')
-            steamid = util.rchop(steamid, '(owner=')
-            name = util.lchop(message.data(), 'username="')
-            name = util.rchop(name, '" connection-type=')
+            steamid, name = util.fill(_PlayerEventSubscriber.LOGIN_FILTER.find_all(message.data()), 2)
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
         elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
-            parts = util.lchop(message.data(), _PlayerEventSubscriber.LOGOUT).split(' ')
-            steamid, name = parts[-1], ' '.join(parts[:-1])
-            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name[1:-1], steamid)
+            steamid, name = util.fill(_PlayerEventSubscriber.LOGOUT_FILTER.find_all(message.data()), 2)
+            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name, steamid)
         elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
             data = objconv.json_to_dict(util.lchop(message.data(), 'PlayerDeath'))
             name = util.get('player', data)
