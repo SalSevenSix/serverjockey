@@ -4,7 +4,7 @@ from core.context import contextsvc
 from core.http import httprsc, httpext
 from core.proc import proch
 from core.common import svrhelpers, cachelock
-from servers.projectzomboid import modcheck as mck
+from servers.projectzomboid import messaging as msg, modcheck as mck
 
 APPID = '380870'
 _WORLD_NAME_DEF = 'servertest'
@@ -69,7 +69,8 @@ class Deployment:
             db=self._player_dir + '/' + self._world_name + '.db', jvm=self._runtime_dir + '/ProjectZomboid64.json',
             cmdargs=self._cmdargs_file, ini=config_pre + '.ini', sandbox=config_pre + '_SandboxVars.lua',
             spawnpoints=config_pre + '_spawnpoints.lua', spawnregions=config_pre + '_spawnregions.lua',
-            logo=config_pre + '_logo.jpg', shop=self._lua_dir + '/ServerPointsListings.ini'))
+            imgicon=config_pre + '_icon.jpg', imglogin=config_pre + '_login.jpg',
+            imgloading=config_pre + '_loading.jpg', shop=self._lua_dir + '/ServerPointsListings.ini'))
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/start-server.sh'
@@ -78,10 +79,8 @@ class Deployment:
         world_name = await self._get_world_name()
         if world_name != self._world_name:
             raise Exception('Server Name missmatch, ServerJockey needs to be restarted.')
-        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-        if util.get('cache_map_files', cmdargs, False):
-            cachelock.set_path(self._context, self, self._save_dir)
-        mck.apply_config(self._context, self, cmdargs)
+        await self._prestart_ini()
+        await self._prestart_cmdargs()
         server = proch.ServerProcess(self._context, executable)
         server.append_arg('-cachedir=' + self._world_dir)
         if world_name != _WORLD_NAME_DEF:
@@ -94,6 +93,33 @@ class Deployment:
         if not await io.directory_exists(self._runtime_dir):
             return
         await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
+
+    async def _prestart_cmdargs(self):
+        cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        if util.get('cache_map_files', cmdargs, False):
+            cachelock.set_path(self._context, self, self._save_dir)
+        mck.apply_config(self._context, self, cmdargs)
+
+    async def _prestart_ini(self):
+        config_pre = self._config_dir + '/' + self._world_name
+        ini_file = config_pre + '.ini'
+        if not await io.file_exists(ini_file):
+            return
+        ini_read = await io.read_file(ini_file)
+        ini_read, ini_write = ini_read.split('\n'), []
+        for line_read in ini_read:
+            line_write = line_read
+            if line_read and line_read.find('=') > 0:
+                if line_read.startswith('DefaultPort='):
+                    self._context.post(self, msg.SERVER_PORT, util.lchop(line_read, '='))
+                elif line_read.startswith('ServerImageIcon='):
+                    line_write = 'ServerImageIcon=' + config_pre + '_icon.jpg'
+                elif line_read.startswith('ServerImageLoginScreen='):
+                    line_write = 'ServerImageLoginScreen=' + config_pre + '_login.jpg'
+                elif line_read.startswith('ServerImageLoadingScreen='):
+                    line_write = 'ServerImageLoadingScreen=' + config_pre + '_loading.jpg'
+            ini_write.append(line_write)
+        await io.write_file(ini_file, '\n'.join(ini_write))
 
     async def _get_world_name(self) -> str:
         if await io.directory_exists(self._multiplayer_dir):

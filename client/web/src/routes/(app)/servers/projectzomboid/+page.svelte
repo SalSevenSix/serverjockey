@@ -12,6 +12,7 @@
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
+  import ImageFile from '$lib/instance/ImageFile.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
@@ -65,16 +66,22 @@
           </p>
         </ConfigFile>
       </Collapsible>
-      <!-- Collapsible icon="fa-image" title="Server Logo">
+      <Collapsible icon="fa-image" title="Branding">
         <div class="content">
           <p>
-            Upload an image to set the Logo for your server. Only
-            <span class="is-family-monospace">.jpg</span>
-            files allowed.
+            Upload images for your (b42+) server branding.
+            <span class="is-italic">Only</span>
+            <span class="has-text-weight-bold is-family-monospace">.jpg</span>
+            <span class="is-italic">images can be used.</span>
           </p>
         </div>
-        <ImageFile path="/config/logo" />
-      </Collapsible -->
+        <div class="content"><h3 class="title is-5 has-text-centered">Server Icon</h3></div>
+        <ImageFile path="/config/imgicon" />
+        <div class="content mt-3"><h3 class="title is-5 has-text-centered">Login Screen Banner</h3></div>
+        <ImageFile path="/config/imglogin" />
+        <div class="content mt-3"><h3 class="title is-5 has-text-centered">Loading Screen Banner</h3></div>
+        <ImageFile path="/config/imgloading" />
+      </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />
       </Collapsible>

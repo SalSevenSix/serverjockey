@@ -1,5 +1,5 @@
 # ALLOW core.*
-from core.util import util, dtutil, objconv
+from core.util import util, dtutil, objconv, sysutil
 from core.msg import msgabc, msglog, msgftr
 from core.msgc import mc
 from core.context import contextsvc
@@ -23,38 +23,35 @@ CONSOLE_LOG_ERROR_FILTER = msgftr.And(
     msgftr.Or(msgftr.DataStrStartsWith('ERROR:'), msgftr.DataStrStartsWith('SEVERE:')))
 CONSOLE_OUTPUT_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
-SERVER_RESTART_REQUIRED = 'messaging.RESTART_REQUIRED'
+SERVER_PORT, SERVER_RESTART_REQUIRED = 'messaging.SERVER_PORT', 'messaging.RESTART_REQUIRED'
+SERVER_PORT_FILTER = msgftr.NameIs(SERVER_PORT)
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
 
 
-def initialise(context: contextsvc.Context):
+async def initialise(context: contextsvc.Context):
     svrhelpers.MessagingInitHelper(context).init_state().init_players()
-    context.register(_ServerDetailsSubscriber(context))
+    context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
     context.register(_PlayerEventSubscriber(context))
     context.register(_PlayerChatSubscriber(context))
     context.register(_ProvideAdminPasswordSubscriber(context, context.config('secret')))
 
 
 # LOG  : General     , 1759991170072> 4,495,649> version=41.78.16 demo=false
+# LOG  : General      f:0, t:1765447733234, st:1,204,895> version=42.13.0 02...76f 2025-12-11 08:13:47 (ZB) demo=false
 # LOG  : Network     , 1759991173462> 4,499,040> [09-10-25 13:26:13.462] > ZNet: Public IP: 14.237.58.218
 # LOG  : Network     , 1759991199453> 4,525,030> Clients should use 16261 port for connections
 # LOG  : General     , 1759991235467> 4,561,045> IngameTime 1993-07-09 18:00
 class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
-    VERSION_FILTER = msgftr.DataMatches(r'.*> version=(.*?) demo.*')
-    IP_FILTER = msgftr.DataMatches(r'.*> ZNet: Public IP: (.*?)$')
-    PORT_FILTER = msgftr.DataMatches(r'.*> Clients should use (\d+) port for connections$')
+    VERSION_FILTER = msgftr.DataMatches(r'.*> version=(.*?) .*')
     INGAMETIME_FILTER = msgftr.DataMatches(r'.*> IngameTime (.*?)$')
 
-    def __init__(self, mailer: msgabc.Mailer):
+    def __init__(self, mailer: msgabc.Mailer, public_ip: str):
         super().__init__(msgftr.Or(
-            SERVER_RESTART_REQUIRED_FILTER,
+            SERVER_RESTART_REQUIRED_FILTER, SERVER_PORT_FILTER,
             msgftr.And(
                 CONSOLE_OUTPUT_FILTER,
-                msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER,
-                          _ServerDetailsSubscriber.VERSION_FILTER,
-                          _ServerDetailsSubscriber.IP_FILTER,
-                          _ServerDetailsSubscriber.PORT_FILTER))))
-        self._mailer = mailer
+                msgftr.Or(_ServerDetailsSubscriber.INGAMETIME_FILTER, _ServerDetailsSubscriber.VERSION_FILTER))))
+        self._mailer, self._public_ip, self._port = mailer, public_ip, '16261'
 
     def handle(self, message):
         if _ServerDetailsSubscriber.INGAMETIME_FILTER.accepts(message):
@@ -62,15 +59,12 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ingametime=ingametime))
         elif SERVER_RESTART_REQUIRED_FILTER.accepts(message):
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(restart=dtutil.to_millis(message.created())))
+        elif SERVER_PORT_FILTER.accepts(message):
+            self._port = message.data()
         elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             version = _ServerDetailsSubscriber.VERSION_FILTER.find_one(message.data())
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
-        elif _ServerDetailsSubscriber.IP_FILTER.accepts(message):
-            ip = _ServerDetailsSubscriber.IP_FILTER.find_one(message.data())
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(ip=ip))
-        elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):
-            port = _ServerDetailsSubscriber.PORT_FILTER.find_one(message.data())
-            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(port=port))
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(
+                version=version, ip=self._public_ip, port=self._port))
         return None
 
 
