@@ -4,7 +4,7 @@ from core.context import contextsvc
 from core.http import httprsc, httpext
 from core.proc import proch
 from core.common import svrhelpers, cachelock
-from servers.projectzomboid import messaging as msg, modcheck as mck, playerscraper as psk
+from servers.projectzomboid import messaging as msg, modcheck as mck, scrapers as skr
 
 APPID = '380870'
 _WORLD_NAME_DEF = 'servertest'
@@ -43,7 +43,7 @@ class Deployment:
 
     async def initialise(self):
         self._world_name = await self._get_world_name()
-        psk.initialise(self._context, self._logs_dir)
+        self._context.register(skr.ScraperService(self._context, self._logs_dir))
         await cachelock.initialise(self._context)
         helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_jobs().init_archiving(self._tempdir).done()

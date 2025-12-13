@@ -7,7 +7,6 @@ from core.system import svrsvc
 from core.proc import proch, jobh
 from core.common import cachelock, playerstore, svrhelpers
 
-_CHAT_KEY_STRING = 'New message \'ChatMessage{chat=General'
 SERVER_STARTED_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('*** SERVER STARTED ***'))
 CONSOLE_LOG_FILTER = msgftr.Or(
@@ -22,7 +21,7 @@ CONSOLE_LOG_ERROR_FILTER = msgftr.And(
     mc.ServerProcess.FILTER_ALL_LINES,
     msgftr.Or(msgftr.DataStrStartsWith('ERROR:'), msgftr.DataStrStartsWith('SEVERE:')))
 CONSOLE_OUTPUT_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.Not(msgftr.DataStrContains(_CHAT_KEY_STRING)))
+    mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.Not(msgftr.DataStrContains('ChatMessage{chat=General')))
 SERVER_PORT, SERVER_RESTART_REQUIRED = 'messaging.SERVER_PORT', 'messaging.RESTART_REQUIRED'
 SERVER_PORT_FILTER = msgftr.NameIs(SERVER_PORT)
 SERVER_RESTART_REQUIRED_FILTER = msgftr.NameIs(SERVER_RESTART_REQUIRED)
@@ -111,20 +110,18 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
 
 
 # New message 'ChatMessage{chat=General, author='Sal', text='Helo Everyone'}' was sent members of chat '0'
+# [...][info] Message ChatMessage{chat=General, author='Apollo', text='hello from game'} sent to chat (id = 0) members.
 class _PlayerChatSubscriber(msgabc.AbcSubscriber):
+    CHAT_FILTER = msgftr.DataMatches(
+        r"^\[.*\]\[info\] Message ChatMessage\{chat=General, author='(.*?)', text='(.*?)'\} sent to chat.*")
 
     def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.And(
-            mc.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.DataStrContains(_CHAT_KEY_STRING)))
+        super().__init__(msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, _PlayerChatSubscriber.CHAT_FILTER))
         self._mailer = mailer
 
     def handle(self, message):
-        name = util.lchop(message.data(), 'author=')
-        name = util.rchop(name, ', text=')
-        text = util.lchop(message.data(), ', text=')
-        text = util.rchop(text, '}\' was sent members of chat')
-        playerstore.PlayersSubscriber.event_chat(self._mailer, self, name[1:-1], text[1:-1])
+        name, text = util.fill(_PlayerChatSubscriber.CHAT_FILTER.find_all(message.data()), 2)
+        playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
         return None
 
 

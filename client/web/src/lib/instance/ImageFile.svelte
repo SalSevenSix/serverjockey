@@ -19,7 +19,7 @@
 
 
 <div class="content"><figure class="image maxh is-bordered">
-  <img src={instance.url(imagePath)} alt="No Image Set" />
+  <img src={instance.url(imagePath)} alt="Not Set" />
 </figure></div>
 
 <FileUpload idPrefix={idPrefix} rootPath={path} filenameHelp={null} onCompleted={onCompleted} nospinner />
