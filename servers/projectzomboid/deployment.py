@@ -102,25 +102,36 @@ class Deployment:
         mck.apply_config(self._context, self, cmdargs)
 
     async def _prestart_ini(self):
-        config_pre = self._config_dir + '/' + self._world_name
-        ini_file = config_pre + '.ini'
+        ini_file = self._config_dir + '/' + self._world_name + '.ini'
         if not await io.file_exists(ini_file):
             return
         ini_read = await io.read_file(ini_file)
-        ini_read, ini_write = ini_read.split('\n'), []
+        ini_read = ini_read.split('\n')
         for line_read in ini_read:
-            line_write = line_read
             if line_read and line_read.find('=') > 0:
                 if line_read.startswith('DefaultPort='):
                     self._context.post(self, msg.SERVER_PORT, util.lchop(line_read, '='))
-                elif line_read.startswith('ServerImageIcon='):
-                    line_write = 'ServerImageIcon=' + config_pre + '_icon.jpg'
-                elif line_read.startswith('ServerImageLoginScreen='):
-                    line_write = 'ServerImageLoginScreen=' + config_pre + '_login.jpg'
-                elif line_read.startswith('ServerImageLoadingScreen='):
-                    line_write = 'ServerImageLoadingScreen=' + config_pre + '_loading.jpg'
-            ini_write.append(line_write)
-        await io.write_file(ini_file, '\n'.join(ini_write))
+
+      # async def _prestart_ini(self):
+      #  config_pre = self._config_dir + '/' + self._world_name
+      #  ini_file = config_pre + '.ini'
+      #  if not await io.file_exists(ini_file):
+      #      return
+      #  ini_read = await io.read_file(ini_file)
+      #  ini_read, ini_write = ini_read.split('\n'), []
+      #  for line_read in ini_read:
+      #      line_write = line_read
+      #      if line_read and line_read.find('=') > 0:
+      #          if line_read.startswith('DefaultPort='):
+      #              self._context.post(self, msg.SERVER_PORT, util.lchop(line_read, '='))
+      #          elif line_read.startswith('ServerImageIcon='):
+      #              line_write = 'ServerImageIcon=' + config_pre + '_icon.jpg'
+      #          elif line_read.startswith('ServerImageLoginScreen='):
+      #              line_write = 'ServerImageLoginScreen=' + config_pre + '_login.jpg'
+      #          elif line_read.startswith('ServerImageLoadingScreen='):
+      #              line_write = 'ServerImageLoadingScreen=' + config_pre + '_loading.jpg'
+      #      ini_write.append(line_write)
+      #  await io.write_file(ini_file, '\n'.join(ini_write))
 
     async def _get_world_name(self) -> str:
         if await io.directory_exists(self._multiplayer_dir):

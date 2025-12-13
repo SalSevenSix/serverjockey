@@ -1,5 +1,5 @@
 # ALLOW core.*
-from core.util import util, dtutil, objconv, sysutil
+from core.util import util, dtutil, sysutil
 from core.msg import msgabc, msglog, msgftr
 from core.msgc import mc
 from core.context import contextsvc
@@ -74,10 +74,11 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # b42   [12-12-25 18:33:42.901] 76561197968989085 "Apollo" disconnected player (10856,9894,0).
 # LOG  : General   mod > PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "x": 10897, "y": 10126, "
 #   z": 0 }}
+# b42   [13-12-25 07:51:08.007] user Truffle Pigg died at (3104,6147,0) (non pvp).
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN_FILTER = msgftr.DataMatches(r'^\[.*\] (.*?) "(.*?)" fully connected \(.*\)\.$')
     LOGOUT_FILTER = msgftr.DataMatches(r'^\[.*\] (.*?) "(.*?)" disconnected player \(.*\)\.$')
-    DEATH_FILTER = msgftr.DataStrContains('> PlayerDeath { "player"')
+    DEATH_FILTER = msgftr.DataMatches(r'^\[.*\] user (.*?) died at \((.*?)\).*')
 
     def __init__(self, mailer: msgabc.Mailer):
         super().__init__(msgftr.And(
@@ -95,16 +96,9 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             steamid, name = util.fill(_PlayerEventSubscriber.LOGOUT_FILTER.find_all(message.data()), 2)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name, steamid)
         elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
-            data = objconv.json_to_dict(util.lchop(message.data(), 'PlayerDeath'))
-            name = util.get('player', data)
+            name, position = util.fill(_PlayerEventSubscriber.DEATH_FILTER.find_all(message.data()), 2)
             if name:
-                text = 'survived ' + dtutil.duration_to_str(util.get('hours', data, 0.0) * 3600.0)
-                text += ', killed ' + str(util.get('zkills', data, 0)) + ' zombies'
-                text += ', died at '
-                position = util.get('position', data)
-                text += str(util.get('x', position, 0)) + ','
-                text += str(util.get('y', position, 0)) + ','
-                text += str(util.get('z', position, 0))
+                name, text = name.strip(), 'died at ' + position if position else None
                 playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
         return None
 

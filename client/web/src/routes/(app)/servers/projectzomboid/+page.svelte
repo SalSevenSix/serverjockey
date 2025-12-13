@@ -12,7 +12,6 @@
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
-  import ImageFile from '$lib/instance/ImageFile.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
@@ -66,7 +65,7 @@
           </p>
         </ConfigFile>
       </Collapsible>
-      <Collapsible icon="fa-image" title="Branding">
+      <!-- Collapsible icon="fa-image" title="Branding">
         <div class="content">
           <p>
             Upload images for your (b42+) server branding.
@@ -81,7 +80,7 @@
         <ImageFile path="/config/imglogin" />
         <div class="content mt-3"><h3 class="title is-5 has-text-centered">Loading Screen Banner</h3></div>
         <ImageFile path="/config/imgloading" />
-      </Collapsible>
+      </Collapsible -->
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />
       </Collapsible>
