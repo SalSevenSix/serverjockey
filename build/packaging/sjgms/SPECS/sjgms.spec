@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Fri Dec 12 2025 Bowden Salis <bsalis76@gmail.com> - 0.25.0
-- Feature release 0.25.0
+* Sun Dec 14 2025 Bowden Salis <bsalis76@gmail.com> - 0.25.0
+- Project Zomboid b42 support release
 * Thu Dec 11 2025 Bowden Salis <bsalis76@gmail.com> - 0.24.0
 - TeamSpeak server support release
 * Wed Oct 15 2025 Bowden Salis <bsalis76@gmail.com> - 0.23.0

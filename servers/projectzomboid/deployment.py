@@ -1,4 +1,4 @@
-# ALLOW core.* projectzomboid.messaging projectzomboid.playerscraper
+# ALLOW core.* projectzomboid.messaging projectzomboid.modcheck projectzomboid.scrapers
 from core.util import util, io, objconv
 from core.context import contextsvc
 from core.http import httprsc, httpext
