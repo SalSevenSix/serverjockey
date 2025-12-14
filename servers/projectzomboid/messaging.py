@@ -72,6 +72,7 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 # b42   [12-12-25 18:31:34.628] 76561197968989085 "Apollo" fully connected (10856,9894,0).
 # LOG  : Network   b41 > Disconnected player "Sal" 76561197968989085
 # b42   [12-12-25 18:33:42.901] 76561197968989085 "Apollo" disconnected player (10856,9894,0).
+# b42   [13-12-25 22:57:17.456] 76561199229441234(owner=76561199817858765) "Fooya" fully connected (12720,5056,1).
 # LOG  : General   mod > PlayerDeath { "player": "Sal", "hours": 0, "zkills": 0, "position": { "x": 10897, "y": 10126, "
 #   z": 0 }}
 # b42   [13-12-25 07:51:08.007] user Truffle Pigg died at (3104,6147,0) (non pvp).
@@ -91,9 +92,11 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     def handle(self, message):
         if _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             steamid, name = util.fill(_PlayerEventSubscriber.LOGIN_FILTER.find_all(message.data()), 2)
+            steamid = util.rchop(steamid, '(owner=')
             playerstore.PlayersSubscriber.event_login(self._mailer, self, name, steamid)
         elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
             steamid, name = util.fill(_PlayerEventSubscriber.LOGOUT_FILTER.find_all(message.data()), 2)
+            steamid = util.rchop(steamid, '(owner=')
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name, steamid)
         elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
             name, position = util.fill(_PlayerEventSubscriber.DEATH_FILTER.find_all(message.data()), 2)
