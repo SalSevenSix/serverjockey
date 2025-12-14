@@ -47,7 +47,7 @@ export const help = helptext.newServerHelpBuilder()
   .addDeployment()
   .addHelp('player set-access-level', [
     'Set access level for online player. Level options:', '```',
-    'admin, moderator, overseer, gm, observer, none', '```'])
+    'banned, user, priority, observer, gm, moderator, admin', '```'])
   .addHelp('player tele-to', [
     'Teleport the player named {name} to location of player named {toplayer}',
     'e.g. `!player "Mr Tee" tele-to "Jojo"`'])

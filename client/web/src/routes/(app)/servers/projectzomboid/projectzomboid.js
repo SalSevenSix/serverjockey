@@ -35,7 +35,7 @@ export const consoleCommands = {
     'set-access-level': [
       {input: 'text>', type: 'item', name: 'player'},
       {input: 'radio', type: 'string', name: 'level', options: [
-        'none', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
+        'none', 'banned', 'user', 'priority', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
     ],
     'tele-to': [
       {input: 'text>', type: 'item', name: 'player', label: 'Move Player'},
