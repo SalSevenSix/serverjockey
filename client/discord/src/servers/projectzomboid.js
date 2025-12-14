@@ -57,10 +57,12 @@ export const help = helptext.newServerHelpBuilder()
   .addHelp('player give-xp', [
     'Give XP to online player. Skill options:', '```',
     'Sprinting, Lightfoot, Nimble, Sneak, Aiming, Reloading,',
-    'Axe, SmallBlunt, Blunt, Spear, SmallBlade, LongBlade, Combat,',
-    'Woodwork, Cooking, Farming, Doctor, Electricity, MetalWelding,',
-    'Tailoring, Mechanics, FlintKnapping, Carving, Masonry, Pottery,',
-    'Fishing, Trapping, PlantScavenging, Fitness, Strength', '```'])
+    'Fitness', 'Strength', 'Sprinting', 'Running', 'Lightfoot', 'Nimble', 'Sneak',
+    'Axe', 'Blunt', 'SmallBlunt', 'LongBlade', 'SmallBlade', 'Spear', 'Maintenance',
+    'Farming', 'Agriculture', 'Husbandry', 'Woodwork', 'Carving', 'Cooking',
+    'Butchering', 'Electricity', 'Doctor', 'Glassmaking', 'FlintKnapping', 'Masonry',
+    'MetalWelding', 'Welding', 'Blacksmithing', 'Mechanics', 'Pottery', 'Tailoring',
+    'Aiming', 'Reloading', 'Fishing', 'PlantScavenging', 'Tracking', 'Trapping', '```'])
   .addHelp('player give-item', [
     'Give item to player, {count} is optional.'])
   .addHelp('player spawn-vehicle', [

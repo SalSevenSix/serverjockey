@@ -48,11 +48,12 @@ export const consoleCommands = {
     'give-xp': [
       {input: 'text>', type: 'item', name: 'player'},
       {input: 'radio', type: 'string', name: 'skill', options: [
-        'Sprinting', 'Lightfoot', 'Nimble', 'Sneak', 'Aiming', 'Reloading',
-        'Axe', 'SmallBlunt', 'Blunt', 'Spear', 'SmallBlade', 'LongBlade', 'Combat',
-        'Woodwork', 'Cooking', 'Farming', 'Doctor', 'Electricity', 'MetalWelding',
-        'Tailoring', 'Mechanics', 'FlintKnapping', 'Carving', 'Masonry', 'Pottery',
-        'Fishing', 'Trapping', 'PlantScavenging', 'Fitness', 'Strength']},
+        'Fitness', 'Strength', 'Sprinting', 'Running', 'Lightfoot', 'Nimble', 'Sneak',
+        'Axe', 'Blunt', 'SmallBlunt', 'LongBlade', 'SmallBlade', 'Spear', 'Maintenance',
+        'Farming', 'Agriculture', 'Husbandry', 'Woodwork', 'Carving', 'Cooking',
+        'Butchering', 'Electricity', 'Doctor', 'Glassmaking', 'FlintKnapping', 'Masonry',
+        'MetalWelding', 'Welding', 'Blacksmithing', 'Mechanics', 'Pottery', 'Tailoring',
+        'Aiming', 'Reloading', 'Fishing', 'PlantScavenging', 'Tracking', 'Trapping']},
       {input: 'text', type: 'number', name: 'xp', label: 'XP'}
     ],
     'give-item': [
