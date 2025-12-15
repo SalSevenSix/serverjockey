@@ -27,6 +27,9 @@ export const help = helptext.newServerHelpBuilder()
   .add([
     'player "{name}" kick      : Kick from server',
     'player "{name}" set-access-level {level} : Set access level',
+    'player "{name}" godmode {state}          : God mode true|false',
+    'player "{name}" invisible {state}        : Invisible true|false',
+    'player "{name}" set-password {password}  : Set new password',
     'player "{name}" tele-to "{toplayer}"     : Teleport to player',
     'player "{name}" tele-at {x,y,z}          : Teleport to location',
     'player "{name}" give-xp {skill} {xp}     : Give XP',
@@ -87,6 +90,10 @@ export function player({ httptool, aliases, message, data }) {
   if (data.length > 2) {
     if (cmd === 'set-access-level') {
       body = { level: data[2] };
+    } else if (cmd === 'godmode' || cmd === 'invisible') {
+      body = { state: data[2] };
+    } else if (cmd === 'set-password') {
+      body = { password: data[2] };
     } else if (cmd === 'tele-to') {
       body = { toplayer: data[2] };
     } else if (cmd === 'tele-at') {

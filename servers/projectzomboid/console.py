@@ -20,6 +20,9 @@ _WORLD = cmdutil.CommandLines({
     'stop-rain': 'stoprain'})
 _PLAYER = cmdutil.CommandLines({
     'set-access-level': 'setaccesslevel "{player}" "{level}"',
+    'godmode': 'godmodeplayer "{player}" -{state}',
+    'invisible': 'invisibleplayer "{player}" -{state}',
+    'set-password': 'setpassword "{player}" "{password}"',
     'give-item': ['additem "{player}" "{module}.{item}"', {'count': '{}'}],
     'give-xp': 'addxp "{player}" {skill}={xp}',
     'spawn-vehicle': 'addvehicle "{module}.{item}" "{player}"',

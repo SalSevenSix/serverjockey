@@ -37,6 +37,18 @@ export const consoleCommands = {
       {input: 'radio', type: 'string', name: 'level', options: [
         'none', 'banned', 'user', 'priority', 'observer', 'gm', 'overseer', 'moderator', 'admin']}
     ],
+    'godmode': [
+      {input: 'text>', type: 'item', name: 'player'},
+      {input: 'radio', type: 'string', name: 'state', options: ['false', 'true']}
+    ],
+    'invisible': [
+      {input: 'text>', type: 'item', name: 'player'},
+      {input: 'radio', type: 'string', name: 'state', options: ['false', 'true']}
+    ],
+    'set-password': [
+      {input: 'text>', type: 'item', name: 'player'},
+      {input: 'text', type: 'string', name: 'password'}
+    ],
     'tele-to': [
       {input: 'text>', type: 'item', name: 'player', label: 'Move Player'},
       {input: 'text', type: 'string', name: 'toplayer', label: 'To Player'}
