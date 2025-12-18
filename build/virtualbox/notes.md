@@ -22,7 +22,7 @@
 
 ### VM Settings
 1. Name: ZomBox
-2. Shape: 80Gb disc / 10240Mb mem / 2 cpu
+2. Shape: 100Gb disc / 10240Mb mem / 2 cpu
 3. Clipboard OFF
 4. Paste in Description
 5. Boot order optical then hdd only
@@ -54,13 +54,13 @@ https://serverjockey.net
 ```
 
 ### Install Ubuntu OS
-1. Confim USA repo
+1. Confim central repo
 2. No LVM group
 3. Name everything zombox
 4. Install OpenSSH server
 
 ### After Install
-1. Check swap exists 4Gb
+1. Create swap file 10Gb
 2. apt update && apt upgrade
 3. Check zerofree installed
 4. Install vmtouch, inotify-tools, steamcmd

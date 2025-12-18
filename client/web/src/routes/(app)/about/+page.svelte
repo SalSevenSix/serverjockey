@@ -20,6 +20,7 @@
       Both this webapp and Discord can be used to manage servers.
     </p>
     <p class="has-text-weight-bold">
+      <i class="fa fa-chevron-circle-right fa-lg"></i>&nbsp;
       Join the ServerJockey Discord
     </p>
     <div class="columns is-centered">
@@ -33,6 +34,7 @@
       </div>
     </div>
     <p class="has-text-weight-bold">
+      <i class="fa fa-chevron-circle-right fa-lg"></i>&nbsp;
       If you like using this system, please consider supporting it on Ko-fi
     </p>
     <div class="columns is-centered">
@@ -46,6 +48,7 @@
       </div>
     </div>
     <p class="has-text-weight-bold">
+      <i class="fa fa-chevron-circle-right fa-lg"></i>&nbsp;
       For instructional guides and dev updates, visit the YouTube channel
     </p>
     <div class="columns is-centered">
@@ -59,13 +62,14 @@
       </div>
     </div>
     <p class="has-text-weight-bold">
+      <i class="fa fa-chevron-circle-right fa-lg"></i>&nbsp;
       Install instructions and source can be found on GitHub
     </p>
     <div class="columns is-centered">
-      <div class="column is-half">
+      <div class="column is-two-thirds">
         <a id="aboutPageGithub" href="https://github.com/SalSevenSix/serverjockey" target="_blank">
-          <figure class="image background-frame pl-1 pr-1">
-            <img src={surl('/assets/brands/GitHub_Logo.png')}
+          <figure class="image background-frame pl-5 pr-5 pt-3 pb-3">
+            <img src={surl('/assets/brands/GitHub_Lockup_Dark.svg')}
                  alt="ServerJockey on GitHub" title="ServerJockey on GitHub" />
           </figure>
         </a>
