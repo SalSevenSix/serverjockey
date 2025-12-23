@@ -67,9 +67,9 @@ const workshopCache = {
   uncached: function(workshops, limit=10) {
     const result = [];
     if (workshops.length === 0 || limit < 1) return result;
-    for (let i = 0; i < workshops.length; i++) {  // TODO change to for..of
-      const item = workshopCache.get(workshops[i]);
-      if (!item) { result.push(workshops[i]); }
+    for (const workshop of workshops) {
+      const item = workshopCache.get(workshop);
+      if (!item) { result.push(workshop); }
       if (result.length >= limit) return result;
     }
     return result;
@@ -146,6 +146,7 @@ export function processResults(dom, ini, updated) {
     }
   };
   self.mods = {
+    backslash: self.ini.backslash,
     available: self.dom.mods.filter(function(value) { return !self.ini.mods.includes(value); }),
     selected: [...self.ini.mods],
     addTop: function(item) {
@@ -173,6 +174,7 @@ export function processResults(dom, ini, updated) {
     }
   };
   self.maps = {
+    backslash: self.ini.backslash,
     available: self.dom.maps.filter(function(value) { return !self.ini.maps.includes(value); }),
     selected: [...self.ini.maps],
     addTop: function(item) {
@@ -205,9 +207,11 @@ export function processResults(dom, ini, updated) {
       if (line.startsWith('WorkshopItems=')) {
         result.push('WorkshopItems=' + self.workshop.selected.join(';'));
       } else if (line.startsWith('Mods=')) {
-        result.push('Mods=' + self.mods.selected.join(';'));
+        const prefix = self.mods.selected.length > 0 && self.mods.backslash ? '\\' : '';
+        result.push('Mods=' + prefix + self.mods.selected.join(';' + prefix));
       } else if (line.startsWith('Map=')) {
-        result.push('Map=' + self.maps.selected.join(';'));
+        const prefix = self.maps.selected.length > 0 && self.maps.backslash ? '\\' : '';
+        result.push('Map=' + prefix + self.maps.selected.join(';' + prefix));
       } else {
         result.push(line);
       }

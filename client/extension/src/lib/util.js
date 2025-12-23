@@ -23,6 +23,7 @@ function iniExtractItem(ini, cutlen, regex) {
   if (!result) return [];
   result = result[result.length - 1].substring(cutlen);
   result = result.split(';');
+  result = result.map(function(value) { return value && value.startsWith('\\') ? value.substring(1) : value; });
   result = result.filter(function(value) { return value.trim(); });
   return result.filter(unique);
 }
@@ -65,7 +66,8 @@ export function iniExtract(ini) {
   return {
     workshops: iniExtractItem(ini, 14, /^WorkshopItems=.*$/gm),
     mods: iniExtractItem(ini, 5, /^Mods=.*$/gm),
-    maps: iniExtractItem(ini, 4, /^Map=.*$/gm)
+    maps: iniExtractItem(ini, 4, /^Map=.*$/gm),
+    backslash: ini.indexOf('AntiCheatServerCustomization=') > -1
   };
 }
 
