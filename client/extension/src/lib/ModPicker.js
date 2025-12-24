@@ -174,7 +174,7 @@ export function processResults(dom, ini, updated) {
     }
   };
   self.maps = {
-    backslash: self.ini.backslash,
+    backslash: false,
     available: self.dom.maps.filter(function(value) { return !self.ini.maps.includes(value); }),
     selected: [...self.ini.maps],
     addTop: function(item) {

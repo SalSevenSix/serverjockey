@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Mon Dec 15 2025 Bowden Salis <bsalis76@gmail.com> - 0.26.0
-- Feature release v0.26.0
+* Thu Dec 25 2025 Bowden Salis <bsalis76@gmail.com> - 0.26.0
+- Project Zomboid b42 fixes release
 * Sun Dec 14 2025 Bowden Salis <bsalis76@gmail.com> - 0.25.0
 - Project Zomboid b42 support release
 * Thu Dec 11 2025 Bowden Salis <bsalis76@gmail.com> - 0.24.0
