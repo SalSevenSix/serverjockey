@@ -15,6 +15,7 @@ _MODULE_DATA = dict(
     starbound='Starbound',
     palworld='Palworld',
     valheim='Valheim',
+    hytale='Hytale',
     csii='Counter Strike 2',
     teamspeak='TeamSpeak 3')
 

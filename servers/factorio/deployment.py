@@ -159,7 +159,7 @@ class Deployment:
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
                     assert response.status == 200
-                    tracker, content_length = None, response.headers.get('Content-Length')
+                    tracker, content_length = io.NullBytesTracker(), response.headers.get('Content-Length')
                     if content_length:
                         tracker = msglog.PercentTracker(self._context, int(content_length), prefix='downloaded')
                     await io.stream_write_file(
@@ -226,7 +226,7 @@ class Deployment:
                         download_url = baseurl + release['download_url'] + credentials
                         async with session.get(download_url, read_bufsize=io.DEFAULT_CHUNK_SIZE) as modfile_resp:
                             assert modfile_resp.status == 200
-                            tracker, content_length = None, modfile_resp.headers.get('Content-Length')
+                            tracker, content_length = io.NullBytesTracker(), modfile_resp.headers.get('Content-Length')
                             if content_length:
                                 tracker = msglog.PercentTracker(
                                     self._context, int(content_length), notifications=5, prefix='downloaded')
