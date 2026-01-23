@@ -4,9 +4,7 @@ from core.msgc import mc
 from core.context import contextsvc
 from core.common import svrhelpers
 
-SERVER_STARTED_FILTER = msgftr.And(
-    mc.ServerProcess.FILTER_STDOUT_LINE,
-    msgftr.DataMatches(r''))
+SERVER_STARTED_FILTER = msgftr.And(mc.ServerProcess.FILTER_STDOUT_LINE, msgftr.DataStrContains('Hytale Server Booted!'))
 DEPLOYMENT_START, DEPLOYMENT_DONE = 'Deployment.Start', 'Deployment.Done'
 FILTER_DEPLOYMENT_START, FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_START), msgftr.NameIs(DEPLOYMENT_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(mc.ServerProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
