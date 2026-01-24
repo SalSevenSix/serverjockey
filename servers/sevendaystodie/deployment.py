@@ -13,7 +13,7 @@ from servers.sevendaystodie import messaging as msg
 APPID = '294420'
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_server_upnp': 'Try to automatically redirect server ports on home network using UPnP',
         'server_upnp': True,

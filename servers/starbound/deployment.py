@@ -10,7 +10,7 @@ from core.common import rconsvc, portmapper, svrhelpers
 APPID = '211820'
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_server_upnp': 'Try to automatically redirect server ports on home network using UPnP',
         'server_upnp': True,

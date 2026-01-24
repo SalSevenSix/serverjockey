@@ -10,7 +10,7 @@ from servers.unturned import messaging as msg
 APPID = '1110390'
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_scope': 'Server scope. Options are InternetServer or LanServer',
         'scope': 'InternetServer',

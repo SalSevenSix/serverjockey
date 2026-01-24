@@ -9,7 +9,7 @@ from servers.valheim import messaging as msg
 APPID = '896660'
 
 
-def _default_cmdargs():
+def _default_cmdargs() -> dict:
     return {
         '_comment_port': 'Specify server port, note port+1 also used',
         '-port': msg.DEFAULT_PORT,
@@ -93,7 +93,7 @@ class Deployment:
         if not await io.file_exists(executable):
             raise FileNotFoundError('Valheim game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
-        await self._map_ports(cmdargs)
+        self._map_ports(cmdargs)
         server = proch.ServerProcess(self._context, executable)
         server.use_cwd(self._runtime_dir).use_env(self._env)
         server.append_arg('-nographics').append_arg('-batchmode')
@@ -109,7 +109,7 @@ class Deployment:
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
 
-    async def _map_ports(self, cmdargs: dict):
+    def _map_ports(self, cmdargs: dict):
         port = util.get('port', cmdargs)
         port = port if port else msg.DEFAULT_PORT
         self._context.post(self, msg.NAME_PORT, port)
