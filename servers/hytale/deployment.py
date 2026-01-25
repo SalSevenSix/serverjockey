@@ -215,7 +215,8 @@ class Deployment:
             logger.log('RUNNING ' + LAUNCHER_EXE + ' ' + ' '.join(args))
             mailer, source, name, decoder = logger.mailer(), logger.source(), logger.name(), linenc.PtyLineDecoder()
             process = await asyncio.create_subprocess_exec(
-                self._launcher_exe, *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                self._launcher_exe, *args, env=self._context.env(), cwd=self._runtime_dir,
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             stderr = msgpipe.PipeOutLineProducer(mailer, source, name, process.stderr, decoder)
             stdout = msgpipe.PipeOutLineProducer(mailer, source, name, process.stdout, decoder)
             rc = await process.wait()

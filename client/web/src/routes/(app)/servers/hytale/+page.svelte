@@ -62,8 +62,8 @@
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Patchline">
-          <p>Watch console log for authorisation step during install process.
-             Copy and paste URL into a browser to authorise device.</p>
+          <p>Watch server status and console log for authorisation step during install process.
+             Authorise device for install when prompted.</p>
         </RuntimeControls>
         <WorldControls actions={worldActions} />
       </Collapsible>

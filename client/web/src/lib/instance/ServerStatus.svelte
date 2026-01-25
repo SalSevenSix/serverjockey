@@ -1,12 +1,15 @@
 <script>
   import { onDestroy, getContext } from 'svelte';
-  import { humanDuration } from 'common/util/util';
+  import { hasProp, humanDuration } from 'common/util/util';
   import { capitalize } from '$lib/util/util';
+  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
+  import ExtLink from '$lib/widget/ExtLink.svelte';
   import ServerStateSymbol from '$lib/widget/ServerStateSymbol.svelte';
 
+  const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
-  const commonKeys = ['version', 'ip', 'port'];
 
   export let stateOnly = false;
 
@@ -21,8 +24,40 @@
     return result;
   }
 
+  $: extras = getDetails($serverStatus.details); function getDetails(details) {
+    const result = [];
+    if (!details) return result;
+    const excludedKeys = ['version', 'ip', 'port'];
+    for (const [key, detail] of Object.entries(details)) {
+      if (!excludedKeys.includes(key)) {
+        const entry = { type: 'text', label: capitalize(key), value: detail, data: null };
+        if (hasProp(detail, 'type')) {
+          entry.type = detail.type;
+          if (hasProp(detail, 'label')) { entry.label = detail.label; }
+          if (hasProp(detail, 'value')) { entry.value = detail.value; }
+          if (hasProp(detail, 'data')) { entry.data = detail.data; }
+        }
+        result.push(entry);
+      }
+    }
+    return result;
+  }
+
   $: uptime = $serverStatus.uptime ? $serverStatus.uptime : 0;
   const uptimeClock = setInterval(function() { uptime += 10000; }, 10000);
+
+  function sendCommand(cmd) {
+    const request = newPostRequest();
+    request.body = JSON.stringify({ 'line': cmd });
+    fetch(instance.url('/console/send'), request)
+      .then(function(response) {
+        if (!response.ok) throw new Error('Status: ' + response.status);
+        notifyInfo('Console command sent.');
+      })
+      .catch(function() {
+        notifyError('Failed to send command to server.');
+      });
+  }
 
   onDestroy(function() {
     clearInterval(uptimeClock);
@@ -52,14 +87,21 @@
               {#if connect.url}<a href={connect.url} title="Play through Steam"><i class="fa-brands fa-steam"></i></a>{/if}
             </td></tr>
       {/if}
-      {#if $serverStatus.details}
-        {#each Object.keys($serverStatus.details) as key}
-          {#if !commonKeys.includes(key)}
-            <tr><td class="has-text-weight-bold">{capitalize(key)}</td>
-                <td id="serverStatus{capitalize(key)}">{$serverStatus.details[key]}</td></tr>
-          {/if}
-        {/each}
-      {/if}
+      {#each extras as entry}
+        <tr>
+          <td class="has-text-weight-bold">{entry.label}</td>
+          <td id="serverStatus{entry.label}">
+            {#if entry.type === 'cmd'}
+               <button id="serverStatus{entry.label}Cmd" class="button button-cmd is-success"
+                 on:click={function() { sendCommand(entry.data); }}>{entry.value}</button>
+            {:else if entry.type === 'url'}
+              <ExtLink id="serverStatus{entry.label}Url" href={entry.data}>{entry.value}</ExtLink>
+            {:else}
+              {entry.value}
+            {/if}
+          </td>
+        </tr>
+      {/each}
     </tbody>
   </table>
 </div>
@@ -68,5 +110,9 @@
 <style>
   .full-size-status {
     min-height: 8.5em;
+  }
+
+  .button-cmd {
+    height: 1.6em;
   }
 </style>
