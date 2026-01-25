@@ -11,7 +11,14 @@
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
 
-  export let commands;
+  export let commands = {
+    'console': {
+      'send': [
+        {name: 'help', input: 'display'},
+        {name: 'line', input: 'text>', type: 'string', label: null}
+      ]
+    }
+  };
 
   let args = [null, null, null, null, null, null, null, null, null, null];
   let action = null;

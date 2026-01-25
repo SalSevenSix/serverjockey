@@ -2,7 +2,7 @@ import socket
 import asyncio
 import aiohttp
 # ALLOW core.* hytale.messaging
-from core.util import gc, util, tasks, io, aggtrf, pack, shellutil, funcutil, objconv
+from core.util import gc, util, tasks, io, aggtrf, pack, shellutil, funcutil, objconv, linenc
 from core.msg import msgabc, msglog, msgpipe
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
@@ -92,10 +92,10 @@ class Deployment:
 
     def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
-        builder.put_meta(self._runtime_meta, httpext.MtimeHandler().dir(self._map_dir + '/resources'))
+        builder.put_meta(self._runtime_meta, httpext.MtimeHandler().check(self._map_dir).dir(self._logs_dir))
         builder.put_installer(_InstallRuntimeHandler(self, self._context))
         builder.put_wipes(self._runtime_dir, dict(
-            logs=self._logs_dir, autobackups=self._autobackups_dir, save=self._save_dir, all=self._world_dir))
+            save=self._save_dir, logs=self._logs_dir, autobackups=self._autobackups_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.pop()
         builder.put_logs(self._logs_dir)
@@ -110,7 +110,8 @@ class Deployment:
             raise FileNotFoundError('Hytale game server not installed. Please Install Runtime first.')
         cmdargs, jreargs, svrargs = await self._load_args()
         self._map_ports(cmdargs)
-        server = proch.ServerProcess(self._context, self._java_exe).use_cwd(self._world_dir)
+        server = proch.ServerProcess(self._context, self._java_exe)
+        server.use_cwd(self._world_dir).use_out_decoder(linenc.PtyLineDecoder())
         server.append_arg('-XX:AOTCache=' + self._server_dir + '/Server/HytaleServer.aot')
         server.append_struct(jreargs)
         server.append_arg('-jar').append_arg(self._server_jar)
@@ -140,11 +141,14 @@ class Deployment:
         return cmdargs, jreargs, svrargs
 
     def _map_ports(self, cmdargs: dict):
-        server_upnp, port = util.get('server_upnp', cmdargs, True), util.get('--bind', cmdargs, 5520)
-        if server_upnp and port:
-            if isinstance(port, str):
-                port = int(util.lchop(util.lchop(port, '/'), ':'))
-            portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
+        if not util.get('server_upnp', cmdargs, True):
+            return
+        port = util.get('--bind', cmdargs)
+        if not port:
+            port = 5520
+        if isinstance(port, str):
+            port = int(util.lchop(util.lchop(port, '/'), ':'))
+        portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
 
     async def install_runtime(self, version: str):
         logger = msglog.LogPublisher(self._context, self)
@@ -209,10 +213,11 @@ class Deployment:
             args.append(version.strip())
         try:
             logger.log('RUNNING ' + LAUNCHER_EXE + ' ' + ' '.join(args))
+            mailer, source, name, decoder = logger.mailer(), logger.source(), logger.name(), linenc.PtyLineDecoder()
             process = await asyncio.create_subprocess_exec(
                 self._launcher_exe, *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = msgpipe.PipeOutLineProducer(logger.mailer(), logger.source(), logger.name(), process.stderr)
-            stdout = msgpipe.PipeOutLineProducer(logger.mailer(), logger.source(), logger.name(), process.stdout)
+            stderr = msgpipe.PipeOutLineProducer(mailer, source, name, process.stderr, decoder)
+            stdout = msgpipe.PipeOutLineProducer(mailer, source, name, process.stdout, decoder)
             rc = await process.wait()
             if rc != 0:
                 raise Exception(f'HytaleServer download failed (exit code {rc})')

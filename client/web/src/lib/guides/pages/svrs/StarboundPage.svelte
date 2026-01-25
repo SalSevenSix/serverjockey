@@ -15,8 +15,6 @@
     <ExtLink href="https://playstarbound.com" notranslate>Starbound</ExtLink>
     is an action-adventure game with fighting, mining and crafting in a procedurally generated 2D world.
     It has RPG elements and a focus on exploration and player guided storytelling.
-  </p>
-  <p>
     This guide will show you how to install, configure and run a Starbound server using this Webapp.
   </p>
   <p>

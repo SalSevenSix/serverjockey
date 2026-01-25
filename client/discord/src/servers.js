@@ -8,6 +8,7 @@ import * as csii from './servers/csii.js';
 import * as palworld from './servers/palworld.js';
 import * as valheim from './servers/valheim.js';
 import * as teamspeak from './servers/teamspeak.js';
+import * as hytale from './servers/hytale.js';
 
 export { testserver, projectzomboid, factorio, sevendaystodie, unturned, starbound, csii, palworld, valheim,
-  teamspeak };
+  teamspeak, hytale };

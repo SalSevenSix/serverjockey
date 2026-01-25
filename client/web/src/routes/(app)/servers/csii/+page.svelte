@@ -18,15 +18,6 @@
   const worldActions = [
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all configuration and delete all logs.' }];
-
-  const consoleCommands = {
-    'console': {
-      'send': [
-        {name: 'help', input: 'display'},
-        {name: 'line', input: 'text>', type: 'string', label: null}
-      ]
-    }
-  };
 </script>
 
 
@@ -45,7 +36,7 @@
       </div>
       <InstanceLog />
       <Collapsible icon="fa-keyboard" title="Console Commands">
-        <CommandBuilder commands={consoleCommands} />
+        <CommandBuilder />
       </Collapsible>
       <Collapsible icon="fa-user" title="Players">
         <Players />

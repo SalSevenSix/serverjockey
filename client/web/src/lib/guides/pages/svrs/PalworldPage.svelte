@@ -19,8 +19,6 @@
     is a monster-catching, survival and crafting game, but incorporates a variety of mechanics from other genres in
     order to provide a new experience for everyone. Fight, farm, build and work alongside mysterious creatures called
     &quot;Pals&quot; in a multiplayer open world survival and crafting game.
-  </p>
-  <p>
     This guide will show you how to install, configure and run a Palworld server using this Webapp.
   </p>
   <p>

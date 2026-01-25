@@ -4,28 +4,29 @@
   import WebappTitle from '$lib/guides/common/WebappTitle.svelte';
   import WebappServerInstall from '$lib/guides/common/WebappServerInstall.svelte';
   import WebappConfigRun from '$lib/guides/common/WebappConfigRun.svelte';
+  import WebappGenerateConfig from '$lib/guides/common/WebappGenerateConfig.svelte';
   import WebappAdditionalInformation from '$lib/guides/common/WebappAdditionalInformation.svelte';
   import WebappPortForward from '$lib/guides/common/WebappPortForward.svelte';
 </script>
 
 
-<WebappTitle module="valheim" serverName="Valheim">
+<WebappTitle module="hytale" serverName="Hytale">
   <p>
-    <ExtLink href="https://www.valheimgame.com" notranslate>Valheim</ExtLink>
-    is a survival game set in a procedurally generated 3D open world sandbox.
-    Explore, forage, hunt, mine materials, build shelters and fight enemies to survive in a Viking themed afterlife.
-    This guide will show you how to install, configure and run an Valheim server using this Webapp.
+    <ExtLink href="https://hytale.com" notranslate>Hytale</ExtLink>
+    is a voxel based open sandbox game heavily inspired by Minecraft, but with a bigger focus on RPG style adventure.
+    This guide will show you how to install, configure and run an Hytale server using this Webapp.
   </p>
   <p>
     Jump to the <a href="#portForwarding" use:scrollto={'#portForwarding'}>Port Forwarding</a>
     section at the end for information on ports.
   </p>
 </WebappTitle>
-<WebappServerInstall module="valheim" />
+<WebappServerInstall module="hytale" />
+<WebappGenerateConfig />
 <WebappConfigRun />
 <WebappAdditionalInformation />
-<WebappPortForward serverName="Valheim" configName="Launch Options"
-  portsList={[{ purpose: 'Server', port: 2456, protocal: 'UDP' }, { purpose: 'Query', port: 2457, protocal: 'UDP' }]}>
-&quot;_comment_upnp&quot;: &quot;Try to automatically redirect ports on home network using UPnP&quot;,
-&quot;upnp&quot;: false
+<WebappPortForward serverName="Hytale" configName="Command Line Args"
+  portsList={[{ purpose: 'Server', port: 5520, protocal: 'UDP' }]}>
+&quot;_comment_server_upnp&quot;: &quot;Try to automatically redirect server port on home network using UPnP&quot;,
+&quot;server_upnp&quot;: false
 </WebappPortForward>

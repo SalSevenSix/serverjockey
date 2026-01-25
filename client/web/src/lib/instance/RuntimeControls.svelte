@@ -110,7 +110,11 @@
 
 <div class="content pb-1">
   <h3 class="title is-5 mb-3">Runtime</h3>
-  <p>Install process may take a while. Check the console log to confirm success.</p>
+  {#if $$slots.default}
+    <slot />
+  {:else}
+    <p>Install process may take a while. Check the console log to confirm success.</p>
+  {/if}
   <div class="field has-addons">
     <div class="control">
       <button id="runtimeControlsInstall" class="button is-warning" title="Install game server"

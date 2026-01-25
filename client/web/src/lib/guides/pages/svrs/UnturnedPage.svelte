@@ -15,8 +15,6 @@
     <ExtLink href="https://smartlydressedgames.com" notranslate>Unturned</ExtLink>
     is a free-to-play zombie apocalypse survival game set in a 3D open world.
     It features combat, looting, gear upgrades, exploration, and RPG elements.
-  </p>
-  <p>
     This guide will show you how to install, configure and run an Unturned server using this Webapp.
   </p>
   <p>
@@ -28,7 +26,7 @@
 <WebappGenerateConfig />
 <WebappConfigRun />
 <WebappAdditionalInformation />
-<WebappPortForward serverName="Starbound" configName="Launch Options"
+<WebappPortForward serverName="Unturned" configName="Launch Options"
   portsList={[{ purpose: 'Queries', port: 27015, protocal: 'UDP' }, { purpose: 'Server', port: 27016, protocal: 'UDP' }]}>
 &quot;_comment_upnp&quot;: &quot;Try to automatically redirect ports on home network using UPnP&quot;,
 &quot;upnp&quot;: false

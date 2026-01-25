@@ -19,8 +19,6 @@
     <ExtLink href="https://7daystodie.com" notranslate>7 Days to Die</ExtLink>
     is zombie apocalypse survival horror game set in a 3D open world. It features combat, looting, mining, crafting,
     base building &amp; defence, exploration, and RPG elements.
-  </p>
-  <p>
     This guide will show you how to install, configure and run a 7 Days to Die server using this Webapp.
   </p>
   <p>

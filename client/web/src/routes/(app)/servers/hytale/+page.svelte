@@ -1,5 +1,4 @@
 <script>
-  import ExtLink from '$lib/widget/ExtLink.svelte';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -18,11 +17,13 @@
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
-      'desc': 'Reset the game world map only.' },
+      'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
       'desc': 'Delete the log files only.' },
+    { 'key': 'wipe-world-autobackups', 'name': 'Delete Autobackups',
+      'desc': 'Delete the automatic server created backups.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
-      'desc': 'Reset game world map and configuration.' }];
+      'desc': 'Reset all of the above.' }];
 </script>
 
 
@@ -47,24 +48,23 @@
         <Players />
       </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
-        <div class="content">
-          <p>For help with configuration, see the
-          <ExtLink
-             href="https://docs.smartlydressedgames.com/en/stable/servers/server-hosting.html#how-to-configure-server"
-             wrap>server guide</ExtLink>
-          on the docs website.<br />
-          Default configuration files are not generated until after first server start.</p>
-        </div>
-        <ConfigFile name="Command Line Args" path="/config/cmdargs" />
-        <ConfigFile name="Server Commands" path="/config/commands" />
-        <ConfigFile name="General Settings" path="/config/settings" />
-        <ConfigFile name="Workshop Mods" path="/config/workshop" />
+        <ConfigFile name="Command Line Args" path="/config/cmdargs">
+          <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
+        </ConfigFile>
+        <ConfigFile name="Server Config" path="/config/config" />
+        <ConfigFile name="Permissions" path="/config/permissions" />
+        <ConfigFile name="Whitelist" path="/config/whitelist" />
+        <ConfigFile name="Bans" path="/config/bans" />
+        <ConfigFile name="World Config" path="/config/default" />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
-        <RuntimeControls />
+        <RuntimeControls qualifierName="Patchline">
+          <p>Watch console log for authorisation step during install process.
+             Copy and paste URL into a browser to authorise device.</p>
+        </RuntimeControls>
         <WorldControls actions={worldActions} />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">

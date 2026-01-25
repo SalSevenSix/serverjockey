@@ -23,15 +23,6 @@
       'desc': 'Delete the log files only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset game world map and configuration.' }];
-
-  const consoleCommands = {
-    'console': {
-      'send': [
-        {name: 'help', input: 'display'},
-        {name: 'line', input: 'text>', type: 'string', label: null}
-      ]
-    }
-  };
 </script>
 
 
@@ -50,7 +41,7 @@
       </div>
       <InstanceLog canDownload />
       <Collapsible icon="fa-keyboard" title="Console Commands">
-        <CommandBuilder commands={consoleCommands} />
+        <CommandBuilder />
       </Collapsible>
       <Collapsible icon="fa-user" title="Players">
         <Players />

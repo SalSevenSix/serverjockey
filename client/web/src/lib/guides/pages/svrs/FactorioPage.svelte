@@ -14,8 +14,6 @@
     <ExtLink href="https://www.factorio.com" notranslate>Factorio</ExtLink>
     is a game where you build, maintain and protect a factory. This involves mining resources,
     researching technologies, building infrastructure, automating production, and fighting enemies.
-  </p>
-  <p>
     This guide will show you how to install, configure and run a Factorio server using this Webapp.
     Both base game and Space Age expansion are supported.
   </p>

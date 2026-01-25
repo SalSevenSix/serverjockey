@@ -17,15 +17,6 @@
       'desc': 'Reset the game world save only.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset config, logs and game world save.' }];
-
-  const consoleCommands = {
-    'console': {
-      'send': [
-        {name: 'help', input: 'display'},
-        {name: 'line', input: 'text>', type: 'string', label: null}
-      ]
-    }
-  };
 </script>
 
 
@@ -44,7 +35,7 @@
       </div>
       <InstanceLog />
       <Collapsible icon="fa-keyboard" title="Console Commands">
-        <CommandBuilder commands={consoleCommands} />
+        <CommandBuilder />
       </Collapsible>
       <Collapsible icon="fa-file-code" title="Configuration">
         <ConfigFile name="Launch Options" path="/config/cmdargs" />

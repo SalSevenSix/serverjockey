@@ -17,7 +17,7 @@ async def initialise(context: contextsvc.Context):
     svrhelpers.MessagingInitHelper(context).init_state(FILTER_DEPLOYMENT_START, FILTER_DEPLOYMENT_DONE).init_players()
     context.register(_ServerDetailsSubscriber(context, await sysutil.public_ip()))
     context.register(_PlayerEventSubscriber(context))
-    # TO DO _AuthStatusSubscriber
+    context.register(_AuthStatusSubscriber(context))
 
 
 # [2026/01/24 12:51:45   INFO]   [HytaleServer] Booting up HytaleServer - Version: 2026.01.17-4b0f30090, Revision: 4b0f3
@@ -75,4 +75,37 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             if name in self._player_names:
                 self._player_names.remove(name)
             playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
+        return None
+
+
+# [2026/01/25 08:48:59   WARN]   [HytaleServer] No server tokens configured. Use /auth login to authenticate.
+# [2026/01/25 08:56:59   INFO]   [AbstractCommand] Or visit: https://oauth.accounts.hytale.com/oauth2/device/verify?user
+#   _code=...
+# [2026/01/25 09:51:11   INFO]   [ServerAuthManager] Authentication successful! Mode: OAUTH_DEVICE
+# Authentication successful! Use '/auth status' to view details.
+# WARNING: Credentials stored in memory only - they will be lost on restart!
+# To persist credentials, run: /auth persistence <type>
+# Available types: Memory, Encrypted
+class _AuthStatusSubscriber(msgabc.AbcSubscriber):
+    NOAUTH_FILTER = msgftr.DataMatches(r'.*WARN\]\s*\[HytaleServer\].*Use \/auth login to authenticate.$')
+    VERIFY_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[AbstractCommand\] Or visit: (.*?)$')
+    AUTHED_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[ServerAuthManager\] Authentication successful!.*')
+
+    def __init__(self, mailer: msgabc.Mailer):
+        super().__init__(msgftr.And(
+            mc.ServerProcess.FILTER_STDOUT_LINE,
+            msgftr.Or(_AuthStatusSubscriber.NOAUTH_FILTER, _AuthStatusSubscriber.VERIFY_FILTER,
+                      _AuthStatusSubscriber.AUTHED_FILTER)))
+        self._mailer = mailer
+
+    def handle(self, message):
+        if _AuthStatusSubscriber.NOAUTH_FILTER.accepts(message):
+            # auth login device
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(auth='Not Authorised'))
+        elif _AuthStatusSubscriber.VERIFY_FILTER.accepts(message):
+            url = _AuthStatusSubscriber.VERIFY_FILTER.find_one(message.data())
+            if url.startswith('https://oauth.accounts.hytale.com/oauth2/device/verify?user_code='):
+                svrsvc.ServerStatus.notify_details(self._mailer, self, dict(auth='Verify ' + url))
+        elif _AuthStatusSubscriber.AUTHED_FILTER.accepts(message):
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(auth='Authorised'))
         return None
