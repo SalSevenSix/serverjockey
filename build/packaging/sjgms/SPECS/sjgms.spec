@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Fri Dec 26 2025 Bowden Salis <bsalis76@gmail.com> - 0.27.0
-- Feature release v0.27.0
+* Wed Jan 28 2026 Bowden Salis <bsalis76@gmail.com> - 0.27.0
+- Hytale server support release
 * Thu Dec 25 2025 Bowden Salis <bsalis76@gmail.com> - 0.26.0
 - Project Zomboid b42 fixes release
 * Sun Dec 14 2025 Bowden Salis <bsalis76@gmail.com> - 0.25.0
