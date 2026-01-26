@@ -9,6 +9,7 @@
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
+  import FileCollection from '$lib/instance/FileCollection.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
@@ -56,6 +57,12 @@
         <ConfigFile name="Whitelist" path="/config/whitelist" />
         <ConfigFile name="Bans" path="/config/bans" />
         <ConfigFile name="World Config" path="/config/default" />
+      </Collapsible>
+      <Collapsible icon="fa-puzzle-piece" title="Mod Files">
+        <div class="content"><p>Only .jar or .zip files accepted.
+          All mod files present will automatically be loaded when server starts.</p></div>
+        <FileCollection path="/modfiles" allowDelete={1} filenameHelp="Only .jar and .zip files are accepted."
+                        validateFilename={function(fn) { return (fn.endsWith('.jar') || fn.endsWith('.zip')); }} />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles />

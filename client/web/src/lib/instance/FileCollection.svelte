@@ -7,12 +7,13 @@
   export let idPrefix = 'fileCollection';
   export let filenameHelp = 'Please choose a valid filename.';
   export let validateFilename = fTrue;
+  export let allowDelete = 2;
 
   let fileSystem;
 </script>
 
 
-<FileSystem bind:this={fileSystem} rootPath={path} allowDelete={2} />
+<FileSystem bind:this={fileSystem} rootPath={path} allowDelete={allowDelete} />
 <FileUpload idPrefix={idPrefix} rootPath={path} multiple
             filenameHelp={filenameHelp} validateFilename={validateFilename}
             onCompleted={function() { fileSystem.reload(); }} />

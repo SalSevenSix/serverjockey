@@ -11,6 +11,7 @@ from core.common import svrhelpers, portmapper
 from servers.hytale import messaging as msg
 
 LAUNCHER_EXE = 'hytale-downloader-linux-amd64'
+MOD_EXTS = 'jar', 'zip'
 
 
 def _default_cmdargs() -> dict:
@@ -80,8 +81,9 @@ class Deployment:
         self._server_dir = self._runtime_dir + '/server'
         self._server_jar = self._server_dir + '/Server/HytaleServer.jar'
         self._world_dir = self._home_dir + '/world'
-        self._logs_dir = self._world_dir + '/logs'
         self._autobackups_dir = self._world_dir + '/backups'
+        self._logs_dir = self._world_dir + '/logs'
+        self._mods_dir = self._world_dir + '/mods'
         self._save_dir = self._world_dir + '/universe'
         self._map_dir = self._save_dir + '/worlds/default'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
@@ -92,10 +94,12 @@ class Deployment:
 
     def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
-        builder.put_meta(self._runtime_meta, httpext.MtimeHandler().check(self._map_dir).dir(self._logs_dir))
+        builder.put_meta_runtime(self._runtime_meta)
+        builder.put_meta_world(httpext.MtimeHandler().check(self._map_dir + '/resources').dir(self._logs_dir))
         builder.put_installer(_InstallRuntimeHandler(self, self._context))
         builder.put_wipes(self._runtime_dir, dict(
-            save=self._save_dir, logs=self._logs_dir, autobackups=self._autobackups_dir, all=self._world_dir))
+            all=self._world_dir, logs=self._logs_dir, autobackups=self._autobackups_dir,
+            save=dict(path=self._map_dir, ls_filter=_ls_mapdata)))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.pop()
         builder.put_logs(self._logs_dir)
@@ -104,6 +108,8 @@ class Deployment:
             cmdargs=self._cmdargs_file, config=self._world_dir + '/config.json',
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
             whitelist=self._world_dir + '/whitelist.json', default=self._map_dir + '/config.json'))
+        builder.psh('modfiles', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_modfile))
+        builder.put('*{path}', httpext.FileSystemHandler(self._mods_dir, 'path', tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._server_jar):
@@ -122,7 +128,8 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._autobackups_dir)
+        await io.create_directory(
+            self._backups_dir, self._world_dir, self._logs_dir, self._mods_dir, self._autobackups_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
@@ -269,3 +276,12 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
         tasks.task_fork(self._deployment.install_runtime(util.get('beta', data)), 'hytale.install_runtime()')
         url = util.get('baseurl', data, '') + subscription_path
         return dict(url=url)
+
+
+def _ls_mapdata(entry) -> bool:
+    return entry['type'] == 'directory'
+
+
+def _ls_modfile(entry) -> bool:
+    ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
+    return ftype == 'file' and fname and len(fname) > 4 and fext in MOD_EXTS
