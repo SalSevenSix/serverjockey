@@ -160,3 +160,12 @@ class TestPlaying(unittest.TestCase):
         time.sleep(2.0)
         self.assertEqual('Broadcasted: Welcome_to_PW', context.get_instance_loglastline())
         self._stop_server()
+
+    def test_playing_hytale(self):
+        context, player_name = webcontext.get(), self._start_server_and_wait_for_login('ht', 'hytale')
+        self._check_status_info(r'^20[0-9][0-9]\.[0-9]*\.[0-9]*-.*', 5520)
+        self.assertTrue(context.find_element('serverStatusAuth').get_attribute('innerText').startswith('Authenticated'))
+        # send welcome message to player
+        context.find_element('commandBuilderIline').send_keys('say Welcome to HT ' + player_name)
+        self._send_console_command()
+        self._wait_for_logout_and_stop_server(player_name)

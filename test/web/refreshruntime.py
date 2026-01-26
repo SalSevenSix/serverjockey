@@ -81,3 +81,6 @@ class TestRefreshRuntime(unittest.TestCase):
 
     def test_refresh_valheim(self):
         self._refresh('vh', 'valheim', APPID_VALHEIM)
+
+    def test_refresh_hytale(self):
+        self._refresh('ht', 'hytale', weight=1.5)

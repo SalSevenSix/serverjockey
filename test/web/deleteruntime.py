@@ -40,3 +40,6 @@ class TestDeleteRuntime(unittest.TestCase):
 
     def test_delete_valheim(self):
         self._delete('vh', 'valheim')
+
+    def test_delete_hytale(self):
+        self._delete('ht', 'hytale')
