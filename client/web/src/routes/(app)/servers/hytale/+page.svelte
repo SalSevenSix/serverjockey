@@ -15,6 +15,7 @@
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
+  import Autobackups from './Autobackups.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -73,6 +74,9 @@
              Authorise device for install when prompted.</p>
         </RuntimeControls>
         <WorldControls actions={worldActions} />
+      </Collapsible>
+      <Collapsible icon="fa-file-zipper" title="Autobackups">
+        <Autobackups />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />
