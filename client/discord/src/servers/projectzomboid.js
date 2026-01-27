@@ -59,13 +59,12 @@ export const help = helptext.newServerHelpBuilder()
     'e.g. `!player "Mr Tee" tele-at 10339,9267,0`'])
   .addHelp('player give-xp', [
     'Give XP to online player. Skill options:', '```',
-    'Sprinting, Lightfoot, Nimble, Sneak, Aiming, Reloading,',
-    'Fitness', 'Strength', 'Sprinting', 'Running', 'Lightfoot', 'Nimble', 'Sneak',
-    'Axe', 'Blunt', 'SmallBlunt', 'LongBlade', 'SmallBlade', 'Spear', 'Maintenance',
-    'Farming', 'Agriculture', 'Husbandry', 'Woodwork', 'Carving', 'Cooking',
-    'Butchering', 'Electricity', 'Doctor', 'Glassmaking', 'FlintKnapping', 'Masonry',
-    'MetalWelding', 'Welding', 'Blacksmithing', 'Mechanics', 'Pottery', 'Tailoring',
-    'Aiming', 'Reloading', 'Fishing', 'PlantScavenging', 'Tracking', 'Trapping', '```'])
+    'Fitness, Strength, Sprinting, Running, Lightfoot, Nimble, Sneak',
+    'Axe, Blunt, SmallBlunt, LongBlade, SmallBlade, Spear, Maintenance',
+    'Farming, Agriculture, Husbandry, Woodwork, Carving, Cooking',
+    'Butchering, Electricity, Doctor, Glassmaking, FlintKnapping, Masonry',
+    'MetalWelding, Welding, Blacksmithing, Mechanics, Pottery, Tailoring',
+    'Aiming, Reloading, Fishing, PlantScavenging, Tracking, Trapping', '```'])
   .addHelp('player give-item', [
     'Give item to player, {count} is optional.'])
   .addHelp('player spawn-vehicle', [

@@ -13,6 +13,7 @@ export function status({ httptool, instance }) {
     const dtl = body.details;
     if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
     if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
+    if (dtl.auth) { result += 'Auth:     ' + (cutil.isString(dtl.auth) ? dtl.auth : '[see webapp]') + '\n'; }
     if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
     if (dtl.map) { result += 'Map:      ' + dtl.map + '\n'; }
     if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }

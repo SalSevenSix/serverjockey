@@ -7,6 +7,8 @@ from selenium.webdriver.support.ui import Select
 from core.util import util, dtutil
 from core.msgc import sc
 
+PLAYER_GREETING = 'hello from game'
+
 
 class TestPlaying(unittest.TestCase):
 
@@ -52,7 +54,7 @@ class TestPlaying(unittest.TestCase):
         if not nochat:
             row += 1
             self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', row, 2))
-            self.assertEqual('hello from game', context.get_cell_text('chatActivityChatLogList', row, 3))
+            self.assertEqual(PLAYER_GREETING, context.get_cell_text('chatActivityChatLogList', row, 3))
         row += 1
         self.assertEqual(player_name, context.get_cell_text('chatActivityChatLogList', row, 2))
         self.assertEqual(sc.LOGOUT, util.rchop(context.get_cell_text('chatActivityChatLogList', row, 3), '('))
