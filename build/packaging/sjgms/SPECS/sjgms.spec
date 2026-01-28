@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.27.0
+Version:        0.28.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -58,6 +58,8 @@ exit 0
 
 
 %changelog
+* Thu Jan 29 2026 Bowden Salis <bsalis76@gmail.com> - 0.28.0
+- Technical release, library upgrades and fixes
 * Wed Jan 28 2026 Bowden Salis <bsalis76@gmail.com> - 0.27.0
 - Hytale server support release
 * Thu Dec 25 2025 Bowden Salis <bsalis76@gmail.com> - 0.26.0
