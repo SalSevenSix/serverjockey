@@ -143,7 +143,10 @@ events &#123;
 
 http &#123;
   sendfile on&#59;
+  sendfile_max_chunk 1m&#59;
   tcp_nopush on&#59;
+  proxy_max_temp_file_size 32768m&#59;
+  client_max_body_size 32768m&#59;
   types_hash_max_size 2048&#59;
   server_tokens off&#59;
   gzip off&#59;

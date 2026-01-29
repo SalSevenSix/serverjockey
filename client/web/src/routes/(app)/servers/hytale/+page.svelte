@@ -66,7 +66,7 @@
                         validateFilename={function(fn) { return (fn.endsWith('.jar') || fn.endsWith('.zip')); }} />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
-        <LogFiles />
+        <LogFiles allowDelete={1} />
       </Collapsible>
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Patchline">
