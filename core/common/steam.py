@@ -14,7 +14,7 @@ def _script_head() -> str:
     return '''find_steamcmd() {
   /usr/games/steamcmd +quit >/dev/null 2>&1 && echo /usr/games/steamcmd && return 0
   ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0
-  echo steamcmd && return 1
+  echo $(pwd)/steamcmd.sh && return 0
 }
 echo "Running SteamCMD, log output may be delayed..."
 '''

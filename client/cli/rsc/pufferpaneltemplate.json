@@ -1,0 +1,44 @@
+{
+  "name": "serverjockey", "type": "serverjockey", "icon": "serverjockey", "display": "ServerJockey",
+  "data": {
+    "deburl": {
+      "type": "string", "value": "https://dl.serverjockey.net/sjgms-master-latest.deb", "display": "DEB download URL",
+      "desc": "What ServerJockey DEB package to download for install",
+      "required": true, "userEdit": false
+    },
+    "port": {
+      "type": "integer", "value": 6164, "display": "Port",
+      "desc": "What port to bind the ServerJockey service to",
+      "required": true, "userEdit": false
+    }
+  },
+  "install": [
+    { "type": "download", "files": ["${deburl}"] },
+    { "type": "move", "source": "*.deb", "target": "sjgms.deb" },
+    { "type": "command", "commands": ["dpkg-deb -x ./sjgms.deb ."] },
+    { "type": "mkdir", "target": "./serverlink" },
+    { "type": "writefile",  "text": "{ \"module\": \"serverlink\", \"hidden\": true }\n",  "target": "./serverlink/instance.json" },
+    {
+      "type": "command", "commands": [
+        "mv ./usr/local/bin/serverlink ./serverlink/serverlink",
+        "mv ./usr/local/bin/serverjockey_cmd.pyz ./serverjockey_cmd.pyz",
+        "mv ./usr/local/bin/serverjockey.pyz ./serverjockey.pyz",
+        "chmod 744 ./serverjockey.pyz ./serverjockey_cmd.pyz ./serverlink/serverlink",
+        "./serverjockey_cmd.pyz -nt ddwrapper:/var/lib/pufferpanel/binaries/depotdownloader/DepotDownloader,steamcmd.sh",
+        "chmod 744 ./steamcmd.sh",
+        "rm -rf ./usr ./sjgms.deb"
+      ]
+    }
+  ],
+  "run": {
+    "command": "./serverjockey.pyz --showtoken --port ${port}",
+    "stopCode": 2, "autostart": false, "autorecover": false, "autorestart": false
+  },
+  "supportedEnvironments": [
+    { "type": "host",  "disableUnshare": true, "mounts": [] }
+  ],
+  "requirements": {
+    "os": "linux", "arch": "amd64",
+    "binaries": ["sh", "bash", "find", "tr", "ps", "lscpu", "hostname", "free", "head", "tail", "openssl", "systemd-detect-virt"]
+  }
+}

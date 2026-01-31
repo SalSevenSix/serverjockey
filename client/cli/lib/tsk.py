@@ -82,6 +82,21 @@ class TaskProcessor:
         return _dump_to_log(resource)
 
     # noinspection PyMethodMayBeStatic
+    def _pufferpaneltemplate(self) -> bool:
+        return _dump_to_log(util.get_resource('pufferpaneltemplate.json'))
+
+    # noinspection PyMethodMayBeStatic
+    def _ddwrapper(self, argument) -> bool:
+        ddexe, outfile = util.split_argument(argument, 2)
+        assert ddexe
+        resource = util.get_resource('ddwrapper.sh').replace('{ddexe}', ddexe)
+        if not outfile:
+            return _dump_to_log(resource)
+        with open(outfile, 'w') as f:
+            f.write(resource)
+        return True
+
+    # noinspection PyMethodMayBeStatic
     def _upgrade(self) -> bool:
         _checkpyz()
         _checkroot('upgrade')
