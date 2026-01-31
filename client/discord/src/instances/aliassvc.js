@@ -7,6 +7,7 @@ import * as logger from '../util/logger.js';
 export function newAliases(context, instance) {
   const file = context.config.DATADIR + '/' + instance + '.alias.json';
   const data = { base: [], snowflake: {}, discordid: {}, name: {}, maxidlen: 0 };
+  const aliasme = { codes: [] };
   const self = {};
 
   const unpack = function(value) {
@@ -28,6 +29,25 @@ export function newAliases(context, instance) {
       data.name[record.name] = value;
       if (record.discordid.length > data.maxidlen) { data.maxidlen = record.discordid.length; }
     });
+  };
+
+  self.aliasmeAdd = function(snowflake, discordid, code) {
+    aliasme.codes = aliasme.codes.filter(function(value) { return value.snowflake != snowflake; });
+    aliasme.codes.push({ timestamp: Date.now(), code: code, snowflake: snowflake, discordid: discordid });
+  };
+
+  self.aliasmeCheck = function(name, code) {
+    if (code.length != 4) return null;
+    const now = Date.now();
+    aliasme.codes = aliasme.codes.filter(function(value) { return now - value.timestamp < 1200000; });  // 20 mins
+    const records = aliasme.codes.filter(function(value) { return value.code === code; });
+    if (records.length === 0) return null;
+    aliasme.codes = aliasme.codes.filter(function(value) { return value.code != code; });
+    const existing = self.findByName(name);
+    if (existing) { self.remove(existing.snowflake); }
+    const record = unpack([records[0].snowflake, records[0].discordid, name]);
+    if (self.add(record.snowflake, record.discordid, record.name)) return record;
+    return null;
   };
 
   self.load = function() {

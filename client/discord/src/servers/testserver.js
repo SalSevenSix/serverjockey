@@ -3,11 +3,11 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { status, server, auto, log, getconfig, setconfig, deployment, players, send, chat,
-  alias, reward, trigger, activity, chatlog } = commons;
+  aliasme, alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('TEST SERVER COMMANDS')
-  .addServer(true, true).addPlayers().addChat().addSend()
+  .addServer(true, true).addPlayers().addChat().addSend().addAliasme()
   .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .addConfig(['cmdargs']).addDeployment(true)
   .build();

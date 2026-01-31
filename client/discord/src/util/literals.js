@@ -7,6 +7,7 @@ export const emojis = {
   error: '⛔',
   success: '✅',
   say: '💬',
+  link: '🔗',
   thinking: '🤔',
   medal: '🏅',
   thumbsup: '👍',

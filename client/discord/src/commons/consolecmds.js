@@ -13,7 +13,7 @@ export function send({ httptool, message, data }) {
 
 export function say({ httptool, message, data }) {
   if (data.length === 0) return msgutil.reactUnknown(message);
-  const name = msgutil.extractUserTag(message);
+  const name = '@' + message.member.user.tag;
   const line = msgutil.extractCommandLine(message);
   httptool.doPost(
     '/console/say', { player: name, text: line },

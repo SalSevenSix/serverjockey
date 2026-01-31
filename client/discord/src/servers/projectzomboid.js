@@ -7,11 +7,11 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { status, server, auto, log, getconfig, setconfig, deployment, players, chat,
-  alias, reward, trigger, activity, chatlog } = commons;
+  aliasme, alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PROJECT ZOMBOID COMMANDS')
-  .addServer(true, true).addChat()
+  .addServer(true, true).addChat().addAliasme()
   .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .add([
     'world save                : Save the game world',
@@ -151,8 +151,7 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
   context.client.users.fetch(snowflake)
     .then(function(user) {
       if (!record) {
-        const discordid = user.tag.replaceAll('#', '');
-        if (!aliases.add(snowflake, discordid, name)) return msgutil.reactError(message);
+        if (!aliases.add(snowflake, user.tag, name)) return msgutil.reactError(message);
         aliases.save();
       }
       const pwd = Math.random().toString(16).substr(2, 8);

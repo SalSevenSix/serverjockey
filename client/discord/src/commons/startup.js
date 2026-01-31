@@ -7,6 +7,16 @@ import * as subs from '../util/subs.js';
 const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
 
+function newAliasmeHandler(instance, channel, aliases) {
+  return function(text, name) {
+    if (!name || !text) return;
+    const alias = aliases.aliasmeCheck(name, text);
+    if (!alias) return;
+    aliases.save();
+    channel.send('`' + instance + '` ' + emojis.link + ' ' + alias.name + ' is now @' + alias.discordid);
+  };
+}
+
 function newChatbotHandler(context, instance, url) {
   const data = { chatbot: null };
 
@@ -65,12 +75,15 @@ function newTriggerHandler(context, channels, instance, triggers) {
     result = result.replaceAll('{instance}', instance);
     result = result.replaceAll('{channel}', channel.name);
     result = result.replaceAll('{event}', event.toLowerCase());
-    if (alias && alias.name) {
-      result = result.replaceAll('{playername}', alias.name);
-      result = result.replaceAll('{player}', '"' + alias.name + '"');
+    if (!alias) return result;
+    const player = alias.name;
+    if (player) {
+      result = result.replaceAll('{playername}', player);
+      result = result.replaceAll('{player}', '"' + player + '"');
     }
-    if (alias && alias.discordid) {
-      result = result.replaceAll('{member}', alias.discordid);
+    const member = alias.discordid ? alias.discordid : player;
+    if (member) {
+      result = result.replaceAll('{member}', member);
     }
     return result;
   };
@@ -161,7 +174,7 @@ function newTriggerHandler(context, channels, instance, triggers) {
 /* eslint-enable max-depth */
 
 
-function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler) {
+function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, aliasmeHandler, chatbotHandler) {
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     if (json.event === 'CLEAR') {
       if (triggerHandler) { triggerHandler(json.event); }
@@ -172,6 +185,7 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
     const playerAlias = aliases.findByName(playerName);
     if (playerAlias) { playerName += ' `@' + playerAlias.discordid + '`'; }
     if (json.event === 'CHAT') {
+      if (aliasmeHandler) { aliasmeHandler(json.text, json.player.name); }
       if (chatbotHandler) { chatbotHandler(json.text); }
       if (!channels.chat) return true;
       channels.chat.send('`' + instance + '` ' + emojis.say + ' ' + playerName + ': ' + json.text);
@@ -233,7 +247,8 @@ export function startupAll({ context, channels, instance, url, triggers, aliases
     startServerEvents(context, channels, instance, url, triggerHandler);
   }
   if (channels.login || channels.chat) {
+    const aliasmeHandler = newAliasmeHandler(instance, channels.chat ? channels.chat : channels.login, aliases);
     const chatbotHandler = newChatbotHandler(context, instance, url);
-    startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, chatbotHandler);
+    startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, aliasmeHandler, chatbotHandler);
   }
 }

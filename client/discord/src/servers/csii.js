@@ -3,11 +3,11 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { status, server, auto, log, getconfig, setconfig, deployment, players, send, say, chat,
-  alias, reward, trigger, activity, chatlog } = commons;
+  aliasme, alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('CS2 COMMANDS')
-  .addServer().addPlayers().addSay().addChat().addSend()
+  .addServer().addPlayers().addSay().addChat().addSend().addAliasme()
   .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .addConfig().addDeployment(true)
   .addHelp('getconfig', [

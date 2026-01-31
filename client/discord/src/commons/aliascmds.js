@@ -20,8 +20,7 @@ export function alias({ context, aliases, message, data }) {
     if (!snowflake) return msgutil.reactError(message);
     context.client.users.fetch(snowflake)
       .then(function(user) {
-        const discordid = user.tag.replaceAll('#', '');
-        if (!aliases.add(snowflake, discordid, name)) return msgutil.reactError(message);
+        if (!aliases.add(snowflake, user.tag, name)) return msgutil.reactError(message);
         aliases.save();
         msgutil.reactSuccess(message);
       })
@@ -34,4 +33,17 @@ export function alias({ context, aliases, message, data }) {
   } else {
     msgutil.reactUnknown(message);
   }
+}
+
+export function aliasme({ instance, aliases, message }) {
+  const code = Math.random().toString(16).substr(2, 4);
+  let text = 'Alias request for server: **' + instance + '**\n';
+  text += 'Enter this code in global chat in-game: `' + code + '`\n';
+  text += '*Code will be valid for 20 minutes*';
+  message.member.user.send(text)
+    .then(function() {
+      aliases.aliasmeAdd(message.member.user.id, message.member.user.tag, code);
+      msgutil.reactSuccess(message);
+    })
+    .catch(function(error) { logger.error(error, message); });
 }

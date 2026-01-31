@@ -16,12 +16,6 @@ export function extractCommandLine(message) {
   return result;
 }
 
-export function extractUserTag(message) {
-  let result = message.member.user.tag;
-  result = '@' + result.split('#')[0];
-  return result;
-}
-
 export function checkHasRole(message, command, adminRoles, commandRoles) {
   if (['help', 'about', 'modules'].includes(command)) return true;
   const roles = [...adminRoles];

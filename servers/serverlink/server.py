@@ -52,7 +52,7 @@ def _default_config() -> dict:
             'instances': None, 'status': None, 'server': None, 'log': None,
             'say': None, 'players': None, 'chat': None, 'send': None,
             'world': None, 'player': None, 'banlist': None, 'whitelist': None,
-            'getconfig': None, 'setconfig': None, 'deployment': None,
+            'getconfig': None, 'setconfig': None, 'deployment': None, 'aliasme': None,
             'alias': None, 'reward': None, 'trigger': None, 'activity': None, 'chatlog': None
         },
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},

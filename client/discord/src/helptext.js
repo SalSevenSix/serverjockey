@@ -78,6 +78,12 @@ const helpDeploymentInstallRuntime = [
   'For Steam installs, use the beta for version.',
   'Console output will be attached as a file.'];
 
+const aliasmeHelp = 'aliasme              : DM self service code for alias';
+const helpAliasme = [
+  'Request a self service alias code sent by DM.',
+  'Paste this code into in-game global chat.',
+  'This will link your in-game name to your discord name.'];
+
 const aliasHelp = 'alias {cmds ...}     : Alias management, use help for details';
 const helpAlias = [
   'Alias Management. Link discord users to player names. Commands are...', '```',
@@ -251,6 +257,7 @@ export function newServerHelpBuilder() {
   self.addSay = function() { return self.addHelp(sayHelp, helpSay).add(sayHelp); };
   self.addSend = function() { return self.addHelp(sendHelp, helpSend).add(sendHelp); };
   self.addChat = function() { return self.addHelp(chatHelp, helpChat).add(chatHelp); };
+  self.addAliasme = function() { return self.addHelp(aliasmeHelp, helpAliasme).add(aliasmeHelp); };
   self.addAlias = function() { return self.addHelp(aliasHelp, helpAlias).add(aliasHelp); };
   self.addReward = function() { return self.addHelp(rewardHelp, helpReward).add(rewardHelp); };
   self.addTrigger = function() { return self.addHelp(triggerHelp, helpTrigger).add(triggerHelp); };
