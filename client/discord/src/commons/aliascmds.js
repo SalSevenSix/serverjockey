@@ -36,14 +36,11 @@ export function alias({ context, aliases, message, data }) {
 }
 
 export function aliasme({ instance, aliases, message }) {
-  const code = Math.random().toString(16).substr(2, 4);
+  const code = aliases.aliasmeAdd(message.member.user.id, message.member.user.tag);
   let text = 'Alias request for server: **' + instance + '**\n';
-  text += 'Enter this code in global chat in-game: `' + code + '`\n';
-  text += '*Code will be valid for 20 minutes*';
+  text += 'Enter this code in global in-game chat: `' + code + '`\n';
+  text += '*Code will be valid for 10 minutes*';
   message.member.user.send(text)
-    .then(function() {
-      aliases.aliasmeAdd(message.member.user.id, message.member.user.tag, code);
-      msgutil.reactSuccess(message);
-    })
+    .then(function() { msgutil.reactSuccess(message); })
     .catch(function(error) { logger.error(error, message); });
 }

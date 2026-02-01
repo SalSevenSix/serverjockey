@@ -31,23 +31,30 @@ export function newAliases(context, instance) {
     });
   };
 
-  self.aliasmeAdd = function(snowflake, discordid, code) {
-    aliasme.codes = aliasme.codes.filter(function(value) { return value.snowflake != snowflake; });
+  /* eslint-disable no-loop-func */
+  self.aliasmeAdd = function(snowflake, discordid) {
+    aliasme.codes = aliasme.codes.filter(function(value) { return value.snowflake != snowflake; });  // Delete existing
+    let code = null;
+    while (!code) {  // Ensure no code clash
+      code = Math.random().toString(16).substr(2, 4);
+      const found = aliasme.codes.filter(function(value) { return value.code === code; });
+      if (found.length > 0) { code = null; }
+    }
     aliasme.codes.push({ timestamp: Date.now(), code: code, snowflake: snowflake, discordid: discordid });
+    return code;
   };
+  /* eslint-enable no-loop-func */
 
   self.aliasmeCheck = function(name, code) {
-    if (code.length != 4) return null;
+    if (aliasme.codes.length === 0 || code.length != 4) return null;
     const now = Date.now();
-    aliasme.codes = aliasme.codes.filter(function(value) { return now - value.timestamp < 1200000; });  // 20 mins
-    const records = aliasme.codes.filter(function(value) { return value.code === code; });
-    if (records.length === 0) return null;
+    aliasme.codes = aliasme.codes.filter(function(value) { return now - value.timestamp < 600000; });  // 10 mins
+    const found = aliasme.codes.filter(function(value) { return value.code === code; });
+    if (found.length === 0) return null;
     aliasme.codes = aliasme.codes.filter(function(value) { return value.code != code; });
-    const existing = self.findByName(name);
-    if (existing) { self.remove(existing.snowflake); }
-    const record = unpack([records[0].snowflake, records[0].discordid, name]);
-    if (self.add(record.snowflake, record.discordid, record.name)) return record;
-    return null;
+    const record = unpack([found[0].snowflake, found[0].discordid, name]);
+    const result = self.add(record.snowflake, record.discordid, record.name);
+    return result ? record : self.findByName(name);
   };
 
   self.load = function() {
