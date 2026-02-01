@@ -53,7 +53,7 @@ if $VALIDATE; then
 fi
 
 echo "START ${CMD[*]}"
-exec "${CMD[@]}"
+${CMD[*]}
 echo "END ${DEPOTDOWNLOADER} (exit code: ${?})"
 find $INSTALL_DIR -type f \( -name "*.sh" -o -name "*.x86_64" -o ! -name "*.*" \) -exec chmod 744 {} +
 

@@ -89,6 +89,7 @@ class TaskProcessor:
     def _ddwrapper(self, argument) -> bool:
         ddexe, outfile = util.split_argument(argument, 2)
         assert ddexe
+        # see https://github.com/SteamRE/DepotDownloader
         resource = util.get_resource('ddwrapper.sh').replace('{ddexe}', ddexe)
         if not outfile:
             return _dump_to_log(resource)

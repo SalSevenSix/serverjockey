@@ -39,6 +39,6 @@
   ],
   "requirements": {
     "os": "linux", "arch": "amd64",
-    "binaries": ["sh", "bash", "find", "tr", "ps", "lscpu", "hostname", "free", "head", "tail", "openssl", "systemd-detect-virt"]
+    "binaries": ["sh", "bash", "find", "tr", "ps", "chmod", "lscpu", "hostname", "free", "head", "tail", "openssl", "systemd-detect-virt"]
   }
 }

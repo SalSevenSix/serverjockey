@@ -78,11 +78,11 @@ const helpDeploymentInstallRuntime = [
   'For Steam installs, use the beta for version.',
   'Console output will be attached as a file.'];
 
-const aliasmeHelp = 'aliasme              : DM self service code for alias';
+const aliasmeHelp = 'aliasme              : DM self service alias code';
 const helpAliasme = [
   'Request a self service alias code sent by DM.',
-  'Paste this code into in-game global chat.',
-  'This will link your in-game name to your discord name.'];
+  'Enter the code in global in-game chat.',
+  'This will link your in-game name to your discord member.'];
 
 const aliasHelp = 'alias {cmds ...}     : Alias management, use help for details';
 const helpAlias = [
