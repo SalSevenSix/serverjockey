@@ -134,6 +134,8 @@ const helpTrigger = [
   '  on-death                : Trigger on player death',
   '  on-started              : Trigger on server started',
   '  on-stopped              : Trigger on server stopped',
+  '  rq-member               : Player must have alias to member',
+  '  rq-not-member           : Player must not have alias to member',
   '  rq-role={roleid}        : Player must have this role for action',
   '  rq-not-role={roleid}    : Player must not have this role for action',
   '  cx-channel={channelid}  : Channel to use for any actions',

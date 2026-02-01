@@ -111,6 +111,10 @@ function newTriggerHandler(context, channels, instance, triggers) {
   const handlePlayerEvent = async function(trigger, event, alias) {
     if (!trigger['on-event'].includes(playerEventMap[event])) return;  // Check applicable event
     const member = alias && alias.snowflake ? await get('member', cache.guild.members, alias.snowflake) : null;
+    if (cutil.hasProp(trigger, 'rq-member')) {  // Must meet member condition
+      if (trigger['rq-member'] && !member) return;
+      if (!trigger['rq-member'] && member) return;
+    }
     if (cutil.hasProp(trigger, 'rq-not-role')) {  // Member cannot have any of these roles
       if (!member) return;
       for (const triggerRole of trigger['rq-not-role']) {

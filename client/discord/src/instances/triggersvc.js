@@ -63,8 +63,12 @@ export function newTriggers(context, instance) {
       return ['on-login', 'on-logout', 'on-death', 'on-started', 'on-stopped'].includes(arg);
     });
     if (record['on-event'].length === 0) return false;  // At least one event required
+    args.forEach(function(arg) {  // Capture member conditions
+      if (arg === 'rq-member') { record['rq-member'] = true; }
+      if (arg === 'rq-not-member') { record['rq-member'] = false; }
+    });
     let [actions, value] = [0, null];
-    ['rq-not-role', 'rq-role'].forEach(function(key) {  // Capture conditions
+    ['rq-not-role', 'rq-role'].forEach(function(key) {  // Capture role conditions
       args.forEach(function(arg) {
         value = getArgValue(key, arg);
         if (value) {
@@ -118,10 +122,11 @@ export function newTriggers(context, instance) {
             result.push(line.join(' '));
             line = ['  >'];
           }
-          let displayValue = value;
-          if (key.includes('channel') && value.name) { displayValue = '#' + value.name; }
-          else if (key.includes('role') && value.name) { displayValue = '@' + value.name; }
-          line.push(key === 'on-event' ? displayValue.toString() : key + '=' + displayValue.toString());
+          if (key === 'on-event') { line.push(value.toString()); }
+          else if (key === 'rq-member') { line.push('rq' + (value ? '-' : '-not-') + 'member'); }
+          else if (key.includes('channel') && value.name) { line.push(key + '=#' + value.name); }
+          else if (key.includes('role') && value.name) { line.push(key + '=@' + value.name); }
+          else { line.push(key + '=' + value.toString()); }
         }
       }
       result.push(line.join(' '));
