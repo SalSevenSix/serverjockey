@@ -31,12 +31,17 @@ export default [
       'svelte/no-useless-mustaches': 0,
       'svelte/require-stores-init': 0,
       // ^^^ above same as extension ^^^
+      'svelte/prefer-const': 1,
       'svelte/no-reactive-reassign': 0,
       'svelte/shorthand-directive': 0,
       'svelte/shorthand-attribute': 0,
       'svelte/prefer-style-directive' : 0,
       'svelte/no-goto-without-base': 0,
-      'svelte/no-at-html-tags': 0
+      'svelte/no-at-html-tags': 0,
+      'svelte/no-navigation-without-base': 0,
+      'svelte/no-navigation-without-resolve': 0,
+      'svelte/consistent-selector-style': 0,
+      'svelte/no-top-level-browser-globals': 0
     }
   },
   js.configs.all,
