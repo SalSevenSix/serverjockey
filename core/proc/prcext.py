@@ -1,3 +1,4 @@
+import abc
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
 from core.util import cmdutil, util
 from core.msg import msgabc
@@ -34,10 +35,26 @@ class ConsoleCommandHandler(httpabc.PostHandler):
         return httpabc.ResponseBody.NO_CONTENT
 
 
+class SayFormatter(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def cmdline(self, player: str, line: str) -> str:
+        pass
+
+
+class TemplateSayFormatter(SayFormatter):
+
+    def __init__(self, template: str):
+        self._template = template
+
+    def cmdline(self, player: str, line: str) -> str:
+        return self._template.format(player=player, line=line)
+
+
 class SayHandler(httpabc.PostHandler):
 
-    def __init__(self, mailer: msgabc.MulticastMailer, template: str):
-        self._mailer, self._template = mailer, template
+    def __init__(self, mailer: msgabc.MulticastMailer, formatter: SayFormatter | str):
+        self._mailer = mailer
+        self._formatter = TemplateSayFormatter(formatter) if isinstance(formatter, str) else formatter
 
     async def handle_post(self, resource, data):
         player, text = util.get('player', data), util.get('text', data)
@@ -53,5 +70,5 @@ class SayHandler(httpabc.PostHandler):
         if not lines:
             return httpabc.ResponseBody.BAD_REQUEST
         for line in [o.strip() for o in lines if o]:
-            await proch.PipeInLineService.request(self._mailer, self, self._template.format(player=player, line=line))
+            await proch.PipeInLineService.request(self._mailer, self, self._formatter.cmdline(player, line))
         return httpabc.ResponseBody.NO_CONTENT

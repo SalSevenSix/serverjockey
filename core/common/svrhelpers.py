@@ -225,5 +225,5 @@ class ConsoleResourceBuilder:
     def put_send_pipein(self) -> ConsoleResourceBuilder:
         return self.put('{command}', prcext.ConsoleCommandHandler(self._mailer, _SEND_COMMAND), 's')
 
-    def put_say_pipein(self, template: str) -> ConsoleResourceBuilder:
-        return self.put('say', prcext.SayHandler(self._mailer, template), 's')
+    def put_say_pipein(self, formatter: prcext.SayFormatter | str) -> ConsoleResourceBuilder:
+        return self.put('say', prcext.SayHandler(self._mailer, formatter), 's')
