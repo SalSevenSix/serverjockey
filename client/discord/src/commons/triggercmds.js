@@ -2,6 +2,21 @@ import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 
+function subsHelpText() {
+  return [
+    'Use the following keywords to substitute values in messages...',
+    '{n}          : new line',
+    '{!}          : bot command character(s)',
+    '{player}     : quoted player "name", suitable for commands',
+    '{playername} : just the player name',
+    '{atmember}   : member @name, will ping',
+    '{member}     : member name only, no ping',
+    '{instance}   : instance name',
+    '{channel}    : channel name',
+    '{event}      : event name'
+  ];
+}
+
 async function handleAdd(triggers, message, data) {
   const args = [];
   for (const arg of util.clobCommandLine(data)) {
@@ -30,8 +45,10 @@ export function trigger({ triggers, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, triggers.listText());
-  } else if (cmd === 'add') {
-    handleAdd(triggers, message, data.slice(1))
+  } else if (cmd === 'subs') {
+    msgutil.sendText(message, subsHelpText());
+  } else if (cmd === 'add' || cmd.startsWith('on-')) {
+    handleAdd(triggers, message, cmd === 'add' ? data.slice(1) : data)
       .then(function() { msgutil.reactSuccess(message); })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'remove') {

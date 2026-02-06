@@ -136,14 +136,15 @@ const helpTrigger = [
   '  on-stopped              : Trigger on server stopped',
   '  rq-member               : Player must have alias to member',
   '  rq-not-member           : Player must not have alias to member',
-  '  rq-role={roleid}        : Player must have this role for action',
-  '  rq-not-role={roleid}    : Player must not have this role for action',
+  '  rq-role={roleid}        : Member must have this role',
+  '  rq-not-role={roleid}    : Member must not have this role',
   '  cx-channel={channelid}  : Channel to use for any actions',
   '  cx-delay={seconds}      : Delay between trigger event and actions',
-  '  do-add-role={roleid}    : Action add role to player',
-  '  do-remove-role={roleid} : Action remove role from player',
-  '  "do-message={line}"     : Action send message, can be command with subs;',
-  '    {!} for command prefix, {instance} for instance, {player} for "name"',
+  '  do-add-role={roleid}    : Add role to member',
+  '  do-remove-role={roleid} : Remove role from member',
+  '  "do-dm={line}"          : Send DM to member (allows subs)',
+  '  "do-message={line}"     : Send message to channel (allows subs)',
+  'subs           : Show help on message substitutes',
   'remove {id}    : Remove trigger by id as shown in list',
   '```', 'Examples...',
   'a) Give PZ player an Axe on login if has @AxemanKit role, also remove role',
@@ -151,7 +152,7 @@ const helpTrigger = [
   '"do-message={!}{instance}.player {player} give-item Base Axe"', '```',
   'b) Give @Zombie role to player on death and announce it on #general channel',
   '```', '!trigger add on-death cx-channel=#general',
-  'do-add-role=@Zombie "do-message={member} Died!"', '```'];
+  'do-add-role=@Zombie "do-message={atmember} Died!"', '```'];
 
 const activityHelp = 'activity {query ...} : Activity reporting, use help for details';
 const helpActivity = [

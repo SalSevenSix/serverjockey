@@ -160,6 +160,14 @@ function newTriggerHandler(context, channels, instance, triggers) {
         channel.send(subsText(triggerMessage, channel, event, alias));
       }
     }
+    if (member && cutil.hasProp(trigger, 'do-dm')) {  // Process DM action
+      const text = [];
+      for (const triggerMessage of trigger['do-dm']) {
+        text.push(subsText(triggerMessage, channel, event, alias));
+      }
+      await cutil.sleep(1000);
+      member.send(text.join('\n\n'));
+    }
   };
 
   resetCache();

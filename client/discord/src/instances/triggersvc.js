@@ -84,12 +84,12 @@ export function newTriggers(context, instance) {
       if (value) { value = parseInt(value, 10); }
       if (value && !isNaN(value) && value > 1) { record['cx-delay'] = value; }
     });
-    ['do-remove-role', 'do-add-role', 'do-message'].forEach(function(key) {  // Capture actions
+    ['do-remove-role', 'do-add-role', 'do-message', 'do-dm'].forEach(function(key) {  // Capture role actions
       args.forEach(function(arg) {
         value = getArgValue(key, arg);
         if (value) {
           if (!cutil.hasProp(record, key)) { record[key] = []; }
-          record[key].push(key === 'do-message' ? value : JSON.parse(value));
+          record[key].push(key.endsWith('role') ? JSON.parse(value) : value);
           actions += 1;
         }
       });
