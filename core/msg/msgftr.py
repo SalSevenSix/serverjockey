@@ -159,3 +159,12 @@ class DataMatches(msgabc.Filter):
 
     def find_one(self, value: str) -> str | None:
         return util.single(self.find_all(value))
+
+
+class DataIsInstance(msgabc.Filter):
+
+    def __init__(self, clazz: type | tuple):
+        self._clazz = clazz
+
+    def accepts(self, message):
+        return isinstance(message.data(), self._clazz)

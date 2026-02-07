@@ -179,3 +179,6 @@ class _EventClear:
     # noinspection PyMethodMayBeStatic
     def asdict(self) -> dict:
         return dict(event=sc.CLEAR)
+
+
+EVENT_CLEAR_FILTER = msgftr.And(mc.PlayerStore.EVENT_FILTER, msgftr.DataIsInstance(_EventClear))

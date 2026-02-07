@@ -47,35 +47,46 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
 
 # [2026/01/24 08:54:05   INFO]   [World|default] Player 'SalSevenSix' joined world 'default' at location Vector3d{x=143.
 # [2026/01/24 08:55:01   INFO]   [Hytale] SalSevenSix: Hello everyone
+# [2026/02/06 15:22:45   INFO]   [Universe|P] Removing player 'SalSevenSix' (dd8d4c6b-64e9-4f49-aa45-387f7450f5e2)
 # [2026/01/24 08:55:07   INFO]   [PlayerSystems] Removing player 'SalSevenSix (SalSevenSix)' from world 'default' (dd8d4
+# [2026/02/07 07:21:09   INFO]   [Gravestones|P] [Gravestones] Created for SalSevenSix at (1322, 119, -83)
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
     LOGIN_FILTER = msgftr.DataMatches(r".*INFO\]\s*\[World\|default\] Player '(.*?)' joined world 'default'.*")
     CHAT_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[Hytale\] (.*?): (.*?)$')
-    LOGOUT_FILTER = msgftr.DataMatches(
-        r".*INFO\]\s*\[PlayerSystems\] Removing player '(.*?) \(.*\)' from world 'default'.*")
+    LOGOUT_FILTER = msgftr.DataMatches(r".*INFO\]\s*\[Universe.*\] Removing player '(.*?)' \(.*\)$")
+    DEATH_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[Gravestones.*\].* Created for (.*?) at \((.*?)\)$')
 
     def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.And(
-            mc.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER,
-                      _PlayerEventSubscriber.LOGIN_FILTER,
-                      _PlayerEventSubscriber.LOGOUT_FILTER)))
-        self._mailer, self._player_names = mailer, set()
+        super().__init__(msgftr.Or(
+            msgftr.And(
+                mc.ServerProcess.FILTER_STDOUT_LINE,
+                msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER, _PlayerEventSubscriber.LOGIN_FILTER,
+                          _PlayerEventSubscriber.LOGOUT_FILTER, _PlayerEventSubscriber.DEATH_FILTER)),
+            playerstore.EVENT_CLEAR_FILTER))
+        self._mailer, self._player_names = mailer, []
 
     def handle(self, message):
         if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
             name, text = util.fill(_PlayerEventSubscriber.CHAT_FILTER.find_all(message.data()), 2)
-            if name in self._player_names:
+            if name and name in self._player_names:
                 playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
         elif _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
             name = _PlayerEventSubscriber.LOGIN_FILTER.find_one(message.data())
-            self._player_names.add(name)
-            playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
+            if name and name not in self._player_names:
+                self._player_names.append(name)
+                playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
         elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
             name = _PlayerEventSubscriber.LOGOUT_FILTER.find_one(message.data())
-            if name in self._player_names:
+            if name and name in self._player_names:
                 self._player_names.remove(name)
-            playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
+                playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
+        elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
+            name, text = util.fill(_PlayerEventSubscriber.DEATH_FILTER.find_all(message.data()), 2)
+            if name and name in self._player_names:
+                text = 'location ' + text.replace(' ', '') if text else None
+                playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
+        elif playerstore.EVENT_CLEAR_FILTER.accepts(message):
+            self._player_names = []
         return None
 
 
