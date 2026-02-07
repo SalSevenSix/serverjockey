@@ -66,7 +66,9 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
         self._mailer, self._player_names = mailer, []
 
     def handle(self, message):
-        if _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
+        if playerstore.EVENT_CLEAR_FILTER.accepts(message):
+            self._player_names = []
+        elif _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
             name, text = util.fill(_PlayerEventSubscriber.CHAT_FILTER.find_all(message.data()), 2)
             if name and name in self._player_names:
                 playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
@@ -85,8 +87,6 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             if name and name in self._player_names:
                 text = 'location ' + text.replace(' ', '') if text else None
                 playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)
-        elif playerstore.EVENT_CLEAR_FILTER.accepts(message):
-            self._player_names = []
         return None
 
 

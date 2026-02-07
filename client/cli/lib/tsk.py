@@ -1,18 +1,18 @@
 import logging
+import pathlib
 import time
 import os
+import pwd
 import inspect
 import subprocess
+import zipfile
 # ALLOW lib.util, lib.ddns
 from . import util, cxt, ddns
 
 
-def _checkpyz():
-    if not os.path.isfile('/usr/local/bin/serverjockey_cmd.pyz'):
-        raise Exception('Task not applicable when running from Source')
-
-
 def _checkroot(args: str):
+    if not os.path.isfile('/usr/local/bin/serverjockey_cmd.pyz'):  # All root tasks are for service deployment
+        raise Exception('Task not applicable when running from Source')
     script = util.get_resource('checkroot.sh').format(args=args)
     result = subprocess.run(script, shell=True, capture_output=True)
     _dump_to_log(result.stdout, result.stderr)
@@ -99,7 +99,6 @@ class TaskProcessor:
 
     # noinspection PyMethodMayBeStatic
     def _upgrade(self) -> bool:
-        _checkpyz()
         _checkroot('upgrade')
         script = util.get_resource('upgrade.sh')
         result = subprocess.run(script, shell=True, capture_output=True)
@@ -110,7 +109,6 @@ class TaskProcessor:
 
     # noinspection PyMethodMayBeStatic
     def _uninstall(self) -> bool:
-        _checkpyz()
         _checkroot('uninstall')
         script = util.get_resource('uninstall.sh').replace('{userdef}', util.DEFAULT_USER)
         result = subprocess.run(script, shell=True, capture_output=True)
@@ -121,7 +119,6 @@ class TaskProcessor:
 
     # noinspection PyMethodMayBeStatic
     def _adduser(self, argument: str) -> bool:
-        _checkpyz()
         _checkroot('adduser:<name>,<port>')
         user, port = _extract_user_and_port(argument)
         if user == util.DEFAULT_SERVICE:
@@ -137,7 +134,6 @@ class TaskProcessor:
 
     # noinspection PyMethodMayBeStatic
     def _userdel(self, argument: str) -> bool:
-        _checkpyz()
         _checkroot('userdel:<name>')
         user = _extract_user_and_port(argument)[0]
         if user == util.DEFAULT_USER:
@@ -149,8 +145,34 @@ class TaskProcessor:
             raise Exception('Delete user task failed')
         return True
 
+    def _export(self, argument: str) -> bool:
+        if not argument:
+            raise Exception(f'Zipfile required')
+        _checkroot('export:<zipfile>')
+        user, file = self._context.user(), argument if argument.endswith('.zip') else argument + '.zip'
+        logging.info(f'Exporting ServerJockey service user {user} to {file}')
+        home, svcname = pathlib.Path('/home/' + user), util.DEFAULT_SERVICE if user == util.DEFAULT_USER else user
+        if not home.is_dir():
+            raise Exception(f'Directory not found: {home}')
+        logging.info(f'Stopping ServerJockey service name {svcname}')
+        subprocess.run(util.get_resource('systemctl.sh').format(args=f'stop {svcname}'), shell=True)
+        if os.path.isfile(file):
+            os.remove(file)
+        with zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED) as f:
+            for path in home.rglob('*'):
+                relpath = str(path.relative_to(home))
+                dozip = not relpath.startswith('.') and (relpath.find('/') > -1 or not relpath.endswith('.log'))
+                dozip = dozip and not path.is_dir() and not path.is_symlink()
+                if dozip:
+                    logging.info(relpath)
+                    f.write(path, relpath)
+        suser = os.getenv('SUDO_USER')
+        if suser:
+            pwnam = pwd.getpwnam(suser)
+            os.chown(file, pwnam.pw_uid, pwnam.pw_gid)
+        return True
+
     def _service(self, argument: str) -> bool:
-        _checkpyz()
         _checkroot('service:<command>')
         user = self._context.user()
         args = argument if argument else 'status'

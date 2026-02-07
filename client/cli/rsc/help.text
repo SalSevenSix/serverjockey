@@ -17,6 +17,8 @@ tasks:
   service:enable         | Enable ServerJockey service
   service:disable        | Disable ServerJockey service
   wait:<seconds>         | Wait seconds for service to be started
+  export:<zipfile>       | Export ServerJockey service to zip file
+  import:<zipfile>       | Import ServerJockey service from zip file
 
 commands:
   showtoken         | Show webapp url and login token
