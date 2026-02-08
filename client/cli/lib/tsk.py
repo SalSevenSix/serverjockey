@@ -4,6 +4,7 @@ import time
 import os
 import pwd
 import inspect
+import shutil
 import subprocess
 import zipfile
 # ALLOW lib.util, lib.ddns
@@ -147,29 +148,68 @@ class TaskProcessor:
 
     def _export(self, argument: str) -> bool:
         if not argument:
-            raise Exception(f'Zipfile required')
+            raise Exception('<zipfile> required')
         _checkroot('export:<zipfile>')
         user, file = self._context.user(), argument if argument.endswith('.zip') else argument + '.zip'
+        if os.path.isfile(file) or os.path.isdir(file):
+            raise Exception(f'Zipfile elready exists: {file}')
         logging.info(f'Exporting ServerJockey service user {user} to {file}')
         home, svcname = pathlib.Path('/home/' + user), util.DEFAULT_SERVICE if user == util.DEFAULT_USER else user
         if not home.is_dir():
-            raise Exception(f'Directory not found: {home}')
+            raise Exception(f'ServerJockey home not found: {home}')
         logging.info(f'Stopping ServerJockey service name {svcname}')
         subprocess.run(util.get_resource('systemctl.sh').format(args=f'stop {svcname}'), shell=True)
-        if os.path.isfile(file):
-            os.remove(file)
         with zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED) as f:
-            for path in home.rglob('*'):
-                relpath = str(path.relative_to(home))
+            for abspath in home.rglob('*'):
+                relpath = str(abspath.relative_to(home))
                 dozip = not relpath.startswith('.') and (relpath.find('/') > -1 or not relpath.endswith('.log'))
-                dozip = dozip and not path.is_dir() and not path.is_symlink()
+                dozip = dozip and not abspath.is_dir() and not abspath.is_symlink()
                 if dozip:
-                    logging.info(relpath)
-                    f.write(path, relpath)
+                    logging.info(f'DEFLATE {abspath}')
+                    f.write(abspath, relpath)
         suser = os.getenv('SUDO_USER')
         if suser:
             pwnam = pwd.getpwnam(suser)
             os.chown(file, pwnam.pw_uid, pwnam.pw_gid)
+        return True
+
+    def _import(self, argument: str) -> bool:
+        if not argument:
+            raise Exception('<zipfile> required')
+        _checkroot('import:<zipfile>')
+        user, file = self._context.user(), argument if argument.endswith('.zip') else argument + '.zip'
+        if not os.path.isfile(file):
+            raise Exception(f'Zipfile not found: {file}')
+        home, pwnam = '/home/' + user, pwd.getpwnam(user)
+        if not os.path.isdir(home):
+            raise Exception(f'ServerJockey home not found: {home}')
+        svcname = util.DEFAULT_SERVICE if user == util.DEFAULT_USER else user
+        logging.info(f'Stopping ServerJockey service name {svcname}')
+        subprocess.run(util.get_resource('systemctl.sh').format(args=f'stop {svcname}'), shell=True)
+        with zipfile.ZipFile(file, 'r') as f:
+            alldirs, rootdirs, uid, gid = [home], [home], pwnam.pw_uid, pwnam.pw_gid
+            for member in f.infolist():
+                relpath, pos = member.filename, member.filename.find('/')
+                if pos == -1:  # root file
+                    abspath = home + '/' + relpath
+                    if os.path.isfile(abspath):
+                        logging.info(f'RMFILE  {abspath}')
+                        os.remove(abspath)
+                elif relpath.count('/') == 1:  # root directory
+                    abspath = home + '/' + relpath[:pos]
+                    if abspath not in rootdirs:
+                        rootdirs.append(abspath)
+                        if os.path.isdir(abspath):
+                            logging.info(f'RMDIR   {abspath}')
+                            shutil.rmtree(abspath)
+                abspath = f.extract(member, home)
+                logging.info(f'UNPACK  {abspath}')
+                dirpath = os.path.dirname(abspath)
+                if dirpath not in alldirs:
+                    alldirs.append(dirpath)
+                    logging.info(f'CHODIR  {dirpath}')
+                    os.chown(dirpath, uid, gid)
+                os.chown(abspath, uid, gid)
         return True
 
     def _service(self, argument: str) -> bool:
