@@ -37,7 +37,7 @@ def _load_cmdargs(home: str) -> dict:
 
 def _argument_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description='Start ServerJockey game server management system.')
-    p.add_argument('--version', action='store_true', help='Show version and exit')
+    p.add_argument('-v', '--version', action='store_true', help='Show version and exit')
     p.add_argument('--home', type=str,
                    help='Home directory to use for server instances, default is current working directory')
     p.add_argument('--logfile', type=str, nargs='?', const='serverjockey.log',

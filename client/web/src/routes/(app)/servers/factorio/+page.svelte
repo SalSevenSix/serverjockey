@@ -14,7 +14,7 @@
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
-  import Autosaves from './Autosaves.svelte';
+  import Autobackups from '$lib/instance//Autobackups.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -23,7 +23,7 @@
       'desc': 'Reset the configuration files only.' },
     { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
       'desc': 'Delete the log files only.' },
-    { 'key': 'wipe-world-autosaves', 'name': 'Delete Autosaves',
+    { 'key': 'wipe-world-autobackups', 'name': 'Delete Autobackups',
       'desc': 'Delete the automatic server created saves.' },
     { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
       'desc': 'Reset all of the above.' }];
@@ -88,8 +88,8 @@
         <RuntimeControls qualifierName="Version" />
         <WorldControls actions={worldActions} />
       </Collapsible>
-      <Collapsible icon="fa-file-zipper" title="Autosaves">
-        <Autosaves />
+      <Collapsible icon="fa-file-zipper" title="Autobackups">
+        <Autobackups />
       </Collapsible>
       <Collapsible icon="fa-box-archive" title="Backups">
         <BackupRestoreActions />

@@ -11,7 +11,7 @@ from core.proc import proch, jobh
 from core.common import rconsvc, portmapper, svrhelpers
 from servers.factorio import messaging as msg
 
-_MAP, _ZIP, _AUTOSAVE_PREFIX = 'map', '.zip', '_autosave'
+_MAP, _ZIP, _AUTOBACKUP_PREFIX = 'map', '.zip', '_autosave'
 _BASE_MOD_NAMES = 'base', 'elevated-rails', 'quality', 'space-age'
 
 
@@ -75,14 +75,14 @@ class Deployment:
         builder.put_installer(_InstallRuntimeHandler(self, self._context))
         builder.put_wipes(self._runtime_dir, dict(
             save=self._map_file, config=self._config_dir, all=self._world_dir,
-            logs=dict(path=self._runtime_dir, ls_filter=_logfiles),
-            autosaves=dict(path=self._save_dir, ls_filter=_autosaves)))
+            logs=dict(path=self._runtime_dir, ls_filter=_ls_logfiles),
+            autobackups=dict(path=self._save_dir, ls_filter=_ls_autobackups)))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
-        builder.put('restore-autosave', _RestoreAutosaveHandler(self), 'r')
+        builder.put('restore-autobackup', _RestoreAutobackupHandler(self), 'r')
         builder.pop()
-        builder.put_log(self._runtime_dir + '/factorio-current.log').put_logs(self._runtime_dir, ls_filter=_logfiles)
+        builder.put_log(self._runtime_dir + '/factorio-current.log').put_logs(self._runtime_dir, ls_filter=_ls_logfiles)
         builder.put_backups(self._tempdir, self._backups_dir)
-        builder.psh('autosaves', httpext.FileSystemHandler(self._save_dir, ls_filter=_autosaves))
+        builder.psh('autobackups', httpext.FileSystemHandler(self._save_dir, ls_filter=_ls_autobackups))
         builder.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
         builder.pop()
         builder.put_config(dict(
@@ -183,9 +183,9 @@ class Deployment:
                 '--create', self._map_file,
                 '--map-gen-settings', self._map_gen_settings,
                 '--map-settings', self._map_settings))
-        autosave_dir = self._runtime_dir + '/saves'
-        if not await io.symlink_exists(autosave_dir):
-            await io.create_symlink(autosave_dir, self._save_dir)
+        save_dir = self._runtime_dir + '/saves'
+        if not await io.symlink_exists(save_dir):
+            await io.create_symlink(save_dir, self._save_dir)
 
     # pylint: disable=too-many-locals
     async def _sync_mods(self):
@@ -243,25 +243,26 @@ class Deployment:
         logger.log('Writing live mod config, base game and mods')
         await io.write_file(live_mod_list, objconv.obj_to_json(dict(mods=mod_list)))
 
-    async def restore_autosave(self, filename: str):
+    async def restore_autobackup(self, filename: str):
         logger = msglog.LogPublisher(self._context, self)
-        map_backup = self._save_dir + '/' + _AUTOSAVE_PREFIX + '_' + _MAP + '_backup' + _ZIP
+        map_backup = self._save_dir + '/' + _AUTOBACKUP_PREFIX + '_' + _MAP + '_backup' + _ZIP
         try:
             self._context.post(self, msg.DEPLOYMENT_START)
             filename = filename[1:] if filename[0] == '/' else filename
             logger.log('RESTORING ' + filename)
-            autosave_file = self._save_dir + '/' + filename
-            if not await io.file_exists(autosave_file):
-                raise FileNotFoundError(autosave_file)
-            autosave_size = await io.file_size(autosave_file)
-            tracker = msglog.PercentTracker(self._context, autosave_size, notifications=4)
+            autobackup_file = self._save_dir + '/' + filename
+            if not await io.file_exists(autobackup_file):
+                raise FileNotFoundError(autobackup_file)
+            autobackup_size = await io.file_size(autobackup_file)
+            tracker = msglog.PercentTracker(self._context, autobackup_size, notifications=4)
             if await io.file_exists(self._map_file):
-                if map_backup == autosave_file:
+                if map_backup == autobackup_file:
                     await io.delete_file(self._map_file)
                 else:
                     await io.delete_file(map_backup)
                     await io.rename_path(self._map_file, map_backup)
-            await io.stream_copy_file(autosave_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, self._tempdir, tracker)
+            await io.stream_copy_file(
+                autobackup_file, self._map_file, io.DEFAULT_CHUNK_SIZE * 2, self._tempdir, tracker)
             logger.log('Autosave ' + filename + ' restored')
             await funcutil.silently_call(io.delete_file(map_backup))
         except Exception as e:
@@ -287,7 +288,7 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
         return dict(url=url)
 
 
-class _RestoreAutosaveHandler(httpabc.PostHandler):
+class _RestoreAutobackupHandler(httpabc.PostHandler):
 
     def __init__(self, deployment: Deployment):
         self._deployment = deployment
@@ -296,13 +297,13 @@ class _RestoreAutosaveHandler(httpabc.PostHandler):
         filename = util.get('filename', data)
         if not filename or filename.endswith(_MAP + _ZIP):
             return httpabc.ResponseBody.BAD_REQUEST
-        tasks.task_fork(self._deployment.restore_autosave(filename), 'factorio.restore_autosave()')
+        tasks.task_fork(self._deployment.restore_autobackup(filename), 'factorio.restore_autobackup()')
         return httpabc.ResponseBody.NO_CONTENT
 
 
-def _logfiles(entry) -> bool:
+def _ls_logfiles(entry) -> bool:
     return entry['type'] == 'file' and entry['name'].endswith('.log')
 
 
-def _autosaves(entry) -> bool:
-    return entry['type'] == 'file' and entry['name'].startswith(_AUTOSAVE_PREFIX) and entry['name'].endswith(_ZIP)
+def _ls_autobackups(entry) -> bool:
+    return entry['type'] == 'file' and entry['name'].startswith(_AUTOBACKUP_PREFIX) and entry['name'].endswith(_ZIP)
