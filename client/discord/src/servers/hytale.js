@@ -10,5 +10,5 @@ export const help = helptext.newServerHelpBuilder()
   .addServer().addPlayers().addSay().addChat().addSend().addAliasme()
   .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .next()
-  .addConfig(['cmdargs', 'Config', 'Permissions', 'Whitelist', 'Bans', 'Default'])
+  .addConfig(['cmdargs', 'Settings', 'Permissions', 'Whitelist', 'Bans'])
   .build();

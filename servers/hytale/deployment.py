@@ -84,7 +84,8 @@ class Deployment:
         self._logs_dir = self._world_dir + '/logs'
         self._mods_dir = self._world_dir + '/mods'
         self._save_dir = self._world_dir + '/universe'
-        self._map_dir = self._save_dir + '/worlds/default'
+        self._worlds_dir = self._save_dir + '/worlds'
+        self._map_dir = self._worlds_dir + '/default'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
 
     async def initialise(self):
@@ -109,9 +110,12 @@ class Deployment:
         builder.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_ls_autobackups), 'r')
         builder.pop()
         builder.put_config(dict(
-            cmdargs=self._cmdargs_file, config=self._world_dir + '/config.json',
+            cmdargs=self._cmdargs_file, settings=self._world_dir + '/config.json',
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
-            whitelist=self._world_dir + '/whitelist.json', default=self._map_dir + '/config.json'))
+            whitelist=self._world_dir + '/whitelist.json'))
+        builder.psh('universe', httpext.FileSystemHandler(self._worlds_dir, ls_filter=_ls_uroot))
+        builder.put('*{path}', httpext.FileSystemHandler(self._worlds_dir, 'path', ls_filter=_ls_wconfig), 'm')
+        builder.pop()
         builder.psh('modfiles', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_modfile))
         builder.put('*{path}', httpext.FileSystemHandler(
             self._mods_dir, 'path', ls_filter=_ls_modfile, tempdir=self._tempdir), 'm')
@@ -133,8 +137,8 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await io.create_directory(
-            self._backups_dir, self._world_dir, self._logs_dir, self._mods_dir, self._autobackups_dir)
+        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._mods_dir,
+                                  self._autobackups_dir, self._save_dir, self._worlds_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
@@ -285,6 +289,14 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
 
 def _ls_mapdata(entry) -> bool:
     return entry['type'] == 'directory'
+
+
+def _ls_uroot(entry) -> bool:
+    return entry['type'] == 'directory'
+
+
+def _ls_wconfig(entry) -> bool:
+    return entry['name'] == 'config.json'
 
 
 def _ls_modfile(entry) -> bool:

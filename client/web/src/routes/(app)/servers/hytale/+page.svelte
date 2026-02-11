@@ -1,4 +1,5 @@
 <script>
+  import { worldActions } from './hytale.js';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
   import InstanceHeader from '$lib/instance/InstanceHeader.svelte';
@@ -15,17 +16,8 @@
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
   import Autobackups from '$lib/instance//Autobackups.svelte';
+  import WorldConfig from './WorldConfig.svelte';
   import Modfiles from './Modfiles.svelte';
-
-  const worldActions = [
-    { 'key': 'wipe-world-save', 'name': 'Reset Save',
-      'desc': 'Reset the game world save only.' },
-    { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
-      'desc': 'Delete the log files only.' },
-    { 'key': 'wipe-world-autobackups', 'name': 'Delete Autobackups',
-      'desc': 'Delete the automatic server created backups.' },
-    { 'key': 'wipe-world-all', 'name': 'Reset All', 'icon': 'fa-explosion',
-      'desc': 'Reset all of the above.' }];
 </script>
 
 
@@ -49,15 +41,17 @@
       <Collapsible icon="fa-user" title="Players">
         <Players />
       </Collapsible>
-      <Collapsible icon="fa-file-code" title="Configuration">
+      <Collapsible icon="fa-file-code" title="Server Config">
         <ConfigFile name="Command Line Args" path="/config/cmdargs">
           <p>See &quot;_comment_...&quot; fields for description of configuration fields.</p>
         </ConfigFile>
-        <ConfigFile name="Server Config" path="/config/config" />
+        <ConfigFile name="Settings" path="/config/settings" />
         <ConfigFile name="Permissions" path="/config/permissions" />
         <ConfigFile name="Whitelist" path="/config/whitelist" />
         <ConfigFile name="Bans" path="/config/bans" />
-        <ConfigFile name="World Config" path="/config/default" />
+      </Collapsible>
+      <Collapsible icon="fa-file-fragment" title="Universe Config">
+        <WorldConfig />
       </Collapsible>
       <Collapsible icon="fa-puzzle-piece" title="Mod Files">
         <Modfiles />
