@@ -22,7 +22,8 @@
   export let customMeta = null;
 
   const idPrefix = 'fileSystem' + toCamelCase(rootPath.replaceAll('/', ' '));
-  const hasActions = allowDelete > 0 || customMeta;
+  const allowAction = customMeta ? (customMeta.allowAction ? customMeta.allowAction : 1) : 0;
+  const hasActions = allowDelete + allowAction > 0;
   const columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
                     + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
@@ -33,11 +34,11 @@
   let paths = [];
 
   $: isMaint = $serverStatus.state === 'MAINTENANCE';
-  $: cannotAction = $serverStatus.running || isMaint;
-  $: cannotDelete = (allowDelete === 1 && cannotAction) || (allowDelete === 2 && isMaint);
+  $: cannotDelete = (allowDelete === 1 && ($serverStatus.running || isMaint)) || (allowDelete === 2 && isMaint);
+  $: cannotAction = (allowAction === 1 && ($serverStatus.running || isMaint)) || (allowAction === 2 && isMaint);
   $: containerClass = paths.length > softLimit ? 'block oversize-container mr-6' : 'block';
 
-  $: if (!cannotAction && notifyText) {
+  $: if (!isMaint && notifyText) {
     notifyInfo(notifyText);
     notifyText = null;
   }
@@ -104,6 +105,11 @@
     const parts = pwdUrl.split('/');
     parts.pop();
     load(parts.join('/'));
+  }
+
+  function customCannotAction(entry) {
+    if (!customMeta.canAction) return entry.type === 'directory';
+    return !customMeta.canAction(entry);
   }
 
   function customAction(url) {
@@ -211,9 +217,9 @@
             {/if}
             {#if hasActions}
               <td>
-                {#if customMeta}
+                {#if allowAction > 0}
                   <button name="{idPrefix}ActionE{path.name}" title={customMeta.name}
-                          disabled={cannotAction || path.type === 'directory'}
+                          disabled={cannotAction || customCannotAction(path)}
                           class={'button ' + customMeta.button + (allowDelete > 0 ? ' mb-1' : '')}
                           on:click={function() { customAction(path.url); }}>
                     <i class="fa {customMeta.icon} fa-lg"></i></button>

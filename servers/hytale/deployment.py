@@ -11,7 +11,6 @@ from core.common import svrhelpers, portmapper
 from servers.hytale import messaging as msg
 
 LAUNCHER_EXE = 'hytale-downloader-linux-amd64'
-MOD_EXTS = 'jar', 'zip'
 
 
 def _default_cmdargs() -> dict:
@@ -114,7 +113,8 @@ class Deployment:
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
             whitelist=self._world_dir + '/whitelist.json', default=self._map_dir + '/config.json'))
         builder.psh('modfiles', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_modfile))
-        builder.put('*{path}', httpext.FileSystemHandler(self._mods_dir, 'path', tempdir=self._tempdir), 'm')
+        builder.put('*{path}', httpext.FileSystemHandler(
+            self._mods_dir, 'path', ls_filter=_ls_modfile, tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._server_jar):
@@ -289,7 +289,11 @@ def _ls_mapdata(entry) -> bool:
 
 def _ls_modfile(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
-    return ftype == 'file' and fname and len(fname) > 4 and fext in MOD_EXTS
+    if ftype == 'link' or not fname:
+        return False
+    if ftype == 'directory':
+        return True
+    return fext == 'jar' or fext == 'zip' or fext.startswith('json')
 
 
 def _ls_autobackups(entry) -> bool:

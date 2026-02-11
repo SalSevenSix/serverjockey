@@ -161,5 +161,6 @@ _CONTENT_TYPES = {
     'woff': ContentTypeImpl('font/woff'),
     'woff2': ContentTypeImpl('font/woff2'),
     'ttf': ContentTypeImpl('font/ttf'),
-    'zip': ContentTypeImpl('application/zip')
+    'zip': ContentTypeImpl('application/zip'),
+    'jar': ContentTypeImpl('application/java-archive')
 }

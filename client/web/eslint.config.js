@@ -48,6 +48,7 @@ export default [
   {
     rules: {
       'no-plusplus': [2, { 'allowForLoopAfterthoughts': true }],
+      'no-nested-ternary': 1,
       'prefer-const': 1,
       'no-self-assign': 0,
       'no-new': 0,
