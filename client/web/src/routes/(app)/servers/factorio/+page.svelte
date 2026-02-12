@@ -14,7 +14,7 @@
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
-  import Autobackups from '$lib/instance//Autobackups.svelte';
+  import Autobackups from '$lib/instance/Autobackups.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
