@@ -65,6 +65,7 @@ Open additional ports for game servers as needed.
 ```bash
 sudo docker run -p 6164:6164/tcp salsevensix/serverjockey:latest
 ```
+If desired, you can bind the container directory `/home/container` to the local filesystem.
 
 
 ## Running from Source

@@ -49,6 +49,8 @@
         <ConfigFile name="Permissions" path="/config/permissions" />
         <ConfigFile name="Whitelist" path="/config/whitelist" />
         <ConfigFile name="Bans" path="/config/bans" />
+        <ConfigFile name="Memories" path="/config/memories" />
+        <ConfigFile name="Warps" path="/config/warps" />
       </Collapsible>
       <Collapsible icon="fa-file-fragment" title="Universe Config">
         <WorldConfig />

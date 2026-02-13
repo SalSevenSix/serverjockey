@@ -112,7 +112,8 @@ class Deployment:
         builder.put_config(dict(
             cmdargs=self._cmdargs_file, settings=self._world_dir + '/config.json',
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
-            whitelist=self._world_dir + '/whitelist.json'))
+            whitelist=self._world_dir + '/whitelist.json', memories=self._save_dir + '/memories.json',
+            warps=self._save_dir + '/warps.json'))
         builder.psh('universe', httpext.FileSystemHandler(self._worlds_dir, ls_filter=_ls_uroot))
         builder.put('*{path}', httpext.FileSystemHandler(self._worlds_dir, 'path', ls_filter=_ls_wconfig), 'm')
         builder.pop()
@@ -132,16 +133,15 @@ class Deployment:
         server.append_arg('-jar').append_arg(self._server_jar)
         server.append_arg('--assets').append_arg(self._server_dir + '/Assets.zip')
         server.append_arg('--universe').append_arg(self._save_dir)
-        server.append_arg('--backup-dir').append_arg(self._world_dir + '/backups')
+        server.append_arg('--backup-dir').append_arg(self._autobackups_dir)
         server.append_struct(svrargs)
         return server
 
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._mods_dir,
                                   self._autobackups_dir, self._save_dir, self._worlds_dir)
-        if not await io.directory_exists(self._runtime_dir):
-            return
-        await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
+        if await io.directory_exists(self._runtime_dir):
+            await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
 
     async def _load_args(self) -> tuple:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
