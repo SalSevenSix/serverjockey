@@ -12,15 +12,19 @@
   const serverStatus = getContext('serverStatus');
 
   export let stateOnly = false;
+  export let noSteamUrl = false;
 
   $: version = $serverStatus.details && $serverStatus.details.version ? $serverStatus.details.version : '';
 
   $: connect = getConnect($serverStatus.details); function getConnect(details) {
-    const result = { ip: '', port: '', url: null };
+    const result = { ip: '', port: '', ipnp: false, url: null };
     if (!details) return result;
     if (details.ip) { result.ip = details.ip; }
     if (details.port) { result.port = details.port; }
-    if (result.ip && result.port) { result.url = 'steam://connect/' + result.ip + ':' + result.port; }
+    if (result.ip && result.port) {
+      result.ipnp = true;
+      if (!noSteamUrl) { result.url = 'steam://connect/' + result.ip + ':' + result.port; }
+    }
     return result;
   }
 
@@ -83,7 +87,7 @@
             <td id="serverStatusVersion">{version}</td></tr>
         <tr><td class="has-text-weight-bold">Connect</td>
             <td id="serverStatusConnect">
-              {#if connect.ip}{connect.ip}{/if}{#if connect.url}<wbr>:{/if}{#if connect.port}{connect.port}{/if}
+              {#if connect.ip}{connect.ip}{/if}{#if connect.ipnp}<wbr>:{/if}{#if connect.port}{connect.port}{/if}
               {#if connect.url}<a href={connect.url} title="Play through Steam"><i class="fa-brands fa-steam"></i></a>{/if}
             </td></tr>
       {/if}

@@ -33,7 +33,7 @@
           <ServerConfig />
         </div>
         <div class="column">
-          <ServerStatus />
+          <ServerStatus noSteamUrl />
         </div>
       </div>
       <InstanceLog />

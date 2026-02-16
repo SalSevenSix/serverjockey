@@ -31,7 +31,7 @@
           <ServerConfig />
         </div>
         <div class="column">
-          <ServerStatus />
+          <ServerStatus noSteamUrl />
         </div>
       </div>
       <InstanceLog />
@@ -64,7 +64,7 @@
       <Collapsible icon="fa-gears" title="Deployment">
         <RuntimeControls qualifierName="Patchline">
           <p>Watch server status and console log for authorisation step during install process.
-             Authorise device for install when prompted.</p>
+             Authorise device for install when prompted. Delete Runtime first for full re-install.</p>
         </RuntimeControls>
         <WorldControls actions={worldActions} />
       </Collapsible>

@@ -73,7 +73,7 @@ class Deployment:
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
-        self._runtime_meta = self._runtime_dir + '/versions.text'
+        self._runtime_meta = self._runtime_dir + '/versions.json'
         self._launcher_exe = self._runtime_dir + '/' + LAUNCHER_EXE
         self._java_dir = self._runtime_dir + '/java'
         self._java_exe = self._java_dir + '/bin/java'
@@ -146,9 +146,7 @@ class Deployment:
     async def _load_args(self) -> tuple:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
         jreargs, svrargs, cmdargs = {}, {}, util.delete_dict(cmdargs, (
-            '-b', '-t', '-jar', '--version', '--help', '--assets', '--universe', '--world-gen', '--backup-dir',
-            '--early-plugins', '--generate-schema', '--migrate-worlds', '--migrations', '--mods', '--prefab-cache',
-            '--shutdown-after-validate', '--validate-assets', '--validate-prefabs', '--validate-world-gen'))
+            '-b', '-t', '-jar', '--version', '--help', '--assets', '--universe', '--backup-dir'))
         for key, value in cmdargs.items():
             if key and key.startswith('--'):
                 svrargs[key] = value
@@ -167,17 +165,21 @@ class Deployment:
         portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
 
     async def install_runtime(self, version: str):
-        logger = msglog.LogPublisher(self._context, self)
+        logger, meta = msglog.LogPublisher(self._context, self), {}
         try:
             self._context.post(self, msg.DEPLOYMENT_START)
             logger.log('START Install')
-            await io.delete_directory(self._runtime_dir)
-            await io.create_directory(self._runtime_dir)
-            meta = '=== JAVA ===\n' + await self._install_java(logger)
-            meta += '\n\n=== LAUNCHER ===\n' + await self._install_launcher(logger)
+            if await io.file_exists(self._runtime_meta):
+                meta = objconv.json_to_dict(await io.read_file(self._runtime_meta))
+                await io.delete_file(self._runtime_meta)
+            else:
+                await io.delete_directory(self._runtime_dir)
+                await io.create_directory(self._runtime_dir)
+                meta['java'] = await self._install_java(logger)
+                meta['launcher'] = await self._install_launcher(logger)
             server_package = await self._download_server(logger, version)
-            meta += '\n\n=== SERVER ===\n' + await self._install_server(logger, server_package)
-            await io.write_file(self._runtime_meta, meta)
+            meta['server'] = await self._install_server(logger, server_package)
+            await io.write_file(self._runtime_meta, objconv.obj_to_json(meta, True))
             await self.build_world()
             logger.log('END Install')
         except Exception as e:
@@ -223,6 +225,7 @@ class Deployment:
     async def _download_server(self, logger, version: str) -> str:
         logger.log('DOWNLOADING HytaleServer (' + (version.strip() if version else 'release') + ')')
         stderr, stdout, package = None, None, self._server_dir + '.zip'
+        await io.delete_file(package)
         args = ['-download-path', package]
         if version:
             args.append('-patchline')
@@ -246,6 +249,7 @@ class Deployment:
 
     async def _install_server(self, logger, package: str) -> str:
         logger.log('UNPACKING HytaleServer')
+        await io.delete_directory(self._server_dir)
         await io.create_directory(self._server_dir)
         await pack.unpack_archive(package, self._server_dir)
         await io.delete_file(package)
