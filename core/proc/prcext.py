@@ -1,6 +1,8 @@
 import abc
+import logging
+import asyncio
 # ALLOW util.* msg*.* context.* http.* system.* proc.*
-from core.util import cmdutil, util
+from core.util import cmdutil, util, tasks
 from core.msg import msgabc
 from core.msgc import mc
 from core.http import httpabc
@@ -72,3 +74,46 @@ class SayHandler(httpabc.PostHandler):
         for line in [o.strip() for o in lines if o]:
             await proch.PipeInLineService.request(self._mailer, self, self._formatter.cmdline(player, line))
         return httpabc.ResponseBody.NO_CONTENT
+
+
+class TimedConsoleCommand:
+
+    def __init__(self, mailer: msgabc.MulticastMailer, cmdline: str, seconds: float):
+        self._mailer, self._cmdline, self._seconds = mailer, cmdline, seconds
+        self._queue = asyncio.Queue(maxsize=1)
+        self._running, self._task = False, None
+
+    def start(self):
+        if self._running or self._seconds == 0.0:
+            return
+        self._running = True
+        self._task = tasks.task_start(self._run(), self)
+
+    def stop(self):
+        if not self._running:
+            return
+        self._running = False
+        if self._task and not self._task.done():
+            self._queue.put_nowait(None)
+
+    async def _run(self):
+        try:
+            running = True
+            while running and self._running:
+                running = await self._next()
+                if running and self._running:
+                    await proch.PipeInLineService.request(self._mailer, self, self._cmdline)
+        except Exception as e:
+            logging.debug('TimedConsoleCommand(%s) %s', self._cmdline, repr(e))
+        finally:
+            self._running = False
+            util.clear_queue(self._queue)
+            tasks.task_end(self._task)
+
+    async def _next(self) -> bool:
+        try:
+            await asyncio.wait_for(self._queue.get(), self._seconds)
+            self._queue.task_done()
+            return False
+        except asyncio.TimeoutError:
+            return True

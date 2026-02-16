@@ -1,12 +1,11 @@
-import logging
 import asyncio
 import enum
 # ALLOW core.*
-from core.util import util, tasks
+from core.util import util
 from core.msg import msgabc, msgftr
 from core.msgc import mc
 from core.system import svrsvc
-from core.proc import proch
+from core.proc import proch, prcext
 from core.common import restarts
 from servers.projectzomboid import messaging as msg
 
@@ -14,6 +13,7 @@ from servers.projectzomboid import messaging as msg
 # LOG : General, 1703088424899> 2,217,885> CheckModsNeedUpdate: Checking...
 # LOG : General, 1703088424899> 2,217,885> Checking started. The answer will be written in the log file and in the chat
 # LOG : General, 1703088425200> 2,218,186> CheckModsNeedUpdate: Mods need update
+_CHECK_COMMAND = 'checkModsNeedUpdate'
 
 
 def initialise(mailer: msgabc.MulticastMailer):
@@ -94,71 +94,24 @@ class _CheckModsNeedUpdate(msgabc.AbcSubscriber):
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.Or(
-            _CheckModsConfig.APPLY_FILTER,
-            mc.ServerProcess.FILTER_STATE_STARTED,
-            mc.ServerProcess.FILTER_STATE_STOPPING,
-            mc.ServerProcess.FILTER_STATES_DOWN,
+            _CheckModsConfig.APPLY_FILTER, mc.ServerProcess.FILTER_STATE_STARTED,
+            mc.ServerProcess.FILTER_STATE_STOPPING, mc.ServerProcess.FILTER_STATES_DOWN,
             msg.SERVER_RESTART_REQUIRED_FILTER))
         self._mailer, self._seconds = mailer, 0.0
-        self._checker = _CheckModsNeedUpdateTask(mailer, self._seconds)
+        self._checker = prcext.TimedConsoleCommand(mailer, _CHECK_COMMAND, self._seconds)
 
     def handle(self, message):
         if _CheckModsConfig.APPLY_FILTER.accepts(message):
             self._seconds = message.data().mod_check_seconds()
-            return None
-        if mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
+        elif mc.ServerProcess.FILTER_STATE_STARTED.accepts(message):
             self._checker.stop()
-            self._checker = _CheckModsNeedUpdateTask(self._mailer, self._seconds)
+            self._checker = prcext.TimedConsoleCommand(self._mailer, _CHECK_COMMAND, self._seconds)
             self._checker.start()
-            return None
-        if (mc.ServerProcess.FILTER_STATE_STOPPING.accepts(message)
+        elif (mc.ServerProcess.FILTER_STATE_STOPPING.accepts(message)
                 or mc.ServerProcess.FILTER_STATES_DOWN.accepts(message)
                 or msg.SERVER_RESTART_REQUIRED_FILTER.accepts(message)):
             self._checker.stop()
         return None
-
-
-class _CheckModsNeedUpdateTask:
-
-    def __init__(self, mailer: msgabc.MulticastMailer, seconds: float):
-        self._mailer, self._seconds = mailer, seconds
-        self._queue = asyncio.Queue(maxsize=1)
-        self._running, self._task = False, None
-
-    def start(self):
-        if self._running or self._seconds == 0.0:
-            return
-        self._running = True
-        self._task = tasks.task_start(self._run(), self)
-
-    def stop(self):
-        if not self._running:
-            return
-        self._running = False
-        if self._task and not self._task.done():
-            self._queue.put_nowait(None)
-
-    async def _run(self):
-        running = True
-        try:
-            while running and self._running:
-                running = await self._next()
-                if running and self._running:
-                    await proch.PipeInLineService.request(self._mailer, self, 'checkModsNeedUpdate')
-        except Exception as e:
-            logging.debug('CheckModsNeedUpdateTask.run() %s', repr(e))
-        finally:
-            self._running = False
-            util.clear_queue(self._queue)
-            tasks.task_end(self._task)
-
-    async def _next(self) -> bool:
-        try:
-            await asyncio.wait_for(self._queue.get(), self._seconds)
-            self._queue.task_done()
-            return False
-        except asyncio.TimeoutError:
-            return True
 
 
 class _ModsNeedUpdateSubscriber(msgabc.AbcSubscriber):

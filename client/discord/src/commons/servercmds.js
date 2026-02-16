@@ -16,6 +16,7 @@ export function status({ httptool, instance }) {
     if (dtl.auth) { result += 'Auth:     ' + (cutil.isString(dtl.auth) ? dtl.auth : '[see webapp]') + '\n'; }
     if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
     if (dtl.map) { result += 'Map:      ' + dtl.map + '\n'; }
+    if (dtl.notice) { result += 'Notice:   ' + dtl.notice + '\n'; }
     if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
     return [result.trim()];
   });

@@ -11,6 +11,8 @@ DEPLOYMENT_START, DEPLOYMENT_DONE = 'Deployment.Start', 'Deployment.Done'
 FILTER_DEPLOYMENT_START, FILTER_DEPLOYMENT_DONE = msgftr.NameIs(DEPLOYMENT_START), msgftr.NameIs(DEPLOYMENT_DONE)
 CONSOLE_LOG_FILTER = msgftr.Or(mc.ServerProcess.FILTER_ALL_LINES, msglog.LogPublisher.LOG_FILTER)
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataMatches(r'^\[.*(ERROR|SEVERE)\].*'))
+UPDATE_REQUIRED = 'messaging.UPDATE_REQUIRED'
+UPDATE_REQUIRED_FILTER = msgftr.NameIs(UPDATE_REQUIRED)
 
 
 async def initialise(context: contextsvc.Context):
@@ -30,13 +32,15 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
     PORT_FILTER = msgftr.DataMatches(r'.*\[ServerManager.*Listening on \/\d+\.\d+\.\d+\.\d+:(.*?) and took.*')
 
     def __init__(self, mailer: msgabc.Mailer, public_ip: str):
-        super().__init__(msgftr.And(
+        super().__init__(msgftr.Or(UPDATE_REQUIRED_FILTER, msgftr.And(
             mc.ServerProcess.FILTER_STDOUT_LINE,
-            msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER, _ServerDetailsSubscriber.PORT_FILTER)))
+            msgftr.Or(_ServerDetailsSubscriber.VERSION_FILTER, _ServerDetailsSubscriber.PORT_FILTER))))
         self._mailer, self.public_ip = mailer, public_ip
 
     def handle(self, message):
-        if _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
+        if UPDATE_REQUIRED_FILTER.accepts(message):
+            svrsvc.ServerStatus.notify_details(self._mailer, self, dict(notice='Server Update Required'))
+        elif _ServerDetailsSubscriber.VERSION_FILTER.accepts(message):
             version = _ServerDetailsSubscriber.VERSION_FILTER.find_one(message.data())
             svrsvc.ServerStatus.notify_details(self._mailer, self, dict(version=version))
         elif _ServerDetailsSubscriber.PORT_FILTER.accepts(message):

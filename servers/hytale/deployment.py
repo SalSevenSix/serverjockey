@@ -8,7 +8,7 @@ from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch
 from core.common import svrhelpers, portmapper
-from servers.hytale import messaging as msg
+from servers.hytale import messaging as msg, updatecheck as uck
 
 LAUNCHER_EXE = 'hytale-downloader-linux-amd64'
 
@@ -62,7 +62,9 @@ def _default_cmdargs() -> dict:
         '_comment_transport': 'Transport type, default: QUIC',
         '--transport': None,
         '_comment_server_upnp': 'Try to automatically redirect server port on home network using UPnP',
-        'server_upnp': True
+        'server_upnp': True,
+        '_comment_check_update_minutes': 'Check for server updates frequency, use zero to disable',
+        'check_update_minutes': 360
     }
 
 
@@ -126,6 +128,7 @@ class Deployment:
             raise FileNotFoundError('Hytale game server not installed. Please Install Runtime first.')
         cmdargs, jreargs, svrargs = await self._load_args()
         self._map_ports(cmdargs)
+        uck.set_check_update_minutes(self._context, self, util.get('check_update_minutes', cmdargs))
         server = proch.ServerProcess(self._context, self._java_exe)
         server.use_cwd(self._world_dir).use_out_decoder(linenc.PtyLineDecoder())
         server.append_arg('-XX:AOTCache=' + self._server_dir + '/Server/HytaleServer.aot')

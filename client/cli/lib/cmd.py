@@ -224,6 +224,18 @@ class CommandProcessor:
             return False
         return True
 
+    def _exit_no_update(self) -> bool:
+        result = self._connection.get(self._instance_path('/updatecheck'))
+        result = result['result'] if result else None
+        if result is None:
+            logging.error('Unable to determine if update required, server must be running')
+            return False
+        if result:
+            logging.info(util.OUT + 'exit-no-update found update required')
+        else:
+            logging.info(util.OUT + 'exit-no-update found no update required, no more commands will be processed')
+        return result
+
     # noinspection PyMethodMayBeStatic
     def _sleep(self, argument: str) -> bool:
         seconds = util.to_int(argument, 0)

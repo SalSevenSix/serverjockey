@@ -5,7 +5,7 @@ from core.metrics import mtxinstance
 from core.system import svrabc
 from core.proc import proch
 from core.common import spstopper, svrhelpers
-from servers.hytale import deployment as dep, messaging as msg, console as con
+from servers.hytale import deployment as dep, messaging as msg, console as con, updatecheck as uck
 
 # https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual
 
@@ -22,10 +22,12 @@ class Server(svrabc.Server):
         await mtxinstance.initialise(self._context, error_filter=msg.CONSOLE_LOG_ERROR_FILTER)
         await msg.initialise(self._context)
         await self._deployment.initialise()
+        uck.initialise(self._context)
 
     def resources(self, resource: httprsc.WebResource):
         self._deployment.resources(resource)
         con.resources(self._context, resource)
+        uck.resources(self._context, resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)
         builder.put_server().put_players().put_log(msg.CONSOLE_LOG_FILTER).put_subs()
 
