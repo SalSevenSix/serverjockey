@@ -15,6 +15,6 @@
   "dependencies": {
     "common": "file:../common",
     "discord.js": "^14.25.1",
-    "openai": "^6.17.0"
+    "openai": "^6.22.0"
   }
 }

@@ -1,16 +1,11 @@
-import socket
-import asyncio
-import aiohttp
 # ALLOW core.* hytale.messaging
-from core.util import gc, util, tasks, io, aggtrf, pack, shellutil, funcutil, objconv, linenc
-from core.msg import msgabc, msglog, msgpipe
+from core.util import gc, util, tasks, io, aggtrf, objconv, linenc
+from core.msg import msgabc, msglog
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
 from core.proc import proch
 from core.common import svrhelpers, portmapper
-from servers.hytale import messaging as msg, updatecheck as uck
-
-LAUNCHER_EXE = 'hytale-downloader-linux-amd64'
+from servers.hytale import messaging as msg, updatecheck as uck, installer as ins
 
 
 def _default_cmdargs() -> dict:
@@ -76,7 +71,6 @@ class Deployment:
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
         self._runtime_meta = self._runtime_dir + '/versions.json'
-        self._launcher_exe = self._runtime_dir + '/' + LAUNCHER_EXE
         self._java_dir = self._runtime_dir + '/java'
         self._java_exe = self._java_dir + '/bin/java'
         self._server_dir = self._runtime_dir + '/server'
@@ -168,114 +162,19 @@ class Deployment:
         portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
 
     async def install_runtime(self, version: str):
-        logger, meta = msglog.LogPublisher(self._context, self), {}
+        logger = msglog.LogPublisher(self._context, self)
+        installer = ins.Installer(self._context, logger, self._tempdir, self._runtime_dir, self._runtime_meta,
+                                  self._server_dir, self._server_jar, self._java_dir, self._java_exe)
         try:
             self._context.post(self, msg.DEPLOYMENT_START)
             logger.log('START Install')
-            if await io.file_exists(self._runtime_meta):
-                meta = objconv.json_to_dict(await io.read_file(self._runtime_meta))
-                await io.delete_file(self._runtime_meta)
-            else:
-                await io.delete_directory(self._runtime_dir)
-                await io.create_directory(self._runtime_dir)
-                meta['java'] = await self._install_java(logger)
-                meta['launcher'] = await self._install_launcher(logger)
-            server_package = await self._download_server(logger, version)
-            meta['server'] = await self._install_server(logger, server_package)
-            await io.write_file(self._runtime_meta, objconv.obj_to_json(meta, True))
+            await installer.install_runtime(version)
             await self.build_world()
             logger.log('END Install')
         except Exception as e:
             logger.log(repr(e))
         finally:
             self._context.post(self, msg.DEPLOYMENT_DONE)
-
-    async def _install_java(self, logger) -> str:
-        url = 'https://api.adoptium.net/v3/binary/latest/25/ga/linux/x64/jdk/hotspot/normal/eclipse?project=jdk'
-        logger.log(f'DOWNLOADING Java ({url})')
-        package = self._runtime_dir + '/java.tar.gz'
-        await self._download_url(url, package)
-        logger.log('UNPACKING Java')
-        await pack.unpack_targz(package, self._runtime_dir)
-        unpacked = await io.directory_list(self._runtime_dir)
-        unpacked = util.single([e['name'] for e in unpacked if e['name'].startswith('jdk')])
-        assert unpacked
-        await io.rename_path(self._runtime_dir + '/' + unpacked, self._java_dir)
-        await io.delete_file(package)
-        version = await shellutil.run_executable(self._java_exe, '--version')
-        assert version
-        logger.log('INSTALLED Java (' + util.single(version.split('\n')) + ')')
-        return version
-
-    async def _install_launcher(self, logger) -> str:
-        url = 'https://downloader.hytale.com/hytale-downloader.zip'
-        logger.log(f'DOWNLOADING HytaleLauncher ({url})')
-        package = self._runtime_dir + '/launcher.zip'
-        await self._download_url(url, package)
-        logger.log('UNPACKING HytaleLauncher')
-        unpacked = self._runtime_dir + '/launcher'
-        await io.create_directory(unpacked)
-        await pack.unpack_archive(package, unpacked)
-        await io.move_path(unpacked + '/' + LAUNCHER_EXE, self._launcher_exe)
-        await io.chmod(self._launcher_exe, 0o744)
-        await io.delete_directory(unpacked)
-        await io.delete_file(package)
-        version = await shellutil.run_executable(self._launcher_exe, '-version')
-        assert version
-        logger.log(f'INSTALLED HytaleLauncher ({version})')
-        return version
-
-    async def _download_server(self, logger, version: str) -> str:
-        logger.log('DOWNLOADING HytaleServer (' + (version.strip() if version else 'release') + ')')
-        stderr, stdout, package = None, None, self._server_dir + '.zip'
-        await io.delete_file(package)
-        args = ['-download-path', package]
-        if version:
-            args.append('-patchline')
-            args.append(version.strip())
-        try:
-            logger.log('RUNNING ' + LAUNCHER_EXE + ' ' + ' '.join(args))
-            mailer, source, name, decoder = logger.mailer(), logger.source(), logger.name(), linenc.PtyLineDecoder()
-            process = await asyncio.create_subprocess_exec(
-                self._launcher_exe, *args, env=self._context.env(), cwd=self._runtime_dir,
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stderr = msgpipe.PipeOutLineProducer(mailer, source, name, process.stderr, decoder)
-            stdout = msgpipe.PipeOutLineProducer(mailer, source, name, process.stdout, decoder)
-            rc = await process.wait()
-            if rc != 0:
-                raise Exception(f'HytaleServer download failed (exit code {rc})')
-            logger.log('DOWNLOADED HytaleServer')
-            return package
-        finally:
-            await funcutil.silently_cleanup(stdout)
-            await funcutil.silently_cleanup(stderr)
-
-    async def _install_server(self, logger, package: str) -> str:
-        logger.log('UNPACKING HytaleServer')
-        await io.delete_directory(self._server_dir)
-        await io.create_directory(self._server_dir)
-        await pack.unpack_archive(package, self._server_dir)
-        await io.delete_file(package)
-        version = await shellutil.run_executable(self._java_exe, '-jar', self._server_jar, '--version')
-        assert version
-        logger.log(f'INSTALLED {version}')
-        return version
-
-    async def _download_url(self, url: str, path: str):
-        connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-                                 ' AppleWebKit/537.36 (KHTML, like Gecko)'
-                                 ' Chrome/120.0.0.0 Safari/537.36'}
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with session.get(url, headers=headers, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
-                assert response.status == 200
-                tracker, content_length = io.NullBytesTracker(), response.headers.get('Content-Length')
-                if content_length:
-                    content_length = int(content_length)
-                    if content_length > 52428800:
-                        tracker = msglog.PercentTracker(self._context, content_length, prefix='downloaded')
-                await io.stream_write_file(
-                    path, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, self._tempdir, tracker)
 
 
 class _InstallRuntimeHandler(httpabc.PostHandler):
