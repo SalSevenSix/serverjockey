@@ -1,8 +1,10 @@
 # ALLOW core.* hytale.messaging
 from core.util import gc, util, tasks, io, aggtrf, objconv, linenc
 from core.msg import msgabc, msglog
+from core.msgc import sc
 from core.context import contextsvc
 from core.http import httpabc, httprsc, httpext, httpsubs
+from core.system import svrsvc
 from core.proc import proch
 from core.common import svrhelpers, portmapper
 from servers.hytale import messaging as msg, updatecheck as uck, installer as ins
@@ -63,6 +65,11 @@ def _default_cmdargs() -> dict:
     }
 
 
+def _default_mods() -> dict:
+    services = [dict(type='modtale-v1', endpoint='https://api.modtale.net', mods=['', '', ''])]
+    return {'enabled': True, 'ignoreServerVersion': True, 'services': services}
+
+
 class Deployment:
 
     def __init__(self, context: contextsvc.Context):
@@ -83,6 +90,10 @@ class Deployment:
         self._worlds_dir = self._save_dir + '/worlds'
         self._map_dir = self._worlds_dir + '/default'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
+        self._mods_file = self._world_dir + '/mods.json'
+        self._installer = ins.Installer(
+            context, self._tempdir, self._runtime_dir, self._runtime_meta, self._server_dir, self._server_jar,
+            self._java_dir, self._java_exe, self._mods_dir, self._mods_file)
 
     async def initialise(self):
         helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
@@ -106,7 +117,7 @@ class Deployment:
         builder.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_ls_autobackups), 'r')
         builder.pop()
         builder.put_config(dict(
-            cmdargs=self._cmdargs_file, settings=self._world_dir + '/config.json',
+            cmdargs=self._cmdargs_file, mods=self._mods_file, settings=self._world_dir + '/config.json',
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
             whitelist=self._world_dir + '/whitelist.json', memories=self._save_dir + '/memories.json',
             warps=self._save_dir + '/warps.json'))
@@ -120,7 +131,9 @@ class Deployment:
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._server_jar):
             raise FileNotFoundError('Hytale game server not installed. Please Install Runtime first.')
+        svrsvc.ServerStatus.notify_state(self._context, self, sc.START)  # pushing early because slow pre-start tasks
         cmdargs, jreargs, svrargs = await self._load_args()
+        await self._installer.install_mods()
         self._map_ports(cmdargs)
         uck.set_check_update_minutes(self._context, self, util.get('check_update_minutes', cmdargs))
         server = proch.ServerProcess(self._context, self._java_exe)
@@ -137,8 +150,11 @@ class Deployment:
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._mods_dir,
                                   self._autobackups_dir, self._save_dir, self._worlds_dir)
-        if await io.directory_exists(self._runtime_dir):
-            await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
+        if not await io.directory_exists(self._runtime_dir):
+            return
+        await io.keyfill_json_file(self._cmdargs_file, _default_cmdargs())
+        if not await io.file_exists(self._mods_file):
+            await io.write_file(self._mods_file, objconv.obj_to_json(_default_mods(), pretty=True))
 
     async def _load_args(self) -> tuple:
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
@@ -162,17 +178,14 @@ class Deployment:
         portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
 
     async def install_runtime(self, version: str):
-        logger = msglog.LogPublisher(self._context, self)
-        installer = ins.Installer(self._context, logger, self._tempdir, self._runtime_dir, self._runtime_meta,
-                                  self._server_dir, self._server_jar, self._java_dir, self._java_exe)
         try:
             self._context.post(self, msg.DEPLOYMENT_START)
-            logger.log('START Install')
-            await installer.install_runtime(version)
+            self._installer.log('START Install')
+            await self._installer.install_runtime(version)
             await self.build_world()
-            logger.log('END Install')
+            self._installer.log('END Install')
         except Exception as e:
-            logger.log(repr(e))
+            self._installer.log(repr(e))
         finally:
             self._context.post(self, msg.DEPLOYMENT_DONE)
 

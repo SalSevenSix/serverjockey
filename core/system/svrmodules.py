@@ -10,12 +10,12 @@ _MODULE_TESTSERVER, _MODULE_SERVERLINK = 'testserver', 'serverlink'
 _MODULE_DATA = dict(
     projectzomboid='Project Zomboid',
     factorio='Factorio',
+    hytale='Hytale',
     sevendaystodie='7 Days to Die',
     unturned='Unturned',
     starbound='Starbound',
-    palworld='Palworld',
     valheim='Valheim',
-    hytale='Hytale',
+    palworld='Palworld',
     csii='Counter Strike 2',
     teamspeak='TeamSpeak 3')
 

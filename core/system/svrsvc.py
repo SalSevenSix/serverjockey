@@ -70,8 +70,10 @@ class ServerService(msgabc.AbcSubscriber):
                 try:
                     await self._server.run()
                 except Exception as e:
-                    ServerStatus.notify_status(self._context, self, sc.EXCEPTION, dict(error=str(e)))
-                    logging.warning('%s instance %s [%s]', sc.EXCEPTION, identity, repr(e))
+                    error_repr, error_str = repr(e), str(e)
+                    error_dict = dict(error=error_str if error_str else error_repr)
+                    ServerStatus.notify_status(self._context, self, sc.EXCEPTION, error_dict)
+                    logging.warning('%s instance %s [%s]', sc.EXCEPTION, identity, error_repr)
                 finally:
                     self._running = False
                     controller.check_uptime(dtutil.now_millis() - start)
