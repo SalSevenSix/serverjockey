@@ -16,7 +16,7 @@
   <p>
     <ExtLink href="https://hytale.com" notranslate>Hytale</ExtLink>
     is a voxel based open sandbox game heavily inspired by Minecraft, but with a bigger focus on RPG style adventure.
-    This guide will show you how to install, configure and run an Hytale server using this Webapp.
+    This guide will show you how to install, configure and run a Hytale server using this Webapp.
   </p>
   <p>
     Go to the <a href="#additionalInformation" use:scrollto={'#additionalInformation'}>additional information</a>
@@ -62,15 +62,15 @@
   <p>
     In addition to automated update checks. The
     <a href={surl('/guides/cli')}>Serverjockey CLI</a>
-    has a command that can be used to check if the server requires as update.
-    The CLI command sequence example below shows how it can be used to check and update the server if needed.
+    has a command that can be used to check if the server requires an update.
+    The example CLI command sequence below shows how it can be used to check and update the server if needed.
   </p>
   <ol>
     <li>Select the instance called  <span class="is-family-monospace notranslate">mytale</span></li>
     <li>If the server is not running, then stop processing commands and exit</li>
     <li>If the server version is the latest, then stop processing commands and exit</li>
     <li>Stop the server then wait 10 seconds for that to happen</li>
-    <li>Backup both the game world save and the current installed server</li>
+    <li>Backup both the game world save and the installed server</li>
     <li>Install the latest version of the server</li>
     <li>Start up the server</li>
   </ol>

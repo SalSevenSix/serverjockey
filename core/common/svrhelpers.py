@@ -222,8 +222,9 @@ class ConsoleResourceBuilder:
     def put_send_rcon(self) -> ConsoleResourceBuilder:
         return self.put('send', rconsvc.RconHandler(self._mailer), 's')
 
-    def put_send_pipein(self) -> ConsoleResourceBuilder:
-        return self.put('{command}', prcext.ConsoleCommandHandler(self._mailer, _SEND_COMMAND), 's')
+    def put_send_pipein(self, commands: cmdutil.CommandLines = None) -> ConsoleResourceBuilder:
+        return self.put('{command}', prcext.ConsoleCommandHandler(
+            self._mailer, commands if commands else _SEND_COMMAND), 's')
 
     def put_say_pipein(self, formatter: prcext.SayFormatter | str) -> ConsoleResourceBuilder:
         return self.put('say', prcext.SayHandler(self._mailer, formatter), 's')
