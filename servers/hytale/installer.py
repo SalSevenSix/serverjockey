@@ -201,5 +201,4 @@ async def _download_url(context, tempdir, session, url: str, path: str):
             content_length = int(content_length)
             if content_length > 52428800:
                 tracker = msglog.PercentTracker(context, content_length, prefix='downloaded')
-        await io.stream_write_file(
-            path, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, tempdir, tracker)
+        await io.stream_write_file(path, io.WrapReader(response.content), io.DEFAULT_CHUNK_SIZE, tempdir, tracker)

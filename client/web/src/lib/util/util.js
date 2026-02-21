@@ -1,6 +1,6 @@
 import { isString } from 'common/util/util';
 
-const textExtensions = ['txt', 'text', 'log', 'json', 'ini'];
+const textExtensions = ['txt', 'text', 'log', 'json', 'yml', 'yaml', 'toml', 'ini'];
 const stampExtRegex = /^[0-9_-]+$/;
 
 export function guessTextFile(filename) {

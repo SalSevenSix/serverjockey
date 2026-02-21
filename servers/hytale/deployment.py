@@ -9,6 +9,9 @@ from core.proc import proch
 from core.common import svrhelpers, portmapper
 from servers.hytale import messaging as msg, updatecheck as uck, installer as ins
 
+_EXT_MOD_ARCHIVE = 'jar', 'zip'
+_EXT_MOD_CONFIG = 'json', 'toml', 'yaml', 'yml'
+
 
 def _default_cmdargs() -> dict:
     return {
@@ -220,11 +223,15 @@ def _ls_wconfig(entry) -> bool:
 
 def _ls_modfile(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
-    if ftype == 'link' or not fname:
+    if ftype == 'link' or not fname:  # ignore
         return False
-    if ftype == 'directory':
+    if ftype == 'directory':  # allow drilldown into mod config dirs
         return True
-    return fext == 'jar' or fext == 'zip' or fext.startswith('json')
+    if fext in _EXT_MOD_ARCHIVE:  # plugin and mod archives
+        return True
+    if fext in _EXT_MOD_CONFIG or fext.startswith(_EXT_MOD_CONFIG[0]):  # plugin configs
+        return True
+    return False
 
 
 def _ls_autobackups(entry) -> bool:
