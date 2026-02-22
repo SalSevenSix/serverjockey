@@ -110,7 +110,7 @@
 <div class="content" id="createBot">
   <p><span class="step-title"></span>
     With a Discord server ready to use, it&#39;s now time to setup the Discord bot. To begin, open the
-    <ExtLink href="https://discord.com/developers" wrap>Discord Developer Portal</ExtLink>
+    <ExtLink href="https://discord.com/developers/applications" wrap>Discord Developer Portal</ExtLink>
     then click the
     <span class="has-text-weight-bold">New Application</span>
     button.
@@ -184,11 +184,11 @@
     <span class="has-text-weight-bold">Save Changes</span>
     button.
   </p>
-  <figure class="image max-1024">
+  <figure class="image max-1028">
     <img src={surl('/assets/guides/discord/setup/make_bot_private.png')}
          alt="Make Bot Private" loading="lazy" />
   </figure>
-  <figure class="image max-1024">
+  <figure class="image max-1028">
     <img src={surl('/assets/guides/discord/setup/allow_receive_messages.png')}
          alt="Allow Receive Messages" loading="lazy" />
   </figure>
@@ -215,11 +215,9 @@
   <p><span class="step-title"></span>
     Scroll down to
     <span class="has-text-weight-bold">BOT PERMISSIONS</span>,
-    then check all the checkboxes as shown in the screenshot below. Then click the
-    <span class="has-text-weight-bold">Copy</span>
-    button to copy the generated invite URL.
+    then check all the checkboxes as shown in the screenshot below.
   </p>
-  <figure class="image max-860">
+  <figure class="image max-900">
     <img src={surl('/assets/guides/discord/setup/bot_invite_perms.png')}
          alt="Choose Bot Perms" loading="lazy" />
   </figure>
@@ -227,8 +225,14 @@
 
 <div class="content">
   <p><span class="step-title"></span>
-    Open a new tab in the browser. Paste the URL into the address bar then hit Enter key.
+    Click the copy button for the
+    <span class="has-text-weight-bold">Generated URL</span>.
+    Then open a new browser tab and paste the URL into the address bar, then hit Enter key.
   </p>
+  <figure class="image max-1024">
+    <img src={surl('/assets/guides/discord/setup/bot_copy_url.png')}
+         alt="Copy Invite" loading="lazy" />
+  </figure>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/bot_invite_url.png')}
          alt="Invite Bot" loading="lazy" />
@@ -244,7 +248,7 @@
     button.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/setup/bot_invite_choose_server.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_choose_server.jpg')}
          alt="Choose Server for Bot" loading="lazy" />
   </figure>
 </div>
@@ -256,7 +260,7 @@
     button to complete the bot invite.
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/setup/bot_invite_authorize.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_authorize.jpg')}
          alt="Authorise Bot" loading="lazy" />
   </figure>
 </div>
@@ -266,7 +270,7 @@
     Your new bot has now joined your Discord server!
   </p>
   <figure class="image max-1024">
-    <img src={surl('/assets/guides/discord/setup/bot_invite_authorized.png')}
+    <img src={surl('/assets/guides/discord/setup/bot_invite_authorized.jpg')}
          alt="Bot Authorised" loading="lazy" />
   </figure>
 </div>
@@ -537,7 +541,7 @@
 
 
 <style>
-  figure.max-860 img {
+  figure.max-900 img {
     max-width: 860px;
   }
 
