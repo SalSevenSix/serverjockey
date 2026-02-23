@@ -10,8 +10,8 @@ export const { status, server, auto, log, getconfig, setconfig, players, send, s
 export const help = helptext.newServerHelpBuilder()
   .title('HYTALE COMMANDS')
   .addServer().addPlayers().add([
-    'player "{name}" add-group {group}    : Add player to group',
-    'player "{name}" remove-group {group} : Remove player from group'])
+    'player "{name}" group-true {group}  : Add player to group',
+    'player "{name}" group-false {group} : Remove player from group'])
   .addSay().addChat().addSend().addAliasme().addAlias()
   .addReward().addTrigger().addActivity().addChatlog()
   .next()
@@ -22,8 +22,8 @@ export function player({ httptool, aliases, message, data }) {
   if (data.length < 3) return msgutil.reactUnknown(message);
   const cmd = data[1];
   let url = '/console/perm/players/' + cutil.urlSafeB64encode(aliases.resolveName(data[0]));
-  if (cmd === 'add-group') { url += '/groups/add'; }
-  else if (cmd === 'remove-group') { url += '/groups/remove'; }
+  if (cmd === 'group-true') { url += '/groups/add'; }
+  else if (cmd === 'group-false') { url += '/groups/remove'; }
   else { return msgutil.reactUnknown(message); }
   const body = { group: data[2] };
   httptool.doPost(url, body);
