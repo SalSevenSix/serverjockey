@@ -13,6 +13,7 @@ CONSOLE_LOG_FILTER = msgftr.Or(mc.ServerProcess.FILTER_ALL_LINES, msglog.LogPubl
 CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.DataMatches(r'^\[.*(ERROR|SEVERE)\].*'))
 UPDATE_REQUIRED = 'messaging.UPDATE_REQUIRED'
 UPDATE_REQUIRED_FILTER = msgftr.NameIs(UPDATE_REQUIRED)
+USER_UUID = 'messaging.USER_UUID'
 
 
 async def initialise(context: contextsvc.Context):
@@ -49,13 +50,15 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-# [2026/01/24 08:54:05   INFO]   [World|default] Player 'SalSevenSix' joined world 'default' at location Vector3d{x=143.
+# [2026/02/22 15:51:38   INFO]   [World|default] Player 'SalSevenSix' joined world 'default' at location Vector3d{x=-926
+#   .6228637695312, y=133.45010375976562, z=730.14306640625} (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 # [2026/01/24 08:55:01   INFO]   [Hytale] SalSevenSix: Hello everyone
 # [2026/02/06 15:22:45   INFO]   [Universe|P] Removing player 'SalSevenSix' (dd8d4c6b-64e9-4f49-aa45-387f7450f5e2)
 # [2026/01/24 08:55:07   INFO]   [PlayerSystems] Removing player 'SalSevenSix (SalSevenSix)' from world 'default' (dd8d4
 # [2026/02/07 07:21:09   INFO]   [Gravestones|P] [Gravestones] Created for SalSevenSix at (1322, 119, -83)
 class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    LOGIN_FILTER = msgftr.DataMatches(r".*INFO\]\s*\[World\|default\] Player '(.*?)' joined world 'default'.*")
+    LOGIN_FILTER = msgftr.DataMatches(
+        r".*INFO\]\s*\[World\|default\] Player '(.*?)' joined world 'default'.*\((.*?)\)$")
     CHAT_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[Hytale\] (.*?): (.*?)$')
     LOGOUT_FILTER = msgftr.DataMatches(r".*INFO\]\s*\[Universe.*\] Removing player '(.*?)' \(.*\)$")
     DEATH_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[Gravestones.*\].* Created for (.*?) at \((.*?)\)$')
@@ -77,10 +80,12 @@ class _PlayerEventSubscriber(msgabc.AbcSubscriber):
             if name and name in self._player_names:
                 playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
         elif _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            name = _PlayerEventSubscriber.LOGIN_FILTER.find_one(message.data())
+            name, uuid = util.fill(_PlayerEventSubscriber.LOGIN_FILTER.find_all(message.data()), 2)
             if name and name not in self._player_names:
                 self._player_names.append(name)
                 playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
+                if uuid:
+                    self._mailer.post(self, USER_UUID, (uuid, name))
         elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
             name = _PlayerEventSubscriber.LOGOUT_FILTER.find_one(message.data())
             if name and name in self._player_names:

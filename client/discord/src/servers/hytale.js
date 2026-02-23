@@ -1,3 +1,5 @@
+import * as cutil from 'common/util/util';
+import * as msgutil from '../util/msgutil.js';
 import * as helptext from '../helptext.js';
 import * as commons from '../commons.js';
 
@@ -7,8 +9,22 @@ export const { status, server, auto, log, getconfig, setconfig, players, send, s
 
 export const help = helptext.newServerHelpBuilder()
   .title('HYTALE COMMANDS')
-  .addServer().addPlayers().addSay().addChat().addSend().addAliasme()
-  .addAlias().addReward().addTrigger().addActivity().addChatlog()
+  .addServer().addPlayers().add([
+    'player "{name}" add-group {group}    : Add player to group',
+    'player "{name}" remove-group {group} : Remove player from group'])
+  .addSay().addChat().addSend().addAliasme().addAlias()
+  .addReward().addTrigger().addActivity().addChatlog()
   .next()
   .addConfig(['cmdargs', 'Mods', 'Settings', 'Permissions', 'Whitelist', 'Bans', 'Memories', 'Warps'])
   .build();
+
+export function player({ httptool, aliases, message, data }) {
+  if (data.length < 3) return msgutil.reactUnknown(message);
+  const cmd = data[1];
+  let url = '/console/perm/players/' + cutil.urlSafeB64encode(aliases.resolveName(data[0]));
+  if (cmd === 'add-group') { url += '/groups/add'; }
+  else if (cmd === 'remove-group') { url += '/groups/remove'; }
+  else { return msgutil.reactUnknown(message); }
+  const body = { group: data[2] };
+  httptool.doPost(url, body);
+}

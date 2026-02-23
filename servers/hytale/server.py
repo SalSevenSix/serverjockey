@@ -16,17 +16,18 @@ class Server(svrabc.Server):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
         self._stopper = spstopper.ServerProcessStopper(context, 10.0, 'stop')
-        self._deployment = dep.Deployment(context)
+        self._console, self._deployment = con.Console(context), dep.Deployment(context)
 
     async def initialise(self):
         await mtxinstance.initialise(self._context, error_filter=msg.CONSOLE_LOG_ERROR_FILTER)
         await msg.initialise(self._context)
-        await self._deployment.initialise()
+        self._console.initialise()
         uck.initialise(self._context)
+        await self._deployment.initialise()
 
     def resources(self, resource: httprsc.WebResource):
         self._deployment.resources(resource)
-        con.resources(self._context, resource)
+        self._console.resources(resource)
         uck.resources(self._context, resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)
         builder.put_server().put_players().put_log(msg.CONSOLE_LOG_FILTER).put_subs()

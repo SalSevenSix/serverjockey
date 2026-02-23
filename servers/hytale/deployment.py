@@ -1,3 +1,4 @@
+import logging
 # ALLOW core.* hytale.messaging
 from core.util import gc, util, tasks, io, aggtrf, objconv, linenc
 from core.msg import msgabc, msglog
@@ -101,6 +102,7 @@ class Deployment:
     async def initialise(self):
         helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
         helper.init_ports().init_archiving(self._tempdir).done()
+        tasks.task_fork(self._load_user_uuids(), 'hytale.load_user_uuids()')
 
     def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
@@ -179,6 +181,23 @@ class Deployment:
         if isinstance(port, str):
             port = int(util.lchop(util.lchop(port, '/'), ':'))
         portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
+
+    async def _load_user_uuids(self):
+        players_dir = self._save_dir + '/players'
+        try:
+            if not await io.directory_exists(players_dir):
+                return
+            players = await io.directory_list(players_dir)
+            players = [e['name'] for e in players if util.fext(e['name']) == 'json']
+            for player in players:
+                name = objconv.json_to_dict(await io.read_file(players_dir + '/' + player))
+                name = util.get('Text', util.get('Nameplate', util.get('Components', name)))
+                if name:
+                    self._context.post(self, msg.USER_UUID, (player[0:-5], name))
+                else:
+                    logging.warning('hytale.load_user_uuids(%s) failed processing file %s', players_dir, player)
+        except Exception as e:
+            logging.error('hytale.load_user_uuids(%s) failed %s', players_dir, repr(e))
 
     async def install_runtime(self, version: str):
         try:
