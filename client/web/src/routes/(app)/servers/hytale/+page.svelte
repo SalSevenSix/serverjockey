@@ -1,5 +1,4 @@
 <script>
-  import { surl } from '$lib/util/sjgmsapi';
   import { worldActions } from './hytale.js';
   import Collapsible from '$lib/widget/Collapsible.svelte';
   import ServerStatusStore from '$lib/instance/ServerStatusStore.svelte';
@@ -19,6 +18,7 @@
   import Autobackups from '$lib/instance/Autobackups.svelte';
   import WorldConfig from './WorldConfig.svelte';
   import Modfiles from './Modfiles.svelte';
+  import Modconfigs from './Modconfigs.svelte';
 </script>
 
 
@@ -53,17 +53,14 @@
         <ConfigFile name="Memories" path="/config/memories" />
         <ConfigFile name="Warps" path="/config/warps" />
       </Collapsible>
-      <Collapsible icon="fa-file-fragment" title="Universe Config">
+      <Collapsible icon="fa-file-word" title="Universe Config">
         <WorldConfig />
+      </Collapsible>
+      <Collapsible icon="fa-file-excel" title="Mod Config">
+        <Modconfigs />
       </Collapsible>
       <Collapsible icon="fa-puzzle-piece" title="Mod Files">
         <Modfiles />
-        <div class="block"></div>
-        <ConfigFile name="Auto Download Mods" path="/config/mods">
-          <p>Configure mod list to automatically download latest version when server starts. See the
-             <a href={surl('/guides/servers/hytale#automaticModDownloads')}>Hytale help page</a>
-             for more information.</p>
-        </ConfigFile>
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

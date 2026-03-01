@@ -111,7 +111,7 @@ class Deployment:
         builder.put_installer(_InstallRuntimeHandler(self, self._context))
         builder.put_wipes(self._runtime_dir, dict(
             all=self._world_dir, logs=self._logs_dir, autobackups=self._autobackups_dir,
-            save=dict(path=self._map_dir, ls_filter=_ls_mapdata)))
+            save=dict(path=self._map_dir, ls_filter=_ls_onlydir)))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.put('restore-autobackup', httpext.UnpackerHandler(
             self._context, self._autobackups_dir, self._save_dir, to_root=True), 'r')
@@ -126,12 +126,17 @@ class Deployment:
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
             whitelist=self._world_dir + '/whitelist.json', memories=self._save_dir + '/memories.json',
             warps=self._save_dir + '/warps.json'))
-        builder.psh('universe', httpext.FileSystemHandler(self._worlds_dir, ls_filter=_ls_uroot))
+        builder.psh('universe', httpext.FileSystemHandler(self._worlds_dir, ls_filter=_ls_onlydir))
         builder.put('*{path}', httpext.FileSystemHandler(self._worlds_dir, 'path', ls_filter=_ls_wconfig), 'm')
         builder.pop()
-        builder.psh('modfiles', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_modfile))
+        builder.psh('mod')
+        builder.psh('files', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_mfile))
         builder.put('*{path}', httpext.FileSystemHandler(
-            self._mods_dir, 'path', ls_filter=_ls_modfile, tempdir=self._tempdir), 'm')
+            self._mods_dir, 'path', ls_filter=_ls_mfile, tempdir=self._tempdir), 'm')
+        builder.pop()
+        builder.psh('configs', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_onlydir))
+        builder.put('*{path}', httpext.FileSystemHandler(
+            self._mods_dir, 'path', ls_filter=_ls_mconfig, tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         if not await io.file_exists(self._server_jar):
@@ -228,11 +233,7 @@ class _InstallRuntimeHandler(httpabc.PostHandler):
         return dict(url=url)
 
 
-def _ls_mapdata(entry) -> bool:
-    return entry['type'] == 'directory'
-
-
-def _ls_uroot(entry) -> bool:
+def _ls_onlydir(entry) -> bool:
     return entry['type'] == 'directory'
 
 
@@ -240,17 +241,16 @@ def _ls_wconfig(entry) -> bool:
     return entry['name'] == 'config.json'
 
 
-def _ls_modfile(entry) -> bool:
+def _ls_mfile(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
-    if ftype == 'link' or not fname:  # ignore
-        return False
-    if ftype == 'directory':  # allow drilldown into mod config dirs
+    return fname and ftype == 'file' and fext in _EXT_MOD_ARCHIVE
+
+
+def _ls_mconfig(entry) -> bool:
+    if _ls_onlydir(entry):
         return True
-    if fext in _EXT_MOD_ARCHIVE:  # plugin and mod archives
-        return True
-    if fext in _EXT_MOD_CONFIG or fext.startswith(_EXT_MOD_CONFIG[0]):  # plugin configs
-        return True
-    return False
+    ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
+    return fname and ftype == 'file' and (fext in _EXT_MOD_CONFIG or fext.startswith(_EXT_MOD_CONFIG[0]))
 
 
 def _ls_autobackups(entry) -> bool:

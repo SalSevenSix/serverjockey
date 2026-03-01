@@ -4,22 +4,22 @@ const textExtensions = ['txt', 'text', 'log', 'json', 'yml', 'yaml', 'toml', 'in
 const stampExtRegex = /^[0-9_-]+$/;
 
 export function guessTextFile(filename) {
-    if (!filename) return false;
-    const parts = filename.split('.');
-    if (parts.length < 2) return false;
-    const extension = parts[parts.length - 1].toLowerCase();
-    if (textExtensions.includes(extension)) return true;
-    const prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
-    if (!prextion) return false;
-    if (!textExtensions.includes(prextion)) return false;
-    if (stampExtRegex.test(extension)) return true;
-    if (extension.startsWith('prev')) return true;
-    if (extension.startsWith('back')) return true;
-    return false;
+  if (!filename) return false;
+  const parts = filename.split('.');
+  if (parts.length < 2) return false;
+  const extension = parts[parts.length - 1].toLowerCase();
+  if (textExtensions.includes(extension)) return true;
+  const prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
+  if (!prextion) return false;
+  if (!textExtensions.includes(prextion)) return false;
+  if (stampExtRegex.test(extension)) return true;
+  if (extension.startsWith('prev')) return true;
+  if (extension.startsWith('back')) return true;
+  return false;
 }
 
 export function fNoop() {
-  // Pass
+  // Noop
 }
 
 export function fTrue() {
