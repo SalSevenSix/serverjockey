@@ -62,33 +62,16 @@ function initialise() {
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  const channelConfig = context.config.EVENT_CHANNELS;
-  const channels = { server: null, login: null, chat: null };
-  Object.keys(channels).forEach(function(channelType) {
-    if (cutil.hasProp(channelConfig, channelType) && channelConfig[channelType]) {
-      channels[channelType] = channelConfig[channelType];
-    }
-  });
-  let promises = [...new Set(Object.values(channels))];
-  promises = promises.filter(function(channelId) { return channelId; });
-  promises = promises.map(function(channelId) {
-    return context.client.channels.fetch(channelId).then(function(channel) { return channel; }).catch(logger.error);
-  });
-  Promise.all(promises).then(function(results) {
-    const channelMap = {};
-    results.forEach(function(channel) {
-      if (channel) { channelMap[channel.id] = channel; }
-    });
-    Object.keys(channels).forEach(function(channelType) {
-      const channelId = channels[channelType];
-      channels[channelType] = null;
-      if (channelId && cutil.hasProp(channelMap, channelId)) {
-        channels[channelType] = channelMap[channelId];
-        logger.info('Publishing ' + channelType + ' events to ' + channels[channelType].name + ' (' + channelId + ')');
-      }
-    });
-    context.instancesService.startup(channels).then(function() { logger.info('ServerLink Bot has STARTED'); });
-  });
+  context.instancesService.startup().then(function() { logger.info('ServerLink Bot has STARTED'); });
+}
+
+function shutdown() {
+  logger.info('Shutdown ServerLink');
+  if (!context.running) return;
+  context.running = false;
+  context.controller.abort();
+  context.client.destroy();
+  logger.info('*** END ServerLink Bot ***');
 }
 
 function handleMessage(message) {
@@ -116,15 +99,6 @@ function handleMessage(message) {
   } else {
     msgutil.reactUnknown(message);
   }
-}
-
-function shutdown() {
-  logger.info('Shutdown ServerLink');
-  if (!context.running) return;
-  context.running = false;
-  context.controller.abort();
-  context.client.destroy();
-  logger.info('*** END ServerLink Bot ***');
 }
 
 export function main() {
