@@ -9,6 +9,7 @@ import * as llm from './util/llm.js';
 import * as http from './util/http.js';
 import * as system from './system.js';
 import * as instances from './instances.js';
+import * as channelsvc from './instances/channelsvc.js';
 
 const context = { running: false };
 
@@ -62,7 +63,12 @@ function initialise() {
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  context.instancesService.startup().then(function() { logger.info('ServerLink Bot has STARTED'); });
+  channelsvc.newSystemChannels(context).then(function(channels) {
+    context.channels = channels;
+    context.instancesService.startup(channels).then(function() {
+      logger.info('ServerLink Bot has STARTED');
+    });
+  });
 }
 
 function shutdown() {
@@ -90,8 +96,8 @@ function handleMessage(message) {
   const instanceData = context.instancesService.getData(instance);
   if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
     args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
-    [args.chatbot, args.aliases, args.rewards, args.triggers] = [
-      instanceData.chatbot, instanceData.aliases, instanceData.rewards, instanceData.triggers];
+    [args.channels, args.chatbot, args.aliases, args.rewards, args.triggers] = [
+      instanceData.channels, instanceData.chatbot, instanceData.aliases, instanceData.rewards, instanceData.triggers];
     instanceData.server[command](args);
   } else if (cutil.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);

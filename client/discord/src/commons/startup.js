@@ -247,12 +247,14 @@ function startServerEvents(context, channels, instance, url, triggerHandler) {
 }
 
 export function startupServerOnly({ context, channels, instance, url, triggers }) {
+  channels = channels.resolve();
   if (!channels.server) return;
   const triggerHandler = newTriggerHandler(context, channels, instance, triggers);
   startServerEvents(context, channels, instance, url, triggerHandler);
 }
 
 export function startupAll({ context, channels, instance, url, triggers, aliases }) {
+  channels = channels.resolve();
   const triggerHandler = channels.server || channels.login
     ? newTriggerHandler(context, channels, instance, triggers) : null;
   if (channels.server) {

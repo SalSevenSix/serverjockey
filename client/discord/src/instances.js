@@ -4,7 +4,6 @@ import * as cutil from 'common/util/util';
 import * as util from './util/util.js';
 import * as logger from './util/logger.js';
 import * as subs from './util/subs.js';
-import * as channelsvc from './instances/channelsvc.js';
 import * as aliassvc from './instances/aliassvc.js';
 import * as rewardsvc from './instances/rewardsvc.js';
 import * as triggersvc from './instances/triggersvc.js';
@@ -33,7 +32,7 @@ export class Service {
     this.#context = context;
   }
 
-  async startup() {
+  async startup(channels) {
     const [self, context] = [this, this.#context];
     const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATADIR + '/current.json'];
     const [modules, instances] = await Promise.all([
@@ -43,15 +42,15 @@ export class Service {
       const currentData = JSON.parse(fs.readFileSync(currentFile));
       if (currentData && cutil.hasProp(instances, currentData.instance)) { this.#current = currentData.instance; }
     }
-    const channels = await channelsvc.fetchDefaultChannels(context);
     for (const [identity, instance] of Object.entries(instances)) {
+      instance.channels = channels.newInstanceChannels(identity).load();
       instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
       instance.aliases = aliassvc.newAliases(context, identity).load();
       instance.rewards = rewardsvc.newRewards(context, identity).load();
       instance.triggers = triggersvc.newTriggers(context, identity).load();
       instance.server = servers[instance.module];
-      instance.server.startup({ context: context, channels: channels, instance: identity, url: instance.url,
-        aliases: instance.aliases, triggers: instance.triggers });
+      instance.server.startup({ context: context, instance: identity, url: instance.url,
+        channels: instance.channels, aliases: instance.aliases, triggers: instance.triggers });
     }
     logger.info('Instances...');
     logger.log(self.getInstancesText().join('\n'));
@@ -61,16 +60,18 @@ export class Service {
         const instance = data.instance;
         logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
         instance.url = baseurl + '/instances/' + identity;
+        instance.channels = channels.newInstanceChannels(identity);
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
         instance.triggers = triggersvc.newTriggers(context, identity);
         instance.server = servers[instance.module];
         instances[identity] = instance;
         instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
-        instance.server.startup({ context: context, channels: channels, instance: identity, url: instance.url,
-          aliases: instance.aliases, triggers: instance.triggers });
+        instance.server.startup({ context: context, instance: identity, url: instance.url,
+          channels: instance.channels, aliases: instance.aliases, triggers: instance.triggers });
       } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {
         logger.info('Event delete instance: ' + identity + ' (' + instances[identity].module + ')');
+        instances[identity].channels.reset().save();
         instances[identity].aliases.reset().save();
         instances[identity].rewards.reset().save();
         instances[identity].triggers.reset().save();
