@@ -8,8 +8,8 @@ import * as msgutil from './util/msgutil.js';
 import * as llm from './util/llm.js';
 import * as http from './util/http.js';
 import * as system from './system.js';
+import * as syschan from './syschan.js';
 import * as instances from './instances.js';
-import * as channelsvc from './instances/channelsvc.js';
 
 const context = { running: false };
 
@@ -63,9 +63,9 @@ function initialise() {
 function startup() {
   context.running = true;
   logger.info('Logged in as ' + context.client.user.tag);
-  channelsvc.newSystemChannels(context).then(function(channels) {
+  syschan.newSystemChannels(context).then(function(channels) {
     context.channels = channels;
-    context.instancesService.startup(channels).then(function() {
+    context.instancesService.startup().then(function() {
       logger.info('ServerLink Bot has STARTED');
     });
   });

@@ -5,14 +5,14 @@ import * as commons from '../commons.js';
 
 export const startup = commons.startupAll;
 export const { status, server, auto, log, getconfig, setconfig, players, send, say, chat,
-  aliasme, alias, reward, trigger, activity, chatlog } = commons;
+  channel, aliasme, alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('HYTALE COMMANDS')
   .addServer().addPlayers().add([
     'player "{name}" group-true {group}  : Add player to group',
     'player "{name}" group-false {group} : Remove player from group'])
-  .addSay().addChat().addSend().addAliasme().addAlias()
+  .addSay().addChat().addSend().addChannel().addAliasme().addAlias()
   .addReward().addTrigger().addActivity().addChatlog()
   .next()
   .addConfig(['cmdargs', 'Mods', 'Settings', 'Permissions', 'Whitelist', 'Bans', 'Memories', 'Warps'])

@@ -78,6 +78,18 @@ const helpDeploymentInstallRuntime = [
   'For Steam installs, use the beta for version.',
   'Console output will be attached as a file.'];
 
+const channelHelp = 'channel              : Channel management, use help for details';
+const helpChannel = [
+  'Channel Management. Configure instance level channels instead of the defaults specified',
+  'in the webapp. The `{id}` can be `#channel` mention or the snowflake. Commands are...', '```',
+  'list           : List all channels for the instance (default command)',
+  'server {id}    : Set the channel to use for server events',
+  'server reset   : Reset the server events channel to use default',
+  'player {id}    : Set the channel to use for player events',
+  'player reset   : Reset the player events channel to use default',
+  'chat {id}      : Set the channel to use for in-game chat',
+  'chat reset     : Reset the in-game chat channel to use default', '```'];
+
 const aliasmeHelp = 'aliasme              : DM self service alias code';
 const helpAliasme = [
   'Request a self service alias code sent by DM.',
@@ -260,6 +272,7 @@ export function newServerHelpBuilder() {
   self.addSay = function() { return self.addHelp(sayHelp, helpSay).add(sayHelp); };
   self.addSend = function() { return self.addHelp(sendHelp, helpSend).add(sendHelp); };
   self.addChat = function() { return self.addHelp(chatHelp, helpChat).add(chatHelp); };
+  self.addChannel = function() { return self.addHelp(channelHelp, helpChannel).add(channelHelp); };
   self.addAliasme = function() { return self.addHelp(aliasmeHelp, helpAliasme).add(aliasmeHelp); };
   self.addAlias = function() { return self.addHelp(aliasHelp, helpAlias).add(aliasHelp); };
   self.addReward = function() { return self.addHelp(rewardHelp, helpReward).add(rewardHelp); };

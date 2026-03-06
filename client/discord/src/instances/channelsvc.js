@@ -1,78 +1,75 @@
-import * as cutil from 'common/util/util';
+import fs from 'fs';
 import * as logger from '../util/logger.js';
 
-function shallowCopyObject(input) {
-  const result = {};
-  for (const [key, value] of Object.entries(input)) {
-    result[key] = value ? value : null;
-  }
-  return result;
-}
-
-function toChannelMap(channels) {
-  const result = {};
-  channels.forEach(function(channel) {
-    if (channel) { result[channel.id] = channel; }
-  });
-  return result;
-}
-
-function newInstanceChannels(systemChannels, instance) {
+/* eslint-disable max-lines-per-function */
+export function newInstanceChannels(context, instance) {
+  const file = context.config.DATADIR + '/' + instance + '.channel.json';
+  const data = { base: [] };
   const self = {};
 
-  self.load = function() { return self; };
+  const load = async function(input) {
+    const [result, channels] = [[], {}];
+    input.forEach(function({ channelType, channelId }) {
+      channels[channelType] = channelId;
+    });
+    const fetched = await context.channels.fetchChannels(channels);
+    Object.keys(fetched).forEach(function(channelType) {
+      const channel = fetched[channelType];
+      if (channel) {
+        result.push({ channelType: channelType, channelId: channel.id, channel: channel });
+        context.channels.logChannel(channelType, channel, instance);
+      }
+    });
+    return result;
+  };
 
-  self.reset = function() { return self; };
+  self.load = function() {
+    fs.exists(file, function(exists) {
+      if (!exists) return;
+      fs.readFile(file, function(error, body) {
+        if (error) return logger.error(error);
+        load(JSON.parse(body)).then(function(result) {
+          data.base = result;
+        });
+      });
+    });
+    return self;
+  };
 
-  self.save = function() { logger.info('Saved ' + instance); };
+  self.reset = function(channelType = null) {
+    data.base = data.base.filter(function(value) {
+      return channelType && channelType != value.channelType;
+    });
+    return self;
+  };
+
+  self.save = function() {
+    const payload = data.base.map(function({ channelType, channelId }) {
+      return { channelType, channelId };
+    });
+    fs.writeFile(file, JSON.stringify(payload), logger.error);
+  };
+
+  self.set = function(channelType, channel) {
+    self.reset(channelType);
+    data.base.push({ channelType: channelType, channelId: channel.id, channel: channel });
+    return self;
+  };
+
+  self.list = function() {
+    return data.base.map(function({ channelType, channelId, channel }) {
+      return { channelType, channelId, channel };
+    });
+  };
 
   self.resolve = function() {
-    return systemChannels.resolve();
-  };
-
-  return self;
-}
-
-export async function newSystemChannels(context) {
-  const [self, cache] = [{}, {}];
-
-  self.fetchChannel = async function(channelId) {
-    let channel = cutil.hasProp(cache, channelId) ? cache[channelId] : null;
-    if (channel) return channel;
-    channel = await context.client.channels.fetch(channelId)
-      .then(function(result) { return result; })
-      .catch(logger.error);
-    if (channel) { cache[channelId] = channel; }
-    return channel;
-  };
-
-  self.fetchChannels = async function(channels) {
-    let results = [...new Set(Object.values(channels))];
-    results = results.filter(function(channelId) { return channelId; });
-    if (results.length === 0) return channels;
-    results = results.map(function(channelId) { return self.fetchChannel(channelId); });
-    results = await Promise.all(results);
-    results = toChannelMap(results);
-    Object.keys(channels).forEach(function(channelType) {
-      const channelId = channels[channelType];
-      channels[channelType] = null;
-      if (channelId && cutil.hasProp(results, channelId)) {
-        channels[channelType] = results[channelId];
-        logger.info('Publishing ' + channelType + ' events to ' + channels[channelType].name + ' (' + channelId + ')');
-      }
+    const channels = context.channels.resolve();
+    data.base.forEach(function({ channelType, channel }) {
+      if (channel) { channels[channelType] = channel; }
     });
     return channels;
   };
 
-  const defaultChannels = await self.fetchChannels(shallowCopyObject(context.config.EVENT_CHANNELS));
-
-  self.resolve = function() {
-    return shallowCopyObject(defaultChannels);
-  };
-
-  self.newInstanceChannels = function(instance) {
-    return newInstanceChannels(self, instance);
-  };
-
   return self;
 }
+/* eslint-enable max-lines-per-function */

@@ -4,6 +4,7 @@ import * as cutil from 'common/util/util';
 import * as util from './util/util.js';
 import * as logger from './util/logger.js';
 import * as subs from './util/subs.js';
+import * as channelsvc from './instances/channelsvc.js';
 import * as aliassvc from './instances/aliassvc.js';
 import * as rewardsvc from './instances/rewardsvc.js';
 import * as triggersvc from './instances/triggersvc.js';
@@ -32,7 +33,7 @@ export class Service {
     this.#context = context;
   }
 
-  async startup(channels) {
+  async startup() {
     const [self, context] = [this, this.#context];
     const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATADIR + '/current.json'];
     const [modules, instances] = await Promise.all([
@@ -43,7 +44,7 @@ export class Service {
       if (currentData && cutil.hasProp(instances, currentData.instance)) { this.#current = currentData.instance; }
     }
     for (const [identity, instance] of Object.entries(instances)) {
-      instance.channels = channels.newInstanceChannels(identity).load();
+      instance.channels = channelsvc.newInstanceChannels(context, identity).load();
       instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
       instance.aliases = aliassvc.newAliases(context, identity).load();
       instance.rewards = rewardsvc.newRewards(context, identity).load();
@@ -60,7 +61,7 @@ export class Service {
         const instance = data.instance;
         logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
         instance.url = baseurl + '/instances/' + identity;
-        instance.channels = channels.newInstanceChannels(identity);
+        instance.channels = channelsvc.newInstanceChannels(context, identity);
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
         instance.triggers = triggersvc.newTriggers(context, identity);
