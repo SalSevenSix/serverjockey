@@ -17,7 +17,7 @@ function subsHelpText() {
   ];
 }
 
-async function handleAdd(triggers, message, data) {
+async function handleAdd(context, triggers, message, data) {
   const args = [];
   for (const arg of util.clobCommandLine(data)) {
     const [key, value] = arg.split('=');
@@ -30,7 +30,7 @@ async function handleAdd(triggers, message, data) {
     } else if (value && key.includes('channel')) {
       const snowflake = util.toSnowflake(value, '<#');
       if (!snowflake) throw new Error('Invalid channel id: ' + value);
-      const channel = await message.guild.channels.fetch(snowflake);
+      const channel = await context.channels.fetch(snowflake, message.guild.channels);
       if (!channel) throw new Error('Channel not found: ' + value);
       args.push(key + '=' + JSON.stringify({ snowflake: snowflake, name: channel.name }));
     } else {
@@ -41,14 +41,14 @@ async function handleAdd(triggers, message, data) {
   else { throw new Error('Failed adding new trigger'); }
 }
 
-export function trigger({ triggers, message, data }) {
+export function trigger({ context, triggers, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, triggers.listText());
   } else if (cmd === 'subs') {
     msgutil.sendText(message, subsHelpText());
   } else if (cmd === 'add' || cmd.startsWith('on-')) {
-    handleAdd(triggers, message, cmd === 'add' ? data.slice(1) : data)
+    handleAdd(context, triggers, message, cmd === 'add' ? data.slice(1) : data)
       .then(function() { msgutil.reactSuccess(message); })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'remove') {

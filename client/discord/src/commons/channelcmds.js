@@ -23,7 +23,7 @@ export function channel({ context, channels, instance, message, data }) {
     } else {  // Action is channel
       const channelId = util.toSnowflake(action, '<#');
       if (!channelId) return msgutil.reactError(message);
-      context.channels.fetchChannel(channelId).then(function(result) {
+      context.channels.fetch(channelId, message.guild.channels).then(function(result) {
         if (!result) return msgutil.reactError(message);
         channels.set(channelType, result).save();
         context.channels.logChannel(channelType, result, instance);

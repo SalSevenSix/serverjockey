@@ -17,6 +17,7 @@ function toChannelMap(channels) {
   return result;
 }
 
+/* eslint-disable max-lines-per-function */
 export async function newSystemChannels(context) {
   const [self, cache] = [{}, {}];
 
@@ -26,10 +27,16 @@ export async function newSystemChannels(context) {
     logger.info('Channel ' + channelType + ' for ' + target + ' is ' + channelName);
   };
 
-  self.fetchChannel = async function(channelId) {
+  self.findGuild = function() {
+    const channels = Object.values(cache);
+    return channels.length > 0 ? channels[0].guild : null;
+  };
+
+  self.fetch = async function(channelId, fetcher = null) {
     let channel = cutil.hasProp(cache, channelId) ? cache[channelId] : null;
     if (channel) return channel;
-    channel = await context.client.channels.fetch(channelId)
+    if (!fetcher) { fetcher = context.client.channels; }
+    channel = await fetcher.fetch(channelId)
       .then(function(result) { return result; })
       .catch(logger.error);
     if (channel) { cache[channelId] = channel; }
@@ -41,7 +48,7 @@ export async function newSystemChannels(context) {
     let results = [...new Set(Object.values(channels))];
     results = results.filter(function(channelId) { return channelId; });
     if (results.length === 0) return channels;
-    results = results.map(function(channelId) { return self.fetchChannel(channelId); });
+    results = results.map(function(channelId) { return self.fetch(channelId); });
     results = await Promise.all(results);
     results = toChannelMap(results);
     Object.keys(channels).forEach(function(channelType) {
@@ -63,3 +70,4 @@ export async function newSystemChannels(context) {
 
   return self;
 }
+/* eslint-enable max-lines-per-function */
