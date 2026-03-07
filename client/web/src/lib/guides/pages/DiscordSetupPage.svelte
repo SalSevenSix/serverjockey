@@ -465,6 +465,13 @@
     <span class="has-text-weight-bold">Create Role</span>
     button.
   </p>
+  <p>
+    <span class="is-italic">Quick reminder here while on the topic of roles in Discord.</span>
+    If a role has permission to add/remove roles for members, it is only allowed for roles
+    <span class="is-italic">below</span>
+    the role itself. So make sure bot role (ServerLink in this case) is above other roles you
+    wish to use in the Rewards and Trigger features.
+  </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/discord/setup/create_role_new.png')}
          alt="Create New Role" loading="lazy" />

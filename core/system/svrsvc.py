@@ -116,13 +116,13 @@ class ServerService(msgabc.AbcSubscriber):
         if not self._running:
             return
         try:
-            await asyncio.wait_for(self._server.stop(), 12.0)
+            await asyncio.wait_for(self._server.stop(), 25.0)
         except asyncio.TimeoutError:
             pass
 
     async def _queue_join(self):
         try:
-            await asyncio.wait_for(self._queue.join(), 32.0)
+            await asyncio.wait_for(self._queue.join(), 25.0)
         except asyncio.TimeoutError:
             util.clear_queue(self._queue)
 

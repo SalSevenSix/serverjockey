@@ -14,7 +14,7 @@ class ServerProcessStopper:
     def __init__(self, mailer: msgabc.MulticastMailer, timeout: float,
                  quit_command: typing.Optional[str] = None,
                  use_rcon: bool = False, use_interrupt: bool = False):
-        assert 1.0 <= timeout <= 30.0
+        assert 1.0 <= timeout <= 20.0
         self._mailer, self._timeout = mailer, timeout
         self._quit_command, self._use_rcon, self._use_interrupt = quit_command, use_rcon, use_interrupt
         self._process_subscriber = _ServerProcessSubscriber()
