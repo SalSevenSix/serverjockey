@@ -1,1 +1,2 @@
-import { main } from './src/main.js'; main();
+import { main } from './src/system/bootstrap.js';
+main();

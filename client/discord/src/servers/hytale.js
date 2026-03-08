@@ -1,7 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as msgutil from '../util/msgutil.js';
-import * as helptext from '../helptext.js';
-import * as commons from '../commons.js';
+import * as helptext from '../system/helptext.js';
+import * as commons from '../system/commons.js';
 
 export const startup = commons.startupAll;
 export const { status, server, auto, log, getconfig, setconfig, players, send, say, chat,

@@ -1,4 +1,4 @@
-import * as help from './util/help.js';
+import * as help from '../util/help.js';
 
 const systemHelpData = help.newHelpBuilder()
   .title('SYSTEM COMMANDS')
@@ -78,7 +78,7 @@ const helpDeploymentInstallRuntime = [
   'For Steam installs, use the beta for version.',
   'Console output will be attached as a file.'];
 
-const channelHelp = 'channel              : Channel management, use help for details';
+const channelHelp = 'channel {cmds ...}   : Channel management, use help for details';
 const helpChannel = [
   'Channel Management. Configure instance level channels instead of the defaults specified',
   'in the webapp. The `{id}` can be `#channel` mention or the snowflake. Commands are...', '```',
@@ -100,9 +100,9 @@ const aliasHelp = 'alias {cmds ...}     : Alias management, use help for details
 const helpAlias = [
   'Alias Management. Link discord users to player names. Commands are...', '```',
   'list              : List all aliases for the instance (default command)',
-  'find {alias}      : Find an alias by @ID, snowflake, discordid, player name',
-  'add {id} "{name}" : Add alias linking id as @ID or snowflake to player name',
-  'remove {id}       : Remove alias by @ID, snowflake, discordid',
+  'find {alias}      : Find an alias by @, snowflake, discordid, player name',
+  'add {id} "{name}" : Add alias linking id as @ or snowflake to player name',
+  'remove {id}       : Remove alias by @, snowflake, discordid',
   '```', 'Examples...',
   'a) add alias linking discord user @RealMrTee to player name "Mr Tee"',
   '`!alias add @RealMrTee "Mr Tee"`',
@@ -119,7 +119,7 @@ const helpReward = [
   'list           : List all rewards for the instance (default command)',
   'add            : Add reward scheme, with following parameters...',
   '  give|take    : Give or take role based on >= or < than threshold',
-  '  {roleid}     : The @ID or snowflake of the reward role',
+  '  {roleid}     : The @ or snowflake of the reward role',
   '  played|top   : Choose to reward based on time played or ranking',
   '  {threshold}  : Threshold to evaluate, negative value to invert',
   '  {range}      : Time range for player activity query',

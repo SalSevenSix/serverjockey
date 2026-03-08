@@ -1,13 +1,13 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
 import * as cutil from 'common/util/util';
-import * as util from './util/util.js';
-import * as logger from './util/logger.js';
-import * as subs from './util/subs.js';
-import * as channelsvc from './instances/channelsvc.js';
-import * as aliassvc from './instances/aliassvc.js';
-import * as rewardsvc from './instances/rewardsvc.js';
-import * as triggersvc from './instances/triggersvc.js';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
+import * as subs from '../util/subs.js';
+import * as channelsvc from '../services/channelsvc.js';
+import * as aliassvc from '../services/aliassvc.js';
+import * as rewardsvc from '../services/rewardsvc.js';
+import * as triggersvc from '../services/triggersvc.js';
 import * as servers from './servers.js';
 
 async function fetchJson(context, url) {

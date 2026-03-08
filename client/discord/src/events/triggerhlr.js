@@ -1,51 +1,8 @@
 import * as cutil from 'common/util/util';
 import { emojis } from '../util/literals.js';
-import * as util from '../util/util.js';
-import * as logger from '../util/logger.js';
-import * as subs from '../util/subs.js';
 
 const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
 const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
-
-function newAliasmeHandler(instance, channels, aliases) {
-  return function(text, name) {
-    if (!name || !text) return;
-    const alias = aliases.aliasmeCheck(name, text);
-    if (!alias) return;
-    aliases.save();
-    cutil.sleep(500).then(function() {
-      const resolved = channels.resolve();
-      const channel = resolved.chat ? resolved.chat : resolved.login;
-      if (!channel) return;
-      channel.send('`' + instance + '` ' + emojis.link + ' ' + alias.name + ' is alias of <@' + alias.snowflake + '>');
-    });
-  };
-}
-
-function newChatbotHandler(context, instance, url) {
-  const data = { chatbot: null };
-
-  fetch(url + '/console/say', util.newPostRequest('application/json', context.config.SERVER_TOKEN))
-    .then(function(response) {
-      if ([200, 204, 400, 409].includes(response.status)) {  // This confirms the Say service is available
-        data.chatbot = context.llmClient.newChatbot(context.instancesService.getModuleName(instance));
-      }
-    })
-    .catch(logger.error);
-
-  return function(input) {
-    if (!data.chatbot || !input || !input.startsWith(context.config.CMD_PREFIX)) return;
-    if (input.trim() === context.config.CMD_PREFIX) return data.chatbot.reset();
-    data.chatbot.request(input.slice(context.config.CMD_PREFIX.length).trim())
-      .then(function(text) {
-        const request = util.newPostRequest('application/json', context.config.SERVER_TOKEN);
-        request.body = JSON.stringify({ player: '@', text: text });
-        fetch(url + '/console/say', request)
-          .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
-          .catch(logger.error);
-      });
-  };
-}
 
 function newEntityLoader(context) {
   const [self, cache] = [{}, {}];
@@ -89,7 +46,7 @@ function newEntityLoader(context) {
 /* eslint-disable max-depth */
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
-function newTriggerHandler(context, channels, instance, triggers) {
+export function newTriggerHandler(context, channels, instance, triggers) {
   const loader = newEntityLoader(context);
   const prelog = '`' + instance + '` ' + emojis.bell + ' ';
 
@@ -209,81 +166,3 @@ function newTriggerHandler(context, channels, instance, triggers) {
 /* eslint-enable max-lines-per-function */
 /* eslint-enable complexity */
 /* eslint-enable max-depth */
-
-function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, aliasmeHandler, chatbotHandler) {
-  new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
-    const [event, text] = [json.event, json.text];
-    if (event === 'CLEAR') {
-      if (triggerHandler) { triggerHandler(event); }
-      return true;
-    }
-    const name = json.player && json.player.name ? json.player.name : null;
-    if (!name) return true;
-    const alias = aliases.findByName(name);
-    const displayName = alias ? name + ' `@' + alias.discordid + '`' : name;
-    const { login: channelLogin, chat: channelChat } = channels.resolve();
-    if (event === 'CHAT') {
-      if (aliasmeHandler) { aliasmeHandler(text, name); }
-      if (chatbotHandler) { chatbotHandler(text); }
-      if (channelChat) { channelChat.send('`' + instance + '` ' + emojis.say + ' ' + displayName + ': ' + text); }
-      return true;
-    }
-    if (channelLogin) {
-      let result = null;
-      if (event === 'LOGIN') { result = emojis.greendot; }
-      else if (event === 'LOGOUT') { result = emojis.reddot; }
-      else if (event === 'DEATH') { result = emojis.skull; }
-      if (!result) return true;
-      result = '`' + instance + '` ' + result + ' ' + displayName;
-      if (text) { result += ' [' + text + ']'; }
-      if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
-      channelLogin.send(result);
-    }
-    if (triggerHandler) { triggerHandler(event, alias ? alias : { name: name }); }
-    return true;
-  });
-}
-
-function startServerEvents(context, channels, instance, url, triggerHandler) {
-  let [state, restartRequired] = [null, false];
-  new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
-    if (!json.state) return true;  // Ignore no state
-    if (!state) { state = json.state; }  // Set initial state
-    if (json.state === 'START') return true;  // Ignore transient state
-    const channelServer = channels.resolve().server;
-    if (!restartRequired && json.details.restart) {
-      if (channelServer) { channelServer.send('`' + instance + '` ' + emojis.restart + ' restart required'); }
-      restartRequired = true;
-      return true;
-    }
-    if (state === json.state) return true;  // Ignore no state change
-    state = json.state;
-    if (state === 'STARTED') { restartRequired = false; }
-    if (channelServer) {
-      let text = '`' + instance + '` ' + emojis.satellite + ' ' + state;
-      if (['READY', 'STARTED', 'STOPPED'].includes(state) && json.sincelaststate) {
-        let seconds = json.sincelaststate / 1000;
-        seconds = seconds.toFixed(seconds < 10.0 ? 1 : 0);
-        text += ' in ' + seconds + ' seconds';
-      } else if (state === 'EXCEPTION' && json.details && json.details.error) {
-        text += ' [' + json.details.error + ']';
-      }
-      channelServer.send(text);
-    }
-    if (triggerHandler) { triggerHandler(state); }
-    return true;
-  });
-}
-
-export function startupServerOnly({ context, channels, instance, url, triggers }) {
-  const triggerHandler = newTriggerHandler(context, channels, instance, triggers);
-  startServerEvents(context, channels, instance, url, triggerHandler);
-}
-
-export function startupAll({ context, channels, instance, url, triggers, aliases }) {
-  const triggerHandler = newTriggerHandler(context, channels, instance, triggers);
-  const aliasmeHandler = newAliasmeHandler(instance, channels, aliases);
-  const chatbotHandler = newChatbotHandler(context, instance, url);
-  startServerEvents(context, channels, instance, url, triggerHandler);
-  startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, aliasmeHandler, chatbotHandler);
-}

@@ -1,5 +1,5 @@
 import * as cutil from 'common/util/util';
-import * as logger from './util/logger.js';
+import * as logger from '../util/logger.js';
 
 function shallowCopy(input) {
   const result = {};
