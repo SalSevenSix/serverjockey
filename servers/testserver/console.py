@@ -4,7 +4,7 @@ from core.http import httprsc
 from core.common import svrhelpers
 
 _HELP_TEXT = '''CONSOLE COMMANDS
-quit, crash, players,
+quit, zombie, crash, players,
 login {player}, logout {player},
 say {player} {text}, kill {player},
 broadcast {message}, error {message},

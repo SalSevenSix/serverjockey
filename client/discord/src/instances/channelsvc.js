@@ -57,9 +57,15 @@ export function newInstanceChannels(context, instance) {
   };
 
   self.list = function() {
-    return data.base.map(function({ channelType, channelId, channel }) {
-      return { channelType, channelId, channel };
+    const result = {};
+    for (const [channelType, channelId] of Object.entries(context.channels.config())) {
+      result[channelType] = { channelType: channelType, channelId: channelId, isDefault: true };
+    }
+    data.base.forEach(function({ channelType, channelId }) {
+      result[channelType].channelId = channelId;
+      result[channelType].isDefault = false;
     });
+    return Object.values(result);
   };
 
   self.resolve = function() {

@@ -124,6 +124,13 @@ def main() -> int:
             size, seconds = int(parts[1]), float(parts[2])
             with multiprocessing.Pool(size) as process:
                 process.map(dummy_load, [seconds] * size)
+        elif line == 'zombie':
+            p('### ERROR: oh noes ima stuck')
+            time.sleep(999)
+        elif line == 'crash':
+            p('### FATAL: shutting down')
+            time.sleep(0.1)
+            rc = 1
         elif line == 'quit':
             p('### shutting down')
             p('### messaging players')
@@ -136,10 +143,6 @@ def main() -> int:
             time.sleep(0.2)
             p('### goodbye')
             rc = 0
-        elif line == 'crash':
-            p('### FATAL shutting down')
-            time.sleep(0.1)
-            rc = 1
         else:
             p('### NOOP')
     return rc

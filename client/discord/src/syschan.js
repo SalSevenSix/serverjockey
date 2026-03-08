@@ -1,7 +1,7 @@
 import * as cutil from 'common/util/util';
 import * as logger from './util/logger.js';
 
-function shallowCopyObject(input) {
+function shallowCopy(input) {
   const result = {};
   for (const [key, value] of Object.entries(input)) {
     result[key] = value ? value : null;
@@ -44,7 +44,7 @@ export async function newSystemChannels(context) {
   };
 
   self.fetchChannels = async function(input) {
-    const channels = shallowCopyObject(input);
+    const channels = shallowCopy(input);
     let results = [...new Set(Object.values(channels))];
     results = results.filter(function(channelId) { return channelId; });
     if (results.length === 0) return channels;
@@ -62,11 +62,12 @@ export async function newSystemChannels(context) {
   };
 
   const defaultChannels = await self.fetchChannels(context.config.EVENT_CHANNELS);
-  for (const [channelType, channel] of Object.entries(defaultChannels)) { self.logChannel(channelType, channel); }
+  for (const [channelType, channel] of Object.entries(defaultChannels)) {
+    self.logChannel(channelType, channel);
+  }
 
-  self.resolve = function() {
-    return shallowCopyObject(defaultChannels);
-  };
+  self.config = function() { return shallowCopy(context.config.EVENT_CHANNELS); };
+  self.resolve = function() { return shallowCopy(defaultChannels); };
 
   return self;
 }

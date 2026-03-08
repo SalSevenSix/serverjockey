@@ -5,13 +5,13 @@ export function channel({ context, channels, instance, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     const channelsList = channels.list();
-    let text = ['No Instance Channels'];
-    if (channelsList.length > 0) {
-      text = channelsList.map(function({ channelType, channelId }) {
-        if (channelType === 'login') { channelType = 'player'; }
-        return '`' + channelType.padEnd(6) + ' =>` <#' + channelId + '>';
-      });
-    }
+    if (channelsList.length === 0) return msgutil.sendText(message, ['No Instance Channels']);
+    const text = channelsList.map(function({ channelType, channelId, isDefault }) {
+      let result = '`' + (channelType === 'login' ? 'player' : channelType).padEnd(6);
+      result += ' | ' + (isDefault ? ' default' : 'instance') + ' =>';
+      result += channelId ? ('` <#' + channelId + '>') : ' NONE`';
+      return result;
+    });
     msgutil.sendText(message, text, false);
   } else if (['server', 'player', 'chat'].includes(cmd)) {
     if (data.length < 2) return msgutil.reactUnknown(message);
