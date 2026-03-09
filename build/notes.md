@@ -30,7 +30,7 @@
 * specs/sjgms.spec
 * common/package.json
 * discord/package.json
-* discord/src/main.js
+* discord/src/system/bootstrap.js
 * extension/package.json
 * extension/static/manifest.json
 * web/package.json
