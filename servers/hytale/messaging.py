@@ -14,6 +14,21 @@ CONSOLE_LOG_ERROR_FILTER = msgftr.And(mc.ServerProcess.FILTER_ALL_LINES, msgftr.
 UPDATE_REQUIRED = 'messaging.UPDATE_REQUIRED'
 UPDATE_REQUIRED_FILTER = msgftr.NameIs(UPDATE_REQUIRED)
 USER_UUID = 'messaging.USER_UUID'
+EVENT_EXPRESSIONS = 'messaging.EVENT_EXPRESSIONS'
+
+
+# [2026/02/22 15:51:38   INFO]   [World|default] Player 'SalSevenSix' joined world 'default' at location Vector3d{x=-926
+#   .6228637695312, y=133.45010375976562, z=730.14306640625} (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+# [2026/01/24 08:55:01   INFO]   [Hytale] SalSevenSix: Hello everyone
+# [2026/02/06 15:22:45   INFO]   [Universe|P] Removing player 'SalSevenSix' (dd8d4c6b-64e9-4f49-aa45-387f7450f5e2)
+# [2026/01/24 08:55:07   INFO]   [PlayerSystems] Removing player 'SalSevenSix (SalSevenSix)' from world 'default' (dd8d4
+# [2026/02/07 07:21:09   INFO]   [Gravestones|P] [Gravestones] Created for SalSevenSix at (1322, 119, -83)
+def default_event_expressions() -> dict:
+    return dict(
+        login=r".*INFO\]\s*\[World\|.*\] Player '(.*?)' joined world '.*'.*\((.*?)\)$",
+        logout=r".*INFO\]\s*\[Universe.*\] Removing player '(.*?)' \(.*\)$",
+        chat=r'.*INFO\]\s*\[Hytale\] (.*?): (.*?)$',
+        death=r'.*INFO\]\s*\[Gravestones.*\].* Created for (.*?) at \((.*?)\)$')
 
 
 async def initialise(context: contextsvc.Context):
@@ -50,49 +65,52 @@ class _ServerDetailsSubscriber(msgabc.AbcSubscriber):
         return None
 
 
-# [2026/02/22 15:51:38   INFO]   [World|default] Player 'SalSevenSix' joined world 'default' at location Vector3d{x=-926
-#   .6228637695312, y=133.45010375976562, z=730.14306640625} (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
-# [2026/01/24 08:55:01   INFO]   [Hytale] SalSevenSix: Hello everyone
-# [2026/02/06 15:22:45   INFO]   [Universe|P] Removing player 'SalSevenSix' (dd8d4c6b-64e9-4f49-aa45-387f7450f5e2)
-# [2026/01/24 08:55:07   INFO]   [PlayerSystems] Removing player 'SalSevenSix (SalSevenSix)' from world 'default' (dd8d4
-# [2026/02/07 07:21:09   INFO]   [Gravestones|P] [Gravestones] Created for SalSevenSix at (1322, 119, -83)
-class _PlayerEventSubscriber(msgabc.AbcSubscriber):
-    LOGIN_FILTER = msgftr.DataMatches(
-        r".*INFO\]\s*\[World\|default\] Player '(.*?)' joined world 'default'.*\((.*?)\)$")
-    CHAT_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[Hytale\] (.*?): (.*?)$')
-    LOGOUT_FILTER = msgftr.DataMatches(r".*INFO\]\s*\[Universe.*\] Removing player '(.*?)' \(.*\)$")
-    DEATH_FILTER = msgftr.DataMatches(r'.*INFO\]\s*\[Gravestones.*\].* Created for (.*?) at \((.*?)\)$')
+class _PlayerEventSubscriber(msgabc.Subscriber):
+    EVENT_EXPRESSIONS_FILTER = msgftr.NameIs(EVENT_EXPRESSIONS)
+
+    @staticmethod
+    def event_filters(expressions: dict) -> tuple:
+        fmap, filters = {}, []
+        for key, value in default_event_expressions().items():
+            expression = util.get(key, expressions)
+            fmap[key] = msgftr.DataMatches(expression if expression else value)
+            filters.append(fmap[key])
+        return fmap, msgftr.Or(*filters)
 
     def __init__(self, mailer: msgabc.Mailer):
-        super().__init__(msgftr.Or(
-            msgftr.And(
-                mc.ServerProcess.FILTER_STDOUT_LINE,
-                msgftr.Or(_PlayerEventSubscriber.CHAT_FILTER, _PlayerEventSubscriber.LOGIN_FILTER,
-                          _PlayerEventSubscriber.LOGOUT_FILTER, _PlayerEventSubscriber.DEATH_FILTER)),
-            playerstore.EVENT_CLEAR_FILTER))
         self._mailer, self._player_names = mailer, []
+        self._fmap, self._filters = _PlayerEventSubscriber.event_filters({})
+
+    def accepts(self, message):
+        if mc.ServerProcess.FILTER_STDOUT_LINE.accepts(message) and self._filters.accepts(message):
+            return True
+        if _PlayerEventSubscriber.EVENT_EXPRESSIONS_FILTER or playerstore.EVENT_CLEAR_FILTER.accepts(message):
+            return True
+        return False
 
     def handle(self, message):
-        if playerstore.EVENT_CLEAR_FILTER.accepts(message):
+        if _PlayerEventSubscriber.EVENT_EXPRESSIONS_FILTER.accepts(message):
+            self._fmap, self._filters = _PlayerEventSubscriber.event_filters(message.data())
+        elif playerstore.EVENT_CLEAR_FILTER.accepts(message):
             self._player_names = []
-        elif _PlayerEventSubscriber.CHAT_FILTER.accepts(message):
-            name, text = util.fill(_PlayerEventSubscriber.CHAT_FILTER.find_all(message.data()), 2)
+        elif self._fmap['chat'].accepts(message):
+            name, text = util.fill(self._fmap['chat'].find_all(message.data()), 2)
             if name and name in self._player_names:
                 playerstore.PlayersSubscriber.event_chat(self._mailer, self, name, text)
-        elif _PlayerEventSubscriber.LOGIN_FILTER.accepts(message):
-            name, uuid = util.fill(_PlayerEventSubscriber.LOGIN_FILTER.find_all(message.data()), 2)
+        elif self._fmap['login'].accepts(message):
+            name, uuid = util.fill(self._fmap['login'].find_all(message.data()), 2)
             if name and name not in self._player_names:
                 self._player_names.append(name)
                 playerstore.PlayersSubscriber.event_login(self._mailer, self, name)
                 if uuid:
                     self._mailer.post(self, USER_UUID, (uuid, name))
-        elif _PlayerEventSubscriber.LOGOUT_FILTER.accepts(message):
-            name = _PlayerEventSubscriber.LOGOUT_FILTER.find_one(message.data())
+        elif self._fmap['logout'].accepts(message):
+            name = self._fmap['logout'].find_one(message.data())
             if name and name in self._player_names:
                 self._player_names.remove(name)
                 playerstore.PlayersSubscriber.event_logout(self._mailer, self, name)
-        elif _PlayerEventSubscriber.DEATH_FILTER.accepts(message):
-            name, text = util.fill(_PlayerEventSubscriber.DEATH_FILTER.find_all(message.data()), 2)
+        elif self._fmap['death'].accepts(message):
+            name, text = util.fill(self._fmap['death'].find_all(message.data()), 2)
             if name and name in self._player_names:
                 text = 'location ' + text.replace(' ', '') if text else None
                 playerstore.PlayersSubscriber.event_death(self._mailer, self, name, text)

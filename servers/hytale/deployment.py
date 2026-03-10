@@ -65,7 +65,9 @@ def _default_cmdargs() -> dict:
         '_comment_server_upnp': 'Try to automatically redirect server port on home network using UPnP',
         'server_upnp': True,
         '_comment_check_update_minutes': 'Check for server updates frequency, use zero to disable',
-        'check_update_minutes': 360
+        'check_update_minutes': 360,
+        '_comment_event_expressions': 'Regular expressions to extract events from console log',
+        'event_expressions': msg.default_event_expressions()
     }
 
 
@@ -145,6 +147,7 @@ class Deployment:
         cmdargs, jreargs, svrargs = await self._load_args()
         await self._installer.install_mods()
         self._map_ports(cmdargs)
+        self._set_event_expressions(cmdargs)
         uck.set_check_update_minutes(self._context, self, util.get('check_update_minutes', cmdargs))
         server = proch.ServerProcess(self._context, self._java_exe)
         server.use_cwd(self._world_dir).use_out_decoder(linenc.PtyLineDecoder())
@@ -186,6 +189,11 @@ class Deployment:
         if isinstance(port, str):
             port = int(util.lchop(util.lchop(port, '/'), ':'))
         portmapper.map_port(self._context, self, port, gc.UDP, 'Hytale Server port')
+
+    def _set_event_expressions(self, cmdargs: dict):
+        event_expressions = util.get('event_expressions', cmdargs)
+        if event_expressions and isinstance(event_expressions, dict):
+            self._context.post(self, msg.EVENT_EXPRESSIONS, event_expressions)
 
     async def _load_user_uuids(self):
         players_dir = self._save_dir + '/players'
