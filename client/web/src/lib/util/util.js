@@ -1,13 +1,19 @@
 import { isString } from 'common/util/util';
 
 const textExtensions = ['txt', 'text', 'log', 'json', 'yml', 'yaml', 'toml', 'ini'];
+const archiveExtensions = ['zip', 'jar', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz'];
 const stampExtRegex = /^[0-9_-]+$/;
 
-export function guessTextFile(filename) {
-  if (!filename) return false;
+function splitFilename(filename) {
+  if (!filename) return [null, null];
   const parts = filename.split('.');
-  if (parts.length < 2) return false;
-  const extension = parts[parts.length - 1].toLowerCase();
+  if (parts.length < 2) return [parts, null];
+  return [parts, parts[parts.length - 1].toLowerCase()];
+}
+
+export function guessTextFile(filename) {
+  const [parts, extension] = splitFilename(filename);
+  if (!extension) return false;
   if (textExtensions.includes(extension)) return true;
   const prextion = parts.length > 2 ? parts[parts.length - 2].toLowerCase() : null;
   if (!prextion) return false;
@@ -16,6 +22,12 @@ export function guessTextFile(filename) {
   if (extension.startsWith('prev')) return true;
   if (extension.startsWith('back')) return true;
   return false;
+}
+
+export function guessArchiveFile(filename) {
+  const extension = splitFilename(filename)[1];
+  if (!extension) return false;
+  return archiveExtensions.includes(extension);
 }
 
 export function fNoop() {

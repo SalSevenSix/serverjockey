@@ -25,5 +25,5 @@
 
 
 <FileSystem rootPath="/autobackups" allowDelete={1}
-            columnsMeta={{ type: false, date: 'Date', name: 'Name', size: 'Size' }}
-            customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-undo', action: restoreAutobackup }} />
+  columnsMeta={{ date: 'Date', name: 'Backup', size: 'Size' }}
+  customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-arrow-rotate-left', action: restoreAutobackup }} />

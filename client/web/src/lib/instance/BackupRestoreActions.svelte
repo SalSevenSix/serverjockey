@@ -59,8 +59,8 @@
 
 
 <FileSystem bind:this={fileSystem} rootPath="/backups" allowDelete={2}
-            columnsMeta={{ type: false, date: 'Date', name: 'Backup', size: 'Size' }}
-            customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-undo', action: restoreBackup }} />
+  columnsMeta={{ date: 'Date', name: 'Backup', size: 'Size' }}
+  customMeta={{ name: 'Restore', button: 'is-warning', icon: 'fa-arrow-rotate-left', action: restoreBackup }} />
 
 <div class="content">
   <p>

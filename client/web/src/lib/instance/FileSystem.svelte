@@ -3,7 +3,7 @@
   import { isString, humanFileSize } from 'common/util/util';
   import { confirmModal } from '$lib/modal/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
-  import { guessTextFile, toCamelCase } from '$lib/util/util';
+  import { guessTextFile, guessArchiveFile, toCamelCase } from '$lib/util/util';
   import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
@@ -18,13 +18,13 @@
   export let allowDelete = 0;  // 0=Never 1=!RunOrMaint 2=!Maint 3=Always
   export let confirmDelete = true;
   export let sorter = null;
-  export let columnsMeta = { type: true, date: 'Date', name: 'Name', size: 'Size' };
+  export let columnsMeta = { date: 'Date', name: 'Name', size: 'Size' };
   export let customMeta = null;
 
   const idPrefix = 'fileSystem' + toCamelCase(rootPath.replaceAll('/', ' '));
   const allowAction = customMeta ? (customMeta.allowAction ? customMeta.allowAction : 1) : 0;
   const hasActions = allowDelete + allowAction > 0;
-  const columnCount = (hasActions ? 1 : 0) + (columnsMeta.type ? 1 : 0) + (columnsMeta.date ? 1 : 0)
+  const columnCount = 1 + (hasActions ? 1 : 0) + (columnsMeta.date ? 1 : 0)
                     + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
   let pwdUrl = null;
@@ -148,6 +148,14 @@
       .finally(reload);
   }
 
+  function entryIconClass(entry) {
+    if (entry.type === 'directory') return 'fa-folder';
+    if (entry.type === 'link') return 'fa-file-powerpoint';
+    if (guessTextFile(entry.name)) return 'fa-file-lines';
+    if (guessArchiveFile(entry.name)) return 'fa-file-zipper';
+    return 'fa-file';
+  }
+
   onMount(loadRoot);
 </script>
 
@@ -156,7 +164,9 @@
   <table class="table">
     <thead>
       <tr>
-        {#if columnsMeta.type}<th>{isString(columnsMeta.type) ? columnsMeta.type : ''}</th>{/if}
+        <th class="pt-0 pb-0 pr-0 pl-1">
+          <button id="{idPrefix}Reload" title="RELOAD" class="button is-success refresh-button"
+                  on:click={reload}><i class="fa fa-arrows-rotate"></i></button></th>
         {#if columnsMeta.date}<th>{isString(columnsMeta.date) ? columnsMeta.date : ''}</th>{/if}
         {#if columnsMeta.name}<th>{isString(columnsMeta.name) ? columnsMeta.name : ''}</th>{/if}
         {#if columnsMeta.size}<th>{isString(columnsMeta.size) ? columnsMeta.size : ''}</th>{/if}
@@ -189,16 +199,7 @@
       {:else}
         {#each paths as path}
           <tr>
-            {#if columnsMeta.type}
-              <td>
-                {#if path.type === 'directory'}
-                  <i class="fa fa-folder fa-2x fileico"></i>
-                {/if}
-                {#if path.type === 'file'}
-                  <i class="fa {guessTextFile(path.name) ? 'fa-file-lines' : 'fa-file'} fa-2x fileico"></i>
-                {/if}
-              </td>
-            {/if}
+            <td class="pr-0 pl-2"><i class="fa {entryIconClass(path)} fa-2x fileico"></i></td>
             {#if columnsMeta.date}
               <td class="notranslate">{path.updated}</td>
             {/if}
@@ -251,7 +252,12 @@
     min-width: 380px;
   }
 
+  .refresh-button {
+    width: 1.0em;
+    height: 1.8em;
+  }
+
   .fileico {
-    width: 0.6em;
+    width: 1.0em;
   }
 </style>

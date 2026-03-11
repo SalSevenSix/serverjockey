@@ -4,7 +4,7 @@
   export let rootPath = '/logs';
   export let allowDelete = 0;
   export let confirmDelete = false;
-  export let columnsMeta = { type: true, date: false, name: 'Name', size: 'Size' };
+  export let columnsMeta = { date: null, name: 'Name', size: 'Size' };
   export let sorter = null;
 </script>
 

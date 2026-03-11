@@ -27,11 +27,12 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
       if (event === 'LOGIN') { result = emojis.greendot; }
       else if (event === 'LOGOUT') { result = emojis.reddot; }
       else if (event === 'DEATH') { result = emojis.skull; }
-      if (!result) return true;
-      result = '`' + instance + '` ' + result + ' ' + displayName;
-      if (text) { result += ' [' + text + ']'; }
-      if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
-      channelLogin.send(result);
+      if (result) {
+        result = '`' + instance + '` ' + result + ' ' + displayName;
+        if (text) { result += ' [' + text + ']'; }
+        if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
+        channelLogin.send(result);
+      }
     }
     if (triggerHandler) { triggerHandler(event, alias ? alias : { name: name }); }
     return true;
