@@ -211,7 +211,7 @@ class _InstancesHandler(httpabc.GetHandler, httpabc.PostHandler):
         module, identity = util.get('module', data), util.get('identity', data)
         if not identity or not self._modules.can_create(module):
             return httpabc.ResponseBody.BAD_REQUEST
-        identity = identity.replace(' ', '_').lower()
+        identity = identity.lower().replace(' ', '_')
         if _InstancesHandler.VALIDATOR.search(identity):
             return httpabc.ResponseBody.BAD_REQUEST
         if identity in ('sjgms', 'serverjockey', 'serverlink', 'subscribe'):

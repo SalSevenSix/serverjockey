@@ -74,6 +74,7 @@ export class Service {
         instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
         instance.server.startup({ context: context, instance: identity, url: instance.url, channels: instance.channels,
           panels: instance.panels, aliases: instance.aliases, triggers: instance.triggers });
+        if (!self.currentInstance()) { self.useInstance(identity); }
       } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {
         logger.info('Event delete instance: ' + identity + ' (' + instances[identity].module + ')');
         instances[identity].channels.reset().save();

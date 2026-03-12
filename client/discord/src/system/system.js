@@ -59,7 +59,7 @@ export function use({ context, message, data }) {
 
 export function create({ context, httptool, message, data }) {
   if (data.length < 2) return msgutil.reactUnknown(message);
-  const body = { identity: data[0], module: data[1] };
+  const body = { identity: data[0].toLowerCase().replaceAll(' ', '_'), module: data[1] };
   httptool.doPost('/instances', body, function() {
     context.instancesService.useInstance(body.identity, true);
     msgutil.reactSuccess(message);
