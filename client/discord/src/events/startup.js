@@ -1,14 +1,19 @@
+/* eslint-disable @stylistic/js/function-paren-newline */
 import { emojis } from '../util/literals.js';
 import * as subs from '../util/subs.js';
+import * as panelhlr from './panelhlr.js';
 import * as aliasmehlr from './aliasmehlr.js';
 import * as chatbothlr from './chatbothlr.js';
 import * as triggerhlr from './triggerhlr.js';
 
-function startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, aliasmeHandler, chatbotHandler) {
+/* eslint-disable complexity */
+function startPlayerEvents(context, channels, instance, url, aliases,
+  panelHandler, triggerHandler, aliasmeHandler, chatbotHandler) {
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     const [event, text] = [json.event, json.text];
     if (event === 'CLEAR') {
       if (triggerHandler) { triggerHandler(event); }
+      if (panelHandler) { panelHandler(event); }
       return true;
     }
     const name = json.player && json.player.name ? json.player.name : null;
@@ -34,12 +39,15 @@ function startPlayerEvents(context, channels, instance, url, aliases, triggerHan
         channelLogin.send(result);
       }
     }
-    if (triggerHandler) { triggerHandler(event, alias ? alias : { name: name }); }
+    const aliasForHandler = alias ? alias : { name: name };
+    if (triggerHandler) { triggerHandler(event, aliasForHandler); }
+    if (panelHandler) { panelHandler(event, aliasForHandler); }
     return true;
   });
 }
+/* eslint-enable complexity */
 
-function startServerEvents(context, channels, instance, url, triggerHandler) {
+function startServerEvents(context, channels, instance, url, panelHandler, triggerHandler) {
   let [state, restartRequired] = [null, false];
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // Ignore no state
@@ -66,19 +74,24 @@ function startServerEvents(context, channels, instance, url, triggerHandler) {
       channelServer.send(text);
     }
     if (triggerHandler) { triggerHandler(state); }
+    if (panelHandler) { panelHandler(state); }
     return true;
   });
 }
 
-export function startupServerOnly({ context, channels, instance, url, triggers }) {
+export function startupServerOnly({ context, channels, panels, instance, url, triggers }) {
+  const panelHandler = panelhlr.newPanelHandler(context, instance, panels);
   const triggerHandler = triggerhlr.newTriggerHandler(context, channels, instance, triggers);
-  startServerEvents(context, channels, instance, url, triggerHandler);
+  startServerEvents(context, channels, instance, url, panelHandler, triggerHandler);
 }
 
-export function startupAll({ context, channels, instance, url, triggers, aliases }) {
+export function startupAll({ context, channels, panels, instance, url, triggers, aliases }) {
+  const panelHandler = panelhlr.newPanelHandler(context, instance, panels);
   const triggerHandler = triggerhlr.newTriggerHandler(context, channels, instance, triggers);
   const aliasmeHandler = aliasmehlr.newAliasmeHandler(instance, channels, aliases);
   const chatbotHandler = chatbothlr.newChatbotHandler(context, instance, url);
-  startServerEvents(context, channels, instance, url, triggerHandler);
-  startPlayerEvents(context, channels, instance, url, aliases, triggerHandler, aliasmeHandler, chatbotHandler);
+  startServerEvents(context, channels, instance, url, panelHandler, triggerHandler);
+  startPlayerEvents(context, channels, instance, url, aliases,
+    panelHandler, triggerHandler, aliasmeHandler, chatbotHandler);
 }
+/* eslint-enable @stylistic/js/function-paren-newline */

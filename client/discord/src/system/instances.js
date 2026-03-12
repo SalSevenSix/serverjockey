@@ -5,6 +5,7 @@ import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 import * as subs from '../util/subs.js';
 import * as channelsvc from '../services/channelsvc.js';
+import * as panelsvc from '../services/panelsvc.js';
 import * as aliassvc from '../services/aliassvc.js';
 import * as rewardsvc from '../services/rewardsvc.js';
 import * as triggersvc from '../services/triggersvc.js';
@@ -33,6 +34,7 @@ export class Service {
     this.#context = context;
   }
 
+  /* eslint-disable max-lines-per-function */
   async startup() {
     const [self, context] = [this, this.#context];
     const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATADIR + '/current.json'];
@@ -45,13 +47,14 @@ export class Service {
     }
     for (const [identity, instance] of Object.entries(instances)) {
       instance.channels = channelsvc.newInstanceChannels(context, identity).load();
+      instance.panels = panelsvc.newPanels(context, identity).load();
       instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
       instance.aliases = aliassvc.newAliases(context, identity).load();
       instance.rewards = rewardsvc.newRewards(context, identity).load();
       instance.triggers = triggersvc.newTriggers(context, identity).load();
       instance.server = servers[instance.module];
-      instance.server.startup({ context: context, instance: identity, url: instance.url,
-        channels: instance.channels, aliases: instance.aliases, triggers: instance.triggers });
+      instance.server.startup({ context: context, instance: identity, url: instance.url, channels: instance.channels,
+        panels: instance.panels, aliases: instance.aliases, triggers: instance.triggers });
     }
     logger.info('Instances...');
     logger.log(self.getInstancesText().join('\n'));
@@ -62,17 +65,19 @@ export class Service {
         logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
         instance.url = baseurl + '/instances/' + identity;
         instance.channels = channelsvc.newInstanceChannels(context, identity);
+        instance.panels = panelsvc.newPanels(context, identity);
         instance.aliases = aliassvc.newAliases(context, identity);
         instance.rewards = rewardsvc.newRewards(context, identity);
         instance.triggers = triggersvc.newTriggers(context, identity);
         instance.server = servers[instance.module];
         instances[identity] = instance;
         instance.chatbot = context.llmClient.newChatbot(self.getModuleName(identity));
-        instance.server.startup({ context: context, instance: identity, url: instance.url,
-          channels: instance.channels, aliases: instance.aliases, triggers: instance.triggers });
+        instance.server.startup({ context: context, instance: identity, url: instance.url, channels: instance.channels,
+          panels: instance.panels, aliases: instance.aliases, triggers: instance.triggers });
       } else if (data.event === 'deleted' && cutil.hasProp(instances, identity)) {
         logger.info('Event delete instance: ' + identity + ' (' + instances[identity].module + ')');
         instances[identity].channels.reset().save();
+        instances[identity].panels.reset().save();
         instances[identity].aliases.reset().save();
         instances[identity].rewards.reset().save();
         instances[identity].triggers.reset().save();
@@ -82,6 +87,7 @@ export class Service {
       return true;
     });
   }
+  /* eslint-enable max-lines-per-function */
 
   currentInstance() {
     return this.#current;

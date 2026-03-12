@@ -93,12 +93,12 @@ function handleMessage(message) {
   if (command === 'startup') return msgutil.reactUnknown(message);
   if (!msgutil.checkHasRole(message, command, context.config.ADMIN_ROLE, context.config.COMMAND_ROLES)) return;
   const args = { context: context, instance: instance, message: message, data: data };
-  const instanceData = context.instancesService.getData(instance);
-  if (instanceData && instanceData.server && cutil.hasProp(instanceData.server, command)) {
-    args.httptool = new http.MessageHttpTool(context, message, instanceData.url);
-    [args.channels, args.chatbot, args.aliases, args.rewards, args.triggers] = [
-      instanceData.channels, instanceData.chatbot, instanceData.aliases, instanceData.rewards, instanceData.triggers];
-    instanceData.server[command](args);
+  const instdata = context.instancesService.getData(instance);
+  if (instdata && instdata.server && cutil.hasProp(instdata.server, command)) {
+    args.httptool = new http.MessageHttpTool(context, message, instdata.url);
+    [args.channels, args.panels, args.chatbot, args.aliases, args.rewards, args.triggers] = [
+      instdata.channels, instdata.panels, instdata.chatbot, instdata.aliases, instdata.rewards, instdata.triggers];
+    instdata.server[command](args);
   } else if (cutil.hasProp(system, command)) {
     args.httptool = new http.MessageHttpTool(context, message, context.config.SERVER_URL);
     system[command](args);

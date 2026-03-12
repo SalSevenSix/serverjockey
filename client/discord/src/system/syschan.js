@@ -32,6 +32,11 @@ export async function newSystemChannels(context) {
     return channels.length > 0 ? channels[0].guild : null;
   };
 
+  self.remember = function(channel) {
+    if (!channel || channel.id) return;
+    cache[channel.id] = channel;
+  };
+
   self.fetch = async function(channelId, fetcher = null) {
     let channel = cutil.hasProp(cache, channelId) ? cache[channelId] : null;
     if (channel) return channel;

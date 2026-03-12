@@ -90,6 +90,13 @@ const helpChannel = [
   'chat {id}      : Set the channel to use for in-game chat',
   'chat reset     : Reset the in-game chat channel to use default', '```'];
 
+const panelHelp = 'panel {cmds ...}     : Message panels mgnt, use help for details';
+const helpPanel = [
+  'Message Panel Management. Commands are...', '```',
+  'list           : List active panels for the instance (default command)',
+  'status-text    : Create a text message status panel for the instance',
+  'status-embed   : Create an embed message status panel for the instance', '```'];
+
 const aliasmeHelp = 'aliasme              : DM self service alias code';
 const helpAliasme = [
   'Request a self service alias code sent by DM.',
@@ -273,6 +280,7 @@ export function newServerHelpBuilder() {
   self.addSend = function() { return self.addHelp(sendHelp, helpSend).add(sendHelp); };
   self.addChat = function() { return self.addHelp(chatHelp, helpChat).add(chatHelp); };
   self.addChannel = function() { return self.addHelp(channelHelp, helpChannel).add(channelHelp); };
+  self.addPanel = function() { return self.addHelp(panelHelp, helpPanel).add(panelHelp); };
   self.addAliasme = function() { return self.addHelp(aliasmeHelp, helpAliasme).add(aliasmeHelp); };
   self.addAlias = function() { return self.addHelp(aliasHelp, helpAlias).add(aliasHelp); };
   self.addReward = function() { return self.addHelp(rewardHelp, helpReward).add(rewardHelp); };
