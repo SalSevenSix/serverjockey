@@ -1,8 +1,5 @@
 import * as cutil from 'common/util/util';
-import { emojis } from '../util/literals.js';
-
-const serverEventMap = { STARTED: 'on-started', STOPPED: 'on-stopped', EXCEPTION: 'on-stopped' };
-const playerEventMap = { LOGIN: 'on-login', LOGOUT: 'on-logout', DEATH: 'on-death' };
+import { serverEventTriggers, playerEventTriggers, emojis } from '../util/literals.js';
 
 function newEntityLoader(context) {
   const [self, cache] = [{}, {}];
@@ -79,7 +76,7 @@ export function newTriggerHandler(context, channels, instance, triggers) {
   };
 
   const handleServerEvent = async function(trigger, event) {
-    if (!trigger['on-event'].includes(serverEventMap[event])) return;  // Check applicable event
+    if (!trigger['on-event'].includes(serverEventTriggers[event])) return;  // Check applicable event
     if (!cutil.hasProp(trigger, 'do-message')) return;  // Nothing to do
     const channel = await processTriggerContext(trigger, channels.resolve().server);  // Process context values
     if (!channel) return;
@@ -90,7 +87,7 @@ export function newTriggerHandler(context, channels, instance, triggers) {
   };
 
   const handlePlayerEvent = async function(trigger, event, alias) {
-    if (!trigger['on-event'].includes(playerEventMap[event])) return;  // Check applicable event
+    if (!trigger['on-event'].includes(playerEventTriggers[event])) return;  // Check applicable event
     if (!loader.hasGuild()) return;  // Cannot do anything without at least one channel
     const member = alias && alias.snowflake ? await loader.getMember(alias.snowflake) : null;
     if (cutil.hasProp(trigger, 'rq-member')) {  // Must meet member condition
@@ -155,9 +152,9 @@ export function newTriggerHandler(context, channels, instance, triggers) {
   };
 
   return async function(event, alias = null) {
-    if (cutil.hasProp(playerEventMap, event)) {
+    if (cutil.hasProp(playerEventTriggers, event)) {
       for (const trigger of triggers.list()) { await handlePlayerEvent(trigger, event, alias); }
-    } else if (cutil.hasProp(serverEventMap, event)) {
+    } else if (cutil.hasProp(serverEventTriggers, event)) {
       for (const trigger of triggers.list()) { await handleServerEvent(trigger, event); }
     }
     if (event === 'CLEAR') { loader.reset(); }

@@ -1,5 +1,6 @@
 /* eslint-disable @stylistic/js/function-paren-newline */
-import { emojis } from '../util/literals.js';
+import * as cutil from 'common/util/util';
+import { serverStates, serverTimedStates, playerEvents, playerEventEmojis, emojis } from '../util/literals.js';
 import * as subs from '../util/subs.js';
 import * as panelhlr from './panelhlr.js';
 import * as aliasmehlr from './aliasmehlr.js';
@@ -10,8 +11,8 @@ import * as triggerhlr from './triggerhlr.js';
 function startPlayerEvents(context, channels, instance, url, aliases,
   panelHandler, triggerHandler, aliasmeHandler, chatbotHandler) {
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
-    const [event, text] = [json.event, json.text];
-    if (event === 'CLEAR') {
+    const { event, text } = json;
+    if (event === playerEvents.clear) {
       if (triggerHandler) { triggerHandler(event); }
       if (panelHandler) { panelHandler(event); }
       return true;
@@ -21,23 +22,17 @@ function startPlayerEvents(context, channels, instance, url, aliases,
     const alias = aliases.findByName(name);
     const displayName = alias ? name + ' `@' + alias.discordid + '`' : name;
     const { login: channelLogin, chat: channelChat } = channels.resolve();
-    if (event === 'CHAT') {
+    if (event === playerEvents.chat) {
       if (aliasmeHandler) { aliasmeHandler(text, name); }
       if (chatbotHandler) { chatbotHandler(text); }
       if (channelChat) { channelChat.send('`' + instance + '` ' + emojis.say + ' ' + displayName + ': ' + text); }
       return true;
     }
-    if (channelLogin) {
-      let result = null;
-      if (event === 'LOGIN') { result = emojis.greendot; }
-      else if (event === 'LOGOUT') { result = emojis.reddot; }
-      else if (event === 'DEATH') { result = emojis.skull; }
-      if (result) {
-        result = '`' + instance + '` ' + result + ' ' + displayName;
-        if (text) { result += ' [' + text + ']'; }
-        if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
-        channelLogin.send(result);
-      }
+    if (channelLogin && cutil.hasProp(playerEventEmojis, event)) {  // Events: login, logout, death
+      let result = '`' + instance + '` ' + playerEventEmojis[event] + ' ' + displayName;
+      if (text) { result += ' [' + text + ']'; }
+      if (json.player.steamid) { result += ' [' + json.player.steamid + ']'; }
+      channelLogin.send(result);
     }
     const aliasForHandler = alias ? alias : { name: name };
     if (triggerHandler) { triggerHandler(event, aliasForHandler); }
@@ -52,7 +47,7 @@ function startServerEvents(context, channels, instance, url, panelHandler, trigg
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json.state) return true;  // Ignore no state
     if (!state) { state = json.state; }  // Set initial state
-    if (json.state === 'START') return true;  // Ignore transient state
+    if (json.state === serverStates.start) return true;  // Ignore transient state
     const channelServer = channels.resolve().server;
     if (!restartRequired && json.details.restart) {
       if (channelServer) { channelServer.send('`' + instance + '` ' + emojis.restart + ' restart required'); }
@@ -61,14 +56,14 @@ function startServerEvents(context, channels, instance, url, panelHandler, trigg
     }
     if (state === json.state) return true;  // Ignore no state change
     state = json.state;
-    if (state === 'STARTED') { restartRequired = false; }
+    if (state === serverStates.started) { restartRequired = false; }
     if (channelServer) {
       let text = '`' + instance + '` ' + emojis.satellite + ' ' + state;
-      if (['READY', 'STARTED', 'STOPPED'].includes(state) && json.sincelaststate) {
+      if (serverTimedStates.includes(state) && json.sincelaststate) {
         let seconds = json.sincelaststate / 1000;
         seconds = seconds.toFixed(seconds < 10.0 ? 1 : 0);
         text += ' in ' + seconds + ' seconds';
-      } else if (state === 'EXCEPTION' && json.details && json.details.error) {
+      } else if (state === serverStates.exception && json.details && json.details.error) {
         text += ' [' + json.details.error + ']';
       }
       channelServer.send(text);

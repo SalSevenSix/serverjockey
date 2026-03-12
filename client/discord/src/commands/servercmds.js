@@ -1,4 +1,5 @@
 import * as cutil from 'common/util/util';
+import * as literals from '../util/literals.js';
 import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 import * as subs from '../util/subs.js';
@@ -9,41 +10,36 @@ export function status({ httptool, instance }) {
     if (!body.running) return [result + 'DOWN'];
     result += body.state;
     if (body.uptime) { result += ' (' + cutil.humanDuration(body.uptime) + ')'; }
-    result += '\n';
-    const dtl = body.details;
-    if (dtl.version) { result += 'Version:  ' + dtl.version + '\n'; }
-    if (dtl.ip && dtl.port) { result += 'Connect:  ' + dtl.ip + ':' + dtl.port + '\n'; }
-    if (dtl.auth) { result += 'Auth:     ' + (cutil.isString(dtl.auth) ? dtl.auth : '[see webapp]') + '\n'; }
-    if (dtl.ingametime) { result += 'Ingame:   ' + dtl.ingametime + '\n'; }
-    if (dtl.map) { result += 'Map:      ' + dtl.map + '\n'; }
-    if (dtl.notice) { result += 'Notice:   ' + dtl.notice + '\n'; }
-    if (dtl.restart) { result += 'SERVER RESTART REQUIRED\n'; }
-    return [result.trim()];
+    const dtl = body.details ? body.details : {};
+    if (dtl.version) { result += '\nVersion:  ' + dtl.version; }
+    if (dtl.ip && dtl.port) { result += '\nConnect:  ' + dtl.ip + ':' + dtl.port; }
+    if (dtl.auth) { result += '\nAuth:     ' + (cutil.isString(dtl.auth) ? dtl.auth : '[see webapp]'); }
+    if (dtl.ingametime) { result += '\nIngame:   ' + dtl.ingametime; }
+    if (dtl.map) { result += '\nMap:      ' + dtl.map; }
+    if (dtl.notice) { result += '\nNotice:   ' + dtl.notice; }
+    if (dtl.restart) { result += '\nSERVER RESTART REQUIRED'; }
+    return [result];
   });
 }
 
 export function server({ context, httptool, instance, message, data }) {
   if (data.length === 0) return status({ httptool, instance });
-  const signals = ['start', 'restart-immediately', 'restart-after-warnings', 'restart-on-empty', 'stop'];
-  const upStates = ['START', 'STARTING', 'STARTED', 'STOPPING'];
-  const downStates = ['READY', 'STOPPED', 'EXCEPTION'];
+  const { serverSignals: sg, serverStates: ss, serverUpStates: upStates, serverDownStates: downStates } = literals;
   let cmd = data[0].toLowerCase();
-  if (cmd === 'restart') { cmd = signals[1]; }
-  if (!signals.includes(cmd)) return msgutil.reactUnknown(message);
+  if (cmd === sg.restart) { cmd = sg.restartImmediately; }
+  if (!Object.values(sg).includes(cmd)) return msgutil.reactUnknown(message);
   httptool.doPost('/server/' + cmd, { respond: true }, function(json) {
-    let state = json.current.state;
-    let tgt = cmd === signals[0];
-    if (tgt && upStates.includes(state)) return msgutil.reactError(message);
-    if (!tgt && downStates.includes(state)) return msgutil.reactError(message);
-    if ([signals[2], signals[3]].includes(cmd)) return msgutil.reactSuccess(message);
+    let [state, target] = [json.current.state, cmd === sg.start];
+    if ((target ? upStates : downStates).includes(state)) return msgutil.reactError(message);
+    if ([sg.restartWarnings, sg.restartEmpty].includes(cmd)) return msgutil.reactSuccess(message);
     msgutil.reactWait(message);
-    tgt ||= cmd === signals[1];
+    target ||= cmd === sg.restartImmediately;
     new subs.Helper(context).poll(json.url, function(polldata) {
       if (state === polldata.state) return true;
       state = polldata.state;
-      if (state === downStates[2]) return msgutil.rmReacts(message, msgutil.reactError, logger.error, false);
-      if (tgt && state === upStates[2]) return msgutil.rmReacts(message, msgutil.reactSuccess, logger.error, false);
-      if (!tgt && state === downStates[1]) return msgutil.rmReacts(message, msgutil.reactSuccess, logger.error, false);
+      if (state === ss.exception) return msgutil.rmReacts(message, msgutil.reactError, logger.error, false);
+      if (target && state === ss.started) return msgutil.rmReacts(message, msgutil.reactSuccess, logger.error, false);
+      if (!target && state === ss.stopped) return msgutil.rmReacts(message, msgutil.reactSuccess, logger.error, false);
       return true;
     });
   });
