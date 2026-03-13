@@ -2,6 +2,27 @@ import * as cutil from 'common/util/util';
 import * as logger from '../util/logger.js';
 import { startupEvents, serverStates, playerEvents } from '../util/literals.js';
 
+function compactArray(value, limit) {
+  if (!value) return [];
+  const [length, result] = [value.length, [...value]];
+  if (length <= limit) return result;
+  result.length = limit - 1;
+  result.push('(+' + (length - limit + 1) + ' more)');
+  return result;
+}
+
+function chunkArray(value, rows, columns) {  // TODO move to common
+  if (!value) return [];
+  if (value.length > rows * columns) {
+    rows = Math.ceil(value.length / columns);
+  }
+  const result = [];
+  for (let i = 0; i < columns; i++) {
+    result.push(value.slice(i * rows, i * rows + rows));
+  }
+  return result;
+}
+
 function toStatusText({ instance, server, players }) {
   let text = '```\n';
   text += 'Server ' + instance + ' is ';
@@ -11,7 +32,14 @@ function toStatusText({ instance, server, players }) {
     if (details.version) { text += '\nVersion : ' + details.version; }
     if (details.ip && details.port) { text += '\nConnect : ' + details.ip + ':' + details.port; }
     text += '\nOnline  : ' + players.length;
-    if (players.length > 0) { text += '\n- ' + players.join('\n- '); }  // TODO char limit and columns
+    chunkArray(compactArray(players, 36), 3, 12).forEach(function(row) {
+      text += '\n';
+      row.forEach(function(name, index) {
+        name = name.substring(0, 15);
+        if (index < 2) { name = name.padEnd(16); }
+        text += '| ' + name;
+      });
+    });
   } else {
     text += 'DOWN';
   }

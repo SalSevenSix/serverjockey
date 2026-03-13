@@ -6,13 +6,13 @@ export function channel({ context, channels, instance, message, data }) {
   if (cmd === 'list') {
     const channelsList = channels.list();
     if (channelsList.length === 0) return msgutil.sendText(message, ['No Instance Channels']);
-    const text = channelsList.map(function({ channelType, channelId, isDefault }) {
-      let result = '`' + (channelType === 'login' ? 'player' : channelType).padEnd(6);
-      result += ' | ' + (isDefault ? ' default' : 'instance') + ' =>';
-      result += channelId ? ('` <#' + channelId + '>') : ' NONE`';
-      return result;
+    const result = channelsList.map(function({ channelType, channelId, isDefault }) {
+      let text = '`' + (channelType === 'login' ? 'player' : channelType).padEnd(6);
+      text += ' | ' + (isDefault ? ' default' : 'instance') + ' =>';
+      text += channelId ? ('` <#' + channelId + '>') : ' NONE`';
+      return text;
     });
-    msgutil.sendText(message, text, false);
+    msgutil.sendText(message, result, false);
   } else if (['server', 'player', 'chat'].includes(cmd)) {
     if (data.length < 2) return msgutil.reactUnknown(message);
     const [channelType, action] = [cmd === 'player' ? 'login' : cmd, data[1]];
