@@ -47,9 +47,8 @@ export function server({ context, httptool, instance, message, data }) {
 
 export function auto({ httptool, instance, data }) {
   if (data.length > 0) return httptool.doPost('', { auto: data[0] });
-  const desc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
   httptool.doGet('/server', function(body) {
-    return [instance + ' auto mode: ' + body.auto + ' (' + desc[body.auto] + ')'];
+    return [instance + ' auto mode: ' + body.auto + ' (' + literals.serverAutoDesc[body.auto] + ')'];
   });
 }
 

@@ -23,6 +23,10 @@ export const emojis = {
     '🧝', '🧝‍♂️', '🧝‍♀️', '👵', '👨‍✈️', '👩‍✈️', '🐶', '🐱', '😎', '🤵', '🤵‍♂️', '🤵‍♀️', '👷', '👷‍♂️', '👷‍♀️']
 };
 
+export const startupEvents = { server: 'SERVER', players: 'PLAYERS' };
+
+export const serverAutoDesc = ['Off', 'Auto Start', 'Auto Restart', 'Auto Start and Restart'];
+
 export const serverStates = {
   ready: 'READY', maintenance: 'MAINTENANCE',
   start: 'START', starting: 'STARTING', started: 'STARTED',
@@ -44,9 +48,7 @@ export const serverSignals = {
   restartWarnings: 'restart-after-warnings', restartEmpty: 'restart-on-empty'
 };
 
-export const playerEvents = {
-  login: 'LOGIN', logout: 'LOGOUT', chat: 'CHAT', death: 'DEATH', clear: 'CLEAR'
-};
+export const playerEvents = { login: 'LOGIN', logout: 'LOGOUT', chat: 'CHAT', death: 'DEATH', clear: 'CLEAR' };
 
 export const playerEventEmojis = {
   [playerEvents.login]: emojis.greendot, [playerEvents.logout]: emojis.reddot, [playerEvents.death]: emojis.skull

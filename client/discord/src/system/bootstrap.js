@@ -7,6 +7,7 @@ import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 import * as llm from '../util/llm.js';
 import * as http from '../util/http.js';
+import * as cooldowns from '../util/cooldowns.js';
 import * as system from './system.js';
 import * as syschan from './syschan.js';
 import * as instances from './instances.js';
@@ -75,6 +76,7 @@ function shutdown() {
   logger.info('Shutdown ServerLink');
   if (!context.running) return;
   context.running = false;
+  context.cooldowns.shutdown();
   context.controller.abort();
   context.client.destroy();
   logger.info('*** END ServerLink Bot ***');
@@ -112,6 +114,7 @@ export function main() {
   context.controller = new AbortController();
   context.signal = context.controller.signal;
   context.llmClient = llm.newClient(context.config.LLM_API);
+  context.cooldowns = cooldowns.newCooldowns();
   context.instancesService = new instances.Service(context);
   context.client = new Client({
     intents: [

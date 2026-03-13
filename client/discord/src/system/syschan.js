@@ -33,14 +33,16 @@ export async function newSystemChannels(context) {
   };
 
   self.remember = function(channel) {
-    if (!channel || channel.id) return;
-    cache[channel.id] = channel;
+    if (channel && channel.id) { cache[channel.id] = channel; }
   };
 
   self.fetch = async function(channelId, fetcher = null) {
     let channel = cutil.hasProp(cache, channelId) ? cache[channelId] : null;
     if (channel) return channel;
-    if (!fetcher) { fetcher = context.client.channels; }
+    if (!fetcher) {
+      const guild = self.findGuild();
+      fetcher = guild ? guild.channels : context.client.channels;
+    }
     channel = await fetcher.fetch(channelId)
       .then(function(result) { return result; })
       .catch(logger.error);

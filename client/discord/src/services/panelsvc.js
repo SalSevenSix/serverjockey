@@ -1,17 +1,30 @@
 import fs from 'fs';
 import * as logger from '../util/logger.js';
 
+/* eslint-disable max-lines-per-function */
 export function newPanels(context, instance) {
   const file = context.config.DATADIR + '/' + instance + '.panel.json';
-  const data = { base: [] };
+  const data = { base: [], loaded: false };
+  const callbacks = { onLoad: null, onAdd: null };
   const self = {};
+
+  data.set = function(value = null) {
+    if (value) { data.base = value; }
+    data.loaded = true;
+    if (callbacks.onLoad) { callbacks.onLoad(); }
+  };
+
+  self.onLoad = function(callback) {
+    callbacks.onLoad = callback;
+    if (data.loaded) { callback(); }
+  };
 
   self.load = function() {
     fs.exists(file, function(exists) {
-      if (!exists) return;
+      if (!exists) return data.set();
       fs.readFile(file, function(error, body) {
-        if (error) return logger.error(error);
-        data.base = JSON.parse(body);
+        data.set(error ? null : JSON.parse(body));
+        if (error) { logger.error(error); }
       });
     });
     return self;
@@ -26,16 +39,23 @@ export function newPanels(context, instance) {
     fs.writeFile(file, JSON.stringify(data.base), logger.error);
   };
 
-  self.remove = function(message) {
-    data.base = data.base.filter(function({ channelId, messageId }) {
-      return !(channelId === message.channel.id && messageId === message.id);
+  self.remove = function(channelId, messageId) {
+    data.base = data.base.filter(function(value) {
+      return !(value.channelId === channelId && value.messageId === messageId);
     });
     return self;
   };
 
+  self.onAdd = function(callback) {
+    callbacks.onAdd = callback;
+  };
+
   self.add = function(panelType, message) {
-    self.remove(message);
-    data.base.push({ panelType: panelType, channelId: message.channel.id, messageId: message.id });
+    const [channelId, messageId] = [message.channel.id, message.id];
+    self.remove(channelId, messageId);
+    const entry = { panelType, channelId, messageId };
+    data.base.push(entry);
+    if (callbacks.onAdd) { callbacks.onAdd(entry, message); }
     return self;
   };
 
@@ -47,3 +67,4 @@ export function newPanels(context, instance) {
 
   return self;
 }
+/* eslint-enable max-lines-per-function */
