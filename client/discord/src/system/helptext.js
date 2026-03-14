@@ -90,9 +90,9 @@ const helpChannel = [
   'chat {id}      : Set the channel to use for in-game chat',
   'chat reset     : Reset the in-game chat channel to use default', '```'];
 
-const panelHelp = 'panel {cmds ...}     : Message panels mgnt, use help for details';
+const panelHelp = 'panel {cmds ...}     : Panel management, use help for details';
 const helpPanel = [
-  'Message Panel Management. Creat message status panels that are automatically updated.',
+  'Panel Management. Create message status panels that are automatically updated.',
   'Simply delete the message to remove panel. Commands are...', '```',
   'list           : List active panels for the instance (default command)',
   'status-text    : Create a text status panel for the instance',

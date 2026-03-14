@@ -104,6 +104,7 @@ export function startupServerOnly({ context, channels, panels, instance, url, tr
   const panelHandler = panelhlr.newPanelHandler(context, instance, panels);
   const triggerHandler = triggerhlr.newTriggerHandler(context, channels, instance, triggers);
   startServerEvents(context, channels, instance, url, panelHandler, triggerHandler);
+  panelHandler(startupEvents.players, []);  // Init players required
 }
 
 export function startupAll({ context, channels, panels, instance, url, triggers, aliases }) {

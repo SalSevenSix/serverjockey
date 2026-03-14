@@ -35,7 +35,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
     if (!roleMap[snowflake]) { delete roleMap[snowflake]; }
   }
   schemes = schemes.filter(function(scheme) {  // Remove schemes with invalid role
-    return Object.keys(roleMap).includes(scheme.snowflake);
+    return Object.keys(roleMap).includes(scheme.snowflake);  // TODO use cutil.hasProp()
   });
   if (schemes.length === 0) return;
   for (const scheme of schemes) {  // Gather activity by range

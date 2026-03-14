@@ -7,11 +7,11 @@ import * as commons from '../system/commons.js';
 
 export const startup = commons.startupAll;
 export const { status, server, auto, log, getconfig, setconfig, deployment, players, chat,
-  channel, aliasme, alias, reward, trigger, activity, chatlog } = commons;
+  channel, panel, aliasme, alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PROJECT ZOMBOID COMMANDS')
-  .addServer(true, true).addChat().addChannel().addAliasme()
+  .addServer(true, true).addChat().addChannel().addPanel().addAliasme()
   .addAlias().addReward().addTrigger().addActivity().addChatlog()
   .add([
     'world save                : Save the game world',

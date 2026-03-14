@@ -1,6 +1,8 @@
+const { EmbedBuilder } = require('discord.js');
 import * as cutil from 'common/util/util';
+import { startupEvents, serverStates, playerEvents, serverStateColours,
+  assetUrls, colourCodes } from '../util/literals.js';
 import * as logger from '../util/logger.js';
-import { startupEvents, serverStates, playerEvents } from '../util/literals.js';
 
 function compactArray(value, limit) {
   if (!value) return [];
@@ -25,9 +27,8 @@ function chunkArray(value, rows, columns) {  // TODO move to common
 
 function toStatusText({ instance, server, players }) {
   let text = '```\n';
-  text += 'Server ' + instance + ' is ';
+  text += 'Server ' + instance + ' is ' + server.state;
   if (server.running) {
-    text += server.state;
     const details = server.details ? server.details : {};
     if (details.version) { text += '\nVersion : ' + details.version; }
     if (details.ip && details.port) { text += '\nConnect : ' + details.ip + ':' + details.port; }
@@ -40,12 +41,27 @@ function toStatusText({ instance, server, players }) {
         text += '| ' + name;
       });
     });
-  } else {
-    text += 'DOWN';
   }
-  text += '\n```';
+  text = text.trim() + '\n```';
   text += '\nUpdated <t:' + Math.floor(Date.now() / 1000) + ':R>';
   return text;
+}
+
+function toStatusEmbed({ instance, server, players }) {
+  const details = server.details ? server.details : {};
+  const version = server.running && details.version ? details.version : '---';
+  const connect = server.running && details.ip && details.port ? details.ip + ':' + details.port : '---';
+  const fields = [{ name: 'Version', value: version }, { name: 'Connect', value: connect }];
+  compactArray(players, 21).forEach(function(name, index) {
+    fields.push({ name: (index + 1).toString().padStart(2, '0'), value: name, inline: true });
+  });
+  const colour = cutil.hasProp(serverStateColours, server.state) ? serverStateColours[server.state] : colourCodes.light;
+  const title = 'Server ' + instance + ' is ' + server.state;
+  const footer = { text: 'Last Updated' };
+  const embed = new EmbedBuilder()
+    .setColor(colour).setTitle(title).setThumbnail(assetUrls.sjgmsIconMedium)
+    .addFields(fields).setFooter(footer).setTimestamp();
+  return { embeds: [embed] };
 }
 
 function newModel(instance) {
@@ -92,6 +108,11 @@ function newModel(instance) {
 function newUpdater(context, panels, resolve) {
   const data = { panels: [] };
 
+  const createPanel = function(entry, synced, message = null) {
+    const render = entry.panelType === 'status-embed' ? toStatusEmbed : toStatusText;
+    return { entry, synced, render, message };
+  };
+
   const remove = function(panel, reason) {
     panel.synced = true;  // To ignore if re-queued
     data.panels = data.panels.filter(function(value) { return !(panel.entry === value.entry); });
@@ -115,7 +136,7 @@ function newUpdater(context, panels, resolve) {
         return false;
       }
       panel.synced = true;
-      const result = await panel.message.edit(toStatusText(model)).catch(logger.error);
+      const result = await panel.message.edit(panel.render(model)).catch(logger.error);
       if (!result) return remove(panel, 'failed to edit message: ' + panel.entry.messageId);
       return true;
     };
@@ -130,13 +151,13 @@ function newUpdater(context, panels, resolve) {
   };
 
   panels.onLoad(function() {
-    data.panels = panels.list().map(function(entry) { return { entry: entry, message: null, synced: true }; });
+    data.panels = panels.list().map(function(entry) { return createPanel(entry, true); });
     update();
   });
 
   panels.onAdd(function(entry, message) {
     cutil.sleep(1000).then(function() {
-      const panel = { entry: entry, message: message, synced: false };
+      const panel = createPanel(entry, false, message);
       data.panels.push(panel);
       context.cooldowns.submit(renderer(panel));
     });
