@@ -6,7 +6,6 @@ import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 
 /* eslint-disable complexity */
-/* eslint-disable @stylistic/js/max-len */
 /* eslint-disable max-lines-per-function */
 async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
   const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
@@ -102,7 +101,6 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
   }
 }
 /* eslint-enable max-lines-per-function */
-/* eslint-enable @stylistic/js/max-len */
 /* eslint-enable complexity */
 
 export function reward({ context, httptool, aliases, rewards, instance, message, data }) {

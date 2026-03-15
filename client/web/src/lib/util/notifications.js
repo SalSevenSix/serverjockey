@@ -4,6 +4,14 @@ import { generateId } from '$lib/util/util';
 
 export const notifications = writable([]);
 
+export function removeNotification(identity) {
+  notifications.update(function(current) {
+    return current.filter(function(value) {
+      return identity != value.id;
+    });
+  });
+}
+
 function notify(level, message) {
   const now = Date.now();
   if (get(notifications).reduce(function(result, value) {
@@ -16,14 +24,6 @@ function notify(level, message) {
   });
   sleep(8000).then(function() {
     removeNotification(identity);
-  });
-}
-
-export function removeNotification(identity) {
-  notifications.update(function(current) {
-    return current.filter(function(value) {
-      return identity != value.id;
-    });
   });
 }
 

@@ -5,7 +5,6 @@ import { notifyError } from '$lib/util/notifications';
 
 export const securityToken = writable();
 
-
 export function surl(path) {
   if (path && path.startsWith('http')) return path;  // Assuming full urls are correct
   if (base && path) return base + path;

@@ -1,4 +1,4 @@
-/* eslint-disable @stylistic/js/function-paren-newline */
+/* eslint-disable @stylistic/function-paren-newline */
 import fetch from 'node-fetch';
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
@@ -11,7 +11,6 @@ import * as aliasmehlr from './aliasmehlr.js';
 import * as chatbothlr from './chatbothlr.js';
 import * as triggerhlr from './triggerhlr.js';
 
-/* eslint-disable complexity */
 function startPlayerEvents(context, channels, instance, url, aliases,
   panelHandler, triggerHandler, aliasmeHandler, chatbotHandler) {
   if (panelHandler) {
@@ -53,7 +52,6 @@ function startPlayerEvents(context, channels, instance, url, aliases,
     return true;
   });
 }
-/* eslint-enable complexity */
 
 function startServerEvents(context, channels, instance, url, panelHandler, triggerHandler) {
   let [state, restartRequired] = [null, false];
@@ -116,4 +114,4 @@ export function startupAll({ context, channels, panels, instance, url, triggers,
   startPlayerEvents(context, channels, instance, url, aliases,
     panelHandler, triggerHandler, aliasmeHandler, chatbotHandler);
 }
-/* eslint-enable @stylistic/js/function-paren-newline */
+/* eslint-enable @stylistic/function-paren-newline */

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as cutil from 'common/util/util';
 import { emojis } from './literals.js';
 
@@ -52,3 +53,4 @@ export function error(value, message = null) {
   }
   return reactError(message);
 }
+/* eslint-enable no-console */

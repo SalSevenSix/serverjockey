@@ -1,8 +1,5 @@
-export const noStorage = typeof(Storage) === 'undefined';
-export const browserName = getBrowserName();
-
 function getBrowserName() {
-  if (typeof(window) === 'undefined') return 'Chrome';
+  if (typeof window === 'undefined') return 'Chrome';
   const ua = window.navigator.userAgent;
   if (ua.includes('Firefox')) return 'Firefox';
   if (ua.includes('SamsungBrowser')) return 'SamsungBrowser';
@@ -12,6 +9,9 @@ function getBrowserName() {
   if (ua.includes('Safari')) return 'Safari';
   return 'Chrome';
 }
+
+export const browserName = getBrowserName();
+export const noStorage = typeof Storage === 'undefined';
 
 export class ObjectUrls {
   #urls = [];
@@ -23,7 +23,7 @@ export class ObjectUrls {
   }
 
   openObject(data) {
-    const blob = new Blob([JSON.stringify(data)], { type : 'text/plain;charset=utf-8' });
+    const blob = new Blob([JSON.stringify(data)], { type: 'text/plain;charset=utf-8' });
     this.openBlob(blob);
   }
 
