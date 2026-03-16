@@ -11,10 +11,8 @@ _SCRIPT_SPECIALS = str.maketrans({
     '*': r'\*', '?': r'\?', '&': r'\&'})
 
 
-def script_escape(value: str) -> str:
-    if not value:
-        return value
-    return value.translate(_SCRIPT_SPECIALS)
+def script_escape(value: str | None) -> str:
+    return value.translate(_SCRIPT_SPECIALS) if value else value
 
 
 def is_format(text: str) -> bool:
@@ -86,9 +84,7 @@ def human_file_size(value: int | None) -> str:
 
 
 def get(key: typing.Any, dictionary: dict, default: typing.Any = None) -> typing.Any:
-    if dictionary and key in dictionary:
-        return dictionary[key]
-    return default
+    return dictionary[key] if dictionary and key in dictionary else default
 
 
 def filter_dict(dictionary: dict, keys: typing.Collection, none_fill: bool = False) -> dict:
@@ -196,15 +192,17 @@ def strip_path(path: str | None) -> str | None:
 
 
 def fname(path: str | None) -> str | None:
-    if not path:
-        return path
-    return path.rsplit('/', maxsplit=1)[-1]
+    return path.rsplit('/', maxsplit=1)[-1] if path else path
+
+
+def fname_only(path: str | None) -> str | None:
+    name = fname(path)
+    return name.rsplit('.', maxsplit=1)[0] if name else name
 
 
 def fext(path: str | None) -> str | None:
-    if not path:
-        return path
-    return path.rsplit('.', maxsplit=1)[-1]
+    ext = path.rsplit('.', maxsplit=1)[-1] if path else path
+    return '' if path and path == ext else ext
 
 
 def clear_queue(queue: asyncio.Queue):

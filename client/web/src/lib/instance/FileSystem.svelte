@@ -210,7 +210,11 @@
             {/if}
             {#if columnsMeta.name && path.type === 'file'}
               <td class="word-break-all notranslate">
-                <a href={path.url} target={guessTextFile(path.name) ? '_blank' : '_self'}>{path.name}</a>
+                {#if path.name.indexOf('.') === -1}
+                  {path.name}
+                {:else}
+                  <a href={path.url} target={guessTextFile(path.name) ? '_blank' : '_self'}>{path.name}</a>
+                {/if}
               </td>
               {#if columnsMeta.size}
                 <td class="notranslate">{humanFileSize(path.size)}</td>

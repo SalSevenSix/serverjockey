@@ -1,12 +1,13 @@
 # ALLOW core.* valheim.messaging
 from core.util import gc, util, io, objconv, idutil
 from core.context import contextsvc
-from core.http import httprsc, httpext
+from core.http import httpabc, httprsc, httpext, httpsec
 from core.proc import proch
 from core.common import portmapper, svrhelpers
 from servers.valheim import messaging as msg
 
 APPID = '896660'
+_EXT_AUTOBACKUP = 'db', 'fwl'
 
 
 def _default_cmdargs() -> dict:
@@ -79,11 +80,15 @@ class Deployment:
         builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
                          httpext.MtimeHandler().check(self._save_dir).dir(self._logs_dir))
         builder.put_installer_steam(self._runtime_dir, APPID)
-        builder.put_wipes(self._runtime_dir, dict(save=self._save_dir, logs=self._logs_dir, all=self._world_dir))
+        builder.put_wipes(self._runtime_dir, dict(
+            save=self._save_dir, autobackups=dict(path=self._save_dir, ls_filter=_ls_autobackups),
+            logs=self._logs_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
+        builder.put('restore-autobackup', _RestoreAutobackupHandler(self), 'r')
         builder.pop()
         builder.put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
+        builder.psh('autobackups', _AutobackupsHandler(self))
         builder.put_config(dict(
             cmdargs=self._cmdargs_file, adminlist=self._adminlist_file,
             permittedlist=self._permittedlist_file, bannedlist=self._bannedlist_file))
@@ -116,3 +121,52 @@ class Deployment:
         if util.get('upnp', cmdargs, True):
             portmapper.map_port(self._context, self, port, gc.UDP, 'Valheim server')
             portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')
+
+    async def autobackups(self, baseurl: str) -> tuple:
+        files = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups(e)]
+        alts = [util.fname_only(e['name']) for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[1]]
+        result = [e for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[0] and util.fname_only(e['name']) in alts]
+        for entry in result:
+            entry['name'] = util.fname_only(entry['name'])
+        return tuple(result)
+
+    async def restore_autobackup(self, filename: str) -> bool:
+        name, backups, targets = util.fname_only(filename), [], []
+        for ext in _EXT_AUTOBACKUP:
+            backups.append(self._save_dir + '/' + name + '.' + ext)
+            targets.append(self._save_dir + '/Dedicated.' + ext)
+        for path in backups:
+            if not await io.file_exists(path):
+                return False
+        for index in (0, 1):
+            await io.stream_copy_file(backups[index], targets[index], tempdir=self._tempdir)
+        return True
+
+
+class _AutobackupsHandler(httpabc.GetHandler):
+
+    def __init__(self, deployment: Deployment):
+        self._deployment = deployment
+
+    async def handle_get(self, resource, data):
+        if not httpsec.is_secure(data):
+            return httpabc.ResponseBody.UNAUTHORISED
+        return await self._deployment.autobackups(data['baseurl'] + resource.path(data))
+
+
+class _RestoreAutobackupHandler(httpabc.PostHandler):
+
+    def __init__(self, deployment: Deployment):
+        self._deployment = deployment
+
+    async def handle_post(self, resource, data):
+        filename = util.get('filename', data)
+        if not filename:
+            return httpabc.ResponseBody.BAD_REQUEST
+        result = await self._deployment.restore_autobackup(filename)
+        return httpabc.ResponseBody.NO_CONTENT if result else httpabc.ResponseBody.NOT_FOUND
+
+
+def _ls_autobackups(entry) -> bool:
+    ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
+    return fname and fname.startswith('Dedicated_backup') and ftype == 'file' and fext in _EXT_AUTOBACKUP
