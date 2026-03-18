@@ -6,6 +6,16 @@ import * as logger from './logger.js';
 import * as msgutil from './msgutil.js';
 import * as subs from './subs.js';
 
+export async function fetchJson(context, url) {
+  if (url.startsWith('/')) { url = context.config.SERVER_URL + url; }
+  return await fetch(url, util.newGetRequest(context.config.SERVER_TOKEN))
+    .then(function(response) {
+      if (!response.ok) throw new Error('Status: ' + response.status);
+      return response.json();
+    })
+    .catch(logger.error);
+}
+
 export class MessageHttpTool {
   #context;
 
@@ -17,19 +27,6 @@ export class MessageHttpTool {
     this.#context = context;
     this.#message = message;
     this.#baseurl = baseurl;
-  }
-
-  async getJson(path, baseurlOverride = null) {
-    const [context, message] = [this.#context, this.#message];
-    const aBaseurl = baseurlOverride ? baseurlOverride : this.#baseurl;
-    const aPath = path.url ? path.url : path;
-    return await fetch(aBaseurl + aPath, util.newGetRequest(context.config.SERVER_TOKEN))
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(data) { return data; })
-      .catch(function(error) { return logger.error(error, message); });
   }
 
   doGet(path, dataHandler) {

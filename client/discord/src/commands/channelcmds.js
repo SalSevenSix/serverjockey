@@ -9,7 +9,7 @@ export function channel({ context, channels, instance, message, data }) {
     const result = channelsList.map(function({ channelType, channelId, isDefault }) {
       let text = '`' + (channelType === 'login' ? 'player' : channelType).padEnd(6);
       text += ' | ' + (isDefault ? ' default' : 'instance') + ' =>';
-      text += channelId ? ('` <#' + channelId + '>') : ' NONE`';
+      text += channelId ? '` <#' + channelId + '>' : ' NONE`';
       return text;
     });
     msgutil.sendText(message, result, false);

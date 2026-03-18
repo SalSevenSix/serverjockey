@@ -3,12 +3,24 @@ import * as pstats from 'common/activity/player';
 import { emojis } from '../util/literals.js';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as http from '../util/http.js';
 import * as msgutil from '../util/msgutil.js';
+
+async function roleModify(prelog, channel, memberid, member, role, isAdd) {
+  const [memberName, roleName] = [' `@' + memberid + '` ', ' `@' + role.name + '` '];
+  const [action, thumbs, promise] = isAdd
+    ? ['add', emojis.thumbsup, member.roles.add(role)]
+    : ['remove', emojis.thumbsdown, member.roles.remove(role)];
+  const text = await promise.catch(logger.error)
+    ? emojis.medal + memberName + thumbs + roleName
+    : emojis.bang + ' Failed to ' + action + roleName + 'for' + memberName;
+  channel.send(prelog + text.trim());
+}
 
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
-async function evaluateRewards(context, httptool, aliases, rewards, instance, message) {
-  const [now, baseurl, prelog] = [Date.now(), context.config.SERVER_URL, '`' + instance + '` '];
+async function evaluateRewards(context, aliases, rewards, instance, message) {
+  const [now, prelog] = [Date.now(), '`' + instance + '` '];
   let schemes = rewards.list();
   if (schemes.length === 0) return;
   msgutil.reactWait(message);
@@ -18,7 +30,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
   for (const scheme of schemes) {  // Gather roles and thier members by snowflake
     if (!cutil.hasProp(roleMap, scheme.snowflake)) {
       await cutil.sleep(1000);
-      const role = await message.guild.roles.fetch(scheme.snowflake);
+      const role = await message.guild.roles.fetch(scheme.snowflake).catch(logger.error);
       let schemeRole = null;
       if (role) {
         schemeRole = { role: role };
@@ -34,16 +46,18 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
     if (!roleMap[snowflake]) { delete roleMap[snowflake]; }
   }
   schemes = schemes.filter(function(scheme) {  // Remove schemes with invalid role
-    return Object.keys(roleMap).includes(scheme.snowflake);  // TODO use cutil.hasProp()
+    return cutil.hasProp(roleMap, scheme.snowflake);
   });
   if (schemes.length === 0) return;
   for (const scheme of schemes) {  // Gather activity by range
     if (!cutil.hasProp(activityMap, scheme.range)) {
       const atfrom = now - cutil.rangeCodeToMillis(scheme.range);
+      const fetched = await Promise.all([
+        http.fetchJson(context, pstats.queryLastEvent(instance, atfrom).url),
+        http.fetchJson(context, pstats.queryEvents(instance, atfrom, now).url)]);
+      if (!cutil.checkArray(fetched, 2)) throw new Error('Failed fetching player data');
       let results = {};
-      [results.lastevent, results.events] = await Promise.all([
-        httptool.getJson(pstats.queryLastEvent(instance, atfrom), baseurl),
-        httptool.getJson(pstats.queryEvents(instance, atfrom, now), baseurl)]);
+      [results.lastevent, results.events] = fetched;
       results = pstats.extractActivity(results);
       activityMap[scheme.range] = cutil.hasProp(results.results, instance) ? results.results[instance].players : [];
       activityMap[scheme.range].forEach(function(record) { record.alias = aliases.findByName(record.player); });
@@ -84,17 +98,13 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
     schemeRole.takes = schemeRole.orig.filter(function(member) { return !schemeRole.members.includes(member); });
     for (const [give, members] of [[false, schemeRole.takes], [true, schemeRole.gives]]) {
       for (const member of members) {
+        await cutil.sleep(1000);
         let memberid = aliases.findByKey(member);
         memberid = memberid ? memberid.discordid : member;
-        await cutil.sleep(1000);
-        if (!cutil.hasProp(membersMap, member)) {
-          message.channel.send(prelog + emojis.bang + ' Alias `@' + memberid + '` not found');
-        } else if (give) {
-          await membersMap[member].roles.add(schemeRole.role);
-          message.channel.send(prelog + emojis.medal + ' `@' + memberid + '` ' + emojis.thumbsup + ' `@' + schemeRole.role.name + '`');
+        if (cutil.hasProp(membersMap, member)) {
+          await roleModify(prelog, message.channel, memberid, membersMap[member], schemeRole.role, give);
         } else {
-          await membersMap[member].roles.remove(schemeRole.role);
-          message.channel.send(prelog + emojis.medal + ' `@' + memberid + '` ' + emojis.thumbsdown + ' `@' + schemeRole.role.name + '`');
+          message.channel.send(prelog + emojis.bang + ' Alias `@' + memberid + '` not found');
         }
       }
     }
@@ -103,7 +113,7 @@ async function evaluateRewards(context, httptool, aliases, rewards, instance, me
 /* eslint-enable max-lines-per-function */
 /* eslint-enable complexity */
 
-export function reward({ context, httptool, aliases, rewards, instance, message, data }) {
+export function reward({ context, aliases, rewards, instance, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, rewards.listText());
@@ -114,6 +124,7 @@ export function reward({ context, httptool, aliases, rewards, instance, message,
     if (!snowflake) return msgutil.reactError(message);
     message.guild.roles.fetch(snowflake)
       .then(function(role) {
+        if (!role) return msgutil.reactError(message);
         if (!rewards.add(action, snowflake, role.name, type, threshold, range)) return msgutil.reactError(message);
         rewards.save();
         msgutil.reactSuccess(message);
@@ -130,7 +141,7 @@ export function reward({ context, httptool, aliases, rewards, instance, message,
     rewards.save();
     msgutil.reactSuccess(message);
   } else if (cmd === 'evaluate') {
-    evaluateRewards(context, httptool, aliases, rewards, instance, message)
+    evaluateRewards(context, aliases, rewards, instance, message)
       .then(function() {
         msgutil.rmReacts(message, msgutil.reactSuccess, logger.error);
       })

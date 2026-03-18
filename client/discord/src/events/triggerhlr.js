@@ -1,12 +1,13 @@
 import * as cutil from 'common/util/util';
-import { serverEventTriggers, playerEventTriggers, emojis } from '../util/literals.js';
+import { playerEvents, serverEventTriggers, playerEventTriggers, emojis } from '../util/literals.js';
+import * as logger from '../util/logger.js';
 
 function newEntityLoader(context) {
   const [self, cache] = [{}, {}];
 
   const get = async function(entity, fetcher, snowflake) {
     if (cutil.hasProp(cache[entity], snowflake)) return cache[entity][snowflake];
-    const result = await fetcher.fetch(snowflake);
+    const result = await fetcher.fetch(snowflake).catch(logger.error);
     cache[entity][snowflake] = result ? result : null;
     return cache[entity][snowflake];
   };
@@ -40,12 +41,22 @@ function newEntityLoader(context) {
   return self.reset();
 }
 
+async function roleModify(prelog, channel, discordid, member, role, isAdd) {
+  const [discordName, roleName] = [' `@' + discordid + '` ', ' `@' + role.name + '` '];
+  const [action, thumbs, promise] = isAdd
+    ? ['add', emojis.thumbsup, member.roles.add(role)]
+    : ['remove', emojis.thumbsdown, member.roles.remove(role)];
+  const text = await promise.catch(logger.error)
+    ? emojis.bell + discordName + thumbs + roleName
+    : emojis.bang + ' Failed to ' + action + roleName + 'for' + discordName;
+  if (channel) { channel.send(prelog + text.trim()); }
+}
+
 /* eslint-disable max-depth */
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 export function newTriggerHandler(context, channels, instance, triggers) {
-  const loader = newEntityLoader(context);
-  const prelog = '`' + instance + '` ' + emojis.bell + ' ';
+  const [loader, prelog] = [newEntityLoader(context), '`' + instance + '` '];
 
   const subsText = function(value, channel, event, alias = null) {
     let result = value.replaceAll('{n}', '\n');
@@ -124,12 +135,7 @@ export function newTriggerHandler(context, channels, instance, triggers) {
             const found = member.roles.cache.find(function(memberRole) { return memberRole.id === role.id; });
             if ((isAdd && !found) || (!isAdd && found)) {
               await cutil.sleep(1000);
-              if (isAdd) { await member.roles.add(role); }
-              else { await member.roles.remove(role); }
-              if (channel) {
-                const thumbs = isAdd ? emojis.thumbsup : emojis.thumbsdown;
-                channel.send(prelog + '`@' + alias.discordid + '` ' + thumbs + ' `@' + role.name + '`');
-              }
+              await roleModify(prelog, channel, alias.discordid, member, role, isAdd);
             }
           }
         }
@@ -157,7 +163,7 @@ export function newTriggerHandler(context, channels, instance, triggers) {
     } else if (cutil.hasProp(serverEventTriggers, event)) {
       for (const trigger of triggers.list()) { await handleServerEvent(trigger, event); }
     }
-    if (event === 'CLEAR') { loader.reset(); }
+    if (event === playerEvents.clear) { loader.reset(); }
   };
 }
 /* eslint-enable max-lines-per-function */

@@ -57,18 +57,6 @@ export function capitalizeKebabCase(value) {
   return value.split('-').map(capitalize).join(' ');
 }
 
-export function chunkArray(value, rows = 20, columns = 3) {
-  if (!value) return [];
-  if (value.length > rows * columns) {
-    rows = Math.ceil(value.length / columns);
-  }
-  const result = [];
-  for (let i = 0; i < columns; i++) {
-    result.push(value.slice(i * rows, i * rows + rows));
-  }
-  return result;
-}
-
 
 export class RollingLog {
   #lines;

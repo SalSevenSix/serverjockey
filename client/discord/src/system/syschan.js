@@ -22,8 +22,8 @@ export async function newSystemChannels(context) {
   const [self, cache] = [{}, {}];
 
   self.logChannel = function(channelType, channel, instance = null) {
-    const target = instance ? ('instance ' + instance) : 'DEFAULT';
-    const channelName = channel ? (channel.name + ' (' + channel.id + ')') : 'UNSET';
+    const target = instance ? 'instance ' + instance : 'DEFAULT';
+    const channelName = channel ? channel.name + ' (' + channel.id + ')' : 'UNSET';
     logger.info('Channel ' + channelType + ' for ' + target + ' is ' + channelName);
   };
 
@@ -39,9 +39,7 @@ export async function newSystemChannels(context) {
       const guild = self.findGuild();
       fetcher = guild ? guild.channels : context.client.channels;
     }
-    channel = await fetcher.fetch(channelId)
-      .then(function(result) { return result; })
-      .catch(logger.error);
+    channel = await fetcher.fetch(channelId).catch(logger.error);
     if (channel) { cache[channelId] = channel; }
     return channel;
   };

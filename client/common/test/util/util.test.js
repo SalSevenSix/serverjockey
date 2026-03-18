@@ -1,6 +1,7 @@
 import assert from 'assert';
-import { isBoolean, isString, urlSafeB64encode, floatToPercent, moveArrayElement, humanDuration, humanFileSize,
-         shortISODateTimeString, parseDateToMillis, presetDate, rangeCodeToMillis } from 'common/util/util';
+import { isBoolean, isString, urlSafeB64encode, floatToPercent, checkArray, chunkArray, moveArrayElement,
+  humanDuration, humanFileSize, shortISODateTimeString, parseDateToMillis, presetDate, rangeCodeToMillis
+} from 'common/util/util';
 
 describe('isBoolean()', function() {
   it('true if actually true', function() { assert.strictEqual(isBoolean(true), true); });
@@ -33,6 +34,32 @@ describe('floatToPercent()', function() {
   it('1.0 is 100.0%', function() { assert.strictEqual(floatToPercent(1.0), '100.0%'); });
   it('2.3452 is 234.5%', function() { assert.strictEqual(floatToPercent(2.3452), '234.5%'); });
   it('args used', function() { assert.strictEqual(floatToPercent(0.1234567, 3, ' pc'), '12.346 pc'); });
+});
+
+describe('checkArray()', function() {
+  it('false on null', function() { assert.equal(checkArray(null, 3), false); });
+  it('true empty zero', function() { assert.equal(checkArray([], 0), true); });
+  it('false empty num', function() { assert.equal(checkArray([], 3), false); });
+  it('false wrong len', function() { assert.equal(checkArray([1, 2, 3], 2), false); });
+  it('false nulls 1', function() { assert.equal(checkArray([1, null, 3], 3), false); });
+  it('false nulls 2', function() { assert.equal(checkArray([null, null, 3], 3), false); });
+  it('true match', function() { assert.equal(checkArray([1, 2, 3], 3), true); });
+});
+
+describe('chunkArray()', function() {
+  it('null value', function() { assert.deepEqual(chunkArray(null), []); });
+  it('few', function() { assert.deepEqual(chunkArray([1, 2, 3], 5, 3), [[1, 2, 3], [], []]); });
+  const sample = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  let expected = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13]];
+  it('under', function() { assert.deepEqual(chunkArray(sample, 5, 3), expected); });
+  sample.push(14);
+  sample.push(15);
+  expected = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]];
+  it('filled', function() { assert.deepEqual(chunkArray(sample, 5, 3), expected); });
+  sample.push(16);
+  sample.push(17);
+  expected = [[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17]];
+  it('over', function() { assert.deepEqual(chunkArray(sample, 5, 3), expected); });
 });
 
 describe('moveArrayElement()', function() {

@@ -1,8 +1,8 @@
 import fs from 'fs';
-import fetch from 'node-fetch';
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
+import * as http from '../util/http.js';
 import * as subs from '../util/subs.js';
 import * as channelsvc from '../services/channelsvc.js';
 import * as panelsvc from '../services/panelsvc.js';
@@ -10,16 +10,6 @@ import * as aliassvc from '../services/aliassvc.js';
 import * as rewardsvc from '../services/rewardsvc.js';
 import * as triggersvc from '../services/triggersvc.js';
 import * as servers from './servers.js';
-
-async function fetchJson(context, url) {
-  return await fetch(url, util.newGetRequest(context.config.SERVER_TOKEN))
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
-    .then(function(json) { return json; })
-    .catch(logger.error);
-}
 
 export class Service {
   #context;
@@ -37,10 +27,11 @@ export class Service {
   /* eslint-disable max-lines-per-function */
   async startup() {
     const [self, context] = [this, this.#context];
-    const [baseurl, currentFile] = [context.config.SERVER_URL, context.config.DATADIR + '/current.json'];
     const [modules, instances] = await Promise.all([
-      fetchJson(context, baseurl + '/modules'), fetchJson(context, baseurl + '/instances')]);
+      http.fetchJson(context, '/modules'), http.fetchJson(context, '/instances')]);
+    if (!modules || !instances) throw new Error('Failed fetching system data');
     [this.#modules, this.#instances, this.#current] = [modules, instances, util.getFirstKey(instances)];
+    const currentFile = context.config.DATADIR + '/current.json';
     if (fs.existsSync(currentFile)) {
       const currentData = JSON.parse(fs.readFileSync(currentFile));
       if (currentData && cutil.hasProp(instances, currentData.instance)) { this.#current = currentData.instance; }
@@ -58,12 +49,12 @@ export class Service {
     }
     logger.info('Instances...');
     logger.log(self.getInstancesText().join('\n'));
-    new subs.Helper(context).daemon(baseurl + '/instances/subscribe', function(data) {
+    new subs.Helper(context).daemon('/instances/subscribe', function(data) {
       const identity = data.instance.identity;
       if (data.event === 'created') {
         const instance = data.instance;
         logger.info('Event create instance: ' + identity + ' (' + instance.module + ')');
-        instance.url = baseurl + '/instances/' + identity;
+        instance.url = context.config.SERVER_URL + '/instances/' + identity;
         instance.channels = channelsvc.newInstanceChannels(context, identity);
         instance.panels = panelsvc.newPanels(context, identity);
         instance.aliases = aliassvc.newAliases(context, identity);

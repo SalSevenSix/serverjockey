@@ -20,6 +20,7 @@ export function alias({ context, aliases, message, data }) {
     if (!snowflake) return msgutil.reactError(message);
     context.client.users.fetch(snowflake)
       .then(function(user) {
+        if (!user) return msgutil.reactError(message);
         if (!aliases.add(snowflake, user.tag, name)) return msgutil.reactError(message);
         aliases.save();
         msgutil.reactSuccess(message);

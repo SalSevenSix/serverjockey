@@ -1,8 +1,7 @@
 <script>
   import { onMount, onDestroy, getContext, tick } from 'svelte';
-  import { humanDuration, shortISODateTimeString } from 'common/util/util';
+  import { humanDuration, shortISODateTimeString, chunkArray } from 'common/util/util';
   import { queryEvents, queryLastEvent, extractActivity, compactPlayers } from 'common/activity/player';
-  import { chunkArray } from '$lib/util/util';
   import { ObjectUrls } from '$lib/util/browserutil';
   import { fetchJson } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';

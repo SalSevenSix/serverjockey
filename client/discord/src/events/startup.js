@@ -1,10 +1,8 @@
 /* eslint-disable @stylistic/function-paren-newline */
-import fetch from 'node-fetch';
 import * as cutil from 'common/util/util';
-import * as util from '../util/util.js';
-import * as logger from '../util/logger.js';
 import { startupEvents, serverStates, serverTimedStates,
   playerEvents, playerEventEmojis, emojis } from '../util/literals.js';
+import * as http from '../util/http.js';
 import * as subs from '../util/subs.js';
 import * as panelhlr from './panelhlr.js';
 import * as aliasmehlr from './aliasmehlr.js';
@@ -14,13 +12,9 @@ import * as triggerhlr from './triggerhlr.js';
 function startPlayerEvents(context, channels, instance, url, aliases,
   panelHandler, triggerHandler, aliasmeHandler, chatbotHandler) {
   if (panelHandler) {
-    fetch(url + '/players', util.newGetRequest(context.config.SERVER_TOKEN))
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) { panelHandler(startupEvents.players, json); })
-      .catch(logger.error);
+    http.fetchJson(context, url + '/players').then(function(json) {
+      if (json) { panelHandler(startupEvents.players, json); }
+    });
   }
   new subs.Helper(context).daemon(url + '/players/subscribe', function(json) {
     const { event, text } = json;
@@ -56,17 +50,12 @@ function startPlayerEvents(context, channels, instance, url, aliases,
 function startServerEvents(context, channels, instance, url, panelHandler, triggerHandler) {
   let [state, restartRequired] = [null, false];
   if (panelHandler) {
-    fetch(url + '/server', util.newGetRequest(context.config.SERVER_TOKEN))
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
-      .then(function(json) {
-        if (!json || !json.state) return true;  // Ignore
+    http.fetchJson(context, url + '/server').then(function(json) {
+      if (json && json.state) {
         if (!state) { state = json.state; }
         panelHandler(startupEvents.server, json);
-      })
-      .catch(logger.error);
+      }
+    });
   }
   new subs.Helper(context).daemon(url + '/server/subscribe', function(json) {
     if (!json || !json.state) return true;  // Ignore

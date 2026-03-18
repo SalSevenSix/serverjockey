@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy, getContext } from 'svelte';
-  import { hasProp, humanDuration } from 'common/util/util';
-  import { chunkArray } from '$lib/util/util';
+  import { hasProp, humanDuration, chunkArray } from 'common/util/util';
   import { notifyError } from '$lib/util/notifications';
   import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';

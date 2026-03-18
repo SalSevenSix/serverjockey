@@ -1,6 +1,6 @@
 import assert from 'assert';
-import { fTrue, generateId, guessTextFile, chunkArray,
-         capitalize, toCamelCase, capitalizeKebabCase } from '../../../src/lib/util/util.js';
+import { fTrue, generateId, guessTextFile, capitalize,
+  toCamelCase, capitalizeKebabCase } from '../../../src/lib/util/util.js';
 
 describe('fTrue()', function() {
   it('return true', function() { assert.strictEqual(fTrue(), true); });
@@ -30,22 +30,6 @@ describe('capitalizeKebabCase()', function() {
   it('empty value', function() { assert.strictEqual(capitalizeKebabCase(''), ''); });
   it('simple', function() { assert.strictEqual(capitalizeKebabCase('hello-world'), 'Hello World'); });
   it('complex', function() { assert.strictEqual(capitalizeKebabCase('hello-world hiya'), 'Hello World hiya'); });
-});
-
-describe('chunkArray()', function() {
-  it('null value', function() { assert.deepEqual(chunkArray(null), []); });
-  it('few', function() { assert.deepEqual(chunkArray([1, 2, 3], 5, 3), [[1, 2, 3], [], []]); });
-  const sample = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-  let expected = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13]];
-  it('under', function() { assert.deepEqual(chunkArray(sample, 5, 3), expected); });
-  sample.push(14);
-  sample.push(15);
-  expected = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]];
-  it('filled', function() { assert.deepEqual(chunkArray(sample, 5, 3), expected); });
-  sample.push(16);
-  sample.push(17);
-  expected = [[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17]];
-  it('over', function() { assert.deepEqual(chunkArray(sample, 5, 3), expected); });
 });
 
 describe('guessTextFile()', function() {

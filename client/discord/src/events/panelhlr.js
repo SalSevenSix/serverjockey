@@ -13,18 +13,6 @@ function compactArray(value, limit) {
   return result;
 }
 
-function chunkArray(value, rows, columns) {  // TODO move to common
-  if (!value) return [];
-  if (value.length > rows * columns) {
-    rows = Math.ceil(value.length / columns);
-  }
-  const result = [];
-  for (let i = 0; i < columns; i++) {
-    result.push(value.slice(i * rows, i * rows + rows));
-  }
-  return result;
-}
-
 function toStatusText({ instance, server, players }) {
   let text = '```\n';
   text += 'Server ' + instance + ' is ' + server.state;
@@ -33,7 +21,7 @@ function toStatusText({ instance, server, players }) {
     if (details.version) { text += '\nVersion : ' + details.version; }
     if (details.ip && details.port) { text += '\nConnect : ' + details.ip + ':' + details.port; }
     text += '\nOnline  : ' + players.length;
-    chunkArray(compactArray(players, 36), 3, 12).forEach(function(row) {
+    cutil.chunkArray(compactArray(players, 36), 3, 12).forEach(function(row) {
       text += '\n';
       row.forEach(function(name, index) {
         name = name.substring(0, 15);

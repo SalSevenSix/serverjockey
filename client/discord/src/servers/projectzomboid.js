@@ -150,6 +150,7 @@ function whitelistAddId(context, httptool, instance, aliases, message, snowflake
   }
   context.client.users.fetch(snowflake)
     .then(function(user) {
+      if (!user) return msgutil.reactError(message);
       if (!record) {
         if (!aliases.add(snowflake, user.tag, name)) return msgutil.reactError(message);
         aliases.save();

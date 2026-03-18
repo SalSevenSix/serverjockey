@@ -24,6 +24,23 @@ export function floatToPercent(value, rounding = 1, suffix = '%') {
   return suffix ? result + suffix : result;
 }
 
+export function checkArray(value, length) {
+  if (!value || value.length != length) return false;
+  return value.filter(function(e) { return !e; }).length === 0;
+}
+
+export function chunkArray(value, rows = 20, columns = 3) {
+  if (!value) return [];
+  if (value.length > rows * columns) {
+    rows = Math.ceil(value.length / columns);
+  }
+  const result = [];
+  for (let i = 0; i < columns; i++) {
+    result.push(value.slice(i * rows, i * rows + rows));
+  }
+  return result;
+}
+
 export function moveArrayElement(value, index, positions) {
   if (!value) return value;
   [index, positions] = [parseInt(index, 10), parseInt(positions, 10)];

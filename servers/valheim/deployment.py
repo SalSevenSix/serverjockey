@@ -123,6 +123,8 @@ class Deployment:
             portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')
 
     async def autobackups(self, baseurl: str) -> tuple:
+        if not await io.directory_exists(self._save_dir):
+            return ()
         files = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups(e)]
         alts = [util.fname_only(e['name']) for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[1]]
         result = [e for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[0] and util.fname_only(e['name']) in alts]

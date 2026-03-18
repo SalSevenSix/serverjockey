@@ -31,8 +31,9 @@ export class Helper {
     }
   }
 
-  async subscribe(subscribeUrl) {
-    return await fetch(subscribeUrl, util.newPostRequest('application/json', this.#context.config.SERVER_TOKEN))
+  async subscribe(url) {
+    if (url.startsWith('/')) { url = this.#context.config.SERVER_URL + url; }
+    return await fetch(url, util.newPostRequest('application/json', this.#context.config.SERVER_TOKEN))
       .then(function(response) {
         if (response.status === 404) return false;
         if (!response.ok) throw new Error('Status: ' + response.status);
