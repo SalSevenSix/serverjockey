@@ -21,7 +21,7 @@ export function channel({ context, channels, instance, message, data }) {
       context.channels.logChannel(channelType, null, instance);
       msgutil.reactSuccess(message);
     } else {  // Action is channel
-      const channelId = util.toSnowflake(action, '<#');
+      const channelId = util.toChannelId(action);
       if (!channelId) return msgutil.reactError(message);
       context.channels.fetch(channelId, message.guild.channels).then(function(result) {
         if (!result) return msgutil.reactError(message);

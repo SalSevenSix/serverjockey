@@ -138,7 +138,7 @@ function whitelistRemoveId(httptool, aliases, message, snowflake, dataHandler = 
 function whitelistAddId(context, httptool, instance, aliases, message, snowflake, name = null) {
   let record = aliases.findByKey(snowflake);
   if (name) {
-    snowflake = record ? record.snowflake : util.toSnowflake(snowflake);
+    snowflake = record ? record.snowflake : util.toMemberId(snowflake);
     if (!snowflake) return msgutil.reactError(message);
     if (record && record.name != name) {
       if (aliases.findByName(name)) return msgutil.reactError(message);  // Someone else has name

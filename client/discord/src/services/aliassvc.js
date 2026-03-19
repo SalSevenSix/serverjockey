@@ -105,7 +105,7 @@ export function newAliases(context, instance) {
 
   self.findByKey = function(value) {
     if (!value) return null;
-    const snowflake = util.toSnowflake(value);
+    const snowflake = util.toMemberId(value);
     if (snowflake) return cutil.hasProp(data.snowflake, snowflake) ? unpack(data.snowflake[snowflake]) : null;
     const discordid = value.startsWith('@') ? value.slice(1) : value;
     return cutil.hasProp(data.discordid, discordid) ? unpack(data.discordid[discordid]) : null;
@@ -117,7 +117,7 @@ export function newAliases(context, instance) {
   };
 
   self.resolveName = function(value) {
-    if (!util.toSnowflake(value)) return value;
+    if (!util.toMemberId(value)) return value;
     const record = self.findByKey(value);
     return record ? record.name : value;
   };

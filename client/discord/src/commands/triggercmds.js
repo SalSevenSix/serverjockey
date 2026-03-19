@@ -22,13 +22,13 @@ async function handleAdd(context, triggers, message, data) {
   for (const arg of util.clobCommandLine(data)) {
     const [key, value] = arg.split('=');
     if (value && key.includes('role')) {
-      const snowflake = util.toSnowflake(value, '<@&');
+      const snowflake = util.toRoleId(value);
       if (!snowflake) throw new Error('Invalid role id: ' + value);
       const role = await message.guild.roles.fetch(snowflake);
       if (!role) throw new Error('Role not found: ' + value);
       args.push(key + '=' + JSON.stringify({ snowflake: snowflake, name: role.name }));
     } else if (value && key.includes('channel')) {
-      const snowflake = util.toSnowflake(value, '<#');
+      const snowflake = util.toChannelId(value);
       if (!snowflake) throw new Error('Invalid channel id: ' + value);
       const channel = await context.channels.fetch(snowflake, message.guild.channels);
       if (!channel) throw new Error('Channel not found: ' + value);

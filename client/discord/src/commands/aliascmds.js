@@ -16,7 +16,7 @@ export function alias({ context, aliases, message, data }) {
     msgutil.sendText(message, text.length > 0 ? text : 'No Alias Found');
   } else if (cmd === 'add') {
     if (!aliasid || !name) return msgutil.reactUnknown(message);
-    const snowflake = util.toSnowflake(aliasid);
+    const snowflake = util.toMemberId(aliasid);
     if (!snowflake) return msgutil.reactError(message);
     context.client.users.fetch(snowflake)
       .then(function(user) {

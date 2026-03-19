@@ -89,10 +89,14 @@ export function mergeStringArray(value) {
   return result;
 }
 
-export function toSnowflake(value, prefix = '<@') {
+function toSnowflake(value, prefix) {
   if (!value) return null;
   const result = value.length > prefix.length + 1 && value.startsWith(prefix) && value.endsWith('>')
     ? value.slice(prefix.length, -1) : value;
   if (result.length < 18) return null;
   return (/^\d*$/).test(result) ? result : null;
 }
+
+export function toChannelId(value) { return toSnowflake(value, '<#'); }
+export function toRoleId(value) { return toSnowflake(value, '<@&'); }
+export function toMemberId(value) { return toSnowflake(value, '<@'); }

@@ -13,7 +13,7 @@ async function roleModify(prelog, channel, memberid, member, role, isAdd) {
     : ['remove', emojis.thumbsdown, member.roles.remove(role)];
   const text = await promise.catch(logger.error)
     ? emojis.medal + memberName + thumbs + roleName
-    : emojis.bang + ' Failed to ' + action + roleName + 'for' + memberName;
+    : emojis.bang + ' Failed to ' + action + roleName + 'for member' + memberName + '(please check role order)';
   channel.send(prelog + text.trim());
 }
 
@@ -117,10 +117,11 @@ export function reward({ context, aliases, rewards, instance, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
     msgutil.sendText(message, rewards.listText());
-  } else if (cmd === 'add') {
-    if (data.length < 6) return msgutil.reactUnknown(message);
-    const [action, candidate, type, threshold, range] = data.slice(1);
-    const snowflake = util.toSnowflake(candidate, '<@&');
+  } else if (cmd === 'add' || cmd === 'give' || cmd === 'take') {
+    if (cmd === 'add') { data = data.slice(1); }
+    if (data.length < 5) return msgutil.reactUnknown(message);
+    const [action, candidate, type, threshold, range] = data;
+    const snowflake = util.toRoleId(candidate);
     if (!snowflake) return msgutil.reactError(message);
     message.guild.roles.fetch(snowflake)
       .then(function(role) {

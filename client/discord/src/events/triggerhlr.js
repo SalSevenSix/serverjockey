@@ -48,7 +48,7 @@ async function roleModify(prelog, channel, discordid, member, role, isAdd) {
     : ['remove', emojis.thumbsdown, member.roles.remove(role)];
   const text = await promise.catch(logger.error)
     ? emojis.bell + discordName + thumbs + roleName
-    : emojis.bang + ' Failed to ' + action + roleName + 'for' + discordName;
+    : emojis.bang + ' Failed to ' + action + roleName + 'for member' + discordName + '(please check role order)';
   if (channel) { channel.send(prelog + text.trim()); }
 }
 
