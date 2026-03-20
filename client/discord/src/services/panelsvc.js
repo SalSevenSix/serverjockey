@@ -50,18 +50,21 @@ export function newPanels(context, instance) {
     callbacks.onAdd = callback;
   };
 
-  self.add = function(panelType, message) {
+  self.add = function(panelType, message, thumbUrl = null) {
     const [channelId, messageId] = [message.channel.id, message.id];
     self.remove(channelId, messageId);
     const entry = { panelType, channelId, messageId };
+    if (thumbUrl) { entry.thumbUrl = thumbUrl; }
     data.base.push(entry);
     if (callbacks.onAdd) { callbacks.onAdd(entry, message); }
     return self;
   };
 
   self.list = function() {
-    return data.base.map(function({ panelType, channelId, messageId }) {
-      return { panelType, channelId, messageId };
+    return data.base.map(function({ panelType, channelId, messageId, thumbUrl }) {
+      const entry = { panelType, channelId, messageId };
+      if (thumbUrl) { entry.thumbUrl = thumbUrl; }
+      return entry;
     });
   };
 

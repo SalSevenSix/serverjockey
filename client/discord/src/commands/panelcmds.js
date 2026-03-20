@@ -1,5 +1,5 @@
 const { messageLink, EmbedBuilder } = require('discord.js');
-import { assetUrls, colourCodes } from '../util/literals.js';
+import { emojis, assetUrls, colourCodes } from '../util/literals.js';
 import * as logger from '../util/logger.js';
 import * as msgutil from '../util/msgutil.js';
 
@@ -16,11 +16,10 @@ function placeholderText() {
   ];
 }
 
-function placeholderEmbed() {
-  return new EmbedBuilder()
-    .setColor(colourCodes.light)
-    .setTitle('Server Status Panel').setDescription('waiting for update!')
-    .setThumbnail(assetUrls.sjgmsIconMedium).setTimestamp();
+function placeholderEmbed(thumbUrl) {
+  if (!thumbUrl) { thumbUrl = assetUrls.sjgmsIconMedium; }
+  return new EmbedBuilder().setColor(colourCodes.light).setTitle('Server Status Panel')
+    .setDescription(emojis.wait + ' waiting for update!').setThumbnail(thumbUrl).setTimestamp();
 }
 
 export function panel({ panels, message, data }) {
@@ -39,8 +38,11 @@ export function panel({ panels, message, data }) {
       .then(function(result) { panels.add(cmd, result).save(); })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'status-embed') {
-    message.channel.send({ embeds: [placeholderEmbed()] })
-      .then(function(result) { panels.add(cmd, result).save(); })
+    let thumbUrl = data.length > 1 ? data[1] : null;
+    if (thumbUrl && thumbUrl.startsWith('<')) { thumbUrl = thumbUrl.substring(1); }
+    if (thumbUrl && thumbUrl.endsWith('>')) { thumbUrl = thumbUrl.slice(0, -1); }
+    message.channel.send({ embeds: [placeholderEmbed(thumbUrl)] })
+      .then(function(result) { panels.add(cmd, result, thumbUrl).save(); })
       .catch(function(error) { logger.error(error, message); });
   } else {
     msgutil.reactUnknown(message);

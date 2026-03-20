@@ -94,9 +94,10 @@ const panelHelp = 'panel {cmds ...}     : Panel management, use help for details
 const helpPanel = [
   'Panel Management. Create message status panels that are automatically updated.',
   'Simply delete the message to remove panel. Commands are...', '```',
-  'list           : List active panels for the instance (default command)',
-  'status-text    : Create a text status panel for the instance',
-  'status-embed   : Create an embed status panel for the instance', '```'];
+  'list               : List active panels for the instance (default command)',
+  'status-text        : Create a text status panel for the instance',
+  'status-embed {url} : Create an embed status panel for the instance,',
+  '                     with optional thumbnail {url}', '```'];
 
 const aliasmeHelp = 'aliasme              : DM self service alias code';
 const helpAliasme = [

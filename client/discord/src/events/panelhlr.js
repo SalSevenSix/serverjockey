@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 import * as cutil from 'common/util/util';
 import { startupEvents, serverStates, playerEvents, serverStateColours,
-  assetUrls, colourCodes } from '../util/literals.js';
+  emojis, assetUrls, colourCodes } from '../util/literals.js';
 import * as logger from '../util/logger.js';
 
 function compactArray(value, limit) {
@@ -13,9 +13,10 @@ function compactArray(value, limit) {
   return result;
 }
 
-function toStatusText({ instance, server, players }) {
+function toStatusText({ game, instance, server, players }) {
   let text = '```\n';
   text += 'Server ' + instance + ' is ' + server.state;
+  text += '\nGame    : ' + game;
   if (server.running) {
     const details = server.details ? server.details : {};
     if (details.version) { text += '\nVersion : ' + details.version; }
@@ -35,25 +36,30 @@ function toStatusText({ instance, server, players }) {
   return text;
 }
 
-function toStatusEmbed({ instance, server, players }) {
+function toStatusEmbed({ game, instance, server, players, thumbUrl }) {
   const details = server.details ? server.details : {};
   const version = server.running && details.version ? details.version : '---';
   const connect = server.running && details.ip && details.port ? details.ip + ':' + details.port : '---';
-  const fields = [{ name: 'Version', value: version }, { name: 'Connect', value: connect }];
-  compactArray(players, 21).forEach(function(name, index) {
-    fields.push({ name: (index + 1).toString().padStart(2, '0'), value: name, inline: true });
+  const title = (server.running ? emojis.greenheart : emojis.whitesqr) + '  Server ' + instance + ' is ' + server.state;
+  const description = '\u200B\n' + [
+    emojis.joystick + ' **Game:** ' + game,
+    emojis.dart + ' **Version:** ' + version,
+    emojis.compass + ' **Connect:** ' + connect
+  ].join('\n\u200B\n') + '\n\u200B';
+  const fields = compactArray(players, 21).map(function(name, index) {
+    return { name: (index + 1).toString().padStart(2, '0'), value: name, inline: true };
   });
   const colour = cutil.hasProp(serverStateColours, server.state) ? serverStateColours[server.state] : colourCodes.light;
-  const title = 'Server ' + instance + ' is ' + server.state;
   const footer = { text: 'Last Updated' };
-  const embed = new EmbedBuilder()
-    .setColor(colour).setTitle(title).setThumbnail(assetUrls.sjgmsIconMedium)
-    .addFields(fields).setFooter(footer).setTimestamp();
+  if (!thumbUrl) { thumbUrl = assetUrls.sjgmsIconMedium; }
+  const embed = new EmbedBuilder().setColor(colour).setTitle(title).setDescription(description)
+    .setThumbnail(thumbUrl).addFields(fields).setFooter(footer).setTimestamp();
   return { embeds: [embed] };
 }
 
-function newModel(instance) {
-  const model = { instance: instance, server: null, players: null };
+function newModel(context, instance) {
+  const model = { game: context.instancesService.getModuleName(instance),
+    instance: instance, server: null, players: null };
   const self = {};
 
   self.resolve = function() {
@@ -123,6 +129,7 @@ function newUpdater(context, panels, resolve) {
         context.cooldowns.submit(renderer(panel));
         return false;
       }
+      model.thumbUrl = panel.entry.thumbUrl ? panel.entry.thumbUrl : null;
       panel.synced = true;
       const result = await panel.message.edit(panel.render(model)).catch(logger.error);
       if (!result) return remove(panel, 'failed to edit message: ' + panel.entry.messageId);
@@ -156,7 +163,7 @@ function newUpdater(context, panels, resolve) {
 /* eslint-enable max-lines-per-function */
 
 export function newPanelHandler(context, instance, panels) {
-  const model = newModel(instance);
+  const model = newModel(context, instance);
   const updater = newUpdater(context, panels, model.resolve);
   const handlers = {
     [startupEvents.server]: model.updateServer,
