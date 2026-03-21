@@ -1,10 +1,5 @@
 import assert from 'assert';
-import { fTrue, generateId, guessTextFile, capitalize,
-  toCamelCase, capitalizeKebabCase } from '../../../src/lib/util/util.js';
-
-describe('fTrue()', function() {
-  it('return true', function() { assert.strictEqual(fTrue(), true); });
-});
+import { generateId, guessTextFile, capitalize, toCamelCase, capitalizeKebabCase } from '../../../src/lib/util/util.js';
 
 describe('generateId()', function() {
   const gid = generateId();

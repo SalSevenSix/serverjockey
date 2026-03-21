@@ -13,7 +13,6 @@ export default defineConfig([
       'no-warning-comments': 1,
       'require-atomic-updates': 1,
       'require-await': 1,
-      'no-empty-function': 1,
       'prefer-destructuring': 0,
       'curly': 0,
       'sort-keys': 0,

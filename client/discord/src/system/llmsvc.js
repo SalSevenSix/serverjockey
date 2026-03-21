@@ -1,7 +1,8 @@
 import OpenAI from 'openai';
-import { emojis } from './literals.js';
-import * as util from './util.js';
-import * as logger from './logger.js';
+import * as cutil from 'common/util/util';
+import { emojis } from '../util/literals.js';
+import * as util from '../util/util.js';
+import * as logger from '../util/logger.js';
 
 async function requestChatCompletion(api, config, gamename, messages, input) {
   let content = null;
@@ -39,7 +40,7 @@ function nullChatCompletion(message) {
   return function() {
     return {
       avatar: function() { return emojis.robot; },
-      reset: function() {},
+      reset: cutil.fNoop,
       request: async function() { return message; }
     };
   };

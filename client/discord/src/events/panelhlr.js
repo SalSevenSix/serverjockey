@@ -49,7 +49,7 @@ function toStatusEmbed({ game, instance, server, players, thumbUrl }) {
   const fields = compactArray(players, 21).map(function(name, index) {
     return { name: (index + 1).toString().padStart(2, '0'), value: name, inline: true };
   });
-  if (fields.length === 0) { fields.push({ name: '---', value: 'Zero players online' }); }
+  if (server.running && fields.length === 0) { fields.push({ name: '---', value: 'Zero players online' }); }
   fields.push({ name: '', value: '' });
   const colour = cutil.hasProp(serverStateColours, server.state) ? serverStateColours[server.state] : colourCodes.light;
   const footer = { text: 'Last Updated' };

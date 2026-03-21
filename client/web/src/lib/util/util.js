@@ -30,14 +30,6 @@ export function guessArchiveFile(filename) {
   return archiveExtensions.includes(extension);
 }
 
-export function fNoop() {
-  // Noop
-}
-
-export function fTrue() {
-  return true;
-}
-
 export function generateId() {
   return Date.now().toString() + Math.random().toString().slice(2);
 }

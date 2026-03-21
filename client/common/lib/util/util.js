@@ -1,3 +1,11 @@
+export function fNoop() {
+  // Noop
+}
+
+export function fTrue() {
+  return true;
+}
+
 export function isBoolean(value) {
   return value === false || value === true;
 }

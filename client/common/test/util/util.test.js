@@ -1,7 +1,11 @@
 import assert from 'assert';
-import { isBoolean, isString, urlSafeB64encode, floatToPercent, checkArray, chunkArray, moveArrayElement,
+import { fTrue, isBoolean, isString, urlSafeB64encode, floatToPercent, checkArray, chunkArray, moveArrayElement,
   humanDuration, humanFileSize, shortISODateTimeString, parseDateToMillis, presetDate, rangeCodeToMillis
 } from 'common/util/util';
+
+describe('fTrue()', function() {
+  it('return true', function() { assert.strictEqual(fTrue(), true); });
+});
 
 describe('isBoolean()', function() {
   it('true if actually true', function() { assert.strictEqual(isBoolean(true), true); });

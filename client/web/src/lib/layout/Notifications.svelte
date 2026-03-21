@@ -1,7 +1,6 @@
 <script>
   import { fade } from 'svelte/transition';
-  import { sleep } from 'common/util/util';
-  import { fNoop } from '$lib/util/util';
+  import { fNoop, sleep } from 'common/util/util';
   import { notifications, removeNotification } from '$lib/util/notifications';
 
   const fadeMillis = 200;

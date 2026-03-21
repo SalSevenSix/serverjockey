@@ -1,6 +1,6 @@
 <script>
   import { closeModal } from 'svelte-modals';
-  import { fNoop } from '$lib/util/util';
+  import { fNoop } from 'common/util/util';
   import InputText from '$lib/widget/InputText.svelte';
 
   export let isOpen;

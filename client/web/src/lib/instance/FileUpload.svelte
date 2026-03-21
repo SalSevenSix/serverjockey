@@ -1,7 +1,7 @@
 <script>
   import { getContext } from 'svelte';
   import { slide } from 'svelte/transition';
-  import { fNoop, fTrue } from '$lib/util/util';
+  import { fNoop, fTrue } from 'common/util/util';
   import { newPostRequest } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';

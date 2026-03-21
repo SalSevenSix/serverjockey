@@ -1,5 +1,5 @@
 <script>
-  import { fTrue } from '$lib/util/util';
+  import { fTrue } from 'common/util/util';
   import FileSystem from '$lib/instance/FileSystem.svelte';
   import FileUpload from '$lib/instance/FileUpload.svelte';
 

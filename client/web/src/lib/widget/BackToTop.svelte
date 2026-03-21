@@ -1,5 +1,5 @@
 <script>
-  import { fNoop } from '$lib/util/util';
+  import { fNoop } from 'common/util/util';
 
   export let showOnPx = 1000;
 
