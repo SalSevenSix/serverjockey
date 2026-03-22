@@ -7,24 +7,22 @@ python3 -m pipenv --version > /dev/null || exit 1
 which wget > /dev/null || exit 1
 which unzip > /dev/null || exit 1
 
+[ -z "$1" ] || SOURCE_ZIP=$(realpath "$1")
 cd "$(dirname $0)" || exit 1
-BRANCH="${1-local}"
 BUILD_DIR="$(pwd)"
 TIMESTAMP=$(date '+%Y%m%d%H%M')
 DIST_DIR="$BUILD_DIR/dist"
 [ -d "$DIST_DIR" ] || mkdir $DIST_DIR
-SERVERJOCKEY="serverjockey"
-SERVERJOCKEY_DIR="$DIST_DIR/$SERVERJOCKEY"
+SERVERJOCKEY_DIR="$DIST_DIR/serverjockey"
 TARGET_DIR="$DIST_DIR/sjgms"
-TARGET_BIN_DIR="$TARGET_DIR/usr/local/bin"
+TARGET_BIN_DIR="$TARGET_DIR/bin"
 export PIPENV_VENV_IN_PROJECT=1
 rm -rf "$SERVERJOCKEY_DIR" "$TARGET_DIR" > /dev/null 2>&1
 
-cd $DIST_DIR || exit 1
-if [ "$BRANCH" = "local" ]; then
-  echo "Copying local source files to build"
-  cd ../.. || exit 1
-  [ -d "build" ] || exit 1
+if [ -z $SOURCE_ZIP ]; then
+  echo "Copying source files to build"
+  cd .. || exit 1
+  [ -f "README.md" ] || exit 1
   mkdir -p "$SERVERJOCKEY_DIR/build" || exit 1
   ls | while read file; do
     [[ $file == "build" || $file == "venv" ]] || cp -r "$file" "$SERVERJOCKEY_DIR"
@@ -34,45 +32,32 @@ if [ "$BRANCH" = "local" ]; then
     [ $file == "dist" ] || cp -r "$file" "$SERVERJOCKEY_DIR/build"
   done
 else
-  if [ ! -f "$BRANCH.zip" ]; then
-    echo "Downloading zip from github"
-    wget "https://github.com/SalSevenSix/$SERVERJOCKEY/archive/refs/heads/$BRANCH.zip" || exit 1
-  fi
   echo "Unpacking zip"
-  unzip "$BRANCH.zip" > /dev/null || exit 1
-  [ -d "${SERVERJOCKEY}-${BRANCH}" ] || exit 1
-  mv "${SERVERJOCKEY}-${BRANCH}" "$SERVERJOCKEY" || exit 1
-fi
-
-cd $DIST_DIR || exit 1
-if [ ! -d "../../.git" ]; then
-  echo "Updating build scripts"
+  cd $DIST_DIR || exit 1
+  unzip "$SOURCE_ZIP" > /dev/null || exit 1
+  mv $(ls -d serverjockey-*/ | cut -f1 -d'/') "$SERVERJOCKEY_DIR" || exit 1
+  echo "Checking build scripts"
   if [ $(diff "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" | wc -l) -ne 0 ]; then
     cp "$SERVERJOCKEY_DIR/build/build.sh" "$BUILD_DIR/build.sh" || exit 1
     echo "Build script updated. Please run again."
     exit 1
   fi
-  if which apt > /dev/null; then
-    cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh" || exit 1
-    chmod 755 $BUILD_DIR/deb.sh || exit 1
-  fi
-  if which yum > /dev/null; then
-    cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh" || exit 1
-    chmod 755 $BUILD_DIR/rpm.sh || exit 1
-  fi
+  cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh" || exit 1
+  cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh" || exit 1
+  chmod 755 $BUILD_DIR/deb.sh $BUILD_DIR/rpm.sh || exit 1
 fi
 
 echo "Preparing for build"
-rm "$BRANCH.zip" > /dev/null 2>&1
+cd $DIST_DIR || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/src/system/bootstrap.js || exit 1
-cp -r "$SERVERJOCKEY_DIR/build/packaging/sjgms" "$DIST_DIR" || exit 1
-mkdir -p $TARGET_BIN_DIR || exit 1
+cp -r "$SERVERJOCKEY_DIR/build/packaging" "$TARGET_DIR" || exit 1
+mkdir $TARGET_BIN_DIR || exit 1
 
 echo "Building common lib"
 $SERVERJOCKEY_DIR/client/common/build.sh ci || exit 1
 echo "Building cli client"
-$SERVERJOCKEY_DIR/client/cli/build.sh $TARGET_BIN_DIR/${SERVERJOCKEY}_cmd.pyz || exit 1
+$SERVERJOCKEY_DIR/client/cli/build.sh $TARGET_BIN_DIR/serverjockey_cmd.pyz || exit 1
 echo "Building discord client"
 $SERVERJOCKEY_DIR/client/discord/build.sh ci $TARGET_BIN_DIR/serverlink || exit 1
 echo "Building web client"
@@ -99,7 +84,7 @@ python3 -m unittest discover -t . -s test/system -p "*.py" -f || exit 1
 python3 -m pipenv sync -d || exit 1
 python3 -m pipenv run python3 -m pylint core servers test --rcfile pylint.rc || exit 1
 
-echo "Removing ServerJockey junk"
+echo "Removing junk"
 rm -rf .venv venv build client test *.sh *.text *.rc .git .gitignore .idea > /dev/null 2>&1
 find . -name "__pycache__" -type d | while read file; do
   rm -rf $file > /dev/null 2>&1
@@ -107,7 +92,7 @@ done
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
-python3 -m zipapp $SERVERJOCKEY -p "/usr/bin/env python3" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/$SERVERJOCKEY.pyz" || exit 1
+python3 -m zipapp serverjockey -p "/usr/bin/env python3" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/serverjockey.pyz" || exit 1
 rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
 echo $TIMESTAMP > "$TARGET_DIR/build.ok"
 
