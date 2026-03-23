@@ -57,7 +57,7 @@ def _default_config() -> dict:
         'EVENT_CHANNELS': {'server': None, 'login': None, 'chat': None},
         'WHITELIST_DM': 'Welcome to the {instance} server.\nYour login is `{user}` and password is `{pass}`',
         'LLM_API': {
-            'baseurl': None, 'apikey': None,
+            'baseurl': None, 'apikey': None, 'tvlykey': None,
             'chatlog': {'model': None, 'temperature': None, 'system': clsys, 'user': clusr},
             'chatbot': {'model': None, 'temperature': None, 'system': cbsys}
         }

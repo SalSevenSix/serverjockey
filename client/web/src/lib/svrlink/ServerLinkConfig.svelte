@@ -123,9 +123,12 @@
     <InputText id="serverLinkConfigLlmApiBaseurl" label="AI Service URL"
        bind:value={formData.LLM_API.baseurl} disabled={processing}
        placeholder="https://api.deepseek.com" title="OpenAI compatible URL endpoint to use for AI features" />
-    <InputPassword id="serverLinkConfigLlmApiToken" label="AI Token"
+    <InputPassword id="serverLinkConfigLlmApiKey" label="AI API Key"
        bind:value={formData.LLM_API.apikey} disabled={processing}
-       title="Login token (api key) for AI service" />
+       title="API Key for Open AI API compatible LLM service" />
+    <InputPassword id="serverLinkConfigTvlyApiKey" label="Tavily API Key (optional)"
+       bind:value={formData.LLM_API.tvlykey} disabled={processing}
+       title="Tavily API Key for search enhanced LLM responses (RAG)" />
     <InputText id="serverLinkConfigLlmApiChatbotModel" label="AI Chatbot Model"
        bind:value={formData.LLM_API.chatbot.model} disabled={processing}
        placeholder="deepseek-chat" title="Model to use for Chatbot AI feature" />

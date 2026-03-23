@@ -1,2 +1,2 @@
-10 * * * * /usr/local/bin/serverjockey_cmd.pyz -nc mprof > ~/mprof/current.log 2>&1
-15 18 * * * mv ~/mprof/current.log ~/mprof/$(date +\%Y\%m\%d).log
+12 * * * * serverjockey_cmd.pyz -nc mprof > ~/mprof/current.log 2>&1
+35 15 * * * mv ~/mprof/current.log ~/mprof/$(date +\%Y\%m\%d).log

@@ -1,20 +1,33 @@
 import OpenAI from 'openai';
+import { tavily } from '@tavily/core';
 import * as cutil from 'common/util/util';
 import { emojis } from '../util/literals.js';
 import * as util from '../util/util.js';
 import * as logger from '../util/logger.js';
 
-async function requestChatCompletion(api, config, gamename, messages, input) {
+/* eslint-disable complexity */
+async function requestChatCompletion(api, config, gamename, messages, input, tvly) {
+  input = util.arrayToText(input);
   let content = null;
   if (messages.length === 0 && config.system) {
     content = config.system.replaceAll('{gamename}', gamename);
     messages.push({ role: 'system', content: content });
   }
+  if (tvly && messages.length < 2) {
+    const search = await tvly.search(gamename + ' ' + input, { searchDepth: 'advanced', maxResults: 5 });
+    if (search && search.results && search.results.length) {
+      content = 'Here are some online search results to help with the user request...\n\n';
+      content += search.results.map(function(result) {
+        return '**Title:** ' + result.title + '\n**Content:** ' + result.content;
+      }).join('\n\n');
+      messages.push({ role: 'system', content: content });
+    }
+  }
   if (config.user) {
     content = config.user.replaceAll('{gamename}', gamename);
-    content = content.replace('{content}', util.arrayToText(input));
+    content = content.replace('{content}', input);
   } else {
-    content = util.arrayToText(input);
+    content = input;
   }
   messages.push({ role: 'user', content: content });
   const request = { model: config.model, messages: messages };
@@ -35,6 +48,7 @@ async function requestChatCompletion(api, config, gamename, messages, input) {
   }
   return content;
 }
+/* eslint-enable complexity */
 
 function nullChatCompletion(message) {
   return function() {
@@ -49,7 +63,7 @@ function nullChatCompletion(message) {
 const noApi = nullChatCompletion(emojis.error + ' AI Client not configured for use');
 const noFeature = nullChatCompletion(emojis.error + ' This AI feature is not configured');
 
-function buildChatCompletion(api, avatarEmoji, config) {
+function buildChatCompletion(api, avatarEmoji, config, tvly = null) {
   if (!config || !config.model) return noFeature;
   return function(gamename) {
     const [self, messages] = [{}, []];
@@ -60,7 +74,7 @@ function buildChatCompletion(api, avatarEmoji, config) {
       if (busy) return emojis.thinking + ' *AI is busy!*';
       busy = true;
       if (Date.now() - last > 420000) { self.reset(); }  // 7 minute memory
-      return await requestChatCompletion(api, config, gamename, messages, input)
+      return await requestChatCompletion(api, config, gamename, messages, input, tvly)
         .catch(function(error) {
           logger.error(error);
           self.reset();
@@ -87,10 +101,11 @@ export function newClient(config) {
   const client = { newChatlog: noApi, newChatbot: noApi };
   if (config && config.baseurl && config.apikey) {
     const api = new OpenAI({ baseURL: config.baseurl, apiKey: config.apikey });
-    logger.info('LLM Client initialised on endpoint ' + config.baseurl);
+    const tvly = config.tvlykey ? tavily({ apiKey: config.tvlykey }) : null;
+    logger.info('LLM Client (' + (tvly ? 'with' : 'without') + ' Tavily search) initialised ' + config.baseurl);
     const avatarEmoji = pickAvatarEmoji(config.apikey);
     client.newChatlog = buildChatCompletion(api, avatarEmoji, config.chatlog);
-    client.newChatbot = buildChatCompletion(api, avatarEmoji, config.chatbot);
+    client.newChatbot = buildChatCompletion(api, avatarEmoji, config.chatbot, tvly);
   } else {
     logger.info('LLM Client not configured');
   }
