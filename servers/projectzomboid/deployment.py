@@ -57,14 +57,12 @@ class Deployment:
             save=self._save_dir, playerdb=self._player_dir, logs=self._logs_dir, lua=self._lua_dir,
             config=self._config_dir, autobackups=self._autobackups_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
-        builder.put('restore-autobackup', httpext.UnpackerHandler(
-                    self._context, self._autobackups_dir, self._world_dir, to_root=True, wipe=False), 'r')
+        builder.put_restore_autobackup(httpext.UnpackerHandler(
+            self._context, self._autobackups_dir, self._world_dir, to_root=True, wipe=False))
         builder.pop()
         builder.put_log(self._log_file).put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
-        builder.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_autobackups))
-        builder.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_autobackups), 'r')
-        builder.pop()
+        builder.put_autobackups(self._autobackups_dir, ls_filter=_ls_autobackups, ls_ffilter=_ls_autobackups)
         config_pre = self._config_dir + '/' + self._world_name
         builder.put_config(dict(
             db=self._player_dir + '/' + self._world_name + '.db', jvm=self._runtime_dir + '/ProjectZomboid64.json',
@@ -120,7 +118,7 @@ class Deployment:
         return _WORLD_NAME_DEF
 
 
-def _autobackups(entry) -> bool:
+def _ls_autobackups(entry) -> bool:
     if entry['type'] == 'directory':
         return True
-    return entry['name'].startswith('backup_') and entry['name'].endswith('.zip')
+    return entry['type'] == 'file' and entry['name'].startswith('backup_') and entry['name'].endswith('.zip')

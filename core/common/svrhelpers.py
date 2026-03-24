@@ -170,6 +170,9 @@ class DeploymentResourceBuilder:
         self.put('restore-backup', httpext.UnpackerHandler(self._context, backups_dir, home_dir), 'r')
         return self
 
+    def put_restore_autobackup(self, handler: httpabc.PostHandler) -> DeploymentResourceBuilder:
+        return self.put('restore-autobackup', handler, 'r')
+
     def put_log(self, log_file: str) -> DeploymentResourceBuilder:
         return self.put('log', httpext.FileSystemHandler(log_file))
 
@@ -184,6 +187,15 @@ class DeploymentResourceBuilder:
             backups_dir, 'path', tempdir=tempdir,
             read_tracker=msglog.IntervalTracker(self._context, initial_message='SENDING data...', prefix='sent'),
             write_tracker=msglog.IntervalTracker(self._context)), 'm')
+        return self.pop()
+
+    def put_autobackups_handler(self, handler: httpabc.GetHandler) -> DeploymentResourceBuilder:
+        return self.put('autobackups', handler)
+
+    def put_autobackups(self, autobackups_dir: str, ls_filter: typing.Callable = None,
+                        ls_ffilter: typing.Callable = None) -> DeploymentResourceBuilder:
+        self.psh('autobackups', httpext.FileSystemHandler(autobackups_dir, ls_filter=ls_filter))
+        self.put('*{path}', httpext.FileSystemHandler(autobackups_dir, 'path', ls_filter=ls_ffilter), 'r')
         return self.pop()
 
     def put_config(self, config_files: dict) -> DeploymentResourceBuilder:

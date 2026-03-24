@@ -78,13 +78,11 @@ class Deployment:
             logs=dict(path=self._runtime_dir, ls_filter=_ls_logfiles),
             autobackups=dict(path=self._save_dir, ls_filter=_ls_autobackups)))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
-        builder.put('restore-autobackup', _RestoreAutobackupHandler(self), 'r')
+        builder.put_restore_autobackup(_RestoreAutobackupHandler(self))
         builder.pop()
         builder.put_log(self._runtime_dir + '/factorio-current.log').put_logs(self._runtime_dir, ls_filter=_ls_logfiles)
         builder.put_backups(self._tempdir, self._backups_dir)
-        builder.psh('autobackups', httpext.FileSystemHandler(self._save_dir, ls_filter=_ls_autobackups))
-        builder.put('*{path}', httpext.FileSystemHandler(self._save_dir, 'path'), 'r')
-        builder.pop()
+        builder.put_autobackups(self._save_dir, ls_filter=_ls_autobackups)
         builder.put_config(dict(
             cmdargs=self._cmdargs_settings, server=self._server_settings, map=self._map_settings,
             mapgen=self._map_gen_settings, modslist=self._mods_list, adminlist=self._server_adminlist,

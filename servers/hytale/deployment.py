@@ -115,14 +115,12 @@ class Deployment:
             all=self._world_dir, logs=self._logs_dir, autobackups=self._autobackups_dir,
             save=dict(path=self._map_dir, ls_filter=_ls_onlydir)))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
-        builder.put('restore-autobackup', httpext.UnpackerHandler(
-            self._context, self._autobackups_dir, self._save_dir, to_root=True), 'r')
+        builder.put_restore_autobackup(httpext.UnpackerHandler(
+            self._context, self._autobackups_dir, self._save_dir, to_root=True))
         builder.pop()
         builder.put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
-        builder.psh('autobackups', httpext.FileSystemHandler(self._autobackups_dir, ls_filter=_ls_autobackups))
-        builder.put('*{path}', httpext.FileSystemHandler(self._autobackups_dir, 'path', ls_filter=_ls_autobackups), 'r')
-        builder.pop()
+        builder.put_autobackups(self._autobackups_dir, ls_filter=_ls_autobackups, ls_ffilter=_ls_autobackups)
         builder.put_config(dict(
             cmdargs=self._cmdargs_file, mods=self._mods_file, settings=self._world_dir + '/config.json',
             permissions=self._world_dir + '/permissions.json', bans=self._world_dir + '/bans.json',
@@ -262,4 +260,6 @@ def _ls_mconfig(entry) -> bool:
 
 
 def _ls_autobackups(entry) -> bool:
+    if entry['type'] == 'directory':
+        return True
     return entry['type'] == 'file' and util.fext(entry['name']) == 'zip'

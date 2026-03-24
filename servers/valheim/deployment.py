@@ -84,11 +84,11 @@ class Deployment:
             save=self._save_dir, autobackups=dict(path=self._save_dir, ls_filter=_ls_autobackups),
             logs=self._logs_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
-        builder.put('restore-autobackup', _RestoreAutobackupHandler(self), 'r')
+        builder.put_restore_autobackup(_RestoreAutobackupHandler(self))
         builder.pop()
         builder.put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
-        builder.psh('autobackups', _AutobackupsHandler(self))
+        builder.put_autobackups_handler(_AutobackupsHandler(self))
         builder.put_config(dict(
             cmdargs=self._cmdargs_file, adminlist=self._adminlist_file,
             permittedlist=self._permittedlist_file, bannedlist=self._bannedlist_file))
