@@ -1,28 +1,9 @@
 import sys
 import asyncio
 import time
-import itertools
-import random
 # ALLOW util.* msg.*
-from core.util import tasks, util, io, funcutil, idutil, dtutil, pkg
+from core.util import util, io, funcutil, idutil, dtutil, pack
 from core.msg import msgabc, msgftr, msglog, msgpipe
-
-
-def _make_archive_script(archive_tmp: str, unpacked_dir: str) -> str:
-    return f'''import sys
-import logging
-import shutil
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, format='%(message)s', stream=sys.stdout)
-    shutil.make_archive('{archive_tmp}', 'zip', root_dir='{unpacked_dir}', logger=logging.getLogger())
-'''
-
-
-def _unpack_archive_script(archive: str, target_dir: str) -> str:
-    return f'''import shutil
-if __name__ == '__main__':
-    shutil.unpack_archive('{archive}', '{target_dir}')
-'''
 
 
 async def _run_script(logger: msglog.LogPublisher, script_file: str):
@@ -60,7 +41,7 @@ async def _archive_directory(logger: msglog.LogPublisher, unpacked_dir: str, arc
     now, archive_kind = time.time(), util.fname(unpacked_dir)
     archive_name = archive_kind + '-' + dtutil.format_time('%Y%m%d', now) + '-' + dtutil.format_time('%H%M%S', now)
     working_dir, archive_path = tempdir + '/' + idutil.generate_id(), archives_dir + '/' + archive_name + '.zip'
-    script_file, archive_tmp = working_dir + '/make_archive.py', working_dir + '/' + archive_name
+    script_file, archive_tmp = working_dir + '/make_archive.py', working_dir + '/' + archive_name + '.zip'
     try:
         if not await io.directory_exists(unpacked_dir):
             logger.log('WARNING No directory to archive')
@@ -68,9 +49,9 @@ async def _archive_directory(logger: msglog.LogPublisher, unpacked_dir: str, arc
         logger.log('START Archive Directory')
         assert await io.directory_exists(archives_dir)
         await io.create_directory(working_dir)
-        await io.write_file(script_file, _make_archive_script(archive_tmp, unpacked_dir))
+        await io.write_file(script_file, pack.make_archive_script(archive_tmp, unpacked_dir))
         await _run_script(logger, script_file)
-        await io.move_path(archive_tmp + '.zip', archive_path)
+        await io.move_path(archive_tmp, archive_path)
         logger.log(f'Created {archive_path}')
         await _prune_archives(logger, now, prune_hours, archive_kind, archives_dir)
         logger.log('END Archive Directory')
@@ -84,25 +65,20 @@ async def _archive_directory(logger: msglog.LogPublisher, unpacked_dir: str, arc
 
 async def _unpack_directory(logger: msglog.LogPublisher, archive: str, unpack_dir: str,
                             wipe: bool = True, tempdir: str = '/tmp'):
-    progress_logger, unpack_dir = _ProgressLogger(logger), util.strip_path(unpack_dir)
+    unpack_dir = util.strip_path(unpack_dir)
     working_dir, target_dir = tempdir + '/' + idutil.generate_id(), unpack_dir
     script_file = working_dir + '/unpack_archive.py'
     try:
         logger.log('START Unpack Directory')
         assert await io.file_exists(archive)
         logger.log(f'{archive} => {unpack_dir}')
-        if await io.file_size(archive) > 104857600:  # 100Mb
-            progress_logger.start()
         if wipe:
             await io.delete_directory(target_dir)
         else:
             target_dir = tempdir + '/' + idutil.generate_id()
         await io.create_directory(working_dir, target_dir)
-        await io.write_file(script_file, _unpack_archive_script(archive, target_dir))
+        await io.write_file(script_file, pack.unpack_archive_script(archive, target_dir))
         await _run_script(logger, script_file)
-        progress_logger.stop()
-        logger.log('SET file permissions')
-        await io.auto_chmod(target_dir)
         if not wipe:
             logger.log('MOVING files')
             await io.move_directory(target_dir, unpack_dir)
@@ -111,55 +87,9 @@ async def _unpack_directory(logger: msglog.LogPublisher, archive: str, unpack_di
         logger.log(f'ERROR unpacking {archive} {repr(e)}')
         raise e
     finally:
-        progress_logger.stop()
         await funcutil.silently_call(io.delete_directory(working_dir))
         if not wipe:
             await funcutil.silently_call(io.delete_directory(target_dir))
-
-
-class _ProgressLogger:
-
-    def __init__(self, logger: msglog.LogPublisher):
-        self._logger, self._running, self._task = logger, False, None
-
-    def start(self):
-        self._running = True
-        self._task = tasks.task_start(self._run(), self)
-
-    def stop(self):
-        self._running = False
-
-    @staticmethod
-    async def _load_lines() -> tuple:
-        # https://ascii-generator.site/
-        lines = await pkg.pkg_load('core.msgc', 'art.txt')
-        lines = lines.decode().strip().split('\n')
-        arts, current, divider = [], [], ''.join(list(itertools.repeat('_', 80)))
-        for line in lines:
-            if line == divider:
-                if len(current) > 0:
-                    arts.append(current)
-                current = [line]
-            else:
-                current.append(line)
-        arts.append(current)
-        random.shuffle(arts)
-        lines = []
-        for art in arts:
-            lines.extend(art)
-        return tuple(lines)
-
-    async def _run(self):
-        try:
-            self._logger.log('unpacking... enjoy some ascii art while you wait!')
-            lines = await _ProgressLogger._load_lines()
-            index, end = 0, len(lines) - 1
-            while self._running:
-                self._logger.log(lines[index])
-                await asyncio.sleep(1.0)
-                index = index + 1 if index < end else 0
-        finally:
-            tasks.task_end(self._task)
 
 
 class Archiver(msgabc.AbcSubscriber):

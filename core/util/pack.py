@@ -28,3 +28,36 @@ unpack_targz = funcutil.to_async(_sync_unpack_targz)
 unpack_archive = funcutil.to_async(shutil.unpack_archive)
 gzip_compress = funcutil.to_async(gzip.compress)
 gzip_decompress = funcutil.to_async(gzip.decompress)
+
+
+def make_archive_script(archive_file: str, unpacked_dir: str) -> str:
+    return f'''import logging
+import pathlib
+import sys
+import zipfile
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(message)s', stream=sys.stdout)
+    unpacked_dir = pathlib.Path('{unpacked_dir}')
+    with zipfile.ZipFile('{archive_file}', 'w', zipfile.ZIP_DEFLATED) as f:
+        for abspath in unpacked_dir.rglob('*'):
+            if not abspath.is_symlink():
+                logging.info('DEFLATE ' + str(abspath))
+                f.write(abspath, str(abspath.relative_to(unpacked_dir)))
+'''
+
+
+def unpack_archive_script(archive_file: str, unpacked_dir: str) -> str:
+    return f'''import logging
+import os
+import sys
+import zipfile
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(message)s', stream=sys.stdout)
+    with zipfile.ZipFile('{archive_file}', 'r') as f:
+        for member in f.infolist():
+            abspath = str(f.extract(member, '{unpacked_dir}'))
+            logging.info('UNPACKED ' + abspath)
+            filname = os.path.basename(abspath)
+            if filname.find('.') == -1 or filname.endswith('.sh') or filname.endswith('.x86_64'):
+                os.chmod(abspath, 0o774)
+'''
