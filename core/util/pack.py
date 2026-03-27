@@ -57,7 +57,7 @@ if __name__ == '__main__':
         for member in f.infolist():
             abspath = str(f.extract(member, '{unpacked_dir}'))
             logging.info('UNPACKED ' + abspath)
-            filname = os.path.basename(abspath)
-            if filname.find('.') == -1 or filname.endswith('.sh') or filname.endswith('.x86_64'):
+            filename = os.path.basename(abspath)
+            if filename.find('.') == -1 or filename.endswith('.sh') or filename.endswith('.x86_64'):
                 os.chmod(abspath, 0o774)
 '''

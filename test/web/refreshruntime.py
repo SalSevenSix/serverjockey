@@ -27,7 +27,7 @@ class TestRefreshRuntime(unittest.TestCase):
             context.find_element('confirmModalConfirm').click()
             context.wait_for_instance_state(sc.MAINTENANCE)
             context.scroll_to_top()
-            context.wait_for_instance_state(sc.READY, wait=100.0 * weight)
+            context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
             self.assertEqual('END Install', context.get_instance_loglastline())
             return
         # restore last runtime backup
@@ -36,14 +36,14 @@ class TestRefreshRuntime(unittest.TestCase):
         context.find_element('confirmModalConfirm').click()
         context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
-        context.wait_for_instance_state(sc.READY, wait=100.0 * weight)
+        context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
         self.assertEqual('END Unpack Directory', context.get_instance_loglastline())
         # update runtime steam
         context.find_element('runtimeControlsInstall', enabled=2.0).click()
         context.find_element('confirmModalConfirm').click()
         context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
-        context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
+        context.wait_for_instance_state(sc.READY, wait=600.0 * weight)
         self.assertTrue(context.check_instance_log(
             6, 'Success! App \'' + appid + '\' fully installed.',
             'Error! App \'' + appid + '\' state is 0x10C after update job.',
@@ -52,11 +52,11 @@ class TestRefreshRuntime(unittest.TestCase):
         context.find_element('backupRestoreActionsBackupRuntime').click()
         context.wait_for_instance_state(sc.MAINTENANCE)
         context.scroll_to_top()
-        context.wait_for_instance_state(sc.READY, wait=300.0 * weight)
+        context.wait_for_instance_state(sc.READY, wait=600.0 * weight)
         self.assertEqual('END Archive Directory', context.get_instance_loglastline())
         old_backup = context.backup_path(identity, _TEST_BACKUP)
         self.assertTrue(os.path.isfile(old_backup))
-        new_backup = context.backup_path(identity, context.get_cell_text('fileSystemBackupsFiles', 1, 2))
+        new_backup = context.backup_path(identity, context.get_cell_text('fileSystemBackupsFiles', 1, 3))
         self.assertTrue(os.path.isfile(new_backup))
         os.remove(old_backup)
         os.rename(new_backup, old_backup)

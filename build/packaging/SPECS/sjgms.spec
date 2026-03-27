@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Tue Mar 10 2026 Bowden Salis <bsalis76@gmail.com> - 0.30.0
-- Feature release version 0.30.0
+* Sat Mar 28 2026 Bowden Salis <bsalis76@gmail.com> - 0.30.0
+- Discord bot panel release
 * Mon Mar 09 2026 Bowden Salis <bsalis76@gmail.com> - 0.29.0
 - Discord bot channel rework release
 * Wed Feb 25 2026 Bowden Salis <bsalis76@gmail.com> - 0.28.0
