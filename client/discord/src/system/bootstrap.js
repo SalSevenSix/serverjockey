@@ -20,7 +20,7 @@ function initialise() {
     logger.log('usage: serverlink [-h|--help] [-v|--version] [config1.json config2.json ...]');
     process.exit(metarg == null ? 1 : 0);
   }
-  const version = '0.30.0 ({timestamp})';
+  const version = '0.31.0 ({timestamp})';
   if (metarg === '-v' || metarg === '--version') {
     logger.log(version);
     process.exit(0);
