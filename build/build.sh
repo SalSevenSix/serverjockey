@@ -42,9 +42,6 @@ else
     echo "Build script updated. Please run again."
     exit 1
   fi
-  cp "$SERVERJOCKEY_DIR/build/deb.sh" "$BUILD_DIR/deb.sh" || exit 1
-  cp "$SERVERJOCKEY_DIR/build/rpm.sh" "$BUILD_DIR/rpm.sh" || exit 1
-  chmod 755 $BUILD_DIR/deb.sh $BUILD_DIR/rpm.sh || exit 1
 fi
 
 echo "Preparing for build"
@@ -52,6 +49,7 @@ cd $DIST_DIR || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/src/system/bootstrap.js || exit 1
 cp -r "$SERVERJOCKEY_DIR/build/packaging" "$TARGET_DIR" || exit 1
+chmod 755 $TARGET_DIR/*.sh || exit 1
 mkdir $TARGET_BIN_DIR || exit 1
 
 echo "Building common lib"

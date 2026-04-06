@@ -11,7 +11,7 @@ BRANCH="${1-develop}"
 cd "$(dirname $0)" || exit 1
 BUILD_USER="$(pwd | tr '/' ' ' | awk '{print $2}')"
 BUILD_DIR="$(pwd)"
-CI_OK_FILE="$BUILD_DIR/build_deb.ok"
+CI_OK_FILE="$BUILD_DIR/build_sjgms.ok"
 DIST_DIR="$BUILD_DIR/dist"
 BUILD_OK_FILE="$DIST_DIR/sjgms/build.ok"
 WEB_DIR="/var/www/downloads"
@@ -43,10 +43,10 @@ fi
 echo "CI Checking"
 cd $BUILD_DIR || exit 1
 LAST_URL="none"
-COMMIT_FILE="serverjockey-${BRANCH}.url"
+COMMIT_FILE="sjgms-${BRANCH}.url"
 [ -f "$COMMIT_FILE" ] && LAST_URL="$(head -1 $COMMIT_FILE)"
 echo "  last commit     $LAST_URL"
-BRANCH_FILE="/tmp/${$}-serverjockey-${BRANCH}.json"
+BRANCH_FILE="/tmp/${$}-sjgms-${BRANCH}.json"
 su - $BUILD_USER -c "gh api repos/SalSevenSix/serverjockey/branches/$BRANCH" > $BRANCH_FILE
 [ $? -eq 0 ] || exit 1
 CURRENT_URL="$(jq -r .commit.url $BRANCH_FILE)"
@@ -79,8 +79,8 @@ for PKG in rpm deb; do
   TIMESTAMP="$(head -1 $BUILD_OK_FILE)"
 
   echo "CI Packaging $PKG"
-  [ "$PKG" = "deb" ] && $BUILD_DIR/deb.sh
-  [ "$PKG" = "rpm" ] && docker run -v ${BUILD_DIR}:/home/rpmuser/build rpmbuilder build/rpm.sh
+  [ "$PKG" = "deb" ] && $BUILD_DIR/dist/sjgms/deb.sh
+  [ "$PKG" = "rpm" ] && docker run -v ${BUILD_DIR}:/home/rpmuser/build rpmbuilder build/dist/sjgms/rpm.sh
 
   echo "CI Publishing $PKG"
   cd $DIST_DIR || exit 1
@@ -118,7 +118,7 @@ cd $WEB_DIR || exit 1
 apt -y remove sjgms
 apt -y install ./$TARGET_FILE || exit 1
 cd $BUILD_DIR || exit 1
-rm -rf $DIST_DIR serverjockey-${BRANCH}-*.zip > /dev/null 2>&1
+rm -rf $DIST_DIR docker build.sh serverjockey-${BRANCH}-*.zip > /dev/null 2>&1
 docker system prune -f > /dev/null 2>&1
 echo $TIMESTAMP > $CI_OK_FILE
 chown $BUILD_USER $CI_OK_FILE

@@ -8,7 +8,7 @@ cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
 WEB_DIR="/var/www/downloads"
 DOCKER_IMAGE="salsevensix/serverjockey"
-CI_OK_FILE="build_deb.ok"
+CI_OK_FILE="build_sjgms.ok"
 [ -f $CI_OK_FILE ] || exit 1
 TIMESTAMP="$(head -1 $CI_OK_FILE)"
 
