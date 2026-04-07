@@ -1,12 +1,8 @@
 #!/bin/bash
 
 echo "Initialising build process"
-PYTHON_LIBDIR="python3.12"
-[ $(python3 --version | grep "Python 3\.12\." | wc -l) -eq 1 ] || exit 1
-python3 -m pipenv --version > /dev/null || exit 1
 which wget > /dev/null || exit 1
 which unzip > /dev/null || exit 1
-
 [ -z "$1" ] || SOURCE_ZIP=$(realpath "$1")
 cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
@@ -46,6 +42,8 @@ fi
 
 echo "Preparing for build"
 cd $DIST_DIR || exit 1
+PYTHON_EXE="python$(grep python_version $SERVERJOCKEY_DIR/Pipfile | awk '{print $NF}' | tr -d '"')"
+$PYTHON_EXE -m pipenv --version > /dev/null || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/core/util/sysutil.py || exit 1
 sed -i -e "s/{timestamp}/${TIMESTAMP}/g" $SERVERJOCKEY_DIR/client/discord/src/system/bootstrap.js || exit 1
 cp -r "$SERVERJOCKEY_DIR/build/packaging" "$TARGET_DIR" || exit 1
@@ -65,9 +63,9 @@ $SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
 
 echo "Download ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1
-python3 -m pipenv sync || exit 1
+$PYTHON_EXE -m pipenv sync || exit 1
 for VENV_LIBDIR in lib lib64; do
-  LIBDIR="$SERVERJOCKEY_DIR/.venv/$VENV_LIBDIR/$PYTHON_LIBDIR/site-packages"
+  LIBDIR="$SERVERJOCKEY_DIR/.venv/$VENV_LIBDIR/$PYTHON_EXE/site-packages"
   if [ -d "$LIBDIR" ]; then
     [ -d "$LIBDIR/selenium" ] && exit 1  # nope out if dev dependency included
     rm -rf $LIBDIR/pip* $LIBDIR/test* $LIBDIR/greenlet* $LIBDIR/*virtualenv* > /dev/null 2>&1
@@ -77,10 +75,10 @@ for VENV_LIBDIR in lib lib64; do
 done
 
 echo "Running tests and linting"
-python3 -m unittest discover -t . -s test/unit -p "*.py" || exit 1
-python3 -m unittest discover -t . -s test/system -p "*.py" -f || exit 1
-python3 -m pipenv sync -d || exit 1
-python3 -m pipenv run python3 -m pylint core servers test --rcfile pylint.rc || exit 1
+$PYTHON_EXE -m unittest discover -t . -s test/unit -p "*.py" || exit 1
+$PYTHON_EXE -m unittest discover -t . -s test/system -p "*.py" -f || exit 1
+$PYTHON_EXE -m pipenv sync -d || exit 1
+$PYTHON_EXE -m pipenv run $PYTHON_EXE -m pylint core servers test --rcfile pylint.rc || exit 1
 
 echo "Removing junk"
 rm -rf .venv venv build client test *.sh *.text *.rc .git .gitignore .idea > /dev/null 2>&1
@@ -90,7 +88,7 @@ done
 
 echo "Building ServerJockey zipapp"
 cd $DIST_DIR || exit 1
-python3 -m zipapp serverjockey -p "/usr/bin/env python3" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/serverjockey.pyz" || exit 1
+$PYTHON_EXE -m zipapp serverjockey -p "/usr/bin/env python3" -m "core.system.__main__:main" -c -o "$TARGET_BIN_DIR/serverjockey.pyz" || exit 1
 rm -rf "$SERVERJOCKEY_DIR" > /dev/null 2>&1
 echo $TIMESTAMP > "$TARGET_DIR/build.ok"
 

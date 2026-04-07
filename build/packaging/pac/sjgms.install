@@ -1,0 +1,19 @@
+post_install() {
+  /usr/local/bin/serverjockey_cmd.pyz -nt adduser
+}
+
+pre_upgrade() {
+  systemctl stop serverjockey > /dev/null 2>&1
+}
+
+post_upgrade() {
+  /usr/local/bin/serverjockey_cmd.pyz -nt adduser
+}
+
+pre_remove() {
+  systemctl stop serverjockey > /dev/null 2>&1
+}
+
+post_remove() {
+  rm /etc/systemd/system/serverjockey.service && systemctl daemon-reload
+}

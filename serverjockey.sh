@@ -28,7 +28,8 @@ check_steamcmd() {
 check_jockey() {
   echo
   echo "  checking for python3"
-  if [ $(which python3 | wc -l) -eq 0 ]; then
+  python3 --version
+  if [ $? -ne 0 ]; then
     echo "ERROR python3 not found."
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt install software-properties-common"
@@ -40,14 +41,10 @@ check_jockey() {
   fi
 
   echo
-  echo "  checking python3 version, 3.10 or 3.11 or 3.12 required"
-  local PYTHON_CHECK=0
-  [ $PYTHON_CHECK -eq 0 ] && PYTHON_CHECK=$(python3 --version | grep "Python 3\.10\." | wc -l)
-  [ $PYTHON_CHECK -eq 0 ] && PYTHON_CHECK=$(python3 --version | grep "Python 3\.11\." | wc -l)
-  [ $PYTHON_CHECK -eq 0 ] && PYTHON_CHECK=$(python3 --version | grep "Python 3\.12\." | wc -l)
-  if [ $PYTHON_CHECK -eq 0 ]; then
-    echo "ERROR python3 executable is not version 3.10 or 3.11 or 3.12"
-    echo "ServerJockey cannot run on this system until python3 is an acceptable version."
+  echo "  checking python3 version, 3.10 or higher required"
+  if [ $(python3 -c 'import sys; print(sys.version_info.minor)') -lt 10 ]; then
+    echo "ERROR python3 executable is not version 3.10 or higher"
+    echo "ServerJockey cannot run on this system until python3 is a compatible version."
     exit 1
   fi
 

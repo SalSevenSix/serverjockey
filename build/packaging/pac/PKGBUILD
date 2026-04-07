@@ -1,0 +1,19 @@
+pkgname=sjgms
+pkgver=0.31.0
+pkgrel=1
+pkgdesc="ServerJockey Game Management System"
+arch=("x86_64")
+url="https://serverjockey.net"
+license=("custom")
+#depends=()
+options=("!strip")
+source=("serverjockey.pyz" "serverjockey_cmd.pyz" "serverlink")
+sha256sums=("SKIP" "SKIP" "SKIP")
+install=sjgms.install
+
+package() {
+  install -dm755 "$pkgdir/usr/local/bin"
+  install -m755 "$srcdir/serverjockey.pyz" "$pkgdir/usr/local/bin/serverjockey.pyz"
+  install -m755 "$srcdir/serverjockey_cmd.pyz" "$pkgdir/usr/local/bin/serverjockey_cmd.pyz"
+  install -m755 "$srcdir/serverlink" "$pkgdir/usr/local/bin/serverlink"
+}
