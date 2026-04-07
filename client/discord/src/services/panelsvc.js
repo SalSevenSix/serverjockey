@@ -1,5 +1,4 @@
-import fs from 'fs';
-import * as logger from '../util/logger.js';
+import * as io from '../util/io.js';
 
 /* eslint-disable max-lines-per-function */
 export function newPanels(context, instance) {
@@ -8,8 +7,8 @@ export function newPanels(context, instance) {
   const callbacks = { onLoad: null, onAdd: null };
   const self = {};
 
-  data.set = function(value = null) {
-    if (value) { data.base = value; }
+  data.set = function(body = null) {
+    if (body) { data.base = JSON.parse(body); }
     data.loaded = true;
     if (callbacks.onLoad) { callbacks.onLoad(); }
   };
@@ -20,13 +19,7 @@ export function newPanels(context, instance) {
   };
 
   self.load = function() {
-    fs.exists(file, function(exists) {
-      if (!exists) return data.set();
-      fs.readFile(file, function(error, body) {
-        data.set(error ? null : JSON.parse(body));
-        if (error) { logger.error(error); }
-      });
-    });
+    io.fileRead(file, data.set, data.set, data.set);
     return self;
   };
 
@@ -36,7 +29,7 @@ export function newPanels(context, instance) {
   };
 
   self.save = function() {
-    fs.writeFile(file, JSON.stringify(data.base), logger.error);
+    io.fileSaveArray(file, data.base);
   };
 
   self.remove = function(channelId, messageId) {

@@ -1,7 +1,6 @@
-import fs from 'fs';
 import * as cutil from 'common/util/util';
 import * as util from '../util/util.js';
-import * as logger from '../util/logger.js';
+import * as io from '../util/io.js';
 
 /* eslint-disable max-lines-per-function */
 export function newAliases(context, instance) {
@@ -58,13 +57,7 @@ export function newAliases(context, instance) {
   };
 
   self.load = function() {
-    fs.exists(file, function(exists) {
-      if (!exists) return;
-      fs.readFile(file, function(error, body) {
-        if (error) return logger.error(error);
-        rebuild(JSON.parse(body));
-      });
-    });
+    io.fileRead(file, function(body) { rebuild(JSON.parse(body)); });
     return self;
   };
 
@@ -74,7 +67,7 @@ export function newAliases(context, instance) {
   };
 
   self.save = function() {
-    fs.writeFile(file, JSON.stringify(data.base), logger.error);
+    io.fileSaveArray(file, data.base);
   };
 
   self.add = function(snowflake, discordid, name) {

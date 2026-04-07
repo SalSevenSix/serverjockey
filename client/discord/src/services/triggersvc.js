@@ -1,29 +1,5 @@
-import fs from 'fs';
 import * as cutil from 'common/util/util';
-import * as logger from '../util/logger.js';
-
-function migration(file, loadedData) {
-  if (!loadedData || loadedData.length === 0) return loadedData;  // Nothing to migrate
-  if (cutil.hasProp(loadedData[0], 'on-event')) return loadedData;  // Already in new format
-  const records = loadedData.map(function(loaded) {
-    const record = {};
-    record['on-event'] = Object.keys(loaded).filter(function(key) {  // Convert events
-      return ['on-login', 'on-logout', 'on-death'].includes(key);
-    });
-    ['rq-not-role', 'rq-role'].forEach(function(key) {  // Convert conditions
-      if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
-    });
-    ['cx-channel', 'cx-delay'].forEach(function(key) {  // Convert context
-      if (cutil.hasProp(loaded, key)) { record[key] = loaded[key]; }
-    });
-    ['do-remove-role', 'do-add-role', 'do-message'].forEach(function(key) {  // Convert actions
-      if (cutil.hasProp(loaded, key)) { record[key] = [loaded[key]]; }
-    });
-    return record;
-  });
-  fs.writeFile(file, JSON.stringify(records), logger.error);
-  return records;
-}
+import * as io from '../util/io.js';
 
 function getArgValue(key, arg) {
   if (!arg || !arg.startsWith(key + '=')) return null;
@@ -37,13 +13,7 @@ export function newTriggers(context, instance) {
   const self = {};
 
   self.load = function() {
-    fs.exists(file, function(exists) {
-      if (!exists) return;
-      fs.readFile(file, function(error, body) {
-        if (error) return logger.error(error);
-        data.base = migration(file, JSON.parse(body));
-      });
-    });
+    io.fileRead(file, function(body) { data.base = JSON.parse(body); });
     return self;
   };
 
@@ -53,7 +23,7 @@ export function newTriggers(context, instance) {
   };
 
   self.save = function() {
-    fs.writeFile(file, JSON.stringify(data.base), logger.error);
+    io.fileSaveArray(file, data.base);
   };
 
   self.add = function(args) {

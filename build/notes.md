@@ -25,9 +25,10 @@
 * Post link to Ko-fi release post on discord
 
 ## Versioned Files
-* debian/control
-* debian/changelog
-* specs/sjgms.spec
+* deb/control
+* deb/changelog
+* rpm/sjgms.spec
+* pac/pkgbuild
 * common/package.json
 * discord/package.json
 * discord/src/system/bootstrap.js

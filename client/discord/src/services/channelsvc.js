@@ -1,5 +1,4 @@
-import fs from 'fs';
-import * as logger from '../util/logger.js';
+import * as io from '../util/io.js';
 
 /* eslint-disable max-lines-per-function */
 export function newInstanceChannels(context, instance) {
@@ -24,13 +23,9 @@ export function newInstanceChannels(context, instance) {
   };
 
   self.load = function() {
-    fs.exists(file, function(exists) {
-      if (!exists) return;
-      fs.readFile(file, function(error, body) {
-        if (error) return logger.error(error);
-        load(JSON.parse(body)).then(function(result) {
-          data.base = result;
-        });
+    io.fileRead(file, function(body) {
+      load(JSON.parse(body)).then(function(result) {
+        data.base = result;
       });
     });
     return self;
@@ -47,7 +42,7 @@ export function newInstanceChannels(context, instance) {
     const payload = data.base.map(function({ channelType, channelId }) {
       return { channelType, channelId };
     });
-    fs.writeFile(file, JSON.stringify(payload), logger.error);
+    io.fileSaveArray(file, payload);
   };
 
   self.set = function(channelType, channel) {

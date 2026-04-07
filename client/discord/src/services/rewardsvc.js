@@ -1,6 +1,5 @@
-import fs from 'fs';
 import * as cutil from 'common/util/util';
-import * as logger from '../util/logger.js';
+import * as io from '../util/io.js';
 
 /* eslint-disable max-lines-per-function */
 export function newRewards(context, instance) {
@@ -18,13 +17,7 @@ export function newRewards(context, instance) {
   };
 
   self.load = function() {
-    fs.exists(file, function(exists) {
-      if (!exists) return;
-      fs.readFile(file, function(error, body) {
-        if (error) return logger.error(error);
-        data.base = JSON.parse(body);
-      });
-    });
+    io.fileRead(file, function(body) { data.base = JSON.parse(body); });
     return self;
   };
 
@@ -34,7 +27,7 @@ export function newRewards(context, instance) {
   };
 
   self.save = function() {
-    fs.writeFile(file, JSON.stringify(data.base), logger.error);
+    io.fileSaveArray(file, data.base);
   };
 
   self.add = function(action, snowflake, roleid, type, threshold, range) {
