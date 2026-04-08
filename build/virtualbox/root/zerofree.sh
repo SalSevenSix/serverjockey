@@ -2,7 +2,7 @@
 
 echo "Starting zerofree process"
 [ "$(whoami)" = "root" ] || exit 1
-which zerofree > /dev/null || exit 1
+command -v zerofree > /dev/null || exit 1
 
 echo " unmounting disk"
 echo "u" > /proc/sysrq-trigger

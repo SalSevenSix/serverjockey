@@ -1,8 +1,8 @@
 #!/bin/bash
 
 echo "Initialising build process"
-which wget > /dev/null || exit 1
-which unzip > /dev/null || exit 1
+command -v wget > /dev/null || exit 1
+command -v unzip > /dev/null || exit 1
 [ -z "$1" ] || SOURCE_ZIP=$(realpath "$1")
 cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"

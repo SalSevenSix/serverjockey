@@ -2,7 +2,7 @@
 
 echo "Initialising docker build process"
 [ "$(whoami)" = "root" ] || exit 1
-which docker > /dev/null || exit 1
+command -v docker > /dev/null || exit 1
 REPOTAG="salsevensix/serverjockey:${1}"
 cd "$(dirname $0)" || exit 1
 [ -f Dockerfile ] || exit 1

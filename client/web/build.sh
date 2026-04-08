@@ -8,7 +8,7 @@ if ~/.bun/bin/bun --version > /dev/null 2>&1; then
   [ "$INSTALL_COMMAND" = "ci" ] && INSTALL_COMMAND="install --frozen-lockfile"
   echo "bun version $(~/.bun/bin/bun --version)"
 else
-  which npm > /dev/null || exit 1
+  command -v npm > /dev/null || exit 1
   echo "npm version $(npm --version)"
 fi
 

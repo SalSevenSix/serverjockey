@@ -9,11 +9,11 @@ if ~/.bun/bin/bun --version > /dev/null 2>&1; then
   [ "$INSTALL_COMMAND" = "ci" ] && INSTALL_COMMAND="install --frozen-lockfile"
   echo "bun version $(~/.bun/bin/bun --version)"
 else
-  which node > /dev/null || exit 1
+  command -v node > /dev/null || exit 1
   echo "node version $(node --version)"
-  which npm > /dev/null || exit 1
+  command -v npm > /dev/null || exit 1
   echo "npm version $(npm --version)"
-  which nexe > /dev/null || exit 1
+  command -v nexe > /dev/null || exit 1
 fi
 
 cd "$(dirname $0)" || exit 1
@@ -28,7 +28,7 @@ echo "Discord bot build"
 $JS_PKGMGR run lint || exit 1
 $JS_PKGMGR run test || exit 1
 if [ "$JS_PKGMGR" = "npm" ]; then
-  PYTHON_EXE=$(which python3)
+  PYTHON_EXE=$(command -v python3)
   NODE_OUT_DIR=~/.nexe/$(node --version | cut -c2-)/out/Release
   nexe index.js --output build/serverlink --build --python=$PYTHON_EXE || exit 1
   [ -d $NODE_OUT_DIR ] || exit 1

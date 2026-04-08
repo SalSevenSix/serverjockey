@@ -3,7 +3,7 @@
 echo "Initialising release process"
 [ "$(whoami)" = "root" ] || exit 1
 [ -f /usr/local/bin/serverjockey_cmd.pyz ] || exit 1
-which docker > /dev/null || exit 1
+command -v docker > /dev/null || exit 1
 cd "$(dirname $0)" || exit 1
 BUILD_DIR="$(pwd)"
 WEB_DIR="/var/www/downloads"
@@ -31,6 +31,13 @@ OSVER_RPM="fc$(docker run rpmbuilder -c 'cat /etc/fedora-release' | awk '{print 
 RELEASE_FILE_RPM="sjgms-${VERSION}.${OSVER_RPM}.x86_64.rpm"
 [ -f $RELEASE_FILE_RPM ] && exit 1
 echo " release rpm : $RELEASE_FILE_RPM"
+SOURCE_FILE_PAC="$(readlink -f sjgms-develop-latest.pkg.tar.zst)"
+SOURCE_FILE_PAC="$(basename $SOURCE_FILE_PAC)"
+[ -f $SOURCE_FILE_PAC ] || exit 1
+echo " source  pac : $SOURCE_FILE_PAC"
+RELEASE_FILE_PAC="sjgms-${VERSION}.x86_64.pkg.tar.zst"
+[ -f $RELEASE_FILE_PAC ] && exit 1
+echo " release pac : $RELEASE_FILE_PAC"
 ZOMBOX_FILE="ZomBox-$(echo $TIMESTAMP | cut -c1-8).ova"
 [ -f $ZOMBOX_FILE ] || exit 1
 echo " zombox  ova : $ZOMBOX_FILE"
@@ -64,6 +71,11 @@ echo "RPM package release"
 cp $SOURCE_FILE_RPM $RELEASE_FILE_RPM || exit 1
 chmod 644 $RELEASE_FILE_RPM || exit 1
 ln -fs $RELEASE_FILE_RPM sjgms-master-latest.rpm || exit 1
+
+echo "PAC package release"
+cp $SOURCE_FILE_PAC $RELEASE_FILE_PAC || exit 1
+chmod 644 $RELEASE_FILE_PAC || exit 1
+ln -fs $RELEASE_FILE_PAC sjgms-master-latest.pkg.tar.zst || exit 1
 
 echo "ZomBox ova release"
 chown root $ZOMBOX_FILE || exit 1

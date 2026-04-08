@@ -11,19 +11,18 @@ id -u $SJGMS_USER_DEF > /dev/null 2>&1 || SERVICE_NAME="serverjockey"
 id -u $SJGMS_USER > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   rm -rf $HOME_DIR > /dev/null 2>&1
-  ADDUSER_ARGS="--system --home $HOME_DIR --disabled-login --disabled-password $SJGMS_USER"
-  which yum > /dev/null && ADDUSER_ARGS="--system --home-dir $HOME_DIR $SJGMS_USER"
-  adduser $ADDUSER_ARGS || exit 1
-  [ "$SJGMS_PORT" = "$SJGMS_PORT_DEF" ] || echo "{ \"cmdargs\": { \"port\": $SJGMS_PORT }}" > $HOME_DIR/serverjockey.json
-  mkdir -p $SERVERLINK_DIR
+  groupadd --system "$SJGMS_USER" 2>/dev/null
+  useradd --system --home-dir "$HOME_DIR" --create-home --shell "$(command -v nologin)" --gid "$SJGMS_USER" "$SJGMS_USER" || exit 1
+  mkdir $SERVERLINK_DIR || exit 1
   echo '{ "module": "serverlink", "hidden": true }' > $SERVERLINK_DIR/instance.json
+  [ "$SJGMS_PORT" = "$SJGMS_PORT_DEF" ] || echo "{ \"cmdargs\": { \"port\": $SJGMS_PORT }}" > $HOME_DIR/serverjockey.json
   find $HOME_DIR -type d -exec chmod 755 {} +
-  find $HOME_DIR -type f -exec chmod 600 {} +
+  find $HOME_DIR -type f -exec chmod 644 {} +
   chown -R $SJGMS_USER $HOME_DIR
-  chgrp -R $(ls -ld $HOME_DIR | awk '{print $4}') $HOME_DIR
+  chgrp -R $SJGMS_USER $HOME_DIR
 fi
 
-/usr/local/bin/serverjockey_cmd.pyz -nt sysdsvc:$SJGMS_USER > /etc/systemd/system/${SERVICE_NAME}.service
+/usr/local/bin/serverjockey_cmd.pyz -nt sysdsvc:${SJGMS_USER} > /etc/systemd/system/${SERVICE_NAME}.service
 systemctl daemon-reload
 systemctl enable $SERVICE_NAME
 systemctl start $SERVICE_NAME

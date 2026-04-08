@@ -2,10 +2,10 @@
 
 echo "Initialising CI build process"
 [ "$(whoami)" = "root" ] || exit 1
-which wget > /dev/null || exit 1
-which jq > /dev/null || exit 1
-which gh > /dev/null || exit 1
-which docker > /dev/null || exit 1
+command -v wget > /dev/null || exit 1
+command -v jq > /dev/null || exit 1
+command -v gh > /dev/null || exit 1
+command -v docker > /dev/null || exit 1
 
 BRANCH="${1-develop}"
 cd "$(dirname $0)" || exit 1
@@ -25,8 +25,7 @@ if [ $? -ne 0 ]; then
   cd /tmp/rpmbuilder || exit 1
   cat <<'EOF' > Dockerfile
 FROM fedora:40
-RUN dnf -y install rpm-build python3-pip
-RUN yum -y install which wget unzip
+RUN dnf -y install rpm-build python3-pip wget unzip
 RUN python3 -m pip install pipenv
 ARG UID=1000
 ARG GID=1000
@@ -38,6 +37,31 @@ ENV PATH="$PATH:/home/rpmuser/.bun/bin"
 ENTRYPOINT ["bash"]
 EOF
   docker build --build-arg UID=$(id -u $BUILD_USER) --build-arg GID=$(id -g $BUILD_USER) -t rpmbuilder . || exit 1
+fi
+
+docker image inspect pacbuilder > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "CI Build pacbuilder docker image"
+  rm -rf /tmp/pacbuilder > /dev/null 2>&1
+  mkdir -p /tmp/pacbuilder || exit 1
+  cd /tmp/pacbuilder || exit 1
+  cat <<'EOF' > Dockerfile
+FROM archlinux:base-devel
+RUN echo 'Server = https://archive.archlinux.org/repos/2024/11/01/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+RUN pacman -Syyu --noconfirm --needed python python-pip wget zip unzip
+RUN python3 -m pip install --break-system-packages pipenv
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g $GID pacgroup && \
+    useradd -u $UID -g pacgroup -m -s /bin/bash pacuser && \
+    echo "pacuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+USER pacuser
+WORKDIR /home/pacuser
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="$PATH:/home/pacuser/.bun/bin"
+ENTRYPOINT ["bash"]
+EOF
+  docker build --build-arg UID=$(id -u $BUILD_USER) --build-arg GID=$(id -g $BUILD_USER) -t pacbuilder . || exit 1
 fi
 
 echo "CI Checking"
@@ -69,21 +93,24 @@ chmod 755 build.sh || exit 1
 chown $BUILD_USER $COMMIT_FILE $SOURCE_ZIP build.sh || exit 1
 chgrp $BUILD_USER $COMMIT_FILE $SOURCE_ZIP build.sh || exit 1
 
-for PKG in rpm deb; do
+for PKG in pac rpm deb; do
   echo "CI Building $PKG"
   cd $BUILD_DIR || exit 1
   rm -rf "$DIST_DIR" > /dev/null 2>&1
   [ "$PKG" = "deb" ] && su - $BUILD_USER -c "$BUILD_DIR/build.sh $BUILD_DIR/$SOURCE_ZIP"
   [ "$PKG" = "rpm" ] && docker run -v ${BUILD_DIR}:/home/rpmuser/build rpmbuilder build/build.sh build/$SOURCE_ZIP
+  [ "$PKG" = "pac" ] && docker run -v ${BUILD_DIR}:/home/pacuser/build pacbuilder build/build.sh build/$SOURCE_ZIP
   [ -f "$BUILD_OK_FILE" ] || exit 1
   TIMESTAMP="$(head -1 $BUILD_OK_FILE)"
 
   echo "CI Packaging $PKG"
   [ "$PKG" = "deb" ] && $BUILD_DIR/dist/sjgms/deb.sh
   [ "$PKG" = "rpm" ] && docker run -v ${BUILD_DIR}:/home/rpmuser/build rpmbuilder build/dist/sjgms/rpm.sh
+  [ "$PKG" = "pac" ] && docker run -v ${BUILD_DIR}:/home/pacuser/build pacbuilder build/dist/sjgms/pac.sh
 
   echo "CI Publishing $PKG"
   cd $DIST_DIR || exit 1
+  [ "$PKG" = "pac" ] && PKG="pkg.tar.zst"
   PKG_FILE="$(ls *.${PKG} | tail -1)"
   [ -f "$PKG_FILE" ] || exit 1
   TARGET_FILE="sjgms-${BRANCH}-${TIMESTAMP}.${PKG}"
