@@ -61,7 +61,7 @@ class _OsName:
                     if line.startswith('PRETTY_NAME="'):
                         return line[13:-1]
         except Exception as e:
-            logging.error('_OsName.get() failed %s', repr(e))
+            logging.error('OsName.get() failed %s', repr(e))
         return 'UNKNOWN'
 
 
@@ -73,7 +73,7 @@ class _VirtInfo:
             container = await shellutil.run_executable('systemd-detect-virt', '-c')
             return dict(virtual=virtual.strip().lower(), container=container.strip().lower())
         except Exception as e:
-            logging.error('_VirtInfo.get() failed %s', repr(e))
+            logging.error('VirtInfo.get() failed %s', repr(e))
             return dict(virtual=None, container=None)
 
 
@@ -81,11 +81,17 @@ class _LocalIp:
     # noinspection PyMethodMayBeStatic
     async def get(self) -> str:
         try:
-            result = await shellutil.run_executable('hostname', '-I')
-            result = util.extract_hostname_ips(result)
+            result = await shellutil.run_executable('ip', 'route')
+            result = util.extract_iproute_adaptor(result)
+            if not result:
+                raise Exception('to get network adaptor name')
+            result = await shellutil.run_executable('ip', '-br', 'address', 'show', result)
+            result = util.extract_ipaddrshow_ips(result)
+            if len(result[0]) == 0:
+                raise Exception('to get ip addresses')
             return result[0][0]  # first ipv4
         except Exception as e:
-            logging.error('_LocalIp.get() failed %s', repr(e))
+            logging.error('LocalIp.get() Failed %s', repr(e))
         return 'UNAVAILABLE'
 
 

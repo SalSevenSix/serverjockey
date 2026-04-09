@@ -217,15 +217,28 @@ def clear_queue(queue: asyncio.Queue):
         pass
 
 
-def extract_hostname_ips(hostnames: str | bytes | None) -> tuple:
-    data = hostnames.decode() if isinstance(hostnames, bytes) else hostnames
-    data, ipv4, ipv6 = data.strip() if data else None, [], []
-    if not data:
-        return tuple(ipv4), tuple(ipv6)
-    for item in data.split():
-        len_item = len(item)
-        if len(item.replace('.', '')) == (len_item - 3):
-            ipv4.append(item)
-        elif len(item.replace(':', '')) == (len_item - 7):
-            ipv6.append(item)
+def extract_iproute_adaptor(value: str | bytes | None) -> str | None:
+    data = value.decode() if isinstance(value, bytes) else value
+    data = data.strip().split('\n') if data else []
+    found = False
+    for line in data:
+        if line.find('default') > -1:
+            for item in line.strip().split():
+                if found:
+                    return item
+                found = item == 'dev'
+    return None
+
+
+def extract_ipaddrshow_ips(value: str | bytes | None) -> tuple:
+    data = value.decode() if isinstance(value, bytes) else value
+    data = data.strip().split() if data else []
+    ipv4, ipv6 = [], []
+    for item in data:
+        if item:
+            ipval = rchop(item, '/')
+            if ipval.count('.') == 3:
+                ipv4.append(ipval)
+            elif ipval.count(':') > 1:
+                ipv6.append(ipval)
     return tuple(ipv4), tuple(ipv6)

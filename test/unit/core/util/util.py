@@ -113,31 +113,33 @@ class TestCoreUtilUtil(unittest.TestCase):
         self.assertEqual('/home/path/', util.full_path('/home', 'path/'))
         self.assertEqual('/path/', util.full_path('/home', '/path/'))
 
-    def test_extract_hostname_ips(self):
-        result = util.extract_hostname_ips(None)
-        self.assertEqual(0, len(result[0]))
-        self.assertEqual(0, len(result[1]))
-        result = util.extract_hostname_ips('')
-        self.assertEqual(0, len(result[0]))
-        self.assertEqual(0, len(result[1]))
-        result = util.extract_hostname_ips('   \n')
-        self.assertEqual(0, len(result[0]))
-        self.assertEqual(0, len(result[1]))
-        result = util.extract_hostname_ips(b'')
-        self.assertEqual(0, len(result[0]))
-        self.assertEqual(0, len(result[1]))
-        result = util.extract_hostname_ips('fe80::a66b:e8e4:cfe3:cf20')
-        self.assertEqual(0, len(result[0]))
-        self.assertEqual(0, len(result[1]))
-        result = util.extract_hostname_ips('10.0.0.192 2603:c024:4512:c301:23d0:bce:cdc9:b87a')
-        self.assertEqual(('10.0.0.192',), result[0])
-        self.assertEqual(('2603:c024:4512:c301:23d0:bce:cdc9:b87a', ), result[1])
-        result = util.extract_hostname_ips('10.0.0.251 172.17.0.1')
-        self.assertEqual(('10.0.0.251', '172.17.0.1'), result[0])
-        self.assertEqual(0, len(result[1]))
-        result = util.extract_hostname_ips('192.168.156.76')
-        self.assertEqual(('192.168.156.76',), result[0])
-        self.assertEqual(0, len(result[1]))
+    def test_extract_iproute_adaptor(self):
+        self.assertEqual(None, util.extract_iproute_adaptor(None))
+        self.assertEqual(None, util.extract_iproute_adaptor(''))
+        self.assertEqual(None, util.extract_iproute_adaptor('   \n'))
+        self.assertEqual(None, util.extract_iproute_adaptor(b''))
+        data = '\n'.join([
+          '192.168.1.0/24 dev enp0s3 proto kernel scope link src 192.168.1.8 metric 100',
+          'default via 192.168.1.1 dev enp0s3 proto dhcp metric 100',
+          '169.254.0.0/16 dev docker0 scope link metric 1000 linkdown',
+          '172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown'])
+        self.assertEqual('enp0s3', util.extract_iproute_adaptor(data))
+
+    def test_extract_ipaddrshow_ips(self):
+        ipv4, ipv6 = util.extract_ipaddrshow_ips(None)
+        self.assertEqual(0, len(ipv4) + len(ipv6))
+        ipv4, ipv6 = util.extract_ipaddrshow_ips('')
+        self.assertEqual(0, len(ipv4) + len(ipv6))
+        ipv4, ipv6 = util.extract_ipaddrshow_ips('   \n')
+        self.assertEqual(0, len(ipv4) + len(ipv6))
+        ipv4, ipv6 = util.extract_ipaddrshow_ips(b'')
+        self.assertEqual(0, len(ipv4) + len(ipv6))
+        ipv4, ipv6 = util.extract_ipaddrshow_ips('enp0s3           UP             192.168.18/24 2001:53fc/64')
+        self.assertEqual(0, len(ipv4) + len(ipv6))
+        data = '192.168.1.2/24 192.168.1.8/24 2001::ef1/24 2001:ef0:54b1:8f60:63c4:c232:67e:51fc/64'
+        ipv4, ipv6 = util.extract_ipaddrshow_ips('enp0s3           UP             ' + data)
+        self.assertEqual(('192.168.1.2', '192.168.1.8'), ipv4)
+        self.assertEqual(('2001::ef1', '2001:ef0:54b1:8f60:63c4:c232:67e:51fc'), ipv6)
 
     def test_fname(self):
         self.assertEqual(None, util.fname(None))
