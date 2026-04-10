@@ -8,13 +8,18 @@
   import NetRateSymbol from '$lib/widget/NetRateSymbol.svelte';
   import SpinnerOverlay from '$lib/widget/SpinnerOverlay.svelte';
 
+  const commonDistros = {
+    debian: 'debian', ubuntu: 'ubuntu', fedora: 'fedora', redhat: 'redhat',
+    archlinux: 'arch-linux', cachyos: 'arch-linux', steamos: 'steam' };
+
   let running = true;
   let errordown = 1;
   let info = null;
 
   function osIcon(osPrettyName) {
-    const parts = osPrettyName.split(' ');
-    return 'fa-' + parts[0].toLowerCase();
+    const fingerprint = osPrettyName ? osPrettyName.replace(/\s+/g, '').toLowerCase() : '';
+    const found = Object.keys(commonDistros).find(function(name) { return fingerprint.includes(name); });
+    return 'fa-brands fa-' + (found ? commonDistros[found] : 'linux');
   }
 
   function virtText(value) {
@@ -69,7 +74,7 @@
         <tr><td title="ServerJockey uptime">Uptime</td>
             <td class="notranslate" id="systemInfoUptime">{humanDuration(info.uptime)}</td></tr>
         <tr><td class="has-text-weight-bold" title="Operating system name">OS</td>
-            <td class="notranslate" id="systemInfoOs"><i class="fa-brands {osIcon(info.os)}"></i> {info.os}</td></tr>
+            <td class="notranslate" id="systemInfoOs"><i class={osIcon(info.os)}></i> {info.os}</td></tr>
         <tr><td id="systemInfoVirtual" title="Is operating in a virtual machine">Virtual</td>
             <td>{virtText(info.virt.virtual)}</td></tr>
         <tr><td id="systemInfoContainer" title="Is operating in a container">Container</td>
