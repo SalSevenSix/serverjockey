@@ -93,7 +93,7 @@ function toSnowflake(value, prefix) {
   if (!value) return null;
   const result = value.length > prefix.length + 1 && value.startsWith(prefix) && value.endsWith('>')
     ? value.slice(prefix.length, -1) : value;
-  if (result.length < 18) return null;
+  if (result.length < 17) return null;
   return (/^\d*$/).test(result) ? result : null;
 }
 
