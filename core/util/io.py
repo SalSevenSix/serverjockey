@@ -126,13 +126,14 @@ async def delete_any(path: str):
         await delete_file(path)
 
 
-async def find_in_env_path(env_path: str | None, executable: str) -> str | None:
-    if env_path is None:
+async def find_in_env_path(env_paths: str | None, executable: str) -> str | None:
+    if env_paths is None:
         return None
-    for path in env_path.split(':'):
-        filename = path + '/' + executable
-        if await file_exists(filename):
-            return filename
+    for path in set(env_paths.split(':')):
+        if path:
+            filename = path + '/' + executable
+            if await file_exists(filename):
+                return filename
     return None
 
 

@@ -2,6 +2,7 @@
 
 find_steamcmd() {
   /usr/games/steamcmd +quit >/dev/null 2>&1 && return 0
+  /usr/bin/steamcmd +quit >/dev/null 2>&1 && return 0
   ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && return 0
   return 1
 }

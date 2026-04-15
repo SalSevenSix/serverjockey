@@ -1,4 +1,5 @@
 import logging
+import time
 # ALLOW util.util
 from core.util import shellutil, io
 
@@ -53,18 +54,51 @@ async def link_steamclient_to_sdk(home_dir: str):
     await io.create_symlink(steamclient_link, steamclient_file)
 
 
-async def ensure_steamcmd(home_dir: str):
+class _SteamCmdFinder:
+
+    def __init__(self):
+        self._steamcmd_exe, self._last = 'steamcmd', 0.0
+
+    async def initialise(self, home_dir: str, env_paths: str) -> bool:
+        paths = '/usr/games:/usr/bin'
+        if env_paths:
+            paths += ':' + env_paths
+        steamcmd_exe = await io.find_in_env_path(paths, 'steamcmd')
+        if not steamcmd_exe and await io.file_exists(home_dir + '/Steam/steamcmd.sh'):
+            steamcmd_exe = '~/Steam/steamcmd.sh'
+        self._steamcmd_exe = steamcmd_exe if steamcmd_exe else '$(pwd)/steamcmd.sh'
+        return bool(steamcmd_exe)
+
+    def script_refresh(self) -> str:
+        return self._steamcmd_exe + ' +quit >/dev/null 2>&1'
+
+    def script_execute(self) -> str:
+        script, now = self._steamcmd_exe, time.time()
+        if now - self._last > 3600.0:  # 1 hour
+            script = self.script_refresh() + '\nsleep 1\n' + script
+            self._last = now
+        return script
+
+
+_STEAMCMD_FINDER = _SteamCmdFinder()
+
+
+async def ensure_steamcmd(home_dir: str, env_paths: str):
     steamcmd_dir = await get_steamcmd_dir(home_dir)
     if steamcmd_dir:
         logging.info('SteamCMD: %s', steamcmd_dir)
+    found_steamcmd_exe = await _STEAMCMD_FINDER.initialise(home_dir, env_paths)
+    if not found_steamcmd_exe:
+        logging.warning('SteamCMD executable not found')
+    if steamcmd_dir or not found_steamcmd_exe:
         return
-    steamcmd_exe = '/usr/games/steamcmd'
-    if not await io.file_exists(steamcmd_exe):
-        logging.warning('%s not found, unable to install SteamCMD for user', steamcmd_exe)
-        return
-    logging.info('Installing SteamCMD into %s', home_dir)
+    logging.info('SteamCMD installing for service user')
     try:
-        await shellutil.run_script(steamcmd_exe + ' +quit >/dev/null 2>&1')
+        await shellutil.run_script(_STEAMCMD_FINDER.script_refresh())
         logging.info('SteamCMD install completed')
     except Exception as e:
-        logging.warning('Exception installing SteamCMD: %s', repr(e))
+        logging.warning('SteamCMD install exception: %s', repr(e))
+
+
+def steamcmd_script() -> str:
+    return _STEAMCMD_FINDER.script_execute()

@@ -122,7 +122,8 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
         if self._context.is_trace():
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         tasks.task_fork(self._log_system_info(), 'log_system_info()')
-        tasks.task_fork(steamutil.ensure_steamcmd(self._context.env('HOME')), 'ensure_steamcmd()')
+        tasks.task_fork(steamutil.ensure_steamcmd(
+            self._context.env('HOME'), self._context.env('PATH')), 'ensure_steamcmd()')
         await self._create_tempdir()
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()

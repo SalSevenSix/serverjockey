@@ -10,16 +10,6 @@ from core.http import httpabc, httpext, httpsubs
 from core.proc import jobh
 
 
-def _script_head() -> str:
-    return '''find_steamcmd() {
-  /usr/games/steamcmd +quit >/dev/null 2>&1 && echo /usr/games/steamcmd && return 0
-  ~/Steam/steamcmd.sh +quit >/dev/null 2>&1 && echo ~/Steam/steamcmd.sh && return 0
-  echo $(pwd)/steamcmd.sh && return 0
-}
-echo "Running SteamCMD, log output may be delayed..."
-'''
-
-
 # pylint: disable=logging-not-lazy
 def _dump_script(script: str):
     logging.debug('SCRIPT\n' + script)
@@ -39,10 +29,10 @@ class SteamCmdInstallHandler(httpabc.PostHandler):
         login = 'anonymous' if self._anon else await self._steam_config.get_login()
         if not login:
             raise httpabc.ResponseBody.CONFLICT
-        script = _script_head()
+        script = 'echo "Running SteamCMD for install, log output may be delayed..."\n'
         if util.get('wipe', data):
             script += 'rm -rf ' + self._path + '\n'
-        script += '$(find_steamcmd)'
+        script += steamutil.steamcmd_script()
         script += ' +force_install_dir ' + self._path
         script += ' +login ' + login
         script += ' +app_update ' + self._app_id
@@ -73,8 +63,8 @@ class SteamCmdLoginHandler(httpabc.PostHandler):
         if not login:
             raise httpabc.ResponseBody.BAD_REQUEST
         await self._steam_config.clear_cache()
-        script = _script_head()
-        script += '$(find_steamcmd)'
+        script = 'echo "Running SteamCMD for login, log output may be delayed..."\n'
+        script += steamutil.steamcmd_script()
         script += ' +login ' + util.script_escape(login)
         script += ' +quit'
         _dump_script(script)
