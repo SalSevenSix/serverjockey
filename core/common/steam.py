@@ -153,7 +153,7 @@ class _SteamConfig:
 
     async def _load(self) -> tuple:
         try:
-            config_path = await steamutil.get_config_path(self._home_dir)
+            config_path = await steamutil.get_config_file(self._home_dir)
             root = vdf.loads(await io.read_file(config_path))
             valve = root['InstallConfigStore']['Software']['Valve']
             steamer = util.get('Steam', valve, util.get('steam', valve))

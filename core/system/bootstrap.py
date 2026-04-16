@@ -61,7 +61,8 @@ def _create_context() -> contextsvc.Context | None:
     if args.version:
         print(sysutil.system_version())
         return None
-    home = util.full_path(os.getcwd(), args.home if args.home else '.')
+    cwd = os.getcwd()
+    home = util.full_path(cwd, args.home if args.home else '.')
     stime = home + '/.pid'
     stime = os.stat(stime).st_atime if os.path.isfile(stime) else None
     cfg = _load_cmdargs(home)
@@ -85,9 +86,9 @@ def _create_context() -> contextsvc.Context | None:
     trace = True if args.trace else objconv.to_bool(util.get('trace', cfg))
     secret = util.get('secret', cfg, idutil.generate_token(10, True))
     return contextsvc.Context(dict(
-        home=home, logfile=logfile, tempdir=tempdir, host=host, port=port, modules=modules, single=single,
-        showtoken=showtoken, noupnp=noupnp, dbfile=dbfile, debug=debug, trace=trace, secret=secret,
-        stime=stime, scheme=httpssl.sync_get_scheme(home), env=os.environ.copy()))
+        cwd=cwd, home=home, logfile=logfile, tempdir=tempdir, host=host, port=port, modules=modules, single=single,
+        showtoken=showtoken, noupnp=noupnp, dbfile=dbfile, debug=debug, trace=trace, secret=secret, stime=stime,
+        scheme=httpssl.sync_get_scheme(home), env=os.environ.copy()))
 
 
 def _setup_logging(context: contextsvc.Context):
@@ -123,7 +124,7 @@ class _Callbacks(httpabc.HttpServiceCallbacks):
             self._context.register(msglog.LoggerSubscriber(level=logging.DEBUG))
         tasks.task_fork(self._log_system_info(), 'log_system_info()')
         tasks.task_fork(steamutil.ensure_steamcmd(
-            self._context.env('HOME'), self._context.env('PATH')), 'ensure_steamcmd()')
+            self._context.config('cwd'), self._context.env('HOME'), self._context.env('PATH')), 'ensure_steamcmd()')
         await self._create_tempdir()
         self._syssvc = system.SystemService(self._context)
         await self._syssvc.initialise()
