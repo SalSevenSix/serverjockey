@@ -38,7 +38,7 @@ class _SteamCmdFinder:
         if env_paths:
             paths += ':' + env_paths
         steamcmd_exe = await io.find_in_env_path(paths, 'steamcmd')
-        for home in (home_dir, cwd):
+        for home in (home_dir + '/Steam', home_dir, cwd):
             if not steamcmd_exe and await io.file_exists(home + '/steamcmd.sh'):
                 steamcmd_exe = home + '/steamcmd.sh'
         self._steamcmd_exe = steamcmd_exe if steamcmd_exe else '~/Steam/steamcmd.sh'
