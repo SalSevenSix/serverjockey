@@ -1,6 +1,6 @@
 <script>
   import { getContext } from 'svelte';
-  import { loadAndEditFile } from './hytale.js';
+  import { loadAndEditFile } from '$lib/modal/filehelper';
   import FileSystem from '$lib/instance/FileSystem.svelte';
 
   const instance = getContext('instance');

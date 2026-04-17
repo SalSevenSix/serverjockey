@@ -8,6 +8,7 @@ from servers.projectzomboid import messaging as msg, modcheck as mck, scrapers a
 
 APPID = '380870'
 _WORLD_NAME_DEF = 'servertest'
+_EXT_LUAFILES = 'txt', 'text', 'log', 'json', 'ini', 'lua'
 
 
 def _default_cmdargs() -> dict:
@@ -63,6 +64,9 @@ class Deployment:
         builder.put_log(self._log_file).put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
         builder.put_autobackups(self._autobackups_dir, ls_filter=_ls_autobackups, ls_ffilter=_ls_autobackups)
+        builder.psh('luafiles', httpext.FileSystemHandler(self._lua_dir, ls_filter=_ls_luafiles))
+        builder.put('*{path}', httpext.FileSystemHandler(self._lua_dir, 'path', ls_filter=_ls_luafiles), 'm')
+        builder.pop()
         config_pre = self._config_dir + '/' + self._world_name
         builder.put_config(dict(
             db=self._player_dir + '/' + self._world_name + '.db', jvm=self._runtime_dir + '/ProjectZomboid64.json',
@@ -119,6 +123,10 @@ class Deployment:
 
 
 def _ls_autobackups(entry) -> bool:
-    if entry['type'] == 'directory':
-        return True
-    return entry['type'] == 'file' and entry['name'].startswith('backup_') and entry['name'].endswith('.zip')
+    ftype, fname = entry['type'], entry['name']
+    return ftype == 'directory' or (ftype == 'file' and fname.startswith('backup_') and fname.endswith('.zip'))
+
+
+def _ls_luafiles(entry) -> bool:
+    ftype, fext = entry['type'], util.fext(entry['name'])
+    return ftype == 'directory' or (ftype == 'file' and fext in _EXT_LUAFILES)

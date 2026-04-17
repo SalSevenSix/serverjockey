@@ -37,7 +37,7 @@ check_jockey() {
     echo "  $ sudo add-apt-repository ppa:deadsnakes/ppa"
     echo "  $ sudo apt install python3.12"
     echo "For RedHat/CentOS;"
-    echo "  $ sudo yum install python3.12"
+    echo "  $ sudo dnf install python3.12"
     exit 1
   fi
 
@@ -57,7 +57,7 @@ check_jockey() {
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt install python3-pip"
     echo "For RedHat/CentOS;"
-    echo "  $ sudo yum install python3-pip"
+    echo "  $ sudo dnf install python3-pip"
     exit 1
   fi
 
@@ -69,7 +69,7 @@ check_jockey() {
     echo "For Ubuntu/Debian;"
     echo "  $ sudo apt install pipenv"
     echo "For RedHat/CentOS;"
-    echo "  $ sudo yum install pipenv"
+    echo "  $ sudo dnf install pipenv"
     exit 1
   fi
 

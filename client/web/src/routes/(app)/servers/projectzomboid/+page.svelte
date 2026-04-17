@@ -18,6 +18,7 @@
   import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
   import Autobackups from '$lib/instance/Autobackups.svelte';
+  import LuaConfig from './LuaConfig.svelte';
 </script>
 
 
@@ -65,22 +66,9 @@
           </p>
         </ConfigFile>
       </Collapsible>
-      <!-- Collapsible icon="fa-image" title="Branding">
-        <div class="content">
-          <p>
-            Upload images for your (b42+) server branding.
-            <span class="is-italic">Only</span>
-            <span class="has-text-weight-bold is-family-monospace">.jpg</span>
-            <span class="is-italic">images can be used.</span>
-          </p>
-        </div>
-        <div class="content"><h3 class="title is-5 has-text-centered">Server Icon</h3></div>
-        <ImageFile path="/config/imgicon" />
-        <div class="content mt-3"><h3 class="title is-5 has-text-centered">Login Screen Banner</h3></div>
-        <ImageFile path="/config/imglogin" />
-        <div class="content mt-3"><h3 class="title is-5 has-text-centered">Loading Screen Banner</h3></div>
-        <ImageFile path="/config/imgloading" />
-      </Collapsible -->
+      <Collapsible icon="fa-file-excel" title="Lua Config">
+        <LuaConfig />
+      </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />
       </Collapsible>

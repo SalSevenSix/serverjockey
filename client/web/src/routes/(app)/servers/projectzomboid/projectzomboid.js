@@ -1,4 +1,3 @@
-
 export const worldActions = [
   { 'key': 'wipe-world-save', 'name': 'Reset Save',
     'desc': 'Reset the game world save only. This is the map and player characters.' },
