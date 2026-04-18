@@ -91,6 +91,7 @@ class Deployment:
         self._world_dir = self._home_dir + '/world'
         self._autobackups_dir = self._world_dir + '/backups'
         self._logs_dir = self._world_dir + '/logs'
+        self._plugins_dir = self._world_dir + '/earlyplugins'
         self._mods_dir = self._world_dir + '/mods'
         self._save_dir = self._world_dir + '/universe'
         self._worlds_dir = self._save_dir + '/worlds'
@@ -130,6 +131,10 @@ class Deployment:
         builder.put('*{path}', httpext.FileSystemHandler(self._worlds_dir, 'path', ls_filter=_ls_wconfig), 'm')
         builder.pop()
         builder.psh('mod')
+        builder.psh('plugins', httpext.FileSystemHandler(self._plugins_dir, ls_filter=_ls_plugin))
+        builder.put('*{path}', httpext.FileSystemHandler(
+            self._plugins_dir, 'path', ls_filter=_ls_plugin, tempdir=self._tempdir), 'm')
+        builder.pop()
         builder.psh('files', httpext.FileSystemHandler(self._mods_dir, ls_filter=_ls_mfile))
         builder.put('*{path}', httpext.FileSystemHandler(
             self._mods_dir, 'path', ls_filter=_ls_mfile, tempdir=self._tempdir), 'm')
@@ -159,7 +164,7 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._mods_dir,
+        await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir, self._plugins_dir, self._mods_dir,
                                   self._autobackups_dir, self._save_dir, self._worlds_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
@@ -245,6 +250,11 @@ def _ls_onlydir(entry) -> bool:
 
 def _ls_wconfig(entry) -> bool:
     return entry['name'] == 'config.json'
+
+
+def _ls_plugin(entry) -> bool:
+    ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
+    return fname and ftype == 'file' and fext == _EXT_MOD_ARCHIVE[0]
 
 
 def _ls_mfile(entry) -> bool:

@@ -17,8 +17,9 @@
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
   import Autobackups from '$lib/instance/Autobackups.svelte';
   import WorldConfig from './WorldConfig.svelte';
-  import Modfiles from './Modfiles.svelte';
-  import Modconfigs from './Modconfigs.svelte';
+  import PluginFiles from './PluginFiles.svelte';
+  import ModFiles from './ModFiles.svelte';
+  import ModConfig from './ModConfig.svelte';
 </script>
 
 
@@ -57,10 +58,13 @@
         <WorldConfig />
       </Collapsible>
       <Collapsible icon="fa-file-excel" title="Mod Config">
-        <Modconfigs />
+        <ModConfig />
       </Collapsible>
       <Collapsible icon="fa-puzzle-piece" title="Mod Files">
-        <Modfiles />
+        <ModFiles />
+      </Collapsible>
+      <Collapsible icon="fa-plug" title="Early Plugins">
+        <PluginFiles />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

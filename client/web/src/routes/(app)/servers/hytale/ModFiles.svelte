@@ -6,11 +6,10 @@
 
 
 <div class="content">
-  <p>Only .jar or .zip files accepted.
-     All mod files present will automatically be loaded when server starts.</p>
+  <p>Only .jar and .zip files accepted. All mod files present will automatically be loaded when server starts.</p>
 </div>
 
-<FileCollection path="/mod/files" allowDelete={1} filenameHelp="Only .jar and .zip files are accepted."
+<FileCollection path="/mod/files" allowDelete={1} filenameHelp="Only .jar and .zip files accepted."
                 validateFilename={function(fn) { return (fn.endsWith('.jar') || fn.endsWith('.zip')); }} />
 
 <div class="block"></div>
