@@ -5,9 +5,14 @@
 </script>
 
 
-<div class="content">
-  <p>Only .jar and .zip files accepted. All mod files present will automatically be loaded when server starts.</p>
-</div>
+<div class="content"><p>
+  Only
+  <span class="is-family-monospace notranslate">.jar</span>
+  and
+  <span class="is-family-monospace notranslate">.zip</span>
+  files accepted.<br />
+  All mod files present will automatically be loaded when server starts.
+</p></div>
 
 <FileCollection path="/mod/files" allowDelete={1} filenameHelp="Only .jar and .zip files accepted."
                 validateFilename={function(fn) { return (fn.endsWith('.jar') || fn.endsWith('.zip')); }} />
