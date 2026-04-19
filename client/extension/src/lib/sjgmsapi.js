@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 
-export const noStorage = typeof(Storage) === 'undefined';
+export const noStorage = typeof Storage === 'undefined';
 export const connection = writable();
 export const errorText = writable();
 
@@ -9,6 +9,7 @@ function sleep(millis) {
   return new Promise(function(resolve) { setTimeout(resolve, millis); });
 }
 
+/* eslint-disable no-console */
 export function logError(error) {
   if (!error) return;
   console.error(error);
@@ -18,6 +19,7 @@ export function logError(error) {
     if (text === get(errorText)) { errorText.set(null); }
   });
 }
+/* eslint-enable no-console */
 
 export function baseurl(path) {
   return get(connection).url + path;

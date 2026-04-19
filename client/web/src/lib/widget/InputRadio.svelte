@@ -11,7 +11,7 @@
   export let notranslate = false;
 
   function optionToObject(option) {
-    const result = isString(option) ? {value: option} : option;
+    const result = isString(option) ? { value: option } : option;
     result.label = result.name ? result.name : capitalizeKebabCase(result.value);
     result.id = id + toCamelCase(result.label);
     return result;

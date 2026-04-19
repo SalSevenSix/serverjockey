@@ -26,9 +26,9 @@
           label: ' % ',
           backgroundColor: ['#48C78E', '#F14668'],
           data: [upTime, 100.0 - upTime]
-        }],
+        }]
       },
-      options: { plugins: { legend: { position: 'right', maxWidth: 135 }}}
+      options: { plugins: { legend: { position: 'right', maxWidth: 135 } } }
     };
   }
 

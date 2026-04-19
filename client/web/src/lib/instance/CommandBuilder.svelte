@@ -14,8 +14,8 @@
   export let commands = {
     'console': {
       'send': [
-        {name: 'help', input: 'display'},
-        {name: 'line', input: 'text>', type: 'string', label: null}
+        { name: 'help', input: 'display' },
+        { name: 'line', input: 'text>', type: 'string', label: null }
       ]
     }
   };
@@ -52,7 +52,7 @@
         text = text.trim().split('\n');
         if (text.length > 1 && text[0] === text[0].toUpperCase()) { text.shift(); }
         text = text.join('\n');
-        args[index] = anchorme({ input: text, options: { attributes: { target: '_blank' }}});
+        args[index] = anchorme({ input: text, options: { attributes: { target: '_blank' } } });
       })
       .catch(function() {
         args[index] = ':(';

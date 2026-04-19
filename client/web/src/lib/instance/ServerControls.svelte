@@ -27,14 +27,14 @@
 
   let restartOptions = null;
   if (canRestartAfterWarnings || canRestartOnEmpty) {
-    restartOptions = [{ label: 'Immediately', onSelect: function() { sendCommand('restart-immediately'); }}];
+    restartOptions = [{ label: 'Immediately', onSelect: function() { sendCommand('restart-immediately'); } }];
     if (canRestartAfterWarnings) {
       restartOptions.push({ label: 'After Warnings', onSelect: function() {
-        sendCommand('restart-after-warnings', 'Server restarting after warning players.'); }});
+        sendCommand('restart-after-warnings', 'Server restarting after warning players.'); } });
     }
     if (canRestartOnEmpty) {
       restartOptions.push({ label: 'On Empty', onSelect: function() {
-        sendCommand('restart-on-empty', 'Server restarting when empty.'); }});
+        sendCommand('restart-on-empty', 'Server restarting when empty.'); } });
     }
   }
 </script>

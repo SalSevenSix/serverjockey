@@ -21,10 +21,10 @@
 
   const fnHelp = 'Filename must start with "runtime-" or "world-", end in ".zip", and be lowercase with no spaces.';
   function validateFn(filename) {
-    return filename === filename.replaceAll(' ', '')
-        && filename === filename.toLowerCase()
-        && (filename.startsWith('runtime-') || filename.startsWith('world-'))
-        && filename.endsWith('.zip');
+    return filename === filename.replaceAll(' ', '') &&
+           filename === filename.toLowerCase() &&
+           (filename.startsWith('runtime-') || filename.startsWith('world-')) &&
+           filename.endsWith('.zip');
   }
 
   function createBackup() {

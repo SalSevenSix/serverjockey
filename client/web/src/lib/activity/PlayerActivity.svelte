@@ -27,7 +27,7 @@
     return {
       type: 'pie',
       data: { labels: labels, datasets: [{ label: ' % ', data: data }] },
-      options: { plugins: { legend: { position: 'right', maxWidth: 135 }}}
+      options: { plugins: { legend: { position: 'right', maxWidth: 135 } } }
     };
   }
 

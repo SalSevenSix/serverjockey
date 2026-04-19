@@ -6,7 +6,7 @@
   const fadeMillis = 200;
   const icons = { 'is-success': 'fa-circle-check',
                   'is-warning': 'fa-triangle-exclamation',
-                  'is-danger':  'fa-circle-minus' };
+                  'is-danger': 'fa-circle-minus' };
 
   let hidden = true;
 

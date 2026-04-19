@@ -1,13 +1,13 @@
 export const devDom = '<div class="workshopItemTitle">Dummy Mod</div> ' +
-                      'Workshop ID: 9999999999< ' +
-                      'Mod ID: Alpha< Mod ID: Beta Xyz< Mod ID: Gamma< ' +
-                      'Map Folder: Green< Map Folder: Blue Abc';
+  'Workshop ID: 9999999999< ' +
+  'Mod ID: Alpha< Mod ID: Beta Xyz< Mod ID: Gamma< ' +
+  'Map Folder: Green< Map Folder: Blue Abc';
 
 function unique(value, index, array) {
   return array.indexOf(value) === index;
 }
 
-function domExtractItem(dom, cutlen, regex, single=false) {
+function domExtractItem(dom, cutlen, regex, single = false) {
   let result = dom.match(regex);
   if (!result) return single ? null : [];
   result = result.map(function(value) {

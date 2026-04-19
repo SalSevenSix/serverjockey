@@ -1,3 +1,5 @@
+/* eslint-disable @stylistic/quote-props */
+/* eslint-disable @stylistic/object-curly-spacing */
 export const worldActions = [
   { 'key': 'wipe-world-save', 'name': 'Reset Save',
     'desc': 'Reset the game world save only. This is the map and player characters.' },
@@ -107,3 +109,5 @@ export const consoleCommands = {
     ]
   }
 };
+/* eslint-enable @stylistic/object-curly-spacing */
+/* eslint-enable @stylistic/quote-props */

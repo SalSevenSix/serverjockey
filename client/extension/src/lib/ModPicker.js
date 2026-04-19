@@ -64,7 +64,7 @@ const workshopCache = {
     const item = workshopCache.get(workshop);
     return item ? item.name : '';
   },
-  uncached: function(workshops, limit=10) {
+  uncached: function(workshops, limit = 10) {
     const result = [];
     if (workshops.length === 0 || limit < 1) return result;
     for (const workshop of workshops) {
@@ -101,7 +101,7 @@ async function fetchWorkshops(workshops) {
     });
 }
 
-
+/* eslint-disable max-lines-per-function */
 export function processResults(dom, ini, updated) {
   const self = { raw: { dom: dom, ini: ini } };
   self.dom = domExtract(dom);
@@ -116,7 +116,7 @@ export function processResults(dom, ini, updated) {
       self.workshop.available = false;
       updated();
     },
-    remove: function(workshop=null) {
+    remove: function(workshop = null) {
       if (!workshop) { workshop = self.dom.workshop; }
       let mods = self.dom.mods;
       let maps = self.dom.maps;
@@ -139,7 +139,7 @@ export function processResults(dom, ini, updated) {
       filebaseurl: 'https://steamcommunity.com/sharedfiles/filedetails/?id=',
       name: workshopCache.name,
       fetch: async function() {
-        let result = await fetchWorkshops(self.workshop.selected);
+        const result = await fetchWorkshops(self.workshop.selected);
         updated(false);
         return result;
       }
@@ -202,7 +202,7 @@ export function processResults(dom, ini, updated) {
     }
   };
   self.generateIni = function() {
-    let result = [];
+    const result = [];
     self.raw.ini.split('\n').forEach(function(line) {
       if (line.startsWith('WorkshopItems=')) {
         result.push('WorkshopItems=' + self.workshop.selected.join(';'));
@@ -220,3 +220,4 @@ export function processResults(dom, ini, updated) {
   };
   return self;
 }
+/* eslint-enable max-lines-per-function */

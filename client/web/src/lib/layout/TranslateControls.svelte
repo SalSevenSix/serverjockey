@@ -8,9 +8,9 @@
   let translating = false;
 
   function canTranslate() {
-    if (typeof(google) === 'undefined') return false;
-    if (typeof(google.translate) === 'undefined') return false;
-    if (typeof(google.translate.TranslateElement) === 'undefined') return false;
+    if (typeof google === 'undefined') return false;
+    if (typeof google.translate === 'undefined') return false;
+    if (typeof google.translate.TranslateElement === 'undefined') return false;
     return true;
   }
 

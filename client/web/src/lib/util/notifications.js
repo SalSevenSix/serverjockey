@@ -20,7 +20,7 @@ function notify(level, message) {
   }, false)) return;
   const identity = generateId();
   notifications.update(function(current) {
-    return [{ 'id': identity, 'at': now, 'level': level, 'message': message }, ...current];
+    return [{ id: identity, at: now, level: level, message: message }, ...current];
   });
   sleep(8000).then(function() {
     removeNotification(identity);

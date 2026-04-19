@@ -24,8 +24,8 @@
   const idPrefix = 'fileSystem' + toCamelCase(rootPath.replaceAll('/', ' '));
   const allowAction = customMeta ? (customMeta.allowAction ? customMeta.allowAction : 1) : 0;
   const hasActions = allowDelete + allowAction > 0;
-  const columnCount = 1 + (hasActions ? 1 : 0) + (columnsMeta.date ? 1 : 0)
-                    + (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
+  const columnCount = 1 + (hasActions ? 1 : 0) + (columnsMeta.date ? 1 : 0) +
+                      (columnsMeta.name ? 1 : 0) + (columnsMeta.size ? 1 : 0);
 
   let pwdUrl = null;
   let notifyText = null;

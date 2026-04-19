@@ -14,7 +14,7 @@ export function surl(path) {
 }
 
 export function newGetRequest() {
-  return { method: 'get', headers: { 'X-Secret': get(securityToken) }};
+  return { method: 'get', headers: { 'X-Secret': get(securityToken) } };
 }
 
 export function newPostRequest(ct = 'application/json') {
@@ -36,6 +36,7 @@ export async function fetchJson(data) {
 
 export class SubscriptionHelper {
   #controller;
+
   #running;
 
   constructor() {

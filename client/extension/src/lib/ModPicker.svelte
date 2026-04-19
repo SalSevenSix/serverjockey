@@ -17,7 +17,7 @@
   $: cannotSave = !data || processing || dataSynced;
   $: if ($instance) { fetchDom(); }
 
-  function updated(dirty=true) {
+  function updated(dirty = true) {
     data = data;  // Ugly but svelte is not tracking internal changes
     if (dirty) { dataSynced = false; }
   }

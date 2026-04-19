@@ -52,6 +52,7 @@ export function capitalizeKebabCase(value) {
 
 export class RollingLog {
   #lines;
+
   #limit;
 
   constructor(limit = 200) {
