@@ -1,26 +1,29 @@
 # ServerJockey
 
+![](https://serverjockey.net/assets/mediakit/banner-468x60.jpg)
+
 ServerJockey is a game server management system for Project Zomboid
 and other supported games. It is designed to be an easy to use self-hosting
 option for multiplayer servers. It allows you to create and remotely
 manage your servers using a webapp and Discord bot.
 
-* Visit the [website](https://serverjockey.net/)
-* Join the [Discord](https://discord.gg/TEuurWAhHn)
-* Instructional guides and dev updates on [YouTube](https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw)
-* Source code on [GitHub](https://github.com/SalSevenSix/serverjockey)
+* 🌐️  Visit the [website](https://serverjockey.net/)
+* 🎮️  Join the [Discord](https://discord.gg/TEuurWAhHn)
+* 📺️  Instructional guides and dev updates on [YouTube](https://www.youtube.com/channel/UCprGg-h1FbXwZ5HdRanbijw)
+* 🗃️  Source code on [GitHub](https://github.com/SalSevenSix/serverjockey)
 
 If your like using this system, please consider supporting it on Ko-fi.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/serverjockey)
 
-*Choose ONE of the deployment options from below...*
+📣️ ***Choose ONE of the deployment options from below...***
+
 
 ## DEB Package Install
-Arch x86_64/amd64 only. Requires Python 3.10 or 3.11 or 3.12 installed as default.
+For x86_64/amd64 only. Requires Python 3.10 or higher installed as default.
 Tested and works on **Ubuntu 24.04 LTS** (recommended) and Ubuntu 22.04 LTS.
 
-* Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed
+**1.** Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed already
 ```bash
 sudo apt install software-properties-common
 sudo add-apt-repository multiverse
@@ -29,13 +32,13 @@ sudo apt update
 sudo apt install lib32gcc-s1 steamcmd
 ```
 
-* Download and install the deb package
+**2.** Download and install the deb package
 ```bash
 wget -O sjgms.deb https://dl.serverjockey.net/sjgms-master-latest.deb
 sudo apt install ./sjgms.deb
 ```
 
-* The ServerJockey system should automatically be started.
+**3.** The ServerJockey service should automatically be started.
 Find the login details for the webapp by using the CLI client as shown below.
 ```bash
 serverjockey_cmd.pyz -nc showtoken
@@ -66,6 +69,55 @@ Open additional ports for game servers as needed.
 sudo docker run -p 6164:6164/tcp salsevensix/serverjockey:latest
 ```
 If desired, you can bind the container directory `/home/container` to the local filesystem.
+
+
+## RPM Package Install
+For x86_64/amd64 only. Requires Python 3.10 or higher installed as default.
+
+**1.** Download and install the rpm package
+```bash
+wget -O sjgms.rpm https://dl.serverjockey.net/sjgms-master-latest.rpm
+sudo dnf install ./sjgms.rpm
+```
+
+**2.** Manually install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD)
+```bash
+sudo dnf update
+sudo dnf install glibc.i686 libstdc++.i686
+sudo su - sjgms -s /bin/bash
+mkdir ~/Steam && cd ~/Steam
+curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
+```
+
+**3.** The ServerJockey service should automatically be started.
+Find the login details for the webapp by using the CLI client as shown below.
+```bash
+serverjockey_cmd.pyz -nc showtoken
+```
+
+
+## PACMAN Package Install
+For x86_64/amd64 only. Requires Python 3.10 or higher installed as default.
+
+**1.** Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) from source if not installed already
+```bash
+sudo pacman -Syy base-devel
+git clone https://aur.archlinux.org/steamcmd.git
+cd steamcmd
+makepkg -si
+```
+
+**2.** Download and install the pacman package
+```bash
+wget -O sjgms.pkg.tar.zst https://dl.serverjockey.net/sjgms-master-latest.pkg.tar.zst
+sudo pacman -U ./sjgms.pkg.tar.zst
+```
+
+**3.** The ServerJockey service should automatically be started.
+Find the login details for the webapp by using the CLI client as shown below.
+```bash
+serverjockey_cmd.pyz -nc showtoken
+```
 
 
 ## Running from Source
