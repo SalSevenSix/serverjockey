@@ -36,3 +36,27 @@
 * extension/static/manifest.json
 * web/package.json
 * core/util/sysutil.py
+
+## Dev and CI environment setup
+
+### Common
+
+**Python**
+* Match Pipfile `python_version` to default `python3` version
+* Install latest pip and pipenv
+* Install SteamCMD
+
+**Tools**
+* wget
+* zip
+* unzip
+* jq
+
+**Other**
+* Install git and connnect to github
+* Install bun
+
+### CI Only
+* Install and login docker
+* Install and login gh
+* Install and configure nginx

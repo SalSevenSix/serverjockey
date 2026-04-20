@@ -3,6 +3,7 @@
 echo "Initialising CI build process"
 [ "$(whoami)" = "root" ] || exit 1
 command -v wget > /dev/null || exit 1
+command -v unzip > /dev/null || exit 1
 command -v jq > /dev/null || exit 1
 command -v gh > /dev/null || exit 1
 command -v docker > /dev/null || exit 1

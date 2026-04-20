@@ -52,8 +52,8 @@ can be imported into VirtualBox. Use this option on Windows systems.
 * Install [VirtualBox](https://www.virtualbox.org/) if not installed.
 * Import the VM image file into VirtualBox.
 * Start the VM. Webapp URL and login token will be displayed in the console.
-* *If there are any network issues or welcome banner is not shown*: Check `Settings > Network` and make sure
-a valid physical network adaptor is attached using Bridged mode.
+* *If there are any network issues or welcome banner is not shown*: Check `Settings > Network`
+and make sure a valid physical network adaptor is attached using Bridged mode.
 
 
 ## Docker Image
