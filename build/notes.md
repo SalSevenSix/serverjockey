@@ -6,7 +6,7 @@
 * Commit final changes, including updated release notes in;
   * debian/changelog
   * specs/sjgms.spec
-* If needed, delete the `rpmbuilder` docker image to get fresh bun
+* If needed, delete the `rpmbuilder` and `pacbuilder` docker images to get fresh bun
 * Run or wait for CI build, confirm successful
 * Build new ZomBox as per Release Process in virtualbox/notes.md
 * Import new ZomBox and do post-build release testing

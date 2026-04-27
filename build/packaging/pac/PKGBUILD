@@ -1,5 +1,5 @@
 pkgname=sjgms
-pkgver=0.31.0
+pkgver=0.32.0
 pkgrel=1
 pkgdesc="ServerJockey Game Management System"
 arch=("x86_64")
