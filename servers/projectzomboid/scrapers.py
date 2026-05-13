@@ -1,4 +1,5 @@
 import logging
+import asyncio
 # ALLOW core.* projectzomboid.messaging
 from core.util import io
 from core.msg import msgabc, msgftr, msgpipe
@@ -11,7 +12,7 @@ class ScraperService(msgabc.AbcSubscriber):
     def __init__(self, mailer: msgabc.Mailer, logs_dir: str):
         super().__init__(msgftr.Or(
             msgftr.IsStop(), mc.ServerStatus.RUNNING_FALSE_FILTER,
-            msgftr.And(msg.CONSOLE_OUTPUT_FILTER, msgftr.DataStrContains('[fully-connected]'))))
+            msgftr.And(msg.CONSOLE_OUTPUT_FILTER, msgftr.DataStrContains('> Connected new client'))))
         self._mailer, self._logs_dir = mailer, logs_dir
         self._player_publisher, self._chat_publisher = None, None
 
@@ -24,7 +25,11 @@ class ScraperService(msgabc.AbcSubscriber):
             self._player_publisher, self._chat_publisher = None, None
             return True if message is msgabc.STOP else None
         if not self._player_publisher:
+            await asyncio.sleep(1.0)
             player_log = await self._find_latest_log('_user.txt')
+            if not player_log:  # Just try one more time
+                await asyncio.sleep(1.0)
+                player_log = await self._find_latest_log('_user.txt')
             if player_log:
                 player_publisher = msgpipe.TailPublisher(self._mailer, self, mc.ServerProcess.STDOUT_LINE, player_log)
                 if await player_publisher.start():
