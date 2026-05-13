@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Wed Apr 29 2026 Bowden Salis <bsalis76@gmail.com> - 0.32.0
-- Feature release 0.32.0
+* Thu May 14 2026 Bowden Salis <bsalis76@gmail.com> - 0.32.0
+- Project Zomboid b42.18 fix and library upgrades
 * Tue Apr 28 2026 Bowden Salis <bsalis76@gmail.com> - 0.31.0
 - More package options release
 * Sat Mar 28 2026 Bowden Salis <bsalis76@gmail.com> - 0.30.0
