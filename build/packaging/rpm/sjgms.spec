@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.32.0
+Version:        0.33.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -58,6 +58,8 @@ exit 0
 
 
 %changelog
+* Fri May 15 2026 Bowden Salis <bsalis76@gmail.com> - 0.33.0
+- Feature release 0.33.0
 * Thu May 14 2026 Bowden Salis <bsalis76@gmail.com> - 0.32.0
 - Project Zomboid b42.18 fix and library upgrades
 * Tue Apr 28 2026 Bowden Salis <bsalis76@gmail.com> - 0.31.0
