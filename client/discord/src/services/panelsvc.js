@@ -43,10 +43,11 @@ export function newPanels(context, instance) {
     callbacks.onAdd = callback;
   };
 
-  self.add = function(panelType, message, thumbUrl = null) {
+  self.add = function(panelType, message, notes = null, thumbUrl = null) {
     const [channelId, messageId] = [message.channel.id, message.id];
     self.remove(channelId, messageId);
     const entry = { panelType, channelId, messageId };
+    if (notes) { entry.notes = notes; }
     if (thumbUrl) { entry.thumbUrl = thumbUrl; }
     data.base.push(entry);
     if (callbacks.onAdd) { callbacks.onAdd(entry, message); }
@@ -54,8 +55,9 @@ export function newPanels(context, instance) {
   };
 
   self.list = function() {
-    return data.base.map(function({ panelType, channelId, messageId, thumbUrl }) {
+    return data.base.map(function({ panelType, channelId, messageId, notes, thumbUrl }) {
       const entry = { panelType, channelId, messageId };
+      if (notes) { entry.notes = notes; }
       if (thumbUrl) { entry.thumbUrl = thumbUrl; }
       return entry;
     });

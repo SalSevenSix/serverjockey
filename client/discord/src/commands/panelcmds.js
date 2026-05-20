@@ -22,6 +22,23 @@ function placeholderEmbed(thumbUrl) {
     .setDescription(emojis.wait + ' waiting for update!').setThumbnail(thumbUrl).setTimestamp();
 }
 
+function extractArgs(data) {
+  let [notes, thumbUrl] = [null, null];
+  for (const arg of data) {
+    if (arg && (arg.startsWith('http') || arg.startsWith('<http'))) {
+      if (!thumbUrl) {
+        thumbUrl = arg;
+        if (thumbUrl.startsWith('<')) { thumbUrl = thumbUrl.substring(1); }
+        if (thumbUrl.endsWith('>')) { thumbUrl = thumbUrl.slice(0, -1); }
+      }
+    } else if (arg) {
+      if (notes) { notes += ' ' + arg.trim(); }
+      else { notes = arg.trim(); }
+    }
+  }
+  return { notes, thumbUrl };
+}
+
 export function panel({ panels, message, data }) {
   const cmd = data.length > 0 ? data[0] : 'list';
   if (cmd === 'list') {
@@ -34,15 +51,14 @@ export function panel({ panels, message, data }) {
     });
     msgutil.sendText(message, result, false);
   } else if (cmd === 'status-text') {
+    const args = extractArgs(data.slice(1));
     message.channel.send(placeholderText().join('\n'))
-      .then(function(result) { panels.add(cmd, result).save(); })
+      .then(function(result) { panels.add(cmd, result, args.notes).save(); })
       .catch(function(error) { logger.error(error, message); });
   } else if (cmd === 'status-embed') {
-    let thumbUrl = data.length > 1 ? data[1] : null;
-    if (thumbUrl && thumbUrl.startsWith('<')) { thumbUrl = thumbUrl.substring(1); }
-    if (thumbUrl && thumbUrl.endsWith('>')) { thumbUrl = thumbUrl.slice(0, -1); }
-    message.channel.send({ embeds: [placeholderEmbed(thumbUrl)] })
-      .then(function(result) { panels.add(cmd, result, thumbUrl).save(); })
+    const args = extractArgs(data.slice(1));
+    message.channel.send({ embeds: [placeholderEmbed(args.thumbUrl)] })
+      .then(function(result) { panels.add(cmd, result, args.notes, args.thumbUrl).save(); })
       .catch(function(error) { logger.error(error, message); });
   } else {
     msgutil.reactUnknown(message);

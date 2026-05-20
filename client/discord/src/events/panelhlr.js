@@ -13,10 +13,11 @@ function compactArray(value, limit) {
   return result;
 }
 
-function toStatusText({ game, instance, server, players }) {
+function toStatusText({ game, instance, server, players, notes }) {
   let text = '```\n';
   text += 'Server ' + instance + ' is ' + server.state;
   text += '\nGame    : ' + game;
+  if (notes) { text += '\nNotes   : ' + notes; }
   if (server.running) {
     const details = server.details ? server.details : {};
     if (details.version) { text += '\nVersion : ' + details.version; }
@@ -36,25 +37,27 @@ function toStatusText({ game, instance, server, players }) {
   return text;
 }
 
-function toStatusEmbed({ game, instance, server, players, thumbUrl }) {
+function toStatusEmbed({ game, instance, server, players, notes, thumbUrl }) {
   const details = server.details ? server.details : {};
   const version = server.running && details.version ? details.version : '---';
   const connect = server.running && details.ip && details.port ? details.ip + ':' + details.port : '---';
-  const title = (server.running ? emojis.greenheart : emojis.whitesqr) + '  Server ' + instance + ' is ' + server.state;
-  const description = '\u200B\n' + [
+  const description = [
     emojis.joystick + ' **Game:** ' + game,
     emojis.dart + ' **Version:** ' + version,
     emojis.compass + ' **Connect:** ' + connect
-  ].join('\n\u200B\n') + '\n\u200B';
+  ];
+  if (notes) { description.push(emojis.notes + ' **Notes:** ' + notes); }
   const fields = compactArray(players, 21).map(function(name, index) {
     return { name: (index + 1).toString().padStart(2, '0'), value: name, inline: true };
   });
   if (server.running && fields.length === 0) { fields.push({ name: '---', value: 'Zero players online' }); }
   fields.push({ name: '', value: '' });
   const colour = cutil.hasProp(serverStateColours, server.state) ? serverStateColours[server.state] : colourCodes.light;
+  const title = (server.running ? emojis.greenheart : emojis.whitesqr) + '  Server ' + instance + ' is ' + server.state;
   const footer = { text: 'Last Updated' };
   if (!thumbUrl) { thumbUrl = assetUrls.sjgmsIconMedium; }
-  const embed = new EmbedBuilder().setColor(colour).setTitle(title).setDescription(description)
+  const embed = new EmbedBuilder().setColor(colour).setTitle(title)
+    .setDescription('\u200B\n' + description.join('\n\u200B\n') + '\n\u200B')
     .setThumbnail(thumbUrl).addFields(fields).setFooter(footer).setTimestamp();
   return { embeds: [embed] };
 }
@@ -131,6 +134,7 @@ function newUpdater(context, panels, resolve) {
         context.cooldowns.submit(renderer(panel));
         return false;
       }
+      model.notes = panel.entry.notes ? panel.entry.notes : null;
       model.thumbUrl = panel.entry.thumbUrl ? panel.entry.thumbUrl : null;
       panel.synced = true;
       const result = await panel.message.edit(panel.render(model)).catch(logger.error);
