@@ -3,6 +3,25 @@ import asyncio
 # ALLOW util.util
 
 
+async def run_script_text(script: str) -> str:
+    result = []
+    try:
+        process = await asyncio.create_subprocess_shell(
+            script, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await process.communicate()
+        if stdout:
+            result.append(stdout.decode())
+        if stderr:
+            result.append('--- ERROR ---')
+            result.append(stderr.decode())
+        if process.returncode:
+            result.append('--- RC: ' + str(process.returncode))
+    except Exception as e:
+        result.append('--- EXCEPTION --- ')
+        result.append(repr(e))
+    return '\n'.join(result)
+
+
 async def run_script(script: str) -> str:
     _log('shl> SCRIPT', script)
     process = await asyncio.create_subprocess_shell(

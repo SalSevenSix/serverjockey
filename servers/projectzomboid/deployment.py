@@ -1,7 +1,8 @@
+import sys
 # ALLOW core.* projectzomboid.messaging projectzomboid.modcheck projectzomboid.scrapers
-from core.util import util, io, objconv
+from core.util import util, io, objconv, shellutil, idutil
 from core.context import contextsvc
-from core.http import httprsc, httpext
+from core.http import httpabc, httprsc, httpext
 from core.proc import proch
 from core.common import svrhelpers, cachelock
 from servers.projectzomboid import messaging as msg, modcheck as mck, scrapers as skr
@@ -68,12 +69,13 @@ class Deployment:
         builder.put('*{path}', httpext.FileSystemHandler(self._lua_dir, 'path', ls_filter=_ls_luafiles), 'm')
         builder.pop()
         config_pre = self._config_dir + '/' + self._world_name
+        player_db = self._player_dir + '/' + self._world_name + '.db'
+        builder.put('playerdb', _PlayerDbHandler(self._context, player_db), 'm')
         builder.put_config(dict(
-            db=self._player_dir + '/' + self._world_name + '.db', jvm=self._runtime_dir + '/ProjectZomboid64.json',
-            cmdargs=self._cmdargs_file, ini=config_pre + '.ini', sandbox=config_pre + '_SandboxVars.lua',
+            jvm=self._runtime_dir + '/ProjectZomboid64.json', cmdargs=self._cmdargs_file,
+            ini=config_pre + '.ini', sandbox=config_pre + '_SandboxVars.lua',
             spawnpoints=config_pre + '_spawnpoints.lua', spawnregions=config_pre + '_spawnregions.lua',
-            imgicon=config_pre + '_icon.jpg', imglogin=config_pre + '_login.jpg',
-            imgloading=config_pre + '_loading.jpg', shop=self._lua_dir + '/ServerPointsListings.ini'))
+            db=player_db, shop=self._lua_dir + '/ServerPointsListings.ini'))
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/start-server.sh'
@@ -120,6 +122,38 @@ class Deployment:
                 if entry['type'] == 'directory':
                     return entry['name']
         return _WORLD_NAME_DEF
+
+
+class _PlayerDbHandler(httpabc.GetHandler, httpabc.PostHandler):
+
+    def __init__(self, context: contextsvc.Context, player_db: str):
+        self._context, self._player_db = context, player_db
+        self._executable = None
+
+    async def _get_executable(self) -> str:
+        if self._executable:
+            return self._executable
+        self._executable = await io.find_in_env_path(self._context.env('PATH'), 'sqlite3')
+        if not self._executable:
+            self._executable = sys.executable + ' -m sqlite3'
+        return self._executable
+
+    async def handle_get(self, resource, data):
+        dbexists = await io.file_exists(self._player_db)
+        executable = await self._get_executable()
+        return dict(dbexists=dbexists, executable=executable)
+
+    async def handle_post(self, resource, data):
+        sql = util.get('body', data)
+        if not sql:
+            return '! No SQL provided'
+        if not await io.file_exists(self._player_db):
+            return '! Player DB not found, server must be run once to create it'
+        rid = idutil.generate_id()
+        script = await self._get_executable()
+        script += ' ' + self._player_db + ' <<\'' + rid + '\'\n' + sql.strip() + '\n' + rid
+        result = await shellutil.run_script_text(script)
+        return result if result else '! No results'
 
 
 def _ls_autobackups(entry) -> bool:
