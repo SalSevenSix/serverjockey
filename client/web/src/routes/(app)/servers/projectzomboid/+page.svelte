@@ -19,6 +19,7 @@
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
   import Autobackups from '$lib/instance/Autobackups.svelte';
   import LuaConfig from './LuaConfig.svelte';
+  import PlayerDb from './PlayerDb.svelte';
 </script>
 
 
@@ -68,6 +69,9 @@
       </Collapsible>
       <Collapsible icon="fa-file-excel" title="Lua Config">
         <LuaConfig />
+      </Collapsible>
+      <Collapsible icon="fa-user-pen" title="Player DB">
+        <PlayerDb />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

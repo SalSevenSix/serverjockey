@@ -17,7 +17,7 @@ async def run_script_text(script: str) -> str:
         if process.returncode:
             result.append('--- RC: ' + str(process.returncode))
     except Exception as e:
-        result.append('--- EXCEPTION --- ')
+        result.append('--- EXCEPTION ---')
         result.append(repr(e))
     return '\n'.join(result)
 
