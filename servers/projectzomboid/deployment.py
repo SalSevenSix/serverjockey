@@ -130,8 +130,8 @@ class _PlayerDbHandler(httpabc.GetHandler, httpabc.PostHandler):
         self._context, self._player_db = context, player_db
         self._executable = None
 
-    async def _get_executable(self) -> str:
-        if self._executable:
+    async def _get_executable(self, ignore_cache: bool = False) -> str:
+        if self._executable and not ignore_cache:
             return self._executable
         self._executable = await io.find_in_env_path(self._context.env('PATH'), 'sqlite3')
         if not self._executable:
@@ -140,8 +140,9 @@ class _PlayerDbHandler(httpabc.GetHandler, httpabc.PostHandler):
 
     async def handle_get(self, resource, data):
         dbexists = await io.file_exists(self._player_db)
-        executable = await self._get_executable()
-        return dict(dbexists=dbexists, executable=executable)
+        executable = await self._get_executable(True)
+        nativecli = executable and executable.endswith('/sqlite3')
+        return dict(dbexists=dbexists, executable=executable, nativecli=nativecli)
 
     async def handle_post(self, resource, data):
         sql = util.get('body', data)
