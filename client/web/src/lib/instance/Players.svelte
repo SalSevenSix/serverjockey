@@ -2,7 +2,7 @@
   import { onMount, onDestroy, getContext } from 'svelte';
   import { hasProp, humanDuration, chunkArray } from 'common/util/util';
   import { notifyError } from '$lib/util/notifications';
-  import { SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
+  import { SubscriptionHelper, newGetRequest, getReponseJson } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
@@ -50,20 +50,13 @@
 
   onMount(function() {
     fetch(instance.url('/players'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) {
         players = json;
         subs.start(instance.url('/players/subscribe'), handlePlayerEvent);
       })
-      .catch(function() {
-        notifyError('Failed to load Player list.');
-      })
-      .finally(function() {
-        loading = false;
-      });
+      .catch(function() { notifyError('Failed to load Player list.'); })
+      .finally(function() { loading = false; });
   });
 
   onDestroy(function() {

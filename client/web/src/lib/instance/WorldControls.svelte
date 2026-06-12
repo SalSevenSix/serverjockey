@@ -2,7 +2,7 @@
   import { onMount, getContext } from 'svelte';
   import { shortISODateTimeString } from 'common/util/util';
   import { toCamelCase } from '$lib/util/util';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { newGetRequest, newPostRequest, checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import { confirmModal } from '$lib/modal/modals';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
@@ -28,7 +28,7 @@
       processing = true;
       fetch(instance.url('/deployment/' + actionKey), newPostRequest())
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           notifyInfo(actionTitle + ' completed.');
         })
         .catch(function() { notifyError(actionTitle + ' failed.'); })
@@ -39,10 +39,7 @@
   function loadWorldMeta() {
     processing = true;
     fetch(instance.url('/deployment/world-meta'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) { lastActivity = json.timestamp; })
       .catch(function() { notifyError('Failed to load World meta.'); })
       .finally(function() { processing = false; });

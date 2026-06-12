@@ -1,7 +1,7 @@
 <script>
   import { onMount, getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
-  import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest, checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import InputPassword from '$lib/widget/InputPassword.svelte';
   import InputText from '$lib/widget/InputText.svelte';
   import InputTextArea from '$lib/widget/InputTextArea.svelte';
@@ -47,7 +47,7 @@
     request.body = JSON.stringify(formData);
     fetch(instance.url('/config'), request)
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         loadedData = JSON.parse(JSON.stringify(formData));
         notifyInfo('ServerLink Config saved.');
       })
@@ -57,10 +57,7 @@
 
   onMount(function() {
     fetch(instance.url('/config'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) {
         loadedData = normaliseData(json);
         formData = JSON.parse(JSON.stringify(json));

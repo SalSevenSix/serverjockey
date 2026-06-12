@@ -2,7 +2,7 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
   import { RollingLog, toCamelCase } from '$lib/util/util';
-  import { surl, SubscriptionHelper, newGetRequest } from '$lib/util/sjgmsapi';
+  import { surl, SubscriptionHelper, newGetRequest, getReponseText } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const subs = new SubscriptionHelper();
@@ -66,10 +66,7 @@
 
   onMount(function() {
     fetch(surl(loadUrl), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.text();
-      })
+      .then(function(response) { return getReponseText(response); })
       .then(function(text) {
         logText = logLines.set(text).toText();
         subs.start(subscribeUrl, function(data) {

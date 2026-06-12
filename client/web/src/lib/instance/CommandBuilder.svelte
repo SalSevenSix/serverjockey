@@ -3,7 +3,7 @@
   import anchorme from 'anchorme/dist/browser/anchorme.min.js';
   import { hasProp, urlSafeB64encode } from 'common/util/util';
   import { capitalizeKebabCase } from '$lib/util/util';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { newGetRequest, newPostRequest, checkReponseOk, getReponseText } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import InputText from '$lib/widget/InputText.svelte';
   import InputRadio from '$lib/widget/InputRadio.svelte';
@@ -44,10 +44,7 @@
     args[index] = 'loading...\n\n\n';
     const name = commands[command][action][index].name;
     fetch(instance.url('/' + command + '/' + name), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.text();
-      })
+      .then(function(response) { return getReponseText(response); })
       .then(function(text) {
         text = text.trim().split('\n');
         if (text.length > 1 && text[0] === text[0].toUpperCase()) { text.shift(); }
@@ -89,7 +86,7 @@
     request.body = JSON.stringify(body);
     fetch(instance.url(path), request)
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         notifyInfo(capitalizeKebabCase(command) + ' command sent.');
       })
       .catch(function() { notifyError('Failed to send command to server.'); })

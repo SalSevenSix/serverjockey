@@ -17,9 +17,7 @@
         hasServerLink = true;
         if (json.BOT_TOKEN) { hasToken = true; }
       })
-      .finally(function() {
-        loaded = true;
-      });
+      .finally(function() { loaded = true; });
   });
 </script>
 

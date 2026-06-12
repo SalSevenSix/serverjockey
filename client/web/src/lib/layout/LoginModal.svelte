@@ -3,7 +3,7 @@
   import { closeModal } from 'svelte-modals';
   import { noStorage } from '$lib/util/browserutil';
   import { notifyError } from '$lib/util/notifications';
-  import { surl, securityToken } from '$lib/util/sjgmsapi';
+  import { surl, securityToken, checkReponseOk } from '$lib/util/sjgmsapi';
   import InputText from '$lib/widget/InputText.svelte';
   import InputCheckbox from '$lib/widget/InputCheckbox.svelte';
 
@@ -32,7 +32,7 @@
     fetch(surl('/login'), { method: 'post', headers: { 'X-Secret': token } })
       .then(function(response) {
         if (response.status === 401) throw new LoginFailed();
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         securityToken.set(token);
         if (!noStorage) {
           sessionStorage.setItem(storageKey, token);

@@ -3,7 +3,7 @@
   import { toCamelCase } from '$lib/util/util';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { textAreaModal } from '$lib/modal/modals';
-  import { newPostRequest, newGetRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, newGetRequest, checkReponseOk, getReponseText } from '$lib/util/sjgmsapi';
   import ExtLink from '$lib/widget/ExtLink.svelte';
 
   const instance = getContext('instance');
@@ -35,8 +35,7 @@
     fetch(instance.url(path), newGetRequest())
       .then(function(response) {
         if (response.status === 404) return '';
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.text();
+        return getReponseText(response);
       })
       .then(function(text) {
         originalText = text;
@@ -63,7 +62,7 @@
     request.body = configText;
     fetch(instance.url(path), request)
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         originalText = configText;
         notifyInfo(name + ' saved.');
       })

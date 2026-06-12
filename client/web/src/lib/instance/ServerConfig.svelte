@@ -1,7 +1,7 @@
 <script>
   import { getContext } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
 
   const instance = getContext('instance');
   const serverStatus = getContext('serverStatus');
@@ -32,9 +32,7 @@
     const request = newPostRequest();
     request.body = JSON.stringify({ auto: autoOptions.indexOf(selectedOption) });
     fetch(instance.url(), request)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-      })
+      .then(function(response) { checkReponseOk(response); })
       .catch(function() {
         currentOption = originalOption;  // Safe rollback
         selectedOption = originalOption;

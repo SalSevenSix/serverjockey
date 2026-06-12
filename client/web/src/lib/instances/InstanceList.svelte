@@ -3,7 +3,8 @@
   import { notifyError } from '$lib/util/notifications';
   import { confirmDangerModal } from '$lib/modal/modals';
   import { goto } from '$app/navigation';
-  import { surl, newGetRequest, newPostRequest, SubscriptionHelper } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest, checkReponseOk, getReponseJson,
+           SubscriptionHelper } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import ServerStateSymbol from '$lib/widget/ServerStateSymbol.svelte';
 
@@ -22,7 +23,7 @@
     confirmDangerModal(message, selected.identity, function() {
       deleting = true;
       fetch(surl('/instances/' + selected.identity + '/server/delete'), newPostRequest())
-        .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+        .then(function(response) { checkReponseOk(response); })
         .catch(function() { notifyError('Failed to delete ' + selected.identity); });
     });
   }
@@ -46,10 +47,7 @@
 
   onMount(function() {
     fetch(surl('/instances'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) {
         Object.entries(json).forEach(function([identity, instance]) {
           instances = [...instances, { identity: identity, module: instance.module, state: instance.state }];

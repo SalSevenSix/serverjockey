@@ -1,5 +1,5 @@
 <script>
-  import { surl, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
 
@@ -12,7 +12,7 @@
       processing = true;
       fetch(surl('/store/' + actionName), newPostRequest())
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           notifyInfo(actionTitle + ' completed.');
         })
         .catch(function() { notifyError(actionTitle + ' failed.'); })

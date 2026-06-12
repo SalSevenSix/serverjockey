@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { surl, newGetRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, getReponseJson } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
@@ -9,10 +9,7 @@
 
   onMount(function() {
     fetch(surl('/modules'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) { modules = json; })
       .catch(function() { notifyError('Failed to load module list.'); })
       .finally(function() { loading = false; });

@@ -4,7 +4,7 @@
   import { closeModal } from 'svelte-modals';
   import { fNoop, sleep } from 'common/util/util';
   import { RollingLog } from '$lib/util/util';
-  import { SubscriptionHelper, newPostRequest } from '$lib/util/sjgmsapi';
+  import { SubscriptionHelper, newPostRequest, checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
   import InputText from '$lib/widget/InputText.svelte';
   import InputPassword from '$lib/widget/InputPassword.svelte';
@@ -50,10 +50,7 @@
     const request = newPostRequest();
     request.body = JSON.stringify({ login: steamLogin });
     fetch(instance.url('/steamcmd/login'), request)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) {
         subs.poll(json.url, function(data) {
           logText = logLines.append(data).toText();
@@ -86,7 +83,7 @@
     const request = newPostRequest();
     request.body = JSON.stringify({ value: steamPassword });
     fetch(instance.url('/steamcmd/input'), request)
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .then(function(response) { checkReponseOk(response); })
       .catch(function() { notifyError('Failed to send password.'); });
   }
 
@@ -102,7 +99,7 @@
     const request = newPostRequest();
     request.body = JSON.stringify({ value: steamCode });
     fetch(instance.url('/steamcmd/input'), request)
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .then(function(response) { checkReponseOk(response); })
       .catch(function() { notifyError('Failed to send code.'); });
   }
 

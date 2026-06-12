@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
   import FileSystem from '$lib/instance/FileSystem.svelte';
 
   const instance = getContext('instance');
@@ -19,7 +19,7 @@
       request.body = JSON.stringify({ filename: path });
       fetch(instance.url('/deployment/restore-autobackup'), request)
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           const infoMessage = 'Autobackup restore complete. Please check console log output.';
           if (callbacks) { callbacks.started(infoMessage); }
           else { notifyInfo(infoMessage); }

@@ -2,7 +2,7 @@
   import { onDestroy, getContext } from 'svelte';
   import { hasProp, humanDuration } from 'common/util/util';
   import { capitalize } from '$lib/util/util';
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
   import ExtLink from '$lib/widget/ExtLink.svelte';
@@ -55,12 +55,10 @@
     request.body = JSON.stringify({ 'line': cmd });
     fetch(instance.url('/console/send'), request)
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         notifyInfo('Console command sent.');
       })
-      .catch(function() {
-        notifyError('Failed to send command to server.');
-      });
+      .catch(function() { notifyError('Failed to send command to server.'); });
   }
 
   onDestroy(function() {

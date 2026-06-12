@@ -4,7 +4,7 @@
   import { confirmModal } from '$lib/modal/modals';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
   import { guessTextFile, guessArchiveFile, toCamelCase } from '$lib/util/util';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { newGetRequest, newPostRequest, checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
   const instance = getContext('instance');
@@ -68,10 +68,7 @@
     if (!url) { url = rootUrl(); }
     if (!pwdUrl) { pwdUrl = url; }
     fetch(url, newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) {
         json.sort(sorter ? sorter : defaultSorter);
         if (json.length > hardLimit) { notifyWarning('Only ' + hardLimit + ' of ' + json.length + ' entries shown'); }
@@ -88,9 +85,7 @@
           loadRoot();
         }
       })
-      .finally(function() {
-        loading = false;
-      });
+      .finally(function() { loading = false; });
   }
 
   export function reload() {
@@ -143,7 +138,7 @@
 
   function deleteUrl(url) {
     fetch(url, newPostRequest())
-      .then(function(response) { if (!response.ok) throw new Error('Status: ' + response.status); })
+      .then(function(response) { checkReponseOk(response); })
       .catch(function() { notifyError('Failed to delete ' + urlToPath(url)); })
       .finally(reload);
   }

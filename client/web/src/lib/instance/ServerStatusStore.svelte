@@ -2,7 +2,7 @@
   import { onMount, onDestroy, tick, setContext } from 'svelte';
   import { writable } from 'svelte/store';
   import { notifyError } from '$lib/util/notifications';
-  import { surl, newGetRequest, SubscriptionHelper } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, getReponseJson, SubscriptionHelper } from '$lib/util/sjgmsapi';
 
   const subs = new SubscriptionHelper();
 
@@ -71,10 +71,7 @@
 
   onMount(function() {
     fetch(instance.url('/server'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) {
         lastRunning = json.running;
         lastState = json.state;
@@ -85,9 +82,7 @@
           return true;
         });
       })
-      .catch(function() {
-        notifyError('Failed to load Server Status.');
-      });
+      .catch(function() { notifyError('Failed to load Server Status.'); });
   });
 
   onDestroy(function() {

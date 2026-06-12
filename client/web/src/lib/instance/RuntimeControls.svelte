@@ -3,7 +3,8 @@
   import { openModal } from 'svelte-modals';
   import { RollingLog } from '$lib/util/util';
   import { ObjectUrls } from '$lib/util/browserutil';
-  import { SubscriptionHelper, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { SubscriptionHelper, newGetRequest, newPostRequest,
+           checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyWarning, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
   import SteamLoginModal from '$lib/instance/SteamLoginModal.svelte';
@@ -25,15 +26,11 @@
   function runtimeMeta() {
     fetch(instance.url('/deployment/runtime-meta'), newGetRequest())
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         return response.blob();
       })
-      .then(function(blob) {
-        objectUrls.openBlob(blob);
-      })
-      .catch(function() {
-        notifyWarning('Meta not found. No runtime installed.');
-      });
+      .then(function(blob) { objectUrls.openBlob(blob); })
+      .catch(function() { notifyWarning('Meta not found. No runtime installed.'); });
   }
 
   function wipeRuntime() {
@@ -41,7 +38,7 @@
       cannotProcess = true;
       fetch(instance.url('/deployment/wipe-runtime'), newPostRequest())
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           notifyInfo('Delete runtime completed.');
         })
         .catch(function() { notifyError('Delete Runtime failed.'); })
@@ -69,8 +66,7 @@
       .then(function(response) {
         if (response.status === 204) return true;
         if (response.status === 409) return false;
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
+        return getReponseJson(response);
       })
       .then(function(json) {
         if (json && json.url) {

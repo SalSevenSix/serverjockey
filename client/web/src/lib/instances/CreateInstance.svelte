@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { notifyError } from '$lib/util/notifications';
-  import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest, checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import InputText from '$lib/widget/InputText.svelte';
 
   let modules = [];
@@ -22,7 +22,7 @@
     request.body = JSON.stringify(serverForm);
     fetch(surl('/instances'), request)
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         serverForm.identity = null;
       })
       .catch(function() { notifyError('Failed to create new instance.'); })
@@ -31,10 +31,7 @@
 
   onMount(function() {
     fetch(surl('/modules'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) { modules = Object.keys(json); })
       .catch(function() { notifyError('Failed to load module list.'); })
       .finally(function() { processing = false; });

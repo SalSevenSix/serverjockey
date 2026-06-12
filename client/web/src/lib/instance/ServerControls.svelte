@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import { isBoolean } from 'common/util/util';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
   import DropdownButton from '$lib/widget/DropdownButton.svelte';
 
   const instance = getContext('instance');
@@ -19,7 +19,7 @@
   function sendCommand(value, successMessage = null) {
     fetch(instance.url('/server/' + value), newPostRequest())
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         if (successMessage) { notifyInfo(successMessage); }
       })
       .catch(function() { notifyError('Failed to send server command.'); });

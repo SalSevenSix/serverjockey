@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { surl, newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { surl, newGetRequest, newPostRequest, checkReponseOk, getReponseJson } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
 
@@ -19,7 +19,7 @@
       request.body = JSON.stringify({ enabled: !httpsInfo.enabled });
       fetch(surl('/ssl'), request)
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           httpsInfo.enabled = !httpsInfo.enabled;
           notifyInfo('Successfully ' + change + 'd HTTPS.');
         })
@@ -30,10 +30,7 @@
 
   onMount(function() {
     fetch(surl('/ssl'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) { httpsInfo = json; })
       .catch(function() { notifyError('Failed to load HTTPS info.'); });
   });

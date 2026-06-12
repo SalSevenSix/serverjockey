@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import { confirmModal } from '$lib/modal/modals';
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
   import FileSystem from '$lib/instance/FileSystem.svelte';
   import FileUpload from '$lib/instance/FileUpload.svelte';
 
@@ -31,7 +31,7 @@
     cannotBackup = true;
     fetch(instance.url('/deployment/backup-' + this.name), newPostRequest())
       .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
+        checkReponseOk(response);
         notifyText = 'Backup completed. Please check log output for details.';
       })
       .catch(function() {
@@ -47,7 +47,7 @@
       request.body = JSON.stringify({ filename: path });
       fetch(instance.url('/deployment/restore-backup'), request)
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           callbacks.started('Restored backup. Please check console log output.');
         })
         .catch(function() {

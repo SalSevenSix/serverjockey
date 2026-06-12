@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import { slide } from 'svelte/transition';
   import { fNoop, fTrue } from 'common/util/util';
-  import { newPostRequest } from '$lib/util/sjgmsapi';
+  import { newPostRequest, checkReponseOk } from '$lib/util/sjgmsapi';
   import { notifyInfo, notifyError } from '$lib/util/notifications';
   import SpinnerIcon from '$lib/widget/SpinnerIcon.svelte';
 
@@ -34,7 +34,7 @@
       request.body.append('file', file);
       const successful = await fetch(instance.url(filenameHelp ? rootPath + '/' + file.name : rootPath), request)
         .then(function(response) {
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           return notifyInfo(file.name + ' uploaded successfully.', true);
         })
         .catch(function() {

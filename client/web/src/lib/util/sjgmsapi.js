@@ -22,13 +22,24 @@ export function newPostRequest(ct = 'application/json') {
   return { method: 'post', headers: headers };
 }
 
+export function checkReponseOk(response) {
+  if (!response.ok) throw new Error('Status: ' + response.status);
+}
+
+export function getReponseJson(response) {
+  checkReponseOk(response);
+  return response.json();
+}
+
+export function getReponseText(response) {
+  checkReponseOk(response);
+  return response.text();
+}
+
 export async function fetchJson(data) {
   const { url, error } = data;
   return await fetch(surl(url), newGetRequest())
-    .then(function(response) {
-      if (!response.ok) throw new Error('Status: ' + response.status);
-      return response.json();
-    })
+    .then(function(response) { return getReponseJson(response); })
     .then(function(json) { return json; })
     .catch(function() { return notifyError(error ? error : 'Error'); });
 }
@@ -78,8 +89,7 @@ export class SubscriptionHelper {
     return await fetch(surl(subscribeUrl), newPostRequest())
       .then(function(response) {
         if (response.status === 404) return false;
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
+        return getReponseJson(response);
       })
       .then(function(json) {
         if (json === false) return false;
@@ -97,7 +107,7 @@ export class SubscriptionHelper {
       polling = await fetch(url, { signal })
         .then(function(response) {
           if (response.status === 404) return false;
-          if (!response.ok) throw new Error('Status: ' + response.status);
+          checkReponseOk(response);
           if (response.status === 204) return true;
           const ct = response.headers.get('Content-Type');
           if (ct.startsWith('text/plain')) return response.text();

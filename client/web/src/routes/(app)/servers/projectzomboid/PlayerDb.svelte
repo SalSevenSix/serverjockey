@@ -1,6 +1,6 @@
 <script>
   import { onMount, getContext } from 'svelte';
-  import { newGetRequest, newPostRequest } from '$lib/util/sjgmsapi';
+  import { newGetRequest, newPostRequest, getReponseJson, getReponseText } from '$lib/util/sjgmsapi';
   import { notifyError } from '$lib/util/notifications';
   import InputTextArea from '$lib/widget/InputTextArea.svelte';
 
@@ -20,10 +20,7 @@
     const request = newPostRequest('text/plain');
     request.body = inputText;
     fetch(instance.url('/playerdb'), request)
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.text();
-      })
+      .then(function(response) { return getReponseText(response); })
       .then(function(text) { outputText = text; })
       .catch(function() { notifyError('Failed to execute SQL'); })
       .finally(function() { processing = false; });
@@ -31,10 +28,7 @@
 
   onMount(function() {
     fetch(instance.url('/playerdb'), newGetRequest())
-      .then(function(response) {
-        if (!response.ok) throw new Error('Status: ' + response.status);
-        return response.json();
-      })
+      .then(function(response) { return getReponseJson(response); })
       .then(function(json) { noSqlite = !json || !json.nativecli; })
       .catch(function() { notifyError('Failed to fetch Player DB meta.'); });
   });
