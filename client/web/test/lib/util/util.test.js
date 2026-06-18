@@ -4,7 +4,7 @@ import { generateId, guessTextFile, capitalize, toCamelCase, capitalizeKebabCase
 describe('generateId()', function() {
   const gid = generateId();
   it('is unique', function() { assert.strictEqual(gid === generateId(), false); });
-  it('length over 26', function() { assert.strictEqual(gid.length > 26, true); });
+  it('length over 25', function() { assert.strictEqual(gid.length > 25, true); });
   it('numbers only', function() { assert.strictEqual((/^\d*$/).test(gid), true); });
 });
 

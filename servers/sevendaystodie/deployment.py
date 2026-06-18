@@ -99,7 +99,7 @@ class Deployment:
         result, root, props = {}, doc.find('serversettings'), doc.find_all('property')
         props = [p for p in props if p.has_attr('name') and p.has_attr('value')]
         for prop in props:
-            name, value = prop['name'], prop['value']
+            name, value = str(prop['name']), prop['value']
             if name in subs:
                 value = subs[name]
                 del subs[name]

@@ -3,7 +3,6 @@ import asyncio
 import logging
 import time
 import uuid
-import typing
 # ALLOW util.* msg*.* context.* http.httpabc
 from core.util import aggtrf, util
 from core.msg import msgabc, msgext, msgftr, msgtrf
@@ -29,10 +28,10 @@ class Selector:
                 aggregator = arg
         return Selector(msg_filter, transformer, aggregator, completed_filter)
 
-    def __init__(self, msg_filter: typing.Optional[msgabc.Filter] = None,
-                 transformer: typing.Optional[msgabc.Transformer] = None,
-                 aggregator: typing.Optional[aggtrf.Aggregator] = None,
-                 completed_filter: typing.Optional[msgabc.Filter] = None):
+    def __init__(self, msg_filter: msgabc.Filter | None = None,
+                 transformer: msgabc.Transformer | None = None,
+                 aggregator: aggtrf.Aggregator | None = None,
+                 completed_filter: msgabc.Filter | None = None):
         self.msg_filter = msg_filter if msg_filter else msgftr.AcceptAll()
         self.transformer = transformer if transformer else msgtrf.GetData()
         self.aggregator = aggregator
@@ -45,20 +44,20 @@ class HttpSubscriptionService(msgabc.AbcSubscriber):
     UNSUBSCRIBE = 'HttpSubscriptionService.UnsubscribeRequest'
 
     @staticmethod
-    async def subscribe(mailer: msgabc.MulticastMailer, source: typing.Any, selector: Selector) -> str:
+    async def subscribe(mailer: msgabc.MulticastMailer, source: any, selector: Selector) -> str:
         messenger = msgext.SynchronousMessenger(mailer)
         response = await messenger.request(source, HttpSubscriptionService.SUBSCRIBE, selector)
         return response.data()
 
     @staticmethod
-    def unsubscribe(mailer: msgabc.Mailer, source: typing.Any, identity: str):
+    def unsubscribe(mailer: msgabc.Mailer, source: any, identity: str):
         mailer.post(source, HttpSubscriptionService.UNSUBSCRIBE, identity)
 
     def __init__(self, mailer: msgabc.MulticastMailer):
         super().__init__(msgftr.NameIn(HttpSubscriptionService.SUBSCRIBE, HttpSubscriptionService.UNSUBSCRIBE))
         self._mailer = mailer
         self._subscriptions_path = '/subscriptions'
-        self._subscriptions: typing.Dict[str, _Subscriber] = {}
+        self._subscriptions: dict = {}
         mailer.register(_InactivityCheck(mailer))
         mailer.register(self)
 
@@ -134,7 +133,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         self._running = False
         util.clear_queue(self._queue)
 
-    async def get(self) -> typing.Union[httpabc.AbcResponse, msgabc.STOP, None]:
+    async def get(self) -> httpabc.AbcResponse | msgabc.STOP | None:
         self._time_last_activity = -1.0
         try:
             result = await self._get()
@@ -145,7 +144,7 @@ class _Subscriber(msgabc.AbcSubscriber):
         finally:
             self._time_last_activity = time.time()
 
-    async def _get(self) -> typing.Union[httpabc.AbcResponse, msgabc.STOP, None]:
+    async def _get(self) -> httpabc.AbcResponse | msgabc.STOP | None:
         if self._aggregator is None:
             message = await self._get_one()
             if message is None or message is msgabc.STOP:
@@ -171,7 +170,7 @@ class _Subscriber(msgabc.AbcSubscriber):
             self._queue.put_nowait(msgabc.STOP)
         return self._aggregator.aggregate([self._transformer.transform(m) for m in messages])
 
-    async def _get_all(self) -> typing.List[msgabc.Message]:
+    async def _get_all(self) -> list:
         messages = []
         if self._queue.empty():
             message = await self._get_one()
@@ -189,7 +188,7 @@ class _Subscriber(msgabc.AbcSubscriber):
             pass
         return messages
 
-    async def _get_one(self) -> typing.Union[msgabc.Message, None]:
+    async def _get_one(self) -> msgabc.Message | None:
         try:
             message = await asyncio.wait_for(self._queue.get(), self._poll_timeout)
             self._queue.task_done()
