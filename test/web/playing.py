@@ -106,7 +106,7 @@ class TestPlaying(unittest.TestCase):
         # revoke admin from player
         context.find_element('commandBuilderActionSetAccessLevel').click()
         context.find_element('commandBuilderIplayer').send_keys(player_name)
-        context.find_element('commandBuilderRlevelNone').click()
+        context.find_element('commandBuilderRlevelUser').click()
         self._send_console_command()
         # give item to player
         context.find_element('commandBuilderActionGiveItem').click()
@@ -133,7 +133,7 @@ class TestPlaying(unittest.TestCase):
 
     def test_playing_sevendaystodie(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('7d2d', 'sevendaystodie')
-        self._check_status_info(r'^V 2\.[0-9]* \(b[0-9]*\)$', 26900)
+        self._check_status_info(r'^V 3\.[0-9]* \(b[0-9]*\)$', 26900)
         self.assertEqual('8080', context.find_element('serverStatusCport').get_attribute('innerText'))
         # no console feature to send welcome message
         self._wait_for_logout_and_stop_server(player_name)
@@ -165,7 +165,7 @@ class TestPlaying(unittest.TestCase):
 
     def test_playing_hytale(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('ht', 'hytale')
-        self._check_status_info(r'^20[0-9][0-9]\.[0-9]*\.[0-9]*-.*', 5520)
+        self._check_status_info(r'^0\.[0-9]*\.[0-9]*$', 5520)
         self.assertTrue(context.find_element('serverStatusAuth').get_attribute('innerText').startswith('Authenticated'))
         # send welcome message to player
         context.find_element('commandBuilderIline').send_keys('say Welcome to HT ' + player_name)
