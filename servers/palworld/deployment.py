@@ -6,6 +6,7 @@ from core.context import contextsvc
 from core.http import httprsc, httpext
 from core.proc import proch
 from core.common import portmapper, rconsvc, svrhelpers
+from servers.palworld import messaging as msg
 
 # https://tech.palworldgame.com/settings-and-operation/arguments
 APPID = '2394010'
@@ -49,6 +50,7 @@ class Deployment:
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
         self._save_dir = self._world_dir + '/SaveGames'
+        self._logs_dir = self._world_dir + '/Logs'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
         self._config_dir = self._world_dir + '/Config'
         self._ini_dir = self._config_dir + '/LinuxServer'
@@ -56,16 +58,19 @@ class Deployment:
 
     async def initialise(self):
         helper = await svrhelpers.DeploymentInitHelper(self._context, self.build_world).init()
-        helper.init_ports().init_jobs().init_archiving(self._tempdir).done()
+        helper.init_ports().init_jobs().init_archiving(self._tempdir)
+        helper.init_logging(self._logs_dir, msg.CONSOLE_LOG_FILTER).done()
 
     def resources(self, resource: httprsc.WebResource):
         builder = svrhelpers.DeploymentResourceBuilder(self._context, resource).psh_deployment()
         builder.put_meta(self._runtime_dir + '/steamapps/appmanifest_' + APPID + '.acf',
-                         httpext.MtimeHandler().check(self._save_dir).dir(self._ini_dir))
+                         httpext.MtimeHandler().check(self._save_dir).dir(self._logs_dir))
         builder.put_installer_steam(self._runtime_dir, APPID)
-        builder.put_wipes(self._runtime_dir, dict(save=self._save_dir, all=self._world_dir))
+        builder.put_wipes(self._runtime_dir, dict(
+            save=self._save_dir, logs=self._logs_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.pop()
+        builder.put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
         builder.put_config(dict(cmdargs=self._cmdargs_file, settings=self._settings_file))
 
@@ -82,7 +87,7 @@ class Deployment:
         return server
 
     async def build_world(self):
-        await io.create_directory(self._backups_dir, self._world_dir, self._config_dir, self._ini_dir)
+        await io.create_directory(self._backups_dir, self._world_dir, self._config_dir, self._ini_dir, self._logs_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
         if not await io.file_exists(self._cmdargs_file):

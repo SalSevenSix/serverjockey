@@ -151,17 +151,12 @@ class TestPlaying(unittest.TestCase):
         self._wait_for_logout_and_stop_server(player_name, nochat=True)
 
     def test_playing_palworld(self):
-        context = webcontext.get()
-        self._start_server('pw', 'palworld')
-        time.sleep(10.0)  # grace to allow server to fully start
-        self._check_status_info(r'^v[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$', 8211)
-        # send welcome message
-        context.find_element('collapsibleConsoleCommands').click()
-        context.find_element('commandBuilderIline').send_keys('Broadcast Welcome_to_PW')
+        context, player_name = webcontext.get(), self._start_server_and_wait_for_login('pw', 'palworld')
+        self._check_status_info(r'^v1\.[0-9]*\.[0-9]*\.[0-9]*$', 8211)
+        # send welcome message to player
+        context.find_element('commandBuilderIline').send_keys('Broadcast Welcome to PW ' + player_name)
         self._send_console_command()
-        time.sleep(2.0)
-        self.assertEqual('Broadcasted: Welcome_to_PW', context.get_instance_loglastline())
-        self._stop_server()
+        self._wait_for_logout_and_stop_server(player_name)
 
     def test_playing_hytale(self):
         context, player_name = webcontext.get(), self._start_server_and_wait_for_login('ht', 'hytale')

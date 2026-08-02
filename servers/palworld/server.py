@@ -15,7 +15,7 @@ class Server(svrabc.Server):
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
-        await mtxinstance.initialise(self._context, players=False)
+        await mtxinstance.initialise(self._context)
         con.initialise(self._context)
         await msg.initialise(self._context)
         await self._deployment.initialise()
@@ -24,11 +24,11 @@ class Server(svrabc.Server):
         con.resources(self._context, resource)
         self._deployment.resources(resource)
         builder = svrhelpers.ServerResourceBuilder(self._context, resource)
-        builder.put_server().put_log(msg.CONSOLE_LOG_FILTER).put_subs()
+        builder.put_server().put_players().put_log(msg.CONSOLE_LOG_FILTER).put_subs()
 
     async def run(self):
         server = await self._deployment.new_server_process()
-        server.wait_for_started(msg.SERVER_STARTED_FILTER, 30.0)
+        server.wait_for_started(msg.SERVER_STARTED_FILTER, 60.0)
         await server.run()
 
     async def stop(self):

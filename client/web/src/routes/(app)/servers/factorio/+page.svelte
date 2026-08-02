@@ -8,11 +8,11 @@
   import Players from '$lib/instance/Players.svelte';
   import InstanceLog from '$lib/instance/InstanceLog.svelte';
   import LogFiles from '$lib/instance/LogFiles.svelte';
+  import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import ConfigFile from '$lib/instance/ConfigFile.svelte';
   import RuntimeControls from '$lib/instance/RuntimeControls.svelte';
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
-  import CommandBuilder from '$lib/instance/CommandBuilder.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
   import Autobackups from '$lib/instance/Autobackups.svelte';
 

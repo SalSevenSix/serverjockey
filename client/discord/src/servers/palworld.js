@@ -1,18 +1,14 @@
-import * as msgutil from '../util/msgutil.js';
 import * as helptext from '../system/helptext.js';
 import * as commons from '../system/commons.js';
 
-export const startup = commons.startupServerOnly;
-export const { status, server, auto, log, getconfig, setconfig, deployment, chat, send, channel, panel } = commons;
+export const startup = commons.startupAll;
+export const { status, server, auto, log, getconfig, setconfig, deployment, players, send, say, chat,
+  channel, panel, aliasme, alias, reward, trigger, activity, chatlog } = commons;
 
 export const help = helptext.newServerHelpBuilder()
   .title('PALWORLD COMMANDS')
-  .addServer().addPlayers().addChat().addSend().addChannel().addPanel()
+  .addServer().addPlayers().addSay().addChat().addSend().addChannel().addPanel()
+  .addAliasme().addAlias().addReward().addTrigger().addActivity().addChatlog()
+  .next()
   .addConfig(['cmdargs', 'Settings']).addDeployment()
   .build();
-
-export function players({ httptool, message }) {
-  httptool.doPost('/console/send', { line: 'ShowPlayers' }, function(text) {
-    msgutil.sendText(message, text ? text : 'No players online');
-  });
-}
