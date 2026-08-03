@@ -48,6 +48,7 @@ class Deployment:
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
+        self._pak_dir = self._runtime_dir + '/Pal/Content/Paks'
         self._world_dir = self._home_dir + '/world'
         self._save_dir = self._world_dir + '/SaveGames'
         self._logs_dir = self._world_dir + '/Logs'
@@ -73,6 +74,8 @@ class Deployment:
         builder.put_logs(self._logs_dir)
         builder.put_backups(self._tempdir, self._backups_dir)
         builder.put_config(dict(cmdargs=self._cmdargs_file, settings=self._settings_file))
+        builder.psh('pak', httpext.FileSystemHandler(self._pak_dir))
+        builder.put('*{path}', httpext.FileSystemHandler(self._pak_dir, 'path', tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/PalServer.sh'

@@ -14,6 +14,7 @@
   import WorldControls from '$lib/instance/WorldControls.svelte';
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
+  import PakFiles from './PakFiles.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -48,6 +49,9 @@
       <Collapsible icon="fa-file-code" title="Configuration">
         <ConfigFile name="Launch Options" path="/config/cmdargs" />
         <ConfigFile name="Settings" path="/config/settings" />
+      </Collapsible>
+      <Collapsible icon="fa-puzzle-piece" title="Pak Files">
+        <PakFiles />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles />
