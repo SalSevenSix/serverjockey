@@ -22,7 +22,7 @@
 
 ### VM Settings
 1. Name: ZomBox
-2. Shape: 100Gb disc / 10240Mb mem / 2 cpu
+2. Shape: 128Gb disc / 10240Mb mem / 2 cpu
 3. Clipboard OFF
 4. Paste in Description
 5. Boot order optical then hdd only
@@ -33,7 +33,7 @@
 
 ### Description...
 ```
-ZomBox is the VirtualBox distribution of the ServerJockey. A game server management system for Project Zomboid
+ZomBox is the VirtualBox distribution of ServerJockey. A game server management system for Project Zomboid
 and other supported games. It is designed to be an easy to use self-hosting option for multiplayer servers,
 allowing you to create and remotely manage your servers using a browser or discord bot.
 
@@ -54,7 +54,7 @@ https://serverjockey.net
 ```
 
 ### Install Ubuntu OS
-1. Confim central repo
+1. Use central repo
 2. No LVM group
 3. Name everything zombox
 4. Install OpenSSH server
@@ -66,8 +66,8 @@ https://serverjockey.net
 4. Install vmtouch, inotify-tools, steamcmd
 5. Copy root shell scripts
 6. Add and enable serverjockey-welcome service
-7. Install Samba & configure (see below)
-8. Disable SSH service including socket trigger
+7. Disable SSH service including socket trigger
+8. Install Samba & configure (see below)
 
 ### Samba Setup Commands
 ```
@@ -79,7 +79,7 @@ sudo systemctl disable smbd
 
 ### Samba Configuration
 * Uncomment and use these settings...
-  * interfaces = 127.0.0.0/8 192.168.1.0/24
+  * interfaces = 127.0.0.0/8 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
   * bind interfaces only = yes
 * Turn these off...
   * unix password sync = no
@@ -90,7 +90,7 @@ sudo systemctl disable smbd
 [zombox]
    path = /home/sjgms
    force user = sjgms
-   force group = nogroup
+   force group = sjgms
    create mask = 0644
    force create mode = 0644
    directory mask = 0755

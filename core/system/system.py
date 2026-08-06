@@ -2,7 +2,7 @@ import logging
 import asyncio
 import re
 # ALLOW util.* msg*.* context.* http.* remotes.* metrics.* store.* system.svrabc system.svrsvc
-from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil
+from core.util import util, dtutil, io, sysutil, signals, objconv, funcutil, steamutil
 from core.msg import msgabc, msgftr, msglog, msgext
 from core.msgc import mc
 from core.context import contextsvc, contextext
@@ -41,6 +41,9 @@ class SystemService:
         buidler.put('mprof', mprof.MemoryProfilingHandler())
         buidler.psh('system')
         buidler.put('info', _SystemInfoHandler(self._context))
+        buidler.psh('steamcmd')
+        buidler.put('reset', _SteamCmdResetHandler(self._context))
+        buidler.pop()
         buidler.put('log', httpext.FileSystemHandler(logfile) if logfile else httpext.StaticHandler(_NO_LOG))
         buidler.put('shutdown', _ShutdownHandler())
         buidler.pop()
@@ -284,6 +287,15 @@ class _PidFileSubscriber(msgabc.AbcSubscriber):
     async def shutdown(self):
         self._running = False
         await funcutil.silently_call(io.write_file(self._pidfile, self._pid))
+
+
+class _SteamCmdResetHandler(httpabc.PostHandler):
+
+    def __init__(self, context: contextsvc.Context):
+        self._home_dir = context.env('HOME')
+
+    async def handle_post(self, resource, data):
+        return await steamutil.reset_cache(self._home_dir)
 
 
 class _ShutdownHandler(httpabc.PostHandler):

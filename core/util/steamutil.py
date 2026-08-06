@@ -54,6 +54,14 @@ class _SteamCmdFinder:
             self._last = now
         return script
 
+    async def reset_cache(self, home_dir: str) -> dict:
+        if self._steamcmd_exe.endswith('steamcmd.sh'):
+            return dict(status=False, text='Manual SteamCMD install found, reset not done.')
+        for rpath in ('/.local/share/Steam', '/.steam', '/Steam'):
+            await io.delete_directory(home_dir + rpath)
+        self._last = 0.0
+        return dict(status=True, text='SteamCMD cache reset successfully.')
+
     async def config_file(self, home_dir: str) -> str | None:
         if not self._config_file:
             for rpath in ('/.local/share/Steam', '/.steam', '/Steam'):
@@ -72,6 +80,10 @@ class _SteamCmdFinder:
 
 
 _STEAMCMD_FINDER = _SteamCmdFinder()
+
+
+async def reset_cache(home_dir: str) -> dict:
+    return await _STEAMCMD_FINDER.reset_cache(home_dir)
 
 
 async def get_config_file(home_dir: str) -> str:

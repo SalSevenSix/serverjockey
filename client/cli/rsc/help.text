@@ -68,5 +68,6 @@ commands:
   exit-pl-lt:<#>    | Exit if players less or equal to <#>
   exit-no-update    | Exit if server version is up-to-date, Hytale only
   https:<enabled>   | HTTPS enable https:true or disable https:false
+  steamcmd-reset    | Reset the SteamCMD cache, will force it to reinstall
   delete            | Delete the current instance
   shutdown          | Shutdown the ServerJockey system

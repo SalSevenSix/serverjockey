@@ -389,6 +389,9 @@ class CommandProcessor:
         logging.info('Change takes effect after system restart')
         return True
 
+    def _steamcmd_reset(self) -> bool:
+        return _dump_to_log(self._connection.post('/system/steamcmd/reset'))
+
     def _shutdown(self) -> bool:
         self._connection.post('/system/shutdown')
         return False
