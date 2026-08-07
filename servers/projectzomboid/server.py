@@ -13,7 +13,7 @@ class Server(svrabc.Server):
     def __init__(self, context: contextsvc.Context):
         self._context = context
         self._pipeinsvc = proch.PipeInLineService(context)
-        self._stopper = spstopper.ServerProcessStopper(context, 20.0, 'quit')
+        self._stopper = spstopper.ServerProcessStopper(context, 60.0, 'quit')
         self._deployment = dep.Deployment(context)
 
     async def initialise(self):
