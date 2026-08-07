@@ -15,13 +15,13 @@
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "svelte-eslint-parser": "^1.8.0",
-    "eslint-plugin-svelte": "^3.19.0",
+    "eslint-plugin-svelte": "^3.22.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.5.0",
+    "eslint": "^10.8.0",
     "svelte": "^4.2.20",
     "vite": "^5.4.21",
-    "mocha": "^11.7.6"
+    "mocha": "^11.8.0"
   },
   "dependencies": {
     "common": "file:../common",
