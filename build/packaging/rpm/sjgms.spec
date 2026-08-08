@@ -58,9 +58,9 @@ exit 0
 
 
 %changelog
-* Thu July 16 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
-- Feature release 0.34.0
-* Wed July 15 2026 Bowden Salis <bsalis76@gmail.com> - 0.33.0
+* Sun Aug 09 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
+- Palworld v1 improved support release
+* Wed Jul 15 2026 Bowden Salis <bsalis76@gmail.com> - 0.33.0
 - Player DB feature for PZ release
 * Thu May 14 2026 Bowden Salis <bsalis76@gmail.com> - 0.32.0
 - Project Zomboid b42.18 fix and library upgrades
