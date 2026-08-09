@@ -9,8 +9,9 @@ function subsHelpText() {
     '{!}          : bot command character(s)',
     '{player}     : quoted player "name", suitable for commands',
     '{playername} : just the player name',
-    '{atmember}   : member @name, will ping',
     '{member}     : member name only, no ping',
+    '{atmember}   : member @name, will ping',
+    '{memberid}   : member id (snowflake)',
     '{instance}   : instance name',
     '{channel}    : channel name',
     '{event}      : event name'

@@ -69,6 +69,8 @@ export function newTriggerHandler(context, channels, instance, triggers) {
     if (player) { result = result.replaceAll('{playername}', player).replaceAll('{player}', '"' + player + '"'); }
     const member = alias.discordid ? alias.discordid : player;
     if (member) { result = result.replaceAll('{member}', member); }
+    const memberid = alias.snowflake ? alias.snowflake : member;
+    if (memberid) { result = result.replaceAll('{memberid}', memberid); }
     const atmember = alias.snowflake ? '<@' + alias.snowflake + '>' : member;
     if (atmember) { result = result.replaceAll('{atmember}', atmember); }
     return result;
