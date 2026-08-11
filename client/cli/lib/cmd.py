@@ -59,11 +59,14 @@ class CommandProcessor:
             logging.info(util.OUT + line)
         return True
 
-    def _instance_path(self, command_path: str = '') -> str:
+    def _ensure_instance(self) -> str:
         if not self._instance:
             if not self._use(None):
-                raise Exception('_instance_path() was unable to find instance to use.')
-        return '/instances/' + self._instance + command_path
+                raise Exception('_ensure_instance() was unable to find instance to use.')
+        return self._instance
+
+    def _instance_path(self, command_path: str = '') -> str:
+        return '/instances/' + self._ensure_instance() + command_path
 
     # noinspection PyMethodMayBeStatic
     def _help(self) -> bool:
@@ -221,14 +224,13 @@ class CommandProcessor:
         return True
 
     def _exit_inactive(self, argument: str) -> bool:
-        self._instance_path()  # Just make sure an instance is set
-        timerange = util.to_int(argument)
+        instance, timerange = self._ensure_instance(), util.to_int(argument)
         if not timerange:
             logging.error('Seconds required. No more commands will be processed.')
             return False
         now, timerange, path = int(time.time() * 1000), timerange * 1000, '/store/player/event'
         path += '?atfrom=' + str(now - timerange) + '&atto=' + str(now)
-        path += '&instance=' + self._instance + '&events=LOGIN,LOGOUT&atgroup=max'
+        path += '&instance=' + instance + '&events=LOGIN,LOGOUT&atgroup=max'
         if len(self._connection.get(path)['records']) == 0:
             logging.info('exit-inactive did not find player activity, no more commands will be processed')
             return False
@@ -406,3 +408,46 @@ class CommandProcessor:
     def _shutdown(self) -> bool:
         self._connection.post('/system/shutdown')
         return False
+
+    # qim                      | Query instance meta
+    def _qim(self) -> bool:
+        url = '/store/instance?instance=' + self._ensure_instance()
+        return self._dump_to_log(self._connection.get(url))
+
+    # qie:<from>,<to>,<args>   | Query instance events
+    def _qie(self, argument: str) -> bool:
+        args = argument.split(',')
+        events, url = [], '/store/instance/event'
+        url += '?instance=' + self._ensure_instance()
+        url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
+        for arg in args:
+            if arg.lower() in ('min', 'max'):
+                url += '&atgroup=' + arg.lower()
+            else:
+                events.append(arg.upper())
+        if len(events) > 0:
+            url += '&events=' + ','.join(events)
+        return self._dump_to_log(self._connection.get(url))
+
+    # qpe:<from>,<to>,<args>   | Query player events
+    def _qpe(self, argument: str) -> bool:
+        args = argument.split(',')
+        events, url = [], '/store/player/event'
+        url += '?instance=' + self._ensure_instance()
+        url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
+        for arg in args:
+            if arg.lower() in ('min', 'max'):
+                url += '&atgroup=' + arg.lower()
+            else:
+                events.append(arg.upper())
+        if len(events) > 0:
+            url += '&events=' + ','.join(events)
+        return self._dump_to_log(self._connection.get(url))
+
+    # qpc:<from>,<to>          | Query player chat
+    def _qpc(self, argument: str) -> bool:
+        args = argument.split(',')
+        url = '/store/player/chat'
+        url += '?instance=' + self._ensure_instance()
+        url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
+        return self._dump_to_log(self._connection.get(url))
