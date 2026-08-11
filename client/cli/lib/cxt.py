@@ -21,8 +21,9 @@ def _load_clientfile(clientfile: str) -> tuple:
 
 class Context:
 
-    def __init__(self, debug, user, tasks, commands):
+    def __init__(self, debug, use_json, user, tasks, commands):
         self._debug = True if debug else False
+        self._use_json = True if use_json else False
         self._user = user if user else None
         self._tasks = tuple(tasks) if tasks else ()
         self._commands = tuple(commands) if commands else ()
@@ -31,6 +32,9 @@ class Context:
 
     def is_debug(self) -> bool:
         return self._debug
+
+    def use_json(self) -> bool:
+        return self._use_json
 
     def user(self):
         return self._user if self._user else util.DEFAULT_USER

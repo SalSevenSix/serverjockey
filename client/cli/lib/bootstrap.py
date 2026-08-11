@@ -38,12 +38,13 @@ def _initialise() -> cxt.Context:
         formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument('--debug', '-d', action='store_true', help='Debug mode')
     p.add_argument('--nolog', '-n', action='store_true', help='Suppress logging, only show output')
+    p.add_argument('--json', '-j', action='store_true', help='Output JSON format')
     p.add_argument('--user', '-u', type=str, help='Specify alternate user')
     p.add_argument('--tasks', '-t', type=str, nargs='+', help='List of tasks to run')
     p.add_argument('--commands', '-c', type=str, nargs='+', help='List of commands to process')
     args = p.parse_args(sys.argv[1:])
     _setup_logging(args.debug, args.nolog)
-    return cxt.Context(args.debug, args.user, args.tasks, args.commands)
+    return cxt.Context(args.debug, args.json, args.user, args.tasks, args.commands)
 
 
 # noinspection PyUnusedLocal

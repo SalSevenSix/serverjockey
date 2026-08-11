@@ -58,7 +58,7 @@ exit 0
 
 
 %changelog
-* Tue Aug 11 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
+* Wed Aug 12 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
 - Palworld v1 improved support release
 * Wed Jul 15 2026 Bowden Salis <bsalis76@gmail.com> - 0.33.0
 - Player DB feature for PZ release

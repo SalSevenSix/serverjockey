@@ -98,6 +98,8 @@ def _filter_objects(obj) -> bool:
     if obj.__class__ in _BASIC_TYPES:
         return True
     modulename = obj.__class__.__module__
+    if not isinstance(modulename, str):
+        return False
     return modulename.startswith('core.') or modulename.startswith('servers.')
 
 
