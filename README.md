@@ -3,7 +3,7 @@
 ![](https://serverjockey.net/assets/mediakit/banner-468x60.jpg)
 
 ServerJockey is a game server management system for Project Zomboid
-and other supported games. It is designed to be an easy to use self-hosting
+and other supported games. It is designed to be an easy to use self-hosted
 option for multiplayer servers. It allows you to create and remotely
 manage your servers using a webapp and Discord bot.
 
@@ -21,7 +21,7 @@ If your like using this system, please consider supporting it on Ko-fi.
 
 ## DEB Package Install
 For x86_64/amd64 only. Requires Python 3.10 or higher installed as default.
-Tested and works on **Ubuntu 24.04 LTS** (recommended) and Ubuntu 22.04 LTS.
+Tested and works on Ubuntu 22.04 LTS, 24.04 LTS, 26.04 LTS
 
 **1.** Install [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) if not installed already
 ```bash
