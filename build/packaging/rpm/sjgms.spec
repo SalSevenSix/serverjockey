@@ -1,7 +1,7 @@
 %define __strip /bin/true
 
 Name:           sjgms
-Version:        0.34.0
+Version:        0.35.0
 Release:        1%{?dist}
 Summary:        ServerJockey Game Management System
 BuildArch:      x86_64
@@ -58,6 +58,8 @@ exit 0
 
 
 %changelog
+* Thu Aug 13 2026 Bowden Salis <bsalis76@gmail.com> - 0.35.0
+- Feature release 0.35.0
 * Wed Aug 12 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
 - Palworld v1 improved support release
 * Wed Jul 15 2026 Bowden Salis <bsalis76@gmail.com> - 0.33.0

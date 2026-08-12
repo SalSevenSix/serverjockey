@@ -27,7 +27,7 @@
 ## Versioned Files
 * deb/control
 * deb/changelog
-* rpm/sjgms.spec
+* rpm/sjgms.spec (2 places)
 * pac/pkgbuild
 * common/package.json
 * discord/package.json
