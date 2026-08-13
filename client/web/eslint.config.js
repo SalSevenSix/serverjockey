@@ -37,6 +37,9 @@ export default defineConfig([
   ...svelte.configs['flat/recommended'],
   { // svelte ignores
     rules: {
+      'svelte/html-quotes': [2, { 'prefer': 'double' }],
+      'svelte/html-closing-bracket-spacing': 2,
+      'svelte/spaced-html-comment': 2,
       'svelte/no-at-html-tags': 1,
       'svelte/require-each-key': 0,
       'svelte/no-navigation-without-resolve': 0,

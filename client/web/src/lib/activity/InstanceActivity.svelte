@@ -85,7 +85,7 @@
       <div class="columns">
         <div class="column mt-0 pt-0">
           <table class="table is-thinner"><tbody>
-            <tr><td class="label-column"></td><td></td><tr>
+            <tr><td class="label-column"></td><td></td></tr>
             <tr><td class="label-column has-text-weight-bold"
                     title="Name of the instance">Name</td>
               <td class="notranslate">{entry.instance}</td></tr>
