@@ -21,7 +21,7 @@ fi
 
 echo "Statapp build"
 $JS_PKGMGR run build || exit 1
-rm -rf data > /dev/null 2>&1
+rm -rf build/data > /dev/null 2>&1
 
 if [ -d ../../web/assets/extensions ]; then
   echo "Statapp zip"

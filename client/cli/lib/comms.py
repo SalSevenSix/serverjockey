@@ -1,6 +1,8 @@
 import logging
 import json
 import ssl
+import io
+import zipfile
 from http import client
 # ALLOW lib.util
 from . import util, cxt
@@ -60,6 +62,14 @@ class HttpConnection:
         finally:
             self.close()
 
+    def get_zip(self, path: str, unpacked: str):
+        connection = self._init_connection()
+        try:
+            connection.request(util.GET, path, headers=self._headers_get)
+            _handle_zip(connection.getresponse(), unpacked)
+        finally:
+            self.close()
+
 
 def _handle_post(response) -> str | dict | None:
     try:
@@ -96,6 +106,16 @@ def _handle_drain(response) -> bool:
         if response.status == 404:
             return False
         raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
+    finally:
+        response.close()
+
+
+def _handle_zip(response, unpacked: str):
+    try:
+        if response.status != 200:
+            raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
+        with zipfile.ZipFile(io.BytesIO(response.read()), 'r') as f:
+            f.extractall(unpacked)
     finally:
         response.close()
 

@@ -1,5 +1,6 @@
 import logging
 import inspect
+import os
 import time
 import ssl
 import json
@@ -411,6 +412,12 @@ class CommandProcessor:
     def _shutdown(self) -> bool:
         self._connection.post('/system/shutdown')
         return False
+
+    def _statapp_deploy(self, argument: str) -> bool:
+        os.makedirs(argument, exist_ok=True)
+        self._connection.get_zip('/assets/extensions/statapp.zip', argument)
+        logging.info('Unpacked Status App to ' + argument)
+        return True
 
     # qim                      | Query instance meta
     def _qim(self) -> bool:
