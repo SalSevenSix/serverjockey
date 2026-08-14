@@ -1,0 +1,117 @@
+{
+  "created": 1786597179958,
+  "criteria": {
+    "instance": "test",
+    "events": "STARTED,STOPPED,EXCEPTION",
+    "atfrom": 1778820800000,
+    "atto": 1786596800000,
+    "atgroup": null
+  },
+  "headers": [
+    "at",
+    "instance",
+    "event"
+  ],
+  "records": [
+    [
+      1779267630626,
+      "test",
+      "STARTED"
+    ],
+    [
+      1779267915044,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1779268192784,
+      "test",
+      "STARTED"
+    ],
+    [
+      1779268283089,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011378666,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011390476,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011411723,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011446647,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011449281,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011456630,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011473856,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011506871,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011509203,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011516343,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011563832,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011590174,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1784011590516,
+      "test",
+      "STARTED"
+    ],
+    [
+      1784011593290,
+      "test",
+      "STOPPED"
+    ],
+    [
+      1786432096754,
+      "test",
+      "STARTED"
+    ],
+    [
+      1786433165874,
+      "test",
+      "EXCEPTION"
+    ]
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "created": 1786597409192,
+  "criteria": {
+    "instance": "test",
+    "atfrom": 1778820800000,
+    "atto": 1786596800000,
+    "events": "LOGIN,LOGOUT",
+    "player": null,
+    "atgroup": null,
+    "verbose": false
+  },
+  "headers": [
+    "at",
+    "instance",
+    "player",
+    "event"
+  ],
+  "records": [
+    [
+      1779267630591,
+      "test",
+      "TheOne",
+      "LOGIN"
+    ],
+    [
+      1779267914318,
+      "test",
+      "TheOne",
+      "LOGOUT"
+    ],
+    [
+      1779268192754,
+      "test",
+      "TheOne",
+      "LOGIN"
+    ],
+    [
+      1779268282368,
+      "test",
+      "TheOne",
+      "LOGOUT"
+    ],
+    [
+      1784011380633,
+      "test",
+      "Jojo",
+      "LOGIN"
+    ],
+    [
+      1784011497529,
+      "test",
+      "Jojo",
+      "LOGOUT"
+    ],
+    [
+      1784011563563,
+      "test",
+      "TheOne",
+      "LOGIN"
+    ],
+    [
+      1784011589107,
+      "test",
+      "TheOne",
+      "LOGOUT"
+    ],
+    [
+      1784011590446,
+      "test",
+      "TheOne",
+      "LOGIN"
+    ],
+    [
+      1784011592556,
+      "test",
+      "TheOne",
+      "LOGOUT"
+    ],
+    [
+      1786432096718,
+      "test",
+      "TheOne",
+      "LOGIN"
+    ],
+    [
+      1786433165847,
+      "test",
+      "TheOne",
+      "LOGOUT"
+    ]
+  ]
+}

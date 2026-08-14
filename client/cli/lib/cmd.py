@@ -306,6 +306,9 @@ class CommandProcessor:
         return self._server(None)
 
     def _auto(self, argument: str | None) -> bool:
+        if not argument:
+            result = self._connection.get(self._instance_path('/server'))
+            return self._dump_to_log(dict(auto=result['auto']))
         self._connection.post(self._instance_path(), dict(auto=util.to_int(argument, -1)))
         return True
 

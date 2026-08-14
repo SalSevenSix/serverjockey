@@ -6,6 +6,9 @@ scratch/
 # client build dirs
 /client/cli/build/
 /client/discord/build/
+/client/extension/build/
+/client/statapp/build/
+/client/web/build/
 
 # Web deployment root
 /web/
@@ -13,6 +16,9 @@ scratch/
 # IDEs
 .idea/
 .vscode/
+
+# Svelte
+.svelte-kit/
 
 # Nodejs
 node_modules/

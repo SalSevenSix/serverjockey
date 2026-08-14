@@ -1,0 +1,22 @@
+{
+  "created": 1786597285180,
+  "criteria": {
+    "instance": "test",
+    "events": "STARTED,STOPPED,EXCEPTION",
+    "atfrom": 1771044800000,
+    "atto": 1778820800000,
+    "atgroup": "max"
+  },
+  "headers": [
+    "at",
+    "instance",
+    "event"
+  ],
+  "records": [
+    [
+      1777186848707,
+      "test",
+      "STOPPED"
+    ]
+  ]
+}

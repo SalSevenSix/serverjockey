@@ -1,0 +1,32 @@
+{
+  "created": 1786597367850,
+  "criteria": {
+    "instance": "test",
+    "atfrom": 1771044800000,
+    "atto": 1778820800000,
+    "events": "LOGIN,LOGOUT",
+    "player": null,
+    "atgroup": "max",
+    "verbose": false
+  },
+  "headers": [
+    "at",
+    "instance",
+    "player",
+    "event"
+  ],
+  "records": [
+    [
+      1777186779659,
+      "test",
+      "WebTestPlayer",
+      "LOGOUT"
+    ],
+    [
+      1777186847994,
+      "test",
+      "TheOne",
+      "LOGOUT"
+    ]
+  ]
+}

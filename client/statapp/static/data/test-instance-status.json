@@ -1,0 +1,14 @@
+{
+  "instance": "test",
+  "running": true,
+  "state": "STARTED",
+  "sincelaststate": 67,
+  "startmillis": 1786611029698,
+  "uptime": 8550,
+  "auto": 0,
+  "details": {
+    "version": "1.8.42",
+    "ip": "101.201.301.404",
+    "port": "27001"
+  }
+}
