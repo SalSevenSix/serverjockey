@@ -1,7 +1,6 @@
 #!/bin/bash
 
-echo "Initialising extension build"
-command -v zip > /dev/null || exit 1
+echo "Initialising statapp build"
 INSTALL_COMMAND="${1-skip}"
 JS_PKGMGR="npm"
 if ~/.bun/bin/bun --version > /dev/null 2>&1; then
@@ -14,23 +13,23 @@ else
 fi
 
 cd "$(dirname $0)" || exit 1
-rm -rf build chrome-extension.zip > /dev/null 2>&1
+rm -rf build statapp.zip > /dev/null 2>&1
 if [ "$INSTALL_COMMAND" != "skip" ]; then
   echo "Installing dependencies"
   $JS_PKGMGR $INSTALL_COMMAND || exit 1
 fi
 
-echo "Extension build"
-$JS_PKGMGR run lint || exit 1
+echo "Statapp build"
 $JS_PKGMGR run build || exit 1
+rm -rf data > /dev/null 2>&1
 
 if [ -d ../../web/assets/extensions ]; then
-  echo "Extension zip"
+  echo "Statapp zip"
   cd build || exit 1
-  zip -r9 ../chrome-extension.zip * > /dev/null || exit 1
+  zip -r9 ../statapp.zip * > /dev/null || exit 1
   cd .. || exit 1
-  mv chrome-extension.zip ../../web/assets/extensions || exit 1
+  mv statapp.zip ../../web/assets/extensions || exit 1
 fi
 
-echo "Done extension build"
+echo "Done statapp build"
 exit 0

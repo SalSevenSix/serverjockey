@@ -59,6 +59,8 @@ echo "Building web client"
 $SERVERJOCKEY_DIR/client/web/build.sh ci || exit 1
 echo "Building extension client"
 $SERVERJOCKEY_DIR/client/extension/build.sh ci || exit 1
+echo "Building statapp client"
+$SERVERJOCKEY_DIR/client/statapp/build.sh ci || exit 1
 
 echo "Download ServerJockey dependencies"
 cd $SERVERJOCKEY_DIR || exit 1

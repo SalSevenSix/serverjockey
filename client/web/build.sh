@@ -13,8 +13,7 @@ else
 fi
 
 cd "$(dirname $0)" || exit 1
-rm -rf build > /dev/null 2>&1
-rm -rf ../../web > /dev/null 2>&1
+rm -rf build ../../web > /dev/null 2>&1
 if [ "$INSTALL_COMMAND" != "skip" ]; then
   echo "Installing dependencies"
   $JS_PKGMGR $INSTALL_COMMAND || exit 1
@@ -25,6 +24,7 @@ $JS_PKGMGR run lint || exit 1
 $JS_PKGMGR run test || exit 1
 $JS_PKGMGR run build || exit 1
 touch build/__init__.py || exit 1
+mkdir build/assets/extensions || exit 1
 mv build ../../web || exit 1
 
 echo "Done webapp build"
