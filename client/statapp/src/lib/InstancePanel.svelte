@@ -3,6 +3,8 @@
   import { fetchJson } from '$lib/util';
   import { extractActivity as extractInstance } from 'common/activity/instance';
   import { extractActivity as extractPlayer } from 'common/activity/player';
+  import InstanceTitle from '$lib/InstanceTitle.svelte';
+  import InstanceStatus from '$lib/InstanceStatus.svelte';
   import InstanceSummary from '$lib/InstanceSummary.svelte';
   import PlayerSummary from '$lib/PlayerSummary.svelte';
   import PlayerTop from '$lib/PlayerTop.svelte';
@@ -26,6 +28,7 @@
       res.s = fetched[0];
       res.o = fetched[1];
       [ires.instances, ires.lastevent, ires.events] = fetched.slice(2, 5);
+      res.s.module = ires.instances.records ? ires.instances.records[0][2] : '';
       res.i = extractInstance(ires);
       res.i.results = res.i.results[0];
       [pres.lastevent, pres.events] = fetched.slice(5);
@@ -38,9 +41,11 @@
 
 
 {#if data}
+  <InstanceTitle {data} />
+  <InstanceStatus {data} />
   <InstanceSummary {data} />
-  <PlayerSummary {data} />
   <PlayerOnline {data} />
+  <PlayerSummary {data} />
   <PlayerChart {data} />
   <PlayerTop {data} />
 {/if}

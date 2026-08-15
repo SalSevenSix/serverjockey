@@ -27,6 +27,6 @@
 </script>
 
 
-<div id="PlayerChart" style="width: 50%">
-  <ChartCanvas data={chartDataIntervals(data.p.results)} />
+<div id="PlayerChart" class="dashpanel">
+  <div><ChartCanvas data={chartDataIntervals(data.p.results)} /></div>
 </div>

@@ -1,19 +1,21 @@
 <script>
-  import { floatToPercent, humanDuration } from 'common/util/util';
-
   let { data } = $props();
 </script>
 
 
-<div id="InstanceSummary" class="dashpanel container">
+<div id="InstanceStatus" class="dashpanel container">
   <div>
-    <h2>Availability</h2>
+    <h2>Server Status</h2>
     <table><tbody>
-      <tr><th>Last</th><td>{humanDuration(data.i.results.range)}</td></tr>
-      <tr><th>Uptime</th><td>{humanDuration(data.i.results.uptime)}</td></tr>
+      <tr><th>State</th><td>{data.s.state}</td></tr>
+      <tr><th>Version</th><td>{data.s.details.version}</td></tr>
+      <tr><th>Connect</th><td>{data.s.details.ip}:{data.s.details.port}</td></tr>
+      {#if data.s.details.ingametime}
+        <tr><th>Game Time</th><td>{data.s.details.ingametime}</td></tr>
+      {/if}
     </tbody></table>
   </div>
-  <div>{floatToPercent(data.i.results.available)}</div>
+  <div>{data.s.running ? 'UP' : 'DOWN'}</div>
 </div>
 
 

@@ -1,1 +1,46 @@
-/* TODO */
+html {
+  background: rgba(32, 32, 32);
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  font-size: clamp(1rem, 2vw, 2rem);
+  color: ivory;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  text-transform: lowercase;
+}
+
+h1, h3 {
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 0.2rem;
+}
+
+ol, ul, li {
+  margin: 0;
+}
+
+th {
+  text-align: left;
+  text-transform: lowercase;
+  padding: 0 0.6rem 0 0;
+}
+
+td {
+  font-family: "Courier New", monospace;
+  padding: 0.01rem;
+}
+
+.dashpanel {
+  background-color: rgba(0, 0, 0, 0.7);
+  margin: clamp(1rem, 2vw, 4rem);
+  padding: clamp(0.5rem, 2vw, 1.5rem);
+  border: solid 5px rgba(64, 64, 128);
+  border-radius: clamp(0.5rem, 1.5vw, 2rem);;
+}
