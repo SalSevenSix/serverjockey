@@ -5,17 +5,29 @@
 </script>
 
 
-<div id="PlayerSummary" class="dashpanel" style="height: 7rem;">
-  <h2>Player Summary</h2>
-  <div style="float: left;">
+<div id="PlayerSummary" class="dashcontainer"><div class="dashpanel statbox">
+  <div>
+    <h2>Player Summary</h2>
     <table><tbody>
       <tr><th>Unique Players</th><td>{data.p.results.summary.unique}</td></tr>
       <tr><th>Max Concurrent</th><td>{data.p.results.summary.online.max}</td></tr>
       <tr><th>Total Sessions</th><td>{data.p.results.summary.total.sessions}</td></tr>
     </tbody></table>
-  </div><div style="float: right;">
-    <strong style="font-size: 1.5rem;">{humanDuration(data.p.results.summary.total.uptime)}</strong>
-    <br>
-    <span style="font-size: 0.8rem;">total played time</span>
   </div>
-</div>
+  <div>
+    <p class="tpt-value">{humanDuration(data.p.results.summary.total.uptime)}</p>
+    <p class="tpt-label">total played time</p>
+  </div>
+</div></div>
+
+
+<style>
+  .tpt-value {
+    font-size: 1.3em;
+    font-weight: bold;
+  }
+
+  .tpt-label {
+    font-size: 0.9em;
+  }
+</style>

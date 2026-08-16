@@ -6,14 +6,18 @@
 </script>
 
 
-<div id="PlayerOnline" class="dashpanel">
+<div id="PlayerOnline" class="dashcontainer"><div class="dashpanel">
   <h2>Players Online&nbsp; ({data.o.length})</h2>
-  {#each chunkArray(data.o, 5, 3) as playerColumn}
-    <table><tbody>
-      {#each playerColumn as playerRow}
-        <tr><td>{truncName(playerRow.name, 20)}</td>
-        <td>{humanDuration(playerRow.uptime, 'hm')}</td></tr>
-      {/each}
-    </tbody></table>
-  {/each}
-</div>
+  <div class="flex-columns">
+    {#each chunkArray(data.o, 5, 3) as playerColumn}
+      <div class="flex-column"><table><tbody>
+        {#each playerColumn as playerRow}
+          <tr>
+            <td class="left">{truncName(playerRow.name, 17)}</td>
+            <td class="right">{humanDuration(playerRow.uptime, 'hm')}</td>
+          </tr>
+        {/each}
+      </tbody></table></div>
+    {/each}
+  </div>
+</div></div>

@@ -7,7 +7,7 @@
 </script>
 
 
-<div id="PlayerTop" class="dashpanel">
+<div id="PlayerTop" class="dashcontainer"><div class="dashpanel">
   <h2>Top Players</h2>
   {#each chunkArray(compactPlayers(data.p.results.players, 45), 15, 3) as playerColumn, colindex}
     <table><tbody>
@@ -20,4 +20,4 @@
       {/each}
     </tbody></table>
   {/each}
-</div>
+</div></div>

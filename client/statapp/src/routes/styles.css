@@ -1,10 +1,17 @@
 html {
-  background: rgba(32, 32, 32);
+  background-color: #202923;
+  background-image:
+    radial-gradient(circle, rgba(180, 205, 190, 0.07) 0 0.7px, transparent 0.9px),
+    radial-gradient(circle, rgba(140, 170, 150, 0.035) 0 1px, transparent 1.2px),
+    radial-gradient(circle, rgba(5, 20, 12, 0.10) 0 0.8px, transparent 1px),
+    radial-gradient(circle, rgba(10, 28, 17, 0.05) 0 1.2px, transparent 1.5px);
+  background-size: 4px 4px, 9px 9px, 7px 7px, 15px 15px;
+  background-position: 0 0, 3px 2px, 1px 4px, 6px 3px;
 }
 
 body {
   font-family: "Arial", sans-serif;
-  font-size: clamp(1rem, 2vw, 2rem);
+  font-size: clamp(1rem, 1.6vw, 3rem);
   color: ivory;
   margin: 0;
 }
@@ -19,28 +26,98 @@ h1, h3 {
 }
 
 h2 {
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.22em;
+}
+
+p {
+  margin: 0;
 }
 
 ol, ul, li {
   margin: 0;
 }
 
+table {
+  width: 100%;
+}
+
 th {
   text-align: left;
   text-transform: lowercase;
-  padding: 0 0.6rem 0 0;
+  padding: 0.01em 1em 0.01em 0.01em;
 }
 
 td {
   font-family: "Courier New", monospace;
-  padding: 0.01rem;
+  padding: 0.01em;
+}
+
+td.left {
+  width: 100%;
+}
+
+td.right {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dashcontainer {
+  margin: clamp(0.8rem, 2vw, 4rem) clamp(0.8rem, 12vw - 2rem, 100rem);
+  border: solid 0.35em rgba(0, 16, 0);
+  /* box-shadow: 0 0 0.15em black; */
+  border-radius: 1em;
+  overflow: hidden;
 }
 
 .dashpanel {
-  background-color: rgba(0, 0, 0, 0.7);
-  margin: clamp(1rem, 2vw, 4rem);
-  padding: clamp(0.5rem, 2vw, 1.5rem);
-  border: solid 5px rgba(64, 64, 128);
-  border-radius: clamp(0.5rem, 1.5vw, 2rem);;
+  background-color: rgba(8, 16, 8, 0.6);
+  padding: clamp(0.65rem, 2vw, 1.5rem);
+}
+
+.dashpanel.statbox {
+  display: flex;
+  align-items: center;
+}
+
+.dashpanel.statbox > div:first-child {
+  flex: 0 0 auto;
+}
+
+.dashpanel.statbox > div:last-child {
+  flex: 1;
+  text-align: right;
+  padding-right: calc(6vw - 0.6rem);
+}
+
+.dashpanel.statbox.is-green {
+  background: linear-gradient(to right, rgba(8, 16, 8, 0.6) 0%, rgba(8, 24, 8, 0.5) 68%, lime 92%);
+}
+.dashpanel.statbox.is-yellow {
+  background: linear-gradient(to right, rgba(8, 16, 8, 0.6) 0%, rgba(24, 20, 0, 0.5) 68%, #FFBF00 92%);
+}
+.dashpanel.statbox.is-red {
+  background: linear-gradient(to right, rgba(8, 16, 8, 0.6) 0%, rgba(24, 8, 8, 0.5) 68%, red 92%);
+}
+.dashpanel.statbox.is-green > div:last-child, .dashpanel.statbox.is-yellow > div:last-child {
+  color: rgba(0, 8, 0);
+}
+
+.flex-columns {
+  display: flex;
+  gap: 1em;
+}
+
+.flex-column {
+  flex: 1;
+}
+
+@media (max-width: 800px) {
+  .flex-columns {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  td.right {
+    padding-right: calc(32vw - 2rem);
+  }
 }

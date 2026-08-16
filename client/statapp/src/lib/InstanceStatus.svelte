@@ -3,7 +3,7 @@
 </script>
 
 
-<div id="InstanceStatus" class="dashpanel container">
+<div id="InstanceStatus" class="dashcontainer"><div class="dashpanel statbox is-{data.s.running ? 'green' : 'red'}">
   <div>
     <h2>Server Status</h2>
     <table><tbody>
@@ -15,30 +15,5 @@
       {/if}
     </tbody></table>
   </div>
-  <div>{data.s.running ? 'UP' : 'DOWN'}</div>
-</div>
-
-
-<style>
-  .container {
-    display: flex;
-    align-items: center;
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 16, 0, 0.6) 66%,
-      lime 90%
-    );
-  }
-
-  .container > div:first-child {
-    flex: 0 0 auto;
-  }
-
-  .container > div:last-child {
-    flex: 1;
-    text-align: right;
-    padding-right: 8vw;
-    color: black;
-  }
-</style>
+  <div><h2>{data.s.running ? 'UP' : 'DOWN'}</h2></div>
+</div></div>

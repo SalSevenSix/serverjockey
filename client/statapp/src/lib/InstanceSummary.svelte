@@ -2,10 +2,16 @@
   import { floatToPercent, humanDuration } from 'common/util/util';
 
   let { data } = $props();
+
+  function statusClass(available) {
+    if (available < 0.5) return 'is-red';
+    if (available > 0.9) return 'is-green';
+    return 'is-yellow';
+  }
 </script>
 
 
-<div id="InstanceSummary" class="dashpanel container">
+<div id="InstanceSummary" class="dashcontainer"><div class="dashpanel statbox {statusClass(data.i.results.available)}">
   <div>
     <h2>Availability</h2>
     <table><tbody>
@@ -13,30 +19,5 @@
       <tr><th>Uptime</th><td>{humanDuration(data.i.results.uptime)}</td></tr>
     </tbody></table>
   </div>
-  <div>{floatToPercent(data.i.results.available)}</div>
-</div>
-
-
-<style>
-  .container {
-    display: flex;
-    align-items: center;
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 16, 0, 0.6) 66%,
-      lime 90%
-    );
-  }
-
-  .container > div:first-child {
-    flex: 0 0 auto;
-  }
-
-  .container > div:last-child {
-    flex: 1;
-    text-align: right;
-    padding-right: 8vw;
-    color: black;
-  }
-</style>
+  <div><h2>{floatToPercent(data.i.results.available)}</h2></div>
+</div></div>
