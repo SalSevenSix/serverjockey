@@ -9,15 +9,17 @@
 
 <div id="PlayerTop" class="dashcontainer"><div class="dashpanel">
   <h2>Top Players</h2>
-  {#each chunkArray(compactPlayers(data.p.results.players, 45), 15, 3) as playerColumn, colindex}
-    <table><tbody>
-      {#each playerColumn as playerRow, rowindex}
-        <tr>
-          <td>{colindex * 15 + rowindex + 1}</td>
-          <td>{truncName(playerRow.player, 18)}</td>
-          <td>{humanDuration(playerRow.uptime, 'hm')}</td>
-        </tr>
-      {/each}
-    </tbody></table>
-  {/each}
+  <div class="flex-columns">
+    {#each chunkArray(compactPlayers(data.p.results.players, 45), 15, 3) as playerColumn, colindex}
+      <div class="flex-column"><table><tbody>
+        {#each playerColumn as playerRow, rowindex}
+          <tr>
+            <td class="idx">{colindex * 15 + rowindex + 1}</td>
+            <td class="left">{truncName(playerRow.player, 14)}</td>
+            <td class="right">{humanDuration(playerRow.uptime, 'hm')}</td>
+          </tr>
+        {/each}
+      </tbody></table></div>
+    {/each}
+  </div>
 </div></div>

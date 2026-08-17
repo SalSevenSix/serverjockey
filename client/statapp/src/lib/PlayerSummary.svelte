@@ -5,13 +5,13 @@
 </script>
 
 
-<div id="PlayerSummary" class="dashcontainer"><div class="dashpanel statbox">
+<div id="PlayerSummary" class="dashcontainer"><div class="dashpanel statbox is-black">
   <div>
     <h2>Player Summary</h2>
     <table><tbody>
-      <tr><th>Unique Players</th><td>{data.p.results.summary.unique}</td></tr>
-      <tr><th>Max Concurrent</th><td>{data.p.results.summary.online.max}</td></tr>
-      <tr><th>Total Sessions</th><td>{data.p.results.summary.total.sessions}</td></tr>
+      <tr><th>Unique Players</th><td class="text-align-right">{data.p.results.summary.unique}</td></tr>
+      <tr><th>Max Concurrent</th><td class="text-align-right">{data.p.results.summary.online.max}</td></tr>
+      <tr><th>Total Sessions</th><td class="text-align-right">{data.p.results.summary.total.sessions}</td></tr>
     </tbody></table>
   </div>
   <div>

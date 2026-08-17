@@ -52,12 +52,29 @@ td {
   padding: 0.01em;
 }
 
+td.idx {
+  padding-right: 0.3em;
+  text-align: right;
+}
+
 td.left {
   width: 100%;
 }
 
 td.right {
   white-space: nowrap;
+  text-align: right;
+}
+
+.font-monospace {
+  font-family: "Courier New", monospace;
+}
+
+.text-align-center {
+  text-align: center;
+}
+
+.text-align-right {
   text-align: right;
 }
 
@@ -89,6 +106,9 @@ td.right {
   padding-right: calc(6vw - 0.6rem);
 }
 
+.dashpanel.statbox.is-black {
+  background: linear-gradient(to right, rgba(8, 16, 8, 0.6) 0%, rgba(0, 8, 0, 0.5) 66%, rgba(0, 8, 0, 0.9) 90%);
+}
 .dashpanel.statbox.is-green {
   background: linear-gradient(to right, rgba(8, 16, 8, 0.6) 0%, rgba(8, 24, 8, 0.5) 68%, lime 92%);
 }
@@ -118,6 +138,6 @@ td.right {
   }
 
   td.right {
-    padding-right: calc(32vw - 2rem);
+    padding-right: calc(36vw - 3rem);
   }
 }

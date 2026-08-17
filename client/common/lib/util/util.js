@@ -163,7 +163,7 @@ export function humanDuration(millis, parts = 'dhm') {
   if (millis == null) return '';
   let remainder = millis ? millis : 0;
   const [result, data] = [[], {}];
-  Object.entries({ d: 86400000, h: 3600000, m: 60000, s: 1.0 }).forEach(function([key, value]) {
+  Object.entries({ d: 86400000, h: 3600000, m: 60000, s: 1000 }).forEach(function([key, value]) {
     if (parts.indexOf(key) != -1) {
       data[key] = remainder > 0 ? Math.floor(remainder / value) : Math.ceil(remainder / value);
       remainder -= data[key] * value;

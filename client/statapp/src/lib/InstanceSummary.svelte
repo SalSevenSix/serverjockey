@@ -15,9 +15,17 @@
   <div>
     <h2>Availability</h2>
     <table><tbody>
-      <tr><th>Last</th><td>{humanDuration(data.i.results.range)}</td></tr>
-      <tr><th>Uptime</th><td>{humanDuration(data.i.results.uptime)}</td></tr>
+      <tr><th>Last</th><td class="text-align-right">{humanDuration(data.i.results.range)}</td></tr>
+      <tr><th>Uptime</th><td class="text-align-right">{humanDuration(data.i.results.uptime)}</td></tr>
     </tbody></table>
   </div>
-  <div><h2>{floatToPercent(data.i.results.available)}</h2></div>
+  <div><p class="avail-value">{floatToPercent(data.i.results.available)}</p></div>
 </div></div>
+
+
+<style>
+  .avail-value {
+    font-size: 1.4em;
+    font-weight: bold;
+  }
+</style>
