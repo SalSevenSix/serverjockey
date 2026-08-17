@@ -413,12 +413,6 @@ class CommandProcessor:
         self._connection.post('/system/shutdown')
         return False
 
-    def _statapp_deploy(self, argument: str) -> bool:
-        os.makedirs(argument, exist_ok=True)
-        self._connection.get_zip('/assets/extensions/statapp.zip', argument)
-        logging.info('Unpacked Status App to ' + argument)
-        return True
-
     # qim                      | Query instance meta
     def _qim(self) -> bool:
         url = '/store/instance?instance=' + self._ensure_instance()
@@ -461,3 +455,59 @@ class CommandProcessor:
         url += '?instance=' + self._ensure_instance()
         url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
         return self._dump_to_log(self._connection.get(url))
+
+    def _statapp_deploy(self, argument: str) -> bool:
+        os.makedirs(argument, exist_ok=True)
+        self._connection.get_zip('/assets/extensions/statapp.zip', argument)
+        logging.info('Unpacked Status App to ' + argument)
+        return True
+
+    def _statapp_export(self, argument: str) -> bool:
+        now, original = int(time.time() * 1000), self._instance
+        identities = argument.split(',')
+        homedir, tz = identities.pop(0), identities.pop(0)
+        atbegin, atfrom, atto = str(now - 5184000000), str(now - 2592000000), str(now)
+        datadir = homedir + '/data-' + str(now) + '/'
+        os.makedirs(datadir)
+        for identity in identities:
+            self._instance = identity
+            file, path = datadir + identity + '-instance-status.json', self._instance_path('/server')
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+            file, path = datadir + identity + '-player-online.json', self._instance_path('/players')
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+            file = datadir + identity + '-instances.json'
+            path = '/store/instance?instance=' + identity
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+            file = datadir + identity + '-instance-lastevent.json'
+            path = '/store/instance/event?instance=' + identity
+            path += '&atfrom=' + atbegin + '&atto=' + atfrom
+            path += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max'
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+            file = datadir + identity + '-instance-events.json'
+            path = '/store/instance/event?instance=' + identity
+            path += '&atfrom=' + atfrom + '&atto=' + atto
+            path += '&events=STARTED,STOPPED,EXCEPTION'
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+            file = datadir + identity + '-player-lastevent.json'
+            path = '/store/player/event?instance=' + identity
+            path += '&atfrom=' + atbegin + '&atto=' + atfrom
+            path += '&events=LOGIN,LOGOUT&atgroup=max'
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+            file = datadir + identity + '-player-events.json'
+            path = '/store/player/event?instance=' + identity
+            path += '&atfrom=' + atfrom + '&atto=' + atto
+            path += '&events=LOGIN,LOGOUT'
+            logging.info(f'Saving {file} | {path}')
+            self._connection.get_file(path, file)
+        self._instance = original
+        file = datadir + 'meta.json'
+        logging.info('Saving ' + file + ' | [' + ','.join(identities) + ']')
+        with open(file, 'w') as f:
+            f.write(json.dumps(dict(updated=now, instances=identities)))
+        return True

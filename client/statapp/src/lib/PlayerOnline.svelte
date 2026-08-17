@@ -6,7 +6,7 @@
 </script>
 
 
-<div id="PlayerOnline" class="dashcontainer"><div class="dashpanel">
+<div id="PlayerOnline" class="dashcontainer"><div class="dashpanel minheight">
   <h2>Players Online&nbsp; ({data.o.length})</h2>
   <div class="flex-columns">
     {#each chunkArray(data.o, 5, 3) as playerColumn}
@@ -21,3 +21,10 @@
     {/each}
   </div>
 </div></div>
+
+
+<style>
+  .minheight {
+    min-height: 3em;
+  }
+</style>

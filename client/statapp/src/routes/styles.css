@@ -29,6 +29,11 @@ h2 {
   margin-bottom: 0.22em;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 p {
   margin: 0;
 }

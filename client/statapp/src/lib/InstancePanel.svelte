@@ -3,6 +3,7 @@
   import { fetchJson } from '$lib/util';
   import { extractActivity as extractInstance } from 'common/activity/instance';
   import { extractActivity as extractPlayer } from 'common/activity/player';
+  import MessageBanner from '$lib/MessageBanner.svelte';
   import InstanceTitle from '$lib/InstanceTitle.svelte';
   import InstanceStatus from '$lib/InstanceStatus.svelte';
   import InstanceSummary from '$lib/InstanceSummary.svelte';
@@ -14,15 +15,19 @@
   let { instance } = $props();
   let data = $state(null);
 
+  function buildUrl(file) {
+    return '/data/' + instance + '-' + file;
+  }
+
   onMount(function() {
     Promise.all([
-      fetchJson('/data/' + instance + '-instance-status.json'),
-      fetchJson('/data/' + instance + '-player-online.json'),
-      fetchJson('/data/' + instance + '-instances.json'),
-      fetchJson('/data/' + instance + '-instance-lastevent.json'),
-      fetchJson('/data/' + instance + '-instance-events.json'),
-      fetchJson('/data/' + instance + '-player-lastevent.json'),
-      fetchJson('/data/' + instance + '-player-events.json')
+      fetchJson(buildUrl('instance-status.json')),
+      fetchJson(buildUrl('player-online.json')),
+      fetchJson(buildUrl('instances.json')),
+      fetchJson(buildUrl('instance-lastevent.json')),
+      fetchJson(buildUrl('instance-events.json')),
+      fetchJson(buildUrl('player-lastevent.json')),
+      fetchJson(buildUrl('player-events.json'))
     ]).then(function(fetched) {
       const [res, ires, pres] = [{}, {}, {}];
       res.s = fetched[0];
@@ -45,7 +50,19 @@
   <InstanceStatus {data} />
   <InstanceSummary {data} />
   <PlayerOnline {data} />
-  <PlayerSummary {data} />
-  <PlayerChart {data} />
-  <PlayerTop {data} />
+  {#if data.p.results}
+    <PlayerSummary {data} />
+    <PlayerChart {data} />
+    <PlayerTop {data} />
+  {:else}
+    <MessageBanner text="No Player History Found" />
+  {/if}
+  <div class="footpad"></div>
 {/if}
+
+
+<style>
+  .footpad {
+    height: 1.2em;
+  }
+</style>

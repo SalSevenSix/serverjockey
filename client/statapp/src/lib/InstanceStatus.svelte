@@ -1,5 +1,9 @@
 <script>
   let { data } = $props();
+
+  function version() {
+    return data.s.details.version;
+  }
 </script>
 
 
@@ -8,10 +12,21 @@
     <h2>Server Status</h2>
     <table><tbody>
       <tr><th>State</th><td>{data.s.state}</td></tr>
-      <tr><th>Version</th><td>{data.s.details.version}</td></tr>
-      <tr><th>Connect</th><td>{data.s.details.ip}:{data.s.details.port}</td></tr>
-      {#if data.s.details.ingametime}
-        <tr><th>Game Time</th><td>{data.s.details.ingametime}</td></tr>
+      {#if data.s.details}
+        <tr><th>Version</th><td>
+          {data.s.details.version ? data.s.details.version : '---'}
+        </td></tr>
+        <tr><th>Connect</th><td>
+          {#if data.s.details.ip && data.s.details.port}
+            <a href="steam://connect/{data.s.details.ip}:{data.s.details.port}">
+              {data.s.details.ip}:{data.s.details.port}</a>
+          {:else}
+            ---
+          {/if}
+        </td></tr>
+        {#if data.s.details.ingametime}
+          <tr><th>Ingame</th><td>{data.s.details.ingametime}</td></tr>
+        {/if}
       {/if}
     </tbody></table>
   </div>
