@@ -1,9 +1,11 @@
 import logging
 import inspect
 import os
+import shutil
 import time
 import ssl
 import json
+import subprocess
 import smtplib
 import email.utils
 from email.message import EmailMessage
@@ -457,57 +459,75 @@ class CommandProcessor:
         return self._dump_to_log(self._connection.get(url))
 
     def _statapp_deploy(self, argument: str) -> bool:
-        os.makedirs(argument, exist_ok=True)
+        if os.path.exists(argument):
+            shutil.rmtree(argument)
+        os.makedirs(argument)
         self._connection.get_zip('/assets/extensions/statapp.zip', argument)
         logging.info('Unpacked Status App to ' + argument)
         return True
 
     def _statapp_export(self, argument: str) -> bool:
-        now, original = int(time.time() * 1000), self._instance
+        linkdir = 'data'
         identities = argument.split(',')
         homedir, tz = identities.pop(0), identities.pop(0)
-        atbegin, atfrom, atto = str(now - 5184000000), str(now - 2592000000), str(now)
-        datadir = homedir + '/data-' + str(now) + '/'
+        nows, original = time.time(), self._instance
+        now, mids = int(nows * 1000), util.last_midnight(nows, util.parse_timezone(tz))
+        file, lasts, atto = f'{homedir}/{linkdir}/meta.json', None, None
+        if os.path.exists(file):
+            with open(file, 'r') as f:
+                lasts = json.loads(f.read())['updated'] / 1000
+        if not lasts or mids > lasts:
+            atto = int(mids * 1000)
+        datadir = f'{homedir}/{linkdir}-{now}'
         os.makedirs(datadir)
         for identity in identities:
             self._instance = identity
-            file, path = datadir + identity + '-instance-status.json', self._instance_path('/server')
+            file, path = f'{datadir}/{identity}-instance-status.json', self._instance_path('/server')
             logging.info(f'Saving {file} | {path}')
             self._connection.get_file(path, file)
-            file, path = datadir + identity + '-player-online.json', self._instance_path('/players')
+            file, path = f'{datadir}/{identity}-player-online.json', self._instance_path('/players')
             logging.info(f'Saving {file} | {path}')
             self._connection.get_file(path, file)
-            file = datadir + identity + '-instances.json'
-            path = '/store/instance?instance=' + identity
-            logging.info(f'Saving {file} | {path}')
-            self._connection.get_file(path, file)
-            file = datadir + identity + '-instance-lastevent.json'
-            path = '/store/instance/event?instance=' + identity
-            path += '&atfrom=' + atbegin + '&atto=' + atfrom
-            path += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max'
-            logging.info(f'Saving {file} | {path}')
-            self._connection.get_file(path, file)
-            file = datadir + identity + '-instance-events.json'
-            path = '/store/instance/event?instance=' + identity
-            path += '&atfrom=' + atfrom + '&atto=' + atto
-            path += '&events=STARTED,STOPPED,EXCEPTION'
-            logging.info(f'Saving {file} | {path}')
-            self._connection.get_file(path, file)
-            file = datadir + identity + '-player-lastevent.json'
-            path = '/store/player/event?instance=' + identity
-            path += '&atfrom=' + atbegin + '&atto=' + atfrom
-            path += '&events=LOGIN,LOGOUT&atgroup=max'
-            logging.info(f'Saving {file} | {path}')
-            self._connection.get_file(path, file)
-            file = datadir + identity + '-player-events.json'
-            path = '/store/player/event?instance=' + identity
-            path += '&atfrom=' + atfrom + '&atto=' + atto
-            path += '&events=LOGIN,LOGOUT'
-            logging.info(f'Saving {file} | {path}')
-            self._connection.get_file(path, file)
+            if atto:
+                file = f'{datadir}/{identity}-instances.json'
+                path = f'/store/instance?instance={identity}'
+                logging.info(f'Saving {file} | {path}')
+                atcreated = json.loads(self._connection.get_file(path, file))['records'][0][0]
+                atbegin, atfrom = atto - 5184000000, atto - 2592000000
+                if atcreated > atfrom:
+                    atbegin, atfrom = atcreated - 1000, atcreated
+                file = f'{datadir}/{identity}-instance-lastevent.json'
+                path = f'/store/instance/event?instance={identity}'
+                path += f'&atfrom={atbegin}&atto={atfrom}'
+                path += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max'
+                logging.info(f'Saving {file} | {path}')
+                self._connection.get_file(path, file)
+                file = f'{datadir}/{identity}-instance-events.json'
+                path = f'/store/instance/event?instance={identity}'
+                path += f'&atfrom={atfrom}&atto={atto}'
+                path += '&events=STARTED,STOPPED,EXCEPTION'
+                logging.info(f'Saving {file} | {path}')
+                self._connection.get_file(path, file)
+                file = f'{datadir}/{identity}-player-lastevent.json'
+                path = f'/store/player/event?instance={identity}'
+                path += f'&atfrom={atbegin}&atto={atfrom}'
+                path += '&events=LOGIN,LOGOUT&atgroup=max'
+                logging.info(f'Saving {file} | {path}')
+                self._connection.get_file(path, file)
+                file = f'{datadir}/{identity}-player-events.json'
+                path = f'/store/player/event?instance={identity}'
+                path += f'&atfrom={atfrom}&atto={atto}'
+                path += '&events=LOGIN,LOGOUT'
+                logging.info(f'Saving {file} | {path}')
+                self._connection.get_file(path, file)
         self._instance = original
-        file = datadir + 'meta.json'
-        logging.info('Saving ' + file + ' | [' + ','.join(identities) + ']')
+        file = f'{datadir}/meta.json'
+        logging.info(f'Saving {file} | {now}')
         with open(file, 'w') as f:
             f.write(json.dumps(dict(updated=now, instances=identities)))
+        result = util.get_resource('statappln.sh').replace('{idlist}', ' '.join(identities))
+        result = result.replace('{homedir}', homedir).replace('{linkdir}', linkdir).replace('{now}', str(now))
+        result = subprocess.run(result, shell=True)
+        if result.returncode != 0:
+            raise Exception('Statapp export linking script failed')
         return True

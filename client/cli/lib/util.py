@@ -1,6 +1,8 @@
 import subprocess
 import pkgutil
 import time
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 # ALLOW NONE
 
 OUT = '    '
@@ -55,6 +57,21 @@ def rchop(value: str, keyword: str, strip: bool = True) -> str:
         return value
     value = value[:index]
     return value.strip() if strip else value
+
+
+def parse_timezone(tz: str) -> str | int | float:
+    try:
+        offset = float(tz)
+    except (TypeError, ValueError):
+        return tz
+    return int(offset) if offset.is_integer() else offset
+
+
+def last_midnight(timestamp: float, tz: str | int | float = 'UTC') -> float:
+    zi = timezone(timedelta(hours=tz)) if isinstance(tz, (int, float)) else ZoneInfo(tz)
+    dt = datetime.fromtimestamp(timestamp, zi)
+    midnight = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    return midnight.timestamp()
 
 
 def get_local_ip4() -> str:

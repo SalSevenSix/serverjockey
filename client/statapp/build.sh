@@ -28,7 +28,7 @@ if [ -d ../../web/assets/extensions ]; then
   cd build || exit 1
   zip -r9 ../statapp.zip * > /dev/null || exit 1
   cd .. || exit 1
-  mv statapp.zip ../../web/assets/extensions || exit 1
+  mv -f statapp.zip ../../web/assets/extensions || exit 1
 fi
 
 echo "Done statapp build"

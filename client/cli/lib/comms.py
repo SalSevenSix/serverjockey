@@ -62,10 +62,10 @@ class HttpConnection:
         finally:
             self.close()
 
-    def get_file(self, path: str, file: str):
+    def get_file(self, path: str, file: str) -> str:
         connection = self._init_connection()
         connection.request(util.GET, path, headers=self._headers_get)
-        _handle_file(connection.getresponse(), file)
+        return _handle_file(connection.getresponse(), file)
 
     def get_zip(self, path: str, unpacked: str):
         connection = self._init_connection()
@@ -115,12 +115,14 @@ def _handle_drain(response) -> bool:
         response.close()
 
 
-def _handle_file(response, file: str):
+def _handle_file(response, file: str) -> str:
     try:
         if response.status != 200:
             raise Exception(f'HTTP GET Status: {response.status} Reason: {response.reason}')
         with open(file, 'w') as f:
-            f.write(response.read().decode())
+            text = response.read().decode()
+            f.write(text)
+            return text
     finally:
         response.close()
 

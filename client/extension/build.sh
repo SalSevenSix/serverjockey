@@ -29,7 +29,7 @@ if [ -d ../../web/assets/extensions ]; then
   cd build || exit 1
   zip -r9 ../chrome-extension.zip * > /dev/null || exit 1
   cd .. || exit 1
-  mv chrome-extension.zip ../../web/assets/extensions || exit 1
+  mv -f chrome-extension.zip ../../web/assets/extensions || exit 1
 fi
 
 echo "Done extension build"

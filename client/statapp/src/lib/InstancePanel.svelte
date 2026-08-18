@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { resolve } from '$app/paths';
   import { fetchJson } from '$lib/util';
   import { extractActivity as extractInstance } from 'common/activity/instance';
   import { extractActivity as extractPlayer } from 'common/activity/player';
@@ -16,7 +17,7 @@
   let data = $state(null);
 
   function buildUrl(file) {
-    return '/data/' + instance + '-' + file;
+    return resolve('/data/' + instance + '-' + file);
   }
 
   onMount(function() {
