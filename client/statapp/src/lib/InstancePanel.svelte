@@ -1,7 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { resolve } from '$app/paths';
-  import { fetchJson } from '$lib/util';
+  import { durl, fetchJson, fetchOk } from '$lib/util';
   import { extractActivity as extractInstance } from 'common/activity/instance';
   import { extractActivity as extractPlayer } from 'common/activity/player';
   import MessageBanner from '$lib/MessageBanner.svelte';
@@ -17,7 +16,7 @@
   let data = $state(null);
 
   function buildUrl(file) {
-    return resolve('/data/' + instance + '-' + file);
+    return durl('/' + instance + '-' + file);
   }
 
   onMount(function() {
@@ -29,18 +28,18 @@
       fetchJson(buildUrl('instance-events.json')),
       fetchJson(buildUrl('player-lastevent.json')),
       fetchJson(buildUrl('player-events.json'))
-    ]).then(function(fetched) {
-      const [res, ires, pres] = [{}, {}, {}];
-      res.s = fetched[0];
-      res.o = fetched[1];
-      [ires.instances, ires.lastevent, ires.events] = fetched.slice(2, 5);
-      res.s.module = ires.instances.records ? ires.instances.records[0][2] : '';
-      res.i = extractInstance(ires);
-      res.i.results = res.i.results[0];
-      [pres.lastevent, pres.events] = fetched.slice(5);
-      res.p = extractPlayer(pres);
-      res.p.results = Object.values(res.p.results)[0];
-      data = res;
+    ]).then(function([status, online, irecord, ilastevent, ievents, plastevent, pevents]) {
+      const out = { s: status, o: online, i: null, p: null };
+      out.s.module = irecord.records ? irecord.records[0][2] : 'unknown';
+      if (fetchOk(ilastevent) && fetchOk(ievents)) {
+        out.i = extractInstance({ instances: irecord, lastevent: ilastevent, events: ievents });
+        out.i.results = out.i.results[0];
+      }
+      if (fetchOk(plastevent) && fetchOk(pevents)) {
+        out.p = extractPlayer({ lastevent: plastevent, events: pevents });
+        out.p.results = Object.values(out.p.results)[0];
+      }
+      data = out;
     });
   });
 </script>
@@ -49,9 +48,13 @@
 {#if data}
   <InstanceTitle {data} />
   <InstanceStatus {data} />
-  <InstanceSummary {data} />
+  {#if data.i}
+    <InstanceSummary {data} />
+  {:else}
+    <MessageBanner text="No Server History Found" />
+  {/if}
   <PlayerOnline {data} />
-  {#if data.p.results}
+  {#if data.p && data.p.results}
     <PlayerSummary {data} />
     <PlayerChart {data} />
     <PlayerTop {data} />

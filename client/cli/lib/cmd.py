@@ -472,13 +472,12 @@ class CommandProcessor:
         homedir, tz = identities.pop(0), identities.pop(0)
         nows, original = time.time(), self._instance
         now, mids = int(nows * 1000), util.last_midnight(nows, util.parse_timezone(tz))
-        file, lasts, atbegin, atfrom, atto = f'{homedir}/{linkdir}/meta.json', None, None, None, None
+        file, lasts, atto = f'{homedir}/{linkdir}/meta.json', None, None
         if os.path.exists(file):
             with open(file, 'r') as f:
                 lasts = json.loads(f.read())['updated'] / 1000
         if not lasts or mids > lasts:
             atto = int(mids * 1000)
-            atbegin, atfrom = atto - 5184000000, atto - 2592000000
         datadir = f'{homedir}/{linkdir}-{now}'
         os.makedirs(datadir)
         for identity in identities:
@@ -489,35 +488,39 @@ class CommandProcessor:
             file, path = f'{datadir}/{identity}-player-online.json', self._instance_path('/players')
             logging.info(f'Saving {file} | {path}')
             self._connection.get_file(path, file)
-            if atbegin and atfrom and atto:
+            if atto:
                 file = f'{datadir}/{identity}-instances.json'
                 path = f'/store/instance?instance={identity}'
                 logging.info(f'Saving {file} | {path}')
-                self._connection.get_file(path, file)
-                file = f'{datadir}/{identity}-instance-lastevent.json'
-                path = f'/store/instance/event?instance={identity}'
-                path += f'&atfrom={atbegin}&atto={atfrom}'
-                path += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max'
-                logging.info(f'Saving {file} | {path}')
-                self._connection.get_file(path, file)
-                file = f'{datadir}/{identity}-instance-events.json'
-                path = f'/store/instance/event?instance={identity}'
-                path += f'&atfrom={atfrom}&atto={atto}'
-                path += '&events=STARTED,STOPPED,EXCEPTION'
-                logging.info(f'Saving {file} | {path}')
-                self._connection.get_file(path, file)
-                file = f'{datadir}/{identity}-player-lastevent.json'
-                path = f'/store/player/event?instance={identity}'
-                path += f'&atfrom={atbegin}&atto={atfrom}'
-                path += '&events=LOGIN,LOGOUT&atgroup=max'
-                logging.info(f'Saving {file} | {path}')
-                self._connection.get_file(path, file)
-                file = f'{datadir}/{identity}-player-events.json'
-                path = f'/store/player/event?instance={identity}'
-                path += f'&atfrom={atfrom}&atto={atto}'
-                path += '&events=LOGIN,LOGOUT'
-                logging.info(f'Saving {file} | {path}')
-                self._connection.get_file(path, file)
+                atcreated = json.loads(self._connection.get_file(path, file))['records'][0][0]
+                if atcreated < atto:
+                    atbegin, atfrom = atcreated, atcreated
+                    if atcreated < atfrom:
+                        atbegin, atfrom = atto - 5184000000, atto - 2592000000
+                    file = f'{datadir}/{identity}-instance-lastevent.json'
+                    path = f'/store/instance/event?instance={identity}'
+                    path += f'&atfrom={atbegin}&atto={atfrom}'
+                    path += '&events=STARTED,STOPPED,EXCEPTION&atgroup=max'
+                    logging.info(f'Saving {file} | {path}')
+                    self._connection.get_file(path, file)
+                    file = f'{datadir}/{identity}-instance-events.json'
+                    path = f'/store/instance/event?instance={identity}'
+                    path += f'&atfrom={atfrom}&atto={atto}'
+                    path += '&events=STARTED,STOPPED,EXCEPTION'
+                    logging.info(f'Saving {file} | {path}')
+                    self._connection.get_file(path, file)
+                    file = f'{datadir}/{identity}-player-lastevent.json'
+                    path = f'/store/player/event?instance={identity}'
+                    path += f'&atfrom={atbegin}&atto={atfrom}'
+                    path += '&events=LOGIN,LOGOUT&atgroup=max'
+                    logging.info(f'Saving {file} | {path}')
+                    self._connection.get_file(path, file)
+                    file = f'{datadir}/{identity}-player-events.json'
+                    path = f'/store/player/event?instance={identity}'
+                    path += f'&atfrom={atfrom}&atto={atto}'
+                    path += '&events=LOGIN,LOGOUT'
+                    logging.info(f'Saving {file} | {path}')
+                    self._connection.get_file(path, file)
         self._instance = original
         file = f'{datadir}/meta.json'
         logging.info(f'Saving {file} | {now}')
