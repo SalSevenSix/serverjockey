@@ -101,7 +101,13 @@ describe('humanDuration()', function() {
   it('-1 day', function() { assert.strictEqual(humanDuration(0 - dd), '-1d 0h 0m'); });
   it('1 day, hour, minute', function() { assert.strictEqual(humanDuration(dd + hh + mm), '1d 1h 1m'); });
   it('1 day as hours mins', function() { assert.strictEqual(humanDuration(hh * 32, 'hm'), '32h 0m'); });
-  it('1 day as mins secs', function() { assert.strictEqual(humanDuration(hh * 12 + 6, 'ms'), '720m 6s'); });
+  it('1 day as mins secs', function() { assert.strictEqual(humanDuration(hh * 12 + 6000, 'ms'), '720m 6s'); });
+  it('1 day, hour, minute, hm padded', function() {
+    assert.strictEqual(humanDuration(dd + hh + mm, 'dhm', 32), '1d 001h 01m');
+  });
+  it('1 day, hour, minute, dhm padded', function() {
+    assert.strictEqual(humanDuration(hh + mm, 'dhm', 234), '00d 001h 0001m');
+  });
 });
 
 describe('shortISODateTimeString()', function() {
@@ -134,7 +140,6 @@ describe('presetDate()', function() {
 });
 
 describe('rangeCodeToMillis()', function() {
-  const sample = new Date(2025, 1, 23, 15, 42, 51, 876);
   it('null value', function() { assert.strictEqual(rangeCodeToMillis(null), null); });
   it('zero value', function() { assert.strictEqual(rangeCodeToMillis(0), 0); });
   it('int value', function() { assert.strictEqual(rangeCodeToMillis(123), 123); });

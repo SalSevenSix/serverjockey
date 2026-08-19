@@ -14,9 +14,9 @@
       <div class="flex-column"><table><tbody>
         {#each playerColumn as playerRow, rowindex}
           <tr>
-            <td class="idx">{colindex * 15 + rowindex + 1}</td>
+            <td class="idx">{String(colindex * 15 + rowindex + 1).padStart(2, '0')}</td>
             <td class="left">{truncName(playerRow.player, 14)}</td>
-            <td class="right">{humanDuration(playerRow.uptime, 'hm')}</td>
+            <td class="right">{humanDuration(playerRow.uptime, 'hm', 2)}</td>
           </tr>
         {/each}
       </tbody></table></div>

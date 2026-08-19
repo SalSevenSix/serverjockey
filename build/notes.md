@@ -34,6 +34,7 @@
 * discord/src/system/bootstrap.js
 * extension/package.json
 * extension/static/manifest.json
+* statapp/package.json
 * web/package.json
 * core/util/sysutil.py
 

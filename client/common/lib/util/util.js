@@ -159,18 +159,18 @@ export function shortISODateTimeString(value, tzFlag = true) {
   return result.toISOString().replace('T', ' ').substring(0, 19);
 }
 
-export function humanDuration(millis, parts = 'dhm') {
+export function humanDuration(millis, parts = 'dhm', pads = 0) {
   if (millis == null) return '';
   let remainder = millis ? millis : 0;
-  const [result, data] = [[], {}];
+  const data = {};
   Object.entries({ d: 86400000, h: 3600000, m: 60000, s: 1000 }).forEach(function([key, value]) {
     if (parts.indexOf(key) != -1) {
       data[key] = remainder > 0 ? Math.floor(remainder / value) : Math.ceil(remainder / value);
       remainder -= data[key] * value;
     }
   });
-  Object.entries(data).forEach(function([key, value]) {
-    result.push(value + key);
+  const result = Object.entries(data).map(function([key, value], idx) {
+    return String(value).padStart(Math.floor(pads / 10 ** (parts.length - idx - 1)) % 10, '0') + key;
   });
   return result.length > 0 ? result.join(' ') : '';
 }

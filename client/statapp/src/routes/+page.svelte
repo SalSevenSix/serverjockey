@@ -1,10 +1,10 @@
 <script>
   import { onMount } from 'svelte';
   import { resolve } from '$app/paths';
-  import { shortISODateTimeString, humanDuration } from 'common/util/util';
   import { fetchJson } from '$lib/util';
   import MessageBanner from '$lib/MessageBanner.svelte';
   import InstancePanel from '$lib/InstancePanel.svelte';
+  import Timestamp from '$lib/Timestamp.svelte';
 
   let meta = $state(null);
 
@@ -21,9 +21,6 @@
     {#each meta.instances as instance}
       <InstancePanel {instance} />
     {/each}
-    <div class="dashpanel font-monospace text-align-center"><p>
-      updated {shortISODateTimeString(meta.updated)}<br>
-      [&nbsp;{humanDuration(Date.now() - meta.updated, 'ms')} ago&nbsp;]</p>
-    </div>
+    <Timestamp {meta} />
   {/if}
 {/if}

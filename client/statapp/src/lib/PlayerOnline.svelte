@@ -14,7 +14,7 @@
         {#each playerColumn as playerRow}
           <tr>
             <td class="left">{truncName(playerRow.name, 17)}</td>
-            <td class="right">{humanDuration(playerRow.uptime, 'hm')}</td>
+            <td class="right">{humanDuration(playerRow.uptime, 'hm', 2)}</td>
           </tr>
         {/each}
       </tbody></table></div>

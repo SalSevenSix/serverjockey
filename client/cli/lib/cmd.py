@@ -472,12 +472,13 @@ class CommandProcessor:
         homedir, tz = identities.pop(0), identities.pop(0)
         nows, original = time.time(), self._instance
         now, mids = int(nows * 1000), util.last_midnight(nows, util.parse_timezone(tz))
-        file, lasts, atto = f'{homedir}/{linkdir}/meta.json', None, None
+        file, lasts, atbegin, atfrom, atto = f'{homedir}/{linkdir}/meta.json', None, None, None, None
         if os.path.exists(file):
             with open(file, 'r') as f:
                 lasts = json.loads(f.read())['updated'] / 1000
         if not lasts or mids > lasts:
             atto = int(mids * 1000)
+            atbegin, atfrom = atto - 5184000000, atto - 2592000000
         datadir = f'{homedir}/{linkdir}-{now}'
         os.makedirs(datadir)
         for identity in identities:
@@ -488,14 +489,11 @@ class CommandProcessor:
             file, path = f'{datadir}/{identity}-player-online.json', self._instance_path('/players')
             logging.info(f'Saving {file} | {path}')
             self._connection.get_file(path, file)
-            if atto:
+            if atbegin and atfrom and atto:
                 file = f'{datadir}/{identity}-instances.json'
                 path = f'/store/instance?instance={identity}'
                 logging.info(f'Saving {file} | {path}')
-                atcreated = json.loads(self._connection.get_file(path, file))['records'][0][0]
-                atbegin, atfrom = atto - 5184000000, atto - 2592000000
-                if atcreated > atfrom:
-                    atbegin, atfrom = atcreated - 1000, atcreated
+                self._connection.get_file(path, file)
                 file = f'{datadir}/{identity}-instance-lastevent.json'
                 path = f'/store/instance/event?instance={identity}'
                 path += f'&atfrom={atbegin}&atto={atfrom}'
@@ -525,6 +523,7 @@ class CommandProcessor:
         logging.info(f'Saving {file} | {now}')
         with open(file, 'w') as f:
             f.write(json.dumps(dict(updated=now, instances=identities)))
+        logging.info(f'Running script to link {homedir}/{linkdir} to {datadir}')
         result = util.get_resource('statappln.sh').replace('{idlist}', ' '.join(identities))
         result = result.replace('{homedir}', homedir).replace('{linkdir}', linkdir).replace('{now}', str(now))
         result = subprocess.run(result, shell=True)
