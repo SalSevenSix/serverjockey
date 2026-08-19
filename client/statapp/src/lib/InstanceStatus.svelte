@@ -1,9 +1,5 @@
 <script>
   let { data } = $props();
-
-  function version() {
-    return data.s.details.version;
-  }
 </script>
 
 

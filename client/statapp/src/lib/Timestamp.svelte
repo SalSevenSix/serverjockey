@@ -5,7 +5,7 @@
   let { meta } = $props();
   let duration = $state(Date.now() - meta.updated);
 
-  function tick() { duration = Date.now() - meta.updated; };
+  function tick() { duration = Date.now() - meta.updated; }
 
   const timer = setInterval(tick, 1000);
   onDestroy(function() { clearInterval(timer); });

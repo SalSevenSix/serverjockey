@@ -5,12 +5,18 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build"
+    "build": "vite build",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.70.2",
+    "@sveltejs/kit": "^2.70.3",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "svelte-eslint-parser": "^1.8.0",
+    "eslint-plugin-svelte": "^3.22.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
     "svelte": "^5.56.9",
     "vite": "^8.2.1"
   },

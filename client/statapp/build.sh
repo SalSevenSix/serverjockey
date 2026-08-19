@@ -20,6 +20,7 @@ if [ "$INSTALL_COMMAND" != "skip" ]; then
 fi
 
 echo "Statapp build"
+$JS_PKGMGR run lint || exit 1
 $JS_PKGMGR run build || exit 1
 rm -rf build/data > /dev/null 2>&1
 
