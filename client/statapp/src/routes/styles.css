@@ -11,7 +11,7 @@ html {
 
 body {
   font-family: "Arial", sans-serif;
-  font-size: clamp(1rem, 1.6vw, 3rem);
+  font-size: clamp(1.1rem, 1.6vw, 6rem);
   color: ivory;
   margin: 0;
 }
@@ -26,7 +26,7 @@ h1, h3 {
 }
 
 h2 {
-  margin-bottom: 0.22em;
+  margin-bottom: 0.25em;
 }
 
 a {
@@ -86,14 +86,13 @@ td.right {
 .dashcontainer {
   margin: clamp(0.8rem, 2vw, 4rem) clamp(0.8rem, 12vw - 2rem, 100rem);
   border: solid 0.35em rgba(0, 16, 0);
-  /* box-shadow: 0 0 0.15em black; */
   border-radius: 1em;
   overflow: hidden;
 }
 
 .dashpanel {
   background-color: rgba(8, 16, 8, 0.6);
-  padding: clamp(0.65rem, 2vw, 1.5rem);
+  padding: clamp(0.65rem, 2vw, 6rem);
 }
 
 .dashpanel.statbox {
@@ -136,7 +135,7 @@ td.right {
   flex: 1;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1024px) {
   .flex-columns {
     flex-direction: column;
     gap: 0;
@@ -144,5 +143,13 @@ td.right {
 
   td.right {
     padding-right: calc(36vw - 3rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .dashcontainer {
+    margin: clamp(0.8rem, 2vw, 4rem) 0;
+    border: 0;
+    border-radius: 0;
   }
 }
