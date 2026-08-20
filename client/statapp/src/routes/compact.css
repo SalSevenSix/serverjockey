@@ -1,0 +1,9 @@
+.dashcontainer {
+  margin: clamp(0.8rem, 2vw, 4rem) 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.dashcontainer:first-child {
+  margin: 0;
+}

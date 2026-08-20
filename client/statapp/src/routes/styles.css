@@ -152,4 +152,8 @@ td.right {
     border: 0;
     border-radius: 0;
   }
+
+  .dashcontainer:first-child {
+    margin: 0;
+  }
 }
