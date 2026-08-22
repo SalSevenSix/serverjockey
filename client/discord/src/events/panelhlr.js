@@ -108,15 +108,23 @@ function newUpdater(context, panels, resolve) {
   const data = { panels: [] };
 
   const createPanel = function(entry, synced, message = null) {
+    const errcount = 0;
     const render = entry.panelType === 'status-embed' ? toStatusEmbed : toStatusText;
-    return { entry, synced, render, message };
+    return { entry, synced, errcount, render, message };
   };
 
   const remove = function(panel, reason) {
     panel.synced = true;  // To ignore if re-queued
-    data.panels = data.panels.filter(function(value) { return !(panel.entry === value.entry); });
-    panels.remove(panel.entry.channelId, panel.entry.messageId).save();
-    logger.info('Panel Updater ' + reason);
+    let logmsg = 'Panel Updater ' + reason + ' ';
+    if (panel.errcount > 2) {
+      data.panels = data.panels.filter(function(value) { return !(panel.entry === value.entry); });
+      panels.remove(panel.entry.channelId, panel.entry.messageId).save();
+      logmsg += '[removed]';
+    } else {
+      panel.errcount += 1;
+      logmsg += '[errcount=' + panel.errcount + ']';
+    }
+    logger.info(logmsg);
     return false;
   };
 
@@ -139,6 +147,7 @@ function newUpdater(context, panels, resolve) {
       panel.synced = true;
       const result = await panel.message.edit(panel.render(model)).catch(logger.error);
       if (!result) return remove(panel, 'failed to edit message: ' + panel.entry.messageId);
+      panel.errcount = 0;
       return true;
     };
   };
