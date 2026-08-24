@@ -69,5 +69,7 @@ commands:
   exit-no-update    | Exit if server version is up-to-date, Hytale only
   https:<enabled>   | HTTPS enable https:true or disable https:false
   steamcmd-reset    | Reset the SteamCMD cache, will force it to reinstall
+  statapp-deploy:<path>   | Deploy StatApp website to path
+  statapp-export:<path>,<tz>,<instances,...> | Export StatApp data files
   delete            | Delete the current instance
   shutdown          | Shutdown the ServerJockey system

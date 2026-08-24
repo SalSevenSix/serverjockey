@@ -459,6 +459,10 @@ class CommandProcessor:
         return self._dump_to_log(self._connection.get(url))
 
     def _statapp_deploy(self, argument: str) -> bool:
+        if not argument:
+            logging.error('Execting <path> to deploy StatApp website; e.g.')
+            logging.error('statapp-deploy:/var/www/statapp')
+            return False
         if os.path.exists(argument):
             shutil.rmtree(argument)
         os.makedirs(argument)
@@ -468,7 +472,11 @@ class CommandProcessor:
 
     def _statapp_export(self, argument: str) -> bool:
         linkdir = 'data'
-        identities = argument.split(',')
+        identities = argument.split(',') if argument else []
+        if len(identities) < 3:
+            logging.error('Expecting <path>,<tz>,<instances,...> arguments; e.g.')
+            logging.error('statapp-export:/var/www/statapp,-4,pz-live,ht-live,pw-live')
+            return False
         homedir, tz = identities.pop(0), identities.pop(0)
         nows, original = time.time(), self._instance
         now, mids = int(nows * 1000), util.last_midnight(nows, util.parse_timezone(tz))
