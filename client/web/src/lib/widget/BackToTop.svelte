@@ -43,4 +43,8 @@
     opacity: 0;
     visibility: hidden;
   }
+
+  .fa {
+    display: inline;
+  }
 </style>

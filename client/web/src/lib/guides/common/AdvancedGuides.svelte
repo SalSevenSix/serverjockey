@@ -5,7 +5,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a id="generalGuidesCommandLineInterface"
+    <a id="advancedGuidesCommandLineInterface"
        href={surl('/guides/cli')}><i class="fa fa-terminal fa-lg theme-black-white"></i>
       Command Line Interface</a>
   </div>
@@ -19,7 +19,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a id="generalGuidesGameSaveMigrations"
+    <a id="advancedGuidesGameSaveMigrations"
        href={surl('/guides/migrations')}><i class="fa fa-dolly fa-lg theme-black-white"></i>
       Game Save Migrations</a>
   </div>
@@ -33,7 +33,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a id="generalGuidesHostingBehindNginx"
+    <a id="advancedGuidesHostingBehindNginx"
        href={surl('/guides/nginx')}><i class="fa fa-server fa-lg theme-black-white"></i>
       Hosting behind Nginx</a>
   </div>
@@ -47,7 +47,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a id="generalGuidesMonitoringWithPrometheus"
+    <a id="advancedGuidesMonitoringWithPrometheus"
        href={surl('/guides/prometheus')}><i class="fa fa-wave-square fa-lg theme-black-white"></i>&nbsp;
       Monitoring with Prometheus</a>
   </div>
@@ -62,7 +62,7 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a id="generalGuidesReportingWithGrafana"
+    <a id="advancedGuidesReportingWithGrafana"
        href={surl('/guides/grafana')}><i class="fa fa-chart-line fa-lg theme-black-white"></i>
       Reporting with Grafana</a>
   </div>
@@ -76,7 +76,21 @@
 
 <div class="columns">
   <div class="column is-one-fifth pb-0 has-text-weight-bold">
-    <a id="generalGuidesOffsiteBackupsUsingMEGA"
+    <a id="advancedGuidesStatApp"
+       href={surl('/guides/statapp')}><i class="fa fa-tachograph-digital fa-lg theme-black-white"></i>&nbsp;
+      The Status Dashboard</a>
+  </div>
+  <div class="column is-four-fifths content">
+    <p>
+      ServerJockey has a standalone Status Dashboard page that shows information about instances suitable
+      for public access. This guide will show you how to setup this optional website.
+    </p>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-one-fifth pb-0 has-text-weight-bold">
+    <a id="advancedGuidesOffsiteBackupsUsingMEGA"
        href={surl('/guides/megasync')}><i class="fa fa-boxes-packing fa-lg theme-black-white"></i>&nbsp;
       Offsite backups using MEGA</a>
   </div>
