@@ -71,5 +71,9 @@ commands:
   steamcmd-reset    | Reset the SteamCMD cache, will force it to reinstall
   statapp-deploy:<path>   | Deploy StatApp website to path
   statapp-export:<path>,<tz>,<instances,...> | Export StatApp data files
+  qim                           | Query instance meta
+  qie:<from>,<to>,<events,...>  | Query instance events
+  qpe:<from>,<to>,<events,...>  | Query player events
+  qpc:<from>,<to>               | Query player chat
   delete            | Delete the current instance
   shutdown          | Shutdown the ServerJockey system

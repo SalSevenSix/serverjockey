@@ -415,14 +415,15 @@ class CommandProcessor:
         self._connection.post('/system/shutdown')
         return False
 
-    # qim                      | Query instance meta
     def _qim(self) -> bool:
         url = '/store/instance?instance=' + self._ensure_instance()
         return self._dump_to_log(self._connection.get(url))
 
-    # qie:<from>,<to>,<args>   | Query instance events
     def _qie(self, argument: str) -> bool:
-        args = argument.split(',')
+        args = argument.split(',') if argument else []
+        if len(args) < 2:
+            logging.error('Expecting arguments <from>,<to>,<events,...>')
+            return False
         events, url = [], '/store/instance/event'
         url += '?instance=' + self._ensure_instance()
         url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
@@ -435,9 +436,11 @@ class CommandProcessor:
             url += '&events=' + ','.join(events)
         return self._dump_to_log(self._connection.get(url))
 
-    # qpe:<from>,<to>,<args>   | Query player events
     def _qpe(self, argument: str) -> bool:
-        args = argument.split(',')
+        args = argument.split(',') if argument else []
+        if len(args) < 2:
+            logging.error('Expecting arguments <from>,<to>,<events,...>')
+            return False
         events, url = [], '/store/player/event'
         url += '?instance=' + self._ensure_instance()
         url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
@@ -450,9 +453,11 @@ class CommandProcessor:
             url += '&events=' + ','.join(events)
         return self._dump_to_log(self._connection.get(url))
 
-    # qpc:<from>,<to>          | Query player chat
     def _qpc(self, argument: str) -> bool:
-        args = argument.split(',')
+        args = argument.split(',') if argument else []
+        if len(args) != 2:
+            logging.error('Expecting arguments <from>,<to>')
+            return False
         url = '/store/player/chat'
         url += '?instance=' + self._ensure_instance()
         url += '&atfrom=' + args.pop(0) + '&atto=' + args.pop(0)
