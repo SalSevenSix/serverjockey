@@ -19,13 +19,5 @@
       <tr><th>Uptime</th><td class="text-align-right">{humanDuration(data.i.results.uptime)}</td></tr>
     </tbody></table>
   </div>
-  <div><p class="avail-value">{floatToPercent(data.i.results.available)}</p></div>
+  <div><p class="availability-percent">{floatToPercent(data.i.results.available)}</p></div>
 </div></div>
-
-
-<style>
-  .avail-value {
-    font-size: 1.4em;
-    font-weight: bold;
-  }
-</style>

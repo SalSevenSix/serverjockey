@@ -26,13 +26,5 @@
       {/if}
     </tbody></table>
   </div>
-  <div><p class="running-value">{data.s.running ? 'UP' : 'DOWN'}</p></div>
+  <div><p class="running-state">{data.s.running ? 'UP' : 'DOWN'}</p></div>
 </div></div>
-
-
-<style>
-  .running-value {
-    font-size: 1.3em;
-    font-weight: bold;
-  }
-</style>

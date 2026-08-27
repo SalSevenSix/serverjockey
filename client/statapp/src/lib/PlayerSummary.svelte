@@ -19,15 +19,3 @@
     <p class="tpt-label">total played time</p>
   </div>
 </div></div>
-
-
-<style>
-  .tpt-value {
-    font-size: 1.3em;
-    font-weight: bold;
-  }
-
-  .tpt-label {
-    font-size: 0.9em;
-  }
-</style>

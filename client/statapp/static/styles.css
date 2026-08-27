@@ -157,3 +157,30 @@ td.right {
     margin: 0;
   }
 }
+
+.running-state {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.availability-percent {
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+#PlayerOnline div:first-child {
+  min-height: 3em;
+}
+
+.tpt-value {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.tpt-label {
+  font-size: 0.9em;
+}
+
+.footpad {
+  height: 1.2em;
+}

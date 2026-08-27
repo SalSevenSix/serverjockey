@@ -63,10 +63,3 @@
   {/if}
   <div class="footpad"></div>
 {/if}
-
-
-<style>
-  .footpad {
-    height: 1.2em;
-  }
-</style>
