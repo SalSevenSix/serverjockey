@@ -54,9 +54,9 @@
     Now install the
     <ExtLink href="https://mega.io/cmd#download" notranslate>MEGA CMD App</ExtLink>
     by visiting the website to find and run the appropriate install command for your system.
-    As an example for the guide, the command below is for Ubuntu 24.04 on an Intel or AMD machine.
+    As an example for the guide, the command below is for Ubuntu 26.04 LTS on an Intel or AMD machine.
   </p>
-  <CodeBlock>wget https://mega.nz/linux/repo/xUbuntu_24.04/amd64/megacmd-xUbuntu_24.04_amd64.deb && sudo apt install &quot;$PWD/megacmd-xUbuntu_24.04_amd64.deb&quot;</CodeBlock>
+  <CodeBlock>wget https://mega.nz/linux/repo/xUbuntu_26.04/amd64/megacmd-xUbuntu_26.04_amd64.deb && sudo apt install &quot;$PWD/megacmd-xUbuntu_26.04_amd64.deb&quot;</CodeBlock>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/megasync/install_megacmd.png')} alt="Install MEGA CMD in terminal" loading="lazy" />
   </figure>

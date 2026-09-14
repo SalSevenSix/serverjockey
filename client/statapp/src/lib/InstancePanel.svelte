@@ -30,7 +30,7 @@
       fetchJson(buildUrl('player-events.json'))
     ]).then(function([status, online, irecord, ilastevent, ievents, plastevent, pevents]) {
       const out = { s: status, o: online, i: null, p: null };
-      out.s.module = irecord.records ? irecord.records[0][2] : 'unknown';
+      out.s.module = irecord.records ? irecord.records[0][2] : '---';
       if (fetchOk(ilastevent) && fetchOk(ievents)) {
         out.i = extractInstance({ instances: irecord, lastevent: ilastevent, events: ievents });
         out.i.results = out.i.results[0];
