@@ -33,13 +33,13 @@
 
   <p><span class="step-title"></span>
     Download and unpack Prometheus into its home directory. Note that these commands install version
-    <span class="is-family-monospace notranslate">2.52.0</span>
+    <span class="is-family-monospace notranslate">3.14.0</span>
     of Prometheus. Please check the
     <ExtLink href="https://prometheus.io/download/#prometheus">downloads</ExtLink>
     page to find the latest version.
   </p>
-  <CodeBlock>wget https://github.com/prometheus/prometheus/releases/download/v2.52.0/prometheus-2.52.0.linux-amd64.tar.gz</CodeBlock>
-  <CodeBlock>tar -xzvf prometheus-2.52.0.linux-amd64.tar.gz &amp;&amp; sudo mv prometheus-2.52.0.linux-amd64 /home/prometheus/prometheus</CodeBlock>
+  <CodeBlock>wget https://github.com/prometheus/prometheus/releases/download/v3.14.0/prometheus-3.14.0.linux-amd64.tar.gz</CodeBlock>
+  <CodeBlock>tar -xzvf prometheus-3.14.0.linux-amd64.tar.gz &amp;&amp; sudo mv prometheus-3.14.0.linux-amd64 /home/prometheus/prometheus</CodeBlock>
 
   <p><span class="step-title"></span>
     Prometheus itself just gathers, stores and reports metrics. It does not generate metrics,
@@ -47,8 +47,8 @@
     <ExtLink href="https://prometheus.io/download/#node_exporter">downloads</ExtLink>
     for the latest version.
   </p>
-  <CodeBlock>wget https://github.com/prometheus/node_exporter/releases/download/v1.8.1/node_exporter-1.8.1.linux-amd64.tar.gz</CodeBlock>
-  <CodeBlock>tar -xzvf node_exporter-1.8.1.linux-amd64.tar.gz &amp;&amp; sudo mv node_exporter-1.8.1.linux-amd64 /home/prometheus/node_exporter</CodeBlock>
+  <CodeBlock>wget https://github.com/prometheus/node_exporter/releases/download/v1.12.1/node_exporter-1.12.1.linux-amd64.tar.gz</CodeBlock>
+  <CodeBlock>tar -xzvf node_exporter-1.12.1.linux-amd64.tar.gz &amp;&amp; sudo mv node_exporter-1.12.1.linux-amd64 /home/prometheus/node_exporter</CodeBlock>
 
   <p><span class="step-title"></span>
     To finish the file install process, set the correct user and group for the prometheus home directory.

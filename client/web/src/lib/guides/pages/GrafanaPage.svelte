@@ -35,7 +35,7 @@
     for general information. If you are planning to host the Grafana web panel behind Nginx, see the
     <ExtLink href="https://grafana.com/tutorials/run-grafana-behind-a-proxy/">reverse proxy guide</ExtLink>
     for details. The commands in this guide are for Grafana version
-    <span class="is-family-monospace notranslate">11.0.0</span>
+    <span class="is-family-monospace notranslate">13.2.1</span>
   </p>
 
   <p><span class="step-title"></span>
@@ -46,8 +46,8 @@
   <p><span class="step-title"></span>
     Then download the DEB package and install it with the package manager.
   </p>
-  <CodeBlock>wget https://dl.grafana.com/oss/release/grafana_11.0.0_amd64.deb</CodeBlock>
-  <CodeBlock>sudo dpkg -i grafana_11.0.0_amd64.deb</CodeBlock>
+  <CodeBlock>wget https://dl.grafana.com/grafana/release/13.2.1/grafana_13.2.1_33191028959_linux_amd64.deb</CodeBlock>
+  <CodeBlock>sudo dpkg -i grafana_13.2.1_33191028959_linux_amd64.deb</CodeBlock>
 
   <p><span class="step-title"></span>
     The package will install Grafana as a systemd service.
@@ -75,6 +75,8 @@
     and password
     <span class="is-family-monospace notranslate">admin</span>
     too. Please change the default password for the admin user immediately after login.
+  </p><p class="is-italic">
+    Note that screenshots may not match your version of Grafana exactly.
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/grafana/first_login.jpg')} alt="First Login" loading="lazy" />
@@ -110,7 +112,7 @@
     <span class="has-text-weight-bold">Name</span>
     and
     <span class="has-text-weight-bold">Default</span>
-    setting.
+    setting. You may not need to do this step on your version of Grafana.
   </p>
   <figure class="image max-1024">
     <img src={surl('/assets/guides/grafana/config_page.png')} alt="Config Page" loading="lazy" />
@@ -179,7 +181,7 @@
   <p><span class="step-title"></span>
     Select
     <span class="is-family-monospace notranslate">prometheus</span>
-    from the data source options. Then click the
+    from the data source options (if shown). Then click the
     <span class="has-text-weight-bold">Import</span>
     button to complete the import process.
   </p>
