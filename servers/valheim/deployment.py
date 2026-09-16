@@ -1,13 +1,18 @@
+import socket
+import aiohttp
 # ALLOW core.* valheim.messaging
-from core.util import gc, util, io, objconv, idutil
+from core.util import gc, util, io, objconv, idutil, funcutil, pack
 from core.context import contextsvc
+from core.msg import msglog
+from core.msgc import sc
 from core.http import httpabc, httprsc, httpext, httpsec
+from core.system import svrsvc
 from core.proc import proch
 from core.common import portmapper, svrhelpers
 from servers.valheim import messaging as msg
 
 APPID = '896660'
-_EXT_AUTOBACKUP = 'db', 'fwl'
+_EXTS = 'db', 'fwl'
 
 
 def _default_cmdargs() -> dict:
@@ -16,6 +21,8 @@ def _default_cmdargs() -> dict:
         '-port': msg.DEFAULT_PORT,
         '_comment_upnp': 'Try to automatically redirect ports on home network using UPnP',
         'upnp': True,
+        '_comment_bepinex_url': 'Thunderstore URL to download BepInEx mod framework to install if needed',
+        'bepinex_url': 'https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2350/',
         '_comment_name': 'Name of your server that will be visible in the server listing',
         '-name': 'My Server',
         '_comment_password': 'Password needed by players to join server (required)',
@@ -59,6 +66,10 @@ class Deployment:
         self._home_dir, self._tempdir = context.config('home'), context.config('tempdir')
         self._backups_dir = self._home_dir + '/backups'
         self._runtime_dir = self._home_dir + '/runtime'
+        self._bepinex_dir = self._runtime_dir + '/BepInEx'
+        self._bepplug_dir = self._bepinex_dir + '/plugins'
+        self._bepconf_dir = self._bepinex_dir + '/config'
+        self._bepconf_file = self._bepconf_dir + '/BepInEx.cfg'
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
         self._cache_dir = self._world_dir + '/cache'
@@ -68,7 +79,10 @@ class Deployment:
         self._bannedlist_file = self._world_dir + '/bannedlist.txt'
         self._permittedlist_file = self._world_dir + '/permittedlist.txt'
         self._env = context.env()
-        self._env['LD_LIBRARY_PATH'] = self._runtime_dir + '/linux64'
+        self._env['DOORSTOP_ENABLED'] = '1'
+        self._env['DOORSTOP_TARGET_ASSEMBLY'] = './BepInEx/core/BepInEx.Preloader.dll'
+        self._env['LD_LIBRARY_PATH'] = self._runtime_dir + './linux64:./doorstop_libs'
+        self._env['LD_PRELOAD'] = 'libdoorstop_x64.so'
         self._env['SteamAppId'] = '892970'
 
     async def initialise(self):
@@ -99,19 +113,21 @@ class Deployment:
         if not await io.file_exists(executable):
             raise FileNotFoundError('Valheim game server not installed. Please Install Runtime first.')
         cmdargs = objconv.json_to_dict(await io.read_file(self._cmdargs_file))
+        await self._install_bepinex(cmdargs)
         self._map_ports(cmdargs)
         server = proch.ServerProcess(self._context, executable)
         server.use_cwd(self._runtime_dir).use_env(self._env)
         server.append_arg('-nographics').append_arg('-batchmode')
         server.append_arg('-savedir').append_arg(self._world_dir)
         server.append_struct(util.delete_dict(cmdargs, (
-            'upnp', '-nographics', '-batchmode', '-savedir', '-world', '-logFile', '-instanceid')))
+            'upnp', 'bepinex_url', '-nographics', '-batchmode', '-savedir', '-world', '-logFile', '-instanceid')))
         return server
 
     async def build_world(self):
         await io.create_directory(self._backups_dir, self._world_dir, self._logs_dir)
         if not await io.directory_exists(self._runtime_dir):
             return
+        await io.create_directory(self._bepinex_dir, self._bepconf_dir, self._bepplug_dir)
         if not await io.file_exists(self._cmdargs_file):
             await io.write_file(self._cmdargs_file, objconv.obj_to_json(_default_cmdargs(), pretty=True))
 
@@ -123,16 +139,55 @@ class Deployment:
             portmapper.map_port(self._context, self, port, gc.UDP, 'Valheim server')
             portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')
 
+    async def _install_bepinex(self, cmdargs: dict):
+        logger = msglog.LogPublisher(self._context, self)
+        if await io.file_exists(self._bepconf_file):
+            logger.log('INFO BepInEx already installed')
+            return
+        if len(await io.directory_list(self._bepplug_dir)) == 0:
+            logger.log('INFO No plugins found, BepInEx will not be installed')
+            return
+        url = util.get('bepinex_url', cmdargs)
+        if not url:
+            logger.log('WARNING bepinex_url not found in Launch Options, plugins will not work')
+            return
+        workdir = self._tempdir + '/' + idutil.generate_id()
+        zipfile, unpacked = workdir + '/bepinex.zip', workdir + '/bepinex'
+        source = unpacked + '/BepInExPack_Valheim'
+        try:
+            svrsvc.ServerStatus.notify_state(self._context, self, sc.START)
+            logger.log('INSTALL START BepInEx plugin framework')
+            await io.create_directory(workdir)
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                              ' AppleWebKit/537.36 (KHTML, like Gecko)'
+                              ' Chrome/120.0.0.0 Safari/537.36'}
+            connector = aiohttp.TCPConnector(family=socket.AF_INET)  # force IPv4
+            async with aiohttp.ClientSession(connector=connector) as session:
+                async with session.get(url, headers=headers, read_bufsize=io.DEFAULT_CHUNK_SIZE) as response:
+                    assert response.status == 200
+                    await io.stream_write_file(zipfile, io.WrapReader(response.content),
+                                               io.DEFAULT_CHUNK_SIZE, self._tempdir)
+            await io.create_directory(unpacked)
+            await pack.unpack_archive(zipfile, unpacked)
+            files = [str(e['name']) for e in await io.directory_list(source)]
+            files = [n for n in files if util.fext(n) != 'sh']
+            for name in files:
+                await io.delete_any(self._runtime_dir + '/' + name)
+                await io.move_path(source + '/' + name, self._runtime_dir + '/' + name)
+        finally:
+            await funcutil.silently_call(io.delete_directory(workdir))
+            logger.log('INSTALL END BepInEx plugin framework')
+
     async def autobackups(self, baseurl: str) -> tuple:
         if await io.directory_exists(self._save_dir + '/Dedicated'):  # v1 save format
             result = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups_new(e)]
             for entry in result:
                 entry['type'] = 'file'
             return tuple(result)
-        if await io.file_exists(self._save_dir + '/Dedicated.' + _EXT_AUTOBACKUP[0]):  # old save format
+        if await io.file_exists(self._save_dir + '/Dedicated.' + _EXTS[0]):  # old save format
             files = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups_old(e)]
-            alts = [util.fname_only(e['name']) for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[1]]
-            result = [e for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[0] and util.fname_only(e['name']) in alts]
+            alts = [util.fname_only(e['name']) for e in files if util.fext(e['name']) == _EXTS[1]]
+            result = [e for e in files if util.fext(e['name']) == _EXTS[0] and util.fname_only(e['name']) in alts]
             for entry in result:
                 entry['name'] = util.fname_only(entry['name'])
             return tuple(result)
@@ -142,9 +197,9 @@ class Deployment:
         path = self._save_dir + '/' + util.fname_only(filename)
         if await io.directory_exists(path):  # v1 save format
             await io.copy_directory(path, self._save_dir + '/Dedicated')
-        elif await io.file_exists(path + '.' + _EXT_AUTOBACKUP[0]):  # old save format
+        elif await io.file_exists(path + '.' + _EXTS[0]):  # old save format
             backups, targets = [], []
-            for ext in _EXT_AUTOBACKUP:
+            for ext in _EXTS:
                 backups.append(path + '.' + ext)
                 targets.append(self._save_dir + '/Dedicated.' + ext)
             for path in backups:
@@ -186,7 +241,7 @@ def _ls_autobackups_new(entry) -> bool:
 
 def _ls_autobackups_old(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
-    return fname and fname.startswith('Dedicated_backup') and ftype == 'file' and fext in _EXT_AUTOBACKUP
+    return fname and fname.startswith('Dedicated_backup') and ftype == 'file' and fext in _EXTS
 
 
 def _ls_autobackups_all(entry) -> bool:
