@@ -18,7 +18,9 @@
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
-      'desc': 'Reset the game world map only.' },
+      'desc': 'Reset the game world map and delete autobackups.' },
+    { 'key': 'wipe-world-cache', 'name': 'Reset Cache',
+      'desc': 'Reset the game world cache.' },
     { 'key': 'wipe-world-logs', 'name': 'Delete Logs',
       'desc': 'Delete the log files only.' },
     { 'key': 'wipe-world-autobackups', 'name': 'Delete Autobackups',

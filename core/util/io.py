@@ -39,6 +39,7 @@ class WrapReader(Readable):
 
 _is_symlink = funcutil.to_async(os.path.islink)
 _move = funcutil.to_async(shutil.move)
+_copytree = funcutil.to_async(shutil.copytree)
 _rmtree = funcutil.to_async(shutil.rmtree)
 
 
@@ -172,6 +173,11 @@ async def directory_list(path: str, baseurl: str = None) -> typing.List[typing.D
             entry['url'] = baseurl + '/' + name
         result.append(entry)
     return result
+
+
+async def copy_directory(source: str, target: str):
+    await delete_directory(target)
+    await _copytree(source, target)
 
 
 async def move_directory(source: str, target: str):

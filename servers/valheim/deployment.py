@@ -61,6 +61,7 @@ class Deployment:
         self._runtime_dir = self._home_dir + '/runtime'
         self._world_dir = self._home_dir + '/world'
         self._logs_dir = self._world_dir + '/logs'
+        self._cache_dir = self._world_dir + '/cache'
         self._save_dir = self._world_dir + '/worlds_local'
         self._cmdargs_file = self._world_dir + '/cmdargs.json'
         self._adminlist_file = self._world_dir + '/adminlist.txt'
@@ -81,8 +82,8 @@ class Deployment:
                          httpext.MtimeHandler().check(self._save_dir).dir(self._logs_dir))
         builder.put_installer_steam(self._runtime_dir, APPID)
         builder.put_wipes(self._runtime_dir, dict(
-            save=self._save_dir, autobackups=dict(path=self._save_dir, ls_filter=_ls_autobackups),
-            logs=self._logs_dir, all=self._world_dir))
+            save=self._save_dir, autobackups=dict(path=self._save_dir, ls_filter=_ls_autobackups_all),
+            cache=self._cache_dir, logs=self._logs_dir, all=self._world_dir))
         builder.put_archiving(self._home_dir, self._backups_dir, self._runtime_dir, self._world_dir)
         builder.put_restore_autobackup(_RestoreAutobackupHandler(self))
         builder.pop()
@@ -123,25 +124,34 @@ class Deployment:
             portmapper.map_port(self._context, self, port + 1, gc.UDP, 'Valheim query')
 
     async def autobackups(self, baseurl: str) -> tuple:
-        if not await io.directory_exists(self._save_dir):
-            return ()
-        files = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups(e)]
-        alts = [util.fname_only(e['name']) for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[1]]
-        result = [e for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[0] and util.fname_only(e['name']) in alts]
-        for entry in result:
-            entry['name'] = util.fname_only(entry['name'])
-        return tuple(result)
+        if await io.directory_exists(self._save_dir + '/Dedicated'):  # v1 save format
+            result = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups_new(e)]
+            for entry in result:
+                entry['type'] = 'file'
+            return tuple(result)
+        if await io.file_exists(self._save_dir + '/Dedicated.' + _EXT_AUTOBACKUP[0]):  # old save format
+            files = [e for e in await io.directory_list(self._save_dir, baseurl) if _ls_autobackups_old(e)]
+            alts = [util.fname_only(e['name']) for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[1]]
+            result = [e for e in files if util.fext(e['name']) == _EXT_AUTOBACKUP[0] and util.fname_only(e['name']) in alts]
+            for entry in result:
+                entry['name'] = util.fname_only(entry['name'])
+            return tuple(result)
+        return ()
 
     async def restore_autobackup(self, filename: str) -> bool:
-        name, backups, targets = util.fname_only(filename), [], []
-        for ext in _EXT_AUTOBACKUP:
-            backups.append(self._save_dir + '/' + name + '.' + ext)
-            targets.append(self._save_dir + '/Dedicated.' + ext)
-        for path in backups:
-            if not await io.file_exists(path):
-                return False
-        for index in (0, 1):
-            await io.stream_copy_file(backups[index], targets[index], tempdir=self._tempdir)
+        path = self._save_dir + '/' + util.fname_only(filename)
+        if await io.directory_exists(path):  # v1 save format
+            await io.copy_directory(path, self._save_dir + '/Dedicated')
+        elif await io.file_exists(path + '.' + _EXT_AUTOBACKUP[0]):  # old save format
+            backups, targets = [], []
+            for ext in _EXT_AUTOBACKUP:
+                backups.append(path + '.' + ext)
+                targets.append(self._save_dir + '/Dedicated.' + ext)
+            for path in backups:
+                if not await io.file_exists(path):
+                    return False
+            for index in (0, 1):
+                await io.stream_copy_file(backups[index], targets[index], tempdir=self._tempdir)
         return True
 
 
@@ -169,6 +179,15 @@ class _RestoreAutobackupHandler(httpabc.PostHandler):
         return httpabc.ResponseBody.NO_CONTENT if result else httpabc.ResponseBody.NOT_FOUND
 
 
-def _ls_autobackups(entry) -> bool:
+def _ls_autobackups_new(entry) -> bool:
+    ftype, fname = entry['type'], entry['name']
+    return fname and fname.startswith('Dedicated_backup') and ftype == 'directory'
+
+
+def _ls_autobackups_old(entry) -> bool:
     ftype, fname, fext = entry['type'], entry['name'], util.fext(entry['name'])
     return fname and fname.startswith('Dedicated_backup') and ftype == 'file' and fext in _EXT_AUTOBACKUP
+
+
+def _ls_autobackups_all(entry) -> bool:
+    return _ls_autobackups_new(entry) or _ls_autobackups_old(entry)
