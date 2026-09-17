@@ -106,7 +106,14 @@ class Deployment:
         builder.put_autobackups_handler(_AutobackupsHandler(self))
         builder.put_config(dict(
             cmdargs=self._cmdargs_file, adminlist=self._adminlist_file,
-            permittedlist=self._permittedlist_file, bannedlist=self._bannedlist_file))
+            permittedlist=self._permittedlist_file, bannedlist=self._bannedlist_file,
+            bepinexconf=self._bepconf_file, doorstopconf=self._runtime_dir + '/doorstop_config.ini'))
+        builder.psh('plugin')
+        builder.psh('files', httpext.FileSystemHandler(self._bepplug_dir))
+        builder.put('*{path}', httpext.FileSystemHandler(self._bepplug_dir, 'path', tempdir=self._tempdir), 'm')
+        builder.pop()
+        builder.psh('configs', httpext.FileSystemHandler(self._bepconf_dir))
+        builder.put('*{path}', httpext.FileSystemHandler(self._bepconf_dir, 'path', tempdir=self._tempdir), 'm')
 
     async def new_server_process(self) -> proch.ServerProcess:
         executable = self._runtime_dir + '/valheim_server.x86_64'
@@ -142,21 +149,22 @@ class Deployment:
     async def _install_bepinex(self, cmdargs: dict):
         logger = msglog.LogPublisher(self._context, self)
         if await io.file_exists(self._bepconf_file):
-            logger.log('INFO BepInEx already installed')
+            logger.log('[BepInEx] INFO BepInEx already installed')
             return
         if len(await io.directory_list(self._bepplug_dir)) == 0:
-            logger.log('INFO No plugins found, BepInEx will not be installed')
+            logger.log('[BepInEx] INFO No plugins found, BepInEx will not be installed')
             return
         url = util.get('bepinex_url', cmdargs)
         if not url:
-            logger.log('WARNING bepinex_url not found in Launch Options, plugins will not work')
+            logger.log('[BepInEx] WARNING bepinex_url not found in Launch Options, plugins will not work')
             return
         workdir = self._tempdir + '/' + idutil.generate_id()
         zipfile, unpacked = workdir + '/bepinex.zip', workdir + '/bepinex'
         source = unpacked + '/BepInExPack_Valheim'
         try:
             svrsvc.ServerStatus.notify_state(self._context, self, sc.START)
-            logger.log('INSTALL START BepInEx plugin framework')
+            logger.log('[BepInEx] INFO Install starting')
+            logger.log('[BepInEx] INFO Downloading ' + url)
             await io.create_directory(workdir)
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
                               ' AppleWebKit/537.36 (KHTML, like Gecko)'
@@ -167,6 +175,7 @@ class Deployment:
                     assert response.status == 200
                     await io.stream_write_file(zipfile, io.WrapReader(response.content),
                                                io.DEFAULT_CHUNK_SIZE, self._tempdir)
+            logger.log('[BepInEx] INFO Unpacking ' + zipfile)
             await io.create_directory(unpacked)
             await pack.unpack_archive(zipfile, unpacked)
             files = [str(e['name']) for e in await io.directory_list(source)]
@@ -176,7 +185,7 @@ class Deployment:
                 await io.move_path(source + '/' + name, self._runtime_dir + '/' + name)
         finally:
             await funcutil.silently_call(io.delete_directory(workdir))
-            logger.log('INSTALL END BepInEx plugin framework')
+            logger.log('[BepInEx] INFO Install ended')
 
     async def autobackups(self, baseurl: str) -> tuple:
         if await io.directory_exists(self._save_dir + '/Dedicated'):  # v1 save format

@@ -15,6 +15,8 @@
   import BackupRestoreActions from '$lib/instance/BackupRestoreActions.svelte';
   import StoreInstance from '$lib/instance/StoreInstance.svelte';
   import Autobackups from '$lib/instance/Autobackups.svelte';
+  import PluginFiles from './PluginFiles.svelte';
+  import PluginConfig from './PluginConfig.svelte';
 
   const worldActions = [
     { 'key': 'wipe-world-save', 'name': 'Reset Save',
@@ -60,6 +62,12 @@
         <ConfigFile name="Admin List" path="/config/adminlist" />
         <ConfigFile name="Permitted List" path="/config/permittedlist" />
         <ConfigFile name="Banned List" path="/config/bannedlist" />
+      </Collapsible>
+      <Collapsible icon="fa-file-excel" title="Plugin Config">
+        <PluginConfig />
+      </Collapsible>
+      <Collapsible icon="fa-plug" title="Plugins">
+        <PluginFiles />
       </Collapsible>
       <Collapsible icon="fa-scroll" title="Logging">
         <LogFiles allowDelete={1} />

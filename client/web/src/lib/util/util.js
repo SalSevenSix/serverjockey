@@ -1,6 +1,6 @@
 import { isString } from 'common/util/util';
 
-const textExtensions = ['txt', 'text', 'log', 'json', 'yml', 'yaml', 'toml', 'ini', 'lua'];
+const textExtensions = ['txt', 'text', 'log', 'json', 'yml', 'yaml', 'toml', 'ini', 'lua', 'cfg'];
 const archiveExtensions = ['zip', 'jar', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz'];
 const stampExtRegex = /^[0-9_-]+$/;
 
