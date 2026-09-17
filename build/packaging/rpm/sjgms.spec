@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Thu Aug 13 2026 Bowden Salis <bsalis76@gmail.com> - 0.35.0
-- Feature release 0.35.0
+* Fri Sep 17 2026 Bowden Salis <bsalis76@gmail.com> - 0.35.0
+- Valheim v1 improved support release
 * Wed Aug 12 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
 - Palworld v1 improved support release
 * Wed Jul 15 2026 Bowden Salis <bsalis76@gmail.com> - 0.33.0

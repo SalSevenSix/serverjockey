@@ -159,7 +159,7 @@ class Deployment:
             logger.log('[BepInEx] WARNING bepinex_url not found in Launch Options, plugins will not work')
             return
         workdir = self._tempdir + '/' + idutil.generate_id()
-        zipfile, unpacked = workdir + '/bepinex.zip', workdir + '/bepinex'
+        zipfile, unpacked, plugins = workdir + '/bepinex.zip', workdir + '/bepinex', workdir + '/plugins'
         source = unpacked + '/BepInExPack_Valheim'
         try:
             svrsvc.ServerStatus.notify_state(self._context, self, sc.START)
@@ -178,11 +178,14 @@ class Deployment:
             logger.log('[BepInEx] INFO Unpacking ' + zipfile)
             await io.create_directory(unpacked)
             await pack.unpack_archive(zipfile, unpacked)
+            await io.move_path(self._bepplug_dir, plugins)
             files = [str(e['name']) for e in await io.directory_list(source)]
             files = [n for n in files if util.fext(n) != 'sh']
             for name in files:
                 await io.delete_any(self._runtime_dir + '/' + name)
                 await io.move_path(source + '/' + name, self._runtime_dir + '/' + name)
+            await io.delete_directory(self._bepplug_dir)
+            await io.move_path(plugins, self._bepplug_dir)
         finally:
             await funcutil.silently_call(io.delete_directory(workdir))
             logger.log('[BepInEx] INFO Install ended')
