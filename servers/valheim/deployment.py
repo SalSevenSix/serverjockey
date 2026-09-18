@@ -81,7 +81,7 @@ class Deployment:
         self._env = context.env()
         self._env['DOORSTOP_ENABLED'] = '1'
         self._env['DOORSTOP_TARGET_ASSEMBLY'] = './BepInEx/core/BepInEx.Preloader.dll'
-        self._env['LD_LIBRARY_PATH'] = self._runtime_dir + './linux64:./doorstop_libs'
+        self._env['LD_LIBRARY_PATH'] = './linux64:./doorstop_libs'
         self._env['LD_PRELOAD'] = 'libdoorstop_x64.so'
         self._env['SteamAppId'] = '892970'
 
