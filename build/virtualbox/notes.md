@@ -63,7 +63,7 @@ https://serverjockey.net
 1. Create swap file 10Gb
 2. apt update && apt upgrade
 3. Check zerofree installed
-4. Install vmtouch, inotify-tools, steamcmd
+4. Install vmtouch, inotify-tools, sqlite3, steamcmd
 5. Copy root shell scripts
 6. Add and enable serverjockey-welcome service
 7. Disable SSH service including socket trigger
