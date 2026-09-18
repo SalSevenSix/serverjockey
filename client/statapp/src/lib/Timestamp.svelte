@@ -3,6 +3,7 @@
   import { shortISODateTimeString, humanDuration } from 'common/util/util';
 
   let { meta } = $props();
+  // svelte-ignore state_referenced_locally
   let duration = $state(Date.now() - meta.updated);
 
   function tick() { duration = Date.now() - meta.updated; }

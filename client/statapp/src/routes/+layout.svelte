@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
 
+  let { children } = $props();
   let stylesheets = $state([]);
 
   onMount(function() {
@@ -17,4 +18,4 @@
   {/each}
 </svelte:head>
 
-<slot />
+{@render children()}

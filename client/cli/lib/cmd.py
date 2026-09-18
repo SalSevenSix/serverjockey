@@ -507,9 +507,11 @@ class CommandProcessor:
                 logging.info(f'Saving {file} | {path}')
                 atcreated = json.loads(self._connection.get_file(path, file))['records'][0][0]
                 if atcreated < atto:
-                    atbegin, atfrom = atcreated, atcreated
+                    atfrom = atto - 2592000000  # 30 days before
                     if atcreated < atfrom:
-                        atbegin, atfrom = atto - 5184000000, atto - 2592000000
+                        atbegin = atto - 5184000000  # 60 days before
+                    else:
+                        atbegin, atfrom = atcreated, atcreated
                     file = f'{datadir}/{identity}-instance-lastevent.json'
                     path = f'/store/instance/event?instance={identity}'
                     path += f'&atfrom={atbegin}&atto={atfrom}'

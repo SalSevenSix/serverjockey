@@ -7,6 +7,7 @@ export const rulesJs = {
     'no-warning-comments': 1,
     'require-atomic-updates': 1,
     'require-await': 1,
+    'capitalized-comments': 1,
     'prefer-destructuring': 0,
     'curly': 0,
     'sort-keys': 0,
