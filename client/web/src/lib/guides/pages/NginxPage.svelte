@@ -165,7 +165,7 @@ http &#123;
 
   server &#123;
     listen 443 ssl http2 default_server&#59;
-    listen [&#58;&#58;]&#58;443 ssl http2 ipv6only=on default_server&#59;
+    listen [&#58;&#58;]&#58;443 ssl http2 default_server&#59;
     ssl_certificate /etc/letsencrypt/live/example.duckdns.org/fullchain.pem&#59;
     ssl_certificate_key /etc/letsencrypt/live/example.duckdns.org/privkey.pem&#59;
 
