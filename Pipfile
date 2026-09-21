@@ -7,12 +7,13 @@ verify_ssl = true
 pipenv = "*"
 selenium = "*"                # https://pypi.org/project/selenium/
 pylint = "*"                  # https://pypi.org/project/pylint/
+safety = "*"                  # https://pypi.org/project/safety/
 
 [packages]
 async-timeout = "4.0.3"       # backward compatability for python < 3.11
 aiohttp = "3.14.3"            # https://pypi.org/project/aiohttp/
 aiofiles = "25.1.0"           # https://pypi.org/project/aiofiles/
-sqlalchemy = "2.0.51"         # https://pypi.org/project/sqlalchemy/
+sqlalchemy = "2.0.54"         # https://pypi.org/project/sqlalchemy/
 vdf = "3.4"                   # https://pypi.org/project/vdf/
 rcon = "2.4.9"                # https://pypi.org/project/rcon/
 upnpy = "1.1.8"               # https://pypi.org/project/upnpy/
