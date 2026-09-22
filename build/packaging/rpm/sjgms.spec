@@ -58,8 +58,8 @@ exit 0
 
 
 %changelog
-* Sat Sep 18 2026 Bowden Salis <bsalis76@gmail.com> - 0.36.0
-- Feature release version 0.36.0
+* Wed Sep 23 2026 Bowden Salis <bsalis76@gmail.com> - 0.36.0
+- Bug fixes and library upgrades release
 * Fri Sep 17 2026 Bowden Salis <bsalis76@gmail.com> - 0.35.0
 - Valheim v1 improved support release
 * Wed Aug 12 2026 Bowden Salis <bsalis76@gmail.com> - 0.34.0
